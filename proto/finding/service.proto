@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package core.finding;
+option go_package = "github.com/CyberAgent/mimosa-core/proto/finding";
+
+import "finding/finding.proto";
+
+service FindingService {
+  rpc ListFinding(ListFindingRequest) returns (ListFindingResponse);
+  rpc GetFinding(GetFindingRequest) returns (GetFindingResponse);
+}
+
+message ListFindingRequest {
+  string project_id = 1;
+  string since = 2;
+}
+
+message ListFindingResponse { repeated string project_ids = 1; }
+
+message GetFindingRequest { string finding_id = 1; }
+
+message GetFindingResponse { Finding data = 1; }

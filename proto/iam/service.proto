@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package core.iam;
+option go_package = "github.com/CyberAgent/mimosa-core/proto/iam";
+
+import "iam/user.proto";
+
+service IAMService {
+  rpc Authn(AuthnRequest) returns (AuthnResponse);
+  rpc Authz(AuthzRequest) returns (AuthzResponse);
+}
+
+message AuthnRequest { string token = 1; }
+
+message AuthnResponse { User user = 1; }
+
+message AuthzRequest {
+  string user_id = 1;
+  string action_ptn = 2;
+  string resource_ptn = 3;
+}
+
+message AuthzResponse { bool ok = 1; }

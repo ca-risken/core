@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package core.finding;
+option go_package = "github.com/CyberAgent/mimosa-core/proto/finding";
+
+message Finding {
+  string fiding_id = 1;
+  string name = 2;
+  string data_source = 3;
+  string resource = 4;
+  string project_id = 5;
+  string data = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
+}

@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  gateway:
+    networks:
+      core:
+        aliases: gateway
+    build: src/gateway
+    depends_on:
+      - iam
+      - finding
+    environment:
+      - PORT=8080
+      - FINDING_SVC_ADDR=finding:8081
+    ports:
+      - "8080:8080"
+
+  finding:
+    networks:
+      core:
+        aliases: finding
+    build: src/finding
+    environment:
+      - PORT=8081
+    ports:
+      - "8081"
+
+  iam:
+    networks:
+      core:
+        aliases: iam
+    build: src/iam
+    environment:
+      - PORT=8082
+    ports:
+      - "8082"
+
+networks:
+  core:
+    driver: bridge
+    attachable: true
