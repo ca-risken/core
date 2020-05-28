@@ -3,7 +3,8 @@ all: run
 
 clean:
 	rm -f proto/*/*.pb.go
-	# docker-compose down --volumes --rmi all
+	rm -f doc/*.md
+	. env.sh && docker-compose down --volumes --rmi all
 
 fmt: proto/*/*.proto
 	clang-format -i proto/*/*.proto
@@ -14,7 +15,7 @@ build: fmt
 		--error_format=gcc \
 		--go_out=plugins=grpc,paths=source_relative:proto \
 		proto/*/*.proto
-	# docker-compose build
+	. env.sh && docker-compose build
 
 doc: fmt
 	protoc \
@@ -23,11 +24,11 @@ doc: fmt
 		--doc_out=markdown,README.md:doc \
 		proto/*/*.proto
 
-# run: build
-# 	docker-compose up -d
+run: build
+	. env.sh && docker-compose up -d
 
-# log:
-# 	docker-compose logs -f
+log:
+	. env.sh && docker-compose logs -f
 
-# stop:
-# 	docker-compose down
+stop:
+	. env.sh && docker-compose down

@@ -4,10 +4,13 @@ services:
   gateway:
     networks:
       core:
-        aliases: gateway
-    build: src/gateway
+    build:
+      context: src/gateway
+      args:
+        - GITHUB_USER=${GITHUB_USER}
+        - GITHUB_TOKEN=${GITHUB_TOKEN}
     depends_on:
-      - iam
+      # - iam
       - finding
     environment:
       - PORT=8080
@@ -18,22 +21,28 @@ services:
   finding:
     networks:
       core:
-        aliases: finding
-    build: src/finding
+    build:
+      context: src/finding
+      args:
+        - GITHUB_USER=${GITHUB_USER}
+        - GITHUB_TOKEN=${GITHUB_TOKEN}
     environment:
       - PORT=8081
     ports:
       - "8081"
 
-  iam:
-    networks:
-      core:
-        aliases: iam
-    build: src/iam
-    environment:
-      - PORT=8082
-    ports:
-      - "8082"
+  # iam:
+  #   networks:
+  #     core:
+  #   build: src/iam
+  #     context: src/iam
+  #     args:
+  #       - GITHUB_USER=${GITHUB_USER}
+  #       - GITHUB_TOKEN=${GITHUB_TOKEN}
+  #   environment:
+  #     - PORT=8082
+  #   ports:
+  #     - "8082"
 
 networks:
   core:
