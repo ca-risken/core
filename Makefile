@@ -15,7 +15,10 @@ build: fmt
 		--error_format=gcc \
 		--go_out=plugins=grpc,paths=source_relative:proto \
 		proto/*/*.proto
-	. env.sh && docker-compose build
+
+test: build
+	cd src/gateway && go test ./...
+	cd src/finding && go test ./...
 
 doc: fmt
 	protoc \
@@ -24,8 +27,8 @@ doc: fmt
 		--doc_out=markdown,README.md:doc \
 		proto/*/*.proto
 
-run: build
-	. env.sh && docker-compose up -d
+run: test
+	. env.sh && docker-compose up -d --build
 
 log:
 	. env.sh && docker-compose logs -f

@@ -37,29 +37,15 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) erro
 }
 
 func (g *gatewayService) findingHandler(w http.ResponseWriter, r *http.Request) {
-	project := r.URL.Query().Get("project_id")
-	if project == "" {
-		writeResponse(w, http.StatusBadRequest, map[string]interface{}{
-			"error": "Required `project_id` parameter.",
-		})
-		return
-	}
 	msg, err := finding.NewFindingServiceClient(g.findingSvcConn).ListFinding(
-		r.Context(),
-		&finding.ListFindingRequest{
-			ProjectId: project,
-			Since:     "",
-		})
+		r.Context(), mappingListFindingRequest(r))
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
 		})
 		return
 	}
-
-	writeResponse(w, http.StatusOK, map[string]interface{}{
-		"result": msg,
-	})
+	writeResponse(w, http.StatusOK, map[string]interface{}{"result": msg})
 	return
 }
 
