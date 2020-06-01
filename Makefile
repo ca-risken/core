@@ -1,10 +1,15 @@
-.PHONY: all clean fmt build doc run log stop
+.PHONY: all clean network fmt build doc run log stop
 all: run
 
 clean:
 	rm -f proto/*/*.pb.go
 	rm -f doc/*.md
-	. env.sh && docker-compose down --volumes --rmi all
+	docker-compose down --volumes --rmi all
+	docker network rm local-shared
+
+# @see https://github.com/CyberAgent/mimosa-common/tree/master/local
+network:
+	@if [ -z "`docker network ls | grep local-shared`" ]; then docker network create local-shared; fi
 
 fmt: proto/*/*.proto
 	clang-format -i proto/*/*.proto
@@ -27,7 +32,7 @@ doc: fmt
 		--doc_out=markdown,README.md:doc \
 		proto/*/*.proto
 
-run: test
+run: test network
 	. env.sh && docker-compose up -d --build
 
 log:
@@ -35,3 +40,6 @@ log:
 
 stop:
 	. env.sh && docker-compose down
+
+ssh:
+	. env.sh && docker-compose exec gateway sh

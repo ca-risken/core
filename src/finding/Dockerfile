@@ -13,6 +13,14 @@ FROM alpine
 RUN apk add --no-cache ca-certificates tzdata
 COPY --from=builder /go/bin/finding /usr/local/finding/bin/
 ENV PORT= \
+    DB_MASTER_HOST= \
+    DB_MASTER_USER= \
+    DB_MASTER_PASSWORD= \
+    DB_SLAVE_HOST= \
+    DB_SLAVE_USER= \
+    DB_SLAVE_PASSWORD= \
+    DB_SCHEMA= \
+    DB_PORT=3306 \
     TZ=Asia/Tokyo
 WORKDIR /usr/local/finding
 CMD ["bin/finding"]

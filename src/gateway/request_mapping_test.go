@@ -33,7 +33,6 @@ func TestMappingListFindingRequest(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			t.Logf(c.name)
 			r, _ := http.NewRequest("GET", "/?"+c.input, nil)
 			mapping := mappingListFindingRequest(r)
 			if !reflect.DeepEqual(mapping, c.want) {

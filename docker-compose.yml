@@ -3,7 +3,8 @@ version: "3.8"
 services:
   gateway:
     networks:
-      core:
+      - core
+      - local-shared
     build:
       context: src/gateway
       args:
@@ -20,7 +21,8 @@ services:
 
   finding:
     networks:
-      core:
+      - core
+      - local-shared
     build:
       context: src/finding
       args:
@@ -28,8 +30,14 @@ services:
         - GITHUB_TOKEN=${GITHUB_TOKEN}
     environment:
       - PORT=8081
+      - DB_MASTER_HOST=${DB_MASTER_HOST}
+      - DB_MASTER_USER=${DB_MASTER_USER}
+      - DB_MASTER_PASSWORD=${DB_MASTER_PASSWORD}
+      - DB_SLAVE_HOST=${DB_SLAVE_HOST}
+      - DB_SLAVE_USERDB_SLAVE_USER}
+      - DB_SLAVE_PASSWORD=${DB_SLAVE_PASSWORD}    
     ports:
-      - "8081"
+        - "8081"
 
   # iam:
   #   networks:
@@ -48,3 +56,6 @@ networks:
   core:
     driver: bridge
     attachable: true
+  local-shared:
+    external: true
+    

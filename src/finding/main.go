@@ -26,7 +26,8 @@ func main() {
 	}
 
 	server := grpc.NewServer()
-	finding.RegisterFindingServiceServer(server, &findingService{})
+	findingServer := newFindingService(newFindingRepository()) // DI service & repository
+	finding.RegisterFindingServiceServer(server, findingServer)
 	appLogger.Infof("starting gRPC server at :%s", conf.Port)
 	server.Serve(l)
 }
