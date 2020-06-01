@@ -3,13 +3,179 @@ syntax = "proto3";
 package core.finding;
 option go_package = "github.com/CyberAgent/mimosa-core/proto/finding";
 
+import "github.com/mwitkow/go-proto-validators/validator.proto";
+
+service FindingService {
+  // fiding
+  rpc ListFinding(ListFindingRequest) returns (ListFindingResponse);
+  rpc GetFinding(GetFindingRequest) returns (GetFindingResponse);
+  rpc PutFinding(PutFindingRequest) returns (PutFindingResponse);
+  rpc DeleteFinding(DeleteFindingRequest) returns (Empty);
+  rpc ListFindingTag(ListFindingTagRequest) returns (ListFindingTagResponse);
+  rpc TagFinding(TagFindingRequest) returns (TagFindingResponse);
+  rpc UntagFinding(UntagFindingRequest) returns (Empty);
+
+  // resource
+  rpc ListResource(ListResourceRequest) returns (ListResourceResponse);
+  rpc GetResource(GetResourceRequest) returns (GetResourceResponse);
+  rpc PutResource(PutResourceRequest) returns (PutResourceResponse);
+  rpc DeleteResource(DeleteResourceRequest) returns (Empty);
+  rpc ListResourceTag(ListResourceTagRequest) returns (ListResourceTagResponse);
+  rpc TagResource(TagResourceRequest) returns (TagResourceResponse);
+  rpc UntagResource(UntagResourceRequest) returns (Empty);
+}
+
+message ListFindingRequest {
+  repeated string project_id = 1;
+  repeated string data_source = 2 [ (validator.field) = {length_lt : 64} ];
+  repeated string resource_name = 3 [ (validator.field) = {length_lt : 200} ];
+  float from_score = 4 [ (validator.field) = {float_gt : 0, float_lte : 1} ];
+  float to_score = 5 [ (validator.field) = {float_gt : 0, float_lte : 1} ];
+  int64 from_at = 6;
+  int64 to_at = 7;
+}
+
+message ListFindingResponse { repeated string finding_id = 1; }
+
+message GetFindingRequest {
+  string finding_id = 1 [ (validator.field) = {msg_exists : true} ];
+}
+
+message GetFindingResponse { Finding finding = 1; }
+
+message PutFindingRequest { FindingForUpsert finding = 1; }
+
+message PutFindingResponse { Finding finding = 1; }
+
+message DeleteFindingRequest {
+  string finding_id = 1 [ (validator.field) = {msg_exists : true} ];
+}
+
+message ListFindingTagRequest {
+  string finding_id = 1 [ (validator.field) = {msg_exists : true} ];
+}
+
+message ListFindingTagResponse { repeated FindingTag tag = 1; }
+
+message TagFindingRequest { FindingTagForUpsert tag = 1; }
+
+message TagFindingResponse { FindingTag tag = 1; }
+
+message UntagFindingRequest {
+  string finding_tag_id = 1 [ (validator.field) = {msg_exists : true} ];
+}
+
+message ListResourceRequest {
+  repeated string project_id = 1;
+  repeated string resource_name = 2 [ (validator.field) = {length_lt : 200} ];
+  float from_sum_score = 4 [ (validator.field) = {float_gt : 0} ];
+  float to_sum_score = 5 [ (validator.field) = {float_gt : 0} ];
+  int64 from_at = 6;
+  int64 to_at = 7;
+}
+
+message ListResourceResponse { repeated string resource_id = 1; }
+
+message GetResourceRequest {
+  string resource_id = 1 [ (validator.field) = {msg_exists : true} ];
+}
+
+message GetResourceResponse { Resource resource = 1; }
+
+message PutResourceRequest { ResourceForUpsert resource = 1; }
+
+message PutResourceResponse { Resource resource = 1; }
+
+message DeleteResourceRequest {
+  string resource_id = 1 [ (validator.field) = {msg_exists : true} ];
+}
+
+message ListResourceTagRequest {
+  string resource_id = 1 [ (validator.field) = {msg_exists : true} ];
+}
+
+message ListResourceTagResponse { repeated ResourceTag tag = 1; }
+
+message TagResourceRequest { ResourceTagForUpsert tag = 1; }
+
+message TagResourceResponse { ResourceTag tag = 1; }
+
+message UntagResourceRequest {
+  string resource_tag_id = 1 [ (validator.field) = {msg_exists : true} ];
+}
+
+// -----------
+
 message Finding {
   string fiding_id = 1;
-  string name = 2;
+  string description = 2;
   string data_source = 3;
-  string resource = 4;
+  string resource_name = 4;
   string project_id = 5;
-  string data = 6;
-  int64 created_at = 7;
-  int64 updated_at = 8;
+  float original_score = 6;
+  float original_max_score = 7;
+  float score = 8;
+  string data = 9;
+  int64 created_at = 10;
+  int64 updated_at = 11;
 }
+
+message FindingForUpsert {
+  string description = 1 [ (validator.field) = {length_lt : 200} ];
+  string data_source = 2 [ (validator.field) = {length_lt : 64} ];
+  string resource_name = 3;
+  string project_id = 4;
+  float original_score = 5
+      [ (validator.field) = {float_gte : 0, float_lte : 100} ];
+  float original_max_score = 6
+      [ (validator.field) = {float_gte : 0, float_lte : 100} ];
+  float score = 7 [ (validator.field) = {float_gte : 0, float_lte : 1} ];
+  string data = 8;
+}
+
+message FindingTag {
+  string fiding_tag_id = 1;
+  string fiding_id = 2;
+  string tag_key = 3;
+  string tag_value = 4;
+  int64 created_at = 5;
+  int64 updated_at = 6;
+}
+
+message FindingTagForUpsert {
+  string fiding_id = 2 [ (validator.field) = {msg_exists : true} ];
+  string tag_key = 3
+      [ (validator.field) = {msg_exists : true, length_lt : 64} ];
+  string tag_value = 4 [ (validator.field) = {length_lt : 200} ];
+}
+
+message Resource {
+  string resource_id = 1;
+  string resource_name = 2;
+  string project_id = 3;
+  int64 created_at = 4;
+  int64 updated_at = 5;
+}
+
+message ResourceForUpsert {
+  string resource_name = 1 [ (validator.field) = {msg_exists : true} ];
+  string project_id = 2;
+}
+
+message ResourceTag {
+  string resource_tag_id = 1;
+  string resource_id = 2;
+  string tag_key = 3;
+  string tag_value = 4;
+  int64 created_at = 5;
+  int64 updated_at = 6;
+}
+
+message ResourceTagForUpsert {
+  string resource_id = 1 [ (validator.field) = {msg_exists : true} ];
+  string tag_key = 2
+      [ (validator.field) = {msg_exists : true, length_lt : 64} ];
+  string tag_value = 3 [ (validator.field) = {length_lt : 200} ];
+}
+
+message Empty {}
