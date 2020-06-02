@@ -278,7 +278,7 @@ FindingTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| finding_id | [string](#string) | repeated |  |
+| finding_id | [uint64](#uint64) | repeated |  |
 
 
 
@@ -345,7 +345,7 @@ FindingTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| resource_id | [string](#string) | repeated |  |
+| resource_id | [uint64](#uint64) | repeated |  |
 
 
 

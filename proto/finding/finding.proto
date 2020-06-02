@@ -36,7 +36,7 @@ message ListFindingRequest {
   int64 to_at = 8;
 }
 
-message ListFindingResponse { repeated string finding_id = 1; }
+message ListFindingResponse { repeated uint64 finding_id = 1; }
 
 message GetFindingRequest {
   uint32 user_id = 1;
@@ -86,7 +86,7 @@ message ListResourceRequest {
   int64 to_at = 7;
 }
 
-message ListResourceResponse { repeated string resource_id = 1; }
+message ListResourceResponse { repeated uint64 resource_id = 1; }
 
 message GetResourceRequest {
   uint32 user_id = 1;
