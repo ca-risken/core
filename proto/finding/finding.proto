@@ -30,8 +30,8 @@ message ListFindingRequest {
   repeated uint32 project_id = 2;
   repeated string data_source = 3 [ (validator.field) = {length_lt : 64} ];
   repeated string resource_name = 4 [ (validator.field) = {length_lt : 200} ];
-  float from_score = 5 [ (validator.field) = {float_gt : 0, float_lte : 1} ];
-  float to_score = 6 [ (validator.field) = {float_gt : 0, float_lte : 1} ];
+  float from_score = 5 [ (validator.field) = {float_gte : 0, float_lte : 1} ];
+  float to_score = 6 [ (validator.field) = {float_gte : 0, float_lte : 1} ];
   int64 from_at = 7;
   int64 to_at = 8;
 }
@@ -80,8 +80,9 @@ message ListResourceRequest {
   uint32 user_id = 1;
   repeated uint32 project_id = 2;
   repeated string resource_name = 3 [ (validator.field) = {length_lt : 200} ];
-  float from_sum_score = 4 [ (validator.field) = {float_gt : 0} ];
-  float to_sum_score = 5 [ (validator.field) = {float_gt : 0} ];
+  float from_sum_score = 4
+      [ (validator.field) = {float_gte : 0, float_lte : 1} ];
+  float to_sum_score = 5 [ (validator.field) = {float_gte : 0, float_lte : 1} ];
   int64 from_at = 6;
   int64 to_at = 7;
 }
@@ -218,8 +219,8 @@ message ResourceTag {
 message ResourceTagForUpsert {
   uint64 resource_id = 1 [ (validator.field) = {msg_exists : true} ];
   string tag_key = 2
-      [ (validator.field) = {msg_exists : true, length_lt : 64} ];
-  string tag_value = 3 [ (validator.field) = {length_lt : 200} ];
+      [ (validator.field) = {msg_exists : true, length_lt : 65} ];
+  string tag_value = 3 [ (validator.field) = {length_lt : 201} ];
 }
 
 /**

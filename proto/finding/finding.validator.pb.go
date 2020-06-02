@@ -27,14 +27,14 @@ func (this *ListFindingRequest) Validate() error {
 			return github_com_mwitkow_go_proto_validators.FieldError("ResourceName", fmt.Errorf(`value '%v' must have a length smaller than '200'`, item))
 		}
 	}
-	if !(this.FromScore > 0) {
-		return github_com_mwitkow_go_proto_validators.FieldError("FromScore", fmt.Errorf(`value '%v' must be strictly greater than '0'`, this.FromScore))
+	if !(this.FromScore >= 0) {
+		return github_com_mwitkow_go_proto_validators.FieldError("FromScore", fmt.Errorf(`value '%v' must be greater than or equal to '0'`, this.FromScore))
 	}
 	if !(this.FromScore <= 1) {
 		return github_com_mwitkow_go_proto_validators.FieldError("FromScore", fmt.Errorf(`value '%v' must be lower than or equal to '1'`, this.FromScore))
 	}
-	if !(this.ToScore > 0) {
-		return github_com_mwitkow_go_proto_validators.FieldError("ToScore", fmt.Errorf(`value '%v' must be strictly greater than '0'`, this.ToScore))
+	if !(this.ToScore >= 0) {
+		return github_com_mwitkow_go_proto_validators.FieldError("ToScore", fmt.Errorf(`value '%v' must be greater than or equal to '0'`, this.ToScore))
 	}
 	if !(this.ToScore <= 1) {
 		return github_com_mwitkow_go_proto_validators.FieldError("ToScore", fmt.Errorf(`value '%v' must be lower than or equal to '1'`, this.ToScore))
@@ -112,11 +112,17 @@ func (this *ListResourceRequest) Validate() error {
 			return github_com_mwitkow_go_proto_validators.FieldError("ResourceName", fmt.Errorf(`value '%v' must have a length smaller than '200'`, item))
 		}
 	}
-	if !(this.FromSumScore > 0) {
-		return github_com_mwitkow_go_proto_validators.FieldError("FromSumScore", fmt.Errorf(`value '%v' must be strictly greater than '0'`, this.FromSumScore))
+	if !(this.FromSumScore >= 0) {
+		return github_com_mwitkow_go_proto_validators.FieldError("FromSumScore", fmt.Errorf(`value '%v' must be greater than or equal to '0'`, this.FromSumScore))
 	}
-	if !(this.ToSumScore > 0) {
-		return github_com_mwitkow_go_proto_validators.FieldError("ToSumScore", fmt.Errorf(`value '%v' must be strictly greater than '0'`, this.ToSumScore))
+	if !(this.FromSumScore <= 1) {
+		return github_com_mwitkow_go_proto_validators.FieldError("FromSumScore", fmt.Errorf(`value '%v' must be lower than or equal to '1'`, this.FromSumScore))
+	}
+	if !(this.ToSumScore >= 0) {
+		return github_com_mwitkow_go_proto_validators.FieldError("ToSumScore", fmt.Errorf(`value '%v' must be greater than or equal to '0'`, this.ToSumScore))
+	}
+	if !(this.ToSumScore <= 1) {
+		return github_com_mwitkow_go_proto_validators.FieldError("ToSumScore", fmt.Errorf(`value '%v' must be lower than or equal to '1'`, this.ToSumScore))
 	}
 	return nil
 }
@@ -237,11 +243,11 @@ func (this *ResourceTag) Validate() error {
 	return nil
 }
 func (this *ResourceTagForUpsert) Validate() error {
-	if !(len(this.TagKey) < 64) {
-		return github_com_mwitkow_go_proto_validators.FieldError("TagKey", fmt.Errorf(`value '%v' must have a length smaller than '64'`, this.TagKey))
+	if !(len(this.TagKey) < 65) {
+		return github_com_mwitkow_go_proto_validators.FieldError("TagKey", fmt.Errorf(`value '%v' must have a length smaller than '65'`, this.TagKey))
 	}
-	if !(len(this.TagValue) < 200) {
-		return github_com_mwitkow_go_proto_validators.FieldError("TagValue", fmt.Errorf(`value '%v' must have a length smaller than '200'`, this.TagValue))
+	if !(len(this.TagValue) < 201) {
+		return github_com_mwitkow_go_proto_validators.FieldError("TagValue", fmt.Errorf(`value '%v' must have a length smaller than '201'`, this.TagValue))
 	}
 	return nil
 }
