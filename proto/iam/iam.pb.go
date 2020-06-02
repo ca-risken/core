@@ -233,7 +233,8 @@ func (x *AuthzResponse) GetOk() bool {
 	return false
 }
 
-// ---------
+//*
+// Userエンティティ
 type User struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

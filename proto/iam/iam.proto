@@ -20,7 +20,9 @@ message AuthzRequest {
 
 message AuthzResponse { bool ok = 1; }
 
-// ---------
+/**
+ * Userエンティティ
+ */
 message User {
   string user_id = 1;
   string name = 2;
