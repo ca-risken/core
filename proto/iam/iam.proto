@@ -13,7 +13,7 @@ message AuthnRequest { string token = 1; }
 message AuthnResponse { User user = 1; }
 
 message AuthzRequest {
-  string user_id = 1;
+  int32 user_id = 1;
   string action_ptn = 2;
   string resource_ptn = 3;
 }
@@ -24,7 +24,7 @@ message AuthzResponse { bool ok = 1; }
  * Userエンティティ
  */
 message User {
-  string user_id = 1;
+  int32 user_id = 1;
   string name = 2;
   bool activated = 3;
   int64 created_at = 4;

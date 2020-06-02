@@ -3,7 +3,7 @@ module github.com/CyberAgent/mimosa-core/src/gateway
 go 1.13
 
 require (
-	github.com/CyberAgent/mimosa-core v0.0.0-20200601162348-8da2834ab8ab
+	github.com/CyberAgent/mimosa-core v0.0.0-20200602053855-a6791181cc18
 	github.com/go-chi/chi v4.1.1+incompatible
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mwitkow/go-proto-validators v0.3.0 // indirect

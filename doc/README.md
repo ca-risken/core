@@ -68,7 +68,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| finding_id | [string](#string) |  |  |
+| user_id | [int32](#int32) |  |  |
+| finding_id | [int64](#int64) |  |  |
 
 
 
@@ -83,7 +84,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| resource_id | [string](#string) |  |  |
+| user_id | [int32](#int32) |  |  |
+| resource_id | [int64](#int64) |  |  |
 
 
 
@@ -93,7 +95,7 @@
 <a name="core.finding.Empty"></a>
 
 ### Empty
-
+Empty 空メッセージ
 
 
 
@@ -103,12 +105,12 @@
 <a name="core.finding.Finding"></a>
 
 ### Finding
-
+Finding エンティティ
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| fiding_id | [string](#string) |  |  |
+| fiding_id | [int64](#int64) |  |  |
 | description | [string](#string) |  |  |
 | data_source | [string](#string) |  |  |
 | resource_name | [string](#string) |  |  |
@@ -128,7 +130,7 @@
 <a name="core.finding.FindingForUpsert"></a>
 
 ### FindingForUpsert
-
+Finding エンティティ（登録・更新用）
 
 
 | Field | Type | Label | Description |
@@ -136,7 +138,7 @@
 | description | [string](#string) |  |  |
 | data_source | [string](#string) |  |  |
 | resource_name | [string](#string) |  |  |
-| project_id | [string](#string) |  |  |
+| project_id | [int32](#int32) |  |  |
 | original_score | [float](#float) |  |  |
 | original_max_score | [float](#float) |  |  |
 | score | [float](#float) |  |  |
@@ -150,13 +152,13 @@
 <a name="core.finding.FindingTag"></a>
 
 ### FindingTag
-
+FindingTag エンティティ
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| fiding_tag_id | [string](#string) |  |  |
-| fiding_id | [string](#string) |  |  |
+| fiding_tag_id | [int64](#int64) |  |  |
+| fiding_id | [int64](#int64) |  |  |
 | tag_key | [string](#string) |  |  |
 | tag_value | [string](#string) |  |  |
 | created_at | [int64](#int64) |  |  |
@@ -170,12 +172,12 @@
 <a name="core.finding.FindingTagForUpsert"></a>
 
 ### FindingTagForUpsert
-
+FindingTag エンティティ（登録・更新用）
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| fiding_id | [string](#string) |  |  |
+| fiding_id | [int64](#int64) |  |  |
 | tag_key | [string](#string) |  |  |
 | tag_value | [string](#string) |  |  |
 
@@ -192,7 +194,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| finding_id | [string](#string) |  |  |
+| user_id | [int32](#int32) |  |  |
+| finding_id | [int64](#int64) |  |  |
 
 
 
@@ -222,7 +225,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| resource_id | [string](#string) |  |  |
+| user_id | [int32](#int32) |  |  |
+| resource_id | [int64](#int64) |  |  |
 
 
 
@@ -252,7 +256,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| project_id | [string](#string) | repeated |  |
+| user_id | [int32](#int32) |  |  |
+| project_id | [int32](#int32) | repeated |  |
 | data_source | [string](#string) | repeated |  |
 | resource_name | [string](#string) | repeated |  |
 | from_score | [float](#float) |  |  |
@@ -288,7 +293,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| finding_id | [string](#string) |  |  |
+| user_id | [int32](#int32) |  |  |
+| finding_id | [int64](#int64) |  |  |
 
 
 
@@ -318,7 +324,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| project_id | [string](#string) | repeated |  |
+| user_id | [int32](#int32) |  |  |
+| project_id | [int32](#int32) | repeated |  |
 | resource_name | [string](#string) | repeated |  |
 | from_sum_score | [float](#float) |  |  |
 | to_sum_score | [float](#float) |  |  |
@@ -353,7 +360,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| resource_id | [string](#string) |  |  |
+| user_id | [int32](#int32) |  |  |
+| resource_id | [int64](#int64) |  |  |
 
 
 
@@ -383,6 +391,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
+| user_id | [int32](#int32) |  |  |
 | finding | [FindingForUpsert](#core.finding.FindingForUpsert) |  |  |
 
 
@@ -413,6 +422,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
+| user_id | [int32](#int32) |  |  |
 | resource | [ResourceForUpsert](#core.finding.ResourceForUpsert) |  |  |
 
 
@@ -438,14 +448,14 @@
 <a name="core.finding.Resource"></a>
 
 ### Resource
-
+Resource エンティティ
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| resource_id | [string](#string) |  |  |
+| resource_id | [int64](#int64) |  |  |
 | resource_name | [string](#string) |  |  |
-| project_id | [string](#string) |  |  |
+| project_id | [int32](#int32) |  |  |
 | created_at | [int64](#int64) |  |  |
 | updated_at | [int64](#int64) |  |  |
 
@@ -457,13 +467,13 @@
 <a name="core.finding.ResourceForUpsert"></a>
 
 ### ResourceForUpsert
-
+Resource エンティティ（登録・更新用）
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | resource_name | [string](#string) |  |  |
-| project_id | [string](#string) |  |  |
+| project_id | [int32](#int32) |  |  |
 
 
 
@@ -473,13 +483,13 @@
 <a name="core.finding.ResourceTag"></a>
 
 ### ResourceTag
-
+ResourceTag エンティティ
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| resource_tag_id | [string](#string) |  |  |
-| resource_id | [string](#string) |  |  |
+| resource_tag_id | [int64](#int64) |  |  |
+| resource_id | [int64](#int64) |  |  |
 | tag_key | [string](#string) |  |  |
 | tag_value | [string](#string) |  |  |
 | created_at | [int64](#int64) |  |  |
@@ -493,12 +503,12 @@
 <a name="core.finding.ResourceTagForUpsert"></a>
 
 ### ResourceTagForUpsert
-
+ResourceTag エンティティ（登録・更新用）
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| resource_id | [string](#string) |  |  |
+| resource_id | [int64](#int64) |  |  |
 | tag_key | [string](#string) |  |  |
 | tag_value | [string](#string) |  |  |
 
@@ -515,6 +525,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
+| user_id | [int32](#int32) |  |  |
 | tag | [FindingTagForUpsert](#core.finding.FindingTagForUpsert) |  |  |
 
 
@@ -545,6 +556,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
+| user_id | [int32](#int32) |  |  |
 | tag | [ResourceTagForUpsert](#core.finding.ResourceTagForUpsert) |  |  |
 
 
@@ -575,7 +587,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| finding_tag_id | [string](#string) |  |  |
+| user_id | [int32](#int32) |  |  |
+| finding_tag_id | [int64](#int64) |  |  |
 
 
 
@@ -590,7 +603,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| resource_tag_id | [string](#string) |  |  |
+| user_id | [int32](#int32) |  |  |
+| resource_tag_id | [int64](#int64) |  |  |
 
 
 
@@ -674,7 +688,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [string](#string) |  |  |
+| user_id | [int32](#int32) |  |  |
 | action_ptn | [string](#string) |  |  |
 | resource_ptn | [string](#string) |  |  |
 
@@ -701,12 +715,12 @@
 <a name="core.iam.User"></a>
 
 ### User
----------
+Userエンティティ
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [string](#string) |  |  |
+| user_id | [int32](#int32) |  |  |
 | name | [string](#string) |  |  |
 | activated | [bool](#bool) |  |  |
 | created_at | [int64](#int64) |  |  |
