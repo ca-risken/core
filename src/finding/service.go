@@ -26,7 +26,7 @@ func (f *findingService) ListFinding(ctx context.Context, req *finding.ListFindi
 
 func (f *findingService) GetFinding(ctx context.Context, req *finding.GetFindingRequest) (*finding.GetFindingResponse, error) {
 	return &finding.GetFindingResponse{Finding: &finding.Finding{
-		FidingId:     "xxx",
+		FidingId:     1234567890,
 		Description:  "xxx",
 		DataSource:   "aws:guardduty",
 		ResourceName: "aws:xxx:xxx:::aaa",

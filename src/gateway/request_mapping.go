@@ -11,7 +11,7 @@ import (
 func mappingListFindingRequest(r *http.Request) *finding.ListFindingRequest {
 	req := &finding.ListFindingRequest{}
 	if key := r.URL.Query().Get("project_id"); key != "" {
-		req.ProjectId = commaSeparator(r.URL.Query().Get("project_id"))
+		req.ProjectId = commaSeparatorID(r.URL.Query().Get("project_id"))
 	}
 	if key := r.URL.Query().Get("data_source"); key != "" {
 		req.DataSource = commaSeparator(r.URL.Query().Get("data_source"))
@@ -43,11 +43,21 @@ func mappingListFindingRequest(r *http.Request) *finding.ListFindingRequest {
 	return req
 }
 
-func commaSeparator(param string) []int32 {
-	separated := []int32{}
+func commaSeparatorID(param string) []uint32 {
+	separated := []uint32{}
 	for _, p := range strings.Split(param, ",") {
 		if i, err := strconv.Atoi(p); err == nil {
-			append(separated, i)
+			separated = append(separated, uint32(i))
+		}
+	}
+	return separated
+}
+
+func commaSeparator(param string) []string {
+	separated := []string{}
+	for _, p := range strings.Split(param, ",") {
+		if p != "" {
+			separated = append(separated, p)
 		}
 	}
 	return separated

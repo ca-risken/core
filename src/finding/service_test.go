@@ -33,7 +33,7 @@ func TestListFinding(t *testing.T) {
 	}{
 		{
 			name:  "test1",
-			input: &finding.ListFindingRequest{ProjectId: []string{"hoge"}, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"hoge"}, FromScore: 0.0, ToScore: 1.0},
+			input: &finding.ListFindingRequest{ProjectId: []uint32{123}, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"hoge"}, FromScore: 0.0, ToScore: 1.0},
 			want:  &finding.ListFindingResponse{FindingId: []string{"aaa", "bbb"}},
 		},
 	}

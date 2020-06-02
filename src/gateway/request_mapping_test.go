@@ -21,18 +21,18 @@ func TestMappingListFindingRequest(t *testing.T) {
 		},
 		{
 			name:  "full set",
-			input: "project_id=aaa&data_source=aws:guardduty&resource_name=resouce&from_score=0.5&to_score=1.0&from_at=1590000000&to_at=1600000000",
-			want:  &finding.ListFindingRequest{ProjectId: []string{"aaa"}, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"resouce"}, FromScore: 0.5, ToScore: 1.0, FromAt: 1590000000, ToAt: 1600000000},
+			input: "project_id=123&data_source=aws:guardduty&resource_name=resouce&from_score=0.5&to_score=1.0&from_at=1590000000&to_at=1600000000",
+			want:  &finding.ListFindingRequest{ProjectId: []uint32{123}, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"resouce"}, FromScore: 0.5, ToScore: 1.0, FromAt: 1590000000, ToAt: 1600000000},
 		},
 		{
 			name:  "multiple project_id 1",
-			input: "project_id=hoge,fuga",
-			want:  &finding.ListFindingRequest{ProjectId: []string{"hoge", "fuga"}},
+			input: "project_id=123,456",
+			want:  &finding.ListFindingRequest{ProjectId: []uint32{123, 456}},
 		},
 		{
 			name:  "multiple project_id 2",
-			input: "project_id=hoge,",
-			want:  &finding.ListFindingRequest{ProjectId: []string{"hoge", ""}},
+			input: "project_id=123,",
+			want:  &finding.ListFindingRequest{ProjectId: []uint32{123}},
 		},
 		{
 			name:  "multiple data_source 1",
@@ -67,6 +67,44 @@ func TestMappingListFindingRequest(t *testing.T) {
 	}
 }
 
+func TestCommaSeparatorID(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  []uint32
+	}{
+		{
+			name:  "single param",
+			input: "1234567890",
+			want:  []uint32{1234567890},
+		},
+		{
+			name:  "multiple params",
+			input: "123,456,789",
+			want:  []uint32{123, 456, 789},
+		},
+		{
+			name:  "blank params",
+			input: "1,,3",
+			want:  []uint32{1, 3},
+		},
+		{
+			name:  "parse error",
+			input: "1,aaa",
+			want:  []uint32{1},
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := commaSeparatorID(c.input)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected result: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
 func TestCommaSeparator(t *testing.T) {
 	cases := []struct {
 		name  string
@@ -82,6 +120,11 @@ func TestCommaSeparator(t *testing.T) {
 			name:  "multiple params",
 			input: "aaa,bbb,ccc",
 			want:  []string{"aaa", "bbb", "ccc"},
+		},
+		{
+			name:  "blank params",
+			input: "aaa,,ccc",
+			want:  []string{"aaa", "ccc"},
 		},
 	}
 
