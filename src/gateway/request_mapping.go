@@ -43,8 +43,14 @@ func mappingListFindingRequest(r *http.Request) *finding.ListFindingRequest {
 	return req
 }
 
-func commaSeparator(param string) []string {
-	return strings.Split(param, ",")
+func commaSeparator(param string) []int32 {
+	separated := []int32{}
+	for _, p := range strings.Split(param, ",") {
+		if i, err := strconv.Atoi(p); err == nil {
+			append(separated, i)
+		}
+	}
+	return separated
 }
 
 func parseScore(score string) (float32, error) {

@@ -68,8 +68,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
-| finding_id | [int64](#int64) |  |  |
+| user_id | [uint32](#uint32) |  |  |
+| finding_id | [uint64](#uint64) |  |  |
 
 
 
@@ -84,8 +84,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
-| resource_id | [int64](#int64) |  |  |
+| user_id | [uint32](#uint32) |  |  |
+| resource_id | [uint64](#uint64) |  |  |
 
 
 
@@ -110,7 +110,7 @@ Finding エンティティ
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| fiding_id | [int64](#int64) |  |  |
+| fiding_id | [uint64](#uint64) |  |  |
 | description | [string](#string) |  |  |
 | data_source | [string](#string) |  |  |
 | resource_name | [string](#string) |  |  |
@@ -138,7 +138,7 @@ Finding エンティティ（登録・更新用）
 | description | [string](#string) |  |  |
 | data_source | [string](#string) |  |  |
 | resource_name | [string](#string) |  |  |
-| project_id | [int32](#int32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 | original_score | [float](#float) |  |  |
 | original_max_score | [float](#float) |  |  |
 | score | [float](#float) |  |  |
@@ -157,8 +157,8 @@ FindingTag エンティティ
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| fiding_tag_id | [int64](#int64) |  |  |
-| fiding_id | [int64](#int64) |  |  |
+| fiding_tag_id | [uint64](#uint64) |  |  |
+| fiding_id | [uint64](#uint64) |  |  |
 | tag_key | [string](#string) |  |  |
 | tag_value | [string](#string) |  |  |
 | created_at | [int64](#int64) |  |  |
@@ -177,7 +177,7 @@ FindingTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| fiding_id | [int64](#int64) |  |  |
+| fiding_id | [uint64](#uint64) |  |  |
 | tag_key | [string](#string) |  |  |
 | tag_value | [string](#string) |  |  |
 
@@ -194,8 +194,8 @@ FindingTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
-| finding_id | [int64](#int64) |  |  |
+| user_id | [uint32](#uint32) |  |  |
+| finding_id | [uint64](#uint64) |  |  |
 
 
 
@@ -225,8 +225,8 @@ FindingTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
-| resource_id | [int64](#int64) |  |  |
+| user_id | [uint32](#uint32) |  |  |
+| resource_id | [uint64](#uint64) |  |  |
 
 
 
@@ -256,8 +256,8 @@ FindingTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
-| project_id | [int32](#int32) | repeated |  |
+| user_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) | repeated |  |
 | data_source | [string](#string) | repeated |  |
 | resource_name | [string](#string) | repeated |  |
 | from_score | [float](#float) |  |  |
@@ -293,8 +293,8 @@ FindingTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
-| finding_id | [int64](#int64) |  |  |
+| user_id | [uint32](#uint32) |  |  |
+| finding_id | [uint64](#uint64) |  |  |
 
 
 
@@ -324,8 +324,8 @@ FindingTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
-| project_id | [int32](#int32) | repeated |  |
+| user_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) | repeated |  |
 | resource_name | [string](#string) | repeated |  |
 | from_sum_score | [float](#float) |  |  |
 | to_sum_score | [float](#float) |  |  |
@@ -360,8 +360,8 @@ FindingTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
-| resource_id | [int64](#int64) |  |  |
+| user_id | [uint32](#uint32) |  |  |
+| resource_id | [uint64](#uint64) |  |  |
 
 
 
@@ -391,7 +391,7 @@ FindingTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
+| user_id | [uint32](#uint32) |  |  |
 | finding | [FindingForUpsert](#core.finding.FindingForUpsert) |  |  |
 
 
@@ -422,7 +422,7 @@ FindingTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
+| user_id | [uint32](#uint32) |  |  |
 | resource | [ResourceForUpsert](#core.finding.ResourceForUpsert) |  |  |
 
 
@@ -453,9 +453,9 @@ Resource エンティティ
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| resource_id | [int64](#int64) |  |  |
+| resource_id | [uint64](#uint64) |  |  |
 | resource_name | [string](#string) |  |  |
-| project_id | [int32](#int32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 | created_at | [int64](#int64) |  |  |
 | updated_at | [int64](#int64) |  |  |
 
@@ -473,7 +473,7 @@ Resource エンティティ（登録・更新用）
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | resource_name | [string](#string) |  |  |
-| project_id | [int32](#int32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 
 
 
@@ -488,8 +488,8 @@ ResourceTag エンティティ
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| resource_tag_id | [int64](#int64) |  |  |
-| resource_id | [int64](#int64) |  |  |
+| resource_tag_id | [uint64](#uint64) |  |  |
+| resource_id | [uint64](#uint64) |  |  |
 | tag_key | [string](#string) |  |  |
 | tag_value | [string](#string) |  |  |
 | created_at | [int64](#int64) |  |  |
@@ -508,7 +508,7 @@ ResourceTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| resource_id | [int64](#int64) |  |  |
+| resource_id | [uint64](#uint64) |  |  |
 | tag_key | [string](#string) |  |  |
 | tag_value | [string](#string) |  |  |
 
@@ -525,7 +525,7 @@ ResourceTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
+| user_id | [uint32](#uint32) |  |  |
 | tag | [FindingTagForUpsert](#core.finding.FindingTagForUpsert) |  |  |
 
 
@@ -556,7 +556,7 @@ ResourceTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
+| user_id | [uint32](#uint32) |  |  |
 | tag | [ResourceTagForUpsert](#core.finding.ResourceTagForUpsert) |  |  |
 
 
@@ -587,8 +587,8 @@ ResourceTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
-| finding_tag_id | [int64](#int64) |  |  |
+| user_id | [uint32](#uint32) |  |  |
+| finding_tag_id | [uint64](#uint64) |  |  |
 
 
 
@@ -603,8 +603,8 @@ ResourceTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
-| resource_tag_id | [int64](#int64) |  |  |
+| user_id | [uint32](#uint32) |  |  |
+| resource_tag_id | [uint64](#uint64) |  |  |
 
 
 
