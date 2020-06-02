@@ -1,9 +1,7 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/CyberAgent/mimosa-core v0.0.0-20200602061511-164556a67226 h1:NB2VORC7v8APub8MuGzbaUx4y0MFjl3EVcriQYapb8o=
-github.com/CyberAgent/mimosa-core v0.0.0-20200602061511-164556a67226/go.mod h1:eIxWedkAeUgbc3Qv46sQC5lh6uUme87tM7I+xxWZ78A=
-github.com/CyberAgent/mimosa-core v0.0.0-20200602062810-4039d3eec2cd h1:cE9Iq/YY1JHw3gj+tfneBrImP/vtYajeOISApC1/SSc=
-github.com/CyberAgent/mimosa-core v0.0.0-20200602062810-4039d3eec2cd/go.mod h1:eIxWedkAeUgbc3Qv46sQC5lh6uUme87tM7I+xxWZ78A=
+github.com/CyberAgent/mimosa-core v0.0.0-20200602073905-463cc1ae0c8f h1:/w2G3S6ncoWSIQ2+MEYHzJz15cFgoSscDjMuUnW9f70=
+github.com/CyberAgent/mimosa-core v0.0.0-20200602073905-463cc1ae0c8f/go.mod h1:eIxWedkAeUgbc3Qv46sQC5lh6uUme87tM7I+xxWZ78A=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=

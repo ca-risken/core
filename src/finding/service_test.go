@@ -13,9 +13,9 @@ type mockFindingRepository struct {
 	mock.Mock
 }
 
-func (m *mockFindingRepository) List() (*[]string, error) {
+func (m *mockFindingRepository) ListFinding(req *finding.ListFindingRequest) (*[]listFindingResult, error) {
 	args := m.Called()
-	return args.Get(0).(*[]string), args.Error(1)
+	return args.Get(0).(*[]listFindingResult), args.Error(1)
 }
 
 func newFindingMockRepository() findingRepoInterface {
@@ -34,13 +34,17 @@ func TestListFinding(t *testing.T) {
 		{
 			name:  "test1",
 			input: &finding.ListFindingRequest{ProjectId: []uint32{123}, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"hoge"}, FromScore: 0.0, ToScore: 1.0},
-			want:  &finding.ListFindingResponse{FindingId: []string{"aaa", "bbb"}},
+			want:  &finding.ListFindingResponse{FindingId: []uint64{111, 222}},
 		},
 	}
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("List").Return(&[]string{"aaa", "bbb"}, nil)
+			mock.On("ListFinding").Return(
+				&[]listFindingResult{
+					{FindingID: 111},
+					{FindingID: 222},
+				}, nil)
 			result, err := svc.ListFinding(ctx, c.input)
 			if err != nil {
 				t.Fatalf("unexpected error: %+v", err)

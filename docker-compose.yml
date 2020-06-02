@@ -34,10 +34,12 @@ services:
       - DB_MASTER_USER=${DB_MASTER_USER}
       - DB_MASTER_PASSWORD=${DB_MASTER_PASSWORD}
       - DB_SLAVE_HOST=${DB_SLAVE_HOST}
-      - DB_SLAVE_USERDB_SLAVE_USER}
-      - DB_SLAVE_PASSWORD=${DB_SLAVE_PASSWORD}    
+      - DB_SLAVE_USER=${DB_SLAVE_USER}
+      - DB_SLAVE_PASSWORD=${DB_SLAVE_PASSWORD}
+      - DB_PORT=3306
+      - DB_SCHEMA=mimosa
     ports:
-        - "8081"
+      - "8081"
 
   # iam:
   #   networks:

@@ -17,11 +17,20 @@ func newFindingService(repo findingRepoInterface) finding.FindingServiceServer {
 }
 
 func (f *findingService) ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*finding.ListFindingResponse, error) {
-	ids, err := f.repository.List()
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	list, err := f.repository.ListFinding(req)
 	if err != nil {
 		return nil, err
 	}
-	return &finding.ListFindingResponse{FindingId: *ids}, nil
+
+	// TODO authz
+	var ids []uint64
+	for _, id := range *list {
+		ids = append(ids, uint64(id.FindingID))
+	}
+	return &finding.ListFindingResponse{FindingId: ids}, nil
 }
 
 func (f *findingService) GetFinding(ctx context.Context, req *finding.GetFindingRequest) (*finding.GetFindingResponse, error) {

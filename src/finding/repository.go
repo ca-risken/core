@@ -3,24 +3,26 @@ package main
 import (
 	"fmt"
 
-	"github.com/cloudflare/cfssl/log"
+	"github.com/CyberAgent/mimosa-core/proto/finding"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
 	"github.com/kelseyhightower/envconfig"
-	"github.com/tsenart/nap"
 )
 
 type findingRepoInterface interface {
-	List() (*[]string, error)
+	ListFinding(*finding.ListFindingRequest) (*[]listFindingResult, error)
 }
 
 type findingRepository struct {
-	DB *nap.DB
+	MasterDB *gorm.DB
+	SlaveDB  *gorm.DB
 }
 
 func newFindingRepository() findingRepoInterface {
-	return &findingRepository{
-		DB: initDB(),
-	}
+	repo := findingRepository{}
+	repo.MasterDB = initDB(true)
+	repo.SlaveDB = initDB(false)
+	return &repo
 }
 
 type dbConfig struct {
@@ -31,37 +33,53 @@ type dbConfig struct {
 	SlaveUser      string `split_words:"true"`
 	SlavePassword  string `split_words:"true"`
 
-	Schema string `default:"mimosa"`
-	Port   int    `default:"3306" required:"true"`
+	Schema string `required:"true"`
+	Port   int    `required:"true"`
 }
 
-func initDB() *nap.DB {
+func initDB(isMaster bool) *gorm.DB {
 	conf := &dbConfig{}
 	if err := envconfig.Process("DB", conf); err != nil {
 		appLogger.Fatalf("Failed to load DB config. err: %+v", err)
 	}
 
-	dsns := fmt.Sprintf(
-		"%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
-		conf.MasterUser, conf.MasterPassword, conf.MasterHost, conf.Port, conf.Schema)
+	var user, pass, host string
+	if isMaster {
+		user = conf.MasterUser
+		pass = conf.MasterPassword
+		host = conf.MasterHost
+	} else {
+		user = conf.SlaveUser
+		pass = conf.SlavePassword
+		host = conf.SlaveHost
+	}
 
-	if conf.SlaveHost != "" {
-		dsns += ";"
-		dsns += fmt.Sprintf(
-			"%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
-			conf.SlaveUser, conf.SlavePassword, conf.SlaveHost, conf.Port, conf.Schema)
-	}
-	db, err := nap.Open("mysql", dsns)
+	db, err := gorm.Open("mysql",
+		fmt.Sprintf("%s:%s@tcp([%s]:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
+			user, pass, host, conf.Port, conf.Schema))
 	if err != nil {
-		appLogger.Fatalf("Failed to open DB. err: %+v", err)
+		appLogger.Fatalf("Failed to open DB. isMaster: %t, err: %+v", isMaster, err)
+		return nil
 	}
-	if err := db.Ping(); err != nil {
-		log.Fatalf("Some physical database is unreachable: %s", err)
-	}
-	appLogger.Info("Connected to Database.")
+	db.LogMode(true)
+	db.SingularTable(true) // if set this to true, `User`'s default table name will be `user`
+	appLogger.Infof("Connected to Database. isMaster: %t", isMaster)
 	return db
 }
 
-func (f *findingRepository) List() (*[]string, error) {
-	return &[]string{"0000000001", "0000000002", "0000000003"}, nil
+type listFindingResult struct {
+	FindingID uint64 `gorm:"column:finding_id"`
+}
+
+func (f *findingRepository) ListFinding(req *finding.ListFindingRequest) (*[]listFindingResult, error) {
+	var result []listFindingResult
+	if scan := f.SlaveDB.Raw("select finding_id from finding where project_id in (?)", req.ProjectId).Scan(&result); scan.Error != nil {
+		return nil, scan.Error
+	}
+
+	// var ret []uint64
+	// for _, id := range ids {
+	// 	ret = append(ret, uint64(id.FindingID))
+	// }
+	return &result, nil
 }

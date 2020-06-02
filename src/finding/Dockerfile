@@ -19,7 +19,7 @@ ENV PORT= \
     DB_SLAVE_HOST= \
     DB_SLAVE_USER= \
     DB_SLAVE_PASSWORD= \
-    DB_SCHEMA= \
+    DB_SCHEMA=mimosa \
     DB_PORT=3306 \
     TZ=Asia/Tokyo
 WORKDIR /usr/local/finding
