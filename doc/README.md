@@ -110,7 +110,7 @@ Finding エンティティ
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| fiding_id | [uint64](#uint64) |  |  |
+| finding_id | [uint64](#uint64) |  |  |
 | description | [string](#string) |  |  |
 | data_source | [string](#string) |  |  |
 | resource_name | [string](#string) |  |  |
@@ -157,8 +157,8 @@ FindingTag エンティティ
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| fiding_tag_id | [uint64](#uint64) |  |  |
-| fiding_id | [uint64](#uint64) |  |  |
+| finding_tag_id | [uint64](#uint64) |  |  |
+| finding_id | [uint64](#uint64) |  |  |
 | tag_key | [string](#string) |  |  |
 | tag_value | [string](#string) |  |  |
 | created_at | [int64](#int64) |  |  |
@@ -177,7 +177,7 @@ FindingTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| fiding_id | [uint64](#uint64) |  |  |
+| finding_id | [uint64](#uint64) |  |  |
 | tag_key | [string](#string) |  |  |
 | tag_value | [string](#string) |  |  |
 

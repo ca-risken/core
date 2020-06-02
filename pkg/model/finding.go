@@ -4,7 +4,7 @@ import "time"
 
 // Finding entity model
 type Finding struct {
-	FidingID      uint64
+	FindingID     uint64
 	Description   string
 	DataSource    string
 	ResourceName  string
@@ -18,12 +18,12 @@ type Finding struct {
 
 // FindingTag entity model
 type FindingTag struct {
-	FidingTagID uint64
-	FidingID    uint64
-	TagKey      string
-	TagValue    string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	FindingTagID uint64
+	FindingID    uint64
+	TagKey       string
+	TagValue     string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 // Resource entity model
