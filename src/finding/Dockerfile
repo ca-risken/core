@@ -21,6 +21,7 @@ ENV PORT= \
     DB_SLAVE_PASSWORD= \
     DB_SCHEMA=mimosa \
     DB_PORT=3306 \
+    DB_LOG_MODE=false \
     TZ=Asia/Tokyo
 WORKDIR /usr/local/finding
 CMD ["bin/finding"]

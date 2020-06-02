@@ -9,5 +9,6 @@ export DB_MASTER_PASSWORD="moge"
 export DB_SLAVE_HOST="db"
 export DB_SLAVE_USER="hoge"
 export DB_SLAVE_PASSWORD="moge"
+export DB_LOG_MODE="false"
 
 export GOPRIVATE="github.com/CyberAgent/*"

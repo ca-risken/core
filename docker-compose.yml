@@ -38,6 +38,7 @@ services:
       - DB_SLAVE_PASSWORD=${DB_SLAVE_PASSWORD}
       - DB_PORT=3306
       - DB_SCHEMA=mimosa
+      - DB_LOG_MODE=${DB_LOG_MODE}
     ports:
       - "8081"
 

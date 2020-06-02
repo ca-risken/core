@@ -33,8 +33,9 @@ type dbConfig struct {
 	SlaveUser      string `split_words:"true"`
 	SlavePassword  string `split_words:"true"`
 
-	Schema string `required:"true"`
-	Port   int    `required:"true"`
+	Schema  string `required:"true"`
+	Port    int    `required:"true"`
+	LogMode bool   `split_words:"true" default:"false"`
 }
 
 func initDB(isMaster bool) *gorm.DB {
@@ -61,7 +62,7 @@ func initDB(isMaster bool) *gorm.DB {
 		appLogger.Fatalf("Failed to open DB. isMaster: %t, err: %+v", isMaster, err)
 		return nil
 	}
-	db.LogMode(true)
+	db.LogMode(conf.LogMode)
 	db.SingularTable(true) // if set this to true, `User`'s default table name will be `user`
 	appLogger.Infof("Connected to Database. isMaster: %t", isMaster)
 	return db
@@ -76,10 +77,5 @@ func (f *findingRepository) ListFinding(req *finding.ListFindingRequest) (*[]lis
 	if scan := f.SlaveDB.Raw("select finding_id from finding where project_id in (?)", req.ProjectId).Scan(&result); scan.Error != nil {
 		return nil, scan.Error
 	}
-
-	// var ret []uint64
-	// for _, id := range ids {
-	// 	ret = append(ret, uint64(id.FindingID))
-	// }
 	return &result, nil
 }
