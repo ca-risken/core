@@ -148,16 +148,17 @@ message Finding {
  * Finding エンティティ（登録・更新用）
  */
 message FindingForUpsert {
-  string description = 1 [ (validator.field) = {length_lt : 200} ];
-  string data_source = 2 [ (validator.field) = {length_lt : 64} ];
-  string resource_name = 3;
-  uint32 project_id = 4;
-  float original_score = 5
+  uint64 finding_id = 1;
+  string description = 2 [ (validator.field) = {length_lt : 200} ];
+  string data_source = 3 [ (validator.field) = {length_lt : 64} ];
+  string resource_name = 4;
+  uint32 project_id = 5;
+  float original_score = 6
       [ (validator.field) = {float_gte : 0, float_lte : 100} ];
-  float original_max_score = 6
+  float original_max_score = 7
       [ (validator.field) = {float_gte : 0, float_lte : 100} ];
-  float score = 7 [ (validator.field) = {float_gte : 0, float_lte : 1} ];
-  string data = 8;
+  float score = 8 [ (validator.field) = {float_gte : 0, float_lte : 1} ];
+  string data = 9;
 }
 
 /**
@@ -176,6 +177,7 @@ message FindingTag {
  * FindingTag エンティティ（登録・更新用）
  */
 message FindingTagForUpsert {
+  uint64 finding_tag_id = 1;
   uint64 finding_id = 2 [ (validator.field) = {msg_exists : true} ];
   string tag_key = 3
       [ (validator.field) = {msg_exists : true, length_lt : 64} ];
@@ -197,8 +199,9 @@ message Resource {
  * Resource エンティティ（登録・更新用）
  */
 message ResourceForUpsert {
-  string resource_name = 1 [ (validator.field) = {msg_exists : true} ];
-  uint32 project_id = 2;
+  uint64 resource_id = 1;
+  string resource_name = 2 [ (validator.field) = {msg_exists : true} ];
+  uint32 project_id = 3;
 }
 
 /**
@@ -217,10 +220,11 @@ message ResourceTag {
  * ResourceTag エンティティ（登録・更新用）
  */
 message ResourceTagForUpsert {
-  uint64 resource_id = 1 [ (validator.field) = {msg_exists : true} ];
-  string tag_key = 2
+  uint64 resource_tag_id = 1;
+  uint64 resource_id = 2 [ (validator.field) = {msg_exists : true} ];
+  string tag_key = 3
       [ (validator.field) = {msg_exists : true, length_lt : 65} ];
-  string tag_value = 3 [ (validator.field) = {length_lt : 201} ];
+  string tag_value = 4 [ (validator.field) = {length_lt : 201} ];
 }
 
 /**

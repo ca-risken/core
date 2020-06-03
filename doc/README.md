@@ -135,6 +135,7 @@ Finding エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
+| finding_id | [uint64](#uint64) |  |  |
 | description | [string](#string) |  |  |
 | data_source | [string](#string) |  |  |
 | resource_name | [string](#string) |  |  |
@@ -177,6 +178,7 @@ FindingTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
+| finding_tag_id | [uint64](#uint64) |  |  |
 | finding_id | [uint64](#uint64) |  |  |
 | tag_key | [string](#string) |  |  |
 | tag_value | [string](#string) |  |  |
@@ -472,6 +474,7 @@ Resource エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
+| resource_id | [uint64](#uint64) |  |  |
 | resource_name | [string](#string) |  |  |
 | project_id | [uint32](#uint32) |  |  |
 
@@ -508,6 +511,7 @@ ResourceTag エンティティ（登録・更新用）
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
+| resource_tag_id | [uint64](#uint64) |  |  |
 | resource_id | [uint64](#uint64) |  |  |
 | tag_key | [string](#string) |  |  |
 | tag_value | [string](#string) |  |  |
