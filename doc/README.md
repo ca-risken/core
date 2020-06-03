@@ -114,7 +114,7 @@ Finding エンティティ
 | description | [string](#string) |  |  |
 | data_source | [string](#string) |  |  |
 | resource_name | [string](#string) |  |  |
-| project_id | [string](#string) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 | original_score | [float](#float) |  |  |
 | original_max_score | [float](#float) |  |  |
 | score | [float](#float) |  |  |

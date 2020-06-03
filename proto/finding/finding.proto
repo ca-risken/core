@@ -135,7 +135,7 @@ message Finding {
   string description = 2;
   string data_source = 3;
   string resource_name = 4;
-  string project_id = 5;
+  uint32 project_id = 5;
   float original_score = 6;
   float original_max_score = 7;
   float score = 8;
