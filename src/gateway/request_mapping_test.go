@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"reflect"
 	"testing"
 
 	"github.com/CyberAgent/mimosa-core/proto/finding"
+	"github.com/go-chi/chi"
 )
 
 func TestMappingListFindingRequest(t *testing.T) {
@@ -58,10 +60,49 @@ func TestMappingListFindingRequest(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			r, _ := http.NewRequest("GET", "/?"+c.input, nil)
-			mapping := mappingListFindingRequest(r)
-			if !reflect.DeepEqual(mapping, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, mapping)
+			req, _ := http.NewRequest("GET", "/finding?"+c.input, nil)
+			got := mappingListFindingRequest(req)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestMappintgGetFinding(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  *finding.GetFindingRequest
+	}{
+		{
+			name:  "No param",
+			input: "",
+			want:  &finding.GetFindingRequest{},
+		},
+		{
+			name:  "finding_id",
+			input: "1001",
+			want:  &finding.GetFindingRequest{FindingId: 1001},
+		},
+		{
+			name:  "parse error",
+			input: "xxxxxxxx",
+			want:  &finding.GetFindingRequest{},
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			req, _ := http.NewRequest("GET", "/finding/"+c.input, nil)
+			// Requestにパスパラメータ{finding_id}を登録
+			rctx := chi.NewRouteContext()
+			rctx.URLParams.Add("finding_id", c.input)
+			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
+			got := mappingGetFindingRequest(req)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
 			}
 		})
 	}

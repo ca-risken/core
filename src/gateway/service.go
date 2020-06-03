@@ -38,29 +38,33 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) erro
 }
 
 func (g *gatewayService) listFindingHandler(w http.ResponseWriter, r *http.Request) {
-	msg, err := finding.NewFindingServiceClient(g.findingSvcConn).ListFinding(
-		r.Context(), mappingListFindingRequest(r))
-	if err != nil {
-		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{
-			"error": err.Error(),
-		})
+	req := mappingListFindingRequest(r)
+	if err := req.Validate(); err != nil {
+		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	writeResponse(w, http.StatusOK, map[string]interface{}{"result": msg})
-	return
+
+	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).ListFinding(r.Context(), req)
+	if err != nil {
+		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
 }
 
 func (g *gatewayService) getFindingHandler(w http.ResponseWriter, r *http.Request) {
-	msg, err := finding.NewFindingServiceClient(g.findingSvcConn).GetFinding(
-		r.Context(), mappingGetFindingRequest(r))
-	if err != nil {
-		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{
-			"error": err.Error(),
-		})
+	req := mappingGetFindingRequest(r)
+	if err := req.Validate(); err != nil {
+		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	writeResponse(w, http.StatusOK, map[string]interface{}{"result": msg})
-	return
+
+	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).GetFinding(r.Context(), req)
+	if err != nil {
+		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
 }
 
 func writeResponse(w http.ResponseWriter, status int, body map[string]interface{}) {

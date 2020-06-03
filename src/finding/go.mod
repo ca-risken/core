@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/CyberAgent/mimosa-core v0.0.0-20200603025426-5bf61368207f
-	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200603025152-97b0fdcba0b5
+	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200603031425-be33bf3a971e
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/jinzhu/gorm v1.9.12
 	github.com/kelseyhightower/envconfig v1.4.0

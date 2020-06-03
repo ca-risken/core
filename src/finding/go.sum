@@ -1,13 +1,9 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/CyberAgent/mimosa-core v0.0.0-20200602183238-e99b7221659d h1:4Cl7P+YAAPAc946ngpAsW4tg1AN3+oBeup0rZTAykgg=
-github.com/CyberAgent/mimosa-core v0.0.0-20200602183238-e99b7221659d/go.mod h1:eIxWedkAeUgbc3Qv46sQC5lh6uUme87tM7I+xxWZ78A=
 github.com/CyberAgent/mimosa-core v0.0.0-20200603025426-5bf61368207f h1:DKXshLjZNleZ1Ms1XVYL7dTd723VRSB9lHij4FbAljQ=
 github.com/CyberAgent/mimosa-core v0.0.0-20200603025426-5bf61368207f/go.mod h1:eIxWedkAeUgbc3Qv46sQC5lh6uUme87tM7I+xxWZ78A=
-github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200602183238-e99b7221659d h1:5iYnJISpeKWtZHzq2nOCtJ6DVjmYNNzkN/cHG2/xedg=
-github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200602183238-e99b7221659d/go.mod h1:ijekRVpmEnVlz3+T9PC4qHPu7woaUrznhwekKOV3jyY=
-github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200603025152-97b0fdcba0b5 h1:MjsuIJ2PyYkwRHXOuIezlf+oKlyPxsKhR0BPSezV3H8=
-github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200603025152-97b0fdcba0b5/go.mod h1:ijekRVpmEnVlz3+T9PC4qHPu7woaUrznhwekKOV3jyY=
+github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200603031425-be33bf3a971e h1:L2yDTG+TjfLubUXgZFd03DzvKmjbHanVacvWsEb5UAY=
+github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200603031425-be33bf3a971e/go.mod h1:ijekRVpmEnVlz3+T9PC4qHPu7woaUrznhwekKOV3jyY=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
