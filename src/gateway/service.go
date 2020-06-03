@@ -16,8 +16,9 @@ type gatewayService struct {
 }
 
 func newGatewayService(ctx context.Context, conf gatewayConf) (gatewayService, error) {
-	svc := gatewayService{}
-	svc.findingSvcAddr = conf.FindingSvcAddr
+	svc := gatewayService{
+		findingSvcAddr: conf.FindingSvcAddr,
+	}
 	if err := mustConnGRPC(ctx, &svc.findingSvcConn, svc.findingSvcAddr); err != nil {
 		return svc, err
 	}
@@ -36,9 +37,22 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) erro
 	return nil
 }
 
-func (g *gatewayService) findingHandler(w http.ResponseWriter, r *http.Request) {
+func (g *gatewayService) listFindingHandler(w http.ResponseWriter, r *http.Request) {
 	msg, err := finding.NewFindingServiceClient(g.findingSvcConn).ListFinding(
 		r.Context(), mappingListFindingRequest(r))
+	if err != nil {
+		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
+		return
+	}
+	writeResponse(w, http.StatusOK, map[string]interface{}{"result": msg})
+	return
+}
+
+func (g *gatewayService) getFindingHandler(w http.ResponseWriter, r *http.Request) {
+	msg, err := finding.NewFindingServiceClient(g.findingSvcConn).GetFinding(
+		r.Context(), mappingGetFindingRequest(r))
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),

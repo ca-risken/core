@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 
+	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
+	"github.com/jinzhu/gorm"
 )
 
 type findingService struct {
@@ -22,6 +24,9 @@ func (f *findingService) ListFinding(ctx context.Context, req *finding.ListFindi
 	}
 	list, err := f.repository.ListFinding(req)
 	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return &finding.ListFindingResponse{}, nil
+		}
 		return nil, err
 	}
 
@@ -34,17 +39,19 @@ func (f *findingService) ListFinding(ctx context.Context, req *finding.ListFindi
 }
 
 func (f *findingService) GetFinding(ctx context.Context, req *finding.GetFindingRequest) (*finding.GetFindingResponse, error) {
-	return &finding.GetFindingResponse{Finding: &finding.Finding{
-		FidingId:     1234567890,
-		Description:  "xxx",
-		DataSource:   "aws:guardduty",
-		ResourceName: "aws:xxx:xxx:::aaa",
-		Score:        0.6,
-		ProjectId:    "1234567890",
-		Data:         `{"data": {"key": "value"}}`,
-		CreatedAt:    1590598478,
-		UpdatedAt:    1590598478,
-	}}, nil
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	// TODO authz
+	data, err := f.repository.GetFinding(req)
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return &finding.GetFindingResponse{}, nil
+		}
+		return nil, err
+	}
+	return &finding.GetFindingResponse{Finding: convertFinding(data)}, nil
 }
 
 func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFindingRequest) (*finding.PutFindingResponse, error) {
@@ -93,4 +100,19 @@ func (f *findingService) TagResource(ctx context.Context, req *finding.TagResour
 
 func (f *findingService) UntagResource(ctx context.Context, req *finding.UntagResourceRequest) (*finding.Empty, error) {
 	return nil, nil
+}
+
+func convertFinding(f *model.Finding) *finding.Finding {
+	return &finding.Finding{
+		FindingId:     f.FindingID,
+		Description:   f.Description,
+		DataSource:    f.DataSource,
+		ResourceName:  f.ResourceName,
+		ProjectId:     f.ProjectID,
+		OriginalScore: f.OriginalScore,
+		Score:         f.Score,
+		Data:          f.Data,
+		CreatedAt:     f.CreatedAt.Unix(),
+		UpdatedAt:     f.UpdatedAt.Unix(),
+	}
 }

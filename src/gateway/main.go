@@ -31,7 +31,8 @@ func main() {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Recoverer)
 	r.Use(httpLogger)
-	r.Get("/finding", svc.findingHandler)
+	r.Get("/finding", svc.listFindingHandler)
+	r.Get("/finding/{finding_id}", svc.getFindingHandler)
 
 	appLogger.Infof("starting http server at :%s", conf.Port)
 	err = http.ListenAndServe(":"+conf.Port, r)

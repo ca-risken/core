@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/CyberAgent/mimosa-core/proto/finding"
+	"github.com/go-chi/chi"
 )
 
 func mappingListFindingRequest(r *http.Request) *finding.ListFindingRequest {
@@ -39,7 +40,14 @@ func mappingListFindingRequest(r *http.Request) *finding.ListFindingRequest {
 			req.ToAt = t
 		}
 	}
+	return req
+}
 
+func mappingGetFindingRequest(r *http.Request) *finding.GetFindingRequest {
+	req := &finding.GetFindingRequest{}
+	if i, err := parseUint64(chi.URLParam(r, "finding_id")); err == nil {
+		req.FindingId = i
+	}
 	return req
 }
 
@@ -73,6 +81,14 @@ func parseScore(score string) (float32, error) {
 
 func parseTimeParam(at string) (int64, error) {
 	i, err := strconv.ParseInt(at, 10, 64)
+	if err != nil {
+		return i, err
+	}
+	return i, nil
+}
+
+func parseUint64(str string) (uint64, error) {
+	i, err := strconv.ParseUint(str, 10, 64)
 	if err != nil {
 		return i, err
 	}

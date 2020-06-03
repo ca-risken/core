@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
@@ -10,7 +11,8 @@ import (
 )
 
 type findingRepoInterface interface {
-	ListFinding(*finding.ListFindingRequest) (*[]listFindingResult, error)
+	ListFinding(*finding.ListFindingRequest) (*[]findingIds, error)
+	GetFinding(*finding.GetFindingRequest) (*model.Finding, error)
 }
 
 type findingRepository struct {
@@ -68,13 +70,22 @@ func initDB(isMaster bool) *gorm.DB {
 	return db
 }
 
-type listFindingResult struct {
+type findingIds struct {
 	FindingID uint64 `gorm:"column:finding_id"`
 }
 
-func (f *findingRepository) ListFinding(req *finding.ListFindingRequest) (*[]listFindingResult, error) {
-	var result []listFindingResult
+func (f *findingRepository) ListFinding(req *finding.ListFindingRequest) (*[]findingIds, error) {
+	var result []findingIds
+	// TODO 検索条件の複数対応
 	if scan := f.SlaveDB.Raw("select finding_id from finding where project_id in (?)", req.ProjectId).Scan(&result); scan.Error != nil {
+		return nil, scan.Error
+	}
+	return &result, nil
+}
+
+func (f *findingRepository) GetFinding(req *finding.GetFindingRequest) (*model.Finding, error) {
+	var result model.Finding
+	if scan := f.SlaveDB.Raw("select * from finding where finding_id = ?", req.FindingId).Scan(&result); scan.Error != nil {
 		return nil, scan.Error
 	}
 	return &result, nil
