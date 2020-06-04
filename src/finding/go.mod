@@ -3,8 +3,8 @@ module github.com/CyberAgent/mimosa-core/src/finding
 go 1.13
 
 require (
-	github.com/CyberAgent/mimosa-core v0.0.0-20200603065241-985eb0740d26
-	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200603065241-985eb0740d26
+	github.com/CyberAgent/mimosa-core v0.0.0-20200604101355-ae539075dbf4
+	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200604101355-ae539075dbf4
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/jinzhu/gorm v1.9.12
 	github.com/kelseyhightower/envconfig v1.4.0
