@@ -1,4 +1,4 @@
-.PHONY: all install clean network fmt build doc run log stop
+.PHONY: all install clean network fmt build doc go-test go-mod-update go-mod-tidy run log stop
 all: run
 
 install:
@@ -21,6 +21,14 @@ network:
 fmt: proto/*/*.proto
 	clang-format -i proto/**/*.proto
 
+doc: fmt
+	protoc \
+		--proto_path=proto \
+		--proto_path=${GOPATH}/src \
+		--error_format=gcc \
+		--doc_out=markdown,README.md:doc \
+		proto/**/*.proto
+
 build: BUILD_TARGETS := finding iam
 build: fmt
 	for target in $(BUILD_TARGETS); \
@@ -35,17 +43,17 @@ build: fmt
 			proto/$$target/*.proto; \
 	done
 
-test: build
+go-test: build
 	cd src/gateway && go test ./...
 	cd src/finding && go test ./...
 
-doc: fmt
-	protoc \
-		--proto_path=proto \
-		--proto_path=${GOPATH}/src \
-		--error_format=gcc \
-		--doc_out=markdown,README.md:doc \
-		proto/**/*.proto
+go-mod-update:
+	cd src/gateway && go get -u github.com/CyberAgent/mimosa-core
+	cd src/finding && go get -u github.com/CyberAgent/mimosa-core && go get -u github.com/CyberAgent/mimosa-core/pkg/model
+
+go-mod-tidy: build
+	cd src/gateway && go mod tidy
+	cd src/finding && go mod tidy
 
 run: test network
 	. env.sh && docker-compose up -d --build

@@ -12,7 +12,9 @@ import (
 
 type findingRepoInterface interface {
 	ListFinding(*finding.ListFindingRequest) (*[]findingIds, error)
-	GetFinding(*finding.GetFindingRequest) (*model.Finding, error)
+	GetFinding(uint64) (*model.Finding, error)
+	InsertFinding(*model.Finding) (*model.Finding, error)
+	UpdateFinding(*model.Finding) (*model.Finding, error)
 }
 
 type findingRepository struct {
@@ -83,10 +85,26 @@ func (f *findingRepository) ListFinding(req *finding.ListFindingRequest) (*[]fin
 	return &result, nil
 }
 
-func (f *findingRepository) GetFinding(req *finding.GetFindingRequest) (*model.Finding, error) {
+func (f *findingRepository) GetFinding(findingID uint64) (*model.Finding, error) {
 	var result model.Finding
-	if scan := f.SlaveDB.Raw("select * from finding where finding_id = ?", req.FindingId).Scan(&result); scan.Error != nil {
+	if scan := f.SlaveDB.Raw("select * from finding where finding_id = ?", findingID).Scan(&result); scan.Error != nil {
 		return nil, scan.Error
 	}
 	return &result, nil
+}
+
+func (f findingRepository) InsertFinding(data *model.Finding) (*model.Finding, error) {
+	err := f.MasterDB.Create(data).Error
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (f findingRepository) UpdateFinding(data *model.Finding) (*model.Finding, error) {
+	err := f.MasterDB.Update(data).Error
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

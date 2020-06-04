@@ -113,6 +113,7 @@ Finding エンティティ
 | finding_id | [uint64](#uint64) |  |  |
 | description | [string](#string) |  |  |
 | data_source | [string](#string) |  |  |
+| data_source_id | [string](#string) |  |  |
 | resource_name | [string](#string) |  |  |
 | project_id | [uint32](#uint32) |  |  |
 | original_score | [float](#float) |  |  |
@@ -138,6 +139,7 @@ Finding エンティティ（登録・更新用）
 | finding_id | [uint64](#uint64) |  |  |
 | description | [string](#string) |  |  |
 | data_source | [string](#string) |  |  |
+| data_source_id | [string](#string) |  |  |
 | resource_name | [string](#string) |  |  |
 | project_id | [uint32](#uint32) |  |  |
 | original_score | [float](#float) |  |  |

@@ -134,14 +134,15 @@ message Finding {
   uint64 finding_id = 1;
   string description = 2;
   string data_source = 3;
-  string resource_name = 4;
-  uint32 project_id = 5;
-  float original_score = 6;
-  float original_max_score = 7;
-  float score = 8;
-  string data = 9;
-  int64 created_at = 10;
-  int64 updated_at = 11;
+  string data_source_id = 4;
+  string resource_name = 5;
+  uint32 project_id = 6;
+  float original_score = 7;
+  float original_max_score = 8;
+  float score = 9;
+  string data = 10;
+  int64 created_at = 11;
+  int64 updated_at = 12;
 }
 
 /**
@@ -150,15 +151,20 @@ message Finding {
 message FindingForUpsert {
   uint64 finding_id = 1;
   string description = 2 [ (validator.field) = {length_lt : 200} ];
-  string data_source = 3 [ (validator.field) = {length_lt : 64} ];
-  string resource_name = 4;
-  uint32 project_id = 5;
-  float original_score = 6
-      [ (validator.field) = {float_gte : 0, float_lte : 100} ];
-  float original_max_score = 7
-      [ (validator.field) = {float_gte : 0, float_lte : 100} ];
-  float score = 8 [ (validator.field) = {float_gte : 0, float_lte : 1} ];
-  string data = 9;
+  string data_source = 3
+      [ (validator.field) = {msg_exists : true, length_lt : 64} ];
+  string data_source_id = 4
+      [ (validator.field) = {msg_exists : true, length_lt : 255} ];
+  string resource_name = 5 [ (validator.field) = {msg_exists : true} ];
+  uint32 project_id = 6;
+  float original_score = 7 [
+    (validator.field) = {msg_exists : true, float_gte : 0, float_lte : 100}
+  ];
+  float original_max_score = 8 [
+    (validator.field) = {msg_exists : true, float_gte : 0, float_lte : 100}
+  ];
+  float score = 9 [ (validator.field) = {float_gte : 0, float_lte : 1} ];
+  string data = 10;
 }
 
 /**

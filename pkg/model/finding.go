@@ -7,6 +7,7 @@ type Finding struct {
 	FindingID     uint64
 	Description   string
 	DataSource    string
+	DataSourceID  string
 	ResourceName  string
 	ProjectID     uint32
 	OriginalScore float32

@@ -201,6 +201,9 @@ func (this *FindingForUpsert) Validate() error {
 	if !(len(this.DataSource) < 64) {
 		return github_com_mwitkow_go_proto_validators.FieldError("DataSource", fmt.Errorf(`value '%v' must have a length smaller than '64'`, this.DataSource))
 	}
+	if !(len(this.DataSourceId) < 255) {
+		return github_com_mwitkow_go_proto_validators.FieldError("DataSourceId", fmt.Errorf(`value '%v' must have a length smaller than '255'`, this.DataSourceId))
+	}
 	if !(this.OriginalScore >= 0) {
 		return github_com_mwitkow_go_proto_validators.FieldError("OriginalScore", fmt.Errorf(`value '%v' must be greater than or equal to '0'`, this.OriginalScore))
 	}
