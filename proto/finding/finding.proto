@@ -40,7 +40,7 @@ message ListFindingResponse { repeated uint64 finding_id = 1; }
 
 message GetFindingRequest {
   uint32 user_id = 1;
-  uint64 finding_id = 2 [ (validator.field) = {msg_exists : true} ];
+  uint64 finding_id = 2;
 }
 
 message GetFindingResponse { Finding finding = 1; }
@@ -54,12 +54,12 @@ message PutFindingResponse { Finding finding = 1; }
 
 message DeleteFindingRequest {
   uint32 user_id = 1;
-  uint64 finding_id = 2 [ (validator.field) = {msg_exists : true} ];
+  uint64 finding_id = 2;
 }
 
 message ListFindingTagRequest {
   uint32 user_id = 1;
-  uint64 finding_id = 2 [ (validator.field) = {msg_exists : true} ];
+  uint64 finding_id = 2;
 }
 
 message ListFindingTagResponse { repeated FindingTag tag = 1; }
@@ -73,7 +73,7 @@ message TagFindingResponse { FindingTag tag = 1; }
 
 message UntagFindingRequest {
   uint32 user_id = 1;
-  uint64 finding_tag_id = 2 [ (validator.field) = {msg_exists : true} ];
+  uint64 finding_tag_id = 2;
 }
 
 message ListResourceRequest {
@@ -91,7 +91,7 @@ message ListResourceResponse { repeated uint64 resource_id = 1; }
 
 message GetResourceRequest {
   uint32 user_id = 1;
-  uint64 resource_id = 2 [ (validator.field) = {msg_exists : true} ];
+  uint64 resource_id = 2;
 }
 
 message GetResourceResponse { Resource resource = 1; }
@@ -105,12 +105,12 @@ message PutResourceResponse { Resource resource = 1; }
 
 message DeleteResourceRequest {
   uint32 user_id = 1;
-  uint64 resource_id = 2 [ (validator.field) = {msg_exists : true} ];
+  uint64 resource_id = 2;
 }
 
 message ListResourceTagRequest {
   uint32 user_id = 1;
-  uint64 resource_id = 2 [ (validator.field) = {msg_exists : true} ];
+  uint64 resource_id = 2;
 }
 
 message ListResourceTagResponse { repeated ResourceTag tag = 1; }
@@ -124,7 +124,7 @@ message TagResourceResponse { ResourceTag tag = 1; }
 
 message UntagResourceRequest {
   uint32 user_id = 1;
-  uint64 resource_tag_id = 2 [ (validator.field) = {msg_exists : true} ];
+  uint64 resource_tag_id = 2;
 }
 
 /**
@@ -151,18 +151,14 @@ message Finding {
 message FindingForUpsert {
   uint64 finding_id = 1;
   string description = 2 [ (validator.field) = {length_lt : 200} ];
-  string data_source = 3
-      [ (validator.field) = {msg_exists : true, length_lt : 64} ];
-  string data_source_id = 4
-      [ (validator.field) = {msg_exists : true, length_lt : 255} ];
-  string resource_name = 5 [ (validator.field) = {msg_exists : true} ];
+  string data_source = 3 [ (validator.field) = {length_lt : 64} ];
+  string data_source_id = 4 [ (validator.field) = {length_lt : 255} ];
+  string resource_name = 5;
   uint32 project_id = 6;
-  float original_score = 7 [
-    (validator.field) = {msg_exists : true, float_gte : 0, float_lte : 100}
-  ];
-  float original_max_score = 8 [
-    (validator.field) = {msg_exists : true, float_gte : 0, float_lte : 100}
-  ];
+  float original_score = 7
+      [ (validator.field) = {float_gte : 0, float_lte : 100} ];
+  float original_max_score = 8
+      [ (validator.field) = {float_gte : 0, float_lte : 100} ];
   float score = 9 [ (validator.field) = {float_gte : 0, float_lte : 1} ];
   string data = 10;
 }
@@ -184,9 +180,8 @@ message FindingTag {
  */
 message FindingTagForUpsert {
   uint64 finding_tag_id = 1;
-  uint64 finding_id = 2 [ (validator.field) = {msg_exists : true} ];
-  string tag_key = 3
-      [ (validator.field) = {msg_exists : true, length_lt : 64} ];
+  uint64 finding_id = 2;
+  string tag_key = 3 [ (validator.field) = {length_lt : 64} ];
   string tag_value = 4 [ (validator.field) = {length_lt : 200} ];
 }
 
@@ -206,7 +201,7 @@ message Resource {
  */
 message ResourceForUpsert {
   uint64 resource_id = 1;
-  string resource_name = 2 [ (validator.field) = {msg_exists : true} ];
+  string resource_name = 2;
   uint32 project_id = 3;
 }
 
@@ -227,9 +222,8 @@ message ResourceTag {
  */
 message ResourceTagForUpsert {
   uint64 resource_tag_id = 1;
-  uint64 resource_id = 2 [ (validator.field) = {msg_exists : true} ];
-  string tag_key = 3
-      [ (validator.field) = {msg_exists : true, length_lt : 65} ];
+  uint64 resource_id = 2;
+  string tag_key = 3 [ (validator.field) = {length_lt : 65} ];
   string tag_value = 4 [ (validator.field) = {length_lt : 201} ];
 }
 
