@@ -1,0 +1,6 @@
+[submodule "proto/iam/go-proto-validators"]
+	path = proto/iam/go-proto-validators
+	url = https://github.com/mwitkow/go-proto-validators.git
+[submodule "proto/github.com/mwitkow/go-proto-validators"]
+	path = proto/github.com/mwitkow/go-proto-validators
+	url = https://github.com/mwitkow/go-proto-validators.git
