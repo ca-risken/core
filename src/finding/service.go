@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"math"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jinzhu/gorm"
 )
 
@@ -56,54 +58,52 @@ func (f *findingService) GetFinding(ctx context.Context, req *finding.GetFinding
 }
 
 func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFindingRequest) (*finding.PutFindingResponse, error) {
-	if err := req.Validate(); err != nil {
+	if err := req.Finding.Validate(); err != nil {
 		return nil, err
+	}
+
+	savedData, err := f.repository.GetFindingByDataSource(
+		req.GetFinding().GetProjectId(), req.GetFinding().GetDataSource(), req.GetFinding().GetDataSourceId())
+	noRecord := gorm.IsRecordNotFoundError(err)
+	if err != nil && !noRecord {
+		return nil, err
+	}
+
+	var findingID uint64
+	if !noRecord {
+		if savedData.FindingID != req.GetFinding().GetFindingId() {
+			return nil, fmt.Errorf("Invalid finding_id, want=%d, got=%d", savedData.FindingID, req.GetFinding().GetProjectId())
+		}
+		findingID = req.GetFinding().GetFindingId()
 	}
 
 	// TODO: Authz
-	data, err := f.repository.GetFinding(req.Finding.GetFindingId())
-	if err != nil && !gorm.IsRecordNotFoundError(err) {
-		// return error
-		return nil, err
-	}
-	if gorm.IsRecordNotFoundError(err) {
-		// insert
-		registerdData, err := f.repository.InsertFinding(&model.Finding{
-			Description:   req.GetFinding().GetDescription(),
-			DataSource:    req.GetFinding().GetDataSource(),
-			ResourceName:  req.GetFinding().GetResourceName(),
-			ProjectID:     req.GetFinding().GetProjectId(),
-			OriginalScore: req.GetFinding().GetOriginalScore(),
-			Score:         calculateScore(req.GetFinding().GetScore(), req.Finding.OriginalMaxScore),
-			Data:          req.GetFinding().GetData(),
+	// upsert
+	registerdData, err := f.repository.UpsertFinding(
+		&model.Finding{
+			FindingID:     findingID,
+			Description:   req.Finding.Description,
+			DataSource:    req.Finding.DataSource,
+			DataSourceID:  req.Finding.DataSourceId,
+			ResourceName:  req.Finding.ResourceName,
+			ProjectID:     req.Finding.ProjectId,
+			OriginalScore: req.Finding.OriginalScore,
+			Score:         calculateScore(req.Finding.OriginalScore, req.Finding.OriginalMaxScore),
+			Data:          req.Finding.Data,
 		})
-		if err != nil {
-			return nil, err
-		}
-		// TODO リソース更新
-		return &finding.PutFindingResponse{Finding: convertFinding(registerdData)}, nil
-	}
-	// update
-	data.Description = req.GetFinding().GetDescription()
-	data.DataSource = req.GetFinding().GetDataSource()
-	data.ResourceName = req.GetFinding().GetResourceName()
-	data.ProjectID = req.GetFinding().GetProjectId()
-	data.OriginalScore = req.GetFinding().GetOriginalScore()
-	data.Score = calculateScore(req.GetFinding().GetScore(), req.Finding.OriginalMaxScore)
-	data.Data = req.GetFinding().GetData()
-	updatedData, err := f.repository.UpdateFinding(data)
 	if err != nil {
 		return nil, err
 	}
+
 	// TODO リソース更新
-	return &finding.PutFindingResponse{Finding: convertFinding(updatedData)}, nil
+	return &finding.PutFindingResponse{Finding: convertFinding(registerdData)}, nil
 }
 
-func (f *findingService) DeleteFinding(ctx context.Context, req *finding.DeleteFindingRequest) (*finding.Empty, error) {
+func (f *findingService) DeleteFinding(ctx context.Context, req *finding.DeleteFindingRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
-		return nil, err
+		return &empty.Empty{}, err
 	}
-	return nil, nil
+	return &empty.Empty{}, nil
 }
 
 func (f *findingService) ListFindingTag(ctx context.Context, req *finding.ListFindingTagRequest) (*finding.ListFindingTagResponse, error) {
@@ -120,11 +120,11 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 	return nil, nil
 }
 
-func (f *findingService) UntagFinding(ctx context.Context, req *finding.UntagFindingRequest) (*finding.Empty, error) {
+func (f *findingService) UntagFinding(ctx context.Context, req *finding.UntagFindingRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
-		return nil, err
+		return &empty.Empty{}, err
 	}
-	return nil, nil
+	return &empty.Empty{}, nil
 }
 
 func (f *findingService) ListResource(ctx context.Context, req *finding.ListResourceRequest) (*finding.ListResourceResponse, error) {
@@ -148,11 +148,11 @@ func (f *findingService) PutResource(ctx context.Context, req *finding.PutResour
 	return nil, nil
 }
 
-func (f *findingService) DeleteResource(ctx context.Context, req *finding.DeleteResourceRequest) (*finding.Empty, error) {
+func (f *findingService) DeleteResource(ctx context.Context, req *finding.DeleteResourceRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
-		return nil, err
+		return &empty.Empty{}, err
 	}
-	return nil, nil
+	return &empty.Empty{}, nil
 }
 
 func (f *findingService) ListResourceTag(ctx context.Context, req *finding.ListResourceTagRequest) (*finding.ListResourceTagResponse, error) {
@@ -169,11 +169,11 @@ func (f *findingService) TagResource(ctx context.Context, req *finding.TagResour
 	return nil, nil
 }
 
-func (f *findingService) UntagResource(ctx context.Context, req *finding.UntagResourceRequest) (*finding.Empty, error) {
+func (f *findingService) UntagResource(ctx context.Context, req *finding.UntagResourceRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
-		return nil, err
+		return &empty.Empty{}, err
 	}
-	return nil, nil
+	return &empty.Empty{}, nil
 }
 
 func convertFinding(f *model.Finding) *finding.Finding {
@@ -184,6 +184,7 @@ func convertFinding(f *model.Finding) *finding.Finding {
 		FindingId:     f.FindingID,
 		Description:   f.Description,
 		DataSource:    f.DataSource,
+		DataSourceId:  f.DataSourceID,
 		ResourceName:  f.ResourceName,
 		ProjectId:     f.ProjectID,
 		OriginalScore: f.OriginalScore,

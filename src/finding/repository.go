@@ -13,8 +13,8 @@ import (
 type findingRepoInterface interface {
 	ListFinding(*finding.ListFindingRequest) (*[]findingIds, error)
 	GetFinding(uint64) (*model.Finding, error)
-	InsertFinding(*model.Finding) (*model.Finding, error)
-	UpdateFinding(*model.Finding) (*model.Finding, error)
+	UpsertFinding(*model.Finding) (*model.Finding, error)
+	GetFindingByDataSource(uint32, string, string) (*model.Finding, error)
 }
 
 type findingRepository struct {
@@ -93,18 +93,45 @@ func (f *findingRepository) GetFinding(findingID uint64) (*model.Finding, error)
 	return &result, nil
 }
 
-func (f findingRepository) InsertFinding(data *model.Finding) (*model.Finding, error) {
-	err := f.MasterDB.Create(data).Error
+func (f findingRepository) UpsertFinding(data *model.Finding) (*model.Finding, error) {
+	// finiding_idがゼロ値ではない場合は受け取った値を設定する。
+	// ゼロ値の場合はnilの状態でupsert（auto_incrementが無駄に更新されないようにするための対応）
+	var findingID interface{}
+	if data.FindingID != 0 {
+		findingID = data.FindingID
+	}
+
+	err := f.MasterDB.Exec(`
+INSERT INTO finding
+	(finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+VALUES
+	(?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+	description=VALUES(description),
+	resource_name=VALUES(resource_name),
+	project_id=VALUES(project_id),
+	original_score=VALUES(original_score),
+	score=VALUES(score),
+	data=VALUES(data);
+`,
+		findingID, data.Description, data.DataSource, data.DataSourceID, data.ResourceName,
+		data.ProjectID, data.OriginalScore, data.Score, data.Data).Error
 	if err != nil {
 		return nil, err
 	}
-	return data, nil
+
+	updated, err := f.GetFindingByDataSource(data.ProjectID, data.DataSource, data.DataSourceID)
+	if err != nil {
+		return nil, err
+	}
+	return updated, nil
 }
 
-func (f findingRepository) UpdateFinding(data *model.Finding) (*model.Finding, error) {
-	err := f.MasterDB.Update(data).Error
-	if err != nil {
-		return nil, err
+func (f *findingRepository) GetFindingByDataSource(projectID uint32, dataSource, dataSourceID string) (*model.Finding, error) {
+	var result model.Finding
+	if scan := f.SlaveDB.Raw("select * from finding where project_id = ? and data_source = ? and data_source_id = ?",
+		projectID, dataSource, dataSourceID).First(&result); scan.Error != nil {
+		return nil, scan.Error
 	}
-	return data, nil
+	return &result, nil
 }

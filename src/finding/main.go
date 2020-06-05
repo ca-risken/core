@@ -28,6 +28,10 @@ func main() {
 	server := grpc.NewServer()
 	findingServer := newFindingService(newFindingRepository()) // DI service & repository
 	finding.RegisterFindingServiceServer(server, findingServer)
+
+	// reflection.Register(server) // enable reflection API
 	appLogger.Infof("starting gRPC server at :%s", conf.Port)
-	server.Serve(l)
+	if err := server.Serve(l); err != nil {
+		appLogger.Fatalf("failed to gRPC serve: %v", err)
+	}
 }

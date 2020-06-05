@@ -25,14 +25,14 @@ func TestListFinding(t *testing.T) {
 		mockError    error
 	}{
 		{
-			name:         "ok",
+			name:         "OK",
 			input:        &finding.ListFindingRequest{ProjectId: []uint32{123}, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"hoge"}, FromScore: 0.0, ToScore: 1.0},
 			want:         &finding.ListFindingResponse{FindingId: []uint64{111, 222}},
 			mockResponce: &[]findingIds{{FindingID: 111}, {FindingID: 222}},
 			mockError:    nil,
 		},
 		{
-			name:         "record not found",
+			name:         "NG Record not found",
 			input:        &finding.ListFindingRequest{ProjectId: []uint32{123}, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"hoge"}, FromScore: 0.0, ToScore: 1.0},
 			want:         &finding.ListFindingResponse{},
 			mockResponce: nil,
@@ -68,15 +68,15 @@ func TestGetFinding(t *testing.T) {
 		mockError    error
 	}{
 		{
-			name:         "ok",
+			name:         "OK",
 			input:        &finding.GetFindingRequest{FindingId: 1001},
 			want:         &finding.GetFindingResponse{Finding: &finding.Finding{FindingId: 1001, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockResponce: &model.Finding{FindingID: 1001, CreatedAt: now, UpdatedAt: now},
 			mockError:    nil,
 		},
 		{
-			name:         "record not found",
-			input:        &finding.GetFindingRequest{},
+			name:         "NG record not found",
+			input:        &finding.GetFindingRequest{FindingId: 9999},
 			want:         &finding.GetFindingResponse{},
 			mockResponce: nil,
 			mockError:    gorm.ErrRecordNotFound,
@@ -107,51 +107,75 @@ func TestPutFinding(t *testing.T) {
 		name        string
 		input       *finding.PutFindingRequest
 		want        *finding.PutFindingResponse
+		wantErr     bool
 		mockGetResp *model.Finding
 		mockGetErr  error
-		mockInsResp *model.Finding
-		mockInsErr  error
 		mockUpResp  *model.Finding
 		mockUpErr   error
 	}{
 		{
-			name:        "ok:insert",
-			input:       &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "aws:hoge", ResourceName: "resource", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
-			want:        &finding.PutFindingResponse{Finding: &finding.Finding{FindingId: 1001, DataSource: "aws:hoge", ResourceName: "resource", OriginalScore: 100.00, Score: 1.0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			name:        "OK Insert",
+			input:       &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
+			want:        &finding.PutFindingResponse{Finding: &finding.Finding{FindingId: 1001, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, Score: 1.0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetResp: nil,
 			mockGetErr:  gorm.ErrRecordNotFound,
-			mockInsResp: &model.Finding{FindingID: 1001, DataSource: "aws:hoge", ResourceName: "resource", OriginalScore: 100.00, Score: 1.0, CreatedAt: now, UpdatedAt: now},
-			mockInsErr:  nil,
-			mockUpResp:  nil,
+			mockUpResp:  &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 100.00, Score: 1.0, CreatedAt: now, UpdatedAt: now},
 			mockUpErr:   nil,
 		},
 		{
-			name:        "ok:update",
-			input:       &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{FindingId: 1001, DataSource: "aws:hoge-2", ResourceName: "resource-2", OriginalScore: 20.00, OriginalMaxScore: 100.00}},
-			want:        &finding.PutFindingResponse{Finding: &finding.Finding{FindingId: 1001, DataSource: "aws:hoge-2", ResourceName: "resource-2", OriginalScore: 20.00, Score: 0.2, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockGetResp: &model.Finding{FindingID: 1001, DataSource: "aws:hoge-1", ResourceName: "resource-1", OriginalScore: 10.00, Score: 0.1, CreatedAt: now, UpdatedAt: now},
+			name:        "OK Update",
+			input:       &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{FindingId: 1001, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 20.00, OriginalMaxScore: 100.00}},
+			want:        &finding.PutFindingResponse{Finding: &finding.Finding{FindingId: 1001, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 20.00, Score: 0.2, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp: &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 10.00, Score: 0.1, CreatedAt: now, UpdatedAt: now},
 			mockGetErr:  nil,
-			mockInsResp: nil,
-			mockInsErr:  nil,
-			mockUpResp:  &model.Finding{FindingID: 1001, DataSource: "aws:hoge-2", ResourceName: "resource-2", OriginalScore: 20.00, Score: 0.2, CreatedAt: now, UpdatedAt: now},
+			mockUpResp:  &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 20.00, Score: 0.2, CreatedAt: now, UpdatedAt: now},
 			mockUpErr:   nil,
+		},
+		{
+			name:    "NG Invalid request(no data_source)",
+			input:   &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:        "NG GetFindingByDataSource error",
+			input:       &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
+			want:        nil,
+			wantErr:     true,
+			mockGetResp: nil,
+			mockGetErr:  gorm.ErrInvalidSQL,
+		},
+		{
+			name:        "NG Invalid finding_id",
+			input:       &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{FindingId: 9999, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
+			want:        nil,
+			wantErr:     true,
+			mockGetResp: &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 10.00, Score: 0.1, CreatedAt: now, UpdatedAt: now},
+			mockGetErr:  nil,
+		},
+		{
+			name:        "NG UpsertFinding error",
+			input:       &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
+			want:        nil,
+			wantErr:     true,
+			mockGetResp: &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 10.00, Score: 0.1, CreatedAt: now, UpdatedAt: now},
+			mockGetErr:  nil,
+			mockUpResp:  nil,
+			mockUpErr:   gorm.ErrInvalidSQL,
 		},
 	}
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			if c.mockGetResp != nil || c.mockGetErr != nil {
-				mock.On("GetFinding").Return(c.mockGetResp, c.mockGetErr).Once()
-			}
-			if c.mockInsResp != nil || c.mockInsErr != nil {
-				mock.On("InsertFinding").Return(c.mockInsResp, c.mockInsErr).Once()
+				mock.On("GetFindingByDataSource").Return(c.mockGetResp, c.mockGetErr).Once()
 			}
 			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mock.On("UpdateFinding").Return(c.mockUpResp, c.mockUpErr).Once()
+				mock.On("UpsertFinding").Return(c.mockUpResp, c.mockUpErr).Once()
 			}
 
 			got, err := svc.PutFinding(ctx, c.input)
-			if err != nil {
+			if err != nil && !c.wantErr {
 				t.Fatalf("unexpected error: %+v", err)
 			}
 			if !reflect.DeepEqual(got, c.want) {
@@ -169,7 +193,7 @@ func TestConvertFinding(t *testing.T) {
 		want  *finding.Finding
 	}{
 		{
-			name:  "convert unix time",
+			name:  "OK convert unix time",
 			input: &model.Finding{FindingID: 10001, CreatedAt: now, UpdatedAt: now},
 			want:  &finding.Finding{FindingId: 10001, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 		},
@@ -191,17 +215,17 @@ func TestCalculateScore(t *testing.T) {
 		want  float32
 	}{
 		{
-			name:  "ok:0.01",
+			name:  "OK Score 1%",
 			input: [2]float32{1.0, 100.0},
 			want:  0.01,
 		},
 		{
-			name:  "ok:100",
+			name:  "OK Score 100%",
 			input: [2]float32{100.0, 100.0},
 			want:  1.00,
 		},
 		{
-			name:  "ok:0",
+			name:  "ok Score 0%",
 			input: [2]float32{0, 100.0},
 			want:  0.00,
 		},
@@ -230,12 +254,12 @@ func (m *mockFindingRepository) GetFinding(findingID uint64) (*model.Finding, er
 	return args.Get(0).(*model.Finding), args.Error(1)
 }
 
-func (m *mockFindingRepository) InsertFinding(*model.Finding) (*model.Finding, error) {
+func (m *mockFindingRepository) UpsertFinding(*model.Finding) (*model.Finding, error) {
 	args := m.Called()
 	return args.Get(0).(*model.Finding), args.Error(1)
 }
 
-func (m *mockFindingRepository) UpdateFinding(*model.Finding) (*model.Finding, error) {
+func (m *mockFindingRepository) GetFindingByDataSource(p uint32, ds, dsID string) (*model.Finding, error) {
 	args := m.Called()
 	return args.Get(0).(*model.Finding), args.Error(1)
 }
