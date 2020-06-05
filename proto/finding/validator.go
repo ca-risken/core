@@ -7,7 +7,7 @@ import (
 
 // Validate ListFindingRequest
 func (l *ListFindingRequest) Validate() error {
-	return validation.ValidateStruct(&l,
+	return validation.ValidateStruct(l,
 		validation.Field(l.DataSource, validation.Each(validation.Length(0, 64))),
 		validation.Field(l.ResourceName, validation.Each(validation.Length(0, 200))),
 		validation.Field(l.FromScore, validation.Min(0), validation.Max(1)),
@@ -17,7 +17,7 @@ func (l *ListFindingRequest) Validate() error {
 
 // Validate GetFinding
 func (g *GetFindingRequest) Validate() error {
-	return validation.ValidateStruct(&g,
+	return validation.ValidateStruct(g,
 		validation.Field(g.FindingId, validation.Required),
 	)
 }
@@ -29,14 +29,14 @@ func (p *PutFindingRequest) Validate() error {
 
 // Validate DeleteFindingRequest
 func (d *DeleteFindingRequest) Validate() error {
-	return validation.ValidateStruct(&d,
+	return validation.ValidateStruct(d,
 		validation.Field(d.FindingId, validation.Required),
 	)
 }
 
 // Validate ListFindingTagRequest
 func (l *ListFindingTagRequest) Validate() error {
-	return validation.ValidateStruct(&l,
+	return validation.ValidateStruct(l,
 		validation.Field(l.FindingId, validation.Required),
 	)
 }
@@ -48,7 +48,7 @@ func (t *TagFindingRequest) Validate() error {
 
 // Validate UntagFindingRequest
 func (u *UntagFindingRequest) Validate() error {
-	return validation.ValidateStruct(&u,
+	return validation.ValidateStruct(u,
 		validation.Field(u.FindingTagId, validation.Required),
 	)
 }
@@ -60,7 +60,7 @@ func (l *ListResourceRequest) Validate() error {
 
 // Validate GetResourceRequest
 func (g *GetResourceRequest) Validate() error {
-	return validation.ValidateStruct(&g,
+	return validation.ValidateStruct(g,
 		validation.Field(g.ResourceId, validation.Required),
 	)
 }
@@ -72,7 +72,7 @@ func (p *PutResourceRequest) Validate() error {
 
 // Validate DeleteResourceRequest
 func (d *DeleteResourceRequest) Validate() error {
-	return validation.ValidateStruct(&d,
+	return validation.ValidateStruct(d,
 		validation.Field(d.ResourceId, validation.Required),
 	)
 }
@@ -91,7 +91,7 @@ func (t *TagResourceRequest) Validate() error {
 
 // Validate UntagResourceRequest
 func (u *UntagResourceRequest) Validate() error {
-	return validation.ValidateStruct(&u,
+	return validation.ValidateStruct(u,
 		validation.Field(u.ResourceTagId, validation.Required),
 	)
 }
@@ -102,7 +102,7 @@ func (u *UntagResourceRequest) Validate() error {
 
 // Validate FindingForUpsert
 func (f *FindingForUpsert) Validate() error {
-	return validation.ValidateStruct(&f,
+	return validation.ValidateStruct(f,
 		validation.Field(f.Description, validation.Length(0, 200)),
 		validation.Field(f.DataSource, validation.Required, validation.Length(0, 64)),
 		validation.Field(f.DataSourceId, validation.Required, validation.Length(0, 255)),
@@ -115,7 +115,7 @@ func (f *FindingForUpsert) Validate() error {
 
 // Validate FindingTagForUpsert
 func (f *FindingTagForUpsert) Validate() error {
-	return validation.ValidateStruct(&f,
+	return validation.ValidateStruct(f,
 		validation.Field(f.FindingId, validation.Required),
 		validation.Field(f.TagKey, validation.Required, validation.Length(0, 64)),
 		validation.Field(f.TagKey, validation.Length(0, 200)),
@@ -124,14 +124,14 @@ func (f *FindingTagForUpsert) Validate() error {
 
 // Validate ResourceForUpsert
 func (r *ResourceForUpsert) Validate() error {
-	return validation.ValidateStruct(&r,
+	return validation.ValidateStruct(r,
 		validation.Field(r.ResourceName, validation.Required),
 	)
 }
 
 // Validate ResourceTagForUpsert
 func (r *ResourceTagForUpsert) Validate() error {
-	return validation.ValidateStruct(&r,
+	return validation.ValidateStruct(r,
 		validation.Field(r.ResourceId, validation.Required),
 		validation.Field(r.TagKey, validation.Required, validation.Length(0, 64)),
 		validation.Field(r.TagValue, validation.Length(0, 200)),
