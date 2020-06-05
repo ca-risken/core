@@ -5,8 +5,7 @@ install:
 	go get \
 		google.golang.org/grpc \
 		github.com/golang/protobuf/protoc-gen-go \
-		github.com/grpc-ecosystem/go-grpc-middleware \
-		github.com/mwitkow/go-proto-validators/protoc-gen-govalidators
+		github.com/grpc-ecosystem/go-grpc-middleware
 
 clean:
 	rm -f proto/*/*.pb.go
@@ -18,7 +17,7 @@ clean:
 network:
 	@if [ -z "`docker network ls | grep local-shared`" ]; then docker network create local-shared; fi
 
-fmt: proto/*/*.proto
+fmt: proto/**/*.proto
 	clang-format -i proto/**/*.proto
 
 doc: fmt
@@ -27,21 +26,15 @@ doc: fmt
 		--proto_path=${GOPATH}/src \
 		--error_format=gcc \
 		--doc_out=markdown,README.md:doc \
-		proto/**/*.proto
+		proto/**/*.proto;
 
-build: BUILD_TARGETS := finding iam
 build: fmt
-	for target in $(BUILD_TARGETS); \
-	do \
-		protoc \
-			--proto_path=proto \
-			--proto_path=${GOPATH}/src \
-			--proto_path=${GOPATH}/src/github.com/gogo/protobuf/protobuf \
-			--error_format=gcc \
-			--go_out=plugins=grpc,paths=source_relative:proto \
-			--govalidators_out=paths=source_relative:proto \
-			proto/$$target/*.proto; \
-	done
+	protoc \
+		--proto_path=proto \
+		--proto_path=${GOPATH}/src \
+		--error_format=gcc \
+		--go_out=plugins=grpc,paths=source_relative:proto \
+		proto/**/*.proto;
 
 go-test: build
 	cd src/gateway && go test ./...
@@ -55,7 +48,7 @@ go-mod-tidy: build
 	cd src/gateway && go mod tidy
 	cd src/finding && go mod tidy
 
-run: test network
+run: go-test network
 	. env.sh && docker-compose up -d --build
 
 log:
@@ -66,3 +59,6 @@ stop:
 
 ssh:
 	. env.sh && docker-compose exec gateway sh
+
+grpcurl-finding-list:
+	grpcurl -insecure -import-path proto -proto finding/finding.proto localhost:8081 list core.finding.FindingService

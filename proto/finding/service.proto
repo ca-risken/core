@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+package core.finding;
+option go_package = "github.com/CyberAgent/mimosa-core/proto/finding";
+
+import "google/protobuf/empty.proto";
+import "finding/entity.proto";
+
+service FindingService {
+  // fiding
+  rpc ListFinding(ListFindingRequest) returns (ListFindingResponse);
+  rpc GetFinding(GetFindingRequest) returns (GetFindingResponse);
+  rpc PutFinding(PutFindingRequest) returns (PutFindingResponse);
+  rpc DeleteFinding(DeleteFindingRequest) returns (google.protobuf.Empty);
+  rpc ListFindingTag(ListFindingTagRequest) returns (ListFindingTagResponse);
+  rpc TagFinding(TagFindingRequest) returns (TagFindingResponse);
+  rpc UntagFinding(UntagFindingRequest) returns (google.protobuf.Empty);
+
+  // resource
+  rpc ListResource(ListResourceRequest) returns (ListResourceResponse);
+  rpc GetResource(GetResourceRequest) returns (GetResourceResponse);
+  rpc PutResource(PutResourceRequest) returns (PutResourceResponse);
+  rpc DeleteResource(DeleteResourceRequest) returns (google.protobuf.Empty);
+  rpc ListResourceTag(ListResourceTagRequest) returns (ListResourceTagResponse);
+  rpc TagResource(TagResourceRequest) returns (TagResourceResponse);
+  rpc UntagResource(UntagResourceRequest) returns (google.protobuf.Empty);
+}
+
+message ListFindingRequest {
+  uint32 user_id = 1;
+  repeated uint32 project_id = 2;
+  repeated string data_source = 3;
+  repeated string resource_name = 4;
+  float from_score = 5;
+  float to_score = 6;
+  int64 from_at = 7;
+  int64 to_at = 8;
+}
+
+message ListFindingResponse { repeated uint64 finding_id = 1; }
+
+message GetFindingRequest {
+  uint32 user_id = 1;
+  uint64 finding_id = 2;
+}
+
+message GetFindingResponse { Finding finding = 1; }
+
+message PutFindingRequest {
+  uint32 user_id = 1;
+  FindingForUpsert finding = 2;
+}
+
+message PutFindingResponse { Finding finding = 1; }
+
+message DeleteFindingRequest {
+  uint32 user_id = 1;
+  uint64 finding_id = 2;
+}
+
+message ListFindingTagRequest {
+  uint32 user_id = 1;
+  uint64 finding_id = 2;
+}
+
+message ListFindingTagResponse { repeated FindingTag tag = 1; }
+
+message TagFindingRequest {
+  uint32 user_id = 1;
+  FindingTagForUpsert tag = 2;
+}
+
+message TagFindingResponse { FindingTag tag = 1; }
+
+message UntagFindingRequest {
+  uint32 user_id = 1;
+  uint64 finding_tag_id = 2;
+}
+
+message ListResourceRequest {
+  uint32 user_id = 1;
+  repeated uint32 project_id = 2;
+  repeated string resource_name = 3;
+  float from_sum_score = 4;
+  float to_sum_score = 5;
+  int64 from_at = 6;
+  int64 to_at = 7;
+}
+
+message ListResourceResponse { repeated uint64 resource_id = 1; }
+
+message GetResourceRequest {
+  uint32 user_id = 1;
+  uint64 resource_id = 2;
+}
+
+message GetResourceResponse { Resource resource = 1; }
+
+message PutResourceRequest {
+  uint32 user_id = 1;
+  ResourceForUpsert resource = 2;
+}
+
+message PutResourceResponse { Resource resource = 1; }
+
+message DeleteResourceRequest {
+  uint32 user_id = 1;
+  uint64 resource_id = 2;
+}
+
+message ListResourceTagRequest {
+  uint32 user_id = 1;
+  uint64 resource_id = 2;
+}
+
+message ListResourceTagResponse { repeated ResourceTag tag = 1; }
+
+message TagResourceRequest {
+  uint32 user_id = 1;
+  ResourceTagForUpsert tag = 2;
+}
+
+message TagResourceResponse { ResourceTag tag = 1; }
+
+message UntagResourceRequest {
+  uint32 user_id = 1;
+  uint64 resource_tag_id = 2;
+}

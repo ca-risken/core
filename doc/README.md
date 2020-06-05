@@ -3,14 +3,19 @@
 
 ## Table of Contents
 
-- [finding/finding.proto](#finding/finding.proto)
-    - [DeleteFindingRequest](#core.finding.DeleteFindingRequest)
-    - [DeleteResourceRequest](#core.finding.DeleteResourceRequest)
-    - [Empty](#core.finding.Empty)
+- [finding/entity.proto](#finding/entity.proto)
     - [Finding](#core.finding.Finding)
     - [FindingForUpsert](#core.finding.FindingForUpsert)
     - [FindingTag](#core.finding.FindingTag)
     - [FindingTagForUpsert](#core.finding.FindingTagForUpsert)
+    - [Resource](#core.finding.Resource)
+    - [ResourceForUpsert](#core.finding.ResourceForUpsert)
+    - [ResourceTag](#core.finding.ResourceTag)
+    - [ResourceTagForUpsert](#core.finding.ResourceTagForUpsert)
+  
+- [finding/service.proto](#finding/service.proto)
+    - [DeleteFindingRequest](#core.finding.DeleteFindingRequest)
+    - [DeleteResourceRequest](#core.finding.DeleteResourceRequest)
     - [GetFindingRequest](#core.finding.GetFindingRequest)
     - [GetFindingResponse](#core.finding.GetFindingResponse)
     - [GetResourceRequest](#core.finding.GetResourceRequest)
@@ -27,10 +32,6 @@
     - [PutFindingResponse](#core.finding.PutFindingResponse)
     - [PutResourceRequest](#core.finding.PutResourceRequest)
     - [PutResourceResponse](#core.finding.PutResourceResponse)
-    - [Resource](#core.finding.Resource)
-    - [ResourceForUpsert](#core.finding.ResourceForUpsert)
-    - [ResourceTag](#core.finding.ResourceTag)
-    - [ResourceTagForUpsert](#core.finding.ResourceTagForUpsert)
     - [TagFindingRequest](#core.finding.TagFindingRequest)
     - [TagFindingResponse](#core.finding.TagFindingResponse)
     - [TagResourceRequest](#core.finding.TagResourceRequest)
@@ -40,12 +41,14 @@
   
     - [FindingService](#core.finding.FindingService)
   
-- [iam/iam.proto](#iam/iam.proto)
+- [iam/entity.proto](#iam/entity.proto)
+    - [User](#core.iam.User)
+  
+- [iam/service.proto](#iam/service.proto)
     - [AuthnRequest](#core.iam.AuthnRequest)
     - [AuthnResponse](#core.iam.AuthnResponse)
     - [AuthzRequest](#core.iam.AuthzRequest)
     - [AuthzResponse](#core.iam.AuthzResponse)
-    - [User](#core.iam.User)
   
     - [IAMService](#core.iam.IAMService)
   
@@ -53,10 +56,187 @@
 
 
 
-<a name="finding/finding.proto"></a>
+<a name="finding/entity.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## finding/finding.proto
+## finding/entity.proto
+
+
+
+<a name="core.finding.Finding"></a>
+
+### Finding
+Finding
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| finding_id | [uint64](#uint64) |  |  |
+| description | [string](#string) |  |  |
+| data_source | [string](#string) |  |  |
+| data_source_id | [string](#string) |  |  |
+| resource_name | [string](#string) |  |  |
+| project_id | [uint32](#uint32) |  |  |
+| original_score | [float](#float) |  |  |
+| original_max_score | [float](#float) |  |  |
+| score | [float](#float) |  |  |
+| data | [string](#string) |  |  |
+| created_at | [int64](#int64) |  |  |
+| updated_at | [int64](#int64) |  |  |
+
+
+
+
+
+
+<a name="core.finding.FindingForUpsert"></a>
+
+### FindingForUpsert
+Finding For Upsert
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| finding_id | [uint64](#uint64) |  |  |
+| description | [string](#string) |  |  |
+| data_source | [string](#string) |  |  |
+| data_source_id | [string](#string) |  |  |
+| resource_name | [string](#string) |  |  |
+| project_id | [uint32](#uint32) |  |  |
+| original_score | [float](#float) |  |  |
+| original_max_score | [float](#float) |  |  |
+| data | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="core.finding.FindingTag"></a>
+
+### FindingTag
+FindingTag
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| finding_tag_id | [uint64](#uint64) |  |  |
+| finding_id | [uint64](#uint64) |  |  |
+| tag_key | [string](#string) |  |  |
+| tag_value | [string](#string) |  |  |
+| created_at | [int64](#int64) |  |  |
+| updated_at | [int64](#int64) |  |  |
+
+
+
+
+
+
+<a name="core.finding.FindingTagForUpsert"></a>
+
+### FindingTagForUpsert
+FindingTag For Upsert
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| finding_tag_id | [uint64](#uint64) |  |  |
+| finding_id | [uint64](#uint64) |  |  |
+| tag_key | [string](#string) |  |  |
+| tag_value | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="core.finding.Resource"></a>
+
+### Resource
+Resource
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| resource_id | [uint64](#uint64) |  |  |
+| resource_name | [string](#string) |  |  |
+| project_id | [uint32](#uint32) |  |  |
+| created_at | [int64](#int64) |  |  |
+| updated_at | [int64](#int64) |  |  |
+
+
+
+
+
+
+<a name="core.finding.ResourceForUpsert"></a>
+
+### ResourceForUpsert
+Resource For upsert
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| resource_id | [uint64](#uint64) |  |  |
+| resource_name | [string](#string) |  |  |
+| project_id | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="core.finding.ResourceTag"></a>
+
+### ResourceTag
+ResourceTag
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| resource_tag_id | [uint64](#uint64) |  |  |
+| resource_id | [uint64](#uint64) |  |  |
+| tag_key | [string](#string) |  |  |
+| tag_value | [string](#string) |  |  |
+| created_at | [int64](#int64) |  |  |
+| updated_at | [int64](#int64) |  |  |
+
+
+
+
+
+
+<a name="core.finding.ResourceTagForUpsert"></a>
+
+### ResourceTagForUpsert
+ResourceTag For upsert
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| resource_tag_id | [uint64](#uint64) |  |  |
+| resource_id | [uint64](#uint64) |  |  |
+| tag_key | [string](#string) |  |  |
+| tag_value | [string](#string) |  |  |
+
+
+
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+<a name="finding/service.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## finding/service.proto
 
 
 
@@ -86,104 +266,6 @@
 | ----- | ---- | ----- | ----------- |
 | user_id | [uint32](#uint32) |  |  |
 | resource_id | [uint64](#uint64) |  |  |
-
-
-
-
-
-
-<a name="core.finding.Empty"></a>
-
-### Empty
-Empty 空メッセージ
-
-
-
-
-
-
-<a name="core.finding.Finding"></a>
-
-### Finding
-Finding エンティティ
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| finding_id | [uint64](#uint64) |  |  |
-| description | [string](#string) |  |  |
-| data_source | [string](#string) |  |  |
-| data_source_id | [string](#string) |  |  |
-| resource_name | [string](#string) |  |  |
-| project_id | [uint32](#uint32) |  |  |
-| original_score | [float](#float) |  |  |
-| original_max_score | [float](#float) |  |  |
-| score | [float](#float) |  |  |
-| data | [string](#string) |  |  |
-| created_at | [int64](#int64) |  |  |
-| updated_at | [int64](#int64) |  |  |
-
-
-
-
-
-
-<a name="core.finding.FindingForUpsert"></a>
-
-### FindingForUpsert
-Finding エンティティ（登録・更新用）
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| finding_id | [uint64](#uint64) |  |  |
-| description | [string](#string) |  |  |
-| data_source | [string](#string) |  |  |
-| data_source_id | [string](#string) |  |  |
-| resource_name | [string](#string) |  |  |
-| project_id | [uint32](#uint32) |  |  |
-| original_score | [float](#float) |  |  |
-| original_max_score | [float](#float) |  |  |
-| score | [float](#float) |  |  |
-| data | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="core.finding.FindingTag"></a>
-
-### FindingTag
-FindingTag エンティティ
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| finding_tag_id | [uint64](#uint64) |  |  |
-| finding_id | [uint64](#uint64) |  |  |
-| tag_key | [string](#string) |  |  |
-| tag_value | [string](#string) |  |  |
-| created_at | [int64](#int64) |  |  |
-| updated_at | [int64](#int64) |  |  |
-
-
-
-
-
-
-<a name="core.finding.FindingTagForUpsert"></a>
-
-### FindingTagForUpsert
-FindingTag エンティティ（登録・更新用）
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| finding_tag_id | [uint64](#uint64) |  |  |
-| finding_id | [uint64](#uint64) |  |  |
-| tag_key | [string](#string) |  |  |
-| tag_value | [string](#string) |  |  |
 
 
 
@@ -449,80 +531,6 @@ FindingTag エンティティ（登録・更新用）
 
 
 
-<a name="core.finding.Resource"></a>
-
-### Resource
-Resource エンティティ
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| resource_id | [uint64](#uint64) |  |  |
-| resource_name | [string](#string) |  |  |
-| project_id | [uint32](#uint32) |  |  |
-| created_at | [int64](#int64) |  |  |
-| updated_at | [int64](#int64) |  |  |
-
-
-
-
-
-
-<a name="core.finding.ResourceForUpsert"></a>
-
-### ResourceForUpsert
-Resource エンティティ（登録・更新用）
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| resource_id | [uint64](#uint64) |  |  |
-| resource_name | [string](#string) |  |  |
-| project_id | [uint32](#uint32) |  |  |
-
-
-
-
-
-
-<a name="core.finding.ResourceTag"></a>
-
-### ResourceTag
-ResourceTag エンティティ
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| resource_tag_id | [uint64](#uint64) |  |  |
-| resource_id | [uint64](#uint64) |  |  |
-| tag_key | [string](#string) |  |  |
-| tag_value | [string](#string) |  |  |
-| created_at | [int64](#int64) |  |  |
-| updated_at | [int64](#int64) |  |  |
-
-
-
-
-
-
-<a name="core.finding.ResourceTagForUpsert"></a>
-
-### ResourceTagForUpsert
-ResourceTag エンティティ（登録・更新用）
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| resource_tag_id | [uint64](#uint64) |  |  |
-| resource_id | [uint64](#uint64) |  |  |
-| tag_key | [string](#string) |  |  |
-| tag_value | [string](#string) |  |  |
-
-
-
-
-
-
 <a name="core.finding.TagFindingRequest"></a>
 
 ### TagFindingRequest
@@ -633,26 +641,61 @@ ResourceTag エンティティ（登録・更新用）
 | ListFinding | [ListFindingRequest](#core.finding.ListFindingRequest) | [ListFindingResponse](#core.finding.ListFindingResponse) | fiding |
 | GetFinding | [GetFindingRequest](#core.finding.GetFindingRequest) | [GetFindingResponse](#core.finding.GetFindingResponse) |  |
 | PutFinding | [PutFindingRequest](#core.finding.PutFindingRequest) | [PutFindingResponse](#core.finding.PutFindingResponse) |  |
-| DeleteFinding | [DeleteFindingRequest](#core.finding.DeleteFindingRequest) | [Empty](#core.finding.Empty) |  |
+| DeleteFinding | [DeleteFindingRequest](#core.finding.DeleteFindingRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 | ListFindingTag | [ListFindingTagRequest](#core.finding.ListFindingTagRequest) | [ListFindingTagResponse](#core.finding.ListFindingTagResponse) |  |
 | TagFinding | [TagFindingRequest](#core.finding.TagFindingRequest) | [TagFindingResponse](#core.finding.TagFindingResponse) |  |
-| UntagFinding | [UntagFindingRequest](#core.finding.UntagFindingRequest) | [Empty](#core.finding.Empty) |  |
+| UntagFinding | [UntagFindingRequest](#core.finding.UntagFindingRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 | ListResource | [ListResourceRequest](#core.finding.ListResourceRequest) | [ListResourceResponse](#core.finding.ListResourceResponse) | resource |
 | GetResource | [GetResourceRequest](#core.finding.GetResourceRequest) | [GetResourceResponse](#core.finding.GetResourceResponse) |  |
 | PutResource | [PutResourceRequest](#core.finding.PutResourceRequest) | [PutResourceResponse](#core.finding.PutResourceResponse) |  |
-| DeleteResource | [DeleteResourceRequest](#core.finding.DeleteResourceRequest) | [Empty](#core.finding.Empty) |  |
+| DeleteResource | [DeleteResourceRequest](#core.finding.DeleteResourceRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 | ListResourceTag | [ListResourceTagRequest](#core.finding.ListResourceTagRequest) | [ListResourceTagResponse](#core.finding.ListResourceTagResponse) |  |
 | TagResource | [TagResourceRequest](#core.finding.TagResourceRequest) | [TagResourceResponse](#core.finding.TagResourceResponse) |  |
-| UntagResource | [UntagResourceRequest](#core.finding.UntagResourceRequest) | [Empty](#core.finding.Empty) |  |
+| UntagResource | [UntagResourceRequest](#core.finding.UntagResourceRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 
  
 
 
 
-<a name="iam/iam.proto"></a>
+<a name="iam/entity.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## iam/iam.proto
+## iam/entity.proto
+
+
+
+<a name="core.iam.User"></a>
+
+### User
+User
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| user_id | [int32](#int32) |  |  |
+| name | [string](#string) |  |  |
+| activated | [bool](#bool) |  |  |
+| created_at | [int64](#int64) |  |  |
+| updated_at | [int64](#int64) |  |  |
+
+
+
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+<a name="iam/service.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## iam/service.proto
 
 
 
@@ -712,25 +755,6 @@ ResourceTag エンティティ（登録・更新用）
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | ok | [bool](#bool) |  |  |
-
-
-
-
-
-
-<a name="core.iam.User"></a>
-
-### User
-Userエンティティ
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
-| name | [string](#string) |  |  |
-| activated | [bool](#bool) |  |  |
-| created_at | [int64](#int64) |  |  |
-| updated_at | [int64](#int64) |  |  |
 
 
 

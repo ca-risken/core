@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package core.finding;
+option go_package = "github.com/CyberAgent/mimosa-core/proto/finding";
+
+/*
+ * Entity
+ */
+
+// Finding
+message Finding {
+  uint64 finding_id = 1;
+  string description = 2;
+  string data_source = 3;
+  string data_source_id = 4;
+  string resource_name = 5;
+  uint32 project_id = 6;
+  float original_score = 7;
+  float original_max_score = 8;
+  float score = 9;
+  string data = 10;
+  int64 created_at = 11;
+  int64 updated_at = 12;
+}
+
+// Finding For Upsert
+message FindingForUpsert {
+  uint64 finding_id = 1;
+  string description = 2;
+  string data_source = 3;
+  string data_source_id = 4;
+  string resource_name = 5;
+  uint32 project_id = 6;
+  float original_score = 7;
+  float original_max_score = 8;
+  string data = 9;
+}
+
+// FindingTag
+message FindingTag {
+  uint64 finding_tag_id = 1;
+  uint64 finding_id = 2;
+  string tag_key = 3;
+  string tag_value = 4;
+  int64 created_at = 5;
+  int64 updated_at = 6;
+}
+
+// FindingTag For Upsert
+message FindingTagForUpsert {
+  uint64 finding_tag_id = 1;
+  uint64 finding_id = 2;
+  string tag_key = 3;
+  string tag_value = 4;
+}
+
+// Resource
+message Resource {
+  uint64 resource_id = 1;
+  string resource_name = 2;
+  uint32 project_id = 3;
+  int64 created_at = 4;
+  int64 updated_at = 5;
+}
+
+// Resource For upsert
+message ResourceForUpsert {
+  uint64 resource_id = 1;
+  string resource_name = 2;
+  uint32 project_id = 3;
+}
+
+// ResourceTag
+message ResourceTag {
+  uint64 resource_tag_id = 1;
+  uint64 resource_id = 2;
+  string tag_key = 3;
+  string tag_value = 4;
+  int64 created_at = 5;
+  int64 updated_at = 6;
+}
+
+// ResourceTag For upsert
+message ResourceTagForUpsert {
+  uint64 resource_tag_id = 1;
+  uint64 resource_id = 2;
+  string tag_key = 3;
+  string tag_value = 4;
+}
