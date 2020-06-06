@@ -62,4 +62,11 @@ ssh:
 	. env.sh && docker-compose exec gateway sh
 
 grpcurl-finding-list:
-	grpcurl -insecure -import-path proto -proto finding/finding.proto localhost:8081 list core.finding.FindingService
+	grpcurl \
+		-plaintext localhost:8081 list core.finding.FindingService
+
+grpcurl-finding-put-example:
+	grpcurl \
+		-plaintext \
+		-d '{"finding":{"finding_id":1004, "description":"desc", "data_source":"ogapan", "data_source_id":"ogapan-001", "resource_name":"ogapan-resource", "project_id":1001, "original_score":100.0, "original_max_score":100.0, "data":"{\"key\":\"value\"}"}}' \
+		localhost:8081 core.finding.FindingService.PutFinding

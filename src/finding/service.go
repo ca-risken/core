@@ -63,7 +63,7 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 	}
 
 	savedData, err := f.repository.GetFindingByDataSource(
-		req.GetFinding().GetProjectId(), req.GetFinding().GetDataSource(), req.GetFinding().GetDataSourceId())
+		req.Finding.ProjectId, req.Finding.DataSource, req.Finding.DataSourceId)
 	noRecord := gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		return nil, err
@@ -72,9 +72,9 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 	var findingID uint64
 	if !noRecord {
 		if savedData.FindingID != req.GetFinding().GetFindingId() {
-			return nil, fmt.Errorf("Invalid finding_id, want=%d, got=%d", savedData.FindingID, req.GetFinding().GetProjectId())
+			return nil, fmt.Errorf("Invalid finding_id, want=%d, got=%d", savedData.FindingID, req.Finding.FindingId)
 		}
-		findingID = req.GetFinding().GetFindingId()
+		findingID = savedData.FindingID
 	}
 
 	// TODO: Authz

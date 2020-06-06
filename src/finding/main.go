@@ -7,6 +7,7 @@ import (
 	"github.com/CyberAgent/mimosa-core/proto/finding"
 	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type findingConf struct {
@@ -29,7 +30,7 @@ func main() {
 	findingServer := newFindingService(newFindingRepository()) // DI service & repository
 	finding.RegisterFindingServiceServer(server, findingServer)
 
-	// reflection.Register(server) // enable reflection API
+	reflection.Register(server) // enable reflection API
 	appLogger.Infof("starting gRPC server at :%s", conf.Port)
 	if err := server.Serve(l); err != nil {
 		appLogger.Fatalf("failed to gRPC serve: %v", err)

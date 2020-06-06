@@ -94,8 +94,8 @@ func (f *findingRepository) GetFinding(findingID uint64) (*model.Finding, error)
 }
 
 func (f findingRepository) UpsertFinding(data *model.Finding) (*model.Finding, error) {
-	// finiding_idがゼロ値ではない場合は受け取った値を設定する。
-	// ゼロ値の場合はnilの状態でupsert（auto_incrementが無駄に更新されないようにするための対応）
+	// finiding_idがゼロ値（0）の場合はnilを、ゼロ値以外の場合は受け取った値を設定。
+	// nilの時だけfinding_idをauto_incrementする。（update時にはauto_incrementが無駄にカウントアップされないようにするため）
 	var findingID interface{}
 	if data.FindingID != 0 {
 		findingID = data.FindingID
