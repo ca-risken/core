@@ -9,6 +9,7 @@ import (
 func (l *ListFindingRequest) Validate() error {
 	return validation.ValidateStruct(l,
 		validation.Field(&l.DataSource, validation.Each(validation.Length(0, 64))),
+		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 255))),
 		validation.Field(&l.FromScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.ToScore, validation.Min(0.0), validation.Max(1.0)),
 	)
@@ -55,6 +56,7 @@ func (u *UntagFindingRequest) Validate() error {
 // Validate ListResourceRequest
 func (l *ListResourceRequest) Validate() error {
 	return validation.ValidateStruct(l,
+		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 255))),
 		validation.Field(&l.FromSumScore, validation.Min(0.0)),
 		validation.Field(&l.ToSumScore, validation.Min(0.0)),
 	)
@@ -108,7 +110,7 @@ func (f *FindingForUpsert) Validate() error {
 		validation.Field(&f.Description, validation.Length(0, 200)),
 		validation.Field(&f.DataSource, validation.Required, validation.Length(0, 64)),
 		validation.Field(&f.DataSourceId, validation.Required, validation.Length(0, 255)),
-		validation.Field(&f.ResourceName, validation.Required),
+		validation.Field(&f.ResourceName, validation.Required, validation.Length(0, 255)),
 		validation.Field(&f.OriginalScore, validation.NilOrNotEmpty, validation.Min(0.0), validation.Max(999.99)),
 		validation.Field(&f.OriginalMaxScore, validation.NilOrNotEmpty, validation.Min(0.0), validation.Max(999.99)),
 		validation.Field(&f.Data, is.JSON),
@@ -127,7 +129,7 @@ func (f *FindingTagForUpsert) Validate() error {
 // Validate ResourceForUpsert
 func (r *ResourceForUpsert) Validate() error {
 	return validation.ValidateStruct(r,
-		validation.Field(&r.ResourceName, validation.Required),
+		validation.Field(&r.ResourceName, validation.Required, validation.Length(0, 255)),
 	)
 }
 

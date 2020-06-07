@@ -23,6 +23,11 @@ func TestValidate_ListFindingRequest(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:    "NG too long resource_name",
+			input:   ListFindingRequest{ResourceName: []string{"123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456"}},
+			wantErr: true,
+		},
+		{
 			name:    "NG too long data_source",
 			input:   ListFindingRequest{DataSource: []string{"12345678901234567890123456789012345678901234567890123456789012345"}},
 			wantErr: true,
@@ -186,6 +191,11 @@ func TestValidate_ListResourceRequest(t *testing.T) {
 			name:    "OK",
 			input:   ListResourceRequest{},
 			wantErr: false,
+		},
+		{
+			name:    "NG too long resource_name",
+			input:   ListResourceRequest{ResourceName: []string{"123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456"}},
+			wantErr: true,
 		},
 		{
 			name:    "NG too small from_sum_score",
@@ -365,6 +375,11 @@ func TestValidate_FindingForUpsert(t *testing.T) {
 		{
 			name:    "NG required resource name",
 			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			wantErr: true,
+		},
+		{
+			name:    "NG too long resource name",
+			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
