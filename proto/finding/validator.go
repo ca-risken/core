@@ -111,7 +111,7 @@ func (f *FindingForUpsert) Validate() error {
 		validation.Field(&f.DataSource, validation.Required, validation.Length(0, 64)),
 		validation.Field(&f.DataSourceId, validation.Required, validation.Length(0, 255)),
 		validation.Field(&f.ResourceName, validation.Required, validation.Length(0, 255)),
-		validation.Field(&f.OriginalScore, validation.NilOrNotEmpty, validation.Min(0.0), validation.Max(999.99)),
+		validation.Field(&f.OriginalScore, validation.NilOrNotEmpty, validation.Min(0.0), validation.Max(f.OriginalMaxScore)),
 		validation.Field(&f.OriginalMaxScore, validation.NilOrNotEmpty, validation.Min(0.0), validation.Max(999.99)),
 		validation.Field(&f.Data, is.JSON),
 	)

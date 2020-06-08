@@ -393,8 +393,8 @@ func TestValidate_FindingForUpsert(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG too big OriginalScore",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 999.991, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			name:    "NG OriginalScore bigger than OriginalMaxScore",
+			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 100.01, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
