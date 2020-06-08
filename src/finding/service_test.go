@@ -167,6 +167,9 @@ func TestPutFinding(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			// Resource関連のupdateは別テストで実施。ここでは一律カラを返す
+			mock.On("GetResourceByName").Return(&model.Resource{}, nil)
+			mock.On("UpsertResource").Return(&model.Resource{}, nil)
 			if c.mockGetResp != nil || c.mockGetErr != nil {
 				mock.On("GetFindingByDataSource").Return(c.mockGetResp, c.mockGetErr).Once()
 			}
@@ -183,6 +186,124 @@ func TestPutFinding(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDeleteFinding(t *testing.T) {
+}
+
+func TestListFindingTag(t *testing.T) {
+}
+
+func TestTagFinding(t *testing.T) {
+}
+
+func TestUntagFinding(t *testing.T) {
+}
+
+func TestListResource(t *testing.T) {
+}
+
+func TestGetResource(t *testing.T) {
+}
+
+func TestPutResource(t *testing.T) {
+	var ctx context.Context
+	now := time.Now()
+	mock := mockFindingRepository{}
+	svc := newFindingService(&mock)
+
+	cases := []struct {
+		name        string
+		input       *finding.PutResourceRequest
+		want        *finding.PutResourceResponse
+		wantErr     bool
+		mockGetResp *model.Resource
+		mockGetErr  error
+		mockUpResp  *model.Resource
+		mockUpErr   error
+	}{
+		{
+			name:        "OK Insert",
+			input:       &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceName: "rn", ProjectId: 111}},
+			want:        &finding.PutResourceResponse{Resource: &finding.Resource{ResourceId: 1001, ResourceName: "rn", ProjectId: 111, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp: nil,
+			mockGetErr:  gorm.ErrRecordNotFound,
+			mockUpResp:  &model.Resource{ResourceID: 1001, ResourceName: "rn", ProjectID: 111, CreatedAt: now, UpdatedAt: now},
+			mockUpErr:   nil,
+		},
+		{
+			name:        "OK Update",
+			input:       &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceId: 1001, ResourceName: "rn-2", ProjectId: 999}},
+			want:        &finding.PutResourceResponse{Resource: &finding.Resource{ResourceId: 1001, ResourceName: "rn-2", ProjectId: 999, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp: &model.Resource{ResourceID: 1001, ResourceName: "rn-2", ProjectID: 111, CreatedAt: now, UpdatedAt: now},
+			mockGetErr:  nil,
+			mockUpResp:  &model.Resource{ResourceID: 1001, ResourceName: "rn-2", ProjectID: 999, CreatedAt: now, UpdatedAt: now},
+			mockUpErr:   nil,
+		},
+		{
+			name:    "NG Invalid request",
+			input:   &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceId: 1001, ResourceName: "", ProjectId: 111}},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:        "NG GetResourceByName error",
+			input:       &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceId: 1001, ResourceName: "", ProjectId: 111}},
+			want:        nil,
+			wantErr:     true,
+			mockGetResp: nil,
+			mockGetErr:  gorm.ErrCantStartTransaction,
+		},
+		{
+			name:        "NG Invalid resource_id error",
+			input:       &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceId: 1001, ResourceName: "rn", ProjectId: 111}},
+			want:        nil,
+			wantErr:     true,
+			mockGetResp: &model.Resource{ResourceID: 9999, ResourceName: "rn", ProjectID: 111, CreatedAt: now, UpdatedAt: now},
+			mockGetErr:  nil,
+		},
+		{
+			name:        "NG UpsertResource error",
+			input:       &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceId: 1001, ResourceName: "rn", ProjectId: 111}},
+			want:        nil,
+			wantErr:     true,
+			mockGetResp: &model.Resource{ResourceID: 1001, ResourceName: "rn", ProjectID: 111, CreatedAt: now, UpdatedAt: now},
+			mockGetErr:  nil,
+			mockUpResp:  nil,
+			mockUpErr:   gorm.ErrInvalidSQL,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if c.mockGetResp != nil || c.mockGetErr != nil {
+				mock.On("GetResourceByName").Return(c.mockGetResp, c.mockGetErr).Once()
+			}
+			if c.mockUpResp != nil || c.mockUpErr != nil {
+				mock.On("UpsertResource").Return(c.mockUpResp, c.mockUpErr).Once()
+			}
+
+			got, err := svc.PutResource(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestDeleteResource(t *testing.T) {
+}
+
+func TestListResourceTag(t *testing.T) {
+}
+
+func TestTagResource(t *testing.T) {
+}
+
+func TestUntagResource(t *testing.T) {
 }
 
 func TestConvertFinding(t *testing.T) {
@@ -240,16 +361,39 @@ func TestCalculateScore(t *testing.T) {
 	}
 }
 
+func TestConvertResource(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name  string
+		input *model.Resource
+		want  *finding.Resource
+	}{
+		{
+			name:  "OK convert unix time",
+			input: &model.Resource{ResourceID: 10001, ResourceName: "rn", ProjectID: 111, CreatedAt: now, UpdatedAt: now},
+			want:  &finding.Resource{ResourceId: 10001, ResourceName: "rn", ProjectId: 111, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := convertResource(c.input)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
 type mockFindingRepository struct {
 	mock.Mock
 }
 
-func (m *mockFindingRepository) ListFinding(req *finding.ListFindingRequest) (*[]findingIds, error) {
+func (m *mockFindingRepository) ListFinding(*finding.ListFindingRequest) (*[]findingIds, error) {
 	args := m.Called()
 	return args.Get(0).(*[]findingIds), args.Error(1)
 }
 
-func (m *mockFindingRepository) GetFinding(findingID uint64) (*model.Finding, error) {
+func (m *mockFindingRepository) GetFinding(uint64) (*model.Finding, error) {
 	args := m.Called()
 	return args.Get(0).(*model.Finding), args.Error(1)
 }
@@ -259,7 +403,17 @@ func (m *mockFindingRepository) UpsertFinding(*model.Finding) (*model.Finding, e
 	return args.Get(0).(*model.Finding), args.Error(1)
 }
 
-func (m *mockFindingRepository) GetFindingByDataSource(p uint32, ds, dsID string) (*model.Finding, error) {
+func (m *mockFindingRepository) GetFindingByDataSource(uint32, string, string) (*model.Finding, error) {
 	args := m.Called()
 	return args.Get(0).(*model.Finding), args.Error(1)
+}
+
+func (m *mockFindingRepository) UpsertResource(*model.Resource) (*model.Resource, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Resource), args.Error(1)
+}
+
+func (m *mockFindingRepository) GetResourceByName(uint32, string) (*model.Resource, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Resource), args.Error(1)
 }

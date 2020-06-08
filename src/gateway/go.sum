@@ -1,5 +1,7 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/CyberAgent/mimosa-core v0.0.0-20200607134451-08fbc609a46f h1:4LJz99uF6WXYIbZsRN4jf+lvLYdb5E2ccfBBXPKXkek=
+github.com/CyberAgent/mimosa-core v0.0.0-20200607134451-08fbc609a46f/go.mod h1:eIxWedkAeUgbc3Qv46sQC5lh6uUme87tM7I+xxWZ78A=
 github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20200605090541-d71533a550f0 h1:DyBIC6VKRcPl7p5hufWmlaHXMx5nnL5BgNGcYxxQzF4=
 github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20200605090541-d71533a550f0/go.mod h1:Ukll9SwBNL0kv2b6ee7TrFxkWzZXEL7NZ6V8BV/nx5Q=
 github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 h1:zV3ejI06GQ59hwDQAvmK1qxOQGB3WuVTRoY0okPTAv0=

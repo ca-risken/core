@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
@@ -15,6 +16,8 @@ type findingRepoInterface interface {
 	GetFinding(uint64) (*model.Finding, error)
 	UpsertFinding(*model.Finding) (*model.Finding, error)
 	GetFindingByDataSource(uint32, string, string) (*model.Finding, error)
+	UpsertResource(*model.Resource) (*model.Resource, error)
+	GetResourceByName(uint32, string) (*model.Resource, error)
 }
 
 type findingRepository struct {
@@ -77,9 +80,33 @@ type findingIds struct {
 }
 
 func (f *findingRepository) ListFinding(req *finding.ListFindingRequest) (*[]findingIds, error) {
+	query := `
+select
+	finding_id
+from
+	finding
+where
+	score between ? and ?
+	and 
+	updated_at between ? and ?
+`
+	var params []interface{}
+	params = append(params, req.FromScore, req.ToScore, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
+	if len(req.ProjectId) != 0 {
+		query += " and project_id in (?)"
+		params = append(params, req.ProjectId)
+	}
+	if len(req.DataSource) != 0 {
+		query += " and data_source in (?)"
+		params = append(params, req.DataSource)
+	}
+	if len(req.ResourceName) != 0 {
+		query += " and resource_name in (?)"
+		params = append(params, req.ResourceName)
+	}
+
 	var result []findingIds
-	// TODO 検索条件の複数対応
-	if scan := f.SlaveDB.Raw("select finding_id from finding where project_id in (?)", req.ProjectId).Scan(&result); scan.Error != nil {
+	if scan := f.SlaveDB.Raw(query, params...).Scan(&result); scan.Error != nil {
 		return nil, scan.Error
 	}
 	return &result, nil
@@ -93,14 +120,7 @@ func (f *findingRepository) GetFinding(findingID uint64) (*model.Finding, error)
 	return &result, nil
 }
 
-func (f findingRepository) UpsertFinding(data *model.Finding) (*model.Finding, error) {
-	// finiding_idがゼロ値（0）の場合はnilを、ゼロ値以外の場合は受け取った値を設定。
-	// nilの時だけfinding_idをauto_incrementする。（update時にはauto_incrementが無駄にカウントアップされないようにするため）
-	var findingID interface{}
-	if data.FindingID != 0 {
-		findingID = data.FindingID
-	}
-
+func (f *findingRepository) UpsertFinding(data *model.Finding) (*model.Finding, error) {
 	err := f.MasterDB.Exec(`
 INSERT INTO finding
 	(finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
@@ -114,7 +134,7 @@ ON DUPLICATE KEY UPDATE
 	score=VALUES(score),
 	data=VALUES(data);
 `,
-		findingID, data.Description, data.DataSource, data.DataSourceID, data.ResourceName,
+		data.FindingID, data.Description, data.DataSource, data.DataSourceID, data.ResourceName,
 		data.ProjectID, data.OriginalScore, data.Score, data.Data).Error
 	if err != nil {
 		return nil, err
@@ -131,6 +151,37 @@ func (f *findingRepository) GetFindingByDataSource(projectID uint32, dataSource,
 	var result model.Finding
 	if scan := f.SlaveDB.Raw("select * from finding where project_id = ? and data_source = ? and data_source_id = ?",
 		projectID, dataSource, dataSourceID).First(&result); scan.Error != nil {
+		return nil, scan.Error
+	}
+	return &result, nil
+}
+
+func (f *findingRepository) UpsertResource(data *model.Resource) (*model.Resource, error) {
+	err := f.MasterDB.Exec(`
+INSERT INTO resource
+	(resource_id, resource_name, project_id)
+VALUES
+	(?, ?, ?)
+ON DUPLICATE KEY UPDATE
+	resource_name=VALUES(resource_name),
+	project_id=VALUES(project_id);
+`,
+		data.ResourceID, data.ResourceName, data.ProjectID).Error
+	if err != nil {
+		return nil, err
+	}
+
+	updated, err := f.GetResourceByName(data.ProjectID, data.ResourceName)
+	if err != nil {
+		return nil, err
+	}
+	return updated, nil
+}
+
+func (f *findingRepository) GetResourceByName(projectID uint32, resourceName string) (*model.Resource, error) {
+	var result model.Resource
+	if scan := f.SlaveDB.Raw("select * from resource where project_id = ? and resource_name = ?",
+		projectID, resourceName).First(&result); scan.Error != nil {
 		return nil, scan.Error
 	}
 	return &result, nil
