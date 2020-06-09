@@ -54,6 +54,34 @@ func TestListFinding(t *testing.T) {
 	}
 }
 
+func TestConvertListFindingRequest(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name  string
+		input *finding.ListFindingRequest
+		want  *finding.ListFindingRequest
+	}{
+		{
+			name:  "OK full-set",
+			input: &finding.ListFindingRequest{ProjectId: []uint32{111, 222}, DataSource: []string{"ds"}, ResourceName: []string{"rn"}, FromScore: 0.3, ToScore: 0.9, FromAt: now.Unix(), ToAt: now.Unix()},
+			want:  &finding.ListFindingRequest{ProjectId: []uint32{111, 222}, DataSource: []string{"ds"}, ResourceName: []string{"rn"}, FromScore: 0.3, ToScore: 0.9, FromAt: now.Unix(), ToAt: now.Unix()},
+		},
+		{
+			name:  "OK convert ToScore",
+			input: &finding.ListFindingRequest{ToAt: now.Unix()},
+			want:  &finding.ListFindingRequest{ToScore: 1.0, ToAt: now.Unix()},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := convertListFindingRequest(c.input)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected convert: got=%+v, want: %+v", got, c.want)
+			}
+		})
+	}
+}
+
 func TestGetFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
@@ -189,6 +217,43 @@ func TestPutFinding(t *testing.T) {
 }
 
 func TestDeleteFinding(t *testing.T) {
+	var ctx context.Context
+	mock := mockFindingRepository{}
+	svc := newFindingService(&mock)
+
+	cases := []struct {
+		name    string
+		input   *finding.DeleteFindingRequest
+		wantErr bool
+		mockErr error
+	}{
+		{
+			name:    "OK",
+			input:   &finding.DeleteFindingRequest{FindingId: 1001},
+			wantErr: false,
+		},
+		{
+			name:    "NG validation error",
+			input:   &finding.DeleteFindingRequest{},
+			wantErr: true,
+		},
+		{
+			name:    "NG DB error",
+			input:   &finding.DeleteFindingRequest{FindingId: 1001},
+			wantErr: true,
+			mockErr: gorm.ErrCantStartTransaction,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mock.On("DeleteFinding").Return(c.mockErr).Once()
+			_, err := svc.DeleteFinding(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
 }
 
 func TestListFindingTag(t *testing.T) {
@@ -416,4 +481,9 @@ func (m *mockFindingRepository) UpsertResource(*model.Resource) (*model.Resource
 func (m *mockFindingRepository) GetResourceByName(uint32, string) (*model.Resource, error) {
 	args := m.Called()
 	return args.Get(0).(*model.Resource), args.Error(1)
+}
+
+func (m *mockFindingRepository) DeleteFinding(uint64) error {
+	args := m.Called()
+	return args.Error(0)
 }

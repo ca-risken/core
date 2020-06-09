@@ -57,7 +57,7 @@ func (f *findingService) GetFinding(ctx context.Context, req *finding.GetFinding
 	}
 
 	// TODO authz
-	data, err := f.repository.GetFinding(req.GetFindingId())
+	data, err := f.repository.GetFinding(req.FindingId)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return &finding.GetFindingResponse{}, nil
@@ -121,6 +121,12 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 func (f *findingService) DeleteFinding(ctx context.Context, req *finding.DeleteFindingRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return &empty.Empty{}, err
+	}
+
+	// TODO authz
+	err := f.repository.DeleteFinding(req.FindingId)
+	if err != nil {
+		return nil, err
 	}
 	return &empty.Empty{}, nil
 }

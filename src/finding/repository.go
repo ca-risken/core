@@ -18,6 +18,7 @@ type findingRepoInterface interface {
 	GetFindingByDataSource(uint32, string, string) (*model.Finding, error)
 	UpsertResource(*model.Resource) (*model.Resource, error)
 	GetResourceByName(uint32, string) (*model.Resource, error)
+	DeleteFinding(uint64) error
 }
 
 type findingRepository struct {
@@ -185,4 +186,11 @@ func (f *findingRepository) GetResourceByName(projectID uint32, resourceName str
 		return nil, scan.Error
 	}
 	return &result, nil
+}
+
+func (f *findingRepository) DeleteFinding(findingID uint64) error {
+	if err := f.MasterDB.Exec(`delete from finding where finding_id = ?`, findingID).Error; err != nil {
+		return err
+	}
+	return nil
 }
