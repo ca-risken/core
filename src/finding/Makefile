@@ -42,3 +42,9 @@ list-finding-tag:
 		-d '{"finding_id": 1001}' \
 		localhost:8081 core.finding.FindingService.ListFindingTag
 
+.PHONY: tag-finding
+tag-finding:
+	grpcurl \
+		-plaintext \
+		-d '{"tag": {"finding_id": 1001, "tag_key": "key4", "tag_value": "value"}}' \
+		localhost:8081 core.finding.FindingService.TagFinding

@@ -79,6 +79,7 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 		return nil, err
 	}
 
+	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
 	var findingID uint64
 	if !noRecord {
 		if req.Finding.FindingId != 0 && req.Finding.FindingId != savedData.FindingID {
@@ -146,14 +147,7 @@ func (f *findingService) ListFindingTag(ctx context.Context, req *finding.ListFi
 	}
 	var tags []*finding.FindingTag
 	for _, tag := range *list {
-		tags = append(tags, &finding.FindingTag{
-			FindingTagId: tag.FindingTagID,
-			FindingId:    tag.FindingID,
-			TagKey:       tag.TagKey,
-			TagValue:     tag.TagValue,
-			CreatedAt:    tag.CreatedAt.Unix(),
-			UpdatedAt:    tag.UpdatedAt.Unix(),
-		})
+		tags = append(tags, convertFindingTag(&tag))
 	}
 	return &finding.ListFindingTagResponse{Tag: tags}, nil
 }
@@ -162,7 +156,32 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	return &finding.TagFindingResponse{}, nil
+
+	savedData, err := f.repository.GetFindingTagByKey(req.Tag.FindingId, req.Tag.TagKey)
+	noRecord := gorm.IsRecordNotFoundError(err)
+	if err != nil && !noRecord {
+		return nil, err
+	}
+
+	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
+	var findingTagID uint64
+	if !noRecord {
+		if req.Tag.FindingTagId != 0 && req.Tag.FindingTagId != savedData.FindingTagID {
+			return nil, fmt.Errorf("Invalid finding_tag_id, want=%d, got=%d", savedData.FindingTagID, req.Tag.FindingTagId)
+		}
+		findingTagID = savedData.FindingTagID
+	}
+
+	registerd, err := f.repository.TagFinding(&model.FindingTag{
+		FindingTagID: findingTagID,
+		FindingID:    req.Tag.FindingId,
+		TagKey:       req.Tag.TagKey,
+		TagValue:     req.Tag.TagValue,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &finding.TagFindingResponse{Tag: convertFindingTag(registerd)}, nil
 }
 
 func (f *findingService) UntagFinding(ctx context.Context, req *finding.UntagFindingRequest) (*empty.Empty, error) {
@@ -188,6 +207,20 @@ func convertFinding(f *model.Finding) *finding.Finding {
 		Data:          f.Data,
 		CreatedAt:     f.CreatedAt.Unix(),
 		UpdatedAt:     f.UpdatedAt.Unix(),
+	}
+}
+
+func convertFindingTag(f *model.FindingTag) *finding.FindingTag {
+	if f == nil {
+		return &finding.FindingTag{}
+	}
+	return &finding.FindingTag{
+		FindingTagId: f.FindingTagID,
+		FindingId:    f.FindingID,
+		TagKey:       f.TagKey,
+		TagValue:     f.TagValue,
+		CreatedAt:    f.CreatedAt.Unix(),
+		UpdatedAt:    f.UpdatedAt.Unix(),
 	}
 }
 

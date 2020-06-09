@@ -228,7 +228,7 @@ ON DUPLICATE KEY UPDATE
 
 func (f *findingRepository) GetFindingTagByKey(findingID uint64, tagKey string) (*model.FindingTag, error) {
 	var data model.FindingTag
-	if err := f.SlaveDB.Raw(`select * from finding_tag where finding_id = ? and tag_key = ?`, findingID, tagKey).Error; err != nil {
+	if err := f.SlaveDB.Raw(`select * from finding_tag where finding_id = ? and tag_key = ?`, findingID, tagKey).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

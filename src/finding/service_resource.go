@@ -35,6 +35,7 @@ func (f *findingService) PutResource(ctx context.Context, req *finding.PutResour
 		return nil, err
 	}
 
+	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
 	var resourceID uint64
 	if !noRecord {
 		if req.Resource.ResourceId != 0 && req.Resource.ResourceId != savedData.ResourceID {

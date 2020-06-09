@@ -302,6 +302,77 @@ func TestListFindingTag(t *testing.T) {
 }
 
 func TestTagFinding(t *testing.T) {
+	var ctx context.Context
+	now := time.Now()
+	mock := mockFindingRepository{}
+	svc := newFindingService(&mock)
+	cases := []struct {
+		name        string
+		input       *finding.TagFindingRequest
+		want        *finding.TagFindingResponse
+		wantErr     bool
+		mockGetResp *model.FindingTag
+		mockGetErr  error
+		mockUpResp  *model.FindingTag
+		mockUpErr   error
+	}{
+		{
+			name:       "OK Insert",
+			input:      &finding.TagFindingRequest{Tag: &finding.FindingTagForUpsert{FindingId: 1001, TagKey: "k", TagValue: "v"}},
+			want:       &finding.TagFindingResponse{Tag: &finding.FindingTag{FindingTagId: 10011, FindingId: 1001, TagKey: "k", TagValue: "v", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetErr: gorm.ErrRecordNotFound,
+			mockUpResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, TagKey: "k", TagValue: "v", CreatedAt: now, UpdatedAt: now},
+		},
+		{
+			name:        "OK Update",
+			input:       &finding.TagFindingRequest{Tag: &finding.FindingTagForUpsert{FindingId: 1001, TagKey: "k", TagValue: "v"}},
+			want:        &finding.TagFindingResponse{Tag: &finding.FindingTag{FindingTagId: 10011, FindingId: 1001, TagKey: "k", TagValue: "v", CreatedAt: now.Add(-1 * 24 * time.Hour).Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, TagKey: "k", TagValue: "v", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now.Add(-1 * 24 * time.Hour)},
+			mockUpResp:  &model.FindingTag{FindingTagID: 10011, FindingID: 1001, TagKey: "k", TagValue: "v", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now},
+		},
+		{
+			name:    "NG Invalid request",
+			input:   &finding.TagFindingRequest{Tag: &finding.FindingTagForUpsert{FindingId: 1001, TagKey: "", TagValue: "v"}},
+			wantErr: true,
+		},
+		{
+			name:       "NG GetFindingTagByKey error",
+			input:      &finding.TagFindingRequest{Tag: &finding.FindingTagForUpsert{FindingId: 1001, TagKey: "k", TagValue: "v"}},
+			wantErr:    true,
+			mockGetErr: gorm.ErrInvalidSQL,
+		},
+		{
+			name:        "NG Invalid findingTagID",
+			input:       &finding.TagFindingRequest{Tag: &finding.FindingTagForUpsert{FindingTagId: 10011, FindingId: 1001, TagKey: "k", TagValue: "v"}},
+			wantErr:     true,
+			mockGetResp: &model.FindingTag{FindingTagID: 99999, FindingID: 1001, TagKey: "k", TagValue: "v", CreatedAt: now, UpdatedAt: now},
+		},
+		{
+			name:        "NG TagFinding error",
+			input:       &finding.TagFindingRequest{Tag: &finding.FindingTagForUpsert{FindingTagId: 10011, FindingId: 1001, TagKey: "k", TagValue: "v"}},
+			wantErr:     true,
+			mockGetResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, TagKey: "k", TagValue: "v", CreatedAt: now, UpdatedAt: now},
+			mockUpErr:   gorm.ErrInvalidSQL,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if c.mockGetResp != nil || c.mockGetErr != nil {
+				mock.On("GetFindingTagByKey").Return(c.mockGetResp, c.mockGetErr).Once()
+			}
+			if c.mockUpResp != nil || c.mockUpErr != nil {
+				mock.On("TagFinding").Return(c.mockUpResp, c.mockUpErr).Once()
+			}
+			got, err := svc.TagFinding(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
 }
 
 func TestUntagFinding(t *testing.T) {
@@ -339,9 +410,9 @@ func TestPutResource(t *testing.T) {
 		{
 			name:        "OK Update",
 			input:       &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceId: 1001, ResourceName: "rn-2", ProjectId: 999}},
-			want:        &finding.PutResourceResponse{Resource: &finding.Resource{ResourceId: 1001, ResourceName: "rn-2", ProjectId: 999, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockGetResp: &model.Resource{ResourceID: 1001, ResourceName: "rn-2", ProjectID: 111, CreatedAt: now, UpdatedAt: now},
-			mockUpResp:  &model.Resource{ResourceID: 1001, ResourceName: "rn-2", ProjectID: 999, CreatedAt: now, UpdatedAt: now},
+			want:        &finding.PutResourceResponse{Resource: &finding.Resource{ResourceId: 1001, ResourceName: "rn-2", ProjectId: 999, CreatedAt: now.Add(-1 * 24 * time.Hour).Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp: &model.Resource{ResourceID: 1001, ResourceName: "rn-2", ProjectID: 111, CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now.Add(-1 * 24 * time.Hour)},
+			mockUpResp:  &model.Resource{ResourceID: 1001, ResourceName: "rn-2", ProjectID: 999, CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now},
 		},
 		{
 			name:    "NG Invalid request",
@@ -413,10 +484,43 @@ func TestConvertFinding(t *testing.T) {
 			input: &model.Finding{FindingID: 10001, CreatedAt: now, UpdatedAt: now},
 			want:  &finding.Finding{FindingId: 10001, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 		},
+		{
+			name:  "OK empty",
+			input: nil,
+			want:  &finding.Finding{},
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			got := convertFinding(c.input)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestConvertFindingTag(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name  string
+		input *model.FindingTag
+		want  *finding.FindingTag
+	}{
+		{
+			name:  "OK convert unix time",
+			input: &model.FindingTag{FindingTagID: 11111, FindingID: 10001, TagKey: "k", TagValue: "v", CreatedAt: now, UpdatedAt: now},
+			want:  &finding.FindingTag{FindingTagId: 11111, FindingId: 10001, TagKey: "k", TagValue: "v", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+		},
+		{
+			name:  "OK empty",
+			input: nil,
+			want:  &finding.FindingTag{},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := convertFindingTag(c.input)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
 			}
@@ -467,6 +571,11 @@ func TestConvertResource(t *testing.T) {
 			name:  "OK convert unix time",
 			input: &model.Resource{ResourceID: 10001, ResourceName: "rn", ProjectID: 111, CreatedAt: now, UpdatedAt: now},
 			want:  &finding.Resource{ResourceId: 10001, ResourceName: "rn", ProjectId: 111, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+		},
+		{
+			name:  "OK empty",
+			input: nil,
+			want:  &finding.Resource{},
 		},
 	}
 	for _, c := range cases {
