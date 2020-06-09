@@ -20,6 +20,8 @@ type findingRepoInterface interface {
 	GetResourceByName(uint32, string) (*model.Resource, error)
 	DeleteFinding(uint64) error
 	ListFindingTag(uint64) (*[]model.FindingTag, error)
+	TagFinding(*model.FindingTag) (*model.FindingTag, error)
+	GetFindingTagByKey(uint64, string) (*model.FindingTag, error)
 }
 
 type findingRepository struct {
@@ -182,9 +184,9 @@ ON DUPLICATE KEY UPDATE
 
 func (f *findingRepository) GetResourceByName(projectID uint32, resourceName string) (*model.Resource, error) {
 	var data model.Resource
-	if scan := f.SlaveDB.Raw(`select * from resource where project_id = ? and resource_name = ?`,
-		projectID, resourceName).First(&data); scan.Error != nil {
-		return nil, scan.Error
+	if err := f.SlaveDB.Raw(`select * from resource where project_id = ? and resource_name = ?`,
+		projectID, resourceName).First(&data).Error; err != nil {
+		return nil, err
 	}
 	return &data, nil
 }
@@ -199,7 +201,35 @@ func (f *findingRepository) DeleteFinding(findingID uint64) error {
 func (f *findingRepository) ListFindingTag(findingID uint64) (*[]model.FindingTag, error) {
 	var data []model.FindingTag
 	if err := f.SlaveDB.Raw(`select * from finding_tag where finding_id = ?`, findingID).Scan(&data).Error; err != nil {
-		return &data, err
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (f *findingRepository) TagFinding(tag *model.FindingTag) (*model.FindingTag, error) {
+	err := f.MasterDB.Exec(`
+INSERT INTO finding_tag
+	(finding_tag_id, finding_id, tag_key, tag_value)
+VALUES
+	(?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+	tag_value=VALUES(tag_value);
+`,
+		tag.FindingTagID, tag.FindingID, tag.TagKey, tag.TagValue).Error
+	if err != nil {
+		return nil, err
+	}
+	updated, err := f.GetFindingTagByKey(tag.FindingID, tag.TagKey)
+	if err != nil {
+		return nil, err
+	}
+	return updated, err
+}
+
+func (f *findingRepository) GetFindingTagByKey(findingID uint64, tagKey string) (*model.FindingTag, error) {
+	var data model.FindingTag
+	if err := f.SlaveDB.Raw(`select * from finding_tag where finding_id = ? and tag_key = ?`, findingID, tagKey).Error; err != nil {
+		return nil, err
 	}
 	return &data, nil
 }
