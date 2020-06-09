@@ -376,6 +376,42 @@ func TestTagFinding(t *testing.T) {
 }
 
 func TestUntagFinding(t *testing.T) {
+	var ctx context.Context
+	mock := mockFindingRepository{}
+	svc := newFindingService(&mock)
+	cases := []struct {
+		name    string
+		input   *finding.UntagFindingRequest
+		wantErr bool
+		mockErr error
+	}{
+		{
+			name:    "OK",
+			input:   &finding.UntagFindingRequest{FindingTagId: 1001},
+			wantErr: false,
+		},
+		{
+			name:    "NG validation error",
+			input:   &finding.UntagFindingRequest{},
+			wantErr: true,
+		},
+		{
+			name:    "NG DB error",
+			input:   &finding.UntagFindingRequest{FindingTagId: 1001},
+			wantErr: true,
+			mockErr: gorm.ErrCantStartTransaction,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mock.On("UntagFinding").Return(c.mockErr).Once()
+			_, err := svc.UntagFinding(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
 }
 
 func TestListResource(t *testing.T) {
@@ -643,4 +679,9 @@ func (m *mockFindingRepository) TagFinding(*model.FindingTag) (*model.FindingTag
 func (m *mockFindingRepository) GetFindingTagByKey(uint64, string) (*model.FindingTag, error) {
 	args := m.Called()
 	return args.Get(0).(*model.FindingTag), args.Error(1)
+}
+
+func (m *mockFindingRepository) UntagFinding(uint64) error {
+	args := m.Called()
+	return args.Error(0)
 }

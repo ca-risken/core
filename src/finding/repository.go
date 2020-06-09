@@ -22,6 +22,7 @@ type findingRepoInterface interface {
 	ListFindingTag(uint64) (*[]model.FindingTag, error)
 	TagFinding(*model.FindingTag) (*model.FindingTag, error)
 	GetFindingTagByKey(uint64, string) (*model.FindingTag, error)
+	UntagFinding(uint64) error
 }
 
 type findingRepository struct {
@@ -232,4 +233,11 @@ func (f *findingRepository) GetFindingTagByKey(findingID uint64, tagKey string) 
 		return nil, err
 	}
 	return &data, nil
+}
+
+func (f *findingRepository) UntagFinding(findingTagID uint64) error {
+	if err := f.MasterDB.Exec(`delete from finding_tag where finding_tag_id = ?`, findingTagID).Error; err != nil {
+		return err
+	}
+	return nil
 }

@@ -46,5 +46,12 @@ list-finding-tag:
 tag-finding:
 	grpcurl \
 		-plaintext \
-		-d '{"tag": {"finding_id": 1001, "tag_key": "key4", "tag_value": "value"}}' \
+		-d '{"tag": {"finding_tag_id": 1001, "finding_id": 1001, "tag_key": "key", "tag_value": "value"}}' \
 		localhost:8081 core.finding.FindingService.TagFinding
+
+.PHONY: untag-finding
+untag-finding:
+	grpcurl \
+		-plaintext \
+		-d '{"finding_tag_id": 1001}' \
+		localhost:8081 core.finding.FindingService.UntagFinding

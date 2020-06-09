@@ -188,6 +188,11 @@ func (f *findingService) UntagFinding(ctx context.Context, req *finding.UntagFin
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
+	// TODO authz
+	err := f.repository.UntagFinding(req.FindingTagId)
+	if err != nil {
+		return nil, err
+	}
 	return &empty.Empty{}, nil
 }
 
