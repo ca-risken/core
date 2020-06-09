@@ -61,26 +61,3 @@ stop:
 ssh:
 	. env.sh && docker-compose exec gateway sh
 
-####################################################
-## grpcurl example
-####################################################
-grpcurl-list:
-	grpcurl -plaintext localhost:8081 list
-
-grpcurl-fiding-list:
-	grpcurl \
-		-plaintext \
-		-d '{"project_id":["1001","1002"], "from_score":0.0, "to_score":1.0, "from_at": 1560000000, "to_at": 1660000000}' \
-		localhost:8081 core.finding.FindingService.ListFinding
-
-grpcurl-finding-put:
-	grpcurl \
-		-plaintext \
-		-d '{"finding":{"description":"desc", "data_source":"ds", "data_source_id":"ds-001", "resource_name":"rn", "project_id":1001, "original_score":55.51, "original_max_score":100.0, "data":"{\"key\":\"value\"}"}}' \
-		localhost:8081 core.finding.FindingService.PutFinding
-
-grpcurl-finding-delete:
-	grpcurl \
-		-plaintext \
-		-d '{"finding_id": 1004}' \
-		localhost:8081 core.finding.FindingService.DeleteFinding

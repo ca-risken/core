@@ -19,6 +19,7 @@ type findingRepoInterface interface {
 	UpsertResource(*model.Resource) (*model.Resource, error)
 	GetResourceByName(uint32, string) (*model.Resource, error)
 	DeleteFinding(uint64) error
+	ListFindingTag(uint64) (*[]model.FindingTag, error)
 }
 
 type findingRepository struct {
@@ -106,19 +107,19 @@ where
 		params = append(params, req.ResourceName)
 	}
 
-	var result []findingIds
-	if scan := f.SlaveDB.Raw(query, params...).Scan(&result); scan.Error != nil {
-		return nil, scan.Error
+	var data []findingIds
+	if err := f.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
 	}
-	return &result, nil
+	return &data, nil
 }
 
 func (f *findingRepository) GetFinding(findingID uint64) (*model.Finding, error) {
-	var result model.Finding
-	if scan := f.SlaveDB.Raw("select * from finding where finding_id = ?", findingID).Scan(&result); scan.Error != nil {
-		return nil, scan.Error
+	var data model.Finding
+	if err := f.SlaveDB.Raw(`select * from finding where finding_id = ?`, findingID).Scan(&data).Error; err != nil {
+		return nil, err
 	}
-	return &result, nil
+	return &data, nil
 }
 
 func (f *findingRepository) UpsertFinding(data *model.Finding) (*model.Finding, error) {
@@ -150,9 +151,9 @@ ON DUPLICATE KEY UPDATE
 
 func (f *findingRepository) GetFindingByDataSource(projectID uint32, dataSource, dataSourceID string) (*model.Finding, error) {
 	var result model.Finding
-	if scan := f.SlaveDB.Raw("select * from finding where project_id = ? and data_source = ? and data_source_id = ?",
-		projectID, dataSource, dataSourceID).First(&result); scan.Error != nil {
-		return nil, scan.Error
+	if err := f.SlaveDB.Raw(`select * from finding where project_id = ? and data_source = ? and data_source_id = ?`,
+		projectID, dataSource, dataSourceID).First(&result).Error; err != nil {
+		return nil, err
 	}
 	return &result, nil
 }
@@ -180,12 +181,12 @@ ON DUPLICATE KEY UPDATE
 }
 
 func (f *findingRepository) GetResourceByName(projectID uint32, resourceName string) (*model.Resource, error) {
-	var result model.Resource
-	if scan := f.SlaveDB.Raw("select * from resource where project_id = ? and resource_name = ?",
-		projectID, resourceName).First(&result); scan.Error != nil {
+	var data model.Resource
+	if scan := f.SlaveDB.Raw(`select * from resource where project_id = ? and resource_name = ?`,
+		projectID, resourceName).First(&data); scan.Error != nil {
 		return nil, scan.Error
 	}
-	return &result, nil
+	return &data, nil
 }
 
 func (f *findingRepository) DeleteFinding(findingID uint64) error {
@@ -193,4 +194,12 @@ func (f *findingRepository) DeleteFinding(findingID uint64) error {
 		return err
 	}
 	return nil
+}
+
+func (f *findingRepository) ListFindingTag(findingID uint64) (*[]model.FindingTag, error) {
+	var data []model.FindingTag
+	if err := f.SlaveDB.Raw(`select * from finding_tag where finding_id = ?`, findingID).Scan(&data).Error; err != nil {
+		return &data, err
+	}
+	return &data, nil
 }

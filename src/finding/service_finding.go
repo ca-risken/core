@@ -13,15 +13,16 @@ import (
 )
 
 func (f *findingService) ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*finding.ListFindingResponse, error) {
+	resp := finding.ListFindingResponse{}
 	if err := req.Validate(); err != nil {
-		return nil, err
+		return &resp, err
 	}
 	list, err := f.repository.ListFinding(convertListFindingRequest(req))
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			return &finding.ListFindingResponse{}, nil
+			return &resp, nil
 		}
-		return nil, err
+		return &resp, err
 	}
 
 	// TODO authz
@@ -29,7 +30,8 @@ func (f *findingService) ListFinding(ctx context.Context, req *finding.ListFindi
 	for _, id := range *list {
 		ids = append(ids, uint64(id.FindingID))
 	}
-	return &finding.ListFindingResponse{FindingId: ids}, nil
+	resp.FindingId = ids
+	return &resp, nil
 }
 
 func convertListFindingRequest(req *finding.ListFindingRequest) *finding.ListFindingRequest {
@@ -52,37 +54,40 @@ func convertListFindingRequest(req *finding.ListFindingRequest) *finding.ListFin
 }
 
 func (f *findingService) GetFinding(ctx context.Context, req *finding.GetFindingRequest) (*finding.GetFindingResponse, error) {
+	resp := finding.GetFindingResponse{}
 	if err := req.Validate(); err != nil {
-		return nil, err
+		return &resp, err
 	}
 
 	// TODO authz
 	data, err := f.repository.GetFinding(req.FindingId)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			return &finding.GetFindingResponse{}, nil
+			return &resp, nil
 		}
-		return nil, err
+		return &resp, err
 	}
-	return &finding.GetFindingResponse{Finding: convertFinding(data)}, nil
+	resp.Finding = convertFinding(data)
+	return &resp, nil
 }
 
 func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFindingRequest) (*finding.PutFindingResponse, error) {
+	resp := finding.PutFindingResponse{}
 	if err := req.Finding.Validate(); err != nil {
-		return nil, err
+		return &resp, err
 	}
 
 	savedData, err := f.repository.GetFindingByDataSource(
 		req.Finding.ProjectId, req.Finding.DataSource, req.Finding.DataSourceId)
 	noRecord := gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
-		return nil, err
+		return &resp, err
 	}
 
 	var findingID uint64
 	if !noRecord {
 		if req.Finding.FindingId != 0 && req.Finding.FindingId != savedData.FindingID {
-			return nil, fmt.Errorf("Invalid finding_id, want=%d, got=%d", savedData.FindingID, req.Finding.FindingId)
+			return &resp, fmt.Errorf("Invalid finding_id, want=%d, got=%d", savedData.FindingID, req.Finding.FindingId)
 		}
 		findingID = savedData.FindingID
 	}
@@ -102,7 +107,7 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 			Data:          req.Finding.Data,
 		})
 	if err != nil {
-		return nil, err
+		return &resp, err
 	}
 
 	// Resource
@@ -113,43 +118,69 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 		},
 	})
 	if err != nil {
-		return nil, err
+		return &resp, err
 	}
-	return &finding.PutFindingResponse{Finding: convertFinding(registerdData)}, nil
+	resp.Finding = convertFinding(registerdData)
+	return &resp, nil
 }
 
 func (f *findingService) DeleteFinding(ctx context.Context, req *finding.DeleteFindingRequest) (*empty.Empty, error) {
+	resp := empty.Empty{}
 	if err := req.Validate(); err != nil {
-		return &empty.Empty{}, err
+		return &resp, err
 	}
 
 	// TODO authz
 	err := f.repository.DeleteFinding(req.FindingId)
 	if err != nil {
-		return nil, err
+		return &resp, err
 	}
-	return &empty.Empty{}, nil
+	return &resp, nil
 }
 
 func (f *findingService) ListFindingTag(ctx context.Context, req *finding.ListFindingTagRequest) (*finding.ListFindingTagResponse, error) {
+	resp := finding.ListFindingTagResponse{}
 	if err := req.Validate(); err != nil {
-		return nil, err
+		return &resp, err
 	}
-	return nil, nil
+
+	// TODO authz
+	list, err := f.repository.ListFindingTag(req.FindingId)
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return &resp, nil
+		}
+		return &resp, err
+	}
+	var tags []*finding.FindingTag
+	for _, tag := range *list {
+		tags = append(tags, &finding.FindingTag{
+			FindingTagId: tag.FindingTagID,
+			FindingId:    tag.FindingID,
+			TagKey:       tag.TagKey,
+			TagValue:     tag.TagValue,
+			CreatedAt:    tag.CreatedAt.Unix(),
+			UpdatedAt:    tag.UpdatedAt.Unix(),
+		})
+	}
+	resp.Tag = tags
+	return &resp, nil
 }
 
 func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFindingRequest) (*finding.TagFindingResponse, error) {
+	resp := finding.TagFindingResponse{}
 	if err := req.Validate(); err != nil {
-		return nil, err
+		return &resp, err
 	}
-	return nil, nil
+	return &resp, nil
 }
 
 func (f *findingService) UntagFinding(ctx context.Context, req *finding.UntagFindingRequest) (*empty.Empty, error) {
+	resp := empty.Empty{}
 	if err := req.Validate(); err != nil {
-		return &empty.Empty{}, err
+		return &resp, err
 	}
-	return &empty.Empty{}, nil
+	return &resp, nil
 }
 
 func convertFinding(f *model.Finding) *finding.Finding {
