@@ -12,17 +12,21 @@ import (
 )
 
 type findingRepoInterface interface {
+	// Finding
 	ListFinding(*finding.ListFindingRequest) (*[]findingIds, error)
 	GetFinding(uint64) (*model.Finding, error)
 	UpsertFinding(*model.Finding) (*model.Finding, error)
 	GetFindingByDataSource(uint32, string, string) (*model.Finding, error)
-	UpsertResource(*model.Resource) (*model.Resource, error)
 	GetResourceByName(uint32, string) (*model.Resource, error)
 	DeleteFinding(uint64) error
 	ListFindingTag(uint64) (*[]model.FindingTag, error)
 	TagFinding(*model.FindingTag) (*model.FindingTag, error)
 	GetFindingTagByKey(uint64, string) (*model.FindingTag, error)
 	UntagFinding(uint64) error
+
+	// Resource
+	ListResource(*finding.ListResourceRequest) (*[]resourceIds, error)
+	UpsertResource(*model.Resource) (*model.Resource, error)
 }
 
 type findingRepository struct {
@@ -240,4 +244,38 @@ func (f *findingRepository) UntagFinding(findingTagID uint64) error {
 		return err
 	}
 	return nil
+}
+
+type resourceIds struct {
+	ResourceID uint64 `gorm:"column:resource_id"`
+}
+
+func (f *findingRepository) ListResource(req *finding.ListResourceRequest) (*[]resourceIds, error) {
+	query := `
+select 
+  r.resource_id
+from
+  resource r
+  inner join finding f using(resource_name)
+where
+	r.updated_at between ? and ?
+`
+	var params []interface{}
+	params = append(params, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
+	if len(req.ProjectId) != 0 {
+		query += " and r.project_id in (?)"
+		params = append(params, req.ProjectId)
+	}
+	if len(req.ResourceName) != 0 {
+		query += " and r.resource_name in (?)"
+		params = append(params, req.ResourceName)
+	}
+	query += " group by r.resource_id having sum(f.Score) between ? and ?"
+	params = append(params, req.FromSumScore, req.ToSumScore)
+
+	var data []resourceIds
+	if err := f.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
 }

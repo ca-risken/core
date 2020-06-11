@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
@@ -10,11 +11,46 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+const (
+	maxSumScore = 999999.9
+)
+
 func (f *findingService) ListResource(ctx context.Context, req *finding.ListResourceRequest) (*finding.ListResourceResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	return nil, nil
+	list, err := f.repository.ListResource(convertListResourceRequest(req))
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return &finding.ListResourceResponse{}, nil
+		}
+		return nil, err
+	}
+
+	// TODO authz
+	var ids []uint64
+	for _, id := range *list {
+		ids = append(ids, uint64(id.ResourceID))
+	}
+	return &finding.ListResourceResponse{ResourceId: ids}, nil
+}
+
+func convertListResourceRequest(req *finding.ListResourceRequest) *finding.ListResourceRequest {
+	converted := finding.ListResourceRequest{
+		ProjectId:    req.ProjectId,
+		ResourceName: req.ResourceName,
+		FromSumScore: req.FromSumScore,
+		ToSumScore:   req.ToSumScore,
+		FromAt:       req.FromAt,
+		ToAt:         req.ToAt,
+	}
+	if converted.ToSumScore == 0 {
+		converted.ToSumScore = maxSumScore
+	}
+	if converted.ToAt == 0 {
+		converted.ToAt = time.Now().Unix()
+	}
+	return &converted
 }
 
 func (f *findingService) GetResource(ctx context.Context, req *finding.GetResourceRequest) (*finding.GetResourceResponse, error) {

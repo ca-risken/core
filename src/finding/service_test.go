@@ -112,7 +112,7 @@ func TestGetFinding(t *testing.T) {
 			mock.On("GetFinding").Return(c.mockResponce, c.mockError).Once()
 			result, err := svc.GetFinding(ctx, c.input)
 			if err != nil {
-				t.Fatalf("unexpected error: %+v", err)
+				t.Fatalf("Unexpected error: %+v", err)
 			}
 			if !reflect.DeepEqual(result, c.want) {
 				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
@@ -191,7 +191,7 @@ func TestPutFinding(t *testing.T) {
 
 			got, err := svc.PutFinding(ctx, c.input)
 			if err != nil && !c.wantErr {
-				t.Fatalf("unexpected error: %+v", err)
+				t.Fatalf("Unexpected error: %+v", err)
 			}
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
@@ -366,7 +366,7 @@ func TestTagFinding(t *testing.T) {
 			}
 			got, err := svc.TagFinding(ctx, c.input)
 			if err != nil && !c.wantErr {
-				t.Fatalf("unexpected error: %+v", err)
+				t.Fatalf("Unexpected error: %+v", err)
 			}
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
@@ -415,6 +415,85 @@ func TestUntagFinding(t *testing.T) {
 }
 
 func TestListResource(t *testing.T) {
+	var ctx context.Context
+	now := time.Now()
+	mock := mockFindingRepository{}
+	svc := newFindingService(&mock)
+	cases := []struct {
+		name     string
+		input    *finding.ListResourceRequest
+		want     *finding.ListResourceResponse
+		wantErr  bool
+		mockResp *[]resourceIds
+		mockErr  error
+	}{
+		{
+			name:     "OK",
+			input:    &finding.ListResourceRequest{ProjectId: []uint32{111}, ResourceName: []string{"rn"}, FromSumScore: 0.0, ToSumScore: 100.0, FromAt: now.Unix(), ToAt: now.Unix()},
+			want:     &finding.ListResourceResponse{ResourceId: []uint64{1001, 1002}},
+			mockResp: &[]resourceIds{{ResourceID: 1001}, {ResourceID: 1002}},
+		},
+		{
+			name:    "OK Not found",
+			input:   &finding.ListResourceRequest{},
+			want:    &finding.ListResourceResponse{},
+			mockErr: gorm.ErrRecordNotFound,
+		},
+		{
+			name:    "NG Invalid request",
+			input:   &finding.ListResourceRequest{FromSumScore: -0.1},
+			wantErr: true,
+		},
+		{
+			name:    "NG DB error",
+			input:   &finding.ListResourceRequest{},
+			wantErr: true,
+			mockErr: gorm.ErrUnaddressable,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if c.mockResp != nil || c.mockErr != nil {
+				mock.On("ListResource").Return(c.mockResp, c.mockErr).Once()
+			}
+			got, err := svc.ListResource(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestConvertListResourceRequest(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name  string
+		input *finding.ListResourceRequest
+		want  *finding.ListResourceRequest
+	}{
+		{
+			name:  "OK full-set",
+			input: &finding.ListResourceRequest{ProjectId: []uint32{111, 222}, ResourceName: []string{"rn"}, FromSumScore: 0.3, ToSumScore: 0.9, FromAt: now.Unix(), ToAt: now.Unix()},
+			want:  &finding.ListResourceRequest{ProjectId: []uint32{111, 222}, ResourceName: []string{"rn"}, FromSumScore: 0.3, ToSumScore: 0.9, FromAt: now.Unix(), ToAt: now.Unix()},
+		},
+		{
+			name:  "OK convert ToSumScore",
+			input: &finding.ListResourceRequest{ToAt: now.Unix()},
+			want:  &finding.ListResourceRequest{ToSumScore: maxSumScore, ToAt: now.Unix()},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := convertListResourceRequest(c.input)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected convert: got=%+v, want: %+v", got, c.want)
+			}
+		})
+	}
 }
 
 func TestGetResource(t *testing.T) {
@@ -651,16 +730,6 @@ func (m *mockFindingRepository) GetFindingByDataSource(uint32, string, string) (
 	return args.Get(0).(*model.Finding), args.Error(1)
 }
 
-func (m *mockFindingRepository) UpsertResource(*model.Resource) (*model.Resource, error) {
-	args := m.Called()
-	return args.Get(0).(*model.Resource), args.Error(1)
-}
-
-func (m *mockFindingRepository) GetResourceByName(uint32, string) (*model.Resource, error) {
-	args := m.Called()
-	return args.Get(0).(*model.Resource), args.Error(1)
-}
-
 func (m *mockFindingRepository) DeleteFinding(uint64) error {
 	args := m.Called()
 	return args.Error(0)
@@ -684,4 +753,19 @@ func (m *mockFindingRepository) GetFindingTagByKey(uint64, string) (*model.Findi
 func (m *mockFindingRepository) UntagFinding(uint64) error {
 	args := m.Called()
 	return args.Error(0)
+}
+
+func (m *mockFindingRepository) ListResource(*finding.ListResourceRequest) (*[]resourceIds, error) {
+	args := m.Called()
+	return args.Get(0).(*[]resourceIds), args.Error(1)
+}
+
+func (m *mockFindingRepository) UpsertResource(*model.Resource) (*model.Resource, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Resource), args.Error(1)
+}
+
+func (m *mockFindingRepository) GetResourceByName(uint32, string) (*model.Resource, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Resource), args.Error(1)
 }

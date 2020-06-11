@@ -7,7 +7,7 @@ all: help
 .PHONY: help
 help:
 	@echo "Usage: make <sub-command>"
-	@echo "---------------- command list ----------------"
+	@echo "\n---------------- sub-command list ----------------"
 	@cat Makefile | grep -e "^.PHONY:" | grep -v "all" | cut -f2 -d' '
 
 .PHONY: service-list
@@ -55,3 +55,10 @@ untag-finding:
 		-plaintext \
 		-d '{"finding_tag_id": 1001}' \
 		localhost:8081 core.finding.FindingService.UntagFinding
+
+.PHONY: list-resource
+list-resource:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":["1001","1002"], "resource_name":["rn"], "from_sum_score":0.0, "to_sum_score":999.9, "from_at": 1560000000, "to_at": 1660000000}' \
+		localhost:8081 core.finding.FindingService.ListResource
