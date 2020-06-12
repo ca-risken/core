@@ -93,11 +93,11 @@ Finding
 
 ### FindingForUpsert
 Finding For Upsert
+(Unique keys: project_id, data_source, data_source_id)
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| finding_id | [uint64](#uint64) |  |  |
 | description | [string](#string) |  |  |
 | data_source | [string](#string) |  |  |
 | data_source_id | [string](#string) |  |  |
@@ -136,11 +136,11 @@ FindingTag
 
 ### FindingTagForUpsert
 FindingTag For Upsert
+(Unique keys: finding_id, tag_key)
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| finding_tag_id | [uint64](#uint64) |  |  |
 | finding_id | [uint64](#uint64) |  |  |
 | tag_key | [string](#string) |  |  |
 | tag_value | [string](#string) |  |  |
@@ -173,11 +173,11 @@ Resource
 
 ### ResourceForUpsert
 Resource For upsert
+(Unique keys: project_id, resource_name)
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| resource_id | [uint64](#uint64) |  |  |
 | resource_name | [string](#string) |  |  |
 | project_id | [uint32](#uint32) |  |  |
 
@@ -210,11 +210,11 @@ ResourceTag
 
 ### ResourceTagForUpsert
 ResourceTag For upsert
+(Unique keys: resource_id, tag_key)
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| resource_tag_id | [uint64](#uint64) |  |  |
 | resource_id | [uint64](#uint64) |  |  |
 | tag_key | [string](#string) |  |  |
 | tag_value | [string](#string) |  |  |
