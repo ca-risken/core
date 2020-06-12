@@ -103,6 +103,12 @@ func (f *findingService) DeleteResource(ctx context.Context, req *finding.Delete
 	if err := req.Validate(); err != nil {
 		return &empty.Empty{}, err
 	}
+
+	// TODO authz
+	err := f.repository.DeleteResource(req.ResourceId)
+	if err != nil {
+		return nil, err
+	}
 	return &empty.Empty{}, nil
 }
 

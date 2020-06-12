@@ -595,6 +595,42 @@ func TestPutResource(t *testing.T) {
 }
 
 func TestDeleteResource(t *testing.T) {
+	var ctx context.Context
+	mock := mockFindingRepository{}
+	svc := newFindingService(&mock)
+
+	cases := []struct {
+		name    string
+		input   *finding.DeleteResourceRequest
+		wantErr bool
+		mockErr error
+	}{
+		{
+			name:    "OK",
+			input:   &finding.DeleteResourceRequest{ResourceId: 1001},
+			wantErr: false,
+		},
+		{
+			name:    "NG validation error",
+			input:   &finding.DeleteResourceRequest{},
+			wantErr: true,
+		},
+		{
+			name:    "NG DB error",
+			input:   &finding.DeleteResourceRequest{ResourceId: 1001},
+			wantErr: true,
+			mockErr: gorm.ErrCantStartTransaction,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mock.On("DeleteResource").Return(c.mockErr).Once()
+			_, err := svc.DeleteResource(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
 }
 
 func TestListResourceTag(t *testing.T) {
@@ -792,4 +828,9 @@ func (m *mockFindingRepository) GetResourceByName(uint32, string) (*model.Resour
 func (m *mockFindingRepository) GetResource(uint64) (*model.Resource, error) {
 	args := m.Called()
 	return args.Get(0).(*model.Resource), args.Error(1)
+}
+
+func (m *mockFindingRepository) DeleteResource(uint64) error {
+	args := m.Called()
+	return args.Error(0)
 }

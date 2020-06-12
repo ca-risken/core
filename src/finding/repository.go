@@ -28,6 +28,7 @@ type findingRepoInterface interface {
 	ListResource(*finding.ListResourceRequest) (*[]resourceIds, error)
 	UpsertResource(*model.Resource) (*model.Resource, error)
 	GetResource(uint64) (*model.Resource, error)
+	DeleteResource(uint64) error
 }
 
 type findingRepository struct {
@@ -287,4 +288,11 @@ func (f *findingRepository) GetResource(resourceID uint64) (*model.Resource, err
 		return nil, err
 	}
 	return &data, nil
+}
+
+func (f *findingRepository) DeleteResource(resourceID uint64) error {
+	if err := f.MasterDB.Exec(`delete from resource where resource_id = ?`, resourceID).Error; err != nil {
+		return err
+	}
+	return nil
 }
