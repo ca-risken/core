@@ -62,6 +62,17 @@ func mappingPutFindingRequest(r *http.Request) *finding.PutFindingRequest {
 	}
 }
 
+func mappingDeleteFindingRequest(r *http.Request) *finding.DeleteFindingRequest {
+	param := finding.DeleteFindingRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
+		appLogger.Warnf("Invalid parameter in DeleteFindingRequest, err: %+v", err)
+		return &finding.DeleteFindingRequest{}
+	}
+	return &finding.DeleteFindingRequest{
+		FindingId: param.FindingId,
+	}
+}
+
 func commaSeparatorID(param string) []uint32 {
 	separated := []uint32{}
 	for _, p := range strings.Split(param, ",") {

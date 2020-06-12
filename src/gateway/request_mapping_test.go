@@ -134,6 +134,34 @@ func TestMappintgPutFinding(t *testing.T) {
 	}
 }
 
+func TestMappintgDeleteFinding(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  *finding.DeleteFindingRequest
+	}{
+		{
+			name:  "OK",
+			input: `{"finding_id":1001}`,
+			want:  &finding.DeleteFindingRequest{FindingId: 1001},
+		},
+		{
+			name:  "parse error",
+			input: "xxxxxxxx",
+			want:  &finding.DeleteFindingRequest{},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			req, _ := http.NewRequest("POST", "/finding/delete", strings.NewReader(c.input))
+			got := mappingDeleteFindingRequest(req)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
 func TestCommaSeparatorID(t *testing.T) {
 	cases := []struct {
 		name  string

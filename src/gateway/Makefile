@@ -12,24 +12,22 @@ help:
 
 .PHONY: list-finding
 list-finding:
-	curl -s \
+	curl -is -XGET \
 		http://localhost:8080/finding?project_id=1001,1002
 
 .PHONY: get-finding
 get-finding:
-	curl -s \
+	curl -is -XGET \
 		http://localhost:8080/finding/1001/
 
 .PHONY: put-finding
 put-finding:
-	curl -s \
-		-H 'Content-Type: application/json' \
-		-d '{"description":"desc", "data_source":"ds", "data_source_id":"ds-004", "resource_name":"rn", "project_id":1001, "original_score":55.51, "original_max_score":100.0, "data":"{\"key\":\"value\"}"}' \
+	curl -is -XPOST -H 'Content-Type: application/json' \
+		--data '{"description":"desc", "data_source":"ds", "data_source_id":"ds-004", "resource_name":"rn", "project_id":1001, "original_score":55.51, "original_max_score":100.0, "data":"{\"key\":\"value\"}"}' \
 		http://localhost:8080/finding/put/
 
-.PHONY: put-finding2
-put-finding2:
-	curl -s \
-		-H 'Content-Type: application/json' \
-		-d '{"description":"desc", "data_source":"ds", "data_source_id":"ds-004", "resource_name":"rn", "project_id":1001, "original_score":55.51, "original_max_score":100.0, "data":"{\"key\":\"value\"}"' \
-		http://localhost:8080/finding/put/
+.PHONY: delete-finding
+delete-finding:
+	curl -is -XPOST -H 'Content-Type: application/json' \
+		--data '{"finding_id":1008}' \
+		http://localhost:8080/finding/delete/
