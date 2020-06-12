@@ -31,3 +31,8 @@ delete-finding:
 	curl -is -XPOST -H 'Content-Type: application/json' \
 		--data '{"finding_id":1008}' \
 		http://localhost:8080/finding/delete/
+
+.PHONY: list-finding-tag
+list-finding-tag:
+	curl -is -XGET \
+		http://localhost:8080/finding/1001/tag/

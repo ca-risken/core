@@ -162,6 +162,38 @@ func TestMappintgDeleteFinding(t *testing.T) {
 	}
 }
 
+func TestMappingListFindingTagRequest(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  *finding.ListFindingTagRequest
+	}{
+		{
+			name:  "OK",
+			input: `1001`,
+			want:  &finding.ListFindingTagRequest{FindingId: 1001},
+		},
+		{
+			name:  "parse error",
+			input: "xxx",
+			want:  &finding.ListFindingTagRequest{},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			req, _ := http.NewRequest("POST", "/finding/"+c.input+"/tag", strings.NewReader(c.input))
+			// Requestにパスパラメータ{finding_id}を登録
+			rctx := chi.NewRouteContext()
+			rctx.URLParams.Add("finding_id", c.input)
+			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+			got := mappingListFindingTagRequest(req)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
 func TestCommaSeparatorID(t *testing.T) {
 	cases := []struct {
 		name  string

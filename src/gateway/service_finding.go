@@ -70,9 +70,19 @@ func (g *gatewayService) deleteFindingHandler(w http.ResponseWriter, r *http.Req
 	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
 }
 
-// func (g *gatewayService) listFindingTagHandler(w http.ResponseWriter, r *http.Request) {
-// 	req := mappingListFindingTagRequest(r)
-// }
+func (g *gatewayService) listFindingTagHandler(w http.ResponseWriter, r *http.Request) {
+	req := mappingListFindingTagRequest(r)
+	if err := req.Validate(); err != nil {
+		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).ListFindingTag(r.Context(), req)
+	if err != nil {
+		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
+}
 
 // func (g *gatewayService) tagFindingHandler(w http.ResponseWriter, r *http.Request) {
 // 	req := mappingTagFindingRequest(r)

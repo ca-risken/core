@@ -73,6 +73,12 @@ func mappingDeleteFindingRequest(r *http.Request) *finding.DeleteFindingRequest 
 	}
 }
 
+func mappingListFindingTagRequest(r *http.Request) *finding.ListFindingTagRequest {
+	return &finding.ListFindingTagRequest{
+		FindingId: parseUint64(chi.URLParam(r, "finding_id")),
+	}
+}
+
 func commaSeparatorID(param string) []uint32 {
 	separated := []uint32{}
 	for _, p := range strings.Split(param, ",") {
