@@ -57,7 +57,16 @@ func (f *findingService) GetResource(ctx context.Context, req *finding.GetResour
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	return nil, nil
+
+	// TODO authz
+	data, err := f.repository.GetResource(req.ResourceId)
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return &finding.GetResourceResponse{}, nil
+		}
+		return nil, err
+	}
+	return &finding.GetResourceResponse{Resource: convertResource(data)}, nil
 }
 
 func (f *findingService) PutResource(ctx context.Context, req *finding.PutResourceRequest) (*finding.PutResourceResponse, error) {

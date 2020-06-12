@@ -27,6 +27,7 @@ type findingRepoInterface interface {
 	// Resource
 	ListResource(*finding.ListResourceRequest) (*[]resourceIds, error)
 	UpsertResource(*model.Resource) (*model.Resource, error)
+	GetResource(uint64) (*model.Resource, error)
 }
 
 type findingRepository struct {
@@ -275,6 +276,14 @@ where
 
 	var data []resourceIds
 	if err := f.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (f *findingRepository) GetResource(resourceID uint64) (*model.Resource, error) {
+	var data model.Resource
+	if err := f.SlaveDB.Raw(`select * from resource where resource_id = ?`, resourceID).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

@@ -769,3 +769,8 @@ func (m *mockFindingRepository) GetResourceByName(uint32, string) (*model.Resour
 	args := m.Called()
 	return args.Get(0).(*model.Resource), args.Error(1)
 }
+
+func (m *mockFindingRepository) GetResource(uint64) (*model.Resource, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Resource), args.Error(1)
+}
