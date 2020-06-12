@@ -62,3 +62,10 @@ list-resource:
 		-plaintext \
 		-d '{"project_id":["1001","1002"], "resource_name":["rn"], "from_sum_score":0.0, "to_sum_score":999.9, "from_at": 1560000000, "to_at": 1660000000}' \
 		localhost:8081 core.finding.FindingService.ListResource
+
+.PHONY: get-resource
+get-resource:
+	grpcurl \
+		-plaintext \
+		-d '{"resource_id": 1001}' \
+		localhost:8081 core.finding.FindingService.GetResource

@@ -497,6 +497,43 @@ func TestConvertListResourceRequest(t *testing.T) {
 }
 
 func TestGetResource(t *testing.T) {
+	var ctx context.Context
+	now := time.Now()
+	mock := mockFindingRepository{}
+	svc := newFindingService(&mock)
+	cases := []struct {
+		name         string
+		input        *finding.GetResourceRequest
+		want         *finding.GetResourceResponse
+		mockResponce *model.Resource
+		mockError    error
+	}{
+		{
+			name:         "OK",
+			input:        &finding.GetResourceRequest{ResourceId: 1001},
+			want:         &finding.GetResourceResponse{Resource: &finding.Resource{ResourceId: 1001, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockResponce: &model.Resource{ResourceID: 1001, CreatedAt: now, UpdatedAt: now},
+		},
+		{
+			name:      "NG Record not found",
+			input:     &finding.GetResourceRequest{ResourceId: 9999},
+			want:      &finding.GetResourceResponse{},
+			mockError: gorm.ErrRecordNotFound,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mock.On("GetResource").Return(c.mockResponce, c.mockError).Once()
+			result, err := svc.GetResource(ctx, c.input)
+			if err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(result, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
+			}
+		})
+	}
 }
 
 func TestPutResource(t *testing.T) {
