@@ -344,82 +344,82 @@ func TestValidate_FindingForUpsert(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: false,
 		},
 		{
 			name:    "NG too long Description",
-			input:   FindingForUpsert{FindingId: 1001, Description: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=1", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   FindingForUpsert{Description: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=1", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG required DataSource",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   FindingForUpsert{Description: "desc", DataSource: "", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG too long DataSource",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "12345678901234567890123456789012345678901234567890123456789012345", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   FindingForUpsert{Description: "desc", DataSource: "12345678901234567890123456789012345678901234567890123456789012345", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG required DataSourceId",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG too long DataSourceId",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=01234567890123456789012345678901234567890123456789123456", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=01234567890123456789012345678901234567890123456789123456", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG required resource name",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG too long resource name",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG nil OriginalScore",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG too small OriginalScore",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: -0.1, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: -0.1, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG OriginalScore bigger than OriginalMaxScore",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 100.01, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 100.01, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG nil OriginalMaxScore",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, Data: `{"key": "value"}`},
+			input:   FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG too small OriginalMaxScore",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: -0.01, Data: `{"key": "value"}`},
+			input:   FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: -0.01, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG too big OriginalMaxScore",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 999.991, Data: `{"key": "value"}`},
+			input:   FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 999.991, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG invalid json Data",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"`},
+			input:   FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"`},
 			wantErr: true,
 		},
 		{
 			name:    "NG invalid json Data2",
-			input:   FindingForUpsert{FindingId: 1001, Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{key: value}`},
+			input:   FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{key: value}`},
 			wantErr: true,
 		},
 	}
@@ -443,27 +443,27 @@ func TestValidate_FindingTagForUpsert(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   FindingTagForUpsert{FindingTagId: 1001001, FindingId: 1001, TagKey: "key", TagValue: "value"},
+			input:   FindingTagForUpsert{FindingId: 1001, TagKey: "key", TagValue: "value"},
 			wantErr: false,
 		},
 		{
 			name:    "NG required FindingId",
-			input:   FindingTagForUpsert{FindingTagId: 1001001, FindingId: 0, TagKey: "key", TagValue: "value"},
+			input:   FindingTagForUpsert{FindingId: 0, TagKey: "key", TagValue: "value"},
 			wantErr: true,
 		},
 		{
 			name:    "NG required TagKey",
-			input:   FindingTagForUpsert{FindingTagId: 1001001, FindingId: 1001, TagKey: "", TagValue: "value"},
+			input:   FindingTagForUpsert{FindingId: 1001, TagKey: "", TagValue: "value"},
 			wantErr: true,
 		},
 		{
 			name:    "NG too long TagKey",
-			input:   FindingTagForUpsert{FindingTagId: 1001001, FindingId: 1001, TagKey: "12345678901234567890123456789012345678901234567890123456789012345", TagValue: "value"},
+			input:   FindingTagForUpsert{FindingId: 1001, TagKey: "12345678901234567890123456789012345678901234567890123456789012345", TagValue: "value"},
 			wantErr: true,
 		},
 		{
 			name:    "NG too long TagValue",
-			input:   FindingTagForUpsert{FindingTagId: 1001001, FindingId: 1001, TagKey: "key", TagValue: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=1"},
+			input:   FindingTagForUpsert{FindingId: 1001, TagKey: "key", TagValue: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=1"},
 			wantErr: true,
 		},
 	}
@@ -487,12 +487,12 @@ func TestValidate_ResourceForUpsert(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   ResourceForUpsert{ResourceId: 1001, ResourceName: "rn", ProjectId: 1001},
+			input:   ResourceForUpsert{ResourceName: "rn", ProjectId: 1001},
 			wantErr: false,
 		},
 		{
 			name:    "NG required ResourceName",
-			input:   ResourceForUpsert{ResourceId: 1001, ResourceName: "", ProjectId: 1001},
+			input:   ResourceForUpsert{ResourceName: "", ProjectId: 1001},
 			wantErr: true,
 		},
 	}
@@ -516,27 +516,27 @@ func TestValidate_ResourceTagForUpsert(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   ResourceTagForUpsert{ResourceTagId: 1001001, ResourceId: 1001, TagKey: "key", TagValue: "value"},
+			input:   ResourceTagForUpsert{ResourceId: 1001, TagKey: "key", TagValue: "value"},
 			wantErr: false,
 		},
 		{
 			name:    "NG required FindingId",
-			input:   ResourceTagForUpsert{ResourceTagId: 1001001, ResourceId: 0, TagKey: "key", TagValue: "value"},
+			input:   ResourceTagForUpsert{ResourceId: 0, TagKey: "key", TagValue: "value"},
 			wantErr: true,
 		},
 		{
 			name:    "NG required TagKey",
-			input:   ResourceTagForUpsert{ResourceTagId: 1001001, ResourceId: 1001, TagKey: "", TagValue: "value"},
+			input:   ResourceTagForUpsert{ResourceId: 1001, TagKey: "", TagValue: "value"},
 			wantErr: true,
 		},
 		{
 			name:    "NG too long TagKey",
-			input:   ResourceTagForUpsert{ResourceTagId: 1001001, ResourceId: 1001, TagKey: "12345678901234567890123456789012345678901234567890123456789012345", TagValue: "value"},
+			input:   ResourceTagForUpsert{ResourceId: 1001, TagKey: "12345678901234567890123456789012345678901234567890123456789012345", TagValue: "value"},
 			wantErr: true,
 		},
 		{
 			name:    "NG too long TagValue",
-			input:   ResourceTagForUpsert{ResourceTagId: 1001001, ResourceId: 1001, TagKey: "key", TagValue: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=1"},
+			input:   ResourceTagForUpsert{ResourceId: 1001, TagKey: "key", TagValue: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=1"},
 			wantErr: true,
 		},
 	}
