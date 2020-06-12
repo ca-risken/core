@@ -36,3 +36,9 @@ delete-finding:
 list-finding-tag:
 	curl -is -XGET \
 		http://localhost:8080/finding/1001/tag/
+
+.PHONY: tag-finding
+tag-finding:
+	curl -is -XPOST -H 'Content-Type: application/json' \
+		--data '{"finding_id":1001, "tag_key":"test", "tag_value":"true"}' \
+		http://localhost:8080/finding/tag/

@@ -37,6 +37,7 @@ func main() {
 	r.Post("/finding/put", svc.putFindingHandler)
 	r.Post("/finding/delete", svc.deleteFindingHandler)
 	r.Get("/finding/{finding_id}/tag", svc.listFindingTagHandler)
+	r.Post("/finding/tag", svc.tagFindingHandler)
 
 	appLogger.Infof("starting http server at :%s", conf.Port)
 	err = http.ListenAndServe(":"+conf.Port, r)
