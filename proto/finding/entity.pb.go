@@ -161,8 +161,8 @@ func (x *Finding) GetUpdatedAt() int64 {
 	return 0
 }
 
-// Finding For Upsert（project_id, data_source,
-// data_source_idの複合キーでユニークになります）
+// Finding For Upsert
+// (Unique keys: project_id, data_source, data_source_id)
 type FindingForUpsert struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -354,7 +354,8 @@ func (x *FindingTag) GetUpdatedAt() int64 {
 	return 0
 }
 
-// FindingTag For Upsert（finding_id, tag_keyの複合キーでユニークになります）
+// FindingTag For Upsert
+// (Unique keys: finding_id, tag_key)
 type FindingTagForUpsert struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -498,8 +499,8 @@ func (x *Resource) GetUpdatedAt() int64 {
 	return 0
 }
 
-// Resource For upsert（project_id,
-// resource_nameの複合キーでユニークになります）
+// Resource For upsert
+// (Unique keys: project_id, resource_name)
 type ResourceForUpsert struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -643,7 +644,8 @@ func (x *ResourceTag) GetUpdatedAt() int64 {
 	return 0
 }
 
-// ResourceTag For upsert（resource_id, tag_keyの複合キーでユニークになります）
+// ResourceTag For upsert
+// (Unique keys: resource_id, tag_key)
 type ResourceTagForUpsert struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
