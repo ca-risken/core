@@ -24,16 +24,16 @@ message Finding {
 }
 
 // Finding For Upsert
+// (Unique keys: project_id, data_source, data_source_id)
 message FindingForUpsert {
-  uint64 finding_id = 1;
-  string description = 2;
-  string data_source = 3;
-  string data_source_id = 4;
-  string resource_name = 5;
-  uint32 project_id = 6;
-  float original_score = 7;
-  float original_max_score = 8;
-  string data = 9;
+  string description = 1;
+  string data_source = 2;
+  string data_source_id = 3;
+  string resource_name = 4;
+  uint32 project_id = 5;
+  float original_score = 6;
+  float original_max_score = 7;
+  string data = 8;
 }
 
 // FindingTag
@@ -47,11 +47,11 @@ message FindingTag {
 }
 
 // FindingTag For Upsert
+// (Unique keys: finding_id, tag_key)
 message FindingTagForUpsert {
-  uint64 finding_tag_id = 1;
-  uint64 finding_id = 2;
-  string tag_key = 3;
-  string tag_value = 4;
+  uint64 finding_id = 1;
+  string tag_key = 2;
+  string tag_value = 3;
 }
 
 // Resource
@@ -64,10 +64,10 @@ message Resource {
 }
 
 // Resource For upsert
+// (Unique keys: project_id, resource_name)
 message ResourceForUpsert {
-  uint64 resource_id = 1;
-  string resource_name = 2;
-  uint32 project_id = 3;
+  string resource_name = 1;
+  uint32 project_id = 2;
 }
 
 // ResourceTag
@@ -81,9 +81,9 @@ message ResourceTag {
 }
 
 // ResourceTag For upsert
+// (Unique keys: resource_id, tag_key)
 message ResourceTagForUpsert {
-  uint64 resource_tag_id = 1;
-  uint64 resource_id = 2;
-  string tag_key = 3;
-  string tag_value = 4;
+  uint64 resource_id = 1;
+  string tag_key = 2;
+  string tag_value = 3;
 }
