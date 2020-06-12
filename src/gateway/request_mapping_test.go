@@ -120,7 +120,7 @@ func TestMappintgPutFinding(t *testing.T) {
 		{
 			name:  "parse error",
 			input: "xxxxxxxx",
-			want:  &finding.PutFindingRequest{},
+			want:  &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{}},
 		},
 	}
 	for _, c := range cases {

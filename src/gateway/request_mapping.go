@@ -46,7 +46,7 @@ func mappingPutFindingRequest(r *http.Request) *finding.PutFindingRequest {
 	param := finding.FindingForUpsert{}
 	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
 		appLogger.Warnf("Invalid parameter in PutFindingRequest, err: %+v", err)
-		return &finding.PutFindingRequest{}
+		return &finding.PutFindingRequest{Finding: &param}
 	}
 	return &finding.PutFindingRequest{
 		Finding: &finding.FindingForUpsert{

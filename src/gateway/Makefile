@@ -26,3 +26,10 @@ put-finding:
 		-H 'Content-Type: application/json' \
 		-d '{"description":"desc", "data_source":"ds", "data_source_id":"ds-004", "resource_name":"rn", "project_id":1001, "original_score":55.51, "original_max_score":100.0, "data":"{\"key\":\"value\"}"}' \
 		http://localhost:8080/finding/put/
+
+.PHONY: put-finding2
+put-finding2:
+	curl -s \
+		-H 'Content-Type: application/json' \
+		-d '{"description":"desc", "data_source":"ds", "data_source_id":"ds-004", "resource_name":"rn", "project_id":1001, "original_score":55.51, "original_max_score":100.0, "data":"{\"key\":\"value\"}"' \
+		http://localhost:8080/finding/put/
