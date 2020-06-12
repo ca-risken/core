@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -10,45 +11,55 @@ import (
 )
 
 func mappingListFindingRequest(r *http.Request) *finding.ListFindingRequest {
-	req := &finding.ListFindingRequest{}
-	if key := r.URL.Query().Get("project_id"); key != "" {
-		req.ProjectId = commaSeparatorID(r.URL.Query().Get("project_id"))
+	req := finding.ListFindingRequest{}
+	if param := r.URL.Query().Get("project_id"); param != "" {
+		req.ProjectId = commaSeparatorID(param)
 	}
-	if key := r.URL.Query().Get("data_source"); key != "" {
-		req.DataSource = commaSeparator(r.URL.Query().Get("data_source"))
+	if param := r.URL.Query().Get("data_source"); param != "" {
+		req.DataSource = commaSeparator(param)
 	}
-	if key := r.URL.Query().Get("resource_name"); key != "" {
-		req.ResourceName = commaSeparator(r.URL.Query().Get("resource_name"))
+	if param := r.URL.Query().Get("resource_name"); param != "" {
+		req.ResourceName = commaSeparator(param)
 	}
-	if key := r.URL.Query().Get("from_score"); key != "" {
-		if score, err := parseScore(r.URL.Query().Get("from_score")); err == nil {
-			req.FromScore = score
-		}
+	if param := r.URL.Query().Get("from_score"); param != "" {
+		req.FromScore = parseScore(param)
 	}
-	if key := r.URL.Query().Get("to_score"); key != "" {
-		if score, err := parseScore(r.URL.Query().Get("to_score")); err == nil {
-			req.ToScore = score
-		}
+	if param := r.URL.Query().Get("to_score"); param != "" {
+		req.ToScore = parseScore(param)
 	}
-	if key := r.URL.Query().Get("from_at"); key != "" {
-		if t, err := parseTimeParam(r.URL.Query().Get("from_at")); err == nil {
-			req.FromAt = t
-		}
+	if param := r.URL.Query().Get("from_at"); param != "" {
+		req.FromAt = parseAt(param)
 	}
-	if key := r.URL.Query().Get("to_at"); key != "" {
-		if t, err := parseTimeParam(r.URL.Query().Get("to_at")); err == nil {
-			req.ToAt = t
-		}
+	if param := r.URL.Query().Get("to_at"); param != "" {
+		req.ToAt = parseAt(param)
 	}
-	return req
+	return &req
 }
 
 func mappingGetFindingRequest(r *http.Request) *finding.GetFindingRequest {
-	req := &finding.GetFindingRequest{}
-	if i, err := parseUint64(chi.URLParam(r, "finding_id")); err == nil {
-		req.FindingId = i
+	return &finding.GetFindingRequest{
+		FindingId: parseUint64(chi.URLParam(r, "finding_id")),
 	}
-	return req
+}
+
+func mappingPutFindingRequest(r *http.Request) *finding.PutFindingRequest {
+	param := finding.FindingForUpsert{}
+	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
+		appLogger.Warnf("Invalid parameter in PutFindingRequest, err: %+v", err)
+		return &finding.PutFindingRequest{}
+	}
+	return &finding.PutFindingRequest{
+		Finding: &finding.FindingForUpsert{
+			Description:      param.Description,
+			DataSource:       param.DataSource,
+			DataSourceId:     param.DataSourceId,
+			ResourceName:     param.ResourceName,
+			ProjectId:        param.ProjectId,
+			OriginalScore:    param.OriginalScore,
+			OriginalMaxScore: param.OriginalMaxScore,
+			Data:             param.Data,
+		},
+	}
 }
 
 func commaSeparatorID(param string) []uint32 {
@@ -71,26 +82,26 @@ func commaSeparator(param string) []string {
 	return separated
 }
 
-func parseScore(score string) (float32, error) {
+func parseScore(score string) float32 {
 	f, err := strconv.ParseFloat(score, 32)
 	if err != nil {
-		return 0.0, err
+		return 0.0
 	}
-	return float32(f), nil
+	return float32(f)
 }
 
-func parseTimeParam(at string) (int64, error) {
+func parseAt(at string) int64 {
 	i, err := strconv.ParseInt(at, 10, 64)
 	if err != nil {
-		return i, err
+		return 0
 	}
-	return i, nil
+	return i
 }
 
-func parseUint64(str string) (uint64, error) {
+func parseUint64(str string) uint64 {
 	i, err := strconv.ParseUint(str, 10, 64)
 	if err != nil {
-		return i, err
+		return 0
 	}
-	return i, nil
+	return i
 }

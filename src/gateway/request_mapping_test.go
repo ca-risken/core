@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/CyberAgent/mimosa-core/proto/finding"
@@ -57,7 +58,6 @@ func TestMappingListFindingRequest(t *testing.T) {
 			want:  &finding.ListFindingRequest{},
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			req, _ := http.NewRequest("GET", "/finding?"+c.input, nil)
@@ -91,7 +91,6 @@ func TestMappintgGetFinding(t *testing.T) {
 			want:  &finding.GetFindingRequest{},
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			req, _ := http.NewRequest("GET", "/finding/"+c.input, nil)
@@ -99,8 +98,35 @@ func TestMappintgGetFinding(t *testing.T) {
 			rctx := chi.NewRouteContext()
 			rctx.URLParams.Add("finding_id", c.input)
 			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
-
 			got := mappingGetFindingRequest(req)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestMappintgPutFinding(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  *finding.PutFindingRequest
+	}{
+		{
+			name:  "OK",
+			input: `{"description":"desc", "data_source":"ds", "data_source_id":"ds-01", "resource_name":"rn", "project_id":1, "original_score":0.1, "original_max_score":1.0, "data":"{}"}`,
+			want:  &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-01", ResourceName: "rn", ProjectId: 1, OriginalScore: 0.1, OriginalMaxScore: 1.0, Data: `{}`}},
+		},
+		{
+			name:  "parse error",
+			input: "xxxxxxxx",
+			want:  &finding.PutFindingRequest{},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			req, _ := http.NewRequest("POST", "/finding/put", strings.NewReader(c.input))
+			got := mappingPutFindingRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
 			}
@@ -135,7 +161,6 @@ func TestCommaSeparatorID(t *testing.T) {
 			want:  []uint32{1},
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			got := commaSeparatorID(c.input)
@@ -168,7 +193,6 @@ func TestCommaSeparator(t *testing.T) {
 			want:  []string{"aaa", "ccc"},
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			got := commaSeparator(c.input)
@@ -181,34 +205,24 @@ func TestCommaSeparator(t *testing.T) {
 
 func TestParseScore(t *testing.T) {
 	cases := []struct {
-		name    string
-		input   string
-		want    float32
-		wantErr bool
+		name  string
+		input string
+		want  float32
 	}{
 		{
-			name:    "normal",
-			input:   "0.05",
-			want:    0.05,
-			wantErr: false,
+			name:  "normal",
+			input: "0.05",
+			want:  0.05,
 		},
 		{
-			name:    "parse error",
-			input:   "parse error",
-			want:    0.00,
-			wantErr: true,
+			name:  "parse error",
+			input: "parse error",
+			want:  0.0,
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := parseScore(c.input)
-			if c.wantErr && err == nil {
-				t.Fatalf("No error occurred: wantErr=%+v, err=%+v", c.wantErr, err)
-			}
-			if !c.wantErr && err != nil {
-				t.Fatalf("Unexpected error occurred: wantErr=%+v, err=%+v", c.wantErr, err)
-			}
+			got := parseScore(c.input)
 			if got != c.want {
 				t.Fatalf("Unexpected result: want=%+v, got=%+v", c.want, got)
 			}
@@ -216,36 +230,26 @@ func TestParseScore(t *testing.T) {
 	}
 }
 
-func TestParseTimeParam(t *testing.T) {
+func TestParseAt(t *testing.T) {
 	cases := []struct {
-		name    string
-		input   string
-		want    int64
-		wantErr bool
+		name  string
+		input string
+		want  int64
 	}{
 		{
-			name:    "normal",
-			input:   "1591034681",
-			want:    1591034681,
-			wantErr: false,
+			name:  "normal",
+			input: "1591034681",
+			want:  1591034681,
 		},
 		{
-			name:    "parse error",
-			input:   "parse error",
-			want:    0,
-			wantErr: true,
+			name:  "parse error",
+			input: "parse error",
+			want:  0,
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := parseTimeParam(c.input)
-			if c.wantErr && err == nil {
-				t.Fatalf("No error occurred: wantErr=%+v, err=%+v", c.wantErr, err)
-			}
-			if !c.wantErr && err != nil {
-				t.Fatalf("Unexpected error occurred: wantErr=%+v, err=%+v", c.wantErr, err)
-			}
+			got := parseAt(c.input)
 			if got != c.want {
 				t.Fatalf("Unexpected result: want=%+v, got=%+v", c.want, got)
 			}

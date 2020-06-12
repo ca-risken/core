@@ -42,8 +42,15 @@ go-test: build
 	cd proto/finding && go test ./...
 
 go-mod-update:
-	cd src/gateway && go get -u github.com/CyberAgent/mimosa-core/proto/iam
-	cd src/finding && go get -u github.com/CyberAgent/mimosa-core/proto/finding && go get -u github.com/CyberAgent/mimosa-core/pkg/model
+	cd src/gateway \
+		&& go get -u \
+			github.com/CyberAgent/mimosa-core/proto/finding \
+			github.com/CyberAgent/mimosa-core/proto/iam
+	cd src/finding \
+		&& go get -u \
+			github.com/CyberAgent/mimosa-core/proto/finding \
+		&& go get -u \
+			github.com/CyberAgent/mimosa-core/pkg/model
 
 go-mod-tidy: build
 	cd src/gateway && go mod tidy

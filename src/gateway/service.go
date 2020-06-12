@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/CyberAgent/mimosa-core/proto/finding"
+	"github.com/golang/gddo/httputil/header"
 	"google.golang.org/grpc"
 )
 
@@ -37,36 +39,6 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) erro
 	return nil
 }
 
-func (g *gatewayService) listFindingHandler(w http.ResponseWriter, r *http.Request) {
-	req := mappingListFindingRequest(r)
-	if err := req.Validate(); err != nil {
-		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
-		return
-	}
-
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).ListFinding(r.Context(), req)
-	if err != nil {
-		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
-		return
-	}
-	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
-}
-
-func (g *gatewayService) getFindingHandler(w http.ResponseWriter, r *http.Request) {
-	req := mappingGetFindingRequest(r)
-	if err := req.Validate(); err != nil {
-		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
-		return
-	}
-
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).GetFinding(r.Context(), req)
-	if err != nil {
-		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
-		return
-	}
-	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
-}
-
 func writeResponse(w http.ResponseWriter, status int, body map[string]interface{}) {
 	if body == nil {
 		w.WriteHeader(status)
@@ -82,4 +54,15 @@ func writeResponse(w http.ResponseWriter, status int, body map[string]interface{
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(status)
 	w.Write(buf)
+}
+
+func validatePostHeader(r *http.Request) error {
+	if r.Header.Get("Content-Type") == "" {
+		return errors.New("Not found Content-Type header")
+	}
+	value, _ := header.ParseValueAndParams(r.Header, "Content-Type")
+	if value != "application/json" {
+		return fmt.Errorf("Unexpected Content-Type. want=application/json, got=%s", value)
+	}
+	return nil
 }
