@@ -42,3 +42,9 @@ tag-finding:
 	curl -is -XPOST -H 'Content-Type: application/json' \
 		--data '{"finding_id":1001, "tag_key":"test", "tag_value":"true"}' \
 		http://localhost:8080/finding/tag/
+
+.PHONY: untag-finding
+untag-finding:
+	curl -is -XPOST -H 'Content-Type: application/json' \
+		--data '{"finding_tag_id":1002}' \
+		http://localhost:8080/finding/untag/

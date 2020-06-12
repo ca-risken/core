@@ -100,12 +100,25 @@ func (g *gatewayService) tagFindingHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
-
 }
 
-// func (g *gatewayService) untagFindingHandler(w http.ResponseWriter, r *http.Request) {
-// 	req := mappingUntagFindingRequest(r)
-// }
+func (g *gatewayService) untagFindingHandler(w http.ResponseWriter, r *http.Request) {
+	if err := validatePostHeader(r); err != nil {
+		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	req := mappingUntagFindingRequest(r)
+	if err := req.Validate(); err != nil {
+		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).UntagFinding(r.Context(), req)
+	if err != nil {
+		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
+}
 
 // func (g *gatewayService) listResourceHandler(w http.ResponseWriter, r *http.Request) {
 // 	req := mappingListResourceRequest(r)

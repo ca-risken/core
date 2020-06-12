@@ -94,6 +94,17 @@ func mappingTagFindingRequest(r *http.Request) *finding.TagFindingRequest {
 	}
 }
 
+func mappingUntagFindingRequest(r *http.Request) *finding.UntagFindingRequest {
+	param := finding.UntagFindingRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
+		appLogger.Warnf("Invalid parameter in TagFindingRequest, err: %+v", err)
+		return &finding.UntagFindingRequest{}
+	}
+	return &finding.UntagFindingRequest{
+		FindingTagId: param.FindingTagId,
+	}
+}
+
 func commaSeparatorID(param string) []uint32 {
 	separated := []uint32{}
 	for _, p := range strings.Split(param, ",") {

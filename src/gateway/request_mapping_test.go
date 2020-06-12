@@ -222,6 +222,34 @@ func TestMappintgTagFinding(t *testing.T) {
 	}
 }
 
+func TestMappintgUntagFinding(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  *finding.UntagFindingRequest
+	}{
+		{
+			name:  "OK",
+			input: `{"finding_tag_id":1001}`,
+			want:  &finding.UntagFindingRequest{FindingTagId: 1001},
+		},
+		{
+			name:  "parse error",
+			input: "xxxxxxxx",
+			want:  &finding.UntagFindingRequest{},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			req, _ := http.NewRequest("POST", "/finding/untag", strings.NewReader(c.input))
+			got := mappingUntagFindingRequest(req)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
 func TestCommaSeparatorID(t *testing.T) {
 	cases := []struct {
 		name  string
