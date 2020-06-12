@@ -146,7 +146,7 @@ func TestPutFinding(t *testing.T) {
 		},
 		{
 			name:        "OK Update",
-			input:       &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{FindingId: 1001, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 20.00, OriginalMaxScore: 100.00}},
+			input:       &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 20.00, OriginalMaxScore: 100.00}},
 			want:        &finding.PutFindingResponse{Finding: &finding.Finding{FindingId: 1001, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 20.00, Score: 0.2, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetResp: &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 10.00, Score: 0.1, CreatedAt: now, UpdatedAt: now},
 			mockUpResp:  &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 20.00, Score: 0.2, CreatedAt: now, UpdatedAt: now},
@@ -161,12 +161,6 @@ func TestPutFinding(t *testing.T) {
 			input:      &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
 			wantErr:    true,
 			mockGetErr: gorm.ErrInvalidSQL,
-		},
-		{
-			name:        "NG Invalid finding_id",
-			input:       &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{FindingId: 9999, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
-			wantErr:     true,
-			mockGetResp: &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 10.00, Score: 0.1, CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:        "NG UpsertFinding error",
@@ -342,14 +336,8 @@ func TestTagFinding(t *testing.T) {
 			mockGetErr: gorm.ErrInvalidSQL,
 		},
 		{
-			name:        "NG Invalid findingTagID",
-			input:       &finding.TagFindingRequest{Tag: &finding.FindingTagForUpsert{FindingTagId: 10011, FindingId: 1001, TagKey: "k", TagValue: "v"}},
-			wantErr:     true,
-			mockGetResp: &model.FindingTag{FindingTagID: 99999, FindingID: 1001, TagKey: "k", TagValue: "v", CreatedAt: now, UpdatedAt: now},
-		},
-		{
 			name:        "NG TagFinding error",
-			input:       &finding.TagFindingRequest{Tag: &finding.FindingTagForUpsert{FindingTagId: 10011, FindingId: 1001, TagKey: "k", TagValue: "v"}},
+			input:       &finding.TagFindingRequest{Tag: &finding.FindingTagForUpsert{FindingId: 1001, TagKey: "k", TagValue: "v"}},
 			wantErr:     true,
 			mockGetResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, TagKey: "k", TagValue: "v", CreatedAt: now, UpdatedAt: now},
 			mockUpErr:   gorm.ErrInvalidSQL,
@@ -561,31 +549,25 @@ func TestPutResource(t *testing.T) {
 		},
 		{
 			name:        "OK Update",
-			input:       &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceId: 1001, ResourceName: "rn-2", ProjectId: 999}},
+			input:       &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceName: "rn-2", ProjectId: 999}},
 			want:        &finding.PutResourceResponse{Resource: &finding.Resource{ResourceId: 1001, ResourceName: "rn-2", ProjectId: 999, CreatedAt: now.Add(-1 * 24 * time.Hour).Unix(), UpdatedAt: now.Unix()}},
 			mockGetResp: &model.Resource{ResourceID: 1001, ResourceName: "rn-2", ProjectID: 111, CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now.Add(-1 * 24 * time.Hour)},
 			mockUpResp:  &model.Resource{ResourceID: 1001, ResourceName: "rn-2", ProjectID: 999, CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now},
 		},
 		{
 			name:    "NG Invalid request",
-			input:   &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceId: 1001, ResourceName: "", ProjectId: 111}},
+			input:   &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceName: "", ProjectId: 111}},
 			wantErr: true,
 		},
 		{
 			name:       "NG GetResourceByName error",
-			input:      &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceId: 1001, ResourceName: "", ProjectId: 111}},
+			input:      &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceName: "", ProjectId: 111}},
 			wantErr:    true,
 			mockGetErr: gorm.ErrCantStartTransaction,
 		},
 		{
-			name:        "NG Invalid resource_id error",
-			input:       &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceId: 1001, ResourceName: "rn", ProjectId: 111}},
-			wantErr:     true,
-			mockGetResp: &model.Resource{ResourceID: 9999, ResourceName: "rn", ProjectID: 111, CreatedAt: now, UpdatedAt: now},
-		},
-		{
 			name:        "NG UpsertResource error",
-			input:       &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceId: 1001, ResourceName: "rn", ProjectId: 111}},
+			input:       &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceName: "rn", ProjectId: 111}},
 			wantErr:     true,
 			mockGetResp: &model.Resource{ResourceID: 1001, ResourceName: "rn", ProjectID: 111, CreatedAt: now, UpdatedAt: now},
 			mockUpErr:   gorm.ErrInvalidSQL,

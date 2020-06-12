@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"math"
 	"time"
 
@@ -82,9 +81,6 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
 	var findingID uint64
 	if !noRecord {
-		if req.Finding.FindingId != 0 && req.Finding.FindingId != savedData.FindingID {
-			return nil, fmt.Errorf("Invalid finding_id, want=%d, got=%d", savedData.FindingID, req.Finding.FindingId)
-		}
 		findingID = savedData.FindingID
 	}
 
@@ -166,9 +162,6 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
 	var findingTagID uint64
 	if !noRecord {
-		if req.Tag.FindingTagId != 0 && req.Tag.FindingTagId != savedData.FindingTagID {
-			return nil, fmt.Errorf("Invalid finding_tag_id, want=%d, got=%d", savedData.FindingTagID, req.Tag.FindingTagId)
-		}
 		findingTagID = savedData.FindingTagID
 	}
 

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
@@ -83,9 +82,6 @@ func (f *findingService) PutResource(ctx context.Context, req *finding.PutResour
 	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
 	var resourceID uint64
 	if !noRecord {
-		if req.Resource.ResourceId != 0 && req.Resource.ResourceId != savedData.ResourceID {
-			return nil, fmt.Errorf("Invalid resource_id, want=%d, got=%d", savedData.ResourceID, req.Resource.ResourceId)
-		}
 		resourceID = savedData.ResourceID
 	}
 
