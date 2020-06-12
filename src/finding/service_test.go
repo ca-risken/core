@@ -274,15 +274,16 @@ func TestListFindingTag(t *testing.T) {
 		},
 		{
 			name:    "NG DB error",
-			input:   &finding.ListFindingTagRequest{FindingId: 0},
+			input:   &finding.ListFindingTagRequest{FindingId: 1001},
 			wantErr: true,
 			mockErr: gorm.ErrInvalidSQL,
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("ListFindingTag").Return(c.mockResp, c.mockErr).Once()
+			if c.mockResp != nil || c.mockErr != nil {
+				mock.On("ListFindingTag").Return(c.mockResp, c.mockErr).Once()
+			}
 			got, err := svc.ListFindingTag(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -292,7 +293,6 @@ func TestListFindingTag(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestTagFinding(t *testing.T) {
@@ -343,7 +343,6 @@ func TestTagFinding(t *testing.T) {
 			mockUpErr:   gorm.ErrInvalidSQL,
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			if c.mockGetResp != nil || c.mockGetErr != nil {
@@ -390,7 +389,6 @@ func TestUntagFinding(t *testing.T) {
 			mockErr: gorm.ErrCantStartTransaction,
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			mock.On("UntagFinding").Return(c.mockErr).Once()
@@ -634,12 +632,168 @@ func TestDeleteResource(t *testing.T) {
 }
 
 func TestListResourceTag(t *testing.T) {
+	var ctx context.Context
+	now := time.Now()
+	mock := mockFindingRepository{}
+	svc := newFindingService(&mock)
+	cases := []struct {
+		name     string
+		input    *finding.ListResourceTagRequest
+		want     *finding.ListResourceTagResponse
+		wantErr  bool
+		mockResp *[]model.ResourceTag
+		mockErr  error
+	}{
+		{
+			name:  "OK",
+			input: &finding.ListResourceTagRequest{ResourceId: 1001},
+			want: &finding.ListResourceTagResponse{Tag: []*finding.ResourceTag{
+				{ResourceTagId: 1, ResourceId: 111, TagKey: "k-1", TagValue: "v-1", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+				{ResourceTagId: 2, ResourceId: 111, TagKey: "k-2", TagValue: "v-2", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+			}},
+			mockResp: &[]model.ResourceTag{
+				{ResourceTagID: 1, ResourceID: 111, TagKey: "k-1", TagValue: "v-1", CreatedAt: now, UpdatedAt: now},
+				{ResourceTagID: 2, ResourceID: 111, TagKey: "k-2", TagValue: "v-2", CreatedAt: now, UpdatedAt: now},
+			},
+		},
+		{
+			name:    "OK Record Not Found",
+			input:   &finding.ListResourceTagRequest{ResourceId: 1001},
+			want:    &finding.ListResourceTagResponse{},
+			wantErr: false,
+			mockErr: gorm.ErrRecordNotFound,
+		},
+		{
+			name:    "NG Invalid Request",
+			input:   &finding.ListResourceTagRequest{ResourceId: 0},
+			wantErr: true,
+		},
+		{
+			name:    "NG DB error",
+			input:   &finding.ListResourceTagRequest{ResourceId: 1001},
+			wantErr: true,
+			mockErr: gorm.ErrInvalidSQL,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if c.mockResp != nil || c.mockErr != nil {
+				mock.On("ListResourceTag").Return(c.mockResp, c.mockErr).Once()
+			}
+			got, err := svc.ListResourceTag(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
 }
 
 func TestTagResource(t *testing.T) {
+	var ctx context.Context
+	now := time.Now()
+	mock := mockFindingRepository{}
+	svc := newFindingService(&mock)
+	cases := []struct {
+		name        string
+		input       *finding.TagResourceRequest
+		want        *finding.TagResourceResponse
+		wantErr     bool
+		mockGetResp *model.ResourceTag
+		mockGetErr  error
+		mockUpResp  *model.ResourceTag
+		mockUpErr   error
+	}{
+		{
+			name:       "OK Insert",
+			input:      &finding.TagResourceRequest{Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, TagKey: "k", TagValue: "v"}},
+			want:       &finding.TagResourceResponse{Tag: &finding.ResourceTag{ResourceTagId: 10011, ResourceId: 1001, TagKey: "k", TagValue: "v", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetErr: gorm.ErrRecordNotFound,
+			mockUpResp: &model.ResourceTag{ResourceTagID: 10011, ResourceID: 1001, TagKey: "k", TagValue: "v", CreatedAt: now, UpdatedAt: now},
+		},
+		{
+			name:        "OK Update",
+			input:       &finding.TagResourceRequest{Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, TagKey: "k", TagValue: "v"}},
+			want:        &finding.TagResourceResponse{Tag: &finding.ResourceTag{ResourceTagId: 10011, ResourceId: 1001, TagKey: "k", TagValue: "v", CreatedAt: now.Add(-1 * 24 * time.Hour).Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp: &model.ResourceTag{ResourceTagID: 10011, ResourceID: 1001, TagKey: "k", TagValue: "v", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now.Add(-1 * 24 * time.Hour)},
+			mockUpResp:  &model.ResourceTag{ResourceTagID: 10011, ResourceID: 1001, TagKey: "k", TagValue: "v", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now},
+		},
+		{
+			name:    "NG Invalid request",
+			input:   &finding.TagResourceRequest{Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, TagKey: "", TagValue: "v"}},
+			wantErr: true,
+		},
+		{
+			name:       "NG GetFindingTagByKey error",
+			input:      &finding.TagResourceRequest{Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, TagKey: "k", TagValue: "v"}},
+			wantErr:    true,
+			mockGetErr: gorm.ErrInvalidSQL,
+		},
+		{
+			name:        "NG TagFinding error",
+			input:       &finding.TagResourceRequest{Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, TagKey: "k", TagValue: "v"}},
+			wantErr:     true,
+			mockGetResp: &model.ResourceTag{ResourceTagID: 10011, ResourceID: 1001, TagKey: "k", TagValue: "v", CreatedAt: now, UpdatedAt: now},
+			mockUpErr:   gorm.ErrInvalidSQL,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if c.mockGetResp != nil || c.mockGetErr != nil {
+				mock.On("GetResouorceTagByKey").Return(c.mockGetResp, c.mockGetErr).Once()
+			}
+			if c.mockUpResp != nil || c.mockUpErr != nil {
+				mock.On("TagResource").Return(c.mockUpResp, c.mockUpErr).Once()
+			}
+			got, err := svc.TagResource(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
 }
 
 func TestUntagResource(t *testing.T) {
+	var ctx context.Context
+	mock := mockFindingRepository{}
+	svc := newFindingService(&mock)
+	cases := []struct {
+		name    string
+		input   *finding.UntagResourceRequest
+		wantErr bool
+		mockErr error
+	}{
+		{
+			name:    "OK",
+			input:   &finding.UntagResourceRequest{ResourceTagId: 1001},
+			wantErr: false,
+		},
+		{
+			name:    "NG validation error",
+			input:   &finding.UntagResourceRequest{},
+			wantErr: true,
+		},
+		{
+			name:    "NG DB error",
+			input:   &finding.UntagResourceRequest{ResourceTagId: 1001},
+			wantErr: true,
+			mockErr: gorm.ErrCantStartTransaction,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mock.On("UntagResource").Return(c.mockErr).Once()
+			_, err := svc.UntagResource(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
 }
 
 func TestConvertFinding(t *testing.T) {
@@ -815,7 +969,7 @@ func (m *mockFindingRepository) ListResource(*finding.ListResourceRequest) (*[]r
 	return args.Get(0).(*[]resourceIds), args.Error(1)
 }
 
-func (m *mockFindingRepository) UpsertResource(*model.Resource) (*model.Resource, error) {
+func (m *mockFindingRepository) GetResource(uint64) (*model.Resource, error) {
 	args := m.Called()
 	return args.Get(0).(*model.Resource), args.Error(1)
 }
@@ -825,12 +979,32 @@ func (m *mockFindingRepository) GetResourceByName(uint32, string) (*model.Resour
 	return args.Get(0).(*model.Resource), args.Error(1)
 }
 
-func (m *mockFindingRepository) GetResource(uint64) (*model.Resource, error) {
+func (m *mockFindingRepository) UpsertResource(*model.Resource) (*model.Resource, error) {
 	args := m.Called()
 	return args.Get(0).(*model.Resource), args.Error(1)
 }
 
 func (m *mockFindingRepository) DeleteResource(uint64) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *mockFindingRepository) ListResourceTag(uint64) (*[]model.ResourceTag, error) {
+	args := m.Called()
+	return args.Get(0).(*[]model.ResourceTag), args.Error(1)
+}
+
+func (m *mockFindingRepository) GetResouorceTagByKey(uint64, string) (*model.ResourceTag, error) {
+	args := m.Called()
+	return args.Get(0).(*model.ResourceTag), args.Error(1)
+}
+
+func (m *mockFindingRepository) TagResource(*model.ResourceTag) (*model.ResourceTag, error) {
+	args := m.Called()
+	return args.Get(0).(*model.ResourceTag), args.Error(1)
+}
+
+func (m *mockFindingRepository) UntagResource(uint64) error {
 	args := m.Called()
 	return args.Error(0)
 }

@@ -72,7 +72,6 @@ func (f *findingService) PutResource(ctx context.Context, req *finding.PutResour
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-
 	savedData, err := f.repository.GetResourceByName(req.Resource.ProjectId, req.Resource.ResourceName)
 	noRecord := gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
@@ -84,7 +83,6 @@ func (f *findingService) PutResource(ctx context.Context, req *finding.PutResour
 	if !noRecord {
 		resourceID = savedData.ResourceID
 	}
-
 	// TODO: Authz
 	// upsert
 	registerdData, err := f.repository.UpsertResource(
@@ -103,7 +101,6 @@ func (f *findingService) DeleteResource(ctx context.Context, req *finding.Delete
 	if err := req.Validate(); err != nil {
 		return &empty.Empty{}, err
 	}
-
 	// TODO authz
 	err := f.repository.DeleteResource(req.ResourceId)
 	if err != nil {
@@ -116,19 +113,58 @@ func (f *findingService) ListResourceTag(ctx context.Context, req *finding.ListR
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	return nil, nil
+	// TODO authz
+	list, err := f.repository.ListResourceTag(req.ResourceId)
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return &finding.ListResourceTagResponse{}, nil
+		}
+		return nil, err
+	}
+	var tags []*finding.ResourceTag
+	for _, tag := range *list {
+		tags = append(tags, convertResourceTag(&tag))
+	}
+	return &finding.ListResourceTagResponse{Tag: tags}, nil
 }
 
 func (f *findingService) TagResource(ctx context.Context, req *finding.TagResourceRequest) (*finding.TagResourceResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	return nil, nil
+
+	savedData, err := f.repository.GetResouorceTagByKey(req.Tag.ResourceId, req.Tag.TagKey)
+	noRecord := gorm.IsRecordNotFoundError(err)
+	if err != nil && !noRecord {
+		return nil, err
+	}
+
+	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
+	var resourceTagID uint64
+	if !noRecord {
+		resourceTagID = savedData.ResourceTagID
+	}
+	// TODO: Authz
+	registerd, err := f.repository.TagResource(&model.ResourceTag{
+		ResourceTagID: resourceTagID,
+		ResourceID:    req.Tag.ResourceId,
+		TagKey:        req.Tag.TagKey,
+		TagValue:      req.Tag.TagValue,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &finding.TagResourceResponse{Tag: convertResourceTag(registerd)}, nil
 }
 
 func (f *findingService) UntagResource(ctx context.Context, req *finding.UntagResourceRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return &empty.Empty{}, err
+	}
+	// TODO authz
+	err := f.repository.UntagResource(req.ResourceTagId)
+	if err != nil {
+		return nil, err
 	}
 	return &empty.Empty{}, nil
 }
@@ -143,5 +179,19 @@ func convertResource(r *model.Resource) *finding.Resource {
 		ProjectId:    r.ProjectID,
 		CreatedAt:    r.CreatedAt.Unix(),
 		UpdatedAt:    r.UpdatedAt.Unix(),
+	}
+}
+
+func convertResourceTag(r *model.ResourceTag) *finding.ResourceTag {
+	if r == nil {
+		return &finding.ResourceTag{}
+	}
+	return &finding.ResourceTag{
+		ResourceTagId: r.ResourceTagID,
+		ResourceId:    r.ResourceID,
+		TagKey:        r.TagKey,
+		TagValue:      r.TagValue,
+		CreatedAt:     r.CreatedAt.Unix(),
+		UpdatedAt:     r.UpdatedAt.Unix(),
 	}
 }

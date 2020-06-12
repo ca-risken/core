@@ -83,3 +83,24 @@ delete-resource:
 		-plaintext \
 		-d '{"resource_id": 1006}' \
 		localhost:8081 core.finding.FindingService.DeleteResource
+
+.PHONY: list-resource-tag
+list-resource-tag:
+	grpcurl \
+		-plaintext \
+		-d '{"resource_id": 1001}' \
+		localhost:8081 core.finding.FindingService.ListResourceTag
+
+.PHONY: tag-resource
+tag-resource:
+	grpcurl \
+		-plaintext \
+		-d '{"tag": {"resource_id": 1001, "tag_key": "key", "tag_value": "value"}}' \
+		localhost:8081 core.finding.FindingService.TagResource
+
+.PHONY: untag-resource
+untag-resource:
+	grpcurl \
+		-plaintext \
+		-d '{"resource_tag_id": 1003}' \
+		localhost:8081 core.finding.FindingService.UntagResource

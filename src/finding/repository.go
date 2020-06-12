@@ -15,20 +15,24 @@ type findingRepoInterface interface {
 	// Finding
 	ListFinding(*finding.ListFindingRequest) (*[]findingIds, error)
 	GetFinding(uint64) (*model.Finding, error)
-	UpsertFinding(*model.Finding) (*model.Finding, error)
 	GetFindingByDataSource(uint32, string, string) (*model.Finding, error)
-	GetResourceByName(uint32, string) (*model.Resource, error)
+	UpsertFinding(*model.Finding) (*model.Finding, error)
 	DeleteFinding(uint64) error
 	ListFindingTag(uint64) (*[]model.FindingTag, error)
-	TagFinding(*model.FindingTag) (*model.FindingTag, error)
 	GetFindingTagByKey(uint64, string) (*model.FindingTag, error)
+	TagFinding(*model.FindingTag) (*model.FindingTag, error)
 	UntagFinding(uint64) error
 
 	// Resource
 	ListResource(*finding.ListResourceRequest) (*[]resourceIds, error)
-	UpsertResource(*model.Resource) (*model.Resource, error)
 	GetResource(uint64) (*model.Resource, error)
+	GetResourceByName(uint32, string) (*model.Resource, error)
+	UpsertResource(*model.Resource) (*model.Resource, error)
 	DeleteResource(uint64) error
+	ListResourceTag(uint64) (*[]model.ResourceTag, error)
+	GetResouorceTagByKey(uint64, string) (*model.ResourceTag, error)
+	TagResource(*model.ResourceTag) (*model.ResourceTag, error)
+	UntagResource(uint64) error
 }
 
 type findingRepository struct {
@@ -125,7 +129,7 @@ where
 
 func (f *findingRepository) GetFinding(findingID uint64) (*model.Finding, error) {
 	var data model.Finding
-	if err := f.SlaveDB.Raw(`select * from finding where finding_id = ?`, findingID).Scan(&data).Error; err != nil {
+	if err := f.SlaveDB.Raw(`select * from finding where finding_id = ?`, findingID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -235,7 +239,7 @@ ON DUPLICATE KEY UPDATE
 
 func (f *findingRepository) GetFindingTagByKey(findingID uint64, tagKey string) (*model.FindingTag, error) {
 	var data model.FindingTag
-	if err := f.SlaveDB.Raw(`select * from finding_tag where finding_id = ? and tag_key = ?`, findingID, tagKey).Scan(&data).Error; err != nil {
+	if err := f.SlaveDB.Raw(`select * from finding_tag where finding_id = ? and tag_key = ?`, findingID, tagKey).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -284,7 +288,7 @@ where
 
 func (f *findingRepository) GetResource(resourceID uint64) (*model.Resource, error) {
 	var data model.Resource
-	if err := f.SlaveDB.Raw(`select * from resource where resource_id = ?`, resourceID).Scan(&data).Error; err != nil {
+	if err := f.SlaveDB.Raw(`select * from resource where resource_id = ?`, resourceID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -292,6 +296,49 @@ func (f *findingRepository) GetResource(resourceID uint64) (*model.Resource, err
 
 func (f *findingRepository) DeleteResource(resourceID uint64) error {
 	if err := f.MasterDB.Exec(`delete from resource where resource_id = ?`, resourceID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (f *findingRepository) ListResourceTag(resourceID uint64) (*[]model.ResourceTag, error) {
+	var data []model.ResourceTag
+	if err := f.SlaveDB.Raw(`select * from resource_tag where resource_id = ?`, resourceID).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (f *findingRepository) GetResouorceTagByKey(resourceID uint64, tagKey string) (*model.ResourceTag, error) {
+	var data model.ResourceTag
+	if err := f.SlaveDB.Raw(`select * from resource_tag where resource_id = ? and tag_key = ?`, resourceID, tagKey).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (f *findingRepository) TagResource(tag *model.ResourceTag) (*model.ResourceTag, error) {
+	err := f.MasterDB.Exec(`
+INSERT INTO resource_tag
+	(resource_tag_id, resource_id, tag_key, tag_value)
+VALUES
+	(?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+	tag_value=VALUES(tag_value);
+`,
+		tag.ResourceTagID, tag.ResourceID, tag.TagKey, tag.TagValue).Error
+	if err != nil {
+		return nil, err
+	}
+	updated, err := f.GetResouorceTagByKey(tag.ResourceID, tag.TagKey)
+	if err != nil {
+		return nil, err
+	}
+	return updated, err
+}
+
+func (f *findingRepository) UntagResource(resourceTagID uint64) error {
+	if err := f.MasterDB.Exec(`delete from resource_tag where resource_tag_id = ?`, resourceTagID).Error; err != nil {
 		return err
 	}
 	return nil
