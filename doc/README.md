@@ -672,7 +672,7 @@ User
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
+| user_id | [uint32](#uint32) |  |  |
 | name | [string](#string) |  |  |
 | activated | [bool](#bool) |  |  |
 | created_at | [int64](#int64) |  |  |
@@ -702,7 +702,7 @@ User
 <a name="core.iam.AuthnRequest"></a>
 
 ### AuthnRequest
-
+AuthnRequest tokenからユーザを識別します
 
 
 | Field | Type | Label | Description |
@@ -732,14 +732,16 @@ User
 <a name="core.iam.AuthzRequest"></a>
 
 ### AuthzRequest
-
+AuthzRequest
+ユーザからのリクエストに対して、アクションやリソースへの認可を行います
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [int32](#int32) |  |  |
-| action_ptn | [string](#string) |  |  |
-| resource_ptn | [string](#string) |  |  |
+| user_id | [uint32](#uint32) |  | UserID,(e.g.)111 |
+| project_id | [uint32](#uint32) |  | ProjectID,(e.g.)1001 |
+| action_name | [string](#string) |  | Service&amp;API_name(&lt;service_name&gt;/&lt;API&gt;format),(e.g.)`finding/GetFinding` |
+| resource_name | [string](#string) |  | System_resource_name(&lt;prefix&gt;/&lt;resouorce_name&gt;format),(e.g.)`aws:accessAnalyzer/samplebucket` |
 
 
 
@@ -774,8 +776,8 @@ User
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| Authn | [AuthnRequest](#core.iam.AuthnRequest) | [AuthnResponse](#core.iam.AuthnResponse) |  |
-| Authz | [AuthzRequest](#core.iam.AuthzRequest) | [AuthzResponse](#core.iam.AuthzResponse) |  |
+| Authenticated | [AuthnRequest](#core.iam.AuthnRequest) | [AuthnResponse](#core.iam.AuthnResponse) | 認証（リクエストユーザを識別します） |
+| Authorized | [AuthzRequest](#core.iam.AuthzRequest) | [AuthzResponse](#core.iam.AuthzResponse) | 認可（ユーザがリクエストしたアクションや、リソースに対しての認可を行います） |
 
  
 
