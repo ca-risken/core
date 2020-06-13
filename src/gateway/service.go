@@ -9,18 +9,33 @@ import (
 	"time"
 
 	"github.com/golang/gddo/httputil/header"
+	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
 )
 
 type gatewayService struct {
+	port           string
 	findingSvcAddr string
 	findingSvcConn *grpc.ClientConn
 }
 
-func newGatewayService(ctx context.Context, conf gatewayConf) (gatewayService, error) {
+type gatewayConf struct {
+	Port           string `default:"8080"`
+	FindingSvcAddr string `required:"true" split_words:"true"`
+}
+
+func newGatewayService() (gatewayService, error) {
+	var conf gatewayConf
+	err := envconfig.Process("", &conf)
+	if err != nil {
+		return gatewayService{}, err
+	}
+
 	svc := gatewayService{
+		port:           conf.Port,
 		findingSvcAddr: conf.FindingSvcAddr,
 	}
+	ctx := context.Background()
 	if err := mustConnGRPC(ctx, &svc.findingSvcConn, svc.findingSvcAddr); err != nil {
 		return svc, err
 	}

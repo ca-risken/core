@@ -1,33 +1,16 @@
 package main
 
 import (
-	"context"
 	"net/http"
-
-	"github.com/kelseyhightower/envconfig"
 )
 
-type gatewayConf struct {
-	Port           string `default:"8080"`
-	FindingSvcAddr string `required:"true" split_words:"true"`
-}
-
 func main() {
-	var conf gatewayConf
-	err := envconfig.Process("", &conf)
+	svc, err := newGatewayService()
 	if err != nil {
 		appLogger.Fatal(err.Error())
 	}
-
-	ctx := context.Background()
-	svc, err := newGatewayService(ctx, conf)
-	if err != nil {
-		appLogger.Fatal(err.Error())
-	}
-
-	r := newRouter(svc)
-	appLogger.Infof("starting http server at :%s", conf.Port)
-	err = http.ListenAndServe(":"+conf.Port, r)
+	appLogger.Infof("starting http server at :%s", svc.port)
+	err = http.ListenAndServe(":"+svc.port, newRouter(svc))
 	if err != nil {
 		appLogger.Fatal(err.Error())
 	}
