@@ -134,6 +134,20 @@ func bindGetResourceRequest(r *http.Request) *finding.GetResourceRequest {
 	}
 }
 
+func bindPutResourceRequest(r *http.Request) *finding.PutResourceRequest {
+	param := finding.ResourceForUpsert{}
+	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
+		appLogger.Warnf("Invalid parameter in PutFindingRequest, err: %+v", err)
+		return &finding.PutResourceRequest{Resource: &param}
+	}
+	return &finding.PutResourceRequest{
+		Resource: &finding.ResourceForUpsert{
+			ResourceName: param.ResourceName,
+			ProjectId:    param.ProjectId,
+		},
+	}
+}
+
 func commaSeparatorID(param string) []uint32 {
 	separated := []uint32{}
 	for _, p := range strings.Split(param, ",") {

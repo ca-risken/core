@@ -59,3 +59,8 @@ get-resource:
 	curl -is -XGET \
 		http://localhost:8080/resource/1001/
 
+.PHONY: put-resource
+put-resource:
+	curl -is -XPOST -H 'Content-Type: application/json' \
+		--data '{"resource_name":"rn", "project_id":1001}' \
+		http://localhost:8080/resource/put/

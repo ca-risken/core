@@ -324,6 +324,34 @@ func TestBindGetResourceRequest(t *testing.T) {
 	}
 }
 
+func TestBindPutResourceRequest(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  *finding.PutResourceRequest
+	}{
+		{
+			name:  "OK",
+			input: `{"resource_name":"rn", "project_id":1}`,
+			want:  &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceName: "rn", ProjectId: 1}},
+		},
+		{
+			name:  "parse error",
+			input: "xxxxxxxx",
+			want:  &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{}},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			req, _ := http.NewRequest("POST", "/resource/put", strings.NewReader(c.input))
+			got := bindPutResourceRequest(req)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
 func TestCommaSeparatorID(t *testing.T) {
 	cases := []struct {
 		name  string
