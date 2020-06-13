@@ -25,7 +25,7 @@ func main() {
 		appLogger.Fatal(err.Error())
 	}
 
-	r := newRouoter(svc)
+	r := newRouter(svc)
 	appLogger.Infof("starting http server at :%s", conf.Port)
 	err = http.ListenAndServe(":"+conf.Port, r)
 	if err != nil {
