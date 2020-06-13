@@ -128,6 +128,12 @@ func bindListResourceRequest(r *http.Request) *finding.ListResourceRequest {
 	return &req
 }
 
+func bindGetResourceRequest(r *http.Request) *finding.GetResourceRequest {
+	return &finding.GetResourceRequest{
+		ResourceId: parseUint64(chi.URLParam(r, "resource_id")),
+	}
+}
+
 func commaSeparatorID(param string) []uint32 {
 	separated := []uint32{}
 	for _, p := range strings.Split(param, ",") {

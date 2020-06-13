@@ -134,9 +134,19 @@ func (g *gatewayService) listResourceHandler(w http.ResponseWriter, r *http.Requ
 	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
 }
 
-// func (g *gatewayService) getResourceHandler(w http.ResponseWriter, r *http.Request) {
-// 	req := bindGetResourceRequest(r)
-// }
+func (g *gatewayService) getResourceHandler(w http.ResponseWriter, r *http.Request) {
+	req := bindGetResourceRequest(r)
+	if err := req.Validate(); err != nil {
+		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).GetResource(r.Context(), req)
+	if err != nil {
+		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
+}
 
 // func (g *gatewayService) putResourceHandler(w http.ResponseWriter, r *http.Request) {
 // 	req := bindPutResourceRequest(r)

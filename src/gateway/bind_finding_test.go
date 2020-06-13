@@ -69,7 +69,7 @@ func TestBindListFindingRequest(t *testing.T) {
 	}
 }
 
-func TestBindGetFinding(t *testing.T) {
+func TestBindGetFindingRequest(t *testing.T) {
 	cases := []struct {
 		name  string
 		input string
@@ -106,7 +106,7 @@ func TestBindGetFinding(t *testing.T) {
 	}
 }
 
-func TestBindPutFinding(t *testing.T) {
+func TestBindPutFindingRequest(t *testing.T) {
 	cases := []struct {
 		name  string
 		input string
@@ -134,7 +134,7 @@ func TestBindPutFinding(t *testing.T) {
 	}
 }
 
-func TestBindDeleteFinding(t *testing.T) {
+func TestBindDeleteFindingRequest(t *testing.T) {
 	cases := []struct {
 		name  string
 		input string
@@ -194,7 +194,7 @@ func TestBindListFindingTagRequest(t *testing.T) {
 	}
 }
 
-func TestBindTagFinding(t *testing.T) {
+func TestBindTagFindingRequest(t *testing.T) {
 	cases := []struct {
 		name  string
 		input string
@@ -222,7 +222,7 @@ func TestBindTagFinding(t *testing.T) {
 	}
 }
 
-func TestBindUntagFinding(t *testing.T) {
+func TestBindUntagFindingRequest(t *testing.T) {
 	cases := []struct {
 		name  string
 		input string
@@ -281,6 +281,42 @@ func TestBindListResourceRequest(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			req, _ := http.NewRequest("GET", "/resource?"+c.input, nil)
 			got := bindListResourceRequest(req)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestBindGetResourceRequest(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  *finding.GetResourceRequest
+	}{
+		{
+			name:  "No param",
+			input: "",
+			want:  &finding.GetResourceRequest{},
+		},
+		{
+			name:  "resource id",
+			input: "1001",
+			want:  &finding.GetResourceRequest{ResourceId: 1001},
+		},
+		{
+			name:  "parse error",
+			input: "xxxxxxxx",
+			want:  &finding.GetResourceRequest{},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			req, _ := http.NewRequest("GET", "/resource/"+c.input, nil)
+			rctx := chi.NewRouteContext()
+			rctx.URLParams.Add("resource_id", c.input) // Requestにパスパラメータ{resource_id}を登録
+			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+			got := bindGetResourceRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
 			}

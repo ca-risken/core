@@ -53,3 +53,9 @@ untag-finding:
 list-resource:
 	curl -is -XGET \
 		http://localhost:8080/resource?project_id=1001,1002
+
+.PHONY: get-resource
+get-resource:
+	curl -is -XGET \
+		http://localhost:8080/resource/1001/
+
