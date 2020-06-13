@@ -70,3 +70,20 @@ delete-resource:
 	curl -is -XPOST -H 'Content-Type: application/json' \
 		--data '{"resource_id":1003}' \
 		http://localhost:8080/resource/delete/
+
+.PHONY: list-resource-tag
+list-resource-tag:
+	curl -is -XGET -H 'Content-Type: application/json' \
+		http://localhost:8080/resource/1001/tag/
+
+.PHONY: tag-resource
+tag-resource:
+	curl -is -XPOST -H 'Content-Type: application/json' \
+		--data '{"resource_id":1001, "tag_key":"test", "tag_value":"true"}' \
+		http://localhost:8080/resource/tag/
+
+.PHONY: untag-resource
+untag-resource:
+	curl -is -XPOST -H 'Content-Type: application/json' \
+		--data '{"resource_tag_id":1005}' \
+		http://localhost:8080/resource/untag/

@@ -25,8 +25,11 @@ func newRouter(svc gatewayService) *chi.Mux {
 	r.Route("/resource", func(r chi.Router) {
 		r.Get("/", svc.listResourceHandler)
 		r.Get("/{resource_id}", svc.getResourceHandler)
+		r.Get("/{resource_id}/tag", svc.listResourceTagHandler)
 		r.Post("/put", svc.putResourceHandler)
 		r.Post("/delete", svc.deleteResourceHandler)
+		r.Post("/tag", svc.tagResourceHandler)
+		r.Post("/untag", svc.untagResourceHandler)
 	})
 
 	return r

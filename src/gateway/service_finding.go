@@ -184,14 +184,52 @@ func (g *gatewayService) deleteResourceHandler(w http.ResponseWriter, r *http.Re
 	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
 }
 
-// func (g *gatewayService) listResourceTagHandler(w http.ResponseWriter, r *http.Request) {
-// 	req := bindListResourceTagRequest(r)
-// }
+func (g *gatewayService) listResourceTagHandler(w http.ResponseWriter, r *http.Request) {
+	req := bindListResourceTagRequest(r)
+	if err := req.Validate(); err != nil {
+		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).ListResourceTag(r.Context(), req)
+	if err != nil {
+		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
+}
 
-// func (g *gatewayService) tagResourceHandler(w http.ResponseWriter, r *http.Request) {
-// 	req := bindTagResourceRequest(r)
-// }
+func (g *gatewayService) tagResourceHandler(w http.ResponseWriter, r *http.Request) {
+	if err := validatePostHeader(r); err != nil {
+		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	req := bindTagResourceRequest(r)
+	if err := req.Validate(); err != nil {
+		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).TagResource(r.Context(), req)
+	if err != nil {
+		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
+}
 
-// func (g *gatewayService) untagResourceHandler(w http.ResponseWriter, r *http.Request) {
-// 	req := bindUntagResourceRequest(r)
-// }
+func (g *gatewayService) untagResourceHandler(w http.ResponseWriter, r *http.Request) {
+	if err := validatePostHeader(r); err != nil {
+		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	req := bindUntagResourceRequest(r)
+	if err := req.Validate(); err != nil {
+		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).UntagResource(r.Context(), req)
+	if err != nil {
+		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
+}

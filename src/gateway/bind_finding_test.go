@@ -182,9 +182,8 @@ func TestBindListFindingTagRequest(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			req, _ := http.NewRequest("POST", "/finding/"+c.input+"/tag", strings.NewReader(c.input))
-			// Requestにパスパラメータ{finding_id}を登録
 			rctx := chi.NewRouteContext()
-			rctx.URLParams.Add("finding_id", c.input)
+			rctx.URLParams.Add("finding_id", c.input) // Requestにパスパラメータ{finding_id}を登録
 			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
 			got := bindListFindingTagRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
@@ -373,6 +372,93 @@ func TestBindDeleteResourceRequest(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			req, _ := http.NewRequest("POST", "/resource/delete", strings.NewReader(c.input))
 			got := bindDeleteResourceRequest(req)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestBindListResourceTagReqest(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  *finding.ListResourceTagRequest
+	}{
+		{
+			name:  "OK",
+			input: `1001`,
+			want:  &finding.ListResourceTagRequest{ResourceId: 1001},
+		},
+		{
+			name:  "parse error",
+			input: "xxx",
+			want:  &finding.ListResourceTagRequest{},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			req, _ := http.NewRequest("POST", "/resource/"+c.input+"/tag", strings.NewReader(c.input))
+			rctx := chi.NewRouteContext()
+			rctx.URLParams.Add("resource_id", c.input) // Requestにパスパラメータ{resource_id}を登録
+			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+			got := bindListResourceTagRequest(req)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestBindTagResourceRequest(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  *finding.TagResourceRequest
+	}{
+		{
+			name:  "OK",
+			input: `{"resource_id":111, "tag_key":"key", "tag_value":"value"}`,
+			want:  &finding.TagResourceRequest{Tag: &finding.ResourceTagForUpsert{ResourceId: 111, TagKey: "key", TagValue: "value"}},
+		},
+		{
+			name:  "parse error",
+			input: "xxxxxxxx",
+			want:  &finding.TagResourceRequest{Tag: &finding.ResourceTagForUpsert{}},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			req, _ := http.NewRequest("POST", "/resource/tag", strings.NewReader(c.input))
+			got := bindTagResourceRequest(req)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestBindUntagResourceRequest(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  *finding.UntagResourceRequest
+	}{
+		{
+			name:  "OK",
+			input: `{"resource_tag_id":111}`,
+			want:  &finding.UntagResourceRequest{ResourceTagId: 111},
+		},
+		{
+			name:  "parse error",
+			input: "xxxxxxxx",
+			want:  &finding.UntagResourceRequest{},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			req, _ := http.NewRequest("POST", "/resource/untag", strings.NewReader(c.input))
+			got := bindUntagResourceRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
 			}

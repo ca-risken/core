@@ -131,6 +131,30 @@ func bindDeleteResourceRequest(r *http.Request) *finding.DeleteResourceRequest {
 	return &param
 }
 
+func bindListResourceTagRequest(r *http.Request) *finding.ListResourceTagRequest {
+	return &finding.ListResourceTagRequest{
+		ResourceId: parseUint64(chi.URLParam(r, "resource_id")),
+	}
+}
+
+func bindTagResourceRequest(r *http.Request) *finding.TagResourceRequest {
+	param := finding.ResourceTagForUpsert{}
+	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
+		appLogger.Warnf("Invalid parameter in TagResourceRequest, err: %+v", err)
+		return &finding.TagResourceRequest{Tag: &param}
+	}
+	return &finding.TagResourceRequest{Tag: &param}
+}
+
+func bindUntagResourceRequest(r *http.Request) *finding.UntagResourceRequest {
+	param := finding.UntagResourceRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
+		appLogger.Warnf("Invalid parameter in UntagResourceRequest, err: %+v", err)
+		return &finding.UntagResourceRequest{}
+	}
+	return &param
+}
+
 func commaSeparatorID(param string) []uint32 {
 	separated := []uint32{}
 	for _, p := range strings.Split(param, ",") {
