@@ -64,3 +64,9 @@ put-resource:
 	curl -is -XPOST -H 'Content-Type: application/json' \
 		--data '{"resource_name":"rn", "project_id":1001}' \
 		http://localhost:8080/resource/put/
+
+.PHONY: delete-resource
+delete-resource:
+	curl -is -XPOST -H 'Content-Type: application/json' \
+		--data '{"resource_id":1003}' \
+		http://localhost:8080/resource/delete/

@@ -48,18 +48,7 @@ func bindPutFindingRequest(r *http.Request) *finding.PutFindingRequest {
 		appLogger.Warnf("Invalid parameter in PutFindingRequest, err: %+v", err)
 		return &finding.PutFindingRequest{Finding: &param}
 	}
-	return &finding.PutFindingRequest{
-		Finding: &finding.FindingForUpsert{
-			Description:      param.Description,
-			DataSource:       param.DataSource,
-			DataSourceId:     param.DataSourceId,
-			ResourceName:     param.ResourceName,
-			ProjectId:        param.ProjectId,
-			OriginalScore:    param.OriginalScore,
-			OriginalMaxScore: param.OriginalMaxScore,
-			Data:             param.Data,
-		},
-	}
+	return &finding.PutFindingRequest{Finding: &param}
 }
 
 func bindDeleteFindingRequest(r *http.Request) *finding.DeleteFindingRequest {
@@ -68,9 +57,7 @@ func bindDeleteFindingRequest(r *http.Request) *finding.DeleteFindingRequest {
 		appLogger.Warnf("Invalid parameter in DeleteFindingRequest, err: %+v", err)
 		return &finding.DeleteFindingRequest{}
 	}
-	return &finding.DeleteFindingRequest{
-		FindingId: param.FindingId,
-	}
+	return &param
 }
 
 func bindListFindingTagRequest(r *http.Request) *finding.ListFindingTagRequest {
@@ -85,24 +72,16 @@ func bindTagFindingRequest(r *http.Request) *finding.TagFindingRequest {
 		appLogger.Warnf("Invalid parameter in TagFindingRequest, err: %+v", err)
 		return &finding.TagFindingRequest{Tag: &param}
 	}
-	return &finding.TagFindingRequest{
-		Tag: &finding.FindingTagForUpsert{
-			FindingId: param.FindingId,
-			TagKey:    param.TagKey,
-			TagValue:  param.TagValue,
-		},
-	}
+	return &finding.TagFindingRequest{Tag: &param}
 }
 
 func bindUntagFindingRequest(r *http.Request) *finding.UntagFindingRequest {
 	param := finding.UntagFindingRequest{}
 	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
-		appLogger.Warnf("Invalid parameter in TagFindingRequest, err: %+v", err)
+		appLogger.Warnf("Invalid parameter in UntagFindingRequest, err: %+v", err)
 		return &finding.UntagFindingRequest{}
 	}
-	return &finding.UntagFindingRequest{
-		FindingTagId: param.FindingTagId,
-	}
+	return &param
 }
 
 func bindListResourceRequest(r *http.Request) *finding.ListResourceRequest {
@@ -137,15 +116,19 @@ func bindGetResourceRequest(r *http.Request) *finding.GetResourceRequest {
 func bindPutResourceRequest(r *http.Request) *finding.PutResourceRequest {
 	param := finding.ResourceForUpsert{}
 	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
-		appLogger.Warnf("Invalid parameter in PutFindingRequest, err: %+v", err)
+		appLogger.Warnf("Invalid parameter in PutResourceRequest, err: %+v", err)
 		return &finding.PutResourceRequest{Resource: &param}
 	}
-	return &finding.PutResourceRequest{
-		Resource: &finding.ResourceForUpsert{
-			ResourceName: param.ResourceName,
-			ProjectId:    param.ProjectId,
-		},
+	return &finding.PutResourceRequest{Resource: &param}
+}
+
+func bindDeleteResourceRequest(r *http.Request) *finding.DeleteResourceRequest {
+	param := finding.DeleteResourceRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
+		appLogger.Warnf("Invalid parameter in DeleteResourceRequest, err: %+v", err)
+		return &finding.DeleteResourceRequest{}
 	}
+	return &param
 }
 
 func commaSeparatorID(param string) []uint32 {

@@ -166,9 +166,23 @@ func (g *gatewayService) putResourceHandler(w http.ResponseWriter, r *http.Reque
 	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
 }
 
-// func (g *gatewayService) deleteResourceHandler(w http.ResponseWriter, r *http.Request) {
-// 	req := bindDeleteResourceRequest(r)
-// }
+func (g *gatewayService) deleteResourceHandler(w http.ResponseWriter, r *http.Request) {
+	if err := validatePostHeader(r); err != nil {
+		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	req := bindDeleteResourceRequest(r)
+	if err := req.Validate(); err != nil {
+		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).DeleteResource(r.Context(), req)
+	if err != nil {
+		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
+		return
+	}
+	writeResponse(w, http.StatusOK, map[string]interface{}{"data": resp})
+}
 
 // func (g *gatewayService) listResourceTagHandler(w http.ResponseWriter, r *http.Request) {
 // 	req := bindListResourceTagRequest(r)

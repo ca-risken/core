@@ -352,6 +352,34 @@ func TestBindPutResourceRequest(t *testing.T) {
 	}
 }
 
+func TestBindDeleteResourceRequest(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  *finding.DeleteResourceRequest
+	}{
+		{
+			name:  "OK",
+			input: `{"resource_id":1001}`,
+			want:  &finding.DeleteResourceRequest{ResourceId: 1001},
+		},
+		{
+			name:  "parse error",
+			input: "xxxxxxxx",
+			want:  &finding.DeleteResourceRequest{},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			req, _ := http.NewRequest("POST", "/resource/delete", strings.NewReader(c.input))
+			got := bindDeleteResourceRequest(req)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
 func TestCommaSeparatorID(t *testing.T) {
 	cases := []struct {
 		name  string
