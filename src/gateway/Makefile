@@ -48,3 +48,8 @@ untag-finding:
 	curl -is -XPOST -H 'Content-Type: application/json' \
 		--data '{"finding_tag_id":1002}' \
 		http://localhost:8080/finding/untag/
+
+.PHONY: list-resource
+list-resource:
+	curl -is -XGET \
+		http://localhost:8080/resource?project_id=1001,1002

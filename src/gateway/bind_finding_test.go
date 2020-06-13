@@ -69,7 +69,7 @@ func TestBindListFindingRequest(t *testing.T) {
 	}
 }
 
-func TestMappintgGetFinding(t *testing.T) {
+func TestBindGetFinding(t *testing.T) {
 	cases := []struct {
 		name  string
 		input string
@@ -106,7 +106,7 @@ func TestMappintgGetFinding(t *testing.T) {
 	}
 }
 
-func TestMappintgPutFinding(t *testing.T) {
+func TestBindPutFinding(t *testing.T) {
 	cases := []struct {
 		name  string
 		input string
@@ -134,7 +134,7 @@ func TestMappintgPutFinding(t *testing.T) {
 	}
 }
 
-func TestMappintgDeleteFinding(t *testing.T) {
+func TestBindDeleteFinding(t *testing.T) {
 	cases := []struct {
 		name  string
 		input string
@@ -194,7 +194,7 @@ func TestBindListFindingTagRequest(t *testing.T) {
 	}
 }
 
-func TestMappintgTagFinding(t *testing.T) {
+func TestBindTagFinding(t *testing.T) {
 	cases := []struct {
 		name  string
 		input string
@@ -222,7 +222,7 @@ func TestMappintgTagFinding(t *testing.T) {
 	}
 }
 
-func TestMappintgUntagFinding(t *testing.T) {
+func TestBindUntagFinding(t *testing.T) {
 	cases := []struct {
 		name  string
 		input string
@@ -243,6 +243,44 @@ func TestMappintgUntagFinding(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			req, _ := http.NewRequest("POST", "/finding/untag", strings.NewReader(c.input))
 			got := bindUntagFindingRequest(req)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestBindListResourceRequest(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  *finding.ListResourceRequest
+	}{
+		{
+			name:  "OK",
+			input: `project_id=111,222&resource_name=aaa,bbb&from_sum_score=0.0&to_sum_score=100.0&from_at=&to_at=`,
+			want:  &finding.ListResourceRequest{ProjectId: []uint32{111, 222}, ResourceName: []string{"aaa", "bbb"}, FromSumScore: 0.0, ToSumScore: 100.0},
+		},
+		{
+			name:  "OK No param",
+			input: `project_id=&resource_name=&from_sum_score=&to_sum_score=&from_at=&to_at=`,
+			want:  &finding.ListResourceRequest{},
+		},
+		{
+			name:  "score parse error",
+			input: "from_sum_score=parse_error&to_sum_score=parse_error",
+			want:  &finding.ListResourceRequest{},
+		},
+		{
+			name:  "time parse error",
+			input: "from_at=parse_error&to_at=parse_error",
+			want:  &finding.ListResourceRequest{},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			req, _ := http.NewRequest("GET", "/resource?"+c.input, nil)
+			got := bindListResourceRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
 			}

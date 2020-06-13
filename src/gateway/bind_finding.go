@@ -105,6 +105,29 @@ func bindUntagFindingRequest(r *http.Request) *finding.UntagFindingRequest {
 	}
 }
 
+func bindListResourceRequest(r *http.Request) *finding.ListResourceRequest {
+	req := finding.ListResourceRequest{}
+	if param := r.URL.Query().Get("project_id"); param != "" {
+		req.ProjectId = commaSeparatorID(param)
+	}
+	if param := r.URL.Query().Get("resource_name"); param != "" {
+		req.ResourceName = commaSeparator(param)
+	}
+	if param := r.URL.Query().Get("from_sum_score"); param != "" {
+		req.FromSumScore = parseScore(param)
+	}
+	if param := r.URL.Query().Get("to_sum_score"); param != "" {
+		req.ToSumScore = parseScore(param)
+	}
+	if param := r.URL.Query().Get("from_at"); param != "" {
+		req.FromAt = parseAt(param)
+	}
+	if param := r.URL.Query().Get("to_at"); param != "" {
+		req.ToAt = parseAt(param)
+	}
+	return &req
+}
+
 func commaSeparatorID(param string) []uint32 {
 	separated := []uint32{}
 	for _, p := range strings.Split(param, ",") {
