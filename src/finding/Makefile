@@ -81,7 +81,7 @@ put-resource:
 delete-resource:
 	grpcurl \
 		-plaintext \
-		-d '{"resource_id": 1006}' \
+		-d '{"resource_id": 1007}' \
 		localhost:8081 core.finding.FindingService.DeleteResource
 
 .PHONY: list-resource-tag

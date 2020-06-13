@@ -206,6 +206,16 @@ func (f *findingRepository) DeleteFinding(findingID uint64) error {
 	if err := f.MasterDB.Exec(`delete from finding where finding_id = ?`, findingID).Error; err != nil {
 		return err
 	}
+	if err := f.DeleteTagByFindingID(findingID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (f *findingRepository) DeleteTagByFindingID(findingID uint64) error {
+	if err := f.MasterDB.Exec(`delete from finding_tag where finding_id = ?`, findingID).Error; err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -296,6 +306,16 @@ func (f *findingRepository) GetResource(resourceID uint64) (*model.Resource, err
 
 func (f *findingRepository) DeleteResource(resourceID uint64) error {
 	if err := f.MasterDB.Exec(`delete from resource where resource_id = ?`, resourceID).Error; err != nil {
+		return err
+	}
+	if err := f.DeleteTagByResourceID(resourceID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (f *findingRepository) DeleteTagByResourceID(resourceID uint64) error {
+	if err := f.MasterDB.Exec(`delete from resource_tag where resource_id = ?`, resourceID).Error; err != nil {
 		return err
 	}
 	return nil
