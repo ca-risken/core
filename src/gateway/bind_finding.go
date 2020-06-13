@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/chi"
 )
 
-func mappingListFindingRequest(r *http.Request) *finding.ListFindingRequest {
+func bindListFindingRequest(r *http.Request) *finding.ListFindingRequest {
 	req := finding.ListFindingRequest{}
 	if param := r.URL.Query().Get("project_id"); param != "" {
 		req.ProjectId = commaSeparatorID(param)
@@ -36,13 +36,13 @@ func mappingListFindingRequest(r *http.Request) *finding.ListFindingRequest {
 	return &req
 }
 
-func mappingGetFindingRequest(r *http.Request) *finding.GetFindingRequest {
+func bindGetFindingRequest(r *http.Request) *finding.GetFindingRequest {
 	return &finding.GetFindingRequest{
 		FindingId: parseUint64(chi.URLParam(r, "finding_id")),
 	}
 }
 
-func mappingPutFindingRequest(r *http.Request) *finding.PutFindingRequest {
+func bindPutFindingRequest(r *http.Request) *finding.PutFindingRequest {
 	param := finding.FindingForUpsert{}
 	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
 		appLogger.Warnf("Invalid parameter in PutFindingRequest, err: %+v", err)
@@ -62,7 +62,7 @@ func mappingPutFindingRequest(r *http.Request) *finding.PutFindingRequest {
 	}
 }
 
-func mappingDeleteFindingRequest(r *http.Request) *finding.DeleteFindingRequest {
+func bindDeleteFindingRequest(r *http.Request) *finding.DeleteFindingRequest {
 	param := finding.DeleteFindingRequest{}
 	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
 		appLogger.Warnf("Invalid parameter in DeleteFindingRequest, err: %+v", err)
@@ -73,13 +73,13 @@ func mappingDeleteFindingRequest(r *http.Request) *finding.DeleteFindingRequest 
 	}
 }
 
-func mappingListFindingTagRequest(r *http.Request) *finding.ListFindingTagRequest {
+func bindListFindingTagRequest(r *http.Request) *finding.ListFindingTagRequest {
 	return &finding.ListFindingTagRequest{
 		FindingId: parseUint64(chi.URLParam(r, "finding_id")),
 	}
 }
 
-func mappingTagFindingRequest(r *http.Request) *finding.TagFindingRequest {
+func bindTagFindingRequest(r *http.Request) *finding.TagFindingRequest {
 	param := finding.FindingTagForUpsert{}
 	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
 		appLogger.Warnf("Invalid parameter in TagFindingRequest, err: %+v", err)
@@ -94,7 +94,7 @@ func mappingTagFindingRequest(r *http.Request) *finding.TagFindingRequest {
 	}
 }
 
-func mappingUntagFindingRequest(r *http.Request) *finding.UntagFindingRequest {
+func bindUntagFindingRequest(r *http.Request) *finding.UntagFindingRequest {
 	param := finding.UntagFindingRequest{}
 	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
 		appLogger.Warnf("Invalid parameter in TagFindingRequest, err: %+v", err)

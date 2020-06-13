@@ -7,7 +7,7 @@ import (
 )
 
 func (g *gatewayService) listFindingHandler(w http.ResponseWriter, r *http.Request) {
-	req := mappingListFindingRequest(r)
+	req := bindListFindingRequest(r)
 	if err := req.Validate(); err != nil {
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
@@ -21,7 +21,7 @@ func (g *gatewayService) listFindingHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (g *gatewayService) getFindingHandler(w http.ResponseWriter, r *http.Request) {
-	req := mappingGetFindingRequest(r)
+	req := bindGetFindingRequest(r)
 	if err := req.Validate(); err != nil {
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
@@ -39,7 +39,7 @@ func (g *gatewayService) putFindingHandler(w http.ResponseWriter, r *http.Reques
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	req := mappingPutFindingRequest(r)
+	req := bindPutFindingRequest(r)
 	if err := req.Validate(); err != nil {
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
@@ -57,7 +57,7 @@ func (g *gatewayService) deleteFindingHandler(w http.ResponseWriter, r *http.Req
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	req := mappingDeleteFindingRequest(r)
+	req := bindDeleteFindingRequest(r)
 	if err := req.Validate(); err != nil {
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
@@ -71,7 +71,7 @@ func (g *gatewayService) deleteFindingHandler(w http.ResponseWriter, r *http.Req
 }
 
 func (g *gatewayService) listFindingTagHandler(w http.ResponseWriter, r *http.Request) {
-	req := mappingListFindingTagRequest(r)
+	req := bindListFindingTagRequest(r)
 	if err := req.Validate(); err != nil {
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
@@ -89,7 +89,7 @@ func (g *gatewayService) tagFindingHandler(w http.ResponseWriter, r *http.Reques
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	req := mappingTagFindingRequest(r)
+	req := bindTagFindingRequest(r)
 	if err := req.Validate(); err != nil {
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
@@ -107,7 +107,7 @@ func (g *gatewayService) untagFindingHandler(w http.ResponseWriter, r *http.Requ
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	req := mappingUntagFindingRequest(r)
+	req := bindUntagFindingRequest(r)
 	if err := req.Validate(); err != nil {
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
@@ -121,29 +121,29 @@ func (g *gatewayService) untagFindingHandler(w http.ResponseWriter, r *http.Requ
 }
 
 // func (g *gatewayService) listResourceHandler(w http.ResponseWriter, r *http.Request) {
-// 	req := mappingListResourceRequest(r)
+// 	req := bindListResourceRequest(r)
 // }
 
 // func (g *gatewayService) getResourceHandler(w http.ResponseWriter, r *http.Request) {
-// 	req := mappingGetResourceRequest(r)
+// 	req := bindGetResourceRequest(r)
 // }
 
 // func (g *gatewayService) putResourceHandler(w http.ResponseWriter, r *http.Request) {
-// 	req := mappingPutResourceRequest(r)
+// 	req := bindPutResourceRequest(r)
 // }
 
 // func (g *gatewayService) deleteResourceHandler(w http.ResponseWriter, r *http.Request) {
-// 	req := mappingDeleteResourceRequest(r)
+// 	req := bindDeleteResourceRequest(r)
 // }
 
 // func (g *gatewayService) listResourceTagHandler(w http.ResponseWriter, r *http.Request) {
-// 	req := mappingListResourceTagRequest(r)
+// 	req := bindListResourceTagRequest(r)
 // }
 
 // func (g *gatewayService) tagResourceHandler(w http.ResponseWriter, r *http.Request) {
-// 	req := mappingTagResourceRequest(r)
+// 	req := bindTagResourceRequest(r)
 // }
 
 // func (g *gatewayService) untagResourceHandler(w http.ResponseWriter, r *http.Request) {
-// 	req := mappingUntagResourceRequest(r)
+// 	req := bindUntagResourceRequest(r)
 // }

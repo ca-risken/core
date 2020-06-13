@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/chi"
 )
 
-func TestMappingListFindingRequest(t *testing.T) {
+func TestBindListFindingRequest(t *testing.T) {
 	cases := []struct {
 		name  string
 		input string
@@ -61,9 +61,9 @@ func TestMappingListFindingRequest(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			req, _ := http.NewRequest("GET", "/finding?"+c.input, nil)
-			got := mappingListFindingRequest(req)
+			got := bindListFindingRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
 			}
 		})
 	}
@@ -98,9 +98,9 @@ func TestMappintgGetFinding(t *testing.T) {
 			rctx := chi.NewRouteContext()
 			rctx.URLParams.Add("finding_id", c.input)
 			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
-			got := mappingGetFindingRequest(req)
+			got := bindGetFindingRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
 			}
 		})
 	}
@@ -126,9 +126,9 @@ func TestMappintgPutFinding(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			req, _ := http.NewRequest("POST", "/finding/put", strings.NewReader(c.input))
-			got := mappingPutFindingRequest(req)
+			got := bindPutFindingRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
 			}
 		})
 	}
@@ -154,15 +154,15 @@ func TestMappintgDeleteFinding(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			req, _ := http.NewRequest("POST", "/finding/delete", strings.NewReader(c.input))
-			got := mappingDeleteFindingRequest(req)
+			got := bindDeleteFindingRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
 			}
 		})
 	}
 }
 
-func TestMappingListFindingTagRequest(t *testing.T) {
+func TestBindListFindingTagRequest(t *testing.T) {
 	cases := []struct {
 		name  string
 		input string
@@ -186,9 +186,9 @@ func TestMappingListFindingTagRequest(t *testing.T) {
 			rctx := chi.NewRouteContext()
 			rctx.URLParams.Add("finding_id", c.input)
 			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
-			got := mappingListFindingTagRequest(req)
+			got := bindListFindingTagRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
 			}
 		})
 	}
@@ -214,9 +214,9 @@ func TestMappintgTagFinding(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			req, _ := http.NewRequest("POST", "/finding/tag", strings.NewReader(c.input))
-			got := mappingTagFindingRequest(req)
+			got := bindTagFindingRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
 			}
 		})
 	}
@@ -242,9 +242,9 @@ func TestMappintgUntagFinding(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			req, _ := http.NewRequest("POST", "/finding/untag", strings.NewReader(c.input))
-			got := mappingUntagFindingRequest(req)
+			got := bindUntagFindingRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
 			}
 		})
 	}
