@@ -45,10 +45,8 @@
     - [User](#core.iam.User)
   
 - [iam/service.proto](#iam/service.proto)
-    - [AuthnRequest](#core.iam.AuthnRequest)
-    - [AuthnResponse](#core.iam.AuthnResponse)
-    - [AuthzRequest](#core.iam.AuthzRequest)
-    - [AuthzResponse](#core.iam.AuthzResponse)
+    - [IsAuthorizedRequest](#core.iam.IsAuthorizedRequest)
+    - [IsAuthorizedResponse](#core.iam.IsAuthorizedResponse)
   
     - [IAMService](#core.iam.IAMService)
   
@@ -699,40 +697,10 @@ User
 
 
 
-<a name="core.iam.AuthnRequest"></a>
+<a name="core.iam.IsAuthorizedRequest"></a>
 
-### AuthnRequest
-AuthnRequest tokenからユーザを識別します
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| token | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="core.iam.AuthnResponse"></a>
-
-### AuthnResponse
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| user | [User](#core.iam.User) |  |  |
-
-
-
-
-
-
-<a name="core.iam.AuthzRequest"></a>
-
-### AuthzRequest
-AuthzRequest
+### IsAuthorizedRequest
+IsAuthorizedRequest
 ユーザからのリクエストに対して、アクションやリソースへの認可を行います
 
 
@@ -748,9 +716,9 @@ AuthzRequest
 
 
 
-<a name="core.iam.AuthzResponse"></a>
+<a name="core.iam.IsAuthorizedResponse"></a>
 
-### AuthzResponse
+### IsAuthorizedResponse
 
 
 
@@ -776,8 +744,7 @@ AuthzRequest
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| Authenticated | [AuthnRequest](#core.iam.AuthnRequest) | [AuthnResponse](#core.iam.AuthnResponse) | 認証（リクエストユーザを識別します） |
-| Authorized | [AuthzRequest](#core.iam.AuthzRequest) | [AuthzResponse](#core.iam.AuthzResponse) | 認可（ユーザがリクエストしたアクションや、リソースに対しての認可を行います） |
+| IsAuthorized | [IsAuthorizedRequest](#core.iam.IsAuthorizedRequest) | [IsAuthorizedResponse](#core.iam.IsAuthorizedResponse) | 認可（ユーザがリクエストしたアクションや、リソースに対しての認可を行います） |
 
  
 

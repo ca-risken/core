@@ -6,21 +6,13 @@ option go_package = "github.com/CyberAgent/mimosa-core/proto/iam";
 import "iam/entity.proto";
 
 service IAMService {
-  // 認証（認証済みユーザを識別します）
-  rpc Authenticated(AuthnRequest) returns (AuthnResponse);
   // 認可（ユーザがリクエストしたアクションや、リソースに対しての認可を行います）
-  rpc Authorized(AuthzRequest) returns (AuthzResponse);
+  rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
 }
 
-// AuthnRequest
-// tokenからユーザを識別します
-message AuthnRequest { string token = 1; }
-
-message AuthnResponse { User user = 1; }
-
-// AuthzRequest
+// IsAuthorizedRequest
 // ユーザからのリクエストに対して、アクションやリソースへの認可を行います
-message AuthzRequest {
+message IsAuthorizedRequest {
   uint32 user_id = 1;    // UserID,(e.g.)111
   uint32 project_id = 2; // ProjectID,(e.g.)1001
   string action_name =
@@ -29,4 +21,4 @@ message AuthzRequest {
       4; // System_resource_name(<prefix>/<resouorce_name>format),(e.g.)`aws:accessAnalyzer/samplebucket`
 }
 
-message AuthzResponse { bool ok = 1; }
+message IsAuthorizedResponse { bool ok = 1; }
