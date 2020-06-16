@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/CyberAgent/mimosa-core/proto/finding"
+	"github.com/CyberAgent/mimosa-core/proto/iam"
 	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
-type findingConf struct {
-	Port string `default:"8081"`
+type iamConf struct {
+	Port string `default:"8082"`
 }
 
 func main() {
-	var conf findingConf
+	var conf iamConf
 	err := envconfig.Process("", &conf)
 	if err != nil {
 		appLogger.Fatal(err.Error())
@@ -27,8 +27,8 @@ func main() {
 	}
 
 	server := grpc.NewServer()
-	findingServer := newFindingService(newFindingRepository()) // DI service & repository
-	finding.RegisterFindingServiceServer(server, findingServer)
+	iamServer := newIAMService(newIAMRepository()) // DI service & repository
+	iam.RegisterIAMServiceServer(server, iamServer)
 
 	reflection.Register(server) // enable reflection API
 	appLogger.Infof("Starting gRPC server at :%s", conf.Port)
