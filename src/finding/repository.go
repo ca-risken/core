@@ -291,10 +291,10 @@ func (f *findingRepository) UntagFinding(findingTagID uint64) error {
 func (f *findingRepository) ListResource(req *finding.ListResourceRequest) (*[]model.Resource, error) {
 	query := `
 select 
-  *
+  r.*
 from
   resource r
-  inner join finding f using(resource_name)
+  left outer join finding f using(resource_name)
 where
 	r.updated_at between ? and ?
 `
@@ -308,7 +308,7 @@ where
 		query += " and r.resource_name in (?)"
 		params = append(params, req.ResourceName)
 	}
-	query += " group by r.resource_id having sum(f.Score) between ? and ?"
+	query += " group by r.resource_id having sum(COALESCE(f.score, 0)) between ? and ?"
 	params = append(params, req.FromSumScore, req.ToSumScore)
 
 	var data []model.Resource

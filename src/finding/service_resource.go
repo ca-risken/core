@@ -100,7 +100,7 @@ func (f *findingService) PutResource(ctx context.Context, req *finding.PutResour
 	}
 	// Authz
 	if !f.isAuthorizedWithResource(ctx, req.UserId, "PutResource", data) {
-		return nil, fmt.Errorf("Unauthorized PutResource action for resource=%+v", data)
+		return nil, fmt.Errorf("Unauthorized PutResource action, user_id=%d, data=%+v", req.UserId, data)
 	}
 
 	// upsert
@@ -117,7 +117,7 @@ func (f *findingService) DeleteResource(ctx context.Context, req *finding.Delete
 	}
 	// Authz
 	if !f.isAuthorizedWithResourceID(ctx, req.UserId, "DeleteResource", req.ResourceId) {
-		return nil, fmt.Errorf("Unauthorized DeleteResource action for resource_id=%d", req.ResourceId)
+		return nil, fmt.Errorf("Unauthorized DeleteResource action, user_id=%d, resource_id=%d", req.UserId, req.ResourceId)
 	}
 	err := f.repository.DeleteResource(req.ResourceId)
 	if err != nil {
@@ -177,7 +177,7 @@ func (f *findingService) TagResource(ctx context.Context, req *finding.TagResour
 	}
 	// Authz
 	if !f.isAuthorizedWithResourceTag(ctx, req.UserId, "TagResource", tag) {
-		return nil, fmt.Errorf("Unauthorized TagResource action for tag=%+v", tag)
+		return nil, fmt.Errorf("Unauthorized TagResource action, user_id=%d, tag=%+v", req.UserId, tag)
 	}
 
 	registerd, err := f.repository.TagResource(tag)
@@ -193,7 +193,7 @@ func (f *findingService) UntagResource(ctx context.Context, req *finding.UntagRe
 	}
 	// Authz
 	if !f.isAuthorizedWithResourceTagID(ctx, req.UserId, "UntagResource", req.ResourceTagId) {
-		return nil, fmt.Errorf("Unauthorized UntagResource action for resource_tag_id=%d", req.ResourceTagId)
+		return nil, fmt.Errorf("Unauthorized UntagResource action, user_id=%d, resource_tag_id=%d", req.UserId, req.ResourceTagId)
 	}
 
 	err := f.repository.UntagResource(req.ResourceTagId)
