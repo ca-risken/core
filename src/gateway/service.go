@@ -15,7 +15,6 @@ import (
 
 type gatewayService struct {
 	port           string
-	findingSvcAddr string
 	findingSvcConn *grpc.ClientConn
 }
 
@@ -31,27 +30,24 @@ func newGatewayService() (gatewayService, error) {
 		return gatewayService{}, err
 	}
 
+	ctx := context.Background()
+	conn, err := getGRPCConn(ctx, conf.FindingSvcAddr)
+	if err != nil {
+		return gatewayService{}, err
+	}
 	svc := gatewayService{
 		port:           conf.Port,
-		findingSvcAddr: conf.FindingSvcAddr,
-	}
-	ctx := context.Background()
-	if err := mustConnGRPC(ctx, &svc.findingSvcConn, svc.findingSvcAddr); err != nil {
-		return svc, err
+		findingSvcConn: conn,
 	}
 	return svc, nil
 }
 
-func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) error {
-	var err error
-	*conn, err = grpc.DialContext(ctx, addr,
-		grpc.WithInsecure(),
-		grpc.WithTimeout(time.Second*3),
-	)
+func getGRPCConn(ctx context.Context, addr string) (*grpc.ClientConn, error) {
+	conn, err := grpc.DialContext(ctx, addr, grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return conn, nil
 }
 
 func writeResponse(w http.ResponseWriter, status int, body map[string]interface{}) {

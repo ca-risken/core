@@ -13,7 +13,7 @@ FROM alpine
 RUN apk add --no-cache ca-certificates tzdata
 COPY --from=builder /go/bin/gateway /usr/local/gateway/bin/
 ENV PORT= \
-    FIDING_SVC_ADDR= \
+    FINDING_SVC_ADDR= \
     TZ=Asia/Tokyo
 WORKDIR /usr/local/gateway
 CMD ["bin/gateway"]
