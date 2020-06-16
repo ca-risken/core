@@ -17,7 +17,7 @@ func (i *IsAuthorizedRequest) Validate() error {
 		// must format: "<service-name>/<action-name>"
 		validation.Field(&i.ActionName, validation.Required, validation.Match(regexp.MustCompile(`^(\w|-)+/(\w|-)+$`))),
 		// must format: "<prefix>/<prefix>/.../<resource-name>"
-		validation.Field(&i.ResourceName, validation.Required, validation.Match(regexp.MustCompile(`^(\w|-|:|/)+/(\w|-)+$`))),
+		validation.Field(&i.ResourceName, validation.Required, validation.Match(regexp.MustCompile(`^(\w|-|:|/)+/.+$`))),
 	)
 }
 
