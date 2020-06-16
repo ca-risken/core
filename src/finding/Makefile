@@ -21,6 +21,13 @@ list-finding:
 		-d '{"project_id":["1001","1002"], "from_score":0.0, "to_score":1.0, "from_at": 1560000000, "to_at": 1660000000}' \
 		localhost:8081 core.finding.FindingService.ListFinding
 
+.PHONY: list-finding-with-user
+list-finding-with-user:
+	grpcurl \
+		-plaintext \
+		-d '{"user_id":1001, "project_id":["1001","1002"], "from_score":0.0, "to_score":1.0, "from_at": 1560000000, "to_at": 1660000000}' \
+		localhost:8081 core.finding.FindingService.ListFinding
+
 .PHONY: put-finding
 put-finding:
 	grpcurl \
@@ -46,7 +53,7 @@ list-finding-tag:
 tag-finding:
 	grpcurl \
 		-plaintext \
-		-d '{"tag": {"finding_id": 1001, "tag_key": "key", "tag_value": "value"}}' \
+		-d '{"tag": {"finding_id": 1001, "project_id": 1001, "tag_key": "key", "tag_value": "value"}}' \
 		localhost:8081 core.finding.FindingService.TagFinding
 
 .PHONY: untag-finding
@@ -95,7 +102,7 @@ list-resource-tag:
 tag-resource:
 	grpcurl \
 		-plaintext \
-		-d '{"tag": {"resource_id": 1001, "tag_key": "key", "tag_value": "value"}}' \
+		-d '{"tag": {"resource_id": 1001, "project_id": 1001, "tag_key": "key", "tag_value": "value"}}' \
 		localhost:8081 core.finding.FindingService.TagResource
 
 .PHONY: untag-resource

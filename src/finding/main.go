@@ -27,7 +27,7 @@ func main() {
 	}
 
 	server := grpc.NewServer()
-	findingServer := newFindingService(newFindingRepository()) // DI service & repository
+	findingServer := newFindingService(newFindingRepository(), newIAMServiceClient()) // DI service & repository
 	finding.RegisterFindingServiceServer(server, findingServer)
 
 	reflection.Register(server) // enable reflection API

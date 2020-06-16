@@ -2,8 +2,6 @@ package main
 
 import (
 	"net/http"
-
-	"github.com/CyberAgent/mimosa-core/proto/finding"
 )
 
 func (g *gatewayService) listFindingHandler(w http.ResponseWriter, r *http.Request) {
@@ -12,7 +10,7 @@ func (g *gatewayService) listFindingHandler(w http.ResponseWriter, r *http.Reque
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).ListFinding(r.Context(), req)
+	resp, err := g.findingClient.ListFinding(r.Context(), req)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
 		return
@@ -26,7 +24,7 @@ func (g *gatewayService) getFindingHandler(w http.ResponseWriter, r *http.Reques
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).GetFinding(r.Context(), req)
+	resp, err := g.findingClient.GetFinding(r.Context(), req)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
 		return
@@ -44,7 +42,7 @@ func (g *gatewayService) putFindingHandler(w http.ResponseWriter, r *http.Reques
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).PutFinding(r.Context(), req)
+	resp, err := g.findingClient.PutFinding(r.Context(), req)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
 		return
@@ -62,7 +60,7 @@ func (g *gatewayService) deleteFindingHandler(w http.ResponseWriter, r *http.Req
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).DeleteFinding(r.Context(), req)
+	resp, err := g.findingClient.DeleteFinding(r.Context(), req)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
 		return
@@ -76,7 +74,7 @@ func (g *gatewayService) listFindingTagHandler(w http.ResponseWriter, r *http.Re
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).ListFindingTag(r.Context(), req)
+	resp, err := g.findingClient.ListFindingTag(r.Context(), req)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
 		return
@@ -94,7 +92,7 @@ func (g *gatewayService) tagFindingHandler(w http.ResponseWriter, r *http.Reques
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).TagFinding(r.Context(), req)
+	resp, err := g.findingClient.TagFinding(r.Context(), req)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
 		return
@@ -112,7 +110,7 @@ func (g *gatewayService) untagFindingHandler(w http.ResponseWriter, r *http.Requ
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).UntagFinding(r.Context(), req)
+	resp, err := g.findingClient.UntagFinding(r.Context(), req)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
 		return
@@ -126,7 +124,7 @@ func (g *gatewayService) listResourceHandler(w http.ResponseWriter, r *http.Requ
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).ListResource(r.Context(), req)
+	resp, err := g.findingClient.ListResource(r.Context(), req)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
 		return
@@ -140,7 +138,7 @@ func (g *gatewayService) getResourceHandler(w http.ResponseWriter, r *http.Reque
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).GetResource(r.Context(), req)
+	resp, err := g.findingClient.GetResource(r.Context(), req)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
 		return
@@ -158,7 +156,7 @@ func (g *gatewayService) putResourceHandler(w http.ResponseWriter, r *http.Reque
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).PutResource(r.Context(), req)
+	resp, err := g.findingClient.PutResource(r.Context(), req)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
 		return
@@ -176,7 +174,7 @@ func (g *gatewayService) deleteResourceHandler(w http.ResponseWriter, r *http.Re
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).DeleteResource(r.Context(), req)
+	resp, err := g.findingClient.DeleteResource(r.Context(), req)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
 		return
@@ -190,7 +188,7 @@ func (g *gatewayService) listResourceTagHandler(w http.ResponseWriter, r *http.R
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).ListResourceTag(r.Context(), req)
+	resp, err := g.findingClient.ListResourceTag(r.Context(), req)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
 		return
@@ -208,7 +206,7 @@ func (g *gatewayService) tagResourceHandler(w http.ResponseWriter, r *http.Reque
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).TagResource(r.Context(), req)
+	resp, err := g.findingClient.TagResource(r.Context(), req)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
 		return
@@ -226,7 +224,7 @@ func (g *gatewayService) untagResourceHandler(w http.ResponseWriter, r *http.Req
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 		return
 	}
-	resp, err := finding.NewFindingServiceClient(g.findingSvcConn).UntagResource(r.Context(), req)
+	resp, err := g.findingClient.UntagResource(r.Context(), req)
 	if err != nil {
 		writeResponse(w, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
 		return

@@ -8,14 +8,15 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/CyberAgent/mimosa-core/proto/finding"
 	"github.com/golang/gddo/httputil/header"
 	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
 )
 
 type gatewayService struct {
-	port           string
-	findingSvcConn *grpc.ClientConn
+	port          string
+	findingClient finding.FindingServiceClient
 }
 
 type gatewayConf struct {
@@ -36,8 +37,8 @@ func newGatewayService() (gatewayService, error) {
 		return gatewayService{}, err
 	}
 	svc := gatewayService{
-		port:           conf.Port,
-		findingSvcConn: conn,
+		port:          conf.Port,
+		findingClient: finding.NewFindingServiceClient(conn),
 	}
 	return svc, nil
 }

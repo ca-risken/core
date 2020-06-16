@@ -15,7 +15,7 @@ services:
       - finding
     environment:
       - PORT=8080
-      - FINDING_SVC_ADDR=finding:8081
+      - FINDING_SVC_ADDR=${FINDING_SVC_ADDR}
     ports:
       - "8080:8080"
 
@@ -28,6 +28,8 @@ services:
       args:
         - GITHUB_USER=${GITHUB_USER}
         - GITHUB_TOKEN=${GITHUB_TOKEN}
+    depends_on:
+      - iam
     environment:
       - PORT=8081
       - DB_MASTER_HOST=${DB_MASTER_HOST}
@@ -39,6 +41,7 @@ services:
       - DB_PORT=3306
       - DB_SCHEMA=mimosa
       - DB_LOG_MODE=${DB_LOG_MODE}
+      - IAM_SVC_ADDR=${IAM_SVC_ADDR}
     ports:
       - "8081:8081" # docker-compose外にexposeする必要はないので本来は"8081"だが、grpcurlなどのDebug目的でhost側のportも開放
 

@@ -8,27 +8,36 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
+	"github.com/CyberAgent/mimosa-core/proto/iam"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/mock"
+	"google.golang.org/grpc"
 )
+
+var (
+	iamClient = mockIAMServiceClient{}
+)
+
+func init() {
+	iamClient.On("IsAuthorizedRequest").Return(iam.IsAuthorizedResponse{Ok: true}, nil) // IAMサービスは`true`を返すようにしとく
+}
 
 func TestListFinding(t *testing.T) {
 	var ctx context.Context
-	mock := mockFindingRepository{}
-	svc := newFindingService(&mock)
-
+	mockDB := mockFindingRepository{}
+	svc := newFindingService(&mockDB, &iamClient)
 	cases := []struct {
 		name         string
 		input        *finding.ListFindingRequest
 		want         *finding.ListFindingResponse
-		mockResponce *[]findingIds
+		mockResponce *[]model.Finding
 		mockError    error
 	}{
 		{
 			name:         "OK",
 			input:        &finding.ListFindingRequest{ProjectId: []uint32{123}, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"hoge"}, FromScore: 0.0, ToScore: 1.0},
 			want:         &finding.ListFindingResponse{FindingId: []uint64{111, 222}},
-			mockResponce: &[]findingIds{{FindingID: 111}, {FindingID: 222}},
+			mockResponce: &[]model.Finding{{FindingID: 111}, {FindingID: 222}},
 		},
 		{
 			name:      "NG Record not found",
@@ -37,10 +46,11 @@ func TestListFinding(t *testing.T) {
 			mockError: gorm.ErrRecordNotFound,
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("ListFinding").Return(c.mockResponce, c.mockError).Once()
+			if c.mockResponce != nil || c.mockError != nil {
+				mockDB.On("ListFinding").Return(c.mockResponce, c.mockError).Once()
+			}
 			result, err := svc.ListFinding(ctx, c.input)
 			if err != nil {
 				t.Fatalf("unexpected error: %+v", err)
@@ -83,9 +93,8 @@ func TestConvertListFindingRequest(t *testing.T) {
 func TestGetFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mock := mockFindingRepository{}
-	svc := newFindingService(&mock)
-
+	mockDB := mockFindingRepository{}
+	svc := newFindingService(&mockDB, &iamClient)
 	cases := []struct {
 		name         string
 		input        *finding.GetFindingRequest
@@ -106,10 +115,11 @@ func TestGetFinding(t *testing.T) {
 			mockError: gorm.ErrRecordNotFound,
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("GetFinding").Return(c.mockResponce, c.mockError).Once()
+			if c.mockResponce != nil || c.mockError != nil {
+				mockDB.On("GetFinding").Return(c.mockResponce, c.mockError).Once()
+			}
 			result, err := svc.GetFinding(ctx, c.input)
 			if err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -124,8 +134,11 @@ func TestGetFinding(t *testing.T) {
 func TestPutFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mock := mockFindingRepository{}
-	svc := newFindingService(&mock)
+	mockDB := mockFindingRepository{}
+	svc := newFindingService(&mockDB, &iamClient)
+	// Resource関連のupdateは別テストで実施。ここでは一律カラを返す
+	mockDB.On("GetResourceByName").Return(&model.Resource{}, nil)
+	mockDB.On("UpsertResource").Return(&model.Resource{}, nil)
 
 	cases := []struct {
 		name        string
@@ -170,19 +183,14 @@ func TestPutFinding(t *testing.T) {
 			mockUpErr:   gorm.ErrInvalidSQL,
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			// Resource関連のupdateは別テストで実施。ここでは一律カラを返す
-			mock.On("GetResourceByName").Return(&model.Resource{}, nil)
-			mock.On("UpsertResource").Return(&model.Resource{}, nil)
 			if c.mockGetResp != nil || c.mockGetErr != nil {
-				mock.On("GetFindingByDataSource").Return(c.mockGetResp, c.mockGetErr).Once()
+				mockDB.On("GetFindingByDataSource").Return(c.mockGetResp, c.mockGetErr).Once()
 			}
 			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mock.On("UpsertFinding").Return(c.mockUpResp, c.mockUpErr).Once()
+				mockDB.On("UpsertFinding").Return(c.mockUpResp, c.mockUpErr).Once()
 			}
-
 			got, err := svc.PutFinding(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -196,9 +204,8 @@ func TestPutFinding(t *testing.T) {
 
 func TestDeleteFinding(t *testing.T) {
 	var ctx context.Context
-	mock := mockFindingRepository{}
-	svc := newFindingService(&mock)
-
+	mockDB := mockFindingRepository{}
+	svc := newFindingService(&mockDB, &iamClient)
 	cases := []struct {
 		name    string
 		input   *finding.DeleteFindingRequest
@@ -209,6 +216,7 @@ func TestDeleteFinding(t *testing.T) {
 			name:    "OK",
 			input:   &finding.DeleteFindingRequest{FindingId: 1001},
 			wantErr: false,
+			mockErr: nil,
 		},
 		{
 			name:    "NG validation error",
@@ -222,10 +230,9 @@ func TestDeleteFinding(t *testing.T) {
 			mockErr: gorm.ErrCantStartTransaction,
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("DeleteFinding").Return(c.mockErr).Once()
+			mockDB.On("DeleteFinding").Return(c.mockErr).Once()
 			_, err := svc.DeleteFinding(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -237,8 +244,8 @@ func TestDeleteFinding(t *testing.T) {
 func TestListFindingTag(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mock := mockFindingRepository{}
-	svc := newFindingService(&mock)
+	mockDB := mockFindingRepository{}
+	svc := newFindingService(&mockDB, &iamClient)
 	cases := []struct {
 		name     string
 		input    *finding.ListFindingTagRequest
@@ -282,7 +289,7 @@ func TestListFindingTag(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			if c.mockResp != nil || c.mockErr != nil {
-				mock.On("ListFindingTag").Return(c.mockResp, c.mockErr).Once()
+				mockDB.On("ListFindingTag").Return(c.mockResp, c.mockErr).Once()
 			}
 			got, err := svc.ListFindingTag(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -298,8 +305,8 @@ func TestListFindingTag(t *testing.T) {
 func TestTagFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mock := mockFindingRepository{}
-	svc := newFindingService(&mock)
+	mockDB := mockFindingRepository{}
+	svc := newFindingService(&mockDB, &iamClient)
 	cases := []struct {
 		name        string
 		input       *finding.TagFindingRequest
@@ -346,10 +353,10 @@ func TestTagFinding(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			if c.mockGetResp != nil || c.mockGetErr != nil {
-				mock.On("GetFindingTagByKey").Return(c.mockGetResp, c.mockGetErr).Once()
+				mockDB.On("GetFindingTagByKey").Return(c.mockGetResp, c.mockGetErr).Once()
 			}
 			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mock.On("TagFinding").Return(c.mockUpResp, c.mockUpErr).Once()
+				mockDB.On("TagFinding").Return(c.mockUpResp, c.mockUpErr).Once()
 			}
 			got, err := svc.TagFinding(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -364,8 +371,8 @@ func TestTagFinding(t *testing.T) {
 
 func TestUntagFinding(t *testing.T) {
 	var ctx context.Context
-	mock := mockFindingRepository{}
-	svc := newFindingService(&mock)
+	mockDB := mockFindingRepository{}
+	svc := newFindingService(&mockDB, &iamClient)
 	cases := []struct {
 		name    string
 		input   *finding.UntagFindingRequest
@@ -391,7 +398,7 @@ func TestUntagFinding(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("UntagFinding").Return(c.mockErr).Once()
+			mockDB.On("UntagFinding").Return(c.mockErr).Once()
 			_, err := svc.UntagFinding(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -403,21 +410,21 @@ func TestUntagFinding(t *testing.T) {
 func TestListResource(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mock := mockFindingRepository{}
-	svc := newFindingService(&mock)
+	mockDB := mockFindingRepository{}
+	svc := newFindingService(&mockDB, &iamClient)
 	cases := []struct {
 		name     string
 		input    *finding.ListResourceRequest
 		want     *finding.ListResourceResponse
 		wantErr  bool
-		mockResp *[]resourceIds
+		mockResp *[]model.Resource
 		mockErr  error
 	}{
 		{
 			name:     "OK",
 			input:    &finding.ListResourceRequest{ProjectId: []uint32{111}, ResourceName: []string{"rn"}, FromSumScore: 0.0, ToSumScore: 100.0, FromAt: now.Unix(), ToAt: now.Unix()},
 			want:     &finding.ListResourceResponse{ResourceId: []uint64{1001, 1002}},
-			mockResp: &[]resourceIds{{ResourceID: 1001}, {ResourceID: 1002}},
+			mockResp: &[]model.Resource{{ResourceID: 1001}, {ResourceID: 1002}},
 		},
 		{
 			name:    "OK Not found",
@@ -437,11 +444,10 @@ func TestListResource(t *testing.T) {
 			mockErr: gorm.ErrUnaddressable,
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			if c.mockResp != nil || c.mockErr != nil {
-				mock.On("ListResource").Return(c.mockResp, c.mockErr).Once()
+				mockDB.On("ListResource").Return(c.mockResp, c.mockErr).Once()
 			}
 			got, err := svc.ListResource(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -485,8 +491,8 @@ func TestConvertListResourceRequest(t *testing.T) {
 func TestGetResource(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mock := mockFindingRepository{}
-	svc := newFindingService(&mock)
+	mockDB := mockFindingRepository{}
+	svc := newFindingService(&mockDB, &iamClient)
 	cases := []struct {
 		name         string
 		input        *finding.GetResourceRequest
@@ -507,10 +513,11 @@ func TestGetResource(t *testing.T) {
 			mockError: gorm.ErrRecordNotFound,
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("GetResource").Return(c.mockResponce, c.mockError).Once()
+			if c.mockResponce != nil || c.mockError != nil {
+				mockDB.On("GetResource").Return(c.mockResponce, c.mockError).Once()
+			}
 			result, err := svc.GetResource(ctx, c.input)
 			if err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -525,9 +532,8 @@ func TestGetResource(t *testing.T) {
 func TestPutResource(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mock := mockFindingRepository{}
-	svc := newFindingService(&mock)
-
+	mockDB := mockFindingRepository{}
+	svc := newFindingService(&mockDB, &iamClient)
 	cases := []struct {
 		name        string
 		input       *finding.PutResourceRequest
@@ -571,16 +577,14 @@ func TestPutResource(t *testing.T) {
 			mockUpErr:   gorm.ErrInvalidSQL,
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			if c.mockGetResp != nil || c.mockGetErr != nil {
-				mock.On("GetResourceByName").Return(c.mockGetResp, c.mockGetErr).Once()
+				mockDB.On("GetResourceByName").Return(c.mockGetResp, c.mockGetErr).Once()
 			}
 			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mock.On("UpsertResource").Return(c.mockUpResp, c.mockUpErr).Once()
+				mockDB.On("UpsertResource").Return(c.mockUpResp, c.mockUpErr).Once()
 			}
-
 			got, err := svc.PutResource(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("unexpected error: %+v", err)
@@ -594,9 +598,8 @@ func TestPutResource(t *testing.T) {
 
 func TestDeleteResource(t *testing.T) {
 	var ctx context.Context
-	mock := mockFindingRepository{}
-	svc := newFindingService(&mock)
-
+	mockDB := mockFindingRepository{}
+	svc := newFindingService(&mockDB, &iamClient)
 	cases := []struct {
 		name    string
 		input   *finding.DeleteResourceRequest
@@ -622,7 +625,7 @@ func TestDeleteResource(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("DeleteResource").Return(c.mockErr).Once()
+			mockDB.On("DeleteResource").Return(c.mockErr).Once()
 			_, err := svc.DeleteResource(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -634,8 +637,8 @@ func TestDeleteResource(t *testing.T) {
 func TestListResourceTag(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mock := mockFindingRepository{}
-	svc := newFindingService(&mock)
+	mockDB := mockFindingRepository{}
+	svc := newFindingService(&mockDB, &iamClient)
 	cases := []struct {
 		name     string
 		input    *finding.ListResourceTagRequest
@@ -678,7 +681,7 @@ func TestListResourceTag(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			if c.mockResp != nil || c.mockErr != nil {
-				mock.On("ListResourceTag").Return(c.mockResp, c.mockErr).Once()
+				mockDB.On("ListResourceTag").Return(c.mockResp, c.mockErr).Once()
 			}
 			got, err := svc.ListResourceTag(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -694,8 +697,8 @@ func TestListResourceTag(t *testing.T) {
 func TestTagResource(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mock := mockFindingRepository{}
-	svc := newFindingService(&mock)
+	mockDB := mockFindingRepository{}
+	svc := newFindingService(&mockDB, &iamClient)
 	cases := []struct {
 		name        string
 		input       *finding.TagResourceRequest
@@ -742,10 +745,10 @@ func TestTagResource(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			if c.mockGetResp != nil || c.mockGetErr != nil {
-				mock.On("GetResouorceTagByKey").Return(c.mockGetResp, c.mockGetErr).Once()
+				mockDB.On("GetResourceTagByKey").Return(c.mockGetResp, c.mockGetErr).Once()
 			}
 			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mock.On("TagResource").Return(c.mockUpResp, c.mockUpErr).Once()
+				mockDB.On("TagResource").Return(c.mockUpResp, c.mockUpErr).Once()
 			}
 			got, err := svc.TagResource(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -760,8 +763,8 @@ func TestTagResource(t *testing.T) {
 
 func TestUntagResource(t *testing.T) {
 	var ctx context.Context
-	mock := mockFindingRepository{}
-	svc := newFindingService(&mock)
+	mockDB := mockFindingRepository{}
+	svc := newFindingService(&mockDB, &iamClient)
 	cases := []struct {
 		name    string
 		input   *finding.UntagResourceRequest
@@ -787,7 +790,7 @@ func TestUntagResource(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("UntagResource").Return(c.mockErr).Once()
+			mockDB.On("UntagResource").Return(c.mockErr).Once()
 			_, err := svc.UntagResource(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -919,9 +922,9 @@ type mockFindingRepository struct {
 	mock.Mock
 }
 
-func (m *mockFindingRepository) ListFinding(*finding.ListFindingRequest) (*[]findingIds, error) {
+func (m *mockFindingRepository) ListFinding(*finding.ListFindingRequest) (*[]model.Finding, error) {
 	args := m.Called()
-	return args.Get(0).(*[]findingIds), args.Error(1)
+	return args.Get(0).(*[]model.Finding), args.Error(1)
 }
 
 func (m *mockFindingRepository) GetFinding(uint64) (*model.Finding, error) {
@@ -959,14 +962,19 @@ func (m *mockFindingRepository) GetFindingTagByKey(uint64, string) (*model.Findi
 	return args.Get(0).(*model.FindingTag), args.Error(1)
 }
 
+func (m *mockFindingRepository) GetFindingTagByID(uint64) (*model.FindingTag, error) {
+	args := m.Called()
+	return args.Get(0).(*model.FindingTag), args.Error(1)
+}
+
 func (m *mockFindingRepository) UntagFinding(uint64) error {
 	args := m.Called()
 	return args.Error(0)
 }
 
-func (m *mockFindingRepository) ListResource(*finding.ListResourceRequest) (*[]resourceIds, error) {
+func (m *mockFindingRepository) ListResource(*finding.ListResourceRequest) (*[]model.Resource, error) {
 	args := m.Called()
-	return args.Get(0).(*[]resourceIds), args.Error(1)
+	return args.Get(0).(*[]model.Resource), args.Error(1)
 }
 
 func (m *mockFindingRepository) GetResource(uint64) (*model.Resource, error) {
@@ -994,7 +1002,12 @@ func (m *mockFindingRepository) ListResourceTag(uint64) (*[]model.ResourceTag, e
 	return args.Get(0).(*[]model.ResourceTag), args.Error(1)
 }
 
-func (m *mockFindingRepository) GetResouorceTagByKey(uint64, string) (*model.ResourceTag, error) {
+func (m *mockFindingRepository) GetResourceTagByKey(uint64, string) (*model.ResourceTag, error) {
+	args := m.Called()
+	return args.Get(0).(*model.ResourceTag), args.Error(1)
+}
+
+func (m *mockFindingRepository) GetResourceTagByID(uint64) (*model.ResourceTag, error) {
 	args := m.Called()
 	return args.Get(0).(*model.ResourceTag), args.Error(1)
 }
@@ -1007,4 +1020,16 @@ func (m *mockFindingRepository) TagResource(*model.ResourceTag) (*model.Resource
 func (m *mockFindingRepository) UntagResource(uint64) error {
 	args := m.Called()
 	return args.Error(0)
+}
+
+/*
+ * Mock IAM Service Client
+ */
+type mockIAMServiceClient struct {
+	mock.Mock
+}
+
+func (m *mockIAMServiceClient) IsAuthorized(context.Context, *iam.IsAuthorizedRequest, ...grpc.CallOption) (*iam.IsAuthorizedResponse, error) {
+	args := m.Called()
+	return args.Get(0).(*iam.IsAuthorizedResponse), args.Error(1)
 }

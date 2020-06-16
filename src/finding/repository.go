@@ -13,24 +13,26 @@ import (
 
 type findingRepoInterface interface {
 	// Finding
-	ListFinding(*finding.ListFindingRequest) (*[]findingIds, error)
+	ListFinding(*finding.ListFindingRequest) (*[]model.Finding, error)
 	GetFinding(uint64) (*model.Finding, error)
 	GetFindingByDataSource(uint32, string, string) (*model.Finding, error)
 	UpsertFinding(*model.Finding) (*model.Finding, error)
 	DeleteFinding(uint64) error
 	ListFindingTag(uint64) (*[]model.FindingTag, error)
 	GetFindingTagByKey(uint64, string) (*model.FindingTag, error)
+	GetFindingTagByID(uint64) (*model.FindingTag, error)
 	TagFinding(*model.FindingTag) (*model.FindingTag, error)
 	UntagFinding(uint64) error
 
 	// Resource
-	ListResource(*finding.ListResourceRequest) (*[]resourceIds, error)
+	ListResource(*finding.ListResourceRequest) (*[]model.Resource, error)
 	GetResource(uint64) (*model.Resource, error)
 	GetResourceByName(uint32, string) (*model.Resource, error)
 	UpsertResource(*model.Resource) (*model.Resource, error)
 	DeleteResource(uint64) error
 	ListResourceTag(uint64) (*[]model.ResourceTag, error)
-	GetResouorceTagByKey(uint64, string) (*model.ResourceTag, error)
+	GetResourceTagByKey(uint64, string) (*model.ResourceTag, error)
+	GetResourceTagByID(uint64) (*model.ResourceTag, error)
 	TagResource(*model.ResourceTag) (*model.ResourceTag, error)
 	UntagResource(uint64) error
 }
@@ -90,14 +92,10 @@ func initDB(isMaster bool) *gorm.DB {
 	return db
 }
 
-type findingIds struct {
-	FindingID uint64 `gorm:"column:finding_id"`
-}
-
-func (f *findingRepository) ListFinding(req *finding.ListFindingRequest) (*[]findingIds, error) {
+func (f *findingRepository) ListFinding(req *finding.ListFindingRequest) (*[]model.Finding, error) {
 	query := `
 select
-	finding_id
+	*
 from
 	finding
 where
@@ -120,7 +118,7 @@ where
 		params = append(params, req.ResourceName)
 	}
 
-	var data []findingIds
+	var data []model.Finding
 	if err := f.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
@@ -242,16 +240,16 @@ func (f *findingRepository) ListFindingTag(findingID uint64) (*[]model.FindingTa
 
 const insertTagFinding = `
 INSERT INTO finding_tag
-	(finding_tag_id, finding_id, tag_key, tag_value)
+	(finding_tag_id, finding_id, project_id, tag_key, tag_value)
 VALUES
-	(?, ?, ?, ?)
+	(?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
 	tag_value=VALUES(tag_value)
 `
 
 func (f *findingRepository) TagFinding(tag *model.FindingTag) (*model.FindingTag, error) {
 	if err := f.MasterDB.Exec(insertTagFinding,
-		tag.FindingTagID, tag.FindingID, tag.TagKey, tag.TagValue).Error; err != nil {
+		tag.FindingTagID, tag.FindingID, tag.ProjectID, tag.TagKey, tag.TagValue).Error; err != nil {
 		return nil, err
 	}
 	updated, err := f.GetFindingTagByKey(tag.FindingID, tag.TagKey)
@@ -271,6 +269,16 @@ func (f *findingRepository) GetFindingTagByKey(findingID uint64, tagKey string) 
 	return &data, nil
 }
 
+const selectGetFindingTagByID = `select * from finding_tag where finding_tag_id = ?`
+
+func (f *findingRepository) GetFindingTagByID(findingTagID uint64) (*model.FindingTag, error) {
+	var data model.FindingTag
+	if err := f.SlaveDB.Raw(selectGetFindingTagByID, findingTagID).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
 const deleteUntagFinding = `delete from finding_tag where finding_tag_id = ?`
 
 func (f *findingRepository) UntagFinding(findingTagID uint64) error {
@@ -280,14 +288,10 @@ func (f *findingRepository) UntagFinding(findingTagID uint64) error {
 	return nil
 }
 
-type resourceIds struct {
-	ResourceID uint64 `gorm:"column:resource_id"`
-}
-
-func (f *findingRepository) ListResource(req *finding.ListResourceRequest) (*[]resourceIds, error) {
+func (f *findingRepository) ListResource(req *finding.ListResourceRequest) (*[]model.Resource, error) {
 	query := `
 select 
-  r.resource_id
+  *
 from
   resource r
   inner join finding f using(resource_name)
@@ -307,7 +311,7 @@ where
 	query += " group by r.resource_id having sum(f.Score) between ? and ?"
 	params = append(params, req.FromSumScore, req.ToSumScore)
 
-	var data []resourceIds
+	var data []model.Resource
 	if err := f.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
@@ -355,11 +359,21 @@ func (f *findingRepository) ListResourceTag(resourceID uint64) (*[]model.Resourc
 	return &data, nil
 }
 
-const selectGetResouorceTagByKey = `select * from resource_tag where resource_id = ? and tag_key = ?`
+const selectGetResourceTagByKey = `select * from resource_tag where resource_id = ? and tag_key = ?`
 
-func (f *findingRepository) GetResouorceTagByKey(resourceID uint64, tagKey string) (*model.ResourceTag, error) {
+func (f *findingRepository) GetResourceTagByKey(resourceID uint64, tagKey string) (*model.ResourceTag, error) {
 	var data model.ResourceTag
-	if err := f.SlaveDB.Raw(selectGetResouorceTagByKey, resourceID, tagKey).First(&data).Error; err != nil {
+	if err := f.SlaveDB.Raw(selectGetResourceTagByKey, resourceID, tagKey).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const selectGetResourceTagByID = `select * from resource_tag where resource_tag_id = ?`
+
+func (f *findingRepository) GetResourceTagByID(resourceID uint64) (*model.ResourceTag, error) {
+	var data model.ResourceTag
+	if err := f.SlaveDB.Raw(selectGetResourceTagByID, resourceID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -367,19 +381,19 @@ func (f *findingRepository) GetResouorceTagByKey(resourceID uint64, tagKey strin
 
 const insertTagResource = `
 INSERT INTO resource_tag
-	(resource_tag_id, resource_id, tag_key, tag_value)
+	(resource_tag_id, resource_id, project_id, tag_key, tag_value)
 VALUES
-	(?, ?, ?, ?)
+	(?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
 	tag_value=VALUES(tag_value)
 `
 
 func (f *findingRepository) TagResource(tag *model.ResourceTag) (*model.ResourceTag, error) {
 	if err := f.MasterDB.Exec(insertTagResource,
-		tag.ResourceTagID, tag.ResourceID, tag.TagKey, tag.TagValue).Error; err != nil {
+		tag.ResourceTagID, tag.ResourceID, tag.ProjectID, tag.TagKey, tag.TagValue).Error; err != nil {
 		return nil, err
 	}
-	updated, err := f.GetResouorceTagByKey(tag.ResourceID, tag.TagKey)
+	updated, err := f.GetResourceTagByKey(tag.ResourceID, tag.TagKey)
 	if err != nil {
 		return nil, err
 	}

@@ -3,8 +3,9 @@ module github.com/CyberAgent/mimosa-core/src/iam
 go 1.13
 
 require (
-	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200616051054-45e082266ef3
-	github.com/CyberAgent/mimosa-core/proto/iam v0.0.0-20200616051054-45e082266ef3
+	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200616124053-de23a5a8c884
+	github.com/CyberAgent/mimosa-core/proto/iam v0.0.0-20200616124053-de23a5a8c884
+	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible // indirect
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/jinzhu/gorm v1.9.13
 	github.com/kelseyhightower/envconfig v1.4.0

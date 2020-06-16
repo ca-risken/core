@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"time"
 
@@ -10,6 +11,10 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jinzhu/gorm"
 )
+
+/**
+ * Finding
+ */
 
 func (f *findingService) ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*finding.ListFindingResponse, error) {
 	if err := req.Validate(); err != nil {
@@ -23,10 +28,12 @@ func (f *findingService) ListFinding(ctx context.Context, req *finding.ListFindi
 		return nil, err
 	}
 
-	// TODO authz
 	var ids []uint64
-	for _, id := range *list {
-		ids = append(ids, uint64(id.FindingID))
+	for _, data := range *list {
+		// Authz
+		if f.isAuthorizedWithFinding(ctx, req.UserId, "ListFinding", &data) {
+			ids = append(ids, uint64(data.FindingID))
+		}
 	}
 	return &finding.ListFindingResponse{FindingId: ids}, nil
 }
@@ -55,13 +62,17 @@ func (f *findingService) GetFinding(ctx context.Context, req *finding.GetFinding
 		return nil, err
 	}
 
-	// TODO authz
 	data, err := f.repository.GetFinding(req.FindingId)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return &finding.GetFindingResponse{}, nil
 		}
 		return nil, err
+	}
+
+	// Authz
+	if !f.isAuthorizedWithFinding(ctx, req.UserId, "GetFinding", data) {
+		return &finding.GetFindingResponse{}, nil
 	}
 	return &finding.GetFindingResponse{Finding: convertFinding(data)}, nil
 }
@@ -83,21 +94,25 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 	if !noRecord {
 		findingID = savedData.FindingID
 	}
+	data := &model.Finding{
+		FindingID:     findingID,
+		Description:   req.Finding.Description,
+		DataSource:    req.Finding.DataSource,
+		DataSourceID:  req.Finding.DataSourceId,
+		ResourceName:  req.Finding.ResourceName,
+		ProjectID:     req.Finding.ProjectId,
+		OriginalScore: req.Finding.OriginalScore,
+		Score:         calculateScore(req.Finding.OriginalScore, req.Finding.OriginalMaxScore),
+		Data:          req.Finding.Data,
+	}
 
-	// TODO: Authz
+	// Authz
+	if !f.isAuthorizedWithFinding(ctx, req.UserId, "PutFinding", data) {
+		return nil, fmt.Errorf("Unauthorized PutFinding action for data=%+v", data)
+	}
+
 	// Fiding upsert
-	registerdData, err := f.repository.UpsertFinding(
-		&model.Finding{
-			FindingID:     findingID,
-			Description:   req.Finding.Description,
-			DataSource:    req.Finding.DataSource,
-			DataSourceID:  req.Finding.DataSourceId,
-			ResourceName:  req.Finding.ResourceName,
-			ProjectID:     req.Finding.ProjectId,
-			OriginalScore: req.Finding.OriginalScore,
-			Score:         calculateScore(req.Finding.OriginalScore, req.Finding.OriginalMaxScore),
-			Data:          req.Finding.Data,
-		})
+	registerdData, err := f.repository.UpsertFinding(data)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +135,10 @@ func (f *findingService) DeleteFinding(ctx context.Context, req *finding.DeleteF
 		return nil, err
 	}
 
-	// TODO authz
+	// Authz
+	if !f.isAuthorizedWithFindingID(ctx, req.UserId, "DeleteFinding", req.FindingId) {
+		return nil, fmt.Errorf("Unauthorized DeleteFinding action for finding_id=%d", req.FindingId)
+	}
 	err := f.repository.DeleteFinding(req.FindingId)
 	if err != nil {
 		return nil, err
@@ -128,12 +146,15 @@ func (f *findingService) DeleteFinding(ctx context.Context, req *finding.DeleteF
 	return &empty.Empty{}, nil
 }
 
+/**
+ * FindingTag
+ */
+
 func (f *findingService) ListFindingTag(ctx context.Context, req *finding.ListFindingTagRequest) (*finding.ListFindingTagResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 
-	// TODO authz
 	list, err := f.repository.ListFindingTag(req.FindingId)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
@@ -143,7 +164,10 @@ func (f *findingService) ListFindingTag(ctx context.Context, req *finding.ListFi
 	}
 	var tags []*finding.FindingTag
 	for _, tag := range *list {
-		tags = append(tags, convertFindingTag(&tag))
+		// Authz
+		if f.isAuthorizedWithFindingTag(ctx, req.UserId, "ListFindingTag", &tag) {
+			tags = append(tags, convertFindingTag(&tag))
+		}
 	}
 	return &finding.ListFindingTagResponse{Tag: tags}, nil
 }
@@ -165,12 +189,19 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 		findingTagID = savedData.FindingTagID
 	}
 
-	registerd, err := f.repository.TagFinding(&model.FindingTag{
+	tag := &model.FindingTag{
 		FindingTagID: findingTagID,
 		FindingID:    req.Tag.FindingId,
+		ProjectID:    req.Tag.ProjectId,
 		TagKey:       req.Tag.TagKey,
 		TagValue:     req.Tag.TagValue,
-	})
+	}
+	// Authz
+	if !f.isAuthorizedWithFindingTag(ctx, req.UserId, "TagFinding", tag) {
+		return nil, fmt.Errorf("Unauthorized TagFinding action for tag=%+v", tag)
+	}
+
+	registerd, err := f.repository.TagFinding(tag)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +212,11 @@ func (f *findingService) UntagFinding(ctx context.Context, req *finding.UntagFin
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	// TODO authz
+
+	// Authz
+	if !f.isAuthorizedWithFindingTagID(ctx, req.UserId, "UntagFinding", req.FindingTagId) {
+		return nil, fmt.Errorf("Unauthorized UntagFinding action for finding_tag_id=%d", req.FindingTagId)
+	}
 	err := f.repository.UntagFinding(req.FindingTagId)
 	if err != nil {
 		return nil, err
@@ -215,6 +250,7 @@ func convertFindingTag(f *model.FindingTag) *finding.FindingTag {
 	return &finding.FindingTag{
 		FindingTagId: f.FindingTagID,
 		FindingId:    f.FindingID,
+		ProjectId:    f.ProjectID,
 		TagKey:       f.TagKey,
 		TagValue:     f.TagValue,
 		CreatedAt:    f.CreatedAt.Unix(),
