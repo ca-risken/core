@@ -40,18 +40,20 @@ message FindingForUpsert {
 message FindingTag {
   uint64 finding_tag_id = 1;
   uint64 finding_id = 2;
-  string tag_key = 3;
-  string tag_value = 4;
-  int64 created_at = 5;
-  int64 updated_at = 6;
+  uint32 project_id = 3;
+  string tag_key = 4;
+  string tag_value = 5;
+  int64 created_at = 6;
+  int64 updated_at = 7;
 }
 
 // FindingTag For Upsert
 // (Unique keys: finding_id, tag_key)
 message FindingTagForUpsert {
   uint64 finding_id = 1;
-  string tag_key = 2;
-  string tag_value = 3;
+  uint32 project_id = 2;
+  string tag_key = 3;
+  string tag_value = 4;
 }
 
 // Resource
@@ -74,16 +76,18 @@ message ResourceForUpsert {
 message ResourceTag {
   uint64 resource_tag_id = 1;
   uint64 resource_id = 2;
-  string tag_key = 3;
-  string tag_value = 4;
-  int64 created_at = 5;
-  int64 updated_at = 6;
+  uint32 project_id = 3;
+  string tag_key = 4;
+  string tag_value = 5;
+  int64 created_at = 6;
+  int64 updated_at = 7;
 }
 
 // ResourceTag For upsert
 // (Unique keys: resource_id, tag_key)
 message ResourceTagForUpsert {
   uint64 resource_id = 1;
-  string tag_key = 2;
-  string tag_value = 3;
+  uint32 project_id = 2;
+  string tag_key = 3;
+  string tag_value = 4;
 }
