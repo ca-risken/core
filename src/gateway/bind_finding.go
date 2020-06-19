@@ -1,10 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/CyberAgent/mimosa-core/proto/finding"
 	"github.com/go-chi/chi"
@@ -12,26 +9,17 @@ import (
 
 func bindListFindingRequest(r *http.Request) *finding.ListFindingRequest {
 	req := finding.ListFindingRequest{}
-	if param := r.URL.Query().Get("project_id"); param != "" {
-		req.ProjectId = commaSeparatorID(param)
+	if err := bindQuery(&req, r); err != nil {
+		appLogger.Warnf("Invalid parmeter. err=%+v", err)
 	}
-	if param := r.URL.Query().Get("data_source"); param != "" {
-		req.DataSource = commaSeparator(param)
+	if len(req.ProjectId) > 0 {
+		req.ProjectId = ignoreZeroValue(req.ProjectId)
 	}
-	if param := r.URL.Query().Get("resource_name"); param != "" {
-		req.ResourceName = commaSeparator(param)
+	if len(req.DataSource) > 0 {
+		req.DataSource = commaSeparator(req.DataSource[0])
 	}
-	if param := r.URL.Query().Get("from_score"); param != "" {
-		req.FromScore = parseScore(param)
-	}
-	if param := r.URL.Query().Get("to_score"); param != "" {
-		req.ToScore = parseScore(param)
-	}
-	if param := r.URL.Query().Get("from_at"); param != "" {
-		req.FromAt = parseAt(param)
-	}
-	if param := r.URL.Query().Get("to_at"); param != "" {
-		req.ToAt = parseAt(param)
+	if len(req.ResourceName) > 0 {
+		req.ResourceName = commaSeparator(req.ResourceName[0])
 	}
 	return &req
 }
@@ -43,21 +31,19 @@ func bindGetFindingRequest(r *http.Request) *finding.GetFindingRequest {
 }
 
 func bindPutFindingRequest(r *http.Request) *finding.PutFindingRequest {
-	param := finding.FindingForUpsert{}
-	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
-		appLogger.Warnf("Invalid parameter in PutFindingRequest, err: %+v", err)
-		return &finding.PutFindingRequest{Finding: &param}
+	req := finding.FindingForUpsert{}
+	if err := bindBodyJSON(&req, r); err != nil {
+		appLogger.Warnf("Invalid PutFindingRequest. err=%+v", err)
 	}
-	return &finding.PutFindingRequest{Finding: &param}
+	return &finding.PutFindingRequest{Finding: &req}
 }
 
 func bindDeleteFindingRequest(r *http.Request) *finding.DeleteFindingRequest {
-	param := finding.DeleteFindingRequest{}
-	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
-		appLogger.Warnf("Invalid parameter in DeleteFindingRequest, err: %+v", err)
-		return &finding.DeleteFindingRequest{}
+	req := finding.DeleteFindingRequest{}
+	if err := bindBodyJSON(&req, r); err != nil {
+		appLogger.Warnf("Invalid DeleteFindingRequest. err=%+v", err)
 	}
-	return &param
+	return &req
 }
 
 func bindListFindingTagRequest(r *http.Request) *finding.ListFindingTagRequest {
@@ -67,43 +53,33 @@ func bindListFindingTagRequest(r *http.Request) *finding.ListFindingTagRequest {
 }
 
 func bindTagFindingRequest(r *http.Request) *finding.TagFindingRequest {
-	param := finding.FindingTagForUpsert{}
-	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
-		appLogger.Warnf("Invalid parameter in TagFindingRequest, err: %+v", err)
-		return &finding.TagFindingRequest{Tag: &param}
+	req := finding.FindingTagForUpsert{}
+	if err := bindBodyJSON(&req, r); err != nil {
+		appLogger.Warnf("Invalid FindingTagForUpsert. err=%+v", err)
 	}
-	return &finding.TagFindingRequest{Tag: &param}
+	return &finding.TagFindingRequest{Tag: &req}
 }
 
 func bindUntagFindingRequest(r *http.Request) *finding.UntagFindingRequest {
-	param := finding.UntagFindingRequest{}
-	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
-		appLogger.Warnf("Invalid parameter in UntagFindingRequest, err: %+v", err)
-		return &finding.UntagFindingRequest{}
+	req := finding.UntagFindingRequest{}
+	if err := bindBodyJSON(&req, r); err != nil {
+		appLogger.Warnf("Invalid UntagFindingRequest. err=%+v", err)
 	}
-	return &param
+	return &req
 }
 
 func bindListResourceRequest(r *http.Request) *finding.ListResourceRequest {
 	req := finding.ListResourceRequest{}
-	if param := r.URL.Query().Get("project_id"); param != "" {
-		req.ProjectId = commaSeparatorID(param)
+	if err := bindQuery(&req, r); err != nil {
+		appLogger.Warnf("Invalid parmeter. err=%+v", err)
 	}
-	if param := r.URL.Query().Get("resource_name"); param != "" {
-		req.ResourceName = commaSeparator(param)
+	if len(req.ProjectId) > 0 {
+		req.ProjectId = ignoreZeroValue(req.ProjectId)
 	}
-	if param := r.URL.Query().Get("from_sum_score"); param != "" {
-		req.FromSumScore = parseScore(param)
+	if len(req.ResourceName) > 0 {
+		req.ResourceName = commaSeparator(req.ResourceName[0])
 	}
-	if param := r.URL.Query().Get("to_sum_score"); param != "" {
-		req.ToSumScore = parseScore(param)
-	}
-	if param := r.URL.Query().Get("from_at"); param != "" {
-		req.FromAt = parseAt(param)
-	}
-	if param := r.URL.Query().Get("to_at"); param != "" {
-		req.ToAt = parseAt(param)
-	}
+
 	return &req
 }
 
@@ -114,21 +90,19 @@ func bindGetResourceRequest(r *http.Request) *finding.GetResourceRequest {
 }
 
 func bindPutResourceRequest(r *http.Request) *finding.PutResourceRequest {
-	param := finding.ResourceForUpsert{}
-	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
-		appLogger.Warnf("Invalid parameter in PutResourceRequest, err: %+v", err)
-		return &finding.PutResourceRequest{Resource: &param}
+	req := finding.ResourceForUpsert{}
+	if err := bindBodyJSON(&req, r); err != nil {
+		appLogger.Warnf("Invalid ResourceForUpsert. err=%+v", err)
 	}
-	return &finding.PutResourceRequest{Resource: &param}
+	return &finding.PutResourceRequest{Resource: &req}
 }
 
 func bindDeleteResourceRequest(r *http.Request) *finding.DeleteResourceRequest {
-	param := finding.DeleteResourceRequest{}
-	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
-		appLogger.Warnf("Invalid parameter in DeleteResourceRequest, err: %+v", err)
-		return &finding.DeleteResourceRequest{}
+	req := finding.DeleteResourceRequest{}
+	if err := bindBodyJSON(&req, r); err != nil {
+		appLogger.Warnf("Invalid DeleteResourceRequest. err=%+v", err)
 	}
-	return &param
+	return &req
 }
 
 func bindListResourceTagRequest(r *http.Request) *finding.ListResourceTagRequest {
@@ -138,63 +112,17 @@ func bindListResourceTagRequest(r *http.Request) *finding.ListResourceTagRequest
 }
 
 func bindTagResourceRequest(r *http.Request) *finding.TagResourceRequest {
-	param := finding.ResourceTagForUpsert{}
-	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
-		appLogger.Warnf("Invalid parameter in TagResourceRequest, err: %+v", err)
-		return &finding.TagResourceRequest{Tag: &param}
+	req := finding.ResourceTagForUpsert{}
+	if err := bindBodyJSON(&req, r); err != nil {
+		appLogger.Warnf("Invalid ResourceTagForUpsert. err=%+v", err)
 	}
-	return &finding.TagResourceRequest{Tag: &param}
+	return &finding.TagResourceRequest{Tag: &req}
 }
 
 func bindUntagResourceRequest(r *http.Request) *finding.UntagResourceRequest {
-	param := finding.UntagResourceRequest{}
-	if err := json.NewDecoder(r.Body).Decode(&param); err != nil {
-		appLogger.Warnf("Invalid parameter in UntagResourceRequest, err: %+v", err)
-		return &finding.UntagResourceRequest{}
+	req := finding.UntagResourceRequest{}
+	if err := bindBodyJSON(&req, r); err != nil {
+		appLogger.Warnf("Invalid UntagResourceRequest. err=%+v", err)
 	}
-	return &param
-}
-
-func commaSeparatorID(param string) []uint32 {
-	separated := []uint32{}
-	for _, p := range strings.Split(param, ",") {
-		if i, err := strconv.Atoi(p); err == nil {
-			separated = append(separated, uint32(i))
-		}
-	}
-	return separated
-}
-
-func commaSeparator(param string) []string {
-	separated := []string{}
-	for _, p := range strings.Split(param, ",") {
-		if p != "" {
-			separated = append(separated, p)
-		}
-	}
-	return separated
-}
-
-func parseScore(score string) float32 {
-	f, err := strconv.ParseFloat(score, 32)
-	if err != nil {
-		return 0.0
-	}
-	return float32(f)
-}
-
-func parseAt(at string) int64 {
-	i, err := strconv.ParseInt(at, 10, 64)
-	if err != nil {
-		return 0
-	}
-	return i
-}
-
-func parseUint64(str string) uint64 {
-	i, err := strconv.ParseUint(str, 10, 64)
-	if err != nil {
-		return 0
-	}
-	return i
+	return &req
 }

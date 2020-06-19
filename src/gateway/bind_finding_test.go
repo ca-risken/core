@@ -119,7 +119,7 @@ func TestBindPutFindingRequest(t *testing.T) {
 		},
 		{
 			name:  "parse error",
-			input: "xxxxxxxx",
+			input: `{"description":"desc`,
 			want:  &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{}},
 		},
 	}
@@ -257,12 +257,12 @@ func TestBindListResourceRequest(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: `project_id=111,222&resource_name=aaa,bbb&from_sum_score=0.0&to_sum_score=100.0&from_at=&to_at=`,
+			input: "project_id=111,222&resource_name=aaa,bbb&from_sum_score=0.0&to_sum_score=100.0&from_at=&to_at=",
 			want:  &finding.ListResourceRequest{ProjectId: []uint32{111, 222}, ResourceName: []string{"aaa", "bbb"}, FromSumScore: 0.0, ToSumScore: 100.0},
 		},
 		{
 			name:  "OK No param",
-			input: `project_id=&resource_name=&from_sum_score=&to_sum_score=&from_at=&to_at=`,
+			input: "",
 			want:  &finding.ListResourceRequest{},
 		},
 		{
@@ -461,129 +461,6 @@ func TestBindUntagResourceRequest(t *testing.T) {
 			got := bindUntagResourceRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
-			}
-		})
-	}
-}
-
-func TestCommaSeparatorID(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  []uint32
-	}{
-		{
-			name:  "single param",
-			input: "1234567890",
-			want:  []uint32{1234567890},
-		},
-		{
-			name:  "multiple params",
-			input: "123,456,789",
-			want:  []uint32{123, 456, 789},
-		},
-		{
-			name:  "blank params",
-			input: "1,,3",
-			want:  []uint32{1, 3},
-		},
-		{
-			name:  "parse error",
-			input: "1,aaa",
-			want:  []uint32{1},
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			got := commaSeparatorID(c.input)
-			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected result: want=%+v, got=%+v", c.want, got)
-			}
-		})
-	}
-}
-
-func TestCommaSeparator(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  []string
-	}{
-		{
-			name:  "single param",
-			input: "aaa",
-			want:  []string{"aaa"},
-		},
-		{
-			name:  "multiple params",
-			input: "aaa,bbb,ccc",
-			want:  []string{"aaa", "bbb", "ccc"},
-		},
-		{
-			name:  "blank params",
-			input: "aaa,,ccc",
-			want:  []string{"aaa", "ccc"},
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			got := commaSeparator(c.input)
-			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected result: want=%+v, got=%+v", c.want, got)
-			}
-		})
-	}
-}
-
-func TestParseScore(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  float32
-	}{
-		{
-			name:  "normal",
-			input: "0.05",
-			want:  0.05,
-		},
-		{
-			name:  "parse error",
-			input: "parse error",
-			want:  0.0,
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			got := parseScore(c.input)
-			if got != c.want {
-				t.Fatalf("Unexpected result: want=%+v, got=%+v", c.want, got)
-			}
-		})
-	}
-}
-
-func TestParseAt(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  int64
-	}{
-		{
-			name:  "normal",
-			input: "1591034681",
-			want:  1591034681,
-		},
-		{
-			name:  "parse error",
-			input: "parse error",
-			want:  0,
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			got := parseAt(c.input)
-			if got != c.want {
-				t.Fatalf("Unexpected result: want=%+v, got=%+v", c.want, got)
 			}
 		})
 	}
