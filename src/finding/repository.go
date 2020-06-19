@@ -14,27 +14,27 @@ import (
 type findingRepoInterface interface {
 	// Finding
 	ListFinding(*finding.ListFindingRequest) (*[]model.Finding, error)
-	GetFinding(uint64) (*model.Finding, error)
+	GetFinding(uint32, uint64) (*model.Finding, error)
 	GetFindingByDataSource(uint32, string, string) (*model.Finding, error)
 	UpsertFinding(*model.Finding) (*model.Finding, error)
-	DeleteFinding(uint64) error
-	ListFindingTag(uint64) (*[]model.FindingTag, error)
-	GetFindingTagByKey(uint64, string) (*model.FindingTag, error)
-	GetFindingTagByID(uint64) (*model.FindingTag, error)
+	DeleteFinding(uint32, uint64) error
+	ListFindingTag(uint32, uint64) (*[]model.FindingTag, error)
+	GetFindingTagByKey(uint32, uint64, string) (*model.FindingTag, error)
+	GetFindingTagByID(uint32, uint64) (*model.FindingTag, error)
 	TagFinding(*model.FindingTag) (*model.FindingTag, error)
-	UntagFinding(uint64) error
+	UntagFinding(uint32, uint64) error
 
 	// Resource
 	ListResource(*finding.ListResourceRequest) (*[]model.Resource, error)
-	GetResource(uint64) (*model.Resource, error)
+	GetResource(uint32, uint64) (*model.Resource, error)
 	GetResourceByName(uint32, string) (*model.Resource, error)
 	UpsertResource(*model.Resource) (*model.Resource, error)
-	DeleteResource(uint64) error
-	ListResourceTag(uint64) (*[]model.ResourceTag, error)
-	GetResourceTagByKey(uint64, string) (*model.ResourceTag, error)
-	GetResourceTagByID(uint64) (*model.ResourceTag, error)
+	DeleteResource(uint32, uint64) error
+	ListResourceTag(uint32, uint64) (*[]model.ResourceTag, error)
+	GetResourceTagByKey(uint32, uint64, string) (*model.ResourceTag, error)
+	GetResourceTagByID(uint32, uint64) (*model.ResourceTag, error)
 	TagResource(*model.ResourceTag) (*model.ResourceTag, error)
-	UntagResource(uint64) error
+	UntagResource(uint32, uint64) error
 }
 
 type findingRepository struct {
@@ -99,16 +99,12 @@ select
 from
 	finding
 where
-	score between ? and ?
-	and 
-	updated_at between ? and ?
+  project_id = ?
+	and score between ? and ?
+	and updated_at between ? and ?
 `
 	var params []interface{}
-	params = append(params, req.FromScore, req.ToScore, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
-	if len(req.ProjectId) != 0 {
-		query += " and project_id in (?)"
-		params = append(params, req.ProjectId)
-	}
+	params = append(params, req.ProjectId, req.FromScore, req.ToScore, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
 	if len(req.DataSource) != 0 {
 		query += " and data_source in (?)"
 		params = append(params, req.DataSource)
@@ -125,11 +121,11 @@ where
 	return &data, nil
 }
 
-const selectGetFinding = `select * from finding where finding_id = ?`
+const selectGetFinding = `select * from finding where project_id = ? and finding_id = ?`
 
-func (f *findingRepository) GetFinding(findingID uint64) (*model.Finding, error) {
+func (f *findingRepository) GetFinding(projectID uint32, findingID uint64) (*model.Finding, error) {
 	var data model.Finding
-	if err := f.SlaveDB.Raw(selectGetFinding, findingID).First(&data).Error; err != nil {
+	if err := f.SlaveDB.Raw(selectGetFinding, projectID, findingID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -207,32 +203,32 @@ func (f *findingRepository) GetResourceByName(projectID uint32, resourceName str
 	return &data, nil
 }
 
-const deleteDeleteFinding = `delete from finding where finding_id = ?`
+const deleteDeleteFinding = `delete from finding where project_id = ? and finding_id = ?`
 
-func (f *findingRepository) DeleteFinding(findingID uint64) error {
-	if err := f.MasterDB.Exec(deleteDeleteFinding, findingID).Error; err != nil {
+func (f *findingRepository) DeleteFinding(projectID uint32, findingID uint64) error {
+	if err := f.MasterDB.Exec(deleteDeleteFinding, projectID, findingID).Error; err != nil {
 		return err
 	}
-	if err := f.DeleteTagByFindingID(findingID); err != nil {
-		return err
-	}
-	return nil
-}
-
-const deleteDeleteTagByFindingID = `delete from finding_tag where finding_id = ?`
-
-func (f *findingRepository) DeleteTagByFindingID(findingID uint64) error {
-	if err := f.MasterDB.Exec(deleteDeleteTagByFindingID, findingID).Error; err != nil {
+	if err := f.DeleteTagByFindingID(projectID, findingID); err != nil {
 		return err
 	}
 	return nil
 }
 
-const selectListFindingTag = `select * from finding_tag where finding_id = ?`
+const deleteDeleteTagByFindingID = `delete from finding_tag where project_id = ? and finding_id = ?`
 
-func (f *findingRepository) ListFindingTag(findingID uint64) (*[]model.FindingTag, error) {
+func (f *findingRepository) DeleteTagByFindingID(projectID uint32, findingID uint64) error {
+	if err := f.MasterDB.Exec(deleteDeleteTagByFindingID, projectID, findingID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+const selectListFindingTag = `select * from finding_tag where project_id = ? and finding_id = ?`
+
+func (f *findingRepository) ListFindingTag(projectID uint32, findingID uint64) (*[]model.FindingTag, error) {
 	var data []model.FindingTag
-	if err := f.SlaveDB.Raw(selectListFindingTag, findingID).Scan(&data).Error; err != nil {
+	if err := f.SlaveDB.Raw(selectListFindingTag, projectID, findingID).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -252,37 +248,37 @@ func (f *findingRepository) TagFinding(tag *model.FindingTag) (*model.FindingTag
 		tag.FindingTagID, tag.FindingID, tag.ProjectID, tag.TagKey, tag.TagValue).Error; err != nil {
 		return nil, err
 	}
-	updated, err := f.GetFindingTagByKey(tag.FindingID, tag.TagKey)
+	updated, err := f.GetFindingTagByKey(tag.ProjectID, tag.FindingID, tag.TagKey)
 	if err != nil {
 		return nil, err
 	}
 	return updated, err
 }
 
-const selectGetFindingTagByKey = `select * from finding_tag where finding_id = ? and tag_key = ?`
+const selectGetFindingTagByKey = `select * from finding_tag where project_id = ? and finding_id = ? and tag_key = ?`
 
-func (f *findingRepository) GetFindingTagByKey(findingID uint64, tagKey string) (*model.FindingTag, error) {
+func (f *findingRepository) GetFindingTagByKey(projectID uint32, findingID uint64, tagKey string) (*model.FindingTag, error) {
 	var data model.FindingTag
-	if err := f.SlaveDB.Raw(selectGetFindingTagByKey, findingID, tagKey).First(&data).Error; err != nil {
+	if err := f.SlaveDB.Raw(selectGetFindingTagByKey, projectID, findingID, tagKey).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
-const selectGetFindingTagByID = `select * from finding_tag where finding_tag_id = ?`
+const selectGetFindingTagByID = `select * from finding_tag where project_id = ? and finding_tag_id = ?`
 
-func (f *findingRepository) GetFindingTagByID(findingTagID uint64) (*model.FindingTag, error) {
+func (f *findingRepository) GetFindingTagByID(projectID uint32, findingTagID uint64) (*model.FindingTag, error) {
 	var data model.FindingTag
-	if err := f.SlaveDB.Raw(selectGetFindingTagByID, findingTagID).First(&data).Error; err != nil {
+	if err := f.SlaveDB.Raw(selectGetFindingTagByID, projectID, findingTagID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
-const deleteUntagFinding = `delete from finding_tag where finding_tag_id = ?`
+const deleteUntagFinding = `delete from finding_tag where project_id = ? and finding_tag_id = ?`
 
-func (f *findingRepository) UntagFinding(findingTagID uint64) error {
-	if err := f.MasterDB.Exec(deleteUntagFinding, findingTagID).Error; err != nil {
+func (f *findingRepository) UntagFinding(projectID uint32, findingTagID uint64) error {
+	if err := f.MasterDB.Exec(deleteUntagFinding, projectID, findingTagID).Error; err != nil {
 		return err
 	}
 	return nil
@@ -296,14 +292,11 @@ from
   resource r
   left outer join finding f using(resource_name)
 where
-	r.updated_at between ? and ?
+  r.project_id = ?
+	and r.updated_at between ? and ?
 `
 	var params []interface{}
-	params = append(params, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
-	if len(req.ProjectId) != 0 {
-		query += " and r.project_id in (?)"
-		params = append(params, req.ProjectId)
-	}
+	params = append(params, req.ProjectId, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
 	if len(req.ResourceName) != 0 {
 		query += " and r.resource_name in (?)"
 		params = append(params, req.ResourceName)
@@ -318,62 +311,62 @@ where
 	return &data, nil
 }
 
-const selectGetResource = `select * from resource where resource_id = ?`
+const selectGetResource = `select * from resource where project_id = ? and resource_id = ?`
 
-func (f *findingRepository) GetResource(resourceID uint64) (*model.Resource, error) {
+func (f *findingRepository) GetResource(projectID uint32, resourceID uint64) (*model.Resource, error) {
 	var data model.Resource
-	if err := f.SlaveDB.Raw(selectGetResource, resourceID).First(&data).Error; err != nil {
+	if err := f.SlaveDB.Raw(selectGetResource, projectID, resourceID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
-const deleteDeleteResource = `delete from resource where resource_id = ?`
+const deleteDeleteResource = `delete from resource where project_id = ? and resource_id = ?`
 
-func (f *findingRepository) DeleteResource(resourceID uint64) error {
-	if err := f.MasterDB.Exec(deleteDeleteResource, resourceID).Error; err != nil {
+func (f *findingRepository) DeleteResource(projectID uint32, resourceID uint64) error {
+	if err := f.MasterDB.Exec(deleteDeleteResource, projectID, resourceID).Error; err != nil {
 		return err
 	}
-	if err := f.DeleteTagByResourceID(resourceID); err != nil {
-		return err
-	}
-	return nil
-}
-
-const deleteDeleteTagByResourceID = `delete from resource_tag where resource_id = ?`
-
-func (f *findingRepository) DeleteTagByResourceID(resourceID uint64) error {
-	if err := f.MasterDB.Exec(deleteDeleteTagByResourceID, resourceID).Error; err != nil {
+	if err := f.DeleteTagByResourceID(projectID, resourceID); err != nil {
 		return err
 	}
 	return nil
 }
 
-const selectListResourceTag = `select * from resource_tag where resource_id = ?`
+const deleteDeleteTagByResourceID = `delete from resource_tag where project_id = ? and resource_id = ?`
 
-func (f *findingRepository) ListResourceTag(resourceID uint64) (*[]model.ResourceTag, error) {
+func (f *findingRepository) DeleteTagByResourceID(projectID uint32, resourceID uint64) error {
+	if err := f.MasterDB.Exec(deleteDeleteTagByResourceID, projectID, resourceID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+const selectListResourceTag = `select * from resource_tag where project_id = ? and resource_id = ?`
+
+func (f *findingRepository) ListResourceTag(projectID uint32, resourceID uint64) (*[]model.ResourceTag, error) {
 	var data []model.ResourceTag
-	if err := f.SlaveDB.Raw(selectListResourceTag, resourceID).Scan(&data).Error; err != nil {
+	if err := f.SlaveDB.Raw(selectListResourceTag, projectID, resourceID).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
-const selectGetResourceTagByKey = `select * from resource_tag where resource_id = ? and tag_key = ?`
+const selectGetResourceTagByKey = `select * from resource_tag where project_id = ? and resource_id = ? and tag_key = ?`
 
-func (f *findingRepository) GetResourceTagByKey(resourceID uint64, tagKey string) (*model.ResourceTag, error) {
+func (f *findingRepository) GetResourceTagByKey(projectID uint32, resourceID uint64, tagKey string) (*model.ResourceTag, error) {
 	var data model.ResourceTag
-	if err := f.SlaveDB.Raw(selectGetResourceTagByKey, resourceID, tagKey).First(&data).Error; err != nil {
+	if err := f.SlaveDB.Raw(selectGetResourceTagByKey, projectID, resourceID, tagKey).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
-const selectGetResourceTagByID = `select * from resource_tag where resource_tag_id = ?`
+const selectGetResourceTagByID = `select * from resource_tag where project_id = ? and resource_tag_id = ?`
 
-func (f *findingRepository) GetResourceTagByID(resourceID uint64) (*model.ResourceTag, error) {
+func (f *findingRepository) GetResourceTagByID(projectID uint32, resourceID uint64) (*model.ResourceTag, error) {
 	var data model.ResourceTag
-	if err := f.SlaveDB.Raw(selectGetResourceTagByID, resourceID).First(&data).Error; err != nil {
+	if err := f.SlaveDB.Raw(selectGetResourceTagByID, projectID, resourceID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -393,17 +386,17 @@ func (f *findingRepository) TagResource(tag *model.ResourceTag) (*model.Resource
 		tag.ResourceTagID, tag.ResourceID, tag.ProjectID, tag.TagKey, tag.TagValue).Error; err != nil {
 		return nil, err
 	}
-	updated, err := f.GetResourceTagByKey(tag.ResourceID, tag.TagKey)
+	updated, err := f.GetResourceTagByKey(tag.ProjectID, tag.ResourceID, tag.TagKey)
 	if err != nil {
 		return nil, err
 	}
 	return updated, err
 }
 
-const deleteUntagResource = `delete from resource_tag where resource_tag_id = ?`
+const deleteUntagResource = `delete from resource_tag where project_id = ? and resource_tag_id = ?`
 
-func (f *findingRepository) UntagResource(resourceTagID uint64) error {
-	if err := f.MasterDB.Exec(deleteUntagResource, resourceTagID).Error; err != nil {
+func (f *findingRepository) UntagResource(projectID uint32, resourceTagID uint64) error {
+	if err := f.MasterDB.Exec(deleteUntagResource, projectID, resourceTagID).Error; err != nil {
 		return err
 	}
 	return nil

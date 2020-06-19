@@ -9,7 +9,6 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/gorilla/schema"
-	"github.com/vikyd/zero"
 )
 
 var (
@@ -41,17 +40,6 @@ func commaSeparator(param string) []string {
 		}
 	}
 	return separated
-}
-
-func ignoreZeroValue(param []uint32) []uint32 {
-	var result []uint32
-	for _, v := range param {
-		if zero.IsZeroVal(v) {
-			continue
-		}
-		result = append(result, v)
-	}
-	return result
 }
 
 func parseUint64(str string) uint64 {

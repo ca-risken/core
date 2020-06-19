@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
@@ -33,10 +32,7 @@ func (f *findingService) ListResource(ctx context.Context, req *finding.ListReso
 
 	var ids []uint64
 	for _, data := range *list {
-		// Authz
-		if f.isAuthorizedWithResource(ctx, req.UserId, "ListResource", &data) {
-			ids = append(ids, uint64(data.ResourceID))
-		}
+		ids = append(ids, uint64(data.ResourceID))
 	}
 	return &finding.ListResourceResponse{ResourceId: ids}, nil
 }
@@ -63,17 +59,12 @@ func (f *findingService) GetResource(ctx context.Context, req *finding.GetResour
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-
-	data, err := f.repository.GetResource(req.ResourceId)
+	data, err := f.repository.GetResource(req.ProjectId, req.ResourceId)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return &finding.GetResourceResponse{}, nil
 		}
 		return nil, err
-	}
-	// Authz
-	if !f.isAuthorizedWithResource(ctx, req.UserId, "GetResource", data) {
-		return &finding.GetResourceResponse{}, nil
 	}
 	return &finding.GetResourceResponse{Resource: convertResource(data)}, nil
 }
@@ -98,11 +89,6 @@ func (f *findingService) PutResource(ctx context.Context, req *finding.PutResour
 		ResourceName: req.Resource.ResourceName,
 		ProjectID:    req.Resource.ProjectId,
 	}
-	// Authz
-	if !f.isAuthorizedWithResource(ctx, req.UserId, "PutResource", data) {
-		return nil, fmt.Errorf("Unauthorized PutResource action, user_id=%d, data=%+v", req.UserId, data)
-	}
-
 	// upsert
 	registerdData, err := f.repository.UpsertResource(data)
 	if err != nil {
@@ -115,11 +101,7 @@ func (f *findingService) DeleteResource(ctx context.Context, req *finding.Delete
 	if err := req.Validate(); err != nil {
 		return &empty.Empty{}, err
 	}
-	// Authz
-	if !f.isAuthorizedWithResourceID(ctx, req.UserId, "DeleteResource", req.ResourceId) {
-		return nil, fmt.Errorf("Unauthorized DeleteResource action, user_id=%d, resource_id=%d", req.UserId, req.ResourceId)
-	}
-	err := f.repository.DeleteResource(req.ResourceId)
+	err := f.repository.DeleteResource(req.ProjectId, req.ResourceId)
 	if err != nil {
 		return nil, err
 	}
@@ -134,8 +116,7 @@ func (f *findingService) ListResourceTag(ctx context.Context, req *finding.ListR
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	// TODO authz
-	list, err := f.repository.ListResourceTag(req.ResourceId)
+	list, err := f.repository.ListResourceTag(req.ProjectId, req.ResourceId)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return &finding.ListResourceTagResponse{}, nil
@@ -144,10 +125,7 @@ func (f *findingService) ListResourceTag(ctx context.Context, req *finding.ListR
 	}
 	var tags []*finding.ResourceTag
 	for _, tag := range *list {
-		// Authz
-		if f.isAuthorizedWithResourceTag(ctx, req.UserId, "ListResourceTag", &tag) {
-			tags = append(tags, convertResourceTag(&tag))
-		}
+		tags = append(tags, convertResourceTag(&tag))
 	}
 	return &finding.ListResourceTagResponse{Tag: tags}, nil
 }
@@ -156,8 +134,7 @@ func (f *findingService) TagResource(ctx context.Context, req *finding.TagResour
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-
-	savedData, err := f.repository.GetResourceTagByKey(req.Tag.ResourceId, req.Tag.TagKey)
+	savedData, err := f.repository.GetResourceTagByKey(req.ProjectId, req.Tag.ResourceId, req.Tag.TagKey)
 	noRecord := gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		return nil, err
@@ -175,11 +152,6 @@ func (f *findingService) TagResource(ctx context.Context, req *finding.TagResour
 		TagKey:        req.Tag.TagKey,
 		TagValue:      req.Tag.TagValue,
 	}
-	// Authz
-	if !f.isAuthorizedWithResourceTag(ctx, req.UserId, "TagResource", tag) {
-		return nil, fmt.Errorf("Unauthorized TagResource action, user_id=%d, tag=%+v", req.UserId, tag)
-	}
-
 	registerd, err := f.repository.TagResource(tag)
 	if err != nil {
 		return nil, err
@@ -191,12 +163,7 @@ func (f *findingService) UntagResource(ctx context.Context, req *finding.UntagRe
 	if err := req.Validate(); err != nil {
 		return &empty.Empty{}, err
 	}
-	// Authz
-	if !f.isAuthorizedWithResourceTagID(ctx, req.UserId, "UntagResource", req.ResourceTagId) {
-		return nil, fmt.Errorf("Unauthorized UntagResource action, user_id=%d, resource_tag_id=%d", req.UserId, req.ResourceTagId)
-	}
-
-	err := f.repository.UntagResource(req.ResourceTagId)
+	err := f.repository.UntagResource(req.ProjectId, req.ResourceTagId)
 	if err != nil {
 		return nil, err
 	}

@@ -1,14 +1,12 @@
 package main
 
 import (
-	"context"
 	"net/http"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/CyberAgent/mimosa-core/proto/finding"
-	"github.com/go-chi/chi"
 )
 
 func TestBindListFindingRequest(t *testing.T) {
@@ -24,18 +22,8 @@ func TestBindListFindingRequest(t *testing.T) {
 		},
 		{
 			name:  "full set",
-			input: "project_id=123&data_source=aws:guardduty&resource_name=resouce&from_score=0.5&to_score=1.0&from_at=1590000000&to_at=1600000000",
-			want:  &finding.ListFindingRequest{ProjectId: []uint32{123}, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"resouce"}, FromScore: 0.5, ToScore: 1.0, FromAt: 1590000000, ToAt: 1600000000},
-		},
-		{
-			name:  "multiple project_id 1",
-			input: "project_id=123,456",
-			want:  &finding.ListFindingRequest{ProjectId: []uint32{123, 456}},
-		},
-		{
-			name:  "multiple project_id 2",
-			input: "project_id=123,",
-			want:  &finding.ListFindingRequest{ProjectId: []uint32{123}},
+			input: "project_id=1&data_source=aws:guardduty&resource_name=resouce&from_score=0.5&to_score=1.0&from_at=1590000000&to_at=1600000000",
+			want:  &finding.ListFindingRequest{ProjectId: 1, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"resouce"}, FromScore: 0.5, ToScore: 1.0, FromAt: 1590000000, ToAt: 1600000000},
 		},
 		{
 			name:  "multiple data_source 1",
@@ -82,8 +70,8 @@ func TestBindGetFindingRequest(t *testing.T) {
 		},
 		{
 			name:  "finding_id",
-			input: "1001",
-			want:  &finding.GetFindingRequest{FindingId: 1001},
+			input: "project_id=1&finding_id=1001",
+			want:  &finding.GetFindingRequest{ProjectId: 1, FindingId: 1001},
 		},
 		{
 			name:  "parse error",
@@ -93,11 +81,7 @@ func TestBindGetFindingRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("GET", "/finding/"+c.input, nil)
-			// Requestにパスパラメータ{finding_id}を登録
-			rctx := chi.NewRouteContext()
-			rctx.URLParams.Add("finding_id", c.input)
-			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+			req, _ := http.NewRequest("GET", "/finding/get/?"+c.input, nil)
 			got := bindGetFindingRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -114,13 +98,13 @@ func TestBindPutFindingRequest(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: `{"description":"desc", "data_source":"ds", "data_source_id":"ds-01", "resource_name":"rn", "project_id":1, "original_score":0.1, "original_max_score":1.0, "data":"{}"}`,
-			want:  &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-01", ResourceName: "rn", ProjectId: 1, OriginalScore: 0.1, OriginalMaxScore: 1.0, Data: `{}`}},
+			input: `{"project_id":1001, "finding":{"description":"desc", "data_source":"ds", "data_source_id":"ds-01", "resource_name":"rn", "project_id":1, "original_score":0.1, "original_max_score":1.0, "data":"{}"}}`,
+			want:  &finding.PutFindingRequest{ProjectId: 1001, Finding: &finding.FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-01", ResourceName: "rn", ProjectId: 1, OriginalScore: 0.1, OriginalMaxScore: 1.0, Data: `{}`}},
 		},
 		{
 			name:  "parse error",
 			input: `{"description":"desc`,
-			want:  &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{}},
+			want:  &finding.PutFindingRequest{},
 		},
 	}
 	for _, c := range cases {
@@ -170,8 +154,8 @@ func TestBindListFindingTagRequest(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: `1001`,
-			want:  &finding.ListFindingTagRequest{FindingId: 1001},
+			input: `project_id=1&finding_id=1001`,
+			want:  &finding.ListFindingTagRequest{ProjectId: 1, FindingId: 1001},
 		},
 		{
 			name:  "parse error",
@@ -181,10 +165,7 @@ func TestBindListFindingTagRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("POST", "/finding/"+c.input+"/tag", strings.NewReader(c.input))
-			rctx := chi.NewRouteContext()
-			rctx.URLParams.Add("finding_id", c.input) // Requestにパスパラメータ{finding_id}を登録
-			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+			req, _ := http.NewRequest("GET", "/finding/tag/?"+c.input, nil)
 			got := bindListFindingTagRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -201,13 +182,13 @@ func TestBindTagFindingRequest(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: `{"finding_id":111, "tag_key":"key", "tag_value":"value"}`,
-			want:  &finding.TagFindingRequest{Tag: &finding.FindingTagForUpsert{FindingId: 111, TagKey: "key", TagValue: "value"}},
+			input: `{"project_id":1, "tag":{"finding_id":111, "tag_key":"key", "tag_value":"value"}}`,
+			want:  &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 111, TagKey: "key", TagValue: "value"}},
 		},
 		{
 			name:  "parse error",
 			input: "xxxxxxxx",
-			want:  &finding.TagFindingRequest{Tag: &finding.FindingTagForUpsert{}},
+			want:  &finding.TagFindingRequest{},
 		},
 	}
 	for _, c := range cases {
@@ -257,8 +238,8 @@ func TestBindListResourceRequest(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: "project_id=111,222&resource_name=aaa,bbb&from_sum_score=0.0&to_sum_score=100.0&from_at=&to_at=",
-			want:  &finding.ListResourceRequest{ProjectId: []uint32{111, 222}, ResourceName: []string{"aaa", "bbb"}, FromSumScore: 0.0, ToSumScore: 100.0},
+			input: "project_id=1&resource_name=aaa,bbb&from_sum_score=0.0&to_sum_score=100.0&from_at=&to_at=",
+			want:  &finding.ListResourceRequest{ProjectId: 1, ResourceName: []string{"aaa", "bbb"}, FromSumScore: 0.0, ToSumScore: 100.0},
 		},
 		{
 			name:  "OK No param",
@@ -300,8 +281,8 @@ func TestBindGetResourceRequest(t *testing.T) {
 		},
 		{
 			name:  "resource id",
-			input: "1001",
-			want:  &finding.GetResourceRequest{ResourceId: 1001},
+			input: "project_id=1&resource_id=1001",
+			want:  &finding.GetResourceRequest{ProjectId: 1, ResourceId: 1001},
 		},
 		{
 			name:  "parse error",
@@ -311,10 +292,7 @@ func TestBindGetResourceRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("GET", "/resource/"+c.input, nil)
-			rctx := chi.NewRouteContext()
-			rctx.URLParams.Add("resource_id", c.input) // Requestにパスパラメータ{resource_id}を登録
-			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+			req, _ := http.NewRequest("GET", "/resource/get/?"+c.input, nil)
 			got := bindGetResourceRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -331,13 +309,13 @@ func TestBindPutResourceRequest(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: `{"resource_name":"rn", "project_id":1}`,
-			want:  &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceName: "rn", ProjectId: 1}},
+			input: `{"project_id":1001, "resource":{"resource_name":"rn", "project_id":1}}`,
+			want:  &finding.PutResourceRequest{ProjectId: 1001, Resource: &finding.ResourceForUpsert{ResourceName: "rn", ProjectId: 1}},
 		},
 		{
 			name:  "parse error",
 			input: "xxxxxxxx",
-			want:  &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{}},
+			want:  &finding.PutResourceRequest{},
 		},
 	}
 	for _, c := range cases {
@@ -387,8 +365,8 @@ func TestBindListResourceTagReqest(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: `1001`,
-			want:  &finding.ListResourceTagRequest{ResourceId: 1001},
+			input: `project_id=1&resource_id=1001`,
+			want:  &finding.ListResourceTagRequest{ProjectId: 1, ResourceId: 1001},
 		},
 		{
 			name:  "parse error",
@@ -398,10 +376,7 @@ func TestBindListResourceTagReqest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("POST", "/resource/"+c.input+"/tag", strings.NewReader(c.input))
-			rctx := chi.NewRouteContext()
-			rctx.URLParams.Add("resource_id", c.input) // Requestにパスパラメータ{resource_id}を登録
-			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+			req, _ := http.NewRequest("GET", "/resource/tag/?"+c.input, nil)
 			got := bindListResourceTagRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -418,13 +393,13 @@ func TestBindTagResourceRequest(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: `{"resource_id":111, "tag_key":"key", "tag_value":"value"}`,
-			want:  &finding.TagResourceRequest{Tag: &finding.ResourceTagForUpsert{ResourceId: 111, TagKey: "key", TagValue: "value"}},
+			input: `{"project_id":1, "tag":{"resource_id":111, "tag_key":"key", "tag_value":"value"}}`,
+			want:  &finding.TagResourceRequest{ProjectId: 1, Tag: &finding.ResourceTagForUpsert{ResourceId: 111, TagKey: "key", TagValue: "value"}},
 		},
 		{
 			name:  "parse error",
 			input: "xxxxxxxx",
-			want:  &finding.TagResourceRequest{Tag: &finding.ResourceTagForUpsert{}},
+			want:  &finding.TagResourceRequest{},
 		},
 	}
 	for _, c := range cases {

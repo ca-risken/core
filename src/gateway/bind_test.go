@@ -36,35 +36,3 @@ func TestCommaSeparator(t *testing.T) {
 		})
 	}
 }
-
-func TestIgnoreZeroValuue(t *testing.T) {
-	cases := []struct {
-		name  string
-		input []uint32
-		want  []uint32
-	}{
-		{
-			name:  "single param",
-			input: []uint32{111},
-			want:  []uint32{111},
-		},
-		{
-			name:  "multiple params",
-			input: []uint32{111, 222},
-			want:  []uint32{111, 222},
-		},
-		{
-			name:  "blank params",
-			input: []uint32{111, 0},
-			want:  []uint32{111},
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			got := ignoreZeroValue(c.input)
-			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected result: want=%+v, got=%+v", c.want, got)
-			}
-		})
-	}
-}

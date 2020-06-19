@@ -18,181 +18,96 @@ list-service:
 list-finding:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":["1001","1002"], "from_score":0.0, "to_score":1.0, "from_at": 1560000000, "to_at": 1660000000}' \
+		-d '{"project_id":1001, "from_score":0.0, "to_score":1.0, "from_at":1560000000, "to_at":1660000000}' \
 		localhost:8081 core.finding.FindingService.ListFinding
 
-.PHONY: list-finding-with-user
-list-finding-with-user:
+.PHONY: get-finding
+get-finding:
 	grpcurl \
 		-plaintext \
-		-d '{"user_id":1001, "project_id":["1001","1002"], "from_score":0.0, "to_score":1.0, "from_at": 1560000000, "to_at": 1660000000}' \
-		localhost:8081 core.finding.FindingService.ListFinding
+		-d '{"project_id":1001, "finding_id":1001}' \
+		localhost:8081 core.finding.FindingService.GetFinding
 
 .PHONY: put-finding
 put-finding:
 	grpcurl \
 		-plaintext \
-		-d '{"finding":{"description":"desc", "data_source":"ds", "data_source_id":"ds-001", "resource_name":"rn", "project_id":1001, "original_score":55.51, "original_max_score":100.0, "data":"{\"key\":\"value\"}"}}' \
-		localhost:8081 core.finding.FindingService.PutFinding
-
-.PHONY: put-finding-with-user
-put-finding-with-user:
-	grpcurl \
-		-plaintext \
-		-d '{"user_id":1002, "finding":{"description":"desc", "data_source":"ds", "data_source_id":"ds-001", "resource_name":"rn", "project_id":1001, "original_score":55.51, "original_max_score":100.0, "data":"{\"key\":\"value\"}"}}' \
+		-d '{"project_id":1001, "finding":{"description":"desc", "data_source":"ds", "data_source_id":"ds-001", "resource_name":"rn", "project_id":1001, "original_score":55.51, "original_max_score":100.0, "data":"{\"key\":\"value\"}"}}' \
 		localhost:8081 core.finding.FindingService.PutFinding
 
 .PHONY: delete-finding
 delete-finding:
 	grpcurl \
 		-plaintext \
-		-d '{"finding_id": 1004}' \
-		localhost:8081 core.finding.FindingService.DeleteFinding
-
-.PHONY: delete-finding-with-user
-delete-finding-with-user:
-	grpcurl \
-		-plaintext \
-		-d '{"user_id":1001, "finding_id": 1004}' \
+		-d '{"project_id":1001, "finding_id":1004}' \
 		localhost:8081 core.finding.FindingService.DeleteFinding
 
 .PHONY: list-finding-tag
 list-finding-tag:
 	grpcurl \
 		-plaintext \
-		-d '{"finding_id": 1001}' \
-		localhost:8081 core.finding.FindingService.ListFindingTag
-
-.PHONY: list-finding-tag-with-user
-list-finding-tag-with-user:
-	grpcurl \
-		-plaintext \
-		-d '{"user_id":1003, "finding_id": 1001}' \
+		-d '{"project_id":1001, "finding_id":1001}' \
 		localhost:8081 core.finding.FindingService.ListFindingTag
 
 .PHONY: tag-finding
 tag-finding:
 	grpcurl \
 		-plaintext \
-		-d '{"tag": {"finding_id": 1001, "project_id": 1001, "tag_key": "key", "tag_value": "value"}}' \
-		localhost:8081 core.finding.FindingService.TagFinding
-
-.PHONY: tag-finding-with-user
-tag-finding-with-user:
-	grpcurl \
-		-plaintext \
-		-d '{"user_id":1003, "tag": {"finding_id": 1001, "project_id": 1001, "tag_key": "key", "tag_value": "value"}}' \
+		-d '{"project_id":1001, "tag":{"finding_id":1001, "project_id":1001, "tag_key":"key", "tag_value":"value"}}' \
 		localhost:8081 core.finding.FindingService.TagFinding
 
 .PHONY: untag-finding
 untag-finding:
 	grpcurl \
 		-plaintext \
-		-d '{"finding_tag_id": 1001}' \
+		-d '{"project_id":1001, "finding_tag_id":1001}' \
 		localhost:8081 core.finding.FindingService.UntagFinding
-
-.PHONY: untag-finding-with-user
-untag-finding-with-user:
-	grpcurl \
-		-plaintext \
-		-d '{"user_id":1003, "finding_tag_id": 1001}' \
-		localhost:8081 core.finding.FindingService.UntagFinding
-
 
 .PHONY: list-resource
 list-resource:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":["1001","1002"], "resource_name":["rn"], "from_sum_score":0.0, "to_sum_score":999.9, "from_at": 1560000000, "to_at": 1660000000}' \
-		localhost:8081 core.finding.FindingService.ListResource
-
-.PHONY: list-resource-with-user
-list-resource-with-user:
-	grpcurl \
-		-plaintext \
-		-d '{"user_id":1003, "project_id":["1001","1002"], "resource_name":["rn"], "from_sum_score":0.0, "to_sum_score":999.9, "from_at": 1560000000, "to_at": 1660000000}' \
+		-d '{"project_id":1001, "resource_name":["rn"], "from_sum_score":0.0, "to_sum_score":999.9, "from_at":1560000000, "to_at":1660000000}' \
 		localhost:8081 core.finding.FindingService.ListResource
 
 .PHONY: get-resource
 get-resource:
 	grpcurl \
 		-plaintext \
-		-d '{"resource_id": 1001}' \
-		localhost:8081 core.finding.FindingService.GetResource
-
-.PHONY: get-resource-with-user
-get-resource-with-user:
-	grpcurl \
-		-plaintext \
-		-d '{"user_id":1003, "resource_id": 1001}' \
+		-d '{"project_id":1001,"resource_id":1001}' \
 		localhost:8081 core.finding.FindingService.GetResource
 
 .PHONY: put-resource
 put-resource:
 	grpcurl \
 		-plaintext \
-		-d '{"resource": {"resource_name": "rn-test", "project_id": 1001}}' \
-		localhost:8081 core.finding.FindingService.PutResource
-
-.PHONY: put-resource-with-user
-put-resource-with-user:
-	grpcurl \
-		-plaintext \
-		-d '{"user_id":1002, "resource": {"resource_name": "rn-test", "project_id": 1001}}' \
+		-d '{"project_id":1001, "resource":{"resource_name":"rn-test", "project_id":1001}}' \
 		localhost:8081 core.finding.FindingService.PutResource
 
 .PHONY: delete-resource
 delete-resource:
 	grpcurl \
 		-plaintext \
-		-d '{"resource_id": 1004}' \
-		localhost:8081 core.finding.FindingService.DeleteResource
-
-.PHONY: delete-resource-with-user
-delete-resource-with-user:
-	grpcurl \
-		-plaintext \
-		-d '{"user_id":1002, "resource_id": 1004}' \
+		-d '{"project_id":1001, "resource_id":1004}' \
 		localhost:8081 core.finding.FindingService.DeleteResource
 
 .PHONY: list-resource-tag
 list-resource-tag:
 	grpcurl \
 		-plaintext \
-		-d '{"resource_id": 1001}' \
-		localhost:8081 core.finding.FindingService.ListResourceTag
-
-.PHONY: list-resource-tag-with-user
-list-resource-tag-with-user:
-	grpcurl \
-		-plaintext \
-		-d '{"user_id":1003, "resource_id": 1001}' \
+		-d '{"project_id":1001, "resource_id":1001}' \
 		localhost:8081 core.finding.FindingService.ListResourceTag
 
 .PHONY: tag-resource
 tag-resource:
 	grpcurl \
 		-plaintext \
-		-d '{"tag": {"resource_id": 1001, "project_id": 1001, "tag_key": "key", "tag_value": "value"}}' \
-		localhost:8081 core.finding.FindingService.TagResource
-
-.PHONY: tag-resource-with-user
-tag-resource-with-user:
-	grpcurl \
-		-plaintext \
-		-d '{"user_id":1002, "tag": {"resource_id": 1001, "project_id": 1001, "tag_key": "key", "tag_value": "value"}}' \
+		-d '{"project_id":1001, "tag":{"resource_id":1001, "project_id":1001, "tag_key":"key", "tag_value":"value"}}' \
 		localhost:8081 core.finding.FindingService.TagResource
 
 .PHONY: untag-resource
 untag-resource:
 	grpcurl \
 		-plaintext \
-		-d '{"resource_tag_id": 1003}' \
-		localhost:8081 core.finding.FindingService.UntagResource
-
-.PHONY: untag-resource-with-user
-untag-resource-with-user:
-	grpcurl \
-		-plaintext \
-		-d '{"user_id":1002, "resource_tag_id": 1003}' \
+		-d '{"project_id":1001, "resource_tag_id":1003}' \
 		localhost:8081 core.finding.FindingService.UntagResource

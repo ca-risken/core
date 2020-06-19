@@ -4,16 +4,12 @@ import (
 	"net/http"
 
 	"github.com/CyberAgent/mimosa-core/proto/finding"
-	"github.com/go-chi/chi"
 )
 
 func bindListFindingRequest(r *http.Request) *finding.ListFindingRequest {
 	req := finding.ListFindingRequest{}
 	if err := bindQuery(&req, r); err != nil {
 		appLogger.Warnf("Invalid parmeter. err=%+v", err)
-	}
-	if len(req.ProjectId) > 0 {
-		req.ProjectId = ignoreZeroValue(req.ProjectId)
 	}
 	if len(req.DataSource) > 0 {
 		req.DataSource = commaSeparator(req.DataSource[0])
@@ -25,17 +21,19 @@ func bindListFindingRequest(r *http.Request) *finding.ListFindingRequest {
 }
 
 func bindGetFindingRequest(r *http.Request) *finding.GetFindingRequest {
-	return &finding.GetFindingRequest{
-		FindingId: parseUint64(chi.URLParam(r, "finding_id")),
+	req := finding.GetFindingRequest{}
+	if err := bindQuery(&req, r); err != nil {
+		appLogger.Warnf("Invalid parmeter. err=%+v", err)
 	}
+	return &req
 }
 
 func bindPutFindingRequest(r *http.Request) *finding.PutFindingRequest {
-	req := finding.FindingForUpsert{}
+	req := finding.PutFindingRequest{}
 	if err := bindBodyJSON(&req, r); err != nil {
 		appLogger.Warnf("Invalid PutFindingRequest. err=%+v", err)
 	}
-	return &finding.PutFindingRequest{Finding: &req}
+	return &req
 }
 
 func bindDeleteFindingRequest(r *http.Request) *finding.DeleteFindingRequest {
@@ -47,17 +45,19 @@ func bindDeleteFindingRequest(r *http.Request) *finding.DeleteFindingRequest {
 }
 
 func bindListFindingTagRequest(r *http.Request) *finding.ListFindingTagRequest {
-	return &finding.ListFindingTagRequest{
-		FindingId: parseUint64(chi.URLParam(r, "finding_id")),
+	req := finding.ListFindingTagRequest{}
+	if err := bindQuery(&req, r); err != nil {
+		appLogger.Warnf("Invalid parmeter. err=%+v", err)
 	}
+	return &req
 }
 
 func bindTagFindingRequest(r *http.Request) *finding.TagFindingRequest {
-	req := finding.FindingTagForUpsert{}
+	req := finding.TagFindingRequest{}
 	if err := bindBodyJSON(&req, r); err != nil {
 		appLogger.Warnf("Invalid FindingTagForUpsert. err=%+v", err)
 	}
-	return &finding.TagFindingRequest{Tag: &req}
+	return &req
 }
 
 func bindUntagFindingRequest(r *http.Request) *finding.UntagFindingRequest {
@@ -73,28 +73,26 @@ func bindListResourceRequest(r *http.Request) *finding.ListResourceRequest {
 	if err := bindQuery(&req, r); err != nil {
 		appLogger.Warnf("Invalid parmeter. err=%+v", err)
 	}
-	if len(req.ProjectId) > 0 {
-		req.ProjectId = ignoreZeroValue(req.ProjectId)
-	}
 	if len(req.ResourceName) > 0 {
 		req.ResourceName = commaSeparator(req.ResourceName[0])
 	}
-
 	return &req
 }
 
 func bindGetResourceRequest(r *http.Request) *finding.GetResourceRequest {
-	return &finding.GetResourceRequest{
-		ResourceId: parseUint64(chi.URLParam(r, "resource_id")),
+	req := finding.GetResourceRequest{}
+	if err := bindQuery(&req, r); err != nil {
+		appLogger.Warnf("Invalid parmeter. err=%+v", err)
 	}
+	return &req
 }
 
 func bindPutResourceRequest(r *http.Request) *finding.PutResourceRequest {
-	req := finding.ResourceForUpsert{}
+	req := finding.PutResourceRequest{}
 	if err := bindBodyJSON(&req, r); err != nil {
 		appLogger.Warnf("Invalid ResourceForUpsert. err=%+v", err)
 	}
-	return &finding.PutResourceRequest{Resource: &req}
+	return &req
 }
 
 func bindDeleteResourceRequest(r *http.Request) *finding.DeleteResourceRequest {
@@ -106,17 +104,19 @@ func bindDeleteResourceRequest(r *http.Request) *finding.DeleteResourceRequest {
 }
 
 func bindListResourceTagRequest(r *http.Request) *finding.ListResourceTagRequest {
-	return &finding.ListResourceTagRequest{
-		ResourceId: parseUint64(chi.URLParam(r, "resource_id")),
+	req := finding.ListResourceTagRequest{}
+	if err := bindQuery(&req, r); err != nil {
+		appLogger.Warnf("Invalid parmeter. err=%+v", err)
 	}
+	return &req
 }
 
 func bindTagResourceRequest(r *http.Request) *finding.TagResourceRequest {
-	req := finding.ResourceTagForUpsert{}
+	req := finding.TagResourceRequest{}
 	if err := bindBodyJSON(&req, r); err != nil {
 		appLogger.Warnf("Invalid ResourceTagForUpsert. err=%+v", err)
 	}
-	return &finding.TagResourceRequest{Tag: &req}
+	return &req
 }
 
 func bindUntagResourceRequest(r *http.Request) *finding.UntagResourceRequest {

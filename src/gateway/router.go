@@ -15,8 +15,8 @@ func newRouter(svc gatewayService) *chi.Mux {
 
 	r.Route("/finding", func(r chi.Router) {
 		r.Get("/", svc.listFindingHandler)
-		r.Get("/{finding_id}", svc.getFindingHandler)
-		r.Get("/{finding_id}/tag", svc.listFindingTagHandler)
+		r.Get("/get", svc.getFindingHandler)
+		r.Get("/tag", svc.listFindingTagHandler)
 		r.Post("/put", svc.putFindingHandler)
 		r.Post("/delete", svc.deleteFindingHandler)
 		r.Post("/tag", svc.tagFindingHandler)
@@ -24,8 +24,8 @@ func newRouter(svc gatewayService) *chi.Mux {
 	})
 	r.Route("/resource", func(r chi.Router) {
 		r.Get("/", svc.listResourceHandler)
-		r.Get("/{resource_id}", svc.getResourceHandler)
-		r.Get("/{resource_id}/tag", svc.listResourceTagHandler)
+		r.Get("/get", svc.getResourceHandler)
+		r.Get("/tag", svc.listResourceTagHandler)
 		r.Post("/put", svc.putResourceHandler)
 		r.Post("/delete", svc.deleteResourceHandler)
 		r.Post("/tag", svc.tagResourceHandler)
