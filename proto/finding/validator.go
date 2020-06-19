@@ -8,6 +8,7 @@ import (
 // Validate ListFindingRequest
 func (l *ListFindingRequest) Validate() error {
 	return validation.ValidateStruct(l,
+		validation.Field(&l.ProjectId, validation.Required),
 		validation.Field(&l.DataSource, validation.Each(validation.Length(0, 64))),
 		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 255))),
 		validation.Field(&l.FromScore, validation.Min(0.0), validation.Max(1.0)),
@@ -18,18 +19,25 @@ func (l *ListFindingRequest) Validate() error {
 // Validate GetFinding
 func (g *GetFindingRequest) Validate() error {
 	return validation.ValidateStruct(g,
+		validation.Field(&g.ProjectId, validation.Required),
 		validation.Field(&g.FindingId, validation.Required),
 	)
 }
 
 // Validate PutFindingRequest
 func (p *PutFindingRequest) Validate() error {
+	if err := validation.ValidateStruct(p,
+		validation.Field(&p.ProjectId, validation.In(p.Finding.ProjectId)),
+	); err != nil {
+		return err
+	}
 	return p.Finding.Validate()
 }
 
 // Validate DeleteFindingRequest
 func (d *DeleteFindingRequest) Validate() error {
 	return validation.ValidateStruct(d,
+		validation.Field(&d.ProjectId, validation.Required),
 		validation.Field(&d.FindingId, validation.Required),
 	)
 }
@@ -37,18 +45,25 @@ func (d *DeleteFindingRequest) Validate() error {
 // Validate ListFindingTagRequest
 func (l *ListFindingTagRequest) Validate() error {
 	return validation.ValidateStruct(l,
+		validation.Field(&l.ProjectId, validation.Required),
 		validation.Field(&l.FindingId, validation.Required),
 	)
 }
 
 // Validate TagFindingRequest
 func (t *TagFindingRequest) Validate() error {
+	if err := validation.ValidateStruct(t,
+		validation.Field(&t.ProjectId, validation.Required, validation.In(t.Tag.ProjectId)),
+	); err != nil {
+		return err
+	}
 	return t.Tag.Validate()
 }
 
 // Validate UntagFindingRequest
 func (u *UntagFindingRequest) Validate() error {
 	return validation.ValidateStruct(u,
+		validation.Field(&u.ProjectId, validation.Required),
 		validation.Field(&u.FindingTagId, validation.Required),
 	)
 }
@@ -56,6 +71,7 @@ func (u *UntagFindingRequest) Validate() error {
 // Validate ListResourceRequest
 func (l *ListResourceRequest) Validate() error {
 	return validation.ValidateStruct(l,
+		validation.Field(&l.ProjectId, validation.Required),
 		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 255))),
 		validation.Field(&l.FromSumScore, validation.Min(0.0)),
 		validation.Field(&l.ToSumScore, validation.Min(0.0)),
@@ -65,18 +81,25 @@ func (l *ListResourceRequest) Validate() error {
 // Validate GetResourceRequest
 func (g *GetResourceRequest) Validate() error {
 	return validation.ValidateStruct(g,
+		validation.Field(&g.ProjectId, validation.Required),
 		validation.Field(&g.ResourceId, validation.Required),
 	)
 }
 
 // Validate PutResourceRequest
 func (p *PutResourceRequest) Validate() error {
+	if err := validation.ValidateStruct(p,
+		validation.Field(&p.ProjectId, validation.In(p.Resource.ProjectId)),
+	); err != nil {
+		return err
+	}
 	return p.Resource.Validate()
 }
 
 // Validate DeleteResourceRequest
 func (d *DeleteResourceRequest) Validate() error {
 	return validation.ValidateStruct(d,
+		validation.Field(&d.ProjectId, validation.Required),
 		validation.Field(&d.ResourceId, validation.Required),
 	)
 }
@@ -84,18 +107,25 @@ func (d *DeleteResourceRequest) Validate() error {
 // Validate ListResourceTagRequest
 func (l *ListResourceTagRequest) Validate() error {
 	return validation.ValidateStruct(l,
+		validation.Field(&l.ProjectId, validation.Required),
 		validation.Field(&l.ResourceId, validation.Required),
 	)
 }
 
 // Validate TagResourceRequest
 func (t *TagResourceRequest) Validate() error {
+	if err := validation.ValidateStruct(t,
+		validation.Field(&t.ProjectId, validation.Required, validation.In(t.Tag.ProjectId)),
+	); err != nil {
+		return err
+	}
 	return t.Tag.Validate()
 }
 
 // Validate UntagResourceRequest
 func (u *UntagResourceRequest) Validate() error {
 	return validation.ValidateStruct(u,
+		validation.Field(&u.ProjectId, validation.Required),
 		validation.Field(&u.ResourceTagId, validation.Required),
 	)
 }

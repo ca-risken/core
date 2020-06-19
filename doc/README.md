@@ -250,7 +250,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 | finding_id | [uint64](#uint64) |  |  |
 
 
@@ -266,7 +266,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 | resource_id | [uint64](#uint64) |  |  |
 
 
@@ -282,7 +282,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 | finding_id | [uint64](#uint64) |  |  |
 
 
@@ -313,7 +313,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 | resource_id | [uint64](#uint64) |  |  |
 
 
@@ -344,8 +344,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [uint32](#uint32) |  |  |
-| project_id | [uint32](#uint32) | repeated |  |
+| project_id | [uint32](#uint32) |  |  |
 | data_source | [string](#string) | repeated |  |
 | resource_name | [string](#string) | repeated |  |
 | from_score | [float](#float) |  |  |
@@ -381,7 +380,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 | finding_id | [uint64](#uint64) |  |  |
 
 
@@ -412,8 +411,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [uint32](#uint32) |  |  |
-| project_id | [uint32](#uint32) | repeated |  |
+| project_id | [uint32](#uint32) |  |  |
 | resource_name | [string](#string) | repeated |  |
 | from_sum_score | [float](#float) |  |  |
 | to_sum_score | [float](#float) |  |  |
@@ -448,7 +446,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 | resource_id | [uint64](#uint64) |  |  |
 
 
@@ -479,7 +477,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 | finding | [FindingForUpsert](#core.finding.FindingForUpsert) |  |  |
 
 
@@ -510,7 +508,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 | resource | [ResourceForUpsert](#core.finding.ResourceForUpsert) |  |  |
 
 
@@ -541,7 +539,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 | tag | [FindingTagForUpsert](#core.finding.FindingTagForUpsert) |  |  |
 
 
@@ -572,7 +570,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 | tag | [ResourceTagForUpsert](#core.finding.ResourceTagForUpsert) |  |  |
 
 
@@ -603,7 +601,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 | finding_tag_id | [uint64](#uint64) |  |  |
 
 
@@ -619,7 +617,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| user_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
 | resource_tag_id | [uint64](#uint64) |  |  |
 
 

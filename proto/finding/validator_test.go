@@ -13,43 +13,43 @@ func TestValidate_ListFindingRequest(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "OK empty",
-			input:   &ListFindingRequest{},
+			name:    "OK",
+			input:   &ListFindingRequest{ProjectId: 111, DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix()},
 			wantErr: false,
 		},
 		{
-			name:    "OK full parameters",
-			input:   &ListFindingRequest{UserId: 1001, ProjectId: []uint32{111, 222}, DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix()},
-			wantErr: false,
+			name:    "NG Required(project_id)",
+			input:   &ListFindingRequest{DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix()},
+			wantErr: true,
 		},
 		{
 			name:    "NG too long resource_name",
-			input:   &ListFindingRequest{ResourceName: []string{"123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456"}},
+			input:   &ListFindingRequest{ProjectId: 111, ResourceName: []string{"123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456"}},
 			wantErr: true,
 		},
 		{
 			name:    "NG too long data_source",
-			input:   &ListFindingRequest{DataSource: []string{"12345678901234567890123456789012345678901234567890123456789012345"}},
+			input:   &ListFindingRequest{ProjectId: 111, DataSource: []string{"12345678901234567890123456789012345678901234567890123456789012345"}},
 			wantErr: true,
 		},
 		{
 			name:    "NG small from_score",
-			input:   &ListFindingRequest{FromScore: -0.1},
+			input:   &ListFindingRequest{ProjectId: 111, FromScore: -0.1},
 			wantErr: true,
 		},
 		{
 			name:    "NG big from_score",
-			input:   &ListFindingRequest{FromScore: 1.1},
+			input:   &ListFindingRequest{ProjectId: 111, FromScore: 1.1},
 			wantErr: true,
 		},
 		{
 			name:    "NG small to_score",
-			input:   &ListFindingRequest{ToScore: -0.1},
+			input:   &ListFindingRequest{ProjectId: 111, ToScore: -0.1},
 			wantErr: true,
 		},
 		{
 			name:    "NG big to_score",
-			input:   &ListFindingRequest{ToScore: 1.1},
+			input:   &ListFindingRequest{ProjectId: 111, ToScore: 1.1},
 			wantErr: true,
 		},
 	}
@@ -73,12 +73,46 @@ func TestValidate_GetFindingRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &GetFindingRequest{FindingId: 1001},
+			input:   &GetFindingRequest{ProjectId: 1, FindingId: 1001},
 			wantErr: false,
 		},
 		{
-			name:    "NG required",
-			input:   &GetFindingRequest{},
+			name:    "NG Required(project_id)",
+			input:   &GetFindingRequest{FindingId: 1001},
+			wantErr: true,
+		},
+		{
+			name:    "NG required(finding_id)",
+			input:   &GetFindingRequest{ProjectId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_PutFindingRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *PutFindingRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &PutFindingRequest{ProjectId: 1, Finding: &FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1, OriginalScore: 1.0, OriginalMaxScore: 1.0}},
+			wantErr: false,
+		},
+		{
+			name:    "NG Not Equal(project_id != tag.project_id)",
+			input:   &PutFindingRequest{ProjectId: 999, Finding: &FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1, OriginalScore: 1.0, OriginalMaxScore: 1.0}},
 			wantErr: true,
 		},
 	}
@@ -102,12 +136,17 @@ func TestValidate_DeleteFindingRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &DeleteFindingRequest{FindingId: 1001},
+			input:   &DeleteFindingRequest{ProjectId: 1, FindingId: 1001},
 			wantErr: false,
 		},
 		{
-			name:    "NG required",
-			input:   &DeleteFindingRequest{},
+			name:    "NG Required(project_id)",
+			input:   &DeleteFindingRequest{FindingId: 1001},
+			wantErr: true,
+		},
+		{
+			name:    "NG required(finding_id)",
+			input:   &DeleteFindingRequest{ProjectId: 1},
 			wantErr: true,
 		},
 	}
@@ -131,12 +170,51 @@ func TestValidate_ListFindingTagRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &ListFindingTagRequest{FindingId: 1001},
+			input:   &ListFindingTagRequest{ProjectId: 1, FindingId: 1001},
 			wantErr: false,
 		},
 		{
-			name:    "NG required",
-			input:   &ListFindingTagRequest{},
+			name:    "NG Required(project_id)",
+			input:   &ListFindingTagRequest{FindingId: 1001},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(finding_id)",
+			input:   &ListFindingTagRequest{ProjectId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_TagFindingRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *TagFindingRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &TagFindingRequest{ProjectId: 1, Tag: &FindingTagForUpsert{FindingId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &TagFindingRequest{Tag: &FindingTagForUpsert{FindingId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
+			wantErr: true,
+		},
+		{
+			name:    "NG Not Equal(project_id != tag.project_id)",
+			input:   &TagFindingRequest{ProjectId: 999, Tag: &FindingTagForUpsert{FindingId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
 			wantErr: true,
 		},
 	}
@@ -160,12 +238,17 @@ func TestValidate_UntagFindingRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &UntagFindingRequest{FindingTagId: 1001},
+			input:   &UntagFindingRequest{ProjectId: 1, FindingTagId: 1001},
 			wantErr: false,
 		},
 		{
-			name:    "NG required",
-			input:   &UntagFindingRequest{},
+			name:    "NG Required(project_id)",
+			input:   &UntagFindingRequest{FindingTagId: 1001},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(finding_tag_id)",
+			input:   &UntagFindingRequest{ProjectId: 1},
 			wantErr: true,
 		},
 	}
@@ -189,22 +272,27 @@ func TestValidate_ListResourceRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &ListResourceRequest{},
+			input:   &ListResourceRequest{ProjectId: 1},
 			wantErr: false,
 		},
 		{
-			name:    "NG too long resource_name",
-			input:   &ListResourceRequest{ResourceName: []string{"123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456"}},
+			name:    "NG Required(project_id)",
+			input:   &ListResourceRequest{},
+			wantErr: true,
+		},
+		{
+			name:    "NG Length(esource_name)",
+			input:   &ListResourceRequest{ProjectId: 1, ResourceName: []string{"123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456"}},
 			wantErr: true,
 		},
 		{
 			name:    "NG too small from_sum_score",
-			input:   &ListResourceRequest{FromSumScore: -0.1},
+			input:   &ListResourceRequest{ProjectId: 1, FromSumScore: -0.1},
 			wantErr: true,
 		},
 		{
 			name:    "NG too small to_sum_score",
-			input:   &ListResourceRequest{ToSumScore: -0.1},
+			input:   &ListResourceRequest{ProjectId: 1, ToSumScore: -0.1},
 			wantErr: true,
 		},
 	}
@@ -228,12 +316,46 @@ func TestValidate_GetResourceRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &GetResourceRequest{ResourceId: 1001},
+			input:   &GetResourceRequest{ProjectId: 1, ResourceId: 1001},
 			wantErr: false,
 		},
 		{
-			name:    "NG required",
-			input:   &GetResourceRequest{},
+			name:    "NG Required(project_id)",
+			input:   &GetResourceRequest{ResourceId: 1001},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(resource_id)",
+			input:   &GetResourceRequest{ProjectId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_PutResourceRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *PutResourceRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &PutResourceRequest{ProjectId: 1, Resource: &ResourceForUpsert{ResourceName: "rn", ProjectId: 1}},
+			wantErr: false,
+		},
+		{
+			name:    "NG Not Equal(project_id != tag.project_id)",
+			input:   &PutResourceRequest{ProjectId: 999, Resource: &ResourceForUpsert{ResourceName: "rn", ProjectId: 1}},
 			wantErr: true,
 		},
 	}
@@ -257,12 +379,17 @@ func TestValidate_DeleteResourceRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &DeleteResourceRequest{ResourceId: 1001},
+			input:   &DeleteResourceRequest{ProjectId: 1, ResourceId: 1001},
 			wantErr: false,
 		},
 		{
-			name:    "NG required",
-			input:   &DeleteResourceRequest{},
+			name:    "NG Required(project_id)",
+			input:   &DeleteResourceRequest{ResourceId: 1001},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(resource_id)",
+			input:   &DeleteResourceRequest{ProjectId: 1},
 			wantErr: true,
 		},
 	}
@@ -286,12 +413,51 @@ func TestValidate_ListResourceTagRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &ListResourceTagRequest{ResourceId: 1001},
+			input:   &ListResourceTagRequest{ProjectId: 1, ResourceId: 1001},
 			wantErr: false,
 		},
 		{
-			name:    "NG required",
-			input:   &ListResourceTagRequest{},
+			name:    "NG Required(project_id)",
+			input:   &ListResourceTagRequest{ResourceId: 1001},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(resource_id)",
+			input:   &ListResourceTagRequest{ProjectId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_TagResourceRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *TagResourceRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &TagResourceRequest{ProjectId: 1, Tag: &ResourceTagForUpsert{ResourceId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &TagResourceRequest{Tag: &ResourceTagForUpsert{ResourceId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
+			wantErr: true,
+		},
+		{
+			name:    "NG Not Equal(project_id != tag.project_id)",
+			input:   &TagResourceRequest{ProjectId: 999, Tag: &ResourceTagForUpsert{ResourceId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
 			wantErr: true,
 		},
 	}
@@ -315,12 +481,17 @@ func TestValidate_UntagResourceRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &UntagResourceRequest{ResourceTagId: 1001},
+			input:   &UntagResourceRequest{ProjectId: 1, ResourceTagId: 1001},
 			wantErr: false,
 		},
 		{
-			name:    "NG required",
-			input:   &UntagResourceRequest{},
+			name:    "NG Required(project_id)",
+			input:   &UntagResourceRequest{ResourceTagId: 1001},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(resource_tag_id)",
+			input:   &UntagResourceRequest{ProjectId: 1},
 			wantErr: true,
 		},
 	}

@@ -27,102 +27,100 @@ service FindingService {
 }
 
 message ListFindingRequest {
-  uint32 user_id = 1;
-  repeated uint32 project_id = 2;
-  repeated string data_source = 3;
-  repeated string resource_name = 4;
-  float from_score = 5;
-  float to_score = 6;
-  int64 from_at = 7;
-  int64 to_at = 8;
+  uint32 project_id = 1;
+  repeated string data_source = 2;
+  repeated string resource_name = 3;
+  float from_score = 4;
+  float to_score = 5;
+  int64 from_at = 6;
+  int64 to_at = 7;
 }
 
 message ListFindingResponse { repeated uint64 finding_id = 1; }
 
 message GetFindingRequest {
-  uint32 user_id = 1;
+  uint32 project_id = 1;
   uint64 finding_id = 2;
 }
 
 message GetFindingResponse { Finding finding = 1; }
 
 message PutFindingRequest {
-  uint32 user_id = 1;
+  uint32 project_id = 1;
   FindingForUpsert finding = 2;
 }
 
 message PutFindingResponse { Finding finding = 1; }
 
 message DeleteFindingRequest {
-  uint32 user_id = 1;
+  uint32 project_id = 1;
   uint64 finding_id = 2;
 }
 
 message ListFindingTagRequest {
-  uint32 user_id = 1;
+  uint32 project_id = 1;
   uint64 finding_id = 2;
 }
 
 message ListFindingTagResponse { repeated FindingTag tag = 1; }
 
 message TagFindingRequest {
-  uint32 user_id = 1;
+  uint32 project_id = 1;
   FindingTagForUpsert tag = 2;
 }
 
 message TagFindingResponse { FindingTag tag = 1; }
 
 message UntagFindingRequest {
-  uint32 user_id = 1;
+  uint32 project_id = 1;
   uint64 finding_tag_id = 2;
 }
 
 message ListResourceRequest {
-  uint32 user_id = 1;
-  repeated uint32 project_id = 2;
-  repeated string resource_name = 3;
-  float from_sum_score = 4;
-  float to_sum_score = 5;
-  int64 from_at = 6;
-  int64 to_at = 7;
+  uint32 project_id = 1;
+  repeated string resource_name = 2;
+  float from_sum_score = 3;
+  float to_sum_score = 4;
+  int64 from_at = 5;
+  int64 to_at = 6;
 }
 
 message ListResourceResponse { repeated uint64 resource_id = 1; }
 
 message GetResourceRequest {
-  uint32 user_id = 1;
+  uint32 project_id = 1;
   uint64 resource_id = 2;
 }
 
 message GetResourceResponse { Resource resource = 1; }
 
 message PutResourceRequest {
-  uint32 user_id = 1;
+  uint32 project_id = 1;
   ResourceForUpsert resource = 2;
 }
 
 message PutResourceResponse { Resource resource = 1; }
 
 message DeleteResourceRequest {
-  uint32 user_id = 1;
+  uint32 project_id = 1;
   uint64 resource_id = 2;
 }
 
 message ListResourceTagRequest {
-  uint32 user_id = 1;
+  uint32 project_id = 1;
   uint64 resource_id = 2;
 }
 
 message ListResourceTagResponse { repeated ResourceTag tag = 1; }
 
 message TagResourceRequest {
-  uint32 user_id = 1;
+  uint32 project_id = 1;
   ResourceTagForUpsert tag = 2;
 }
 
 message TagResourceResponse { ResourceTag tag = 1; }
 
 message UntagResourceRequest {
-  uint32 user_id = 1;
-  uint64 resource_tag_id = 2;
+  uint32 project_id = 1;
+  uint64 resource_tag_id = 3;
 }
