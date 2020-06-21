@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gogo/protobuf/proto"
 	"github.com/gorilla/schema"
 )
 
@@ -24,11 +23,30 @@ func newDecoder() *schema.Decoder {
 	return d
 }
 
+func bind(out interface{}, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		if err := bindQuery(out, r); err != nil {
+			appLogger.Warnf("Could not `bindQuery`, url=%s, err=%+v", r.URL.RequestURI(), err)
+		}
+		return
+	case http.MethodPost, http.MethodPut, http.MethodDelete:
+		if err := bindBodyJSON(out, r); err != nil {
+			appLogger.Warnf("Could not `bindBodyJSON`, url=%s, err=%+v", r.URL.RequestURI(), err)
+		}
+		return
+	default:
+		appLogger.Warnf("Unexpected HTTP Method, method=%s", r.Method)
+	}
+	return
+}
+
 func bindQuery(out interface{}, r *http.Request) error {
 	return decoder.Decode(out, r.URL.Query())
 }
 
-func bindBodyJSON(out proto.Message, r *http.Request) error {
+func bindBodyJSON(out interface{}, r *http.Request) error {
+	defer r.Body.Close()
 	return json.NewDecoder(r.Body).Decode(out)
 }
 

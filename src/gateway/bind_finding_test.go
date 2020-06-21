@@ -48,7 +48,7 @@ func TestBindListFindingRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("GET", "/finding?"+c.input, nil)
+			req, _ := http.NewRequest(http.MethodGet, "/finding?"+c.input, nil)
 			got := bindListFindingRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -81,7 +81,7 @@ func TestBindGetFindingRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("GET", "/finding/get/?"+c.input, nil)
+			req, _ := http.NewRequest(http.MethodGet, "/finding/get/?"+c.input, nil)
 			got := bindGetFindingRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -109,7 +109,7 @@ func TestBindPutFindingRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("POST", "/finding/put", strings.NewReader(c.input))
+			req, _ := http.NewRequest(http.MethodPost, "/finding/put", strings.NewReader(c.input))
 			got := bindPutFindingRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -137,7 +137,7 @@ func TestBindDeleteFindingRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("POST", "/finding/delete", strings.NewReader(c.input))
+			req, _ := http.NewRequest(http.MethodPost, "/finding/delete", strings.NewReader(c.input))
 			got := bindDeleteFindingRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -165,7 +165,7 @@ func TestBindListFindingTagRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("GET", "/finding/tag/?"+c.input, nil)
+			req, _ := http.NewRequest(http.MethodGet, "/finding/tag/?"+c.input, nil)
 			got := bindListFindingTagRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -193,7 +193,7 @@ func TestBindTagFindingRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("POST", "/finding/tag", strings.NewReader(c.input))
+			req, _ := http.NewRequest(http.MethodPost, "/finding/tag", strings.NewReader(c.input))
 			got := bindTagFindingRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -221,7 +221,7 @@ func TestBindUntagFindingRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("POST", "/finding/untag", strings.NewReader(c.input))
+			req, _ := http.NewRequest(http.MethodPost, "/finding/untag", strings.NewReader(c.input))
 			got := bindUntagFindingRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -259,7 +259,7 @@ func TestBindListResourceRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("GET", "/resource?"+c.input, nil)
+			req, _ := http.NewRequest(http.MethodGet, "/resource?"+c.input, nil)
 			got := bindListResourceRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -292,7 +292,7 @@ func TestBindGetResourceRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("GET", "/resource/get/?"+c.input, nil)
+			req, _ := http.NewRequest(http.MethodGet, "/resource/get/?"+c.input, nil)
 			got := bindGetResourceRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -320,7 +320,7 @@ func TestBindPutResourceRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("POST", "/resource/put", strings.NewReader(c.input))
+			req, _ := http.NewRequest(http.MethodPost, "/resource/put", strings.NewReader(c.input))
 			got := bindPutResourceRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -348,7 +348,7 @@ func TestBindDeleteResourceRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("POST", "/resource/delete", strings.NewReader(c.input))
+			req, _ := http.NewRequest(http.MethodPost, "/resource/delete", strings.NewReader(c.input))
 			got := bindDeleteResourceRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -376,7 +376,7 @@ func TestBindListResourceTagReqest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("GET", "/resource/tag/?"+c.input, nil)
+			req, _ := http.NewRequest(http.MethodGet, "/resource/tag/?"+c.input, nil)
 			got := bindListResourceTagRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -404,7 +404,7 @@ func TestBindTagResourceRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("POST", "/resource/tag", strings.NewReader(c.input))
+			req, _ := http.NewRequest(http.MethodPost, "/resource/tag", strings.NewReader(c.input))
 			got := bindTagResourceRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
@@ -432,7 +432,7 @@ func TestBindUntagResourceRequest(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			req, _ := http.NewRequest("POST", "/resource/untag", strings.NewReader(c.input))
+			req, _ := http.NewRequest(http.MethodPost, "/resource/untag", strings.NewReader(c.input))
 			got := bindUntagResourceRequest(req)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected bind: want=%+v, got=%+v", c.want, got)
