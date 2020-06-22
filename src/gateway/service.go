@@ -3,15 +3,17 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/proto/finding"
-	"github.com/golang/gddo/httputil/header"
 	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
+)
+
+const (
+	successJSONKey = "data"
+	errorJSONKey   = "error"
 )
 
 type gatewayService struct {
@@ -66,15 +68,4 @@ func writeResponse(w http.ResponseWriter, status int, body map[string]interface{
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(status)
 	w.Write(buf)
-}
-
-func validatePostHeader(r *http.Request) error {
-	if r.Header.Get("Content-Type") == "" {
-		return errors.New("Not found Content-Type header")
-	}
-	value, _ := header.ParseValueAndParams(r.Header, "Content-Type")
-	if value != "application/json" {
-		return fmt.Errorf("Unexpected Content-Type. want=application/json, got=%s", value)
-	}
-	return nil
 }

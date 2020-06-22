@@ -7,10 +7,13 @@ import (
 	"testing"
 )
 
+type param struct {
+	Param1 uint32  `json:"param1"`
+	Param2 string  `json:"param2"`
+	Param3 float32 `json:"param3"`
+}
+
 func TestBindQuery(t *testing.T) {
-	type param struct {
-		ProjectID uint32 `json:"project_id"`
-	}
 	cases := []struct {
 		name    string
 		input   string
@@ -19,12 +22,12 @@ func TestBindQuery(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: `project_id=123`,
-			want:  &param{ProjectID: 123},
+			input: `param1=123&param2=aaa,bbb,ccc&param3=1.1`,
+			want:  &param{Param1: 123, Param2: "aaa,bbb,ccc", Param3: 1.1},
 		},
 		{
 			name:    "NG parse error",
-			input:   `project_id=string`,
+			input:   `param1=string`,
 			want:    &param{},
 			wantErr: true,
 		},
@@ -33,7 +36,7 @@ func TestBindQuery(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			req, _ := http.NewRequest(http.MethodGet, "/test?"+c.input, nil)
 			got := param{}
-			err := BindQuery(&got, req)
+			err := bindQuery(&got, req)
 			if err == nil && c.wantErr {
 				t.Fatalf("Unexpected no error: wantErr=%t", c.wantErr)
 			}
@@ -48,9 +51,6 @@ func TestBindQuery(t *testing.T) {
 }
 
 func TestBindBodyJSON(t *testing.T) {
-	type param struct {
-		ProjectID uint32 `json:"project_id"`
-	}
 	cases := []struct {
 		name    string
 		input   string
@@ -59,8 +59,8 @@ func TestBindBodyJSON(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: `{"project_id":123}`,
-			want:  &param{ProjectID: 123},
+			input: `{"param1":123, "param2":"aaa", "param3":11.1}`,
+			want:  &param{Param1: 123, Param2: "aaa", Param3: 11.1},
 		},
 		{
 			name:    "NG parse error",
@@ -73,7 +73,7 @@ func TestBindBodyJSON(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			req, _ := http.NewRequest(http.MethodPost, "/test", strings.NewReader(c.input))
 			got := param{}
-			err := BindBodyJSON(&got, req)
+			err := bindBodyJSON(&got, req)
 			if err == nil && c.wantErr {
 				t.Fatalf("Unexpected no error: wantErr=%t", c.wantErr)
 			}

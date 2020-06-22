@@ -23,16 +23,16 @@ func newDecoder() *schema.Decoder {
 	return d
 }
 
-// Bind request parameter binding
-func Bind(out interface{}, r *http.Request) {
+// bindding request parameter
+func bind(out interface{}, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		if err := BindQuery(out, r); err != nil {
+		if err := bindQuery(out, r); err != nil {
 			appLogger.Warnf("Could not `bindQuery`, url=%s, err=%+v", r.URL.RequestURI(), err)
 		}
 		return
 	case http.MethodPost, http.MethodPut, http.MethodDelete:
-		if err := BindBodyJSON(out, r); err != nil {
+		if err := bindBodyJSON(out, r); err != nil {
 			appLogger.Warnf("Could not `bindBodyJSON`, url=%s, err=%+v", r.URL.RequestURI(), err)
 		}
 		return
@@ -42,13 +42,13 @@ func Bind(out interface{}, r *http.Request) {
 	return
 }
 
-// BindQuery query parameter binding
-func BindQuery(out interface{}, r *http.Request) error {
+// bindding query parameter
+func bindQuery(out interface{}, r *http.Request) error {
 	return decoder.Decode(out, r.URL.Query())
 }
 
-// BindBodyJSON body parameter binding
-func BindBodyJSON(out interface{}, r *http.Request) error {
+// bindding body parameter binding
+func bindBodyJSON(out interface{}, r *http.Request) error {
 	defer r.Body.Close()
 	return json.NewDecoder(r.Body).Decode(out)
 }

@@ -18,7 +18,7 @@ list-finding:
 .PHONY: get-finding
 get-finding:
 	curl -is -XGET \
-		'http://localhost:8080/finding/get/?project_id=1001&finding_id=1001'
+		'http://localhost:8080/finding/detail/?project_id=1001&finding_id=1001'
 
 .PHONY: put-finding
 put-finding:
@@ -41,13 +41,13 @@ list-finding-tag:
 tag-finding:
 	curl -is -XPOST -H 'Content-Type: application/json' \
 		--data '{"project_id":1001, "tag":{"finding_id":1001, "project_id":1001, "tag_key":"test", "tag_value":"true"}}' \
-		'http://localhost:8080/finding/tag/'
+		'http://localhost:8080/finding/tag/put/'
 
 .PHONY: untag-finding
 untag-finding:
 	curl -is -XPOST -H 'Content-Type: application/json' \
 		--data '{"project_id":1001, "finding_tag_id":1002}' \
-		'http://localhost:8080/finding/untag/'
+		'http://localhost:8080/finding/tag/delete'
 
 .PHONY: list-resource
 list-resource:
@@ -57,7 +57,7 @@ list-resource:
 .PHONY: get-resource
 get-resource:
 	curl -is -XGET \
-		'http://localhost:8080/resource/get/?project_id=1001&resource_id=1001'
+		'http://localhost:8080/resource/detail/?project_id=1001&resource_id=1001'
 
 .PHONY: put-resource
 put-resource:
@@ -80,10 +80,10 @@ list-resource-tag:
 tag-resource:
 	curl -is -XPOST -H 'Content-Type: application/json' \
 		--data '{"project_id":1001, "tag":{"resource_id":1001, "project_id":1001, "tag_key":"test", "tag_value":"true"}}' \
-		'http://localhost:8080/resource/tag/'
+		'http://localhost:8080/resource/tag/put/'
 
 .PHONY: untag-resource
 untag-resource:
 	curl -is -XPOST -H 'Content-Type: application/json' \
 		--data '{"project_id":1001, "resource_tag_id":1004}' \
-		'http://localhost:8080/resource/untag/'
+		'http://localhost:8080/resource/tag/delete/'

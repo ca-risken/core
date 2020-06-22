@@ -15,21 +15,27 @@ func newRouter(svc gatewayService) *chi.Mux {
 
 	r.Route("/finding", func(r chi.Router) {
 		r.Get("/", svc.listFindingHandler)
-		r.Get("/get", svc.getFindingHandler)
+		r.Get("/detail", svc.getFindingHandler)
 		r.Get("/tag", svc.listFindingTagHandler)
-		r.Post("/put", svc.putFindingHandler)
-		r.Post("/delete", svc.deleteFindingHandler)
-		r.Post("/tag", svc.tagFindingHandler)
-		r.Post("/untag", svc.untagFindingHandler)
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.AllowContentType("application/json"))
+			r.Post("/put", svc.putFindingHandler)
+			r.Post("/delete", svc.deleteFindingHandler)
+			r.Post("/tag/put", svc.tagFindingHandler)
+			r.Post("/tag/delete", svc.untagFindingHandler)
+		})
 	})
 	r.Route("/resource", func(r chi.Router) {
 		r.Get("/", svc.listResourceHandler)
-		r.Get("/get", svc.getResourceHandler)
+		r.Get("/detail", svc.getResourceHandler)
 		r.Get("/tag", svc.listResourceTagHandler)
-		r.Post("/put", svc.putResourceHandler)
-		r.Post("/delete", svc.deleteResourceHandler)
-		r.Post("/tag", svc.tagResourceHandler)
-		r.Post("/untag", svc.untagResourceHandler)
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.AllowContentType("application/json"))
+			r.Post("/put", svc.putResourceHandler)
+			r.Post("/delete", svc.deleteResourceHandler)
+			r.Post("/tag/put", svc.tagResourceHandler)
+			r.Post("/tag/delete", svc.untagResourceHandler)
+		})
 	})
 
 	return r
