@@ -1,6 +1,8 @@
 package finding
 
 import (
+	"errors"
+
 	"github.com/go-ozzo/ozzo-validation/is"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
@@ -26,6 +28,9 @@ func (g *GetFindingRequest) Validate() error {
 
 // Validate PutFindingRequest
 func (p *PutFindingRequest) Validate() error {
+	if validation.IsEmpty(p.Finding) {
+		return errors.New("Required finding parameter")
+	}
 	if err := validation.ValidateStruct(p,
 		validation.Field(&p.ProjectId, validation.In(p.Finding.ProjectId)),
 	); err != nil {
@@ -52,6 +57,9 @@ func (l *ListFindingTagRequest) Validate() error {
 
 // Validate TagFindingRequest
 func (t *TagFindingRequest) Validate() error {
+	if validation.IsEmpty(t.Tag) {
+		return errors.New("Required tag parameter")
+	}
 	if err := validation.ValidateStruct(t,
 		validation.Field(&t.ProjectId, validation.Required, validation.In(t.Tag.ProjectId)),
 	); err != nil {
@@ -88,6 +96,9 @@ func (g *GetResourceRequest) Validate() error {
 
 // Validate PutResourceRequest
 func (p *PutResourceRequest) Validate() error {
+	if validation.IsEmpty(p.Resource) {
+		return errors.New("Required resource parameter")
+	}
 	if err := validation.ValidateStruct(p,
 		validation.Field(&p.ProjectId, validation.In(p.Resource.ProjectId)),
 	); err != nil {
@@ -114,6 +125,9 @@ func (l *ListResourceTagRequest) Validate() error {
 
 // Validate TagResourceRequest
 func (t *TagResourceRequest) Validate() error {
+	if validation.IsEmpty(t.Tag) {
+		return errors.New("Required tag parameter")
+	}
 	if err := validation.ValidateStruct(t,
 		validation.Field(&t.ProjectId, validation.Required, validation.In(t.Tag.ProjectId)),
 	); err != nil {

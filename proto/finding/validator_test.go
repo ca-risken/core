@@ -111,6 +111,11 @@ func TestValidate_PutFindingRequest(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:    "NG Required(finding)",
+			input:   &PutFindingRequest{ProjectId: 999},
+			wantErr: true,
+		},
+		{
 			name:    "NG Not Equal(project_id != tag.project_id)",
 			input:   &PutFindingRequest{ProjectId: 999, Finding: &FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1, OriginalScore: 1.0, OriginalMaxScore: 1.0}},
 			wantErr: true,
@@ -206,6 +211,11 @@ func TestValidate_TagFindingRequest(t *testing.T) {
 			name:    "OK",
 			input:   &TagFindingRequest{ProjectId: 1, Tag: &FindingTagForUpsert{FindingId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
 			wantErr: false,
+		},
+		{
+			name:    "NG Required(tag)",
+			input:   &TagFindingRequest{ProjectId: 999},
+			wantErr: true,
 		},
 		{
 			name:    "NG Required(project_id)",
@@ -354,6 +364,11 @@ func TestValidate_PutResourceRequest(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:    "NG Required(resource)",
+			input:   &PutResourceRequest{ProjectId: 999},
+			wantErr: true,
+		},
+		{
 			name:    "NG Not Equal(project_id != tag.project_id)",
 			input:   &PutResourceRequest{ProjectId: 999, Resource: &ResourceForUpsert{ResourceName: "rn", ProjectId: 1}},
 			wantErr: true,
@@ -449,6 +464,11 @@ func TestValidate_TagResourceRequest(t *testing.T) {
 			name:    "OK",
 			input:   &TagResourceRequest{ProjectId: 1, Tag: &ResourceTagForUpsert{ResourceId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
 			wantErr: false,
+		},
+		{
+			name:    "NG Required(tag)",
+			input:   &TagResourceRequest{ProjectId: 999},
+			wantErr: true,
 		},
 		{
 			name:    "NG Required(project_id)",
