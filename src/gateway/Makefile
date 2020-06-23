@@ -13,7 +13,7 @@ help:
 .PHONY: list-finding
 list-finding:
 	curl -is -XGET \
-		'http://localhost:8080/finding/?project_id=1001'
+		'http://localhost:8080/finding/?project_id=1001&data_source=aws:guardduty,aws:access-analizer'
 
 .PHONY: get-finding
 get-finding:

@@ -10,12 +10,6 @@ func (g *gatewayService) listFindingHandler(w http.ResponseWriter, r *http.Reque
 	// bind
 	req := &finding.ListFindingRequest{}
 	bind(req, r)
-	if len(req.DataSource) > 0 {
-		req.DataSource = commaSeparator(req.DataSource[0])
-	}
-	if len(req.ResourceName) > 0 {
-		req.ResourceName = commaSeparator(req.ResourceName[0])
-	}
 	// validate
 	if err := req.Validate(); err != nil {
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{errorJSONKey: err.Error()})
@@ -142,9 +136,6 @@ func (g *gatewayService) listResourceHandler(w http.ResponseWriter, r *http.Requ
 	// bind
 	req := &finding.ListResourceRequest{}
 	bind(req, r)
-	if len(req.ResourceName) > 0 {
-		req.ResourceName = commaSeparator(req.ResourceName[0])
-	}
 	// validate
 	if err := req.Validate(); err != nil {
 		writeResponse(w, http.StatusBadRequest, map[string]interface{}{errorJSONKey: err.Error()})

@@ -8,9 +8,12 @@ import (
 )
 
 type param struct {
-	Param1 uint32  `json:"param1"`
-	Param2 string  `json:"param2"`
-	Param3 float32 `json:"param3"`
+	Param1 uint32    `json:"param1"`
+	Param2 string    `json:"param2"`
+	Param3 float32   `json:"param3"`
+	Param4 []uint32  `json:"param4"`
+	Param5 []string  `json:"param5"`
+	Param6 []float32 `json:"param6"`
 }
 
 func TestBindQuery(t *testing.T) {
@@ -22,11 +25,16 @@ func TestBindQuery(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: `param1=123&param2=aaa,bbb,ccc&param3=1.1`,
-			want:  &param{Param1: 123, Param2: "aaa,bbb,ccc", Param3: 1.1},
+			input: `param1=123&param2=aaa&param3=1.1&param4=1,2,3&param5=aaa,bbb,ccc&param6=0.1,0.2,0.3`,
+			want:  &param{Param1: 123, Param2: "aaa", Param3: 1.1, Param4: []uint32{1, 2, 3}, Param5: []string{"aaa", "bbb", "ccc"}, Param6: []float32{0.1, 0.2, 0.3}},
 		},
 		{
-			name:    "NG parse error",
+			name:  "OK Zero value",
+			input: `param4=&param5=&param6=`,
+			want:  &param{Param1: 0, Param2: "", Param3: 0, Param4: []uint32{0}, Param5: []string{}, Param6: []float32{0}},
+		},
+		{
+			name:    "NG Parse error",
 			input:   `param1=string`,
 			want:    &param{},
 			wantErr: true,
@@ -87,11 +95,12 @@ func TestBindBodyJSON(t *testing.T) {
 	}
 }
 
-func TestCommaSeparator(t *testing.T) {
+func TestStringSeparator(t *testing.T) {
 	cases := []struct {
-		name  string
-		input string
-		want  []string
+		name      string
+		input     string
+		delimiter rune
+		want      []string
 	}{
 		{
 			name:  "single param",
@@ -99,19 +108,27 @@ func TestCommaSeparator(t *testing.T) {
 			want:  []string{"aaa"},
 		},
 		{
-			name:  "multiple params",
-			input: "aaa,bbb,ccc",
-			want:  []string{"aaa", "bbb", "ccc"},
+			name:      "multiple params",
+			input:     "aaa,bbb,ccc",
+			delimiter: ',',
+			want:      []string{"aaa", "bbb", "ccc"},
 		},
 		{
-			name:  "blank params",
-			input: "aaa,,ccc",
-			want:  []string{"aaa", "ccc"},
+			name:      "exsits blank",
+			input:     "aaa,,ccc",
+			delimiter: ',',
+			want:      []string{"aaa", "ccc"},
+		},
+		{
+			name:      "other delimiter",
+			input:     "aaa#ccc",
+			delimiter: '#',
+			want:      []string{"aaa", "ccc"},
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := commaSeparator(c.input)
+			got := stringSeparator(c.input, c.delimiter)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected result: want=%+v, got=%+v", c.want, got)
 			}

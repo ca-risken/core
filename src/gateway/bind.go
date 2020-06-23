@@ -2,17 +2,15 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
-	"strconv"
+	"reflect"
 	"strings"
 
 	"github.com/gorilla/schema"
 )
 
 var (
-	errInvalidContentType = errors.New("request: invalid Content-Type")
-	decoder               = newDecoder()
+	decoder = newDecoder()
 )
 
 func newDecoder() *schema.Decoder {
@@ -20,10 +18,13 @@ func newDecoder() *schema.Decoder {
 	d.IgnoreUnknownKeys(true)
 	d.ZeroEmpty(true)
 	d.SetAliasTag("json")
+	d.RegisterConverter([]string{}, func(input string) reflect.Value {
+		return reflect.ValueOf(stringSeparator(input, ','))
+	})
 	return d
 }
 
-// bindding request parameter
+// bind bindding request parameter
 func bind(out interface{}, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -42,31 +43,23 @@ func bind(out interface{}, r *http.Request) {
 	return
 }
 
-// bindding query parameter
+// bindQuery bindding query parameter
 func bindQuery(out interface{}, r *http.Request) error {
 	return decoder.Decode(out, r.URL.Query())
 }
 
-// bindding body parameter binding
+// bindBodyJSON bindding body parameter binding
 func bindBodyJSON(out interface{}, r *http.Request) error {
 	defer r.Body.Close()
 	return json.NewDecoder(r.Body).Decode(out)
 }
 
-func commaSeparator(param string) []string {
+func stringSeparator(input string, delimiter rune) []string {
 	separated := []string{}
-	for _, p := range strings.Split(param, ",") {
+	for _, p := range strings.Split(input, string(delimiter)) {
 		if p != "" {
 			separated = append(separated, p)
 		}
 	}
 	return separated
-}
-
-func parseUint64(str string) uint64 {
-	i, err := strconv.ParseUint(str, 10, 64)
-	if err != nil {
-		return 0
-	}
-	return i
 }
