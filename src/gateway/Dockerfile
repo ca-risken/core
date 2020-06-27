@@ -1,5 +1,5 @@
 FROM golang AS builder
-WORKDIR /go/src/github.com/CyberAgent/mimosa-core/
+WORKDIR /go/src/github.com/CyberAgent/mimosa-core/src/gateway/
 ADD *.go go.* ./
 ENV CGO_ENABLED=0 GO111MODULE=on GOPRIVATE="github.com/CyberAgent/*"
 ARG GITHUB_USER

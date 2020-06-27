@@ -41,7 +41,6 @@ services:
       - DB_PORT=3306
       - DB_SCHEMA=mimosa
       - DB_LOG_MODE=${DB_LOG_MODE}
-      - IAM_SVC_ADDR=${IAM_SVC_ADDR}
     ports:
       - "8081:8081" # docker-compose外にexposeする必要はないので本来は"8081"だが、grpcurlなどのDebug目的でhost側のportも開放
 

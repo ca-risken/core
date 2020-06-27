@@ -1,5 +1,5 @@
 FROM golang AS builder
-WORKDIR /go/src/github.com/CyberAgent/mimosa-core/
+WORKDIR /go/src/github.com/CyberAgent/mimosa-core/src/finding/
 ADD *.go go.* ./
 ENV CGO_ENABLED=0 GO111MODULE=on GOPRIVATE="github.com/CyberAgent/*"
 ARG GITHUB_USER
@@ -22,7 +22,6 @@ ENV PORT= \
     DB_SCHEMA=mimosa \
     DB_PORT=3306 \
     DB_LOG_MODE=false \
-    IAM_SVC_ADDR= \
     TZ=Asia/Tokyo
 WORKDIR /usr/local/finding
 CMD ["bin/finding"]
