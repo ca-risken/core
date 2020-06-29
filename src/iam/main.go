@@ -27,7 +27,7 @@ func main() {
 	}
 
 	server := grpc.NewServer()
-	iamServer := newIAMService(newIAMRepository()) // DI service & repository
+	iamServer := newIAMService()
 	iam.RegisterIAMServiceServer(server, iamServer)
 
 	reflection.Register(server) // enable reflection API

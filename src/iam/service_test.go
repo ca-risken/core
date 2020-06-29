@@ -14,7 +14,7 @@ import (
 func TestListFinding(t *testing.T) {
 	var ctx context.Context
 	mock := mockIAMRepository{}
-	svc := newIAMService(&mock)
+	svc := iamService{repository: &mock}
 	cases := []struct {
 		name         string
 		input        *iam.IsAuthorizedRequest

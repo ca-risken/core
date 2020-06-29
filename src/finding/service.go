@@ -8,8 +8,8 @@ type findingService struct {
 	repository findingRepoInterface
 }
 
-func newFindingService(repo findingRepoInterface) finding.FindingServiceServer {
+func newFindingService() finding.FindingServiceServer {
 	return &findingService{
-		repository: repo,
+		repository: newFindingRepository(),
 	}
 }

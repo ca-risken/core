@@ -15,7 +15,7 @@ import (
 func TestListFinding(t *testing.T) {
 	var ctx context.Context
 	mockDB := mockFindingRepository{}
-	svc := newFindingService(&mockDB)
+	svc := findingService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *finding.ListFindingRequest
@@ -84,7 +84,7 @@ func TestGetFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
 	mockDB := mockFindingRepository{}
-	svc := newFindingService(&mockDB)
+	svc := findingService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *finding.GetFindingRequest
@@ -125,7 +125,7 @@ func TestPutFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
 	mockDB := mockFindingRepository{}
-	svc := newFindingService(&mockDB)
+	svc := findingService{repository: &mockDB}
 	// Resource関連のupdateは別テストで実施。ここでは一律カラを返す
 	mockDB.On("GetResourceByName").Return(&model.Resource{}, nil)
 	mockDB.On("UpsertResource").Return(&model.Resource{}, nil)
@@ -195,7 +195,7 @@ func TestPutFinding(t *testing.T) {
 func TestDeleteFinding(t *testing.T) {
 	var ctx context.Context
 	mockDB := mockFindingRepository{}
-	svc := newFindingService(&mockDB)
+	svc := findingService{repository: &mockDB}
 	cases := []struct {
 		name    string
 		input   *finding.DeleteFindingRequest
@@ -235,7 +235,7 @@ func TestListFindingTag(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
 	mockDB := mockFindingRepository{}
-	svc := newFindingService(&mockDB)
+	svc := findingService{repository: &mockDB}
 	cases := []struct {
 		name     string
 		input    *finding.ListFindingTagRequest
@@ -296,7 +296,7 @@ func TestTagFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
 	mockDB := mockFindingRepository{}
-	svc := newFindingService(&mockDB)
+	svc := findingService{repository: &mockDB}
 	cases := []struct {
 		name        string
 		input       *finding.TagFindingRequest
@@ -362,7 +362,7 @@ func TestTagFinding(t *testing.T) {
 func TestUntagFinding(t *testing.T) {
 	var ctx context.Context
 	mockDB := mockFindingRepository{}
-	svc := newFindingService(&mockDB)
+	svc := findingService{repository: &mockDB}
 	cases := []struct {
 		name    string
 		input   *finding.UntagFindingRequest
@@ -401,7 +401,7 @@ func TestListResource(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
 	mockDB := mockFindingRepository{}
-	svc := newFindingService(&mockDB)
+	svc := findingService{repository: &mockDB}
 	cases := []struct {
 		name     string
 		input    *finding.ListResourceRequest
@@ -482,7 +482,7 @@ func TestGetResource(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
 	mockDB := mockFindingRepository{}
-	svc := newFindingService(&mockDB)
+	svc := findingService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *finding.GetResourceRequest
@@ -523,7 +523,7 @@ func TestPutResource(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
 	mockDB := mockFindingRepository{}
-	svc := newFindingService(&mockDB)
+	svc := findingService{repository: &mockDB}
 	cases := []struct {
 		name        string
 		input       *finding.PutResourceRequest
@@ -589,7 +589,7 @@ func TestPutResource(t *testing.T) {
 func TestDeleteResource(t *testing.T) {
 	var ctx context.Context
 	mockDB := mockFindingRepository{}
-	svc := newFindingService(&mockDB)
+	svc := findingService{repository: &mockDB}
 	cases := []struct {
 		name    string
 		input   *finding.DeleteResourceRequest
@@ -628,7 +628,7 @@ func TestListResourceTag(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
 	mockDB := mockFindingRepository{}
-	svc := newFindingService(&mockDB)
+	svc := findingService{repository: &mockDB}
 	cases := []struct {
 		name     string
 		input    *finding.ListResourceTagRequest
@@ -688,7 +688,7 @@ func TestTagResource(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
 	mockDB := mockFindingRepository{}
-	svc := newFindingService(&mockDB)
+	svc := findingService{repository: &mockDB}
 	cases := []struct {
 		name        string
 		input       *finding.TagResourceRequest
@@ -754,7 +754,7 @@ func TestTagResource(t *testing.T) {
 func TestUntagResource(t *testing.T) {
 	var ctx context.Context
 	mockDB := mockFindingRepository{}
-	svc := newFindingService(&mockDB)
+	svc := findingService{repository: &mockDB}
 	cases := []struct {
 		name    string
 		input   *finding.UntagResourceRequest

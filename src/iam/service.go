@@ -13,9 +13,9 @@ type iamService struct {
 	repository iamRepoInterface
 }
 
-func newIAMService(repo iamRepoInterface) iam.IAMServiceServer {
+func newIAMService() iam.IAMServiceServer {
 	return &iamService{
-		repository: repo,
+		repository: newIAMRepository(),
 	}
 }
 
