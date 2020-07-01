@@ -1,0 +1,37 @@
+version: 0.2
+
+env:
+  variables:
+    IMAGE_GATEWAY: "core/gateway"
+    IMAGE_FINDING: "core/finding"
+    IMAGE_IAM: "core/iam"
+  parameter-store:
+    GITHUB_USER: "/build/GITHUB_USER"
+    GITHUB_TOKEN: "/build/GITHUB_TOKEN"
+
+phases:
+  install:
+    runtime-versions:
+      golang: 1.13
+    commands:
+      - echo "machine github.com" > ~/.netrc
+      - echo "login $GITHUB_USER" >> ~/.netrc
+      - echo "password $GITHUB_TOKEN" >> ~/.netrc
+  pre_build:
+    commands:
+      - echo Testing the sources...
+      - cd $CODEBUILD_SRC_DIR/proto/finding && go test ./...
+      - cd $CODEBUILD_SRC_DIR/proto/iam     && go test ./...
+      - cd $CODEBUILD_SRC_DIR/src/gateway   && go test ./...
+      - cd $CODEBUILD_SRC_DIR/src/finding   && go test ./...
+      - cd $CODEBUILD_SRC_DIR/src/iam       && go test ./...
+
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+  build:
+    commands:
+      - echo Build gateway started on `date`
+      - echo Pushing the Docker images...
+      - cd $CODEBUILD_SRC_DIR/src/gateway && docker build --no-cache --pull --build-arg GITHUB_USER=$GITHUB_USER --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t $IMAGE_GATEWAY:v0.0.$CODEBUILD_BUILD_NUMBER .
+      - cd $CODEBUILD_SRC_DIR/src/finding && docker build --no-cache --pull --build-arg GITHUB_USER=$GITHUB_USER --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t $IMAGE_FINDING:v0.0.$CODEBUILD_BUILD_NUMBER .
+      - cd $CODEBUILD_SRC_DIR/src/iam     && docker build --no-cache --pull --build-arg GITHUB_USER=$GITHUB_USER --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t $IMAGE_IAM:v0.0.$CODEBUILD_BUILD_NUMBER .
