@@ -15,23 +15,26 @@ phases:
       golang: 1.13
     commands:
       - echo "machine github.com" > ~/.netrc
-      - echo "login $GITHUB_USER" >> ~/.netrc
-      - echo "password $GITHUB_TOKEN" >> ~/.netrc
+      - echo "login ${GITHUB_USER}" >> ~/.netrc
+      - echo "password ${GITHUB_TOKEN}" >> ~/.netrc
   pre_build:
     commands:
+      - echo Setting environment variables
+      - SRC=${CODEBUILD_SRC_DIR}/src
+      - BUILD_OPT="--no-cache --pull"
+      - TAG=v0.0.${CODEBUILD_BUILD_NUMBER}
+
       - echo Testing the sources...
-      - cd $CODEBUILD_SRC_DIR/proto/finding && go test ./...
-      - cd $CODEBUILD_SRC_DIR/proto/iam     && go test ./...
-      - cd $CODEBUILD_SRC_DIR/src/gateway   && go test ./...
-      - cd $CODEBUILD_SRC_DIR/src/finding   && go test ./...
-      - cd $CODEBUILD_SRC_DIR/src/iam       && go test ./...
+      - cd ${SRC}/gateway && go test ./...
+      - cd ${SRC}/finding && go test ./...
+      - cd ${SRC}/iam     && go test ./...
 
       - echo Logging in to Amazon ECR...
-      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - $(aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION})
   build:
     commands:
       - echo Build gateway started on `date`
       - echo Pushing the Docker images...
-      - cd $CODEBUILD_SRC_DIR/src/gateway && docker build --no-cache --pull --build-arg GITHUB_USER=$GITHUB_USER --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t $IMAGE_GATEWAY:v0.0.$CODEBUILD_BUILD_NUMBER .
-      - cd $CODEBUILD_SRC_DIR/src/finding && docker build --no-cache --pull --build-arg GITHUB_USER=$GITHUB_USER --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t $IMAGE_FINDING:v0.0.$CODEBUILD_BUILD_NUMBER .
-      - cd $CODEBUILD_SRC_DIR/src/iam     && docker build --no-cache --pull --build-arg GITHUB_USER=$GITHUB_USER --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t $IMAGE_IAM:v0.0.$CODEBUILD_BUILD_NUMBER .
+      - cd ${SRC}/gateway && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_GATEWAY}:${TAG} .
+      - cd ${SRC}/finding && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_FINDING}:${TAG} .
+      - cd ${SRC}/iam     && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_IAM}:${TAG} .
