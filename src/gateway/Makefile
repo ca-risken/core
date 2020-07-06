@@ -10,6 +10,11 @@ help:
 	@echo "\n---------------- sub-command list ----------------"
 	@cat Makefile | grep -e "^.PHONY:" | grep -v "all" | cut -f2 -d' '
 
+.PHONY: health-check
+health-check:
+	curl -is -XGET \
+		'http://localhost:8080/healthz/'
+
 .PHONY: list-finding
 list-finding:
 	curl -is -XGET \
