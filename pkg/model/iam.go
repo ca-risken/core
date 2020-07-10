@@ -5,6 +5,7 @@ import "time"
 // User entity model
 type User struct {
 	UserID    uint32
+	Sub       string
 	Name      string
 	Actevated bool
 	CreatedAt time.Time
