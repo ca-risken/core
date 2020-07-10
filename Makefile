@@ -39,15 +39,10 @@ build: fmt
 go-test: build
 	cd proto/finding && go test ./...
 	cd proto/iam     && go test ./...
-	cd src/gateway   && go test ./...
 	cd src/finding   && go test ./...
 	cd src/iam       && go test ./...
 
 go-mod-update:
-	cd src/gateway \
-		&& go get -u \
-			github.com/CyberAgent/mimosa-core/proto/finding \
-			github.com/CyberAgent/mimosa-core/proto/iam
 	cd src/finding \
 		&& go get -u \
 			github.com/CyberAgent/mimosa-core/proto/finding \
@@ -60,7 +55,6 @@ go-mod-update:
 go-mod-tidy: build
 	cd proto/finding && go mod tidy
 	cd proto/iam     && go mod tidy
-	cd src/gateway   && go mod tidy
 	cd src/finding   && go mod tidy
 	cd src/iam       && go mod tidy
 
@@ -72,7 +66,3 @@ log:
 
 stop:
 	. env.sh && docker-compose down
-
-ssh:
-	. env.sh && docker-compose exec gateway sh
-

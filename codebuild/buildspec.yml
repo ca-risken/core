@@ -2,7 +2,6 @@ version: 0.2
 
 env:
   variables:
-    IMAGE_GATEWAY: "core/gateway"
     IMAGE_FINDING: "core/finding"
     IMAGE_IAM: "core/iam"
   parameter-store:
@@ -27,7 +26,6 @@ phases:
       - REGISTORY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
 
       - echo Testing the sources...
-      - cd ${SRC}/gateway && go test ./...
       - cd ${SRC}/finding && go test ./...
       - cd ${SRC}/iam     && go test ./...
 
@@ -37,18 +35,15 @@ phases:
     commands:
       - echo Build gateway started on `date`
       - echo Pushing the Docker images...
-      - cd ${SRC}/gateway && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_GATEWAY}:${TAG} .
       - cd ${SRC}/finding && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_FINDING}:${TAG} .
       - cd ${SRC}/iam     && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_IAM}:${TAG} .
 
       - echo Tagging the images...
       # tag the specific version
-      - docker tag ${IMAGE_GATEWAY}:${TAG} ${REGISTORY}/${IMAGE_GATEWAY}:${TAG}
       - docker tag ${IMAGE_FINDING}:${TAG} ${REGISTORY}/${IMAGE_FINDING}:${TAG}
       - docker tag ${IMAGE_IAM}:${TAG}     ${REGISTORY}/${IMAGE_IAM}:${TAG}
 
       # update latest version 
-      - docker tag ${IMAGE_GATEWAY}:${TAG} ${REGISTORY}/${IMAGE_GATEWAY}:latest
       - docker tag ${IMAGE_FINDING}:${TAG} ${REGISTORY}/${IMAGE_FINDING}:latest
       - docker tag ${IMAGE_IAM}:${TAG}     ${REGISTORY}/${IMAGE_IAM}:latest
   post_build:
@@ -57,11 +52,9 @@ phases:
       - echo Pushing the Docker image...
 
       # specific version
-      - docker push ${REGISTORY}/${IMAGE_GATEWAY}:${TAG}
       - docker push ${REGISTORY}/${IMAGE_FINDING}:${TAG}
       - docker push ${REGISTORY}/${IMAGE_IAM}:${TAG}
 
       # latest version
-      - docker push ${REGISTORY}/${IMAGE_GATEWAY}:latest
       - docker push ${REGISTORY}/${IMAGE_FINDING}:latest
       - docker push ${REGISTORY}/${IMAGE_IAM}:latest

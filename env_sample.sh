@@ -15,7 +15,3 @@ export DB_SLAVE_HOST="db"
 export DB_SLAVE_USER="hoge"
 export DB_SLAVE_PASSWORD="moge"
 export DB_LOG_MODE="true"
-
-# grpc server
-export FINDING_SVC_ADDR="finding:8081"
-export IAM_SVC_ADDR="iam:8082"

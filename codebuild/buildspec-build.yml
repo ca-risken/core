@@ -2,7 +2,6 @@ version: 0.2
 
 env:
   variables:
-    IMAGE_GATEWAY: "core/gateway"
     IMAGE_FINDING: "core/finding"
     IMAGE_IAM: "core/iam"
   parameter-store:
@@ -25,7 +24,6 @@ phases:
       - TAG=v0.0.${CODEBUILD_BUILD_NUMBER}
 
       - echo Testing the sources...
-      - cd ${SRC}/gateway && go test ./...
       - cd ${SRC}/finding && go test ./...
       - cd ${SRC}/iam     && go test ./...
 
@@ -35,6 +33,5 @@ phases:
     commands:
       - echo Build gateway started on `date`
       - echo Pushing the Docker images...
-      - cd ${SRC}/gateway && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_GATEWAY}:${TAG} .
       - cd ${SRC}/finding && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_FINDING}:${TAG} .
       - cd ${SRC}/iam     && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_IAM}:${TAG} .
