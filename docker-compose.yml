@@ -1,24 +1,6 @@
 version: "3.8"
 
 services:
-  gateway:
-    networks:
-      - core
-      - local-shared
-    build:
-      context: src/gateway
-      args:
-        - GITHUB_USER=${GITHUB_USER}
-        - GITHUB_TOKEN=${GITHUB_TOKEN}
-    depends_on:
-      - iam
-      - finding
-    environment:
-      - PORT=8080
-      - FINDING_SVC_ADDR=${FINDING_SVC_ADDR}
-    ports:
-      - "8080:8080"
-
   finding:
     networks:
       - core
