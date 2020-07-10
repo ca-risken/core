@@ -14,6 +14,13 @@ help:
 list-service:
 	grpcurl -plaintext localhost:8082 list core.iam.IAMService
 
+.PHONY: get-user
+get-user:
+	grpcurl \
+		-plaintext \
+		-d '{"user_id":1001, "sub":"alice"}' \
+		localhost:8082 core.iam.IAMService.GetUser
+
 .PHONY: is-authorized
 is-authorized:
 	grpcurl \
