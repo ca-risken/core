@@ -45,6 +45,8 @@
     - [User](#core.iam.User)
   
 - [iam/service.proto](#iam/service.proto)
+    - [GetUserRequest](#core.iam.GetUserRequest)
+    - [GetUserResponse](#core.iam.GetUserResponse)
     - [IsAuthorizedRequest](#core.iam.IsAuthorizedRequest)
     - [IsAuthorizedResponse](#core.iam.IsAuthorizedResponse)
   
@@ -673,6 +675,7 @@ User
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | user_id | [uint32](#uint32) |  |  |
+| sub | [string](#string) |  |  |
 | name | [string](#string) |  |  |
 | activated | [bool](#bool) |  |  |
 | created_at | [int64](#int64) |  |  |
@@ -696,6 +699,37 @@ User
 <p align="right"><a href="#top">Top</a></p>
 
 ## iam/service.proto
+
+
+
+<a name="core.iam.GetUserRequest"></a>
+
+### GetUserRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| user_id | [uint32](#uint32) |  |  |
+| sub | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="core.iam.GetUserResponse"></a>
+
+### GetUserResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| user | [User](#core.iam.User) |  |  |
+
+
+
 
 
 
@@ -746,6 +780,7 @@ IsAuthorizedRequest
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
+| GetUser | [GetUserRequest](#core.iam.GetUserRequest) | [GetUserResponse](#core.iam.GetUserResponse) |  |
 | IsAuthorized | [IsAuthorizedRequest](#core.iam.IsAuthorizedRequest) | [IsAuthorizedResponse](#core.iam.IsAuthorizedResponse) | 認可（ユーザがリクエストしたアクションや、リソースに対しての認可を行います） |
 
  

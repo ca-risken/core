@@ -62,3 +62,42 @@ func TestValidate_IsAuthorizedRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestValidate_GetUserRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *GetUserRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK multi",
+			input:   &GetUserRequest{UserId: 111, Sub: "1001"},
+			wantErr: false,
+		},
+		{
+			name:    "OK single(user_id)",
+			input:   &GetUserRequest{UserId: 111},
+			wantErr: false,
+		},
+		{
+			name:    "OK single(sub)",
+			input:   &GetUserRequest{Sub: "1001"},
+			wantErr: false,
+		},
+		{
+			name:    "NG requred",
+			input:   &GetUserRequest{UserId: 0, Sub: ""},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
