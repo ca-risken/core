@@ -7,10 +7,11 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/vikyd/zero"
 )
 
 type iamRepoInterface interface {
-	// Finding
+	GetUser(uint32, string) (*model.User, error)
 	GetUserPoicy(uint32) (*[]model.Policy, error)
 }
 
@@ -67,6 +68,24 @@ func initDB(isMaster bool) *gorm.DB {
 	db.SingularTable(true) // if set this to true, `User`'s default table name will be `user`
 	appLogger.Infof("Connected to Database. isMaster: %t", isMaster)
 	return db
+}
+
+func (i *iamRepository) GetUser(userID uint32, sub string) (*model.User, error) {
+	query := `select * from	user where activated = 'true'`
+	var params []interface{}
+	if !zero.IsZeroVal(userID) {
+		query += " and user_id = ?"
+		params = append(params, userID)
+	}
+	if !zero.IsZeroVal(sub) {
+		query += " and sub = ?"
+		params = append(params, sub)
+	}
+	var data model.User
+	if err := i.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
 }
 
 const selectGetUserPolicy = `

@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/iam"
 	"github.com/jinzhu/gorm"
 	"github.com/vikyd/zero"
@@ -16,6 +17,31 @@ type iamService struct {
 func newIAMService() iam.IAMServiceServer {
 	return &iamService{
 		repository: newIAMRepository(),
+	}
+}
+
+func (i *iamService) GetUser(ctx context.Context, req *iam.GetUserRequest) (*iam.GetUserResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	user, err := i.repository.GetUser(req.UserId, req.Sub)
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return &iam.GetUserResponse{}, nil
+		}
+		return nil, err
+	}
+	return &iam.GetUserResponse{User: convertUser(user)}, nil
+}
+
+func convertUser(u *model.User) *iam.User {
+	return &iam.User{
+		UserId:    u.UserID,
+		Sub:       u.Sub,
+		Name:      u.Name,
+		Activated: u.Activated,
+		CreatedAt: u.CreatedAt.Unix(),
+		UpdatedAt: u.UpdatedAt.Unix(),
 	}
 }
 
