@@ -7,7 +7,7 @@ type User struct {
 	UserID    uint32
 	Sub       string
 	Name      string
-	Actevated bool
+	Activated bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
