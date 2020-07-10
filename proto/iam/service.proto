@@ -6,9 +6,17 @@ option go_package = "github.com/CyberAgent/mimosa-core/proto/iam";
 import "iam/entity.proto";
 
 service IAMService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
   // 認可（ユーザがリクエストしたアクションや、リソースに対しての認可を行います）
   rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
 }
+
+message GetUserRequest {
+  uint32 user_id = 1;
+  string sub = 2;
+}
+
+message GetUserResponse { User user = 1; }
 
 // IsAuthorizedRequest
 // ユーザからのリクエストに対して、アクションやリソースへの認可を行います

@@ -18,7 +18,7 @@ network:
 	@if [ -z "`docker network ls | grep local-shared`" ]; then docker network create local-shared; fi
 
 fmt: proto/**/*.proto
-	clang-format -i proto/**/*.proto
+	@clang-format -i proto/**/*.proto
 
 doc: fmt
 	protoc \

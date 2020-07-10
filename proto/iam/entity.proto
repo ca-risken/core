@@ -10,8 +10,9 @@ option go_package = "github.com/CyberAgent/mimosa-core/proto/iam";
 // User
 message User {
   uint32 user_id = 1;
-  string name = 2;
-  bool activated = 3;
-  int64 created_at = 4;
-  int64 updated_at = 5;
+  string sub = 2;
+  string name = 3;
+  bool activated = 4;
+  int64 created_at = 5;
+  int64 updated_at = 6;
 }
