@@ -97,7 +97,7 @@ from
 	inner join role_policy rp using(role_id)
 	inner join policy p using(policy_id) 
 where
-	u.actevated = 'true'
+	u.activated = 'true'
 	and u.user_id = ?
 `
 
