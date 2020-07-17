@@ -27,6 +27,7 @@ func (i *iamService) GetUser(ctx context.Context, req *iam.GetUserRequest) (*iam
 	user, err := i.repository.GetUser(req.UserId, req.Sub)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
+			appLogger.Infof("[GetUser]User not found: GetUserRequest=%+v", req)
 			return &iam.GetUserResponse{}, nil
 		}
 		return nil, err
