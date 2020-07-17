@@ -23,7 +23,7 @@ ENV PORT= \
     DB_SLAVE_PASSWORD= \
     DB_SCHEMA=mimosa \
     DB_PORT=3306 \
-    DB_LOG_MODE=false \
+    DB_LOG_MODE= \
     TZ=Asia/Tokyo
 WORKDIR /usr/local/iam
 ENTRYPOINT ["/usr/local/bin/env-injector"]
