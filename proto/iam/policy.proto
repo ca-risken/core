@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package core.iam;
+option go_package = "github.com/CyberAgent/mimosa-core/proto/iam";
+
+import "iam/entity.proto";
+
+message ListPolicyRequest {
+  uint32 project_id = 1;
+  string name = 2;
+}
+
+message ListPolicyResponse { repeated uint32 policy_id = 1; }
+
+message GetPolicyRequest {
+  uint32 project_id = 1;
+  uint32 policy_id = 2;
+}
+
+message GetPolicyResponse { Policy policy = 1; }
+
+message PutPolicyRequest {
+  uint32 project_id = 1;
+  PolicyForUpsert policy = 2;
+}
+
+message PutPolicyResponse { Policy policy = 1; }
+
+message DeletePolicyRequest {
+  uint32 project_id = 1;
+  uint32 policy_id = 2;
+}
+
+message AttachPolicyRequest {
+  uint32 project_id = 1;
+  uint32 role_id = 2;
+  uint32 policy_id = 3;
+}
+
+message AttachPolicyResponse { RolePolicy role_policy = 1; }
+
+message DetachPolicyRequest {
+  uint32 project_id = 1;
+  uint32 role_id = 2;
+  uint32 policy_id = 3;
+}

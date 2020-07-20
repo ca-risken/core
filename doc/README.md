@@ -42,15 +42,52 @@
     - [FindingService](#core.finding.FindingService)
   
 - [iam/entity.proto](#iam/entity.proto)
+    - [Policy](#core.iam.Policy)
+    - [PolicyForUpsert](#core.iam.PolicyForUpsert)
+    - [Role](#core.iam.Role)
+    - [RoleForUpsert](#core.iam.RoleForUpsert)
+    - [RolePolicy](#core.iam.RolePolicy)
     - [User](#core.iam.User)
+    - [UserForUpsert](#core.iam.UserForUpsert)
+    - [UserRole](#core.iam.UserRole)
+  
+- [iam/policy.proto](#iam/policy.proto)
+    - [AttachPolicyRequest](#core.iam.AttachPolicyRequest)
+    - [AttachPolicyResponse](#core.iam.AttachPolicyResponse)
+    - [DeletePolicyRequest](#core.iam.DeletePolicyRequest)
+    - [DetachPolicyRequest](#core.iam.DetachPolicyRequest)
+    - [GetPolicyRequest](#core.iam.GetPolicyRequest)
+    - [GetPolicyResponse](#core.iam.GetPolicyResponse)
+    - [ListPolicyRequest](#core.iam.ListPolicyRequest)
+    - [ListPolicyResponse](#core.iam.ListPolicyResponse)
+    - [PutPolicyRequest](#core.iam.PutPolicyRequest)
+    - [PutPolicyResponse](#core.iam.PutPolicyResponse)
+  
+- [iam/role.proto](#iam/role.proto)
+    - [AttachRoleRequest](#core.iam.AttachRoleRequest)
+    - [AttachRoleResponse](#core.iam.AttachRoleResponse)
+    - [DeleteRoleRequest](#core.iam.DeleteRoleRequest)
+    - [DetachRoleRequest](#core.iam.DetachRoleRequest)
+    - [GetRoleRequest](#core.iam.GetRoleRequest)
+    - [GetRoleResponse](#core.iam.GetRoleResponse)
+    - [ListRoleRequest](#core.iam.ListRoleRequest)
+    - [ListRoleResponse](#core.iam.ListRoleResponse)
+    - [PutRoleRequest](#core.iam.PutRoleRequest)
+    - [PutRoleResponse](#core.iam.PutRoleResponse)
   
 - [iam/service.proto](#iam/service.proto)
-    - [GetUserRequest](#core.iam.GetUserRequest)
-    - [GetUserResponse](#core.iam.GetUserResponse)
     - [IsAuthorizedRequest](#core.iam.IsAuthorizedRequest)
     - [IsAuthorizedResponse](#core.iam.IsAuthorizedResponse)
   
     - [IAMService](#core.iam.IAMService)
+  
+- [iam/user.proto](#iam/user.proto)
+    - [GetUserRequest](#core.iam.GetUserRequest)
+    - [GetUserResponse](#core.iam.GetUserResponse)
+    - [ListUserRequest](#core.iam.ListUserRequest)
+    - [ListUserResponse](#core.iam.ListUserResponse)
+    - [PutUserRequest](#core.iam.PutUserRequest)
+    - [PutUserResponse](#core.iam.PutUserResponse)
   
 - [Scalar Value Types](#scalar-value-types)
 
@@ -666,6 +703,99 @@ ResourceTag For upsert
 
 
 
+<a name="core.iam.Policy"></a>
+
+### Policy
+Policy
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| policy_id | [uint32](#uint32) |  |  |
+| name | [string](#string) |  |  |
+| project_id | [uint32](#uint32) |  |  |
+| action_ptn | [string](#string) |  |  |
+| resource_ptn | [string](#string) |  |  |
+| created_at | [int64](#int64) |  |  |
+| updated_at | [int64](#int64) |  |  |
+
+
+
+
+
+
+<a name="core.iam.PolicyForUpsert"></a>
+
+### PolicyForUpsert
+PolicyForUpsert
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| name | [string](#string) |  |  |
+| project_id | [uint32](#uint32) |  |  |
+| action_ptn | [string](#string) |  |  |
+| resource_ptn | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="core.iam.Role"></a>
+
+### Role
+Role
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| role_id | [uint32](#uint32) |  |  |
+| name | [string](#string) |  |  |
+| project_id | [uint32](#uint32) |  |  |
+| created_at | [int64](#int64) |  |  |
+| updated_at | [int64](#int64) |  |  |
+
+
+
+
+
+
+<a name="core.iam.RoleForUpsert"></a>
+
+### RoleForUpsert
+RoleForUpsert
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| name | [string](#string) |  |  |
+| project_id | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="core.iam.RolePolicy"></a>
+
+### RolePolicy
+RolePolicy
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| role_id | [uint32](#uint32) |  |  |
+| policy_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
+| created_at | [int64](#int64) |  |  |
+| updated_at | [int64](#int64) |  |  |
+
+
+
+
+
+
 <a name="core.iam.User"></a>
 
 ### User
@@ -685,6 +815,391 @@ User
 
 
 
+
+<a name="core.iam.UserForUpsert"></a>
+
+### UserForUpsert
+UserForUpsert
+(Unique keys: sub)
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| sub | [string](#string) |  |  |
+| name | [string](#string) |  |  |
+| activated | [bool](#bool) |  |  |
+
+
+
+
+
+
+<a name="core.iam.UserRole"></a>
+
+### UserRole
+UserRole
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| user_id | [uint32](#uint32) |  |  |
+| role_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
+| created_at | [int64](#int64) |  |  |
+| updated_at | [int64](#int64) |  |  |
+
+
+
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+<a name="iam/policy.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## iam/policy.proto
+
+
+
+<a name="core.iam.AttachPolicyRequest"></a>
+
+### AttachPolicyRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| role_id | [uint32](#uint32) |  |  |
+| policy_id | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="core.iam.AttachPolicyResponse"></a>
+
+### AttachPolicyResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| role_policy | [RolePolicy](#core.iam.RolePolicy) |  |  |
+
+
+
+
+
+
+<a name="core.iam.DeletePolicyRequest"></a>
+
+### DeletePolicyRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| policy_id | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="core.iam.DetachPolicyRequest"></a>
+
+### DetachPolicyRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| role_id | [uint32](#uint32) |  |  |
+| policy_id | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="core.iam.GetPolicyRequest"></a>
+
+### GetPolicyRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| policy_id | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="core.iam.GetPolicyResponse"></a>
+
+### GetPolicyResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| policy | [Policy](#core.iam.Policy) |  |  |
+
+
+
+
+
+
+<a name="core.iam.ListPolicyRequest"></a>
+
+### ListPolicyRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| name | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="core.iam.ListPolicyResponse"></a>
+
+### ListPolicyResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| policy_id | [uint32](#uint32) | repeated |  |
+
+
+
+
+
+
+<a name="core.iam.PutPolicyRequest"></a>
+
+### PutPolicyRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| policy | [PolicyForUpsert](#core.iam.PolicyForUpsert) |  |  |
+
+
+
+
+
+
+<a name="core.iam.PutPolicyResponse"></a>
+
+### PutPolicyResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| policy | [Policy](#core.iam.Policy) |  |  |
+
+
+
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+<a name="iam/role.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## iam/role.proto
+
+
+
+<a name="core.iam.AttachRoleRequest"></a>
+
+### AttachRoleRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| user_id | [uint32](#uint32) |  |  |
+| role_id | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="core.iam.AttachRoleResponse"></a>
+
+### AttachRoleResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| user_role | [UserRole](#core.iam.UserRole) |  |  |
+
+
+
+
+
+
+<a name="core.iam.DeleteRoleRequest"></a>
+
+### DeleteRoleRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| role_id | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="core.iam.DetachRoleRequest"></a>
+
+### DetachRoleRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| user_id | [uint32](#uint32) |  |  |
+| role_id | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="core.iam.GetRoleRequest"></a>
+
+### GetRoleRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| role_id | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="core.iam.GetRoleResponse"></a>
+
+### GetRoleResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| role | [Role](#core.iam.Role) |  |  |
+
+
+
+
+
+
+<a name="core.iam.ListRoleRequest"></a>
+
+### ListRoleRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| name | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="core.iam.ListRoleResponse"></a>
+
+### ListRoleResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| role_id | [uint32](#uint32) | repeated |  |
+
+
+
+
+
+
+<a name="core.iam.PutRoleRequest"></a>
+
+### PutRoleRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| role | [RoleForUpsert](#core.iam.RoleForUpsert) |  |  |
+
+
+
+
+
+
+<a name="core.iam.PutRoleResponse"></a>
+
+### PutRoleResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| role | [Role](#core.iam.Role) |  |  |
+
+
+
+
+
  
 
  
@@ -699,37 +1214,6 @@ User
 <p align="right"><a href="#top">Top</a></p>
 
 ## iam/service.proto
-
-
-
-<a name="core.iam.GetUserRequest"></a>
-
-### GetUserRequest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| user_id | [uint32](#uint32) |  |  |
-| sub | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="core.iam.GetUserResponse"></a>
-
-### GetUserResponse
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| user | [User](#core.iam.User) |  |  |
-
-
-
 
 
 
@@ -780,8 +1264,131 @@ IsAuthorizedRequest
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
+| ListUser | [ListUserRequest](#core.iam.ListUserRequest) | [ListUserResponse](#core.iam.ListUserResponse) | User |
 | GetUser | [GetUserRequest](#core.iam.GetUserRequest) | [GetUserResponse](#core.iam.GetUserResponse) |  |
+| PutUser | [PutUserRequest](#core.iam.PutUserRequest) | [PutUserResponse](#core.iam.PutUserResponse) |  |
+| ListRole | [ListRoleRequest](#core.iam.ListRoleRequest) | [ListRoleResponse](#core.iam.ListRoleResponse) | Role |
+| GetRole | [GetRoleRequest](#core.iam.GetRoleRequest) | [GetRoleResponse](#core.iam.GetRoleResponse) |  |
+| PutRole | [PutRoleRequest](#core.iam.PutRoleRequest) | [PutRoleResponse](#core.iam.PutRoleResponse) |  |
+| DeleteRole | [DeleteRoleRequest](#core.iam.DeleteRoleRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
+| AttachRole | [AttachRoleRequest](#core.iam.AttachRoleRequest) | [AttachRoleResponse](#core.iam.AttachRoleResponse) |  |
+| DetachRole | [DetachRoleRequest](#core.iam.DetachRoleRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
+| ListPolicy | [ListPolicyRequest](#core.iam.ListPolicyRequest) | [ListPolicyResponse](#core.iam.ListPolicyResponse) | Policy |
+| GetPolicy | [GetPolicyRequest](#core.iam.GetPolicyRequest) | [GetPolicyResponse](#core.iam.GetPolicyResponse) |  |
+| PutPolicy | [PutPolicyRequest](#core.iam.PutPolicyRequest) | [PutPolicyResponse](#core.iam.PutPolicyResponse) |  |
+| DeletePolicy | [DeletePolicyRequest](#core.iam.DeletePolicyRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
+| AttachPolicy | [AttachPolicyRequest](#core.iam.AttachPolicyRequest) | [AttachPolicyResponse](#core.iam.AttachPolicyResponse) |  |
+| DetachPolicy | [DetachPolicyRequest](#core.iam.DetachPolicyRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 | IsAuthorized | [IsAuthorizedRequest](#core.iam.IsAuthorizedRequest) | [IsAuthorizedResponse](#core.iam.IsAuthorizedResponse) | 認可（ユーザがリクエストしたアクションや、リソースに対しての認可を行います） |
+
+ 
+
+
+
+<a name="iam/user.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## iam/user.proto
+
+
+
+<a name="core.iam.GetUserRequest"></a>
+
+### GetUserRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| user_id | [uint32](#uint32) |  |  |
+| sub | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="core.iam.GetUserResponse"></a>
+
+### GetUserResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| user | [User](#core.iam.User) |  |  |
+
+
+
+
+
+
+<a name="core.iam.ListUserRequest"></a>
+
+### ListUserRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| name | [string](#string) |  |  |
+| activated | [bool](#bool) |  |  |
+
+
+
+
+
+
+<a name="core.iam.ListUserResponse"></a>
+
+### ListUserResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| user_id | [uint32](#uint32) | repeated |  |
+
+
+
+
+
+
+<a name="core.iam.PutUserRequest"></a>
+
+### PutUserRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| user | [UserForUpsert](#core.iam.UserForUpsert) |  |  |
+
+
+
+
+
+
+<a name="core.iam.PutUserResponse"></a>
+
+### PutUserResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| user | [User](#core.iam.User) |  |  |
+
+
+
+
+
+ 
+
+ 
+
+ 
 
  
 

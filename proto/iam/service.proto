@@ -3,20 +3,36 @@ syntax = "proto3";
 package core.iam;
 option go_package = "github.com/CyberAgent/mimosa-core/proto/iam";
 
-import "iam/entity.proto";
+import "google/protobuf/empty.proto";
+import "iam/user.proto";
+import "iam/role.proto";
+import "iam/policy.proto";
 
 service IAMService {
+  // User
+  rpc ListUser(ListUserRequest) returns (ListUserResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc PutUser(PutUserRequest) returns (PutUserResponse);
+
+  // Role
+  rpc ListRole(ListRoleRequest) returns (ListRoleResponse);
+  rpc GetRole(GetRoleRequest) returns (GetRoleResponse);
+  rpc PutRole(PutRoleRequest) returns (PutRoleResponse);
+  rpc DeleteRole(DeleteRoleRequest) returns (google.protobuf.Empty);
+  rpc AttachRole(AttachRoleRequest) returns (AttachRoleResponse);
+  rpc DetachRole(DetachRoleRequest) returns (google.protobuf.Empty);
+
+  // Policy
+  rpc ListPolicy(ListPolicyRequest) returns (ListPolicyResponse);
+  rpc GetPolicy(GetPolicyRequest) returns (GetPolicyResponse);
+  rpc PutPolicy(PutPolicyRequest) returns (PutPolicyResponse);
+  rpc DeletePolicy(DeletePolicyRequest) returns (google.protobuf.Empty);
+  rpc AttachPolicy(AttachPolicyRequest) returns (AttachPolicyResponse);
+  rpc DetachPolicy(DetachPolicyRequest) returns (google.protobuf.Empty);
+
   // 認可（ユーザがリクエストしたアクションや、リソースに対しての認可を行います）
   rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
 }
-
-message GetUserRequest {
-  uint32 user_id = 1;
-  string sub = 2;
-}
-
-message GetUserResponse { User user = 1; }
 
 // IsAuthorizedRequest
 // ユーザからのリクエストに対して、アクションやリソースへの認可を行います

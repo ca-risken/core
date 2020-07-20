@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package core.iam;
+option go_package = "github.com/CyberAgent/mimosa-core/proto/iam";
+
+import "iam/entity.proto";
+
+message ListUserRequest {
+  uint32 project_id = 1;
+  string name = 2;
+  bool activated = 3;
+}
+
+message ListUserResponse { repeated uint32 user_id = 1; }
+
+message GetUserRequest {
+  uint32 user_id = 1;
+  string sub = 2;
+}
+
+message GetUserResponse { User user = 1; }
+
+message PutUserRequest { UserForUpsert user = 1; }
+
+message PutUserResponse { User user = 1; }
