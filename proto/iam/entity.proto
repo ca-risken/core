@@ -16,3 +16,63 @@ message User {
   int64 created_at = 5;
   int64 updated_at = 6;
 }
+
+// UserForUpsert
+// (Unique keys: sub)
+message UserForUpsert {
+  string sub = 1;
+  string name = 2;
+  bool activated = 3;
+}
+
+// Role
+message Role {
+  uint32 role_id = 1;
+  string name = 2;
+  uint32 project_id = 3;
+  int64 created_at = 4;
+  int64 updated_at = 5;
+}
+
+// RoleForUpsert
+message RoleForUpsert {
+  string name = 1;
+  uint32 project_id = 2;
+}
+
+// UserRole
+message UserRole {
+  uint32 user_id = 1;
+  uint32 role_id = 2;
+  uint32 project_id = 3;
+  int64 created_at = 4;
+  int64 updated_at = 5;
+}
+
+// Policy
+message Policy {
+  uint32 policy_id = 1;
+  string name = 2;
+  uint32 project_id = 3;
+  string action_ptn = 4;
+  string resource_ptn = 5;
+  int64 created_at = 6;
+  int64 updated_at = 7;
+}
+
+// PolicyForUpsert
+message PolicyForUpsert {
+  string name = 1;
+  uint32 project_id = 2;
+  string action_ptn = 3;
+  string resource_ptn = 4;
+}
+
+// RolePolicy
+message RolePolicy {
+  uint32 role_id = 1;
+  uint32 policy_id = 2;
+  uint32 project_id = 3;
+  int64 created_at = 4;
+  int64 updated_at = 5;
+}

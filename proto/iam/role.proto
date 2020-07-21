@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package core.iam;
+option go_package = "github.com/CyberAgent/mimosa-core/proto/iam";
+
+import "iam/entity.proto";
+
+message ListRoleRequest {
+  uint32 project_id = 1;
+  string name = 2;
+}
+
+message ListRoleResponse { repeated uint32 role_id = 1; }
+
+message GetRoleRequest {
+  uint32 project_id = 1;
+  uint32 role_id = 2;
+}
+
+message GetRoleResponse { Role role = 1; }
+
+message PutRoleRequest {
+  uint32 project_id = 1;
+  RoleForUpsert role = 2;
+}
+
+message PutRoleResponse { Role role = 1; }
+
+message DeleteRoleRequest {
+  uint32 project_id = 1;
+  uint32 role_id = 2;
+}
+
+message AttachRoleRequest {
+  uint32 project_id = 1;
+  uint32 user_id = 2;
+  uint32 role_id = 3;
+}
+
+message AttachRoleResponse { UserRole user_role = 1; }
+
+message DetachRoleRequest {
+  uint32 project_id = 1;
+  uint32 user_id = 2;
+  uint32 role_id = 3;
+}

@@ -113,6 +113,535 @@ func (x *User) GetUpdatedAt() int64 {
 	return 0
 }
 
+// UserForUpsert
+// (Unique keys: sub)
+type UserForUpsert struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Sub       string `protobuf:"bytes,1,opt,name=sub,proto3" json:"sub,omitempty"`
+	Name      string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Activated bool   `protobuf:"varint,3,opt,name=activated,proto3" json:"activated,omitempty"`
+}
+
+func (x *UserForUpsert) Reset() {
+	*x = UserForUpsert{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_iam_entity_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UserForUpsert) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserForUpsert) ProtoMessage() {}
+
+func (x *UserForUpsert) ProtoReflect() protoreflect.Message {
+	mi := &file_iam_entity_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserForUpsert.ProtoReflect.Descriptor instead.
+func (*UserForUpsert) Descriptor() ([]byte, []int) {
+	return file_iam_entity_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *UserForUpsert) GetSub() string {
+	if x != nil {
+		return x.Sub
+	}
+	return ""
+}
+
+func (x *UserForUpsert) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UserForUpsert) GetActivated() bool {
+	if x != nil {
+		return x.Activated
+	}
+	return false
+}
+
+// Role
+type Role struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RoleId    uint32 `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	Name      string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	ProjectId uint32 `protobuf:"varint,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	CreatedAt int64  `protobuf:"varint,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt int64  `protobuf:"varint,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+}
+
+func (x *Role) Reset() {
+	*x = Role{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_iam_entity_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Role) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Role) ProtoMessage() {}
+
+func (x *Role) ProtoReflect() protoreflect.Message {
+	mi := &file_iam_entity_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Role.ProtoReflect.Descriptor instead.
+func (*Role) Descriptor() ([]byte, []int) {
+	return file_iam_entity_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Role) GetRoleId() uint32 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+func (x *Role) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Role) GetProjectId() uint32 {
+	if x != nil {
+		return x.ProjectId
+	}
+	return 0
+}
+
+func (x *Role) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+func (x *Role) GetUpdatedAt() int64 {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return 0
+}
+
+// RoleForUpsert
+type RoleForUpsert struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name      string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	ProjectId uint32 `protobuf:"varint,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+}
+
+func (x *RoleForUpsert) Reset() {
+	*x = RoleForUpsert{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_iam_entity_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RoleForUpsert) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RoleForUpsert) ProtoMessage() {}
+
+func (x *RoleForUpsert) ProtoReflect() protoreflect.Message {
+	mi := &file_iam_entity_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RoleForUpsert.ProtoReflect.Descriptor instead.
+func (*RoleForUpsert) Descriptor() ([]byte, []int) {
+	return file_iam_entity_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *RoleForUpsert) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *RoleForUpsert) GetProjectId() uint32 {
+	if x != nil {
+		return x.ProjectId
+	}
+	return 0
+}
+
+// UserRole
+type UserRole struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId    uint32 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	RoleId    uint32 `protobuf:"varint,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	ProjectId uint32 `protobuf:"varint,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	CreatedAt int64  `protobuf:"varint,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt int64  `protobuf:"varint,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+}
+
+func (x *UserRole) Reset() {
+	*x = UserRole{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_iam_entity_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UserRole) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserRole) ProtoMessage() {}
+
+func (x *UserRole) ProtoReflect() protoreflect.Message {
+	mi := &file_iam_entity_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserRole.ProtoReflect.Descriptor instead.
+func (*UserRole) Descriptor() ([]byte, []int) {
+	return file_iam_entity_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *UserRole) GetUserId() uint32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *UserRole) GetRoleId() uint32 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+func (x *UserRole) GetProjectId() uint32 {
+	if x != nil {
+		return x.ProjectId
+	}
+	return 0
+}
+
+func (x *UserRole) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+func (x *UserRole) GetUpdatedAt() int64 {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return 0
+}
+
+// Policy
+type Policy struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	PolicyId    uint32 `protobuf:"varint,1,opt,name=policy_id,json=policyId,proto3" json:"policy_id,omitempty"`
+	Name        string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	ProjectId   uint32 `protobuf:"varint,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ActionPtn   string `protobuf:"bytes,4,opt,name=action_ptn,json=actionPtn,proto3" json:"action_ptn,omitempty"`
+	ResourcePtn string `protobuf:"bytes,5,opt,name=resource_ptn,json=resourcePtn,proto3" json:"resource_ptn,omitempty"`
+	CreatedAt   int64  `protobuf:"varint,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt   int64  `protobuf:"varint,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+}
+
+func (x *Policy) Reset() {
+	*x = Policy{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_iam_entity_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Policy) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Policy) ProtoMessage() {}
+
+func (x *Policy) ProtoReflect() protoreflect.Message {
+	mi := &file_iam_entity_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Policy.ProtoReflect.Descriptor instead.
+func (*Policy) Descriptor() ([]byte, []int) {
+	return file_iam_entity_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *Policy) GetPolicyId() uint32 {
+	if x != nil {
+		return x.PolicyId
+	}
+	return 0
+}
+
+func (x *Policy) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Policy) GetProjectId() uint32 {
+	if x != nil {
+		return x.ProjectId
+	}
+	return 0
+}
+
+func (x *Policy) GetActionPtn() string {
+	if x != nil {
+		return x.ActionPtn
+	}
+	return ""
+}
+
+func (x *Policy) GetResourcePtn() string {
+	if x != nil {
+		return x.ResourcePtn
+	}
+	return ""
+}
+
+func (x *Policy) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+func (x *Policy) GetUpdatedAt() int64 {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return 0
+}
+
+// PolicyForUpsert
+type PolicyForUpsert struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name        string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	ProjectId   uint32 `protobuf:"varint,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ActionPtn   string `protobuf:"bytes,3,opt,name=action_ptn,json=actionPtn,proto3" json:"action_ptn,omitempty"`
+	ResourcePtn string `protobuf:"bytes,4,opt,name=resource_ptn,json=resourcePtn,proto3" json:"resource_ptn,omitempty"`
+}
+
+func (x *PolicyForUpsert) Reset() {
+	*x = PolicyForUpsert{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_iam_entity_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PolicyForUpsert) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PolicyForUpsert) ProtoMessage() {}
+
+func (x *PolicyForUpsert) ProtoReflect() protoreflect.Message {
+	mi := &file_iam_entity_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PolicyForUpsert.ProtoReflect.Descriptor instead.
+func (*PolicyForUpsert) Descriptor() ([]byte, []int) {
+	return file_iam_entity_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *PolicyForUpsert) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *PolicyForUpsert) GetProjectId() uint32 {
+	if x != nil {
+		return x.ProjectId
+	}
+	return 0
+}
+
+func (x *PolicyForUpsert) GetActionPtn() string {
+	if x != nil {
+		return x.ActionPtn
+	}
+	return ""
+}
+
+func (x *PolicyForUpsert) GetResourcePtn() string {
+	if x != nil {
+		return x.ResourcePtn
+	}
+	return ""
+}
+
+// RolePolicy
+type RolePolicy struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RoleId    uint32 `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	PolicyId  uint32 `protobuf:"varint,2,opt,name=policy_id,json=policyId,proto3" json:"policy_id,omitempty"`
+	ProjectId uint32 `protobuf:"varint,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	CreatedAt int64  `protobuf:"varint,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt int64  `protobuf:"varint,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+}
+
+func (x *RolePolicy) Reset() {
+	*x = RolePolicy{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_iam_entity_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RolePolicy) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RolePolicy) ProtoMessage() {}
+
+func (x *RolePolicy) ProtoReflect() protoreflect.Message {
+	mi := &file_iam_entity_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RolePolicy.ProtoReflect.Descriptor instead.
+func (*RolePolicy) Descriptor() ([]byte, []int) {
+	return file_iam_entity_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *RolePolicy) GetRoleId() uint32 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+func (x *RolePolicy) GetPolicyId() uint32 {
+	if x != nil {
+		return x.PolicyId
+	}
+	return 0
+}
+
+func (x *RolePolicy) GetProjectId() uint32 {
+	if x != nil {
+		return x.ProjectId
+	}
+	return 0
+}
+
+func (x *RolePolicy) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+func (x *RolePolicy) GetUpdatedAt() int64 {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return 0
+}
+
 var File_iam_entity_proto protoreflect.FileDescriptor
 
 var file_iam_entity_proto_rawDesc = []byte{
@@ -128,10 +657,71 @@ var file_iam_entity_proto_rawDesc = []byte{
 	0x18, 0x05, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41,
 	0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18,
 	0x06, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74,
-	0x42, 0x2d, 0x5a, 0x2b, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x43,
-	0x79, 0x62, 0x65, 0x72, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x2f, 0x6d, 0x69, 0x6d, 0x6f, 0x73, 0x61,
-	0x2d, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x69, 0x61, 0x6d, 0x62,
-	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x22, 0x53, 0x0a, 0x0d, 0x55, 0x73, 0x65, 0x72, 0x46, 0x6f, 0x72, 0x55, 0x70, 0x73, 0x65, 0x72,
+	0x74, 0x12, 0x10, 0x0a, 0x03, 0x73, 0x75, 0x62, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03,
+	0x73, 0x75, 0x62, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x61, 0x63, 0x74, 0x69, 0x76,
+	0x61, 0x74, 0x65, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x08, 0x52, 0x09, 0x61, 0x63, 0x74, 0x69,
+	0x76, 0x61, 0x74, 0x65, 0x64, 0x22, 0x90, 0x01, 0x0a, 0x04, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x17,
+	0x0a, 0x07, 0x72, 0x6f, 0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52,
+	0x06, 0x72, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1d, 0x0a, 0x0a, 0x70,
+	0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52,
+	0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x72,
+	0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09,
+	0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x75, 0x70, 0x64,
+	0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x75,
+	0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x22, 0x42, 0x0a, 0x0d, 0x52, 0x6f, 0x6c, 0x65,
+	0x46, 0x6f, 0x72, 0x55, 0x70, 0x73, 0x65, 0x72, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d,
+	0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1d, 0x0a,
+	0x0a, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x0d, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x22, 0x99, 0x01, 0x0a,
+	0x08, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65,
+	0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72,
+	0x49, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x72, 0x6f, 0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0d, 0x52, 0x06, 0x72, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x70,
+	0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52,
+	0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x72,
+	0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09,
+	0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x75, 0x70, 0x64,
+	0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x75,
+	0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x22, 0xd8, 0x01, 0x0a, 0x06, 0x50, 0x6f, 0x6c,
+	0x69, 0x63, 0x79, 0x12, 0x1b, 0x0a, 0x09, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x5f, 0x69, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x49, 0x64,
+	0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
+	0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1d, 0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f,
+	0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63,
+	0x74, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x70, 0x74,
+	0x6e, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x50,
+	0x74, 0x6e, 0x12, 0x21, 0x0a, 0x0c, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x5f, 0x70,
+	0x74, 0x6e, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72,
+	0x63, 0x65, 0x50, 0x74, 0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64,
+	0x5f, 0x61, 0x74, 0x18, 0x06, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74,
+	0x65, 0x64, 0x41, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x5f,
+	0x61, 0x74, 0x18, 0x07, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65,
+	0x64, 0x41, 0x74, 0x22, 0x86, 0x01, 0x0a, 0x0f, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x46, 0x6f,
+	0x72, 0x55, 0x70, 0x73, 0x65, 0x72, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1d, 0x0a, 0x0a, 0x70,
+	0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52,
+	0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x61, 0x63,
+	0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x70, 0x74, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09,
+	0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x74, 0x6e, 0x12, 0x21, 0x0a, 0x0c, 0x72, 0x65, 0x73,
+	0x6f, 0x75, 0x72, 0x63, 0x65, 0x5f, 0x70, 0x74, 0x6e, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x0b, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x50, 0x74, 0x6e, 0x22, 0x9f, 0x01, 0x0a,
+	0x0a, 0x52, 0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x12, 0x17, 0x0a, 0x07, 0x72,
+	0x6f, 0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x06, 0x72, 0x6f,
+	0x6c, 0x65, 0x49, 0x64, 0x12, 0x1b, 0x0a, 0x09, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x5f, 0x69,
+	0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x49,
+	0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64,
+	0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x04,
+	0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12,
+	0x1d, 0x0a, 0x0a, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x05, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x09, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x42, 0x2d,
+	0x5a, 0x2b, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x43, 0x79, 0x62,
+	0x65, 0x72, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x2f, 0x6d, 0x69, 0x6d, 0x6f, 0x73, 0x61, 0x2d, 0x63,
+	0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x69, 0x61, 0x6d, 0x62, 0x06, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -146,9 +736,16 @@ func file_iam_entity_proto_rawDescGZIP() []byte {
 	return file_iam_entity_proto_rawDescData
 }
 
-var file_iam_entity_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_iam_entity_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_iam_entity_proto_goTypes = []interface{}{
-	(*User)(nil), // 0: core.iam.User
+	(*User)(nil),            // 0: core.iam.User
+	(*UserForUpsert)(nil),   // 1: core.iam.UserForUpsert
+	(*Role)(nil),            // 2: core.iam.Role
+	(*RoleForUpsert)(nil),   // 3: core.iam.RoleForUpsert
+	(*UserRole)(nil),        // 4: core.iam.UserRole
+	(*Policy)(nil),          // 5: core.iam.Policy
+	(*PolicyForUpsert)(nil), // 6: core.iam.PolicyForUpsert
+	(*RolePolicy)(nil),      // 7: core.iam.RolePolicy
 }
 var file_iam_entity_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -176,6 +773,90 @@ func file_iam_entity_proto_init() {
 				return nil
 			}
 		}
+		file_iam_entity_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UserForUpsert); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_iam_entity_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Role); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_iam_entity_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RoleForUpsert); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_iam_entity_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UserRole); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_iam_entity_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Policy); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_iam_entity_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PolicyForUpsert); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_iam_entity_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RolePolicy); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -183,7 +864,7 @@ func file_iam_entity_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_iam_entity_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

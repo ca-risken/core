@@ -9,6 +9,7 @@ package iam
 import (
 	context "context"
 	proto "github.com/golang/protobuf/proto"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -29,108 +30,6 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-type GetUserRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	UserId uint32 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Sub    string `protobuf:"bytes,2,opt,name=sub,proto3" json:"sub,omitempty"`
-}
-
-func (x *GetUserRequest) Reset() {
-	*x = GetUserRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_iam_service_proto_msgTypes[0]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetUserRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserRequest) ProtoMessage() {}
-
-func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_iam_service_proto_msgTypes[0]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserRequest.ProtoReflect.Descriptor instead.
-func (*GetUserRequest) Descriptor() ([]byte, []int) {
-	return file_iam_service_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *GetUserRequest) GetUserId() uint32 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-func (x *GetUserRequest) GetSub() string {
-	if x != nil {
-		return x.Sub
-	}
-	return ""
-}
-
-type GetUserResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	User *User `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
-}
-
-func (x *GetUserResponse) Reset() {
-	*x = GetUserResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_iam_service_proto_msgTypes[1]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetUserResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserResponse) ProtoMessage() {}
-
-func (x *GetUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_iam_service_proto_msgTypes[1]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserResponse.ProtoReflect.Descriptor instead.
-func (*GetUserResponse) Descriptor() ([]byte, []int) {
-	return file_iam_service_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *GetUserResponse) GetUser() *User {
-	if x != nil {
-		return x.User
-	}
-	return nil
-}
-
 // IsAuthorizedRequest
 // ユーザからのリクエストに対して、アクションやリソースへの認可を行います
 type IsAuthorizedRequest struct {
@@ -147,7 +46,7 @@ type IsAuthorizedRequest struct {
 func (x *IsAuthorizedRequest) Reset() {
 	*x = IsAuthorizedRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_iam_service_proto_msgTypes[2]
+		mi := &file_iam_service_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -160,7 +59,7 @@ func (x *IsAuthorizedRequest) String() string {
 func (*IsAuthorizedRequest) ProtoMessage() {}
 
 func (x *IsAuthorizedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_iam_service_proto_msgTypes[2]
+	mi := &file_iam_service_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -173,7 +72,7 @@ func (x *IsAuthorizedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IsAuthorizedRequest.ProtoReflect.Descriptor instead.
 func (*IsAuthorizedRequest) Descriptor() ([]byte, []int) {
-	return file_iam_service_proto_rawDescGZIP(), []int{2}
+	return file_iam_service_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *IsAuthorizedRequest) GetUserId() uint32 {
@@ -215,7 +114,7 @@ type IsAuthorizedResponse struct {
 func (x *IsAuthorizedResponse) Reset() {
 	*x = IsAuthorizedResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_iam_service_proto_msgTypes[3]
+		mi := &file_iam_service_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -228,7 +127,7 @@ func (x *IsAuthorizedResponse) String() string {
 func (*IsAuthorizedResponse) ProtoMessage() {}
 
 func (x *IsAuthorizedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_iam_service_proto_msgTypes[3]
+	mi := &file_iam_service_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -241,7 +140,7 @@ func (x *IsAuthorizedResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IsAuthorizedResponse.ProtoReflect.Descriptor instead.
 func (*IsAuthorizedResponse) Descriptor() ([]byte, []int) {
-	return file_iam_service_proto_rawDescGZIP(), []int{3}
+	return file_iam_service_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *IsAuthorizedResponse) GetOk() bool {
@@ -255,32 +154,89 @@ var File_iam_service_proto protoreflect.FileDescriptor
 
 var file_iam_service_proto_rawDesc = []byte{
 	0x0a, 0x11, 0x69, 0x61, 0x6d, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x12, 0x08, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x1a, 0x10, 0x69,
-	0x61, 0x6d, 0x2f, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22,
-	0x3b, 0x0a, 0x0e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x0d, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x73, 0x75,
-	0x62, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x73, 0x75, 0x62, 0x22, 0x35, 0x0a, 0x0f,
-	0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
-	0x22, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0e, 0x2e,
-	0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x04, 0x75,
-	0x73, 0x65, 0x72, 0x22, 0x93, 0x01, 0x0a, 0x13, 0x49, 0x73, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72,
-	0x69, 0x7a, 0x65, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75,
-	0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x06, 0x75, 0x73,
-	0x65, 0x72, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f,
-	0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63,
-	0x74, 0x49, 0x64, 0x12, 0x1f, 0x0a, 0x0b, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x6e, 0x61,
-	0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e,
-	0x4e, 0x61, 0x6d, 0x65, 0x12, 0x23, 0x0a, 0x0d, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65,
-	0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x72, 0x65, 0x73,
-	0x6f, 0x75, 0x72, 0x63, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x22, 0x26, 0x0a, 0x14, 0x49, 0x73, 0x41,
-	0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x65, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x12, 0x0e, 0x0a, 0x02, 0x6f, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x02, 0x6f,
-	0x6b, 0x32, 0x9b, 0x01, 0x0a, 0x0a, 0x49, 0x41, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
-	0x12, 0x3e, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x12, 0x18, 0x2e, 0x63, 0x6f,
-	0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x19, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d,
-	0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x6f, 0x74, 0x6f, 0x12, 0x08, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x1a, 0x1b, 0x67,
+	0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x65,
+	0x6d, 0x70, 0x74, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x0e, 0x69, 0x61, 0x6d, 0x2f,
+	0x75, 0x73, 0x65, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x0e, 0x69, 0x61, 0x6d, 0x2f,
+	0x72, 0x6f, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x10, 0x69, 0x61, 0x6d, 0x2f,
+	0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x93, 0x01, 0x0a,
+	0x13, 0x49, 0x73, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x65, 0x64, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x1d, 0x0a,
+	0x0a, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x0d, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x1f, 0x0a, 0x0b,
+	0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x0a, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x23, 0x0a,
+	0x0d, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x04,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x4e, 0x61,
+	0x6d, 0x65, 0x22, 0x26, 0x0a, 0x14, 0x49, 0x73, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a,
+	0x65, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x6f, 0x6b,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x02, 0x6f, 0x6b, 0x32, 0xe2, 0x08, 0x0a, 0x0a, 0x49,
+	0x41, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x41, 0x0a, 0x08, 0x4c, 0x69, 0x73,
+	0x74, 0x55, 0x73, 0x65, 0x72, 0x12, 0x19, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d,
+	0x2e, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x1a, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x4c, 0x69, 0x73, 0x74,
+	0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3e, 0x0a, 0x07,
+	0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x12, 0x18, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69,
+	0x61, 0x6d, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x19, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x47, 0x65, 0x74,
+	0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3e, 0x0a, 0x07,
+	0x50, 0x75, 0x74, 0x55, 0x73, 0x65, 0x72, 0x12, 0x18, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69,
+	0x61, 0x6d, 0x2e, 0x50, 0x75, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x19, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x50, 0x75, 0x74,
+	0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x41, 0x0a, 0x08,
+	0x4c, 0x69, 0x73, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x19, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e,
+	0x69, 0x61, 0x6d, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x1a, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x4c,
+	0x69, 0x73, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
+	0x3e, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x18, 0x2e, 0x63, 0x6f, 0x72,
+	0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x47, 0x65, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x19, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e,
+	0x47, 0x65, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
+	0x3e, 0x0a, 0x07, 0x50, 0x75, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x18, 0x2e, 0x63, 0x6f, 0x72,
+	0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x50, 0x75, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x19, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e,
+	0x50, 0x75, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
+	0x41, 0x0a, 0x0a, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x1b, 0x2e,
+	0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x52,
+	0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f,
+	0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70,
+	0x74, 0x79, 0x12, 0x47, 0x0a, 0x0a, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x52, 0x6f, 0x6c, 0x65,
+	0x12, 0x1b, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x41, 0x74, 0x74, 0x61,
+	0x63, 0x68, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e,
+	0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x52,
+	0x6f, 0x6c, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x41, 0x0a, 0x0a, 0x44,
+	0x65, 0x74, 0x61, 0x63, 0x68, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x1b, 0x2e, 0x63, 0x6f, 0x72, 0x65,
+	0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x44, 0x65, 0x74, 0x61, 0x63, 0x68, 0x52, 0x6f, 0x6c, 0x65, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x47,
+	0x0a, 0x0a, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x12, 0x1b, 0x2e, 0x63,
+	0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x6f, 0x6c, 0x69,
+	0x63, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x63, 0x6f, 0x72, 0x65,
+	0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x44, 0x0a, 0x09, 0x47, 0x65, 0x74, 0x50, 0x6f,
+	0x6c, 0x69, 0x63, 0x79, 0x12, 0x1a, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e,
+	0x47, 0x65, 0x74, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x1b, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x47, 0x65, 0x74, 0x50,
+	0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x44, 0x0a,
+	0x09, 0x50, 0x75, 0x74, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x12, 0x1a, 0x2e, 0x63, 0x6f, 0x72,
+	0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x50, 0x75, 0x74, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61,
+	0x6d, 0x2e, 0x50, 0x75, 0x74, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x12, 0x45, 0x0a, 0x0c, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x50, 0x6f, 0x6c,
+	0x69, 0x63, 0x79, 0x12, 0x1d, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x44,
+	0x65, 0x6c, 0x65, 0x74, 0x65, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x4d, 0x0a, 0x0c, 0x41, 0x74,
+	0x74, 0x61, 0x63, 0x68, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x12, 0x1d, 0x2e, 0x63, 0x6f, 0x72,
+	0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x50, 0x6f, 0x6c, 0x69,
+	0x63, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x63, 0x6f, 0x72, 0x65,
+	0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x50, 0x6f, 0x6c, 0x69, 0x63,
+	0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x45, 0x0a, 0x0c, 0x44, 0x65, 0x74,
+	0x61, 0x63, 0x68, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x12, 0x1d, 0x2e, 0x63, 0x6f, 0x72, 0x65,
+	0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x44, 0x65, 0x74, 0x61, 0x63, 0x68, 0x50, 0x6f, 0x6c, 0x69, 0x63,
+	0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
+	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
 	0x12, 0x4d, 0x0a, 0x0c, 0x49, 0x73, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x65, 0x64,
 	0x12, 0x1d, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x49, 0x73, 0x41, 0x75,
 	0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x65, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
@@ -304,25 +260,76 @@ func file_iam_service_proto_rawDescGZIP() []byte {
 	return file_iam_service_proto_rawDescData
 }
 
-var file_iam_service_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_iam_service_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_iam_service_proto_goTypes = []interface{}{
-	(*GetUserRequest)(nil),       // 0: core.iam.GetUserRequest
-	(*GetUserResponse)(nil),      // 1: core.iam.GetUserResponse
-	(*IsAuthorizedRequest)(nil),  // 2: core.iam.IsAuthorizedRequest
-	(*IsAuthorizedResponse)(nil), // 3: core.iam.IsAuthorizedResponse
-	(*User)(nil),                 // 4: core.iam.User
+	(*IsAuthorizedRequest)(nil),  // 0: core.iam.IsAuthorizedRequest
+	(*IsAuthorizedResponse)(nil), // 1: core.iam.IsAuthorizedResponse
+	(*ListUserRequest)(nil),      // 2: core.iam.ListUserRequest
+	(*GetUserRequest)(nil),       // 3: core.iam.GetUserRequest
+	(*PutUserRequest)(nil),       // 4: core.iam.PutUserRequest
+	(*ListRoleRequest)(nil),      // 5: core.iam.ListRoleRequest
+	(*GetRoleRequest)(nil),       // 6: core.iam.GetRoleRequest
+	(*PutRoleRequest)(nil),       // 7: core.iam.PutRoleRequest
+	(*DeleteRoleRequest)(nil),    // 8: core.iam.DeleteRoleRequest
+	(*AttachRoleRequest)(nil),    // 9: core.iam.AttachRoleRequest
+	(*DetachRoleRequest)(nil),    // 10: core.iam.DetachRoleRequest
+	(*ListPolicyRequest)(nil),    // 11: core.iam.ListPolicyRequest
+	(*GetPolicyRequest)(nil),     // 12: core.iam.GetPolicyRequest
+	(*PutPolicyRequest)(nil),     // 13: core.iam.PutPolicyRequest
+	(*DeletePolicyRequest)(nil),  // 14: core.iam.DeletePolicyRequest
+	(*AttachPolicyRequest)(nil),  // 15: core.iam.AttachPolicyRequest
+	(*DetachPolicyRequest)(nil),  // 16: core.iam.DetachPolicyRequest
+	(*ListUserResponse)(nil),     // 17: core.iam.ListUserResponse
+	(*GetUserResponse)(nil),      // 18: core.iam.GetUserResponse
+	(*PutUserResponse)(nil),      // 19: core.iam.PutUserResponse
+	(*ListRoleResponse)(nil),     // 20: core.iam.ListRoleResponse
+	(*GetRoleResponse)(nil),      // 21: core.iam.GetRoleResponse
+	(*PutRoleResponse)(nil),      // 22: core.iam.PutRoleResponse
+	(*empty.Empty)(nil),          // 23: google.protobuf.Empty
+	(*AttachRoleResponse)(nil),   // 24: core.iam.AttachRoleResponse
+	(*ListPolicyResponse)(nil),   // 25: core.iam.ListPolicyResponse
+	(*GetPolicyResponse)(nil),    // 26: core.iam.GetPolicyResponse
+	(*PutPolicyResponse)(nil),    // 27: core.iam.PutPolicyResponse
+	(*AttachPolicyResponse)(nil), // 28: core.iam.AttachPolicyResponse
 }
 var file_iam_service_proto_depIdxs = []int32{
-	4, // 0: core.iam.GetUserResponse.user:type_name -> core.iam.User
-	0, // 1: core.iam.IAMService.GetUser:input_type -> core.iam.GetUserRequest
-	2, // 2: core.iam.IAMService.IsAuthorized:input_type -> core.iam.IsAuthorizedRequest
-	1, // 3: core.iam.IAMService.GetUser:output_type -> core.iam.GetUserResponse
-	3, // 4: core.iam.IAMService.IsAuthorized:output_type -> core.iam.IsAuthorizedResponse
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	2,  // 0: core.iam.IAMService.ListUser:input_type -> core.iam.ListUserRequest
+	3,  // 1: core.iam.IAMService.GetUser:input_type -> core.iam.GetUserRequest
+	4,  // 2: core.iam.IAMService.PutUser:input_type -> core.iam.PutUserRequest
+	5,  // 3: core.iam.IAMService.ListRole:input_type -> core.iam.ListRoleRequest
+	6,  // 4: core.iam.IAMService.GetRole:input_type -> core.iam.GetRoleRequest
+	7,  // 5: core.iam.IAMService.PutRole:input_type -> core.iam.PutRoleRequest
+	8,  // 6: core.iam.IAMService.DeleteRole:input_type -> core.iam.DeleteRoleRequest
+	9,  // 7: core.iam.IAMService.AttachRole:input_type -> core.iam.AttachRoleRequest
+	10, // 8: core.iam.IAMService.DetachRole:input_type -> core.iam.DetachRoleRequest
+	11, // 9: core.iam.IAMService.ListPolicy:input_type -> core.iam.ListPolicyRequest
+	12, // 10: core.iam.IAMService.GetPolicy:input_type -> core.iam.GetPolicyRequest
+	13, // 11: core.iam.IAMService.PutPolicy:input_type -> core.iam.PutPolicyRequest
+	14, // 12: core.iam.IAMService.DeletePolicy:input_type -> core.iam.DeletePolicyRequest
+	15, // 13: core.iam.IAMService.AttachPolicy:input_type -> core.iam.AttachPolicyRequest
+	16, // 14: core.iam.IAMService.DetachPolicy:input_type -> core.iam.DetachPolicyRequest
+	0,  // 15: core.iam.IAMService.IsAuthorized:input_type -> core.iam.IsAuthorizedRequest
+	17, // 16: core.iam.IAMService.ListUser:output_type -> core.iam.ListUserResponse
+	18, // 17: core.iam.IAMService.GetUser:output_type -> core.iam.GetUserResponse
+	19, // 18: core.iam.IAMService.PutUser:output_type -> core.iam.PutUserResponse
+	20, // 19: core.iam.IAMService.ListRole:output_type -> core.iam.ListRoleResponse
+	21, // 20: core.iam.IAMService.GetRole:output_type -> core.iam.GetRoleResponse
+	22, // 21: core.iam.IAMService.PutRole:output_type -> core.iam.PutRoleResponse
+	23, // 22: core.iam.IAMService.DeleteRole:output_type -> google.protobuf.Empty
+	24, // 23: core.iam.IAMService.AttachRole:output_type -> core.iam.AttachRoleResponse
+	23, // 24: core.iam.IAMService.DetachRole:output_type -> google.protobuf.Empty
+	25, // 25: core.iam.IAMService.ListPolicy:output_type -> core.iam.ListPolicyResponse
+	26, // 26: core.iam.IAMService.GetPolicy:output_type -> core.iam.GetPolicyResponse
+	27, // 27: core.iam.IAMService.PutPolicy:output_type -> core.iam.PutPolicyResponse
+	23, // 28: core.iam.IAMService.DeletePolicy:output_type -> google.protobuf.Empty
+	28, // 29: core.iam.IAMService.AttachPolicy:output_type -> core.iam.AttachPolicyResponse
+	23, // 30: core.iam.IAMService.DetachPolicy:output_type -> google.protobuf.Empty
+	1,  // 31: core.iam.IAMService.IsAuthorized:output_type -> core.iam.IsAuthorizedResponse
+	16, // [16:32] is the sub-list for method output_type
+	0,  // [0:16] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_iam_service_proto_init() }
@@ -330,33 +337,11 @@ func file_iam_service_proto_init() {
 	if File_iam_service_proto != nil {
 		return
 	}
-	file_iam_entity_proto_init()
+	file_iam_user_proto_init()
+	file_iam_role_proto_init()
+	file_iam_policy_proto_init()
 	if !protoimpl.UnsafeEnabled {
 		file_iam_service_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetUserRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_iam_service_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetUserResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_iam_service_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*IsAuthorizedRequest); i {
 			case 0:
 				return &v.state
@@ -368,7 +353,7 @@ func file_iam_service_proto_init() {
 				return nil
 			}
 		}
-		file_iam_service_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_iam_service_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*IsAuthorizedResponse); i {
 			case 0:
 				return &v.state
@@ -387,7 +372,7 @@ func file_iam_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_iam_service_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -413,7 +398,24 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type IAMServiceClient interface {
+	// User
+	ListUser(ctx context.Context, in *ListUserRequest, opts ...grpc.CallOption) (*ListUserResponse, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
+	PutUser(ctx context.Context, in *PutUserRequest, opts ...grpc.CallOption) (*PutUserResponse, error)
+	// Role
+	ListRole(ctx context.Context, in *ListRoleRequest, opts ...grpc.CallOption) (*ListRoleResponse, error)
+	GetRole(ctx context.Context, in *GetRoleRequest, opts ...grpc.CallOption) (*GetRoleResponse, error)
+	PutRole(ctx context.Context, in *PutRoleRequest, opts ...grpc.CallOption) (*PutRoleResponse, error)
+	DeleteRole(ctx context.Context, in *DeleteRoleRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	AttachRole(ctx context.Context, in *AttachRoleRequest, opts ...grpc.CallOption) (*AttachRoleResponse, error)
+	DetachRole(ctx context.Context, in *DetachRoleRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// Policy
+	ListPolicy(ctx context.Context, in *ListPolicyRequest, opts ...grpc.CallOption) (*ListPolicyResponse, error)
+	GetPolicy(ctx context.Context, in *GetPolicyRequest, opts ...grpc.CallOption) (*GetPolicyResponse, error)
+	PutPolicy(ctx context.Context, in *PutPolicyRequest, opts ...grpc.CallOption) (*PutPolicyResponse, error)
+	DeletePolicy(ctx context.Context, in *DeletePolicyRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	AttachPolicy(ctx context.Context, in *AttachPolicyRequest, opts ...grpc.CallOption) (*AttachPolicyResponse, error)
+	DetachPolicy(ctx context.Context, in *DetachPolicyRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	// 認可（ユーザがリクエストしたアクションや、リソースに対しての認可を行います）
 	IsAuthorized(ctx context.Context, in *IsAuthorizedRequest, opts ...grpc.CallOption) (*IsAuthorizedResponse, error)
 }
@@ -426,9 +428,135 @@ func NewIAMServiceClient(cc grpc.ClientConnInterface) IAMServiceClient {
 	return &iAMServiceClient{cc}
 }
 
+func (c *iAMServiceClient) ListUser(ctx context.Context, in *ListUserRequest, opts ...grpc.CallOption) (*ListUserResponse, error) {
+	out := new(ListUserResponse)
+	err := c.cc.Invoke(ctx, "/core.iam.IAMService/ListUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *iAMServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
 	out := new(GetUserResponse)
 	err := c.cc.Invoke(ctx, "/core.iam.IAMService/GetUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *iAMServiceClient) PutUser(ctx context.Context, in *PutUserRequest, opts ...grpc.CallOption) (*PutUserResponse, error) {
+	out := new(PutUserResponse)
+	err := c.cc.Invoke(ctx, "/core.iam.IAMService/PutUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *iAMServiceClient) ListRole(ctx context.Context, in *ListRoleRequest, opts ...grpc.CallOption) (*ListRoleResponse, error) {
+	out := new(ListRoleResponse)
+	err := c.cc.Invoke(ctx, "/core.iam.IAMService/ListRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *iAMServiceClient) GetRole(ctx context.Context, in *GetRoleRequest, opts ...grpc.CallOption) (*GetRoleResponse, error) {
+	out := new(GetRoleResponse)
+	err := c.cc.Invoke(ctx, "/core.iam.IAMService/GetRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *iAMServiceClient) PutRole(ctx context.Context, in *PutRoleRequest, opts ...grpc.CallOption) (*PutRoleResponse, error) {
+	out := new(PutRoleResponse)
+	err := c.cc.Invoke(ctx, "/core.iam.IAMService/PutRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *iAMServiceClient) DeleteRole(ctx context.Context, in *DeleteRoleRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/core.iam.IAMService/DeleteRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *iAMServiceClient) AttachRole(ctx context.Context, in *AttachRoleRequest, opts ...grpc.CallOption) (*AttachRoleResponse, error) {
+	out := new(AttachRoleResponse)
+	err := c.cc.Invoke(ctx, "/core.iam.IAMService/AttachRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *iAMServiceClient) DetachRole(ctx context.Context, in *DetachRoleRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/core.iam.IAMService/DetachRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *iAMServiceClient) ListPolicy(ctx context.Context, in *ListPolicyRequest, opts ...grpc.CallOption) (*ListPolicyResponse, error) {
+	out := new(ListPolicyResponse)
+	err := c.cc.Invoke(ctx, "/core.iam.IAMService/ListPolicy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *iAMServiceClient) GetPolicy(ctx context.Context, in *GetPolicyRequest, opts ...grpc.CallOption) (*GetPolicyResponse, error) {
+	out := new(GetPolicyResponse)
+	err := c.cc.Invoke(ctx, "/core.iam.IAMService/GetPolicy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *iAMServiceClient) PutPolicy(ctx context.Context, in *PutPolicyRequest, opts ...grpc.CallOption) (*PutPolicyResponse, error) {
+	out := new(PutPolicyResponse)
+	err := c.cc.Invoke(ctx, "/core.iam.IAMService/PutPolicy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *iAMServiceClient) DeletePolicy(ctx context.Context, in *DeletePolicyRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/core.iam.IAMService/DeletePolicy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *iAMServiceClient) AttachPolicy(ctx context.Context, in *AttachPolicyRequest, opts ...grpc.CallOption) (*AttachPolicyResponse, error) {
+	out := new(AttachPolicyResponse)
+	err := c.cc.Invoke(ctx, "/core.iam.IAMService/AttachPolicy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *iAMServiceClient) DetachPolicy(ctx context.Context, in *DetachPolicyRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/core.iam.IAMService/DetachPolicy", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -446,7 +574,24 @@ func (c *iAMServiceClient) IsAuthorized(ctx context.Context, in *IsAuthorizedReq
 
 // IAMServiceServer is the server API for IAMService service.
 type IAMServiceServer interface {
+	// User
+	ListUser(context.Context, *ListUserRequest) (*ListUserResponse, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
+	PutUser(context.Context, *PutUserRequest) (*PutUserResponse, error)
+	// Role
+	ListRole(context.Context, *ListRoleRequest) (*ListRoleResponse, error)
+	GetRole(context.Context, *GetRoleRequest) (*GetRoleResponse, error)
+	PutRole(context.Context, *PutRoleRequest) (*PutRoleResponse, error)
+	DeleteRole(context.Context, *DeleteRoleRequest) (*empty.Empty, error)
+	AttachRole(context.Context, *AttachRoleRequest) (*AttachRoleResponse, error)
+	DetachRole(context.Context, *DetachRoleRequest) (*empty.Empty, error)
+	// Policy
+	ListPolicy(context.Context, *ListPolicyRequest) (*ListPolicyResponse, error)
+	GetPolicy(context.Context, *GetPolicyRequest) (*GetPolicyResponse, error)
+	PutPolicy(context.Context, *PutPolicyRequest) (*PutPolicyResponse, error)
+	DeletePolicy(context.Context, *DeletePolicyRequest) (*empty.Empty, error)
+	AttachPolicy(context.Context, *AttachPolicyRequest) (*AttachPolicyResponse, error)
+	DetachPolicy(context.Context, *DetachPolicyRequest) (*empty.Empty, error)
 	// 認可（ユーザがリクエストしたアクションや、リソースに対しての認可を行います）
 	IsAuthorized(context.Context, *IsAuthorizedRequest) (*IsAuthorizedResponse, error)
 }
@@ -455,8 +600,50 @@ type IAMServiceServer interface {
 type UnimplementedIAMServiceServer struct {
 }
 
+func (*UnimplementedIAMServiceServer) ListUser(context.Context, *ListUserRequest) (*ListUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUser not implemented")
+}
 func (*UnimplementedIAMServiceServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+}
+func (*UnimplementedIAMServiceServer) PutUser(context.Context, *PutUserRequest) (*PutUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PutUser not implemented")
+}
+func (*UnimplementedIAMServiceServer) ListRole(context.Context, *ListRoleRequest) (*ListRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRole not implemented")
+}
+func (*UnimplementedIAMServiceServer) GetRole(context.Context, *GetRoleRequest) (*GetRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRole not implemented")
+}
+func (*UnimplementedIAMServiceServer) PutRole(context.Context, *PutRoleRequest) (*PutRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PutRole not implemented")
+}
+func (*UnimplementedIAMServiceServer) DeleteRole(context.Context, *DeleteRoleRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteRole not implemented")
+}
+func (*UnimplementedIAMServiceServer) AttachRole(context.Context, *AttachRoleRequest) (*AttachRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AttachRole not implemented")
+}
+func (*UnimplementedIAMServiceServer) DetachRole(context.Context, *DetachRoleRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DetachRole not implemented")
+}
+func (*UnimplementedIAMServiceServer) ListPolicy(context.Context, *ListPolicyRequest) (*ListPolicyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPolicy not implemented")
+}
+func (*UnimplementedIAMServiceServer) GetPolicy(context.Context, *GetPolicyRequest) (*GetPolicyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPolicy not implemented")
+}
+func (*UnimplementedIAMServiceServer) PutPolicy(context.Context, *PutPolicyRequest) (*PutPolicyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PutPolicy not implemented")
+}
+func (*UnimplementedIAMServiceServer) DeletePolicy(context.Context, *DeletePolicyRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePolicy not implemented")
+}
+func (*UnimplementedIAMServiceServer) AttachPolicy(context.Context, *AttachPolicyRequest) (*AttachPolicyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AttachPolicy not implemented")
+}
+func (*UnimplementedIAMServiceServer) DetachPolicy(context.Context, *DetachPolicyRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DetachPolicy not implemented")
 }
 func (*UnimplementedIAMServiceServer) IsAuthorized(context.Context, *IsAuthorizedRequest) (*IsAuthorizedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IsAuthorized not implemented")
@@ -464,6 +651,24 @@ func (*UnimplementedIAMServiceServer) IsAuthorized(context.Context, *IsAuthorize
 
 func RegisterIAMServiceServer(s *grpc.Server, srv IAMServiceServer) {
 	s.RegisterService(&_IAMService_serviceDesc, srv)
+}
+
+func _IAMService_ListUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IAMServiceServer).ListUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.iam.IAMService/ListUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IAMServiceServer).ListUser(ctx, req.(*ListUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _IAMService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -480,6 +685,240 @@ func _IAMService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(IAMServiceServer).GetUser(ctx, req.(*GetUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IAMService_PutUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IAMServiceServer).PutUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.iam.IAMService/PutUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IAMServiceServer).PutUser(ctx, req.(*PutUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IAMService_ListRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IAMServiceServer).ListRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.iam.IAMService/ListRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IAMServiceServer).ListRole(ctx, req.(*ListRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IAMService_GetRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IAMServiceServer).GetRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.iam.IAMService/GetRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IAMServiceServer).GetRole(ctx, req.(*GetRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IAMService_PutRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IAMServiceServer).PutRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.iam.IAMService/PutRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IAMServiceServer).PutRole(ctx, req.(*PutRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IAMService_DeleteRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IAMServiceServer).DeleteRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.iam.IAMService/DeleteRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IAMServiceServer).DeleteRole(ctx, req.(*DeleteRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IAMService_AttachRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AttachRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IAMServiceServer).AttachRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.iam.IAMService/AttachRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IAMServiceServer).AttachRole(ctx, req.(*AttachRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IAMService_DetachRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DetachRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IAMServiceServer).DetachRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.iam.IAMService/DetachRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IAMServiceServer).DetachRole(ctx, req.(*DetachRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IAMService_ListPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IAMServiceServer).ListPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.iam.IAMService/ListPolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IAMServiceServer).ListPolicy(ctx, req.(*ListPolicyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IAMService_GetPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IAMServiceServer).GetPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.iam.IAMService/GetPolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IAMServiceServer).GetPolicy(ctx, req.(*GetPolicyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IAMService_PutPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutPolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IAMServiceServer).PutPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.iam.IAMService/PutPolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IAMServiceServer).PutPolicy(ctx, req.(*PutPolicyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IAMService_DeletePolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IAMServiceServer).DeletePolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.iam.IAMService/DeletePolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IAMServiceServer).DeletePolicy(ctx, req.(*DeletePolicyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IAMService_AttachPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AttachPolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IAMServiceServer).AttachPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.iam.IAMService/AttachPolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IAMServiceServer).AttachPolicy(ctx, req.(*AttachPolicyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IAMService_DetachPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DetachPolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IAMServiceServer).DetachPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.iam.IAMService/DetachPolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IAMServiceServer).DetachPolicy(ctx, req.(*DetachPolicyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -507,8 +946,64 @@ var _IAMService_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*IAMServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "ListUser",
+			Handler:    _IAMService_ListUser_Handler,
+		},
+		{
 			MethodName: "GetUser",
 			Handler:    _IAMService_GetUser_Handler,
+		},
+		{
+			MethodName: "PutUser",
+			Handler:    _IAMService_PutUser_Handler,
+		},
+		{
+			MethodName: "ListRole",
+			Handler:    _IAMService_ListRole_Handler,
+		},
+		{
+			MethodName: "GetRole",
+			Handler:    _IAMService_GetRole_Handler,
+		},
+		{
+			MethodName: "PutRole",
+			Handler:    _IAMService_PutRole_Handler,
+		},
+		{
+			MethodName: "DeleteRole",
+			Handler:    _IAMService_DeleteRole_Handler,
+		},
+		{
+			MethodName: "AttachRole",
+			Handler:    _IAMService_AttachRole_Handler,
+		},
+		{
+			MethodName: "DetachRole",
+			Handler:    _IAMService_DetachRole_Handler,
+		},
+		{
+			MethodName: "ListPolicy",
+			Handler:    _IAMService_ListPolicy_Handler,
+		},
+		{
+			MethodName: "GetPolicy",
+			Handler:    _IAMService_GetPolicy_Handler,
+		},
+		{
+			MethodName: "PutPolicy",
+			Handler:    _IAMService_PutPolicy_Handler,
+		},
+		{
+			MethodName: "DeletePolicy",
+			Handler:    _IAMService_DeletePolicy_Handler,
+		},
+		{
+			MethodName: "AttachPolicy",
+			Handler:    _IAMService_AttachPolicy_Handler,
+		},
+		{
+			MethodName: "DetachPolicy",
+			Handler:    _IAMService_DetachPolicy_Handler,
 		},
 		{
 			MethodName: "IsAuthorized",
