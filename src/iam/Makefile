@@ -14,12 +14,27 @@ help:
 list-service:
 	grpcurl -plaintext localhost:8082 list core.iam.IAMService
 
+.PHONY: list-user
+list-user:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "activated":"true", "name":"alice"}' \
+		localhost:8082 core.iam.IAMService.ListUser
+
 .PHONY: get-user
 get-user:
 	grpcurl \
 		-plaintext \
 		-d '{"user_id":1001, "sub":"alice"}' \
 		localhost:8082 core.iam.IAMService.GetUser
+
+.PHONY: put-user
+put-user:
+	grpcurl \
+		-plaintext \
+		-d '{"user": {"sub":"alice", "sub":"sub", "name":"name"}}' \
+		localhost:8082 core.iam.IAMService.PutUser
+
 
 .PHONY: is-authorized
 is-authorized:

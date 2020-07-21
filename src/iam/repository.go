@@ -11,8 +11,11 @@ import (
 )
 
 type iamRepoInterface interface {
+	ListUser(activated bool, projectID uint32, name string) (*[]model.User, error)
 	GetUser(uint32, string) (*model.User, error)
+	GetUserBySub(string) (*model.User, error)
 	GetUserPoicy(uint32) (*[]model.Policy, error)
+	PutUser(*model.User) (*model.User, error)
 }
 
 type iamRepository struct {
@@ -70,6 +73,32 @@ func initDB(isMaster bool) *gorm.DB {
 	return db
 }
 
+func (i *iamRepository) ListUser(activated bool, projectID uint32, name string) (*[]model.User, error) {
+	query := `
+select
+	u.*
+from
+	user u
+where
+	activated = ?
+`
+	var params []interface{}
+	params = append(params, fmt.Sprintf("%t", activated))
+	if !zero.IsZeroVal(projectID) {
+		query += " and exists (select * from user_role ur where ur.user_id = u.user_id and ur.project_id = ?)"
+		params = append(params, projectID)
+	}
+	if !zero.IsZeroVal(name) {
+		query += " and u.name = ?"
+		params = append(params, name)
+	}
+	var data []model.User
+	if err := i.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
 func (i *iamRepository) GetUser(userID uint32, sub string) (*model.User, error) {
 	query := `select * from	user where activated = 'true'`
 	var params []interface{}
@@ -83,6 +112,16 @@ func (i *iamRepository) GetUser(userID uint32, sub string) (*model.User, error) 
 	}
 	var data model.User
 	if err := i.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const selectGetUserBySub = `select * from user where sub = ?`
+
+func (i *iamRepository) GetUserBySub(sub string) (*model.User, error) {
+	var data model.User
+	if err := i.SlaveDB.Raw(selectGetUserBySub, sub).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -107,4 +146,25 @@ func (i *iamRepository) GetUserPoicy(userID uint32) (*[]model.Policy, error) {
 		return nil, err
 	}
 	return &data, nil
+}
+
+const insertPutUser = `
+INSERT INTO user
+	(user_id, sub, name, activated)
+VALUES
+	(?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+	name=VALUES(name),
+	activated=VALUES(activated)
+`
+
+func (i *iamRepository) PutUser(u *model.User) (*model.User, error) {
+	if err := i.MasterDB.Exec(insertPutUser, u.UserID, u.Sub, u.Name, fmt.Sprintf("%t", u.Activated)).Error; err != nil {
+		return nil, err
+	}
+	updated, err := i.GetUserBySub(u.Sub)
+	if err != nil {
+		return nil, err
+	}
+	return updated, nil
 }

@@ -2,8 +2,16 @@ cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200710085819-a1ab9df9ed23 h1:K38TJeUF2zHkQAMpPbTL8etqyD2Nb1tjf/zI+Vd4gAA=
 github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200710085819-a1ab9df9ed23/go.mod h1:ijekRVpmEnVlz3+T9PC4qHPu7woaUrznhwekKOV3jyY=
+github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200721021221-aa6b27f2288a h1:95eiUFKjPx2LZsbxMqaCqfEkAEpMqIq04YYOnbhdNys=
+github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200721021221-aa6b27f2288a/go.mod h1:ijekRVpmEnVlz3+T9PC4qHPu7woaUrznhwekKOV3jyY=
+github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200721064228-2df7fb58bac1 h1:5fUX6m5tcC2toakVcGyLklWAnHLKlrK7uXwUYpoS/Vo=
+github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200721064228-2df7fb58bac1/go.mod h1:ijekRVpmEnVlz3+T9PC4qHPu7woaUrznhwekKOV3jyY=
 github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20200710085819-a1ab9df9ed23 h1:z8mZ2t+2dc6TRNbJbWNtAM0bIca1L/umxe9a8QZt9Po=
 github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20200710085819-a1ab9df9ed23/go.mod h1:G0wI9XG7mhLG99b/iRRkefGrAXte0qg4eVJKfCVf8ls=
+github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20200721021221-aa6b27f2288a h1:eL/2nDYD/Y9or+70uDJkKpA+2e3pd+KiiY66rT/sQv0=
+github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20200721021221-aa6b27f2288a/go.mod h1:G0wI9XG7mhLG99b/iRRkefGrAXte0qg4eVJKfCVf8ls=
+github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20200721064228-2df7fb58bac1 h1:rA3+Bl+LxVY6ZSnk9wHPGhK1jKESIz0KTVCDZhpaGJk=
+github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20200721064228-2df7fb58bac1/go.mod h1:G0wI9XG7mhLG99b/iRRkefGrAXte0qg4eVJKfCVf8ls=
 github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 h1:zV3ejI06GQ59hwDQAvmK1qxOQGB3WuVTRoY0okPTAv0=
 github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496/go.mod h1:oGkLhpf+kjZl6xBf758TQhh5XrAeiJv/7FRz/2spLIg=
 github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535 h1:4daAzAu0S6Vi7/lbWECcX0j45yZReDZ56BQsrVBOEEY=
@@ -109,6 +117,8 @@ golang.org/x/sys v0.0.0-20190422165155-953cdadca894/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae h1:Ih9Yo4hSPImZOpfGuA4bR/ORKTAbhZo2AbWNRCnevdo=
 golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20200720211630-cb9d2d5c5666 h1:gVCS+QOncANNPlmlO1AhlU3oxs4V9z+gTtPwIk3p2N8=
+golang.org/x/sys v0.0.0-20200720211630-cb9d2d5c5666/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.3.0 h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.3 h1:cokOdA+Jmi5PJGXLlLllQSgYigAEfHXJAERHVMaCc2k=
@@ -130,6 +140,10 @@ google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 h1:+kGHl1aib/qcwaR
 google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013/go.mod h1:NbSheEEYHJ7i3ixzK3sjbqSGDJWnxyFXZblF3eUsNvo=
 google.golang.org/genproto v0.0.0-20200709005830-7a2ca40e9dc3 h1:JwLN1jVnmIsfE4HkDVe2AblFAbo0Z+4cjteDSOnv6oE=
 google.golang.org/genproto v0.0.0-20200709005830-7a2ca40e9dc3/go.mod h1:FWY/as6DDZQgahTzZj3fqbO1CbirC29ZNUFHwi0/+no=
+google.golang.org/genproto v0.0.0-20200720141249-1244ee217b7e h1:KoSCpgvphmtnpVycBCtfV9hNdHbInsqdx4gqnDPQCkg=
+google.golang.org/genproto v0.0.0-20200720141249-1244ee217b7e/go.mod h1:FWY/as6DDZQgahTzZj3fqbO1CbirC29ZNUFHwi0/+no=
+google.golang.org/genproto v0.0.0-20200721032028-5044d0edf986 h1:10ohwcLf82I55O/aQxYqmWKoOdNbQTYYComeP1KDOS4=
+google.golang.org/genproto v0.0.0-20200721032028-5044d0edf986/go.mod h1:FWY/as6DDZQgahTzZj3fqbO1CbirC29ZNUFHwi0/+no=
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.23.0/go.mod h1:Y5yQAOtifL1yxbo5wqy6BxZv8vAUGQwXBOALyacEbxg=
 google.golang.org/grpc v1.25.1/go.mod h1:c3i+UQWmh7LiEpx4sFZnkU36qjEYZ0imhYfXVyQciAY=
