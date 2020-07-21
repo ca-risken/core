@@ -12,7 +12,6 @@ import (
 // Validate ListUserRequest
 func (l *ListUserRequest) Validate() error {
 	return validation.ValidateStruct(l,
-		validation.Field(&l.ProjectId, validation.Required),
 		validation.Field(&l.Name, validation.Length(0, 64)),
 	)
 }
