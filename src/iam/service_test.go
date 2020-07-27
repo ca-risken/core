@@ -120,3 +120,31 @@ func (m *mockIAMRepository) PutUser(*model.User) (*model.User, error) {
 	args := m.Called()
 	return args.Get(0).(*model.User), args.Error(1)
 }
+func (m *mockIAMRepository) ListRole(uint32, string) (*[]model.Role, error) {
+	args := m.Called()
+	return args.Get(0).(*[]model.Role), args.Error(1)
+}
+func (m *mockIAMRepository) GetRole(uint32, uint32) (*model.Role, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Role), args.Error(1)
+}
+func (m *mockIAMRepository) GetRoleByName(uint32, string) (*model.Role, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Role), args.Error(1)
+}
+func (m *mockIAMRepository) PutRole(r *model.Role) (*model.Role, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Role), args.Error(1)
+}
+func (m *mockIAMRepository) DeleteRole(uint32, uint32) error {
+	args := m.Called()
+	return args.Error(0)
+}
+func (m *mockIAMRepository) AttachRole(uint32, uint32, uint32) (*model.UserRole, error) {
+	args := m.Called()
+	return args.Get(0).(*model.UserRole), args.Error(1)
+}
+func (m *mockIAMRepository) DetachRole(uint32, uint32, uint32) error {
+	args := m.Called()
+	return args.Error(0)
+}

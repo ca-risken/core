@@ -35,6 +35,47 @@ put-user:
 		-d '{"user": {"sub":"alice", "sub":"sub", "name":"name"}}' \
 		localhost:8002 core.iam.IAMService.PutUser
 
+.PHONY: list-role
+list-role:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "name":"admin-role"}' \
+		localhost:8002 core.iam.IAMService.ListRole
+
+.PHONY: get-role
+get-role:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "role_id":1001}' \
+		localhost:8002 core.iam.IAMService.GetRole
+
+.PHONY: put-role
+put-role:
+	grpcurl \
+		-plaintext \
+		-d '{"role":{"name":"test-role", "project_id":1001}}' \
+		localhost:8002 core.iam.IAMService.PutRole
+
+.PHONY: delete-role
+delete-role:
+	grpcurl \
+		-plaintext \
+		-d '{"role_id":1004, "project_id":1001}' \
+		localhost:8002 core.iam.IAMService.DeleteRole
+
+.PHONY: attach-role
+attach-role:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "role_id":1005, "user_id":1001}' \
+		localhost:8002 core.iam.IAMService.AttachRole
+
+.PHONY: detach-role
+detach-role:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "role_id":1005, "user_id":1001}' \
+		localhost:8002 core.iam.IAMService.DetachRole
 
 .PHONY: is-authorized
 is-authorized:

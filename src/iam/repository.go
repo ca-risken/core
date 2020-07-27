@@ -11,11 +11,21 @@ import (
 )
 
 type iamRepoInterface interface {
+	// User
 	ListUser(activated bool, projectID uint32, name string) (*[]model.User, error)
 	GetUser(uint32, string) (*model.User, error)
 	GetUserBySub(string) (*model.User, error)
 	GetUserPoicy(uint32) (*[]model.Policy, error)
 	PutUser(*model.User) (*model.User, error)
+
+	// Role
+	ListRole(uint32, string) (*[]model.Role, error)
+	GetRole(uint32, uint32) (*model.Role, error)
+	GetRoleByName(uint32, string) (*model.Role, error)
+	PutRole(r *model.Role) (*model.Role, error)
+	DeleteRole(uint32, uint32) error
+	AttachRole(uint32, uint32, uint32) (*model.UserRole, error)
+	DetachRole(uint32, uint32, uint32) error
 }
 
 type iamRepository struct {
@@ -111,7 +121,7 @@ func (i *iamRepository) GetUser(userID uint32, sub string) (*model.User, error) 
 		params = append(params, sub)
 	}
 	var data model.User
-	if err := i.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
+	if err := i.SlaveDB.Raw(query, params...).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -121,7 +131,7 @@ const selectGetUserBySub = `select * from user where sub = ?`
 
 func (i *iamRepository) GetUserBySub(sub string) (*model.User, error) {
 	var data model.User
-	if err := i.SlaveDB.Raw(selectGetUserBySub, sub).Scan(&data).Error; err != nil {
+	if err := i.SlaveDB.Raw(selectGetUserBySub, sub).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -150,12 +160,12 @@ func (i *iamRepository) GetUserPoicy(userID uint32) (*[]model.Policy, error) {
 
 const insertPutUser = `
 INSERT INTO user
-	(user_id, sub, name, activated)
+  (user_id, sub, name, activated)
 VALUES
-	(?, ?, ?, ?)
+  (?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
-	name=VALUES(name),
-	activated=VALUES(activated)
+  name=VALUES(name),
+  activated=VALUES(activated)
 `
 
 func (i *iamRepository) PutUser(u *model.User) (*model.User, error) {
@@ -167,4 +177,133 @@ func (i *iamRepository) PutUser(u *model.User) (*model.User, error) {
 		return nil, err
 	}
 	return updated, nil
+}
+
+func (i *iamRepository) ListRole(projectID uint32, name string) (*[]model.Role, error) {
+	query := `select * from role where project_id = ?`
+	var params []interface{}
+	params = append(params, projectID)
+	if !zero.IsZeroVal(name) {
+		query += " and name = ?"
+		params = append(params, name)
+	}
+	var data []model.Role
+	if err := i.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const selectGetRole = `select * from role where project_id = ? and role_id =?`
+
+func (i *iamRepository) GetRole(projectID, roleID uint32) (*model.Role, error) {
+	var data model.Role
+	if err := i.SlaveDB.Raw(selectGetRole, projectID, roleID).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const selectGetRoleByName = `select * from role where project_id = ? and name =?`
+
+func (i *iamRepository) GetRoleByName(projectID uint32, name string) (*model.Role, error) {
+	var data model.Role
+	if err := i.SlaveDB.Raw(selectGetRoleByName, projectID, name).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const insertPutRole = `
+INSERT INTO role
+  (role_id, name, project_id)
+VALUES
+  (?, ?, ?)
+ON DUPLICATE KEY UPDATE
+  name=VALUES(name),
+  project_id=VALUES(project_id)
+`
+
+func (i *iamRepository) PutRole(r *model.Role) (*model.Role, error) {
+	if err := i.MasterDB.Exec(insertPutRole, r.RoleID, r.Name, r.ProjectID).Error; err != nil {
+		return nil, err
+	}
+	updated, err := i.GetRoleByName(r.ProjectID, r.Name)
+	if err != nil {
+		return nil, err
+	}
+	return updated, nil
+}
+
+const deleteDeleteRole = `delete from role where project_id = ? and role_id = ?`
+
+func (i *iamRepository) DeleteRole(projectID, roleID uint32) error {
+	if err := i.MasterDB.Exec(deleteDeleteRole, projectID, roleID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+const selectGetUserRole = `select * from user_role where project_id = ? and user_id =? and role_id = ?`
+
+func (i *iamRepository) GetUserRole(projectID, userID, roleID uint32) (*model.UserRole, error) {
+	var data model.UserRole
+	if err := i.SlaveDB.Raw(selectGetUserRole, projectID, userID, roleID).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const insertAttachRole = `
+INSERT INTO user_role
+  (user_id, role_id, project_id)
+VALUES
+  (?, ?, ?)
+ON DUPLICATE KEY UPDATE
+  project_id=VALUES(project_id)
+`
+
+func (i *iamRepository) AttachRole(projectID, roleID, userID uint32) (*model.UserRole, error) {
+	if !i.userExists(userID) || !i.roleExists(projectID, roleID) {
+		return nil, fmt.Errorf(
+			"Not found user or role: user_id=%d, role_id=%d, project_id=%d", userID, roleID, projectID)
+	}
+	if err := i.MasterDB.Exec(insertAttachRole, userID, roleID, projectID).Error; err != nil {
+		return nil, err
+	}
+	return i.GetUserRole(projectID, userID, roleID)
+}
+
+const deleteDetachRole = `delete from user_role where user_id = ? and role_id = ? and project_id = ?`
+
+func (i *iamRepository) DetachRole(projectID, roleID, userID uint32) error {
+	if !i.userExists(userID) || !i.roleExists(projectID, roleID) {
+		return fmt.Errorf(
+			"Not found user or role: user_id=%d, role_id=%d, project_id=%d", userID, roleID, projectID)
+	}
+	if err := i.MasterDB.Exec(deleteDetachRole, userID, roleID, projectID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (i *iamRepository) userExists(userID uint32) bool {
+	if _, err := i.GetUser(userID, ""); gorm.IsRecordNotFoundError(err) {
+		return false
+
+	} else if err != nil {
+		appLogger.Errorf("[userExists]DB error: user_id=%d", userID)
+		return false
+	}
+	return true
+}
+
+func (i *iamRepository) roleExists(projectID, roleID uint32) bool {
+	if _, err := i.GetRole(projectID, roleID); gorm.IsRecordNotFoundError(err) {
+		return false
+	} else if err != nil {
+		appLogger.Errorf("[roleExists]DB error: project_id=%d, role_id=%d", projectID, roleID)
+		return false
+	}
+	return true
 }
