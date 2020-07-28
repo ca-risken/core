@@ -95,13 +95,13 @@ func initDB(isMaster bool) *gorm.DB {
 func (f *findingRepository) ListFinding(req *finding.ListFindingRequest) (*[]model.Finding, error) {
 	query := `
 select
-	*
+  *
 from
-	finding
+  finding
 where
   project_id = ?
-	and score between ? and ?
-	and updated_at between ? and ?
+  and score between ? and ?
+  and updated_at between ? and ?
 `
 	var params []interface{}
 	params = append(params, req.ProjectId, req.FromScore, req.ToScore, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
@@ -113,7 +113,6 @@ where
 		query += " and resource_name in (?)"
 		params = append(params, req.ResourceName)
 	}
-
 	var data []model.Finding
 	if err := f.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
@@ -133,16 +132,16 @@ func (f *findingRepository) GetFinding(projectID uint32, findingID uint64) (*mod
 
 const insertUpsertFinding = `
 INSERT INTO finding
-	(finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
 VALUES
-	(?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
-	description=VALUES(description),
-	resource_name=VALUES(resource_name),
-	project_id=VALUES(project_id),
-	original_score=VALUES(original_score),
-	score=VALUES(score),
-	data=VALUES(data)
+  description=VALUES(description),
+  resource_name=VALUES(resource_name),
+  project_id=VALUES(project_id),
+  original_score=VALUES(original_score),
+  score=VALUES(score),
+  data=VALUES(data)
 `
 
 func (f *findingRepository) UpsertFinding(data *model.Finding) (*model.Finding, error) {
@@ -151,12 +150,7 @@ func (f *findingRepository) UpsertFinding(data *model.Finding) (*model.Finding, 
 		data.ProjectID, data.OriginalScore, data.Score, data.Data).Error; err != nil {
 		return nil, err
 	}
-
-	updated, err := f.GetFindingByDataSource(data.ProjectID, data.DataSource, data.DataSourceID)
-	if err != nil {
-		return nil, err
-	}
-	return updated, nil
+	return f.GetFindingByDataSource(data.ProjectID, data.DataSource, data.DataSourceID)
 }
 
 const selectGetFindingByDataSource = `select * from finding where project_id = ? and data_source = ? and data_source_id = ?`
@@ -172,12 +166,12 @@ func (f *findingRepository) GetFindingByDataSource(projectID uint32, dataSource,
 
 const insertUpsertResource = `
 INSERT INTO resource
-	(resource_id, resource_name, project_id)
+  (resource_id, resource_name, project_id)
 VALUES
-	(?, ?, ?)
+  (?, ?, ?)
 ON DUPLICATE KEY UPDATE
-	resource_name=VALUES(resource_name),
-	project_id=VALUES(project_id);
+  resource_name=VALUES(resource_name),
+  project_id=VALUES(project_id);
 `
 
 func (f *findingRepository) UpsertResource(data *model.Resource) (*model.Resource, error) {
@@ -185,12 +179,7 @@ func (f *findingRepository) UpsertResource(data *model.Resource) (*model.Resourc
 		data.ResourceID, data.ResourceName, data.ProjectID).Error; err != nil {
 		return nil, err
 	}
-
-	updated, err := f.GetResourceByName(data.ProjectID, data.ResourceName)
-	if err != nil {
-		return nil, err
-	}
-	return updated, nil
+	return f.GetResourceByName(data.ProjectID, data.ResourceName)
 }
 
 const selectGetResourceByName = `select * from resource where project_id = ? and resource_name = ?`
@@ -209,19 +198,13 @@ func (f *findingRepository) DeleteFinding(projectID uint32, findingID uint64) er
 	if err := f.MasterDB.Exec(deleteDeleteFinding, projectID, findingID).Error; err != nil {
 		return err
 	}
-	if err := f.DeleteTagByFindingID(projectID, findingID); err != nil {
-		return err
-	}
-	return nil
+	return f.DeleteTagByFindingID(projectID, findingID)
 }
 
 const deleteDeleteTagByFindingID = `delete from finding_tag where project_id = ? and finding_id = ?`
 
 func (f *findingRepository) DeleteTagByFindingID(projectID uint32, findingID uint64) error {
-	if err := f.MasterDB.Exec(deleteDeleteTagByFindingID, projectID, findingID).Error; err != nil {
-		return err
-	}
-	return nil
+	return f.MasterDB.Exec(deleteDeleteTagByFindingID, projectID, findingID).Error
 }
 
 const selectListFindingTag = `select * from finding_tag where project_id = ? and finding_id = ?`
@@ -236,11 +219,11 @@ func (f *findingRepository) ListFindingTag(projectID uint32, findingID uint64) (
 
 const insertTagFinding = `
 INSERT INTO finding_tag
-	(finding_tag_id, finding_id, project_id, tag_key, tag_value)
+  (finding_tag_id, finding_id, project_id, tag_key, tag_value)
 VALUES
-	(?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
-	tag_value=VALUES(tag_value)
+  tag_value=VALUES(tag_value)
 `
 
 func (f *findingRepository) TagFinding(tag *model.FindingTag) (*model.FindingTag, error) {
@@ -248,11 +231,7 @@ func (f *findingRepository) TagFinding(tag *model.FindingTag) (*model.FindingTag
 		tag.FindingTagID, tag.FindingID, tag.ProjectID, tag.TagKey, tag.TagValue).Error; err != nil {
 		return nil, err
 	}
-	updated, err := f.GetFindingTagByKey(tag.ProjectID, tag.FindingID, tag.TagKey)
-	if err != nil {
-		return nil, err
-	}
-	return updated, err
+	return f.GetFindingTagByKey(tag.ProjectID, tag.FindingID, tag.TagKey)
 }
 
 const selectGetFindingTagByKey = `select * from finding_tag where project_id = ? and finding_id = ? and tag_key = ?`
@@ -278,10 +257,7 @@ func (f *findingRepository) GetFindingTagByID(projectID uint32, findingTagID uin
 const deleteUntagFinding = `delete from finding_tag where project_id = ? and finding_tag_id = ?`
 
 func (f *findingRepository) UntagFinding(projectID uint32, findingTagID uint64) error {
-	if err := f.MasterDB.Exec(deleteUntagFinding, projectID, findingTagID).Error; err != nil {
-		return err
-	}
-	return nil
+	return f.MasterDB.Exec(deleteUntagFinding, projectID, findingTagID).Error
 }
 
 func (f *findingRepository) ListResource(req *finding.ListResourceRequest) (*[]model.Resource, error) {
@@ -293,7 +269,7 @@ from
   left outer join finding f using(resource_name)
 where
   r.project_id = ?
-	and r.updated_at between ? and ?
+  and r.updated_at between ? and ?
 `
 	var params []interface{}
 	params = append(params, req.ProjectId, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
@@ -327,19 +303,13 @@ func (f *findingRepository) DeleteResource(projectID uint32, resourceID uint64) 
 	if err := f.MasterDB.Exec(deleteDeleteResource, projectID, resourceID).Error; err != nil {
 		return err
 	}
-	if err := f.DeleteTagByResourceID(projectID, resourceID); err != nil {
-		return err
-	}
-	return nil
+	return f.DeleteTagByResourceID(projectID, resourceID)
 }
 
 const deleteDeleteTagByResourceID = `delete from resource_tag where project_id = ? and resource_id = ?`
 
 func (f *findingRepository) DeleteTagByResourceID(projectID uint32, resourceID uint64) error {
-	if err := f.MasterDB.Exec(deleteDeleteTagByResourceID, projectID, resourceID).Error; err != nil {
-		return err
-	}
-	return nil
+	return f.MasterDB.Exec(deleteDeleteTagByResourceID, projectID, resourceID).Error
 }
 
 const selectListResourceTag = `select * from resource_tag where project_id = ? and resource_id = ?`
@@ -374,11 +344,11 @@ func (f *findingRepository) GetResourceTagByID(projectID uint32, resourceID uint
 
 const insertTagResource = `
 INSERT INTO resource_tag
-	(resource_tag_id, resource_id, project_id, tag_key, tag_value)
+  (resource_tag_id, resource_id, project_id, tag_key, tag_value)
 VALUES
-	(?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
-	tag_value=VALUES(tag_value)
+  tag_value=VALUES(tag_value)
 `
 
 func (f *findingRepository) TagResource(tag *model.ResourceTag) (*model.ResourceTag, error) {
@@ -386,18 +356,11 @@ func (f *findingRepository) TagResource(tag *model.ResourceTag) (*model.Resource
 		tag.ResourceTagID, tag.ResourceID, tag.ProjectID, tag.TagKey, tag.TagValue).Error; err != nil {
 		return nil, err
 	}
-	updated, err := f.GetResourceTagByKey(tag.ProjectID, tag.ResourceID, tag.TagKey)
-	if err != nil {
-		return nil, err
-	}
-	return updated, err
+	return f.GetResourceTagByKey(tag.ProjectID, tag.ResourceID, tag.TagKey)
 }
 
 const deleteUntagResource = `delete from resource_tag where project_id = ? and resource_tag_id = ?`
 
 func (f *findingRepository) UntagResource(projectID uint32, resourceTagID uint64) error {
-	if err := f.MasterDB.Exec(deleteUntagResource, projectID, resourceTagID).Error; err != nil {
-		return err
-	}
-	return nil
+	return f.MasterDB.Exec(deleteUntagResource, projectID, resourceTagID).Error
 }
