@@ -155,13 +155,13 @@ func TestPutRole(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:       "NG DB error(GetUserBySub)",
+			name:       "NG DB error(GetRoleByName)",
 			input:      &iam.PutRoleRequest{Role: &iam.RoleForUpsert{Name: "nm", ProjectId: 123}},
 			mockGetErr: gorm.ErrInvalidTransaction,
 			wantErr:    true,
 		},
 		{
-			name:       "NG DB error(PutUser)",
+			name:       "NG DB error(PutRole)",
 			input:      &iam.PutRoleRequest{Role: &iam.RoleForUpsert{Name: "nm", ProjectId: 123}},
 			mockGetErr: gorm.ErrRecordNotFound,
 			mockUpdErr: gorm.ErrInvalidTransaction,
@@ -209,7 +209,7 @@ func TestDeleteRole(t *testing.T) {
 		},
 		{
 			name:    "NG DB error",
-			input:   &iam.DeleteRoleRequest{ProjectId: 1},
+			input:   &iam.DeleteRoleRequest{ProjectId: 1, RoleId: 1},
 			wantErr: true,
 			mockErr: gorm.ErrCantStartTransaction,
 		},

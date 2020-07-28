@@ -148,3 +148,31 @@ func (m *mockIAMRepository) DetachRole(uint32, uint32, uint32) error {
 	args := m.Called()
 	return args.Error(0)
 }
+func (m *mockIAMRepository) ListPolicy(uint32, string) (*[]model.Policy, error) {
+	args := m.Called()
+	return args.Get(0).(*[]model.Policy), args.Error(1)
+}
+func (m *mockIAMRepository) GetPolicy(uint32, uint32) (*model.Policy, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Policy), args.Error(1)
+}
+func (m *mockIAMRepository) GetPolicyByName(uint32, string) (*model.Policy, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Policy), args.Error(1)
+}
+func (m *mockIAMRepository) PutPolicy(*model.Policy) (*model.Policy, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Policy), args.Error(1)
+}
+func (m *mockIAMRepository) DeletePolicy(uint32, uint32) error {
+	args := m.Called()
+	return args.Error(0)
+}
+func (m *mockIAMRepository) AttachPolicy(uint32, uint32, uint32) (*model.RolePolicy, error) {
+	args := m.Called()
+	return args.Get(0).(*model.RolePolicy), args.Error(1)
+}
+func (m *mockIAMRepository) DetachPolicy(uint32, uint32, uint32) error {
+	args := m.Called()
+	return args.Error(0)
+}

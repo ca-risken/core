@@ -21,8 +21,8 @@ func (i *iamService) ListRole(ctx context.Context, req *iam.ListRoleRequest) (*i
 		return nil, err
 	}
 	ids := []uint32{}
-	for _, u := range *list {
-		ids = append(ids, u.RoleID)
+	for _, r := range *list {
+		ids = append(ids, r.RoleID)
 	}
 	return &iam.ListRoleResponse{RoleId: ids}, nil
 }

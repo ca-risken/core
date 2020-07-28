@@ -14,6 +14,13 @@ help:
 list-service:
 	grpcurl -plaintext localhost:8002 list core.iam.IAMService
 
+.PHONY: is-authorized
+is-authorized:
+	grpcurl \
+		-plaintext \
+		-d '{"user_id":1001, "project_id":1001, "action_name":"finding/GetFinding", "resource_name":"aws:guardduty/s3-bucket-name"}' \
+		localhost:8002 core.iam.IAMService.IsAuthorized
+
 .PHONY: list-user
 list-user:
 	grpcurl \
@@ -77,9 +84,44 @@ detach-role:
 		-d '{"project_id":1001, "role_id":1005, "user_id":1001}' \
 		localhost:8002 core.iam.IAMService.DetachRole
 
-.PHONY: is-authorized
-is-authorized:
+.PHONY: list-policy
+list-policy:
 	grpcurl \
 		-plaintext \
-		-d '{"user_id":1001, "project_id":1001, "action_name":"finding/GetFinding", "resource_name":"aws:guardduty/s3-bucket-name"}' \
-		localhost:8002 core.iam.IAMService.IsAuthorized
+		-d '{"project_id":1001, "name":"admin-policy"}' \
+		localhost:8002 core.iam.IAMService.ListPolicy
+
+.PHONY: get-policy
+get-policy:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "policy_id":1001}' \
+		localhost:8002 core.iam.IAMService.GetPolicy
+
+.PHONY: put-policy
+put-policy:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "policy":{"name":"test-policy", "project_id":1001, "action_ptn":".*", "resource_ptn":".*"}}' \
+		localhost:8002 core.iam.IAMService.PutPolicy
+
+.PHONY: delete-policy
+delete-policy:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "policy_id":1004}' \
+		localhost:8002 core.iam.IAMService.DeletePolicy
+
+.PHONY: attach-policy
+attach-policy:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "role_id":1001, "policy_id":1005}' \
+		localhost:8002 core.iam.IAMService.AttachPolicy
+ 
+.PHONY: detach-policy
+detach-policy:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "role_id":1001, "policy_id":1005}' \
+		localhost:8002 core.iam.IAMService.DetachPolicy
