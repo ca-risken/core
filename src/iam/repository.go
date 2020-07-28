@@ -7,12 +7,33 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"github.com/kelseyhightower/envconfig"
-	"github.com/vikyd/zero"
 )
 
 type iamRepoInterface interface {
+	// User
+	ListUser(activated bool, projectID uint32, name string) (*[]model.User, error)
 	GetUser(uint32, string) (*model.User, error)
+	GetUserBySub(string) (*model.User, error)
 	GetUserPoicy(uint32) (*[]model.Policy, error)
+	PutUser(*model.User) (*model.User, error)
+
+	// Role
+	ListRole(uint32, string) (*[]model.Role, error)
+	GetRole(uint32, uint32) (*model.Role, error)
+	GetRoleByName(uint32, string) (*model.Role, error)
+	PutRole(r *model.Role) (*model.Role, error)
+	DeleteRole(uint32, uint32) error
+	AttachRole(uint32, uint32, uint32) (*model.UserRole, error)
+	DetachRole(uint32, uint32, uint32) error
+
+	// Policy
+	ListPolicy(uint32, string) (*[]model.Policy, error)
+	GetPolicy(uint32, uint32) (*model.Policy, error)
+	GetPolicyByName(uint32, string) (*model.Policy, error)
+	PutPolicy(*model.Policy) (*model.Policy, error)
+	DeletePolicy(uint32, uint32) error
+	AttachPolicy(uint32, uint32, uint32) (*model.RolePolicy, error)
+	DetachPolicy(uint32, uint32, uint32) error
 }
 
 type iamRepository struct {
@@ -70,41 +91,33 @@ func initDB(isMaster bool) *gorm.DB {
 	return db
 }
 
-func (i *iamRepository) GetUser(userID uint32, sub string) (*model.User, error) {
-	query := `select * from	user where activated = 'true'`
-	var params []interface{}
-	if !zero.IsZeroVal(userID) {
-		query += " and user_id = ?"
-		params = append(params, userID)
+func (i *iamRepository) userExists(userID uint32) bool {
+	if _, err := i.GetUser(userID, ""); gorm.IsRecordNotFoundError(err) {
+		return false
+
+	} else if err != nil {
+		appLogger.Errorf("[userExists]DB error: user_id=%d", userID)
+		return false
 	}
-	if !zero.IsZeroVal(sub) {
-		query += " and sub = ?"
-		params = append(params, sub)
-	}
-	var data model.User
-	if err := i.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
+	return true
 }
 
-const selectGetUserPolicy = `
-select
-	p.* 
-from
-	user u
-	inner join user_role ur using(user_id)
-	inner join role_policy rp using(role_id)
-	inner join policy p using(policy_id) 
-where
-	u.activated = 'true'
-	and u.user_id = ?
-`
-
-func (i *iamRepository) GetUserPoicy(userID uint32) (*[]model.Policy, error) {
-	var data []model.Policy
-	if err := i.SlaveDB.Raw(selectGetUserPolicy, userID).Scan(&data).Error; err != nil {
-		return nil, err
+func (i *iamRepository) roleExists(projectID, roleID uint32) bool {
+	if _, err := i.GetRole(projectID, roleID); gorm.IsRecordNotFoundError(err) {
+		return false
+	} else if err != nil {
+		appLogger.Errorf("[roleExists]DB error: project_id=%d, role_id=%d", projectID, roleID)
+		return false
 	}
-	return &data, nil
+	return true
+}
+
+func (i *iamRepository) policyExists(projectID, policyID uint32) bool {
+	if _, err := i.GetPolicy(projectID, policyID); gorm.IsRecordNotFoundError(err) {
+		return false
+	} else if err != nil {
+		appLogger.Errorf("[policyExists]DB error: project_id=%d, policy_id=%d", projectID, policyID)
+		return false
+	}
+	return true
 }

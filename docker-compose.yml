@@ -13,7 +13,7 @@ services:
     depends_on:
       - iam
     environment:
-      - PORT=8081
+      - PORT=8001
       - DB_MASTER_HOST=${DB_MASTER_HOST}
       - DB_MASTER_USER=${DB_MASTER_USER}
       - DB_MASTER_PASSWORD=${DB_MASTER_PASSWORD}
@@ -24,7 +24,7 @@ services:
       - DB_SCHEMA=mimosa
       - DB_LOG_MODE=${DB_LOG_MODE}
     ports:
-      - "8081:8081" # docker-compose外にexposeする必要はないので本来は"8081"だが、grpcurlなどのDebug目的でhost側のportも開放
+      - "8001:8001" # docker-compose外にexposeする必要はないので本来は"8001"だが、grpcurlなどのDebug目的でhost側のportも開放
 
   iam:
     networks:
@@ -36,7 +36,7 @@ services:
         - GITHUB_USER=${GITHUB_USER}
         - GITHUB_TOKEN=${GITHUB_TOKEN}
     environment:
-      - PORT=8082
+      - PORT=8002
       - DB_MASTER_HOST=${DB_MASTER_HOST}
       - DB_MASTER_USER=${DB_MASTER_USER}
       - DB_MASTER_PASSWORD=${DB_MASTER_PASSWORD}
@@ -47,7 +47,7 @@ services:
       - DB_SCHEMA=mimosa
       - DB_LOG_MODE=${DB_LOG_MODE}
     ports:
-      - "8082:8082" # docker-compose外にexposeする必要はないので本来は"8081"だが、grpcurlなどのDebug目的でhost側のportも開放
+      - "8002:8002" # docker-compose外にexposeする必要はないので本来は"8002"だが、grpcurlなどのDebug目的でhost側のportも開放
 
 networks:
   core:
