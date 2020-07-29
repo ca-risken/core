@@ -89,6 +89,20 @@
     - [PutUserRequest](#core.iam.PutUserRequest)
     - [PutUserResponse](#core.iam.PutUserResponse)
   
+- [project/entity.proto](#project/entity.proto)
+    - [Project](#core.project.Project)
+  
+- [project/service.proto](#project/service.proto)
+    - [CreateProjectRequest](#core.project.CreateProjectRequest)
+    - [CreateProjectResponse](#core.project.CreateProjectResponse)
+    - [DeleteProjectRequest](#core.project.DeleteProjectRequest)
+    - [ListProjectRequest](#core.project.ListProjectRequest)
+    - [ListProjectResponse](#core.project.ListProjectResponse)
+    - [UpdateProjectRequest](#core.project.UpdateProjectRequest)
+    - [UpdateProjectResponse](#core.project.UpdateProjectResponse)
+  
+    - [ProjectService](#core.project.ProjectService)
+  
 - [Scalar Value Types](#scalar-value-types)
 
 
@@ -1389,6 +1403,178 @@ IsAuthorizedRequest
  
 
  
+
+ 
+
+
+
+<a name="project/entity.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## project/entity.proto
+
+
+
+<a name="core.project.Project"></a>
+
+### Project
+Project
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| name | [string](#string) |  |  |
+| created_at | [int64](#int64) |  |  |
+| updated_at | [int64](#int64) |  |  |
+
+
+
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+<a name="project/service.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## project/service.proto
+
+
+
+<a name="core.project.CreateProjectRequest"></a>
+
+### CreateProjectRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| user_id | [uint32](#uint32) |  | project owner |
+| name | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="core.project.CreateProjectResponse"></a>
+
+### CreateProjectResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project | [Project](#core.project.Project) |  |  |
+
+
+
+
+
+
+<a name="core.project.DeleteProjectRequest"></a>
+
+### DeleteProjectRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="core.project.ListProjectRequest"></a>
+
+### ListProjectRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| user_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
+| name | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="core.project.ListProjectResponse"></a>
+
+### ListProjectResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project | [Project](#core.project.Project) | repeated |  |
+
+
+
+
+
+
+<a name="core.project.UpdateProjectRequest"></a>
+
+### UpdateProjectRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| name | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="core.project.UpdateProjectResponse"></a>
+
+### UpdateProjectResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project | [Project](#core.project.Project) |  |  |
+
+
+
+
+
+ 
+
+ 
+
+ 
+
+
+<a name="core.project.ProjectService"></a>
+
+### ProjectService
+
+
+| Method Name | Request Type | Response Type | Description |
+| ----------- | ------------ | ------------- | ------------|
+| ListProject | [ListProjectRequest](#core.project.ListProjectRequest) | [ListProjectResponse](#core.project.ListProjectResponse) | project |
+| CreateProject | [CreateProjectRequest](#core.project.CreateProjectRequest) | [CreateProjectResponse](#core.project.CreateProjectResponse) |  |
+| UpdateProject | [UpdateProjectRequest](#core.project.UpdateProjectRequest) | [UpdateProjectResponse](#core.project.UpdateProjectResponse) |  |
+| DeleteProject | [DeleteProjectRequest](#core.project.DeleteProjectRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 
  
 

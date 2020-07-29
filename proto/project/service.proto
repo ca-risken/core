@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package core.project;
+option go_package = "github.com/CyberAgent/mimosa-core/proto/project";
+
+import "google/protobuf/empty.proto";
+import "project/entity.proto";
+
+service ProjectService {
+  // project
+  rpc ListProject(ListProjectRequest) returns (ListProjectResponse);
+  rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse);
+  rpc UpdateProject(UpdateProjectRequest) returns (UpdateProjectResponse);
+  rpc DeleteProject(DeleteProjectRequest) returns (google.protobuf.Empty);
+}
+
+message ListProjectRequest {
+  uint32 user_id = 1;
+  uint32 project_id = 2;
+  string name = 3;
+}
+
+message ListProjectResponse { repeated Project project = 1; }
+
+message CreateProjectRequest {
+  uint32 user_id = 1; // project owner
+  string name = 2;
+}
+
+message CreateProjectResponse { Project project = 1; }
+
+message UpdateProjectRequest {
+  uint32 project_id = 1;
+  string name = 2;
+}
+
+message UpdateProjectResponse { Project project = 1; }
+
+message DeleteProjectRequest { uint32 project_id = 1; }

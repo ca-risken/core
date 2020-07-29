@@ -39,8 +39,16 @@ build: fmt
 go-test: build
 	cd proto/finding && go test ./...
 	cd proto/iam     && go test ./...
+	cd proto/project && go test ./...
 	cd src/finding   && go test ./...
 	cd src/iam       && go test ./...
+
+go-mod-tidy: build
+	cd proto/finding && go mod tidy
+	cd proto/iam     && go mod tidy
+	cd proto/project && go mod tidy
+	cd src/finding   && go mod tidy
+	cd src/iam       && go mod tidy
 
 go-mod-update:
 	cd src/finding \
@@ -51,12 +59,6 @@ go-mod-update:
 		&& go get -u \
 			github.com/CyberAgent/mimosa-core/proto/iam \
 			github.com/CyberAgent/mimosa-core/pkg/model
-
-go-mod-tidy: build
-	cd proto/finding && go mod tidy
-	cd proto/iam     && go mod tidy
-	cd src/finding   && go mod tidy
-	cd src/iam       && go mod tidy
 
 run: go-test network
 	. env.sh && docker-compose up -d --build
