@@ -11,7 +11,7 @@ import (
 )
 
 type iamConf struct {
-	Port string `default:"8082"`
+	Port string `default:"8002"`
 }
 
 func main() {

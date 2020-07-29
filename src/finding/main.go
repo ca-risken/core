@@ -11,7 +11,7 @@ import (
 )
 
 type findingConf struct {
-	Port string `default:"8081"`
+	Port string `default:"8001"`
 }
 
 func main() {

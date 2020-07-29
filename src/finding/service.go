@@ -5,7 +5,7 @@ import (
 )
 
 type findingService struct {
-	repository findingRepoInterface
+	repository findingRepository
 }
 
 func newFindingService() finding.FindingServiceServer {

@@ -7,7 +7,7 @@ import (
 	"github.com/vikyd/zero"
 )
 
-func (i *iamRepository) ListRole(projectID uint32, name string) (*[]model.Role, error) {
+func (i *iamDB) ListRole(projectID uint32, name string) (*[]model.Role, error) {
 	query := `select * from role where project_id = ?`
 	var params []interface{}
 	params = append(params, projectID)
@@ -24,7 +24,7 @@ func (i *iamRepository) ListRole(projectID uint32, name string) (*[]model.Role, 
 
 const selectGetRole = `select * from role where project_id = ? and role_id =?`
 
-func (i *iamRepository) GetRole(projectID, roleID uint32) (*model.Role, error) {
+func (i *iamDB) GetRole(projectID, roleID uint32) (*model.Role, error) {
 	var data model.Role
 	if err := i.SlaveDB.Raw(selectGetRole, projectID, roleID).First(&data).Error; err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func (i *iamRepository) GetRole(projectID, roleID uint32) (*model.Role, error) {
 
 const selectGetRoleByName = `select * from role where project_id = ? and name =?`
 
-func (i *iamRepository) GetRoleByName(projectID uint32, name string) (*model.Role, error) {
+func (i *iamDB) GetRoleByName(projectID uint32, name string) (*model.Role, error) {
 	var data model.Role
 	if err := i.SlaveDB.Raw(selectGetRoleByName, projectID, name).First(&data).Error; err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ ON DUPLICATE KEY UPDATE
   project_id=VALUES(project_id)
 `
 
-func (i *iamRepository) PutRole(r *model.Role) (*model.Role, error) {
+func (i *iamDB) PutRole(r *model.Role) (*model.Role, error) {
 	if err := i.MasterDB.Exec(insertPutRole, r.RoleID, r.Name, r.ProjectID).Error; err != nil {
 		return nil, err
 	}
@@ -61,13 +61,13 @@ func (i *iamRepository) PutRole(r *model.Role) (*model.Role, error) {
 
 const deleteDeleteRole = `delete from role where project_id = ? and role_id = ?`
 
-func (i *iamRepository) DeleteRole(projectID, roleID uint32) error {
+func (i *iamDB) DeleteRole(projectID, roleID uint32) error {
 	return i.MasterDB.Exec(deleteDeleteRole, projectID, roleID).Error
 }
 
 const selectGetUserRole = `select * from user_role where project_id = ? and user_id =? and role_id = ?`
 
-func (i *iamRepository) GetUserRole(projectID, userID, roleID uint32) (*model.UserRole, error) {
+func (i *iamDB) GetUserRole(projectID, userID, roleID uint32) (*model.UserRole, error) {
 	var data model.UserRole
 	if err := i.SlaveDB.Raw(selectGetUserRole, projectID, userID, roleID).First(&data).Error; err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ ON DUPLICATE KEY UPDATE
   project_id=VALUES(project_id)
 `
 
-func (i *iamRepository) AttachRole(projectID, roleID, userID uint32) (*model.UserRole, error) {
+func (i *iamDB) AttachRole(projectID, roleID, userID uint32) (*model.UserRole, error) {
 	if !i.userExists(userID) || !i.roleExists(projectID, roleID) {
 		return nil, fmt.Errorf(
 			"Not found user or role: user_id=%d, role_id=%d, project_id=%d", userID, roleID, projectID)
@@ -97,7 +97,7 @@ func (i *iamRepository) AttachRole(projectID, roleID, userID uint32) (*model.Use
 
 const deleteDetachRole = `delete from user_role where user_id = ? and role_id = ? and project_id = ?`
 
-func (i *iamRepository) DetachRole(projectID, roleID, userID uint32) error {
+func (i *iamDB) DetachRole(projectID, roleID, userID uint32) error {
 	if !i.userExists(userID) || !i.roleExists(projectID, roleID) {
 		return fmt.Errorf(
 			"Not found user or role: user_id=%d, role_id=%d, project_id=%d", userID, roleID, projectID)

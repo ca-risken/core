@@ -9,7 +9,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-type iamRepoInterface interface {
+type iamRepository interface {
 	// User
 	ListUser(activated bool, projectID uint32, name string) (*[]model.User, error)
 	GetUser(uint32, string) (*model.User, error)
@@ -36,13 +36,13 @@ type iamRepoInterface interface {
 	DetachPolicy(uint32, uint32, uint32) error
 }
 
-type iamRepository struct {
+type iamDB struct {
 	MasterDB *gorm.DB
 	SlaveDB  *gorm.DB
 }
 
-func newIAMRepository() iamRepoInterface {
-	return &iamRepository{
+func newIAMRepository() iamRepository {
+	return &iamDB{
 		MasterDB: initDB(true),
 		SlaveDB:  initDB(false),
 	}
@@ -91,7 +91,7 @@ func initDB(isMaster bool) *gorm.DB {
 	return db
 }
 
-func (i *iamRepository) userExists(userID uint32) bool {
+func (i *iamDB) userExists(userID uint32) bool {
 	if _, err := i.GetUser(userID, ""); gorm.IsRecordNotFoundError(err) {
 		return false
 
@@ -102,7 +102,7 @@ func (i *iamRepository) userExists(userID uint32) bool {
 	return true
 }
 
-func (i *iamRepository) roleExists(projectID, roleID uint32) bool {
+func (i *iamDB) roleExists(projectID, roleID uint32) bool {
 	if _, err := i.GetRole(projectID, roleID); gorm.IsRecordNotFoundError(err) {
 		return false
 	} else if err != nil {
@@ -112,7 +112,7 @@ func (i *iamRepository) roleExists(projectID, roleID uint32) bool {
 	return true
 }
 
-func (i *iamRepository) policyExists(projectID, policyID uint32) bool {
+func (i *iamDB) policyExists(projectID, policyID uint32) bool {
 	if _, err := i.GetPolicy(projectID, policyID); gorm.IsRecordNotFoundError(err) {
 		return false
 	} else if err != nil {
