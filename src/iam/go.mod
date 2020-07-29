@@ -5,7 +5,6 @@ go 1.13
 require (
 	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20200721064228-2df7fb58bac1
 	github.com/CyberAgent/mimosa-core/proto/iam v0.0.0-20200721064228-2df7fb58bac1
-	github.com/aws/aws-sdk-go v1.33.9 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/protobuf v1.4.2
 	github.com/jinzhu/gorm v1.9.13
