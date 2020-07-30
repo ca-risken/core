@@ -7,7 +7,7 @@ import (
 	"github.com/vikyd/zero"
 )
 
-func (i *iamRepository) ListUser(activated bool, projectID uint32, name string) (*[]model.User, error) {
+func (i *iamDB) ListUser(activated bool, projectID uint32, name string) (*[]model.User, error) {
 	query := `
 select
   u.*
@@ -33,7 +33,7 @@ where
 	return &data, nil
 }
 
-func (i *iamRepository) GetUser(userID uint32, sub string) (*model.User, error) {
+func (i *iamDB) GetUser(userID uint32, sub string) (*model.User, error) {
 	query := `select * from	user where activated = 'true'`
 	var params []interface{}
 	if !zero.IsZeroVal(userID) {
@@ -53,7 +53,7 @@ func (i *iamRepository) GetUser(userID uint32, sub string) (*model.User, error) 
 
 const selectGetUserBySub = `select * from user where sub = ?`
 
-func (i *iamRepository) GetUserBySub(sub string) (*model.User, error) {
+func (i *iamDB) GetUserBySub(sub string) (*model.User, error) {
 	var data model.User
 	if err := i.SlaveDB.Raw(selectGetUserBySub, sub).First(&data).Error; err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ where
   and u.user_id = ?
 `
 
-func (i *iamRepository) GetUserPoicy(userID uint32) (*[]model.Policy, error) {
+func (i *iamDB) GetUserPoicy(userID uint32) (*[]model.Policy, error) {
 	var data []model.Policy
 	if err := i.SlaveDB.Raw(selectGetUserPolicy, userID).Scan(&data).Error; err != nil {
 		return nil, err
@@ -92,7 +92,7 @@ ON DUPLICATE KEY UPDATE
   activated=VALUES(activated)
 `
 
-func (i *iamRepository) PutUser(u *model.User) (*model.User, error) {
+func (i *iamDB) PutUser(u *model.User) (*model.User, error) {
 	if err := i.MasterDB.Exec(insertPutUser, u.UserID, u.Sub, u.Name, fmt.Sprintf("%t", u.Activated)).Error; err != nil {
 		return nil, err
 	}

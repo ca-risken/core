@@ -10,7 +10,7 @@ import (
 )
 
 type iamService struct {
-	repository iamRepoInterface
+	repository iamRepository
 }
 
 func newIAMService() iam.IAMServiceServer {
