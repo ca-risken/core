@@ -2,9 +2,10 @@ package model
 
 import "time"
 
+// Project entity model
 type Project struct {
-	ProjectID uint 32
-	Name string
+	ProjectID uint32
+	Name      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
