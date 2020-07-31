@@ -24,7 +24,7 @@ services:
       - DB_SCHEMA=mimosa
       - DB_LOG_MODE=${DB_LOG_MODE}
     ports:
-      - "8001:8001" # docker-compose外にexposeする必要はないので本来は"8001"だが、grpcurlなどのDebug目的でhost側のportも開放
+      - "8001:8001" # 本来はdocker-compose外にexposeする必要はない（grpcurlなどのDebug目的でhost側のportも開放）
 
   iam:
     networks:
@@ -47,7 +47,31 @@ services:
       - DB_SCHEMA=mimosa
       - DB_LOG_MODE=${DB_LOG_MODE}
     ports:
-      - "8002:8002" # docker-compose外にexposeする必要はないので本来は"8002"だが、grpcurlなどのDebug目的でhost側のportも開放
+      - "8002:8002" # 本来はdocker-compose外にexposeする必要はない（grpcurlなどのDebug目的でhost側のportも開放）
+
+  project:
+    networks:
+      - core
+      - local-shared
+    build:
+      context: src/project
+      args:
+        - GITHUB_USER=${GITHUB_USER}
+        - GITHUB_TOKEN=${GITHUB_TOKEN}
+    environment:
+      - PORT=8003
+      - IAM_SVC_ADDR=${IAM_SVC_ADDR}
+      - DB_MASTER_HOST=${DB_MASTER_HOST}
+      - DB_MASTER_USER=${DB_MASTER_USER}
+      - DB_MASTER_PASSWORD=${DB_MASTER_PASSWORD}
+      - DB_SLAVE_HOST=${DB_SLAVE_HOST}
+      - DB_SLAVE_USER=${DB_SLAVE_USER}
+      - DB_SLAVE_PASSWORD=${DB_SLAVE_PASSWORD}
+      - DB_PORT=3306
+      - DB_SCHEMA=mimosa
+      - DB_LOG_MODE=${DB_LOG_MODE}
+    ports:
+      - "8003:8003" # 本来はdocker-compose外にexposeする必要はない（grpcurlなどのDebug目的でhost側のportも開放）
 
 networks:
   core:

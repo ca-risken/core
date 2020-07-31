@@ -16,7 +16,7 @@ func (i *iamDB) ListRole(projectID uint32, name string) (*[]model.Role, error) {
 		params = append(params, name)
 	}
 	var data []model.Role
-	if err := i.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
+	if err := i.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -26,7 +26,7 @@ const selectGetRole = `select * from role where project_id = ? and role_id =?`
 
 func (i *iamDB) GetRole(projectID, roleID uint32) (*model.Role, error) {
 	var data model.Role
-	if err := i.SlaveDB.Raw(selectGetRole, projectID, roleID).First(&data).Error; err != nil {
+	if err := i.Slave.Raw(selectGetRole, projectID, roleID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -36,7 +36,7 @@ const selectGetRoleByName = `select * from role where project_id = ? and name =?
 
 func (i *iamDB) GetRoleByName(projectID uint32, name string) (*model.Role, error) {
 	var data model.Role
-	if err := i.SlaveDB.Raw(selectGetRoleByName, projectID, name).First(&data).Error; err != nil {
+	if err := i.Slave.Raw(selectGetRoleByName, projectID, name).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -53,7 +53,7 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (i *iamDB) PutRole(r *model.Role) (*model.Role, error) {
-	if err := i.MasterDB.Exec(insertPutRole, r.RoleID, r.Name, r.ProjectID).Error; err != nil {
+	if err := i.Master.Exec(insertPutRole, r.RoleID, r.Name, r.ProjectID).Error; err != nil {
 		return nil, err
 	}
 	return i.GetRoleByName(r.ProjectID, r.Name)
@@ -62,14 +62,14 @@ func (i *iamDB) PutRole(r *model.Role) (*model.Role, error) {
 const deleteDeleteRole = `delete from role where project_id = ? and role_id = ?`
 
 func (i *iamDB) DeleteRole(projectID, roleID uint32) error {
-	return i.MasterDB.Exec(deleteDeleteRole, projectID, roleID).Error
+	return i.Master.Exec(deleteDeleteRole, projectID, roleID).Error
 }
 
 const selectGetUserRole = `select * from user_role where project_id = ? and user_id =? and role_id = ?`
 
 func (i *iamDB) GetUserRole(projectID, userID, roleID uint32) (*model.UserRole, error) {
 	var data model.UserRole
-	if err := i.SlaveDB.Raw(selectGetUserRole, projectID, userID, roleID).First(&data).Error; err != nil {
+	if err := i.Slave.Raw(selectGetUserRole, projectID, userID, roleID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -89,7 +89,7 @@ func (i *iamDB) AttachRole(projectID, roleID, userID uint32) (*model.UserRole, e
 		return nil, fmt.Errorf(
 			"Not found user or role: user_id=%d, role_id=%d, project_id=%d", userID, roleID, projectID)
 	}
-	if err := i.MasterDB.Exec(insertAttachRole, userID, roleID, projectID).Error; err != nil {
+	if err := i.Master.Exec(insertAttachRole, userID, roleID, projectID).Error; err != nil {
 		return nil, err
 	}
 	return i.GetUserRole(projectID, userID, roleID)
@@ -102,5 +102,5 @@ func (i *iamDB) DetachRole(projectID, roleID, userID uint32) error {
 		return fmt.Errorf(
 			"Not found user or role: user_id=%d, role_id=%d, project_id=%d", userID, roleID, projectID)
 	}
-	return i.MasterDB.Exec(deleteDetachRole, userID, roleID, projectID).Error
+	return i.Master.Exec(deleteDetachRole, userID, roleID, projectID).Error
 }

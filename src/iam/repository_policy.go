@@ -16,7 +16,7 @@ func (i *iamDB) ListPolicy(projectID uint32, name string) (*[]model.Policy, erro
 		params = append(params, name)
 	}
 	var data []model.Policy
-	if err := i.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
+	if err := i.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -26,7 +26,7 @@ const selectGetPolicy = `select * from policy where project_id = ? and policy_id
 
 func (i *iamDB) GetPolicy(projectID, policyID uint32) (*model.Policy, error) {
 	var data model.Policy
-	if err := i.SlaveDB.Raw(selectGetPolicy, projectID, policyID).First(&data).Error; err != nil {
+	if err := i.Slave.Raw(selectGetPolicy, projectID, policyID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -36,7 +36,7 @@ const selectGetPolicyByName = `select * from policy where project_id = ? and nam
 
 func (i *iamDB) GetPolicyByName(projectID uint32, name string) (*model.Policy, error) {
 	var data model.Policy
-	if err := i.SlaveDB.Raw(selectGetPolicyByName, projectID, name).First(&data).Error; err != nil {
+	if err := i.Slave.Raw(selectGetPolicyByName, projectID, name).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -55,7 +55,7 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (i *iamDB) PutPolicy(p *model.Policy) (*model.Policy, error) {
-	if err := i.MasterDB.Exec(insertPutPolicy, p.PolicyID, p.Name, p.ProjectID, p.ActionPtn, p.ResourcePtn).Error; err != nil {
+	if err := i.Master.Exec(insertPutPolicy, p.PolicyID, p.Name, p.ProjectID, p.ActionPtn, p.ResourcePtn).Error; err != nil {
 		return nil, err
 	}
 	return i.GetPolicyByName(p.ProjectID, p.Name)
@@ -64,14 +64,14 @@ func (i *iamDB) PutPolicy(p *model.Policy) (*model.Policy, error) {
 const deleteDeletePolicy = `delete from policy where project_id = ? and policy_id = ?`
 
 func (i *iamDB) DeletePolicy(projectID, policyID uint32) error {
-	return i.MasterDB.Exec(deleteDeletePolicy, projectID, policyID).Error
+	return i.Master.Exec(deleteDeletePolicy, projectID, policyID).Error
 }
 
 const selectGetRolePolicy = `select * from role_policy where project_id = ? and role_id = ? and policy_id =?`
 
 func (i *iamDB) GetRolePolicy(projectID, roleID, policyID uint32) (*model.RolePolicy, error) {
 	var data model.RolePolicy
-	if err := i.SlaveDB.Raw(selectGetRolePolicy, projectID, roleID, policyID).First(&data).Error; err != nil {
+	if err := i.Slave.Raw(selectGetRolePolicy, projectID, roleID, policyID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -91,7 +91,7 @@ func (i *iamDB) AttachPolicy(projectID, roleID, policyID uint32) (*model.RolePol
 		return nil, fmt.Errorf(
 			"Not found role or policy: role_id=%d, policy_id=%d, project_id=%d", roleID, policyID, projectID)
 	}
-	if err := i.MasterDB.Exec(insertAttachPolicy, roleID, policyID, projectID).Error; err != nil {
+	if err := i.Master.Exec(insertAttachPolicy, roleID, policyID, projectID).Error; err != nil {
 		return nil, err
 	}
 	return i.GetRolePolicy(projectID, roleID, policyID)
@@ -104,5 +104,5 @@ func (i *iamDB) DetachPolicy(projectID, roleID, policyID uint32) error {
 		return fmt.Errorf(
 			"Not found role or policy: role_id=%d, policy_id=%d, project_id=%d", roleID, policyID, projectID)
 	}
-	return i.MasterDB.Exec(deleteDetachPolicy, roleID, policyID, projectID).Error
+	return i.Master.Exec(deleteDetachPolicy, roleID, policyID, projectID).Error
 }

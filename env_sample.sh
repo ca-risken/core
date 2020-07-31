@@ -15,3 +15,6 @@ export DB_SLAVE_HOST="db"
 export DB_SLAVE_USER="hoge"
 export DB_SLAVE_PASSWORD="moge"
 export DB_LOG_MODE="true"
+
+# grpc server
+export IAM_SVC_ADDR="iam:8002"

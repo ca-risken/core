@@ -27,7 +27,7 @@ where
 		params = append(params, name)
 	}
 	var data []model.User
-	if err := i.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
+	if err := i.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -45,7 +45,7 @@ func (i *iamDB) GetUser(userID uint32, sub string) (*model.User, error) {
 		params = append(params, sub)
 	}
 	var data model.User
-	if err := i.SlaveDB.Raw(query, params...).First(&data).Error; err != nil {
+	if err := i.Slave.Raw(query, params...).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -55,7 +55,7 @@ const selectGetUserBySub = `select * from user where sub = ?`
 
 func (i *iamDB) GetUserBySub(sub string) (*model.User, error) {
 	var data model.User
-	if err := i.SlaveDB.Raw(selectGetUserBySub, sub).First(&data).Error; err != nil {
+	if err := i.Slave.Raw(selectGetUserBySub, sub).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -76,7 +76,7 @@ where
 
 func (i *iamDB) GetUserPoicy(userID uint32) (*[]model.Policy, error) {
 	var data []model.Policy
-	if err := i.SlaveDB.Raw(selectGetUserPolicy, userID).Scan(&data).Error; err != nil {
+	if err := i.Slave.Raw(selectGetUserPolicy, userID).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -93,7 +93,7 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (i *iamDB) PutUser(u *model.User) (*model.User, error) {
-	if err := i.MasterDB.Exec(insertPutUser, u.UserID, u.Sub, u.Name, fmt.Sprintf("%t", u.Activated)).Error; err != nil {
+	if err := i.Master.Exec(insertPutUser, u.UserID, u.Sub, u.Name, fmt.Sprintf("%t", u.Activated)).Error; err != nil {
 		return nil, err
 	}
 	return i.GetUserBySub(u.Sub)

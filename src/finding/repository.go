@@ -38,15 +38,15 @@ type findingRepository interface {
 }
 
 type findingDB struct {
-	MasterDB *gorm.DB
-	SlaveDB  *gorm.DB
+	Master *gorm.DB
+	Slave  *gorm.DB
 }
 
 func newFindingRepository() findingRepository {
-	repo := findingDB{}
-	repo.MasterDB = initDB(true)
-	repo.SlaveDB = initDB(false)
-	return &repo
+	return &findingDB{
+		Master: initDB(true),
+		Slave:  initDB(false),
+	}
 }
 
 type dbConfig struct {
@@ -114,7 +114,7 @@ where
 		params = append(params, req.ResourceName)
 	}
 	var data []model.Finding
-	if err := f.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
+	if err := f.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -124,7 +124,7 @@ const selectGetFinding = `select * from finding where project_id = ? and finding
 
 func (f *findingDB) GetFinding(projectID uint32, findingID uint64) (*model.Finding, error) {
 	var data model.Finding
-	if err := f.SlaveDB.Raw(selectGetFinding, projectID, findingID).First(&data).Error; err != nil {
+	if err := f.Slave.Raw(selectGetFinding, projectID, findingID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -145,7 +145,7 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (f *findingDB) UpsertFinding(data *model.Finding) (*model.Finding, error) {
-	if err := f.MasterDB.Exec(insertUpsertFinding,
+	if err := f.Master.Exec(insertUpsertFinding,
 		data.FindingID, data.Description, data.DataSource, data.DataSourceID, data.ResourceName,
 		data.ProjectID, data.OriginalScore, data.Score, data.Data).Error; err != nil {
 		return nil, err
@@ -157,7 +157,7 @@ const selectGetFindingByDataSource = `select * from finding where project_id = ?
 
 func (f *findingDB) GetFindingByDataSource(projectID uint32, dataSource, dataSourceID string) (*model.Finding, error) {
 	var result model.Finding
-	if err := f.SlaveDB.Raw(selectGetFindingByDataSource,
+	if err := f.Slave.Raw(selectGetFindingByDataSource,
 		projectID, dataSource, dataSourceID).First(&result).Error; err != nil {
 		return nil, err
 	}
@@ -175,7 +175,7 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (f *findingDB) UpsertResource(data *model.Resource) (*model.Resource, error) {
-	if err := f.MasterDB.Exec(insertUpsertResource,
+	if err := f.Master.Exec(insertUpsertResource,
 		data.ResourceID, data.ResourceName, data.ProjectID).Error; err != nil {
 		return nil, err
 	}
@@ -186,7 +186,7 @@ const selectGetResourceByName = `select * from resource where project_id = ? and
 
 func (f *findingDB) GetResourceByName(projectID uint32, resourceName string) (*model.Resource, error) {
 	var data model.Resource
-	if err := f.SlaveDB.Raw(selectGetResourceByName, projectID, resourceName).First(&data).Error; err != nil {
+	if err := f.Slave.Raw(selectGetResourceByName, projectID, resourceName).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -195,7 +195,7 @@ func (f *findingDB) GetResourceByName(projectID uint32, resourceName string) (*m
 const deleteDeleteFinding = `delete from finding where project_id = ? and finding_id = ?`
 
 func (f *findingDB) DeleteFinding(projectID uint32, findingID uint64) error {
-	if err := f.MasterDB.Exec(deleteDeleteFinding, projectID, findingID).Error; err != nil {
+	if err := f.Master.Exec(deleteDeleteFinding, projectID, findingID).Error; err != nil {
 		return err
 	}
 	return f.DeleteTagByFindingID(projectID, findingID)
@@ -204,14 +204,14 @@ func (f *findingDB) DeleteFinding(projectID uint32, findingID uint64) error {
 const deleteDeleteTagByFindingID = `delete from finding_tag where project_id = ? and finding_id = ?`
 
 func (f *findingDB) DeleteTagByFindingID(projectID uint32, findingID uint64) error {
-	return f.MasterDB.Exec(deleteDeleteTagByFindingID, projectID, findingID).Error
+	return f.Master.Exec(deleteDeleteTagByFindingID, projectID, findingID).Error
 }
 
 const selectListFindingTag = `select * from finding_tag where project_id = ? and finding_id = ?`
 
 func (f *findingDB) ListFindingTag(projectID uint32, findingID uint64) (*[]model.FindingTag, error) {
 	var data []model.FindingTag
-	if err := f.SlaveDB.Raw(selectListFindingTag, projectID, findingID).Scan(&data).Error; err != nil {
+	if err := f.Slave.Raw(selectListFindingTag, projectID, findingID).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -227,7 +227,7 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (f *findingDB) TagFinding(tag *model.FindingTag) (*model.FindingTag, error) {
-	if err := f.MasterDB.Exec(insertTagFinding,
+	if err := f.Master.Exec(insertTagFinding,
 		tag.FindingTagID, tag.FindingID, tag.ProjectID, tag.TagKey, tag.TagValue).Error; err != nil {
 		return nil, err
 	}
@@ -238,7 +238,7 @@ const selectGetFindingTagByKey = `select * from finding_tag where project_id = ?
 
 func (f *findingDB) GetFindingTagByKey(projectID uint32, findingID uint64, tagKey string) (*model.FindingTag, error) {
 	var data model.FindingTag
-	if err := f.SlaveDB.Raw(selectGetFindingTagByKey, projectID, findingID, tagKey).First(&data).Error; err != nil {
+	if err := f.Slave.Raw(selectGetFindingTagByKey, projectID, findingID, tagKey).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -248,7 +248,7 @@ const selectGetFindingTagByID = `select * from finding_tag where project_id = ? 
 
 func (f *findingDB) GetFindingTagByID(projectID uint32, findingTagID uint64) (*model.FindingTag, error) {
 	var data model.FindingTag
-	if err := f.SlaveDB.Raw(selectGetFindingTagByID, projectID, findingTagID).First(&data).Error; err != nil {
+	if err := f.Slave.Raw(selectGetFindingTagByID, projectID, findingTagID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -257,7 +257,7 @@ func (f *findingDB) GetFindingTagByID(projectID uint32, findingTagID uint64) (*m
 const deleteUntagFinding = `delete from finding_tag where project_id = ? and finding_tag_id = ?`
 
 func (f *findingDB) UntagFinding(projectID uint32, findingTagID uint64) error {
-	return f.MasterDB.Exec(deleteUntagFinding, projectID, findingTagID).Error
+	return f.Master.Exec(deleteUntagFinding, projectID, findingTagID).Error
 }
 
 func (f *findingDB) ListResource(req *finding.ListResourceRequest) (*[]model.Resource, error) {
@@ -281,7 +281,7 @@ where
 	params = append(params, req.FromSumScore, req.ToSumScore)
 
 	var data []model.Resource
-	if err := f.SlaveDB.Raw(query, params...).Scan(&data).Error; err != nil {
+	if err := f.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -291,7 +291,7 @@ const selectGetResource = `select * from resource where project_id = ? and resou
 
 func (f *findingDB) GetResource(projectID uint32, resourceID uint64) (*model.Resource, error) {
 	var data model.Resource
-	if err := f.SlaveDB.Raw(selectGetResource, projectID, resourceID).First(&data).Error; err != nil {
+	if err := f.Slave.Raw(selectGetResource, projectID, resourceID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -300,7 +300,7 @@ func (f *findingDB) GetResource(projectID uint32, resourceID uint64) (*model.Res
 const deleteDeleteResource = `delete from resource where project_id = ? and resource_id = ?`
 
 func (f *findingDB) DeleteResource(projectID uint32, resourceID uint64) error {
-	if err := f.MasterDB.Exec(deleteDeleteResource, projectID, resourceID).Error; err != nil {
+	if err := f.Master.Exec(deleteDeleteResource, projectID, resourceID).Error; err != nil {
 		return err
 	}
 	return f.DeleteTagByResourceID(projectID, resourceID)
@@ -309,14 +309,14 @@ func (f *findingDB) DeleteResource(projectID uint32, resourceID uint64) error {
 const deleteDeleteTagByResourceID = `delete from resource_tag where project_id = ? and resource_id = ?`
 
 func (f *findingDB) DeleteTagByResourceID(projectID uint32, resourceID uint64) error {
-	return f.MasterDB.Exec(deleteDeleteTagByResourceID, projectID, resourceID).Error
+	return f.Master.Exec(deleteDeleteTagByResourceID, projectID, resourceID).Error
 }
 
 const selectListResourceTag = `select * from resource_tag where project_id = ? and resource_id = ?`
 
 func (f *findingDB) ListResourceTag(projectID uint32, resourceID uint64) (*[]model.ResourceTag, error) {
 	var data []model.ResourceTag
-	if err := f.SlaveDB.Raw(selectListResourceTag, projectID, resourceID).Scan(&data).Error; err != nil {
+	if err := f.Slave.Raw(selectListResourceTag, projectID, resourceID).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -326,7 +326,7 @@ const selectGetResourceTagByKey = `select * from resource_tag where project_id =
 
 func (f *findingDB) GetResourceTagByKey(projectID uint32, resourceID uint64, tagKey string) (*model.ResourceTag, error) {
 	var data model.ResourceTag
-	if err := f.SlaveDB.Raw(selectGetResourceTagByKey, projectID, resourceID, tagKey).First(&data).Error; err != nil {
+	if err := f.Slave.Raw(selectGetResourceTagByKey, projectID, resourceID, tagKey).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -336,7 +336,7 @@ const selectGetResourceTagByID = `select * from resource_tag where project_id = 
 
 func (f *findingDB) GetResourceTagByID(projectID uint32, resourceID uint64) (*model.ResourceTag, error) {
 	var data model.ResourceTag
-	if err := f.SlaveDB.Raw(selectGetResourceTagByID, projectID, resourceID).First(&data).Error; err != nil {
+	if err := f.Slave.Raw(selectGetResourceTagByID, projectID, resourceID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -352,7 +352,7 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (f *findingDB) TagResource(tag *model.ResourceTag) (*model.ResourceTag, error) {
-	if err := f.MasterDB.Exec(insertTagResource,
+	if err := f.Master.Exec(insertTagResource,
 		tag.ResourceTagID, tag.ResourceID, tag.ProjectID, tag.TagKey, tag.TagValue).Error; err != nil {
 		return nil, err
 	}
@@ -362,5 +362,5 @@ func (f *findingDB) TagResource(tag *model.ResourceTag) (*model.ResourceTag, err
 const deleteUntagResource = `delete from resource_tag where project_id = ? and resource_tag_id = ?`
 
 func (f *findingDB) UntagResource(projectID uint32, resourceTagID uint64) error {
-	return f.MasterDB.Exec(deleteUntagResource, projectID, resourceTagID).Error
+	return f.Master.Exec(deleteUntagResource, projectID, resourceTagID).Error
 }
