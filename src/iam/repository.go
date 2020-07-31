@@ -37,14 +37,14 @@ type iamRepository interface {
 }
 
 type iamDB struct {
-	MasterDB *gorm.DB
-	SlaveDB  *gorm.DB
+	Master *gorm.DB
+	Slave  *gorm.DB
 }
 
 func newIAMRepository() iamRepository {
 	return &iamDB{
-		MasterDB: initDB(true),
-		SlaveDB:  initDB(false),
+		Master: initDB(true),
+		Slave:  initDB(false),
 	}
 }
 
