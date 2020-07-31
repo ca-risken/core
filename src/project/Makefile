@@ -27,3 +27,17 @@ create-project:
 		-plaintext \
 		-d '{"user_id":1001, "name":"project-x"}' \
 		localhost:8003 core.project.ProjectService.CreateProject
+
+.PHONY: update-project
+update-project:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1004, "name":"project-xxx"}' \
+		localhost:8003 core.project.ProjectService.UpdateProject
+
+.PHONY: delete-project
+delete-project:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1005}' \
+		localhost:8003 core.project.ProjectService.DeleteProject
