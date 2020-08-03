@@ -4,6 +4,7 @@ env:
   variables:
     IMAGE_FINDING: "core/finding"
     IMAGE_IAM: "core/iam"
+    IMAGE_PROJECT: "core/project"
   parameter-store:
     GITHUB_USER: "/build/GITHUB_USER"
     GITHUB_TOKEN: "/build/GITHUB_TOKEN"
@@ -26,6 +27,7 @@ phases:
       - echo Testing the sources...
       - cd ${SRC}/finding && go test ./...
       - cd ${SRC}/iam     && go test ./...
+      - cd ${SRC}/project && go test ./...
 
       - echo Logging in to Amazon ECR...
       - $(aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION})
@@ -35,3 +37,4 @@ phases:
       - echo Pushing the Docker images...
       - cd ${SRC}/finding && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_FINDING}:${TAG} .
       - cd ${SRC}/iam     && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_IAM}:${TAG} .
+      - cd ${SRC}/project && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_PROJECT}:${TAG} .
