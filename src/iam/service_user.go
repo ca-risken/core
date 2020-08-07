@@ -59,7 +59,7 @@ func (i *iamService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 	u := &model.User{
 		UserID:    userID,
 		Sub:       req.User.Sub,
-		Name:      req.User.Sub,
+		Name:      req.User.Name,
 		Activated: req.User.Activated,
 	}
 
