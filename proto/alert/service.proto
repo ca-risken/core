@@ -1,0 +1,332 @@
+syntax = "proto3";
+
+package core.alert;
+option go_package = "github.com/CyberAgent/mimosa-core/proto/alert";
+
+import "google/protobuf/empty.proto";
+import "alert/entity.proto";
+
+service AlertService {
+  // alert
+  rpc ListAlert(ListAlertRequest) returns (ListAlertResponse);
+  rpc GetAlert(GetAlertRequest) returns (GetAlertResponse);
+  rpc PutAlert(PutAlertRequest) returns (PutAlertResponse);
+  rpc DeleteAlert(DeleteAlertRequest) returns (google.protobuf.Empty);
+
+  // alert_history
+  rpc ListAlertHistory(ListAlertHistoryRequest)
+      returns (ListAlertHistoryResponse);
+  rpc GetAlertHistory(GetAlertHistoryRequest) returns (GetAlertHistoryResponse);
+  rpc PutAlertHistory(PutAlertHistoryRequest) returns (PutAlertHistoryResponse);
+  rpc DeleteAlertHistory(DeleteAlertHistoryRequest)
+      returns (google.protobuf.Empty);
+
+  // rel_alert_finding
+  rpc ListRelAlertFinding(ListRelAlertFindingRequest)
+      returns (ListRelAlertFindingResponse);
+  rpc GetRelAlertFinding(GetRelAlertFindingRequest)
+      returns (GetRelAlertFindingResponse);
+  rpc PutRelAlertFinding(PutRelAlertFindingRequest)
+      returns (PutRelAlertFindingResponse);
+  rpc DeleteRelAlertFinding(DeleteRelAlertFindingRequest)
+      returns (google.protobuf.Empty);
+
+  // alert_condition
+  rpc ListAlertCondition(ListAlertConditionRequest)
+      returns (ListAlertConditionResponse);
+  rpc GetAlertCondition(GetAlertConditionRequest)
+      returns (GetAlertConditionResponse);
+  rpc PutAlertCondition(PutAlertConditionRequest)
+      returns (PutAlertConditionResponse);
+  rpc DeleteAlertCondition(DeleteAlertConditionRequest)
+      returns (google.protobuf.Empty);
+
+  // alert_rule
+  rpc ListAlertRule(ListAlertRuleRequest) returns (ListAlertRuleResponse);
+  rpc GetAlertRule(GetAlertRuleRequest) returns (GetAlertRuleResponse);
+  rpc PutAlertRule(PutAlertRuleRequest) returns (PutAlertRuleResponse);
+  rpc DeleteAlertRule(DeleteAlertRuleRequest) returns (google.protobuf.Empty);
+
+  // alert_cond_rule
+  rpc ListAlertCondRule(ListAlertCondRuleRequest)
+      returns (ListAlertCondRuleResponse);
+  rpc GetAlertCondRule(GetAlertCondRuleRequest)
+      returns (GetAlertCondRuleResponse);
+  rpc PutAlertCondRule(PutAlertCondRuleRequest)
+      returns (PutAlertCondRuleResponse);
+  rpc DeleteAlertCondRule(DeleteAlertCondRuleRequest)
+      returns (google.protobuf.Empty);
+
+  // notification
+  rpc ListNotification(ListNotificationRequest)
+      returns (ListNotificationResponse);
+  rpc GetNotification(GetNotificationRequest) returns (GetNotificationResponse);
+  rpc PutNotification(PutNotificationRequest) returns (PutNotificationResponse);
+  rpc DeleteNotification(DeleteNotificationRequest)
+      returns (google.protobuf.Empty);
+
+  // alert_cond_notification
+  rpc ListAlertCondNotification(ListAlertCondNotificationRequest)
+      returns (ListAlertCondNotificationResponse);
+  rpc GetAlertCondNotification(GetAlertCondNotificationRequest)
+      returns (GetAlertCondNotificationResponse);
+  rpc PutAlertCondNotification(PutAlertCondNotificationRequest)
+      returns (PutAlertCondNotificationResponse);
+  rpc DeleteAlertCondNotification(DeleteAlertCondNotificationRequest)
+      returns (google.protobuf.Empty);
+
+  // AnalyzeAlert
+  rpc AnalyzeAlert(AnalyzeAlertRequest)
+      returns (google.protobuf.Empty);
+}
+
+message ListAlertRequest {
+  uint32 project_id = 1;
+  bool activated = 2;
+  repeated string severity = 3;
+  string description = 4;
+  int64 from_at = 5;
+  int64 to_at = 6;
+}
+
+message ListAlertResponse { repeated uint64 alert_id = 1; }
+
+message GetAlertRequest {
+  uint32 project_id = 1;
+  uint64 alert_id = 2;
+}
+
+message GetAlertResponse { Alert alert = 1; }
+
+message PutAlertRequest {
+  uint32 project_id = 1;
+  AlertForUpsert alert = 2;
+}
+
+message PutAlertResponse { Alert alert = 1; }
+
+message DeleteAlertRequest {
+  uint32 project_id = 1;
+  uint64 alert_id = 2;
+}
+
+message ListAlertHistoryRequest {
+  uint32 project_id = 1;
+  uint32 alert_id = 2;
+  repeated string history_type = 3;
+  repeated string severity = 4;
+  int64 from_at = 5;
+  int64 to_at = 6;
+}
+
+message ListAlertHistoryResponse { repeated uint64 alert_history_id = 1; }
+
+message GetAlertHistoryRequest {
+  uint32 project_id = 1;
+  uint64 alert_history_id = 2;
+}
+
+message GetAlertHistoryResponse { AlertHistory alert_history = 1; }
+
+message PutAlertHistoryRequest {
+  uint32 project_id = 1;
+  AlertHistoryForUpsert alert_history = 2;
+}
+
+message PutAlertHistoryResponse { AlertHistory alert_history = 1; }
+
+message DeleteAlertHistoryRequest {
+  uint32 project_id = 1;
+  uint64 alert_history_id = 2;
+}
+
+message ListRelAlertFindingRequest {
+  uint32 project_id = 1;
+  uint32 alert_id = 2;
+  uint32 finding_id = 3;
+  int64 from_at = 4;
+  int64 to_at = 5;
+}
+
+message ListRelAlertFindingResponse {
+  repeated uint64 rel_alert_finding_id = 1;
+}
+
+message GetRelAlertFindingRequest {
+  uint32 project_id = 1;
+  uint32 alert_id = 2;
+  uint32 finding_id = 3;
+}
+
+message GetRelAlertFindingResponse { RelAlertFinding rel_alert_finding = 1; }
+
+message PutRelAlertFindingRequest {
+  uint32 project_id = 1;
+  RelAlertFindingForUpsert rel_alert_finding = 2;
+}
+
+message PutRelAlertFindingResponse { RelAlertFinding rel_alert_finding = 1; }
+
+message DeleteRelAlertFindingRequest {
+  uint32 project_id = 1;
+  uint32 alert_id = 2;
+  uint32 finding_id = 3;
+}
+
+message ListAlertConditionRequest {
+  uint32 project_id = 1;
+  repeated string severity = 2;
+  bool enabled = 3;
+  int64 from_at = 4;
+  int64 to_at = 5;
+}
+
+message ListAlertConditionResponse { repeated uint64 alert_condition_id = 1; }
+
+message GetAlertConditionRequest {
+  uint32 project_id = 1;
+  uint32 alert_condition_id = 2;
+}
+
+message GetAlertConditionResponse { AlertCondition alert_condition = 1; }
+
+message PutAlertConditionRequest {
+  uint32 project_id = 1;
+  AlertConditionForUpsert alert_condition = 2;
+}
+
+message PutAlertConditionResponse { AlertCondition alert_condition = 1; }
+
+message DeleteAlertConditionRequest {
+  uint32 project_id = 1;
+  uint64 alert_condition_id = 2;
+}
+
+message ListAlertRuleRequest {
+  uint32 project_id = 1;
+  float from_score = 2;
+  float to_score = 3;
+  int64 from_at = 4;
+  int64 to_at = 5;
+}
+
+message ListAlertRuleResponse { repeated uint64 alert_rule_id = 1; }
+
+message GetAlertRuleRequest {
+  uint32 project_id = 1;
+  uint32 alert_rule_id = 2;
+}
+
+message GetAlertRuleResponse { AlertRule alert_rule = 1; }
+
+message PutAlertRuleRequest {
+  uint32 project_id = 1;
+  AlertRuleForUpsert alert_rule = 2;
+}
+
+message PutAlertRuleResponse { AlertRule alert_rule = 1; }
+
+message DeleteAlertRuleRequest {
+  uint32 project_id = 1;
+  uint64 alert_rule_id = 2;
+}
+
+message ListAlertCondRuleRequest {
+  uint32 project_id = 1;
+  uint32 alert_condition_id = 2;
+  uint32 alert_rule_id = 3;
+  int64 from_at = 4;
+  int64 to_at = 5;
+}
+
+message ListAlertCondRuleResponse { repeated uint64 alert_cond_rule_id = 1; }
+
+message GetAlertCondRuleRequest {
+  uint32 project_id = 1;
+  uint32 alert_condition_id = 2;
+  uint32 alert_rule_id = 3;
+}
+
+message GetAlertCondRuleResponse { AlertCondRule alert_cond_rule = 1; }
+
+message PutAlertCondRuleRequest {
+  uint32 project_id = 1;
+  AlertCondRuleForUpsert alert_cond_rule = 2;
+}
+
+message PutAlertCondRuleResponse { AlertCondRule alert_cond_rule = 1; }
+
+message DeleteAlertCondRuleRequest {
+  uint32 project_id = 1;
+  uint32 alert_condition_id = 2;
+  uint32 alert_rule_id = 3;
+}
+
+message ListNotificationRequest {
+  uint32 project_id = 1;
+  string type = 2;
+  int64 from_at = 3;
+  int64 to_at = 4;
+}
+
+message ListNotificationResponse { repeated uint64 notification_id = 1; }
+
+message GetNotificationRequest {
+  uint32 project_id = 1;
+  uint32 notification_id = 2;
+}
+
+message GetNotificationResponse { Notification notification = 1; }
+
+message PutNotificationRequest {
+  uint32 project_id = 1;
+  NotificationForUpsert notification = 2;
+}
+
+message PutNotificationResponse { Notification notification = 1; }
+
+message DeleteNotificationRequest {
+  uint32 project_id = 1;
+  uint64 notification_id = 2;
+}
+
+message ListAlertCondNotificationRequest {
+  uint32 project_id = 1;
+  uint32 alert_condition_id = 2;
+  uint32 notification_id = 3;
+  int64 from_at = 4;
+  int64 to_at = 5;
+}
+
+message ListAlertCondNotificationResponse {
+  repeated uint64 alert_cond_notification_id = 1;
+}
+
+message GetAlertCondNotificationRequest {
+  uint32 project_id = 1;
+  uint32 alert_condition_id = 2;
+  uint32 notification_id = 3;
+}
+
+message GetAlertCondNotificationResponse {
+  AlertCondNotification alert_cond_notification = 1;
+}
+
+message PutAlertCondNotificationRequest {
+  uint32 project_id = 1;
+  AlertCondNotificationForUpsert alert_cond_notification = 2;
+}
+
+message PutAlertCondNotificationResponse {
+  AlertCondNotification alert_cond_notification = 1;
+}
+
+message DeleteAlertCondNotificationRequest {
+  uint32 project_id = 1;
+  uint32 alert_condition_id = 2;
+  uint32 notification_id = 3;
+}
+
+message AnalyzeAlertRequest {
+  uint32 project_id = 1;
+}

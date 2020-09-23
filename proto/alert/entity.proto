@@ -1,0 +1,166 @@
+syntax = "proto3";
+
+package core.alert;
+option go_package = "github.com/CyberAgent/mimosa-core/proto/alert";
+
+// Alert
+message Alert {
+  uint64 alert_id = 1;
+  uint32 alert_condition_id = 2;
+  string description = 3;
+  string severity = 4;
+  uint32 project_id = 5;
+  bool activated = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
+}
+
+// AlertForUpsert
+message AlertForUpsert {
+  uint64 alert_id = 1;
+  uint32 alert_condition_id = 2;
+  string description = 3;
+  string severity = 4;
+  uint32 project_id = 5;
+  bool activated = 6;
+}
+
+// AlertHistory
+message AlertHistory {
+  uint64 alert_history_id = 1;
+  string history_type = 2;
+  uint32 alert_id = 3;
+  string description = 4;
+  string severity = 5;
+  uint32 project_id = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
+}
+
+// AlertHistoryForUpsert
+message AlertHistoryForUpsert {
+  uint64 alert_history_id = 1;
+  string history_type = 2;
+  uint32 alert_id = 3;
+  string description = 4;
+  string severity = 5;
+  uint32 project_id = 6;
+}
+
+// RelAlertFinding
+message RelAlertFinding {
+  uint32 alert_id = 1;
+  uint32 finding_id = 2;
+  uint32 project_id = 3;
+  int64 created_at = 4;
+  int64 updated_at = 5;
+}
+
+// RelAlertFindingForUpsert
+message RelAlertFindingForUpsert {
+  uint32 alert_id = 1;
+  uint32 finding_id = 2;
+  uint32 project_id = 3;
+}
+
+// AlertCondition
+message AlertCondition {
+  uint32 alert_condition_id = 1;
+  string description = 2;
+  string severity = 3;
+  uint32 project_id = 4;
+  string and_or = 5;
+  bool enabled = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
+}
+
+// AlertConditionForUpsert
+message AlertConditionForUpsert {
+  uint32 alert_condition_id = 1;
+  string description = 2;
+  string severity = 3;
+  uint32 project_id = 4;
+  string and_or = 5;
+  bool enabled = 6;
+}
+
+// AlertRule
+message AlertRule {
+  uint32 alert_rule_id = 1;
+  string name = 2;
+  uint32 project_id = 3;
+  float score = 4;
+  string resource_name = 5;
+  string tag = 6;
+  uint32 finding_cnt = 7;
+  int64 created_at = 8;
+  int64 updated_at = 9;
+}
+
+// AlertRuleForUpsert
+message AlertRuleForUpsert {
+  uint32 alert_rule_id = 1;
+  string name = 2;
+  uint32 project_id = 3;
+  float score = 4;
+  string resource_name = 5;
+  string tag = 6;
+  uint32 finding_cnt = 7;
+}
+
+// AlertCondRule
+message AlertCondRule {
+  uint32 alert_condition_id = 1;
+  uint32 alert_rule_id = 2;
+  uint32 project_id = 3;
+  int64 created_at = 4;
+  int64 updated_at = 5;
+}
+
+// AlertCondRuleForUpsert
+message AlertCondRuleForUpsert {
+  uint32 alert_condition_id = 1;
+  uint32 alert_rule_id = 2;
+  uint32 project_id = 3;
+}
+
+// Notification
+message Notification {
+  uint32 notification_id = 1;
+  string name = 2;
+  uint32 project_id = 3;
+  string type = 4;
+  string notify_setting = 5;
+  int64 created_at = 6;
+  int64 updated_at = 7;
+}
+
+// NotificationForUpsert
+message NotificationForUpsert {
+  uint32 notification_id = 1;
+  string name = 2;
+  uint32 project_id = 3;
+  string type = 4;
+  string notify_setting = 5;
+}
+
+// AlertCondNotification
+message AlertCondNotification {
+  uint32 alert_condition_id = 1;
+  uint32 notification_id = 2;
+  uint32 project_id = 3;
+  uint32 cache_second = 4;
+  string notify_setting = 5;
+  int64 created_at = 6;
+  int64 updated_at = 7;
+}
+
+// AlertCondNotificationForUpsert
+message AlertCondNotificationForUpsert {
+  uint32 alert_condition_id = 1;
+  uint32 notification_id = 2;
+  uint32 project_id = 3;
+  uint32 cache_second = 4;
+  string notify_setting = 5;
+}
