@@ -151,7 +151,7 @@ message AlertCondNotification {
   uint32 notification_id = 2;
   uint32 project_id = 3;
   uint32 cache_second = 4;
-  string notify_setting = 5;
+  int64 notified_at = 5;
   int64 created_at = 6;
   int64 updated_at = 7;
 }
@@ -162,5 +162,5 @@ message AlertCondNotificationForUpsert {
   uint32 notification_id = 2;
   uint32 project_id = 3;
   uint32 cache_second = 4;
-  string notify_setting = 5;
+  int64 notified_at = 5;
 }
