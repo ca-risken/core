@@ -89,7 +89,7 @@ message ListAlertRequest {
   int64 to_at = 6;
 }
 
-message ListAlertResponse { repeated Alert alert_id = 1; }
+message ListAlertResponse { repeated Alert alert = 1; }
 
 message GetAlertRequest {
   uint32 project_id = 1;
@@ -119,7 +119,7 @@ message ListAlertHistoryRequest {
   int64 to_at = 6;
 }
 
-message ListAlertHistoryResponse { repeated AlertHistory alert_history_id = 1; }
+message ListAlertHistoryResponse { repeated AlertHistory alert_history = 1; }
 
 message GetAlertHistoryRequest {
   uint32 project_id = 1;
@@ -149,7 +149,7 @@ message ListRelAlertFindingRequest {
 }
 
 message ListRelAlertFindingResponse {
-  repeated RelAlertFinding rel_alert_finding_id = 1;
+  repeated RelAlertFinding rel_alert_finding = 1;
 }
 
 message GetRelAlertFindingRequest {
@@ -181,7 +181,7 @@ message ListAlertConditionRequest {
   int64 to_at = 5;
 }
 
-message ListAlertConditionResponse { repeated AlertCondition alert_condition_id = 1; }
+message ListAlertConditionResponse { repeated AlertCondition alert_condition = 1; }
 
 message GetAlertConditionRequest {
   uint32 project_id = 1;
@@ -210,7 +210,7 @@ message ListAlertRuleRequest {
   int64 to_at = 5;
 }
 
-message ListAlertRuleResponse { repeated AlertRule alert_rule_id = 1; }
+message ListAlertRuleResponse { repeated AlertRule alert_rule = 1; }
 
 message GetAlertRuleRequest {
   uint32 project_id = 1;
@@ -239,7 +239,7 @@ message ListAlertCondRuleRequest {
   int64 to_at = 5;
 }
 
-message ListAlertCondRuleResponse { repeated AlertCondRule alert_cond_rule_id = 1; }
+message ListAlertCondRuleResponse { repeated AlertCondRule alert_cond_rule = 1; }
 
 message GetAlertCondRuleRequest {
   uint32 project_id = 1;
@@ -269,7 +269,7 @@ message ListNotificationRequest {
   int64 to_at = 4;
 }
 
-message ListNotificationResponse { repeated Notification notification_id = 1; }
+message ListNotificationResponse { repeated Notification notification = 1; }
 
 message GetNotificationRequest {
   uint32 project_id = 1;
@@ -299,7 +299,7 @@ message ListAlertCondNotificationRequest {
 }
 
 message ListAlertCondNotificationResponse {
-  repeated AlertCondNotification alert_cond_notification_id = 1;
+  repeated AlertCondNotification alert_cond_notification = 1;
 }
 
 message GetAlertCondNotificationRequest {
