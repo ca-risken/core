@@ -4,14 +4,14 @@ import "time"
 
 // Alert entity model
 type Alert struct {
-	AlertID           uint64
-	AlertConnditionID uint32
-	Description       string
-	Severity          string
-	ProjectID         uint32
-	Activated         bool
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	AlertID          uint64
+	AlertConditionID uint32
+	Description      string
+	Severity         string
+	ProjectID        uint32
+	Activated        bool
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 // AlertHistory entity model
