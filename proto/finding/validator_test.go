@@ -52,6 +52,26 @@ func TestValidate_ListFindingRequest(t *testing.T) {
 			input:   &ListFindingRequest{ProjectId: 111, ToScore: 1.1},
 			wantErr: true,
 		},
+		{
+			name:    "NG small from_at",
+			input:   &ListFindingRequest{ProjectId: 111, FromAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG big from_at",
+			input:   &ListFindingRequest{ProjectId: 111, FromAt: 253402268400},
+			wantErr: true,
+		},
+		{
+			name:    "NG small to_at",
+			input:   &ListFindingRequest{ProjectId: 111, ToAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG big to_at",
+			input:   &ListFindingRequest{ProjectId: 111, ToAt: 253402268400},
+			wantErr: true,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -303,6 +323,26 @@ func TestValidate_ListResourceRequest(t *testing.T) {
 		{
 			name:    "NG too small to_sum_score",
 			input:   &ListResourceRequest{ProjectId: 1, ToSumScore: -0.1},
+			wantErr: true,
+		},
+		{
+			name:    "NG small from_at",
+			input:   &ListResourceRequest{ProjectId: 1, FromAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG big from_at",
+			input:   &ListResourceRequest{ProjectId: 1, FromAt: 253402268400},
+			wantErr: true,
+		},
+		{
+			name:    "NG small to_at",
+			input:   &ListResourceRequest{ProjectId: 1, ToAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG big to_at",
+			input:   &ListResourceRequest{ProjectId: 1, ToAt: 253402268400},
 			wantErr: true,
 		},
 	}

@@ -15,6 +15,8 @@ func (l *ListFindingRequest) Validate() error {
 		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 255))),
 		validation.Field(&l.FromScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.ToScore, validation.Min(0.0), validation.Max(1.0)),
+		validation.Field(&l.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&l.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 	)
 }
 
@@ -83,6 +85,8 @@ func (l *ListResourceRequest) Validate() error {
 		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 255))),
 		validation.Field(&l.FromSumScore, validation.Min(0.0)),
 		validation.Field(&l.ToSumScore, validation.Min(0.0)),
+		validation.Field(&l.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&l.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 	)
 }
 
