@@ -25,7 +25,7 @@ func TestListPolicy(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: &iam.ListPolicyRequest{ProjectId: 1, Name: "nm"},
+			input: &iam.ListPolicyRequest{ProjectId: 1, Name: "nm", RoleId: 1},
 			want:  &iam.ListPolicyResponse{PolicyId: []uint32{1, 2, 3}},
 			mockResponce: &[]model.Policy{
 				{PolicyID: 1, Name: "nm"},
@@ -35,7 +35,7 @@ func TestListPolicy(t *testing.T) {
 		},
 		{
 			name:      "OK empty reponse",
-			input:     &iam.ListPolicyRequest{ProjectId: 1, Name: "nm"},
+			input:     &iam.ListPolicyRequest{ProjectId: 1, Name: "nm", RoleId: 1},
 			want:      &iam.ListPolicyResponse{},
 			mockError: gorm.ErrRecordNotFound,
 		},

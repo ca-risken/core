@@ -7,13 +7,17 @@ import (
 	"github.com/vikyd/zero"
 )
 
-func (i *iamDB) ListPolicy(projectID uint32, name string) (*[]model.Policy, error) {
-	query := `select * from policy where project_id = ?`
+func (i *iamDB) ListPolicy(projectID uint32, name string, roleID uint32) (*[]model.Policy, error) {
+	query := `select * from policy p where p.project_id = ?`
 	var params []interface{}
 	params = append(params, projectID)
 	if !zero.IsZeroVal(name) {
-		query += " and name = ?"
+		query += " and p.name = ?"
 		params = append(params, name)
+	}
+	if !zero.IsZeroVal(roleID) {
+		query += " and exists(select * from role_policy rp where rp.policy_id = p.policy_id and rp.role_id = ?)"
+		params = append(params, roleID)
 	}
 	var data []model.Policy
 	if err := i.Slave.Raw(query, params...).Scan(&data).Error; err != nil {

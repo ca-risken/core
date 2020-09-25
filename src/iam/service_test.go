@@ -120,7 +120,7 @@ func (m *mockIAMRepository) PutUser(*model.User) (*model.User, error) {
 	args := m.Called()
 	return args.Get(0).(*model.User), args.Error(1)
 }
-func (m *mockIAMRepository) ListRole(uint32, string) (*[]model.Role, error) {
+func (m *mockIAMRepository) ListRole(uint32, string, uint32) (*[]model.Role, error) {
 	args := m.Called()
 	return args.Get(0).(*[]model.Role), args.Error(1)
 }
@@ -148,7 +148,7 @@ func (m *mockIAMRepository) DetachRole(uint32, uint32, uint32) error {
 	args := m.Called()
 	return args.Error(0)
 }
-func (m *mockIAMRepository) ListPolicy(uint32, string) (*[]model.Policy, error) {
+func (m *mockIAMRepository) ListPolicy(uint32, string, uint32) (*[]model.Policy, error) {
 	args := m.Called()
 	return args.Get(0).(*[]model.Policy), args.Error(1)
 }
