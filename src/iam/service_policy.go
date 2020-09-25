@@ -13,7 +13,7 @@ func (i *iamService) ListPolicy(ctx context.Context, req *iam.ListPolicyRequest)
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := i.repository.ListPolicy(req.ProjectId, req.Name)
+	list, err := i.repository.ListPolicy(req.ProjectId, req.Name, req.RoleId)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return &iam.ListPolicyResponse{}, nil

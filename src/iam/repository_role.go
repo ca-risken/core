@@ -7,13 +7,17 @@ import (
 	"github.com/vikyd/zero"
 )
 
-func (i *iamDB) ListRole(projectID uint32, name string) (*[]model.Role, error) {
-	query := `select * from role where project_id = ?`
+func (i *iamDB) ListRole(projectID uint32, name string, userID uint32) (*[]model.Role, error) {
+	query := `select * from role r where project_id = ?`
 	var params []interface{}
 	params = append(params, projectID)
 	if !zero.IsZeroVal(name) {
-		query += " and name = ?"
+		query += " and r.name = ?"
 		params = append(params, name)
+	}
+	if !zero.IsZeroVal(userID) {
+		query += " and exists (select * from user_role ur where ur.role_id = r.role_id and ur.user_id = ? )"
+		params = append(params, userID)
 	}
 	var data []model.Role
 	if err := i.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
