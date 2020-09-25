@@ -8,6 +8,7 @@ import "iam/entity.proto";
 message ListPolicyRequest {
   uint32 project_id = 1;
   string name = 2;
+  uint32 role_id = 3;
 }
 
 message ListPolicyResponse { repeated uint32 policy_id = 1; }
