@@ -4,7 +4,7 @@ import "time"
 
 // Alert entity model
 type Alert struct {
-	AlertID          uint64
+	AlertID          uint32 `gorm:"primary_key"`
 	AlertConditionID uint32
 	Description      string
 	Severity         string
@@ -16,7 +16,7 @@ type Alert struct {
 
 // AlertHistory entity model
 type AlertHistory struct {
-	AlertHistoryID uint64
+	AlertHistoryID uint32 `gorm:"primary_key"`
 	HistoryType    string
 	AlertID        uint32
 	Description    string
@@ -37,7 +37,7 @@ type RelAlertFinding struct {
 
 // AlertCondition entity model
 type AlertCondition struct {
-	AlertConditionID uint32
+	AlertConditionID uint32 `gorm:"primary_key"`
 	Description      string
 	Severity         string
 	ProjectID        uint32
@@ -49,7 +49,7 @@ type AlertCondition struct {
 
 // AlertRule entity model
 type AlertRule struct {
-	AlertRuleID  uint32
+	AlertRuleID  uint32 `gorm:"primary_key"`
 	Name         string
 	ProjectID    uint32
 	Score        float32
@@ -71,7 +71,7 @@ type AlertCondRule struct {
 
 // Notification entity model
 type Notification struct {
-	NotificationID uint32
+	NotificationID uint32 `gorm:"primary_key"`
 	Name           string
 	ProjectID      uint32
 	Type           string

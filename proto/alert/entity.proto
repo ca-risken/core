@@ -5,7 +5,7 @@ option go_package = "github.com/CyberAgent/mimosa-core/proto/alert";
 
 // Alert
 message Alert {
-  uint64 alert_id = 1;
+  uint32 alert_id = 1;
   uint32 alert_condition_id = 2;
   string description = 3;
   string severity = 4;
@@ -17,7 +17,7 @@ message Alert {
 
 // AlertForUpsert
 message AlertForUpsert {
-  uint64 alert_id = 1;
+  uint32 alert_id = 1;
   uint32 alert_condition_id = 2;
   string description = 3;
   string severity = 4;
@@ -27,7 +27,7 @@ message AlertForUpsert {
 
 // AlertHistory
 message AlertHistory {
-  uint64 alert_history_id = 1;
+  uint32 alert_history_id = 1;
   string history_type = 2;
   uint32 alert_id = 3;
   string description = 4;
@@ -39,7 +39,7 @@ message AlertHistory {
 
 // AlertHistoryForUpsert
 message AlertHistoryForUpsert {
-  uint64 alert_history_id = 1;
+  uint32 alert_history_id = 1;
   string history_type = 2;
   uint32 alert_id = 3;
   string description = 4;

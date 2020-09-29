@@ -162,8 +162,8 @@ func (r *DeleteAlertConditionRequest) Validate() error {
 func (r *ListAlertRuleRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ProjectId, validation.Required),
-		validation.Field(&r.FromScore, validation.NilOrNotEmpty, validation.Min(0.0), validation.Max(1.0)),
-		validation.Field(&r.ToScore, validation.NilOrNotEmpty, validation.Min(0.0), validation.Max(1.0)),
+		validation.Field(&r.FromScore, validation.Min(0.0), validation.Max(1.0)),
+		validation.Field(&r.ToScore, validation.Min(0.0), validation.Max(1.0)),
 	)
 }
 

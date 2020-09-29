@@ -580,12 +580,12 @@ func TestValidate_ListAlertRuleRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &ListAlertRuleRequest{ProjectId: 1001, FromScore: 0.1, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix()},
+			input:   &ListAlertRuleRequest{ProjectId: 1001, FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix()},
 			wantErr: false,
 		},
 		{
 			name:    "NG Required(project_id)",
-			input:   &ListAlertRuleRequest{FromScore: 0.1, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix()},
+			input:   &ListAlertRuleRequest{FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix()},
 			wantErr: true,
 		},
 	}
