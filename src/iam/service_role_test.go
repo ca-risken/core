@@ -25,7 +25,7 @@ func TestListRole(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: &iam.ListRoleRequest{ProjectId: 1, Name: "nm"},
+			input: &iam.ListRoleRequest{ProjectId: 1, Name: "nm", UserId: 1},
 			want:  &iam.ListRoleResponse{RoleId: []uint32{1, 2, 3}},
 			mockResponce: &[]model.Role{
 				{RoleID: 1, Name: "nm"},
@@ -35,7 +35,7 @@ func TestListRole(t *testing.T) {
 		},
 		{
 			name:      "OK empty reponse",
-			input:     &iam.ListRoleRequest{ProjectId: 1, Name: "nm"},
+			input:     &iam.ListRoleRequest{ProjectId: 1, Name: "nm", UserId: 1},
 			want:      &iam.ListRoleResponse{},
 			mockError: gorm.ErrRecordNotFound,
 		},

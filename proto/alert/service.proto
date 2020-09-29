@@ -76,8 +76,7 @@ service AlertService {
       returns (google.protobuf.Empty);
 
   // AnalyzeAlert
-  rpc AnalyzeAlert(AnalyzeAlertRequest)
-      returns (google.protobuf.Empty);
+  rpc AnalyzeAlert(AnalyzeAlertRequest) returns (google.protobuf.Empty);
 }
 
 message ListAlertRequest {
@@ -181,7 +180,9 @@ message ListAlertConditionRequest {
   int64 to_at = 5;
 }
 
-message ListAlertConditionResponse { repeated AlertCondition alert_condition = 1; }
+message ListAlertConditionResponse {
+  repeated AlertCondition alert_condition = 1;
+}
 
 message GetAlertConditionRequest {
   uint32 project_id = 1;
@@ -239,7 +240,9 @@ message ListAlertCondRuleRequest {
   int64 to_at = 5;
 }
 
-message ListAlertCondRuleResponse { repeated AlertCondRule alert_cond_rule = 1; }
+message ListAlertCondRuleResponse {
+  repeated AlertCondRule alert_cond_rule = 1;
+}
 
 message GetAlertCondRuleRequest {
   uint32 project_id = 1;
@@ -327,6 +330,4 @@ message DeleteAlertCondNotificationRequest {
   uint32 notification_id = 3;
 }
 
-message AnalyzeAlertRequest {
-  uint32 project_id = 1;
-}
+message AnalyzeAlertRequest { uint32 project_id = 1; }

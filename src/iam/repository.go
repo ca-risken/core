@@ -18,7 +18,7 @@ type iamRepository interface {
 	PutUser(*model.User) (*model.User, error)
 
 	// Role
-	ListRole(uint32, string) (*[]model.Role, error)
+	ListRole(uint32, string, uint32) (*[]model.Role, error)
 	GetRole(uint32, uint32) (*model.Role, error)
 	GetRoleByName(uint32, string) (*model.Role, error)
 	PutRole(r *model.Role) (*model.Role, error)
@@ -27,7 +27,7 @@ type iamRepository interface {
 	DetachRole(uint32, uint32, uint32) error
 
 	// Policy
-	ListPolicy(uint32, string) (*[]model.Policy, error)
+	ListPolicy(uint32, string, uint32) (*[]model.Policy, error)
 	GetPolicy(uint32, uint32) (*model.Policy, error)
 	GetPolicyByName(uint32, string) (*model.Policy, error)
 	PutPolicy(*model.Policy) (*model.Policy, error)
