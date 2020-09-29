@@ -93,7 +93,7 @@ message ListAlertResponse { repeated Alert alert = 1; }
 
 message GetAlertRequest {
   uint32 project_id = 1;
-  uint64 alert_id = 2;
+  uint32 alert_id = 2;
 }
 
 message GetAlertResponse { Alert alert = 1; }
@@ -107,7 +107,7 @@ message PutAlertResponse { Alert alert = 1; }
 
 message DeleteAlertRequest {
   uint32 project_id = 1;
-  uint64 alert_id = 2;
+  uint32 alert_id = 2;
 }
 
 message ListAlertHistoryRequest {
@@ -123,7 +123,7 @@ message ListAlertHistoryResponse { repeated AlertHistory alert_history = 1; }
 
 message GetAlertHistoryRequest {
   uint32 project_id = 1;
-  uint64 alert_history_id = 2;
+  uint32 alert_history_id = 2;
 }
 
 message GetAlertHistoryResponse { AlertHistory alert_history = 1; }
@@ -137,7 +137,7 @@ message PutAlertHistoryResponse { AlertHistory alert_history = 1; }
 
 message DeleteAlertHistoryRequest {
   uint32 project_id = 1;
-  uint64 alert_history_id = 2;
+  uint32 alert_history_id = 2;
 }
 
 message ListRelAlertFindingRequest {
@@ -199,7 +199,7 @@ message PutAlertConditionResponse { AlertCondition alert_condition = 1; }
 
 message DeleteAlertConditionRequest {
   uint32 project_id = 1;
-  uint64 alert_condition_id = 2;
+  uint32 alert_condition_id = 2;
 }
 
 message ListAlertRuleRequest {
@@ -228,7 +228,7 @@ message PutAlertRuleResponse { AlertRule alert_rule = 1; }
 
 message DeleteAlertRuleRequest {
   uint32 project_id = 1;
-  uint64 alert_rule_id = 2;
+  uint32 alert_rule_id = 2;
 }
 
 message ListAlertCondRuleRequest {
@@ -287,7 +287,7 @@ message PutNotificationResponse { Notification notification = 1; }
 
 message DeleteNotificationRequest {
   uint32 project_id = 1;
-  uint64 notification_id = 2;
+  uint32 notification_id = 2;
 }
 
 message ListAlertCondNotificationRequest {
