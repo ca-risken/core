@@ -18,7 +18,7 @@ list-service:
 list-finding:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "from_score":0.0, "to_score":1.0, "from_at":1560000000, "to_at":1660000000}' \
+		-d '{"project_id":1001, "from_score":0.0, "to_score":1.0, "from_at":0, "to_at":253402268399}' \
 		localhost:8001 core.finding.FindingService.ListFinding
 
 .PHONY: get-finding

@@ -13,7 +13,7 @@ func (i *iamService) ListRole(ctx context.Context, req *iam.ListRoleRequest) (*i
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := i.repository.ListRole(req.ProjectId, req.Name)
+	list, err := i.repository.ListRole(req.ProjectId, req.Name, req.UserId)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return &iam.ListRoleResponse{}, nil

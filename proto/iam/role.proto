@@ -8,6 +8,7 @@ import "iam/entity.proto";
 message ListRoleRequest {
   uint32 project_id = 1;
   string name = 2;
+  uint32 user_id = 3;
 }
 
 message ListRoleResponse { repeated uint32 role_id = 1; }
