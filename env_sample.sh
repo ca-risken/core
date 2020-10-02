@@ -18,3 +18,4 @@ export DB_LOG_MODE="true"
 
 # grpc server
 export IAM_SVC_ADDR="iam:8002"
+export FINDING_SVC_ADDR="finding:8001"
