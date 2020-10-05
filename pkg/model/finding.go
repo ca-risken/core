@@ -22,8 +22,7 @@ type FindingTag struct {
 	FindingTagID uint64
 	FindingID    uint64
 	ProjectID    uint32
-	TagKey       string
-	TagValue     string
+	Tag          string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
@@ -42,8 +41,7 @@ type ResourceTag struct {
 	ResourceTagID uint64
 	ResourceID    uint64
 	ProjectID     uint32
-	TagKey        string
-	TagValue      string
+	Tag           string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 }
