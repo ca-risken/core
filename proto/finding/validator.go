@@ -169,8 +169,7 @@ func (f *FindingForUpsert) Validate() error {
 func (f *FindingTagForUpsert) Validate() error {
 	return validation.ValidateStruct(f,
 		validation.Field(&f.FindingId, validation.Required),
-		validation.Field(&f.TagKey, validation.Required, validation.Length(0, 64)),
-		validation.Field(&f.TagValue, validation.Length(0, 200)),
+		validation.Field(&f.Tag, validation.Required, validation.Length(0, 64)),
 	)
 }
 
@@ -185,7 +184,6 @@ func (r *ResourceForUpsert) Validate() error {
 func (r *ResourceTagForUpsert) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ResourceId, validation.Required),
-		validation.Field(&r.TagKey, validation.Required, validation.Length(0, 64)),
-		validation.Field(&r.TagValue, validation.Length(0, 200)),
+		validation.Field(&r.Tag, validation.Required, validation.Length(0, 64)),
 	)
 }
