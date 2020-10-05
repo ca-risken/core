@@ -248,12 +248,12 @@ func TestListFindingTag(t *testing.T) {
 			name:  "OK",
 			input: &finding.ListFindingTagRequest{ProjectId: 1, FindingId: 1001},
 			want: &finding.ListFindingTagResponse{Tag: []*finding.FindingTag{
-				{FindingTagId: 1, FindingId: 111, TagKey: "k-1", TagValue: "v-1", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-				{FindingTagId: 2, FindingId: 111, TagKey: "k-2", TagValue: "v-2", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+				{FindingTagId: 1, FindingId: 111, Tag: "tag1", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+				{FindingTagId: 2, FindingId: 111, Tag: "tag2", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 			}},
 			mockResp: &[]model.FindingTag{
-				{FindingTagID: 1, FindingID: 111, TagKey: "k-1", TagValue: "v-1", CreatedAt: now, UpdatedAt: now},
-				{FindingTagID: 2, FindingID: 111, TagKey: "k-2", TagValue: "v-2", CreatedAt: now, UpdatedAt: now},
+				{FindingTagID: 1, FindingID: 111, Tag: "tag1", CreatedAt: now, UpdatedAt: now},
+				{FindingTagID: 2, FindingID: 111, Tag: "tag2", CreatedAt: now, UpdatedAt: now},
 			},
 			mockErr: nil,
 		},
@@ -309,34 +309,34 @@ func TestTagFinding(t *testing.T) {
 	}{
 		{
 			name:       "OK Insert",
-			input:      &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
-			want:       &finding.TagFindingResponse{Tag: &finding.FindingTag{FindingTagId: 10011, ProjectId: 1, FindingId: 1001, TagKey: "k", TagValue: "v", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			input:      &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, ProjectId: 1, Tag: "tag"}},
+			want:       &finding.TagFindingResponse{Tag: &finding.FindingTag{FindingTagId: 10011, ProjectId: 1, FindingId: 1001, Tag: "tag", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetErr: gorm.ErrRecordNotFound,
-			mockUpResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, ProjectID: 1, TagKey: "k", TagValue: "v", CreatedAt: now, UpdatedAt: now},
+			mockUpResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, ProjectID: 1, Tag: "tag", CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:        "OK Update",
-			input:       &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
-			want:        &finding.TagFindingResponse{Tag: &finding.FindingTag{FindingTagId: 10011, ProjectId: 1, FindingId: 1001, TagKey: "k", TagValue: "v", CreatedAt: now.Add(-1 * 24 * time.Hour).Unix(), UpdatedAt: now.Unix()}},
-			mockGetResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, ProjectID: 1, TagKey: "k", TagValue: "v", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now.Add(-1 * 24 * time.Hour)},
-			mockUpResp:  &model.FindingTag{FindingTagID: 10011, FindingID: 1001, ProjectID: 1, TagKey: "k", TagValue: "v", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now},
+			input:       &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, ProjectId: 1, Tag: "tag"}},
+			want:        &finding.TagFindingResponse{Tag: &finding.FindingTag{FindingTagId: 10011, ProjectId: 1, FindingId: 1001, Tag: "tag", CreatedAt: now.Add(-1 * 24 * time.Hour).Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, ProjectID: 1, Tag: "tag", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now.Add(-1 * 24 * time.Hour)},
+			mockUpResp:  &model.FindingTag{FindingTagID: 10011, FindingID: 1001, ProjectID: 1, Tag: "tag", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now},
 		},
 		{
 			name:    "NG Invalid request",
-			input:   &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, TagKey: "", TagValue: "v"}},
+			input:   &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, Tag: ""}},
 			wantErr: true,
 		},
 		{
 			name:       "NG GetFindingTagByKey error",
-			input:      &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, TagKey: "k", TagValue: "v"}},
+			input:      &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, Tag: "tag"}},
 			wantErr:    true,
 			mockGetErr: gorm.ErrInvalidSQL,
 		},
 		{
 			name:        "NG TagFinding error",
-			input:       &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, TagKey: "k", TagValue: "v"}},
+			input:       &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, Tag: "tag"}},
 			wantErr:     true,
-			mockGetResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, TagKey: "k", TagValue: "v", CreatedAt: now, UpdatedAt: now},
+			mockGetResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, Tag: "tag", CreatedAt: now, UpdatedAt: now},
 			mockUpErr:   gorm.ErrInvalidSQL,
 		},
 	}
@@ -641,12 +641,12 @@ func TestListResourceTag(t *testing.T) {
 			name:  "OK",
 			input: &finding.ListResourceTagRequest{ProjectId: 1, ResourceId: 1001},
 			want: &finding.ListResourceTagResponse{Tag: []*finding.ResourceTag{
-				{ResourceTagId: 1, ResourceId: 111, TagKey: "k-1", TagValue: "v-1", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-				{ResourceTagId: 2, ResourceId: 111, TagKey: "k-2", TagValue: "v-2", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+				{ResourceTagId: 1, ResourceId: 111, Tag: "tag1", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+				{ResourceTagId: 2, ResourceId: 111, Tag: "tag2", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 			}},
 			mockResp: &[]model.ResourceTag{
-				{ResourceTagID: 1, ResourceID: 111, TagKey: "k-1", TagValue: "v-1", CreatedAt: now, UpdatedAt: now},
-				{ResourceTagID: 2, ResourceID: 111, TagKey: "k-2", TagValue: "v-2", CreatedAt: now, UpdatedAt: now},
+				{ResourceTagID: 1, ResourceID: 111, Tag: "tag1", CreatedAt: now, UpdatedAt: now},
+				{ResourceTagID: 2, ResourceID: 111, Tag: "tag2", CreatedAt: now, UpdatedAt: now},
 			},
 		},
 		{
@@ -701,34 +701,34 @@ func TestTagResource(t *testing.T) {
 	}{
 		{
 			name:       "OK Insert",
-			input:      &finding.TagResourceRequest{ProjectId: 1, Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
-			want:       &finding.TagResourceResponse{Tag: &finding.ResourceTag{ResourceTagId: 10011, ResourceId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			input:      &finding.TagResourceRequest{ProjectId: 1, Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, ProjectId: 1, Tag: "tag"}},
+			want:       &finding.TagResourceResponse{Tag: &finding.ResourceTag{ResourceTagId: 10011, ResourceId: 1001, ProjectId: 1, Tag: "tag", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetErr: gorm.ErrRecordNotFound,
-			mockUpResp: &model.ResourceTag{ResourceTagID: 10011, ResourceID: 1001, ProjectID: 1, TagKey: "k", TagValue: "v", CreatedAt: now, UpdatedAt: now},
+			mockUpResp: &model.ResourceTag{ResourceTagID: 10011, ResourceID: 1001, ProjectID: 1, Tag: "tag", CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:        "OK Update",
-			input:       &finding.TagResourceRequest{ProjectId: 1, Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
-			want:        &finding.TagResourceResponse{Tag: &finding.ResourceTag{ResourceTagId: 10011, ResourceId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v", CreatedAt: now.Add(-1 * 24 * time.Hour).Unix(), UpdatedAt: now.Unix()}},
-			mockGetResp: &model.ResourceTag{ResourceTagID: 10011, ResourceID: 1001, ProjectID: 1, TagKey: "k", TagValue: "v", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now.Add(-1 * 24 * time.Hour)},
-			mockUpResp:  &model.ResourceTag{ResourceTagID: 10011, ResourceID: 1001, ProjectID: 1, TagKey: "k", TagValue: "v", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now},
+			input:       &finding.TagResourceRequest{ProjectId: 1, Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, ProjectId: 1, Tag: "tag"}},
+			want:        &finding.TagResourceResponse{Tag: &finding.ResourceTag{ResourceTagId: 10011, ResourceId: 1001, ProjectId: 1, Tag: "tag", CreatedAt: now.Add(-1 * 24 * time.Hour).Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp: &model.ResourceTag{ResourceTagID: 10011, ResourceID: 1001, ProjectID: 1, Tag: "tag", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now.Add(-1 * 24 * time.Hour)},
+			mockUpResp:  &model.ResourceTag{ResourceTagID: 10011, ResourceID: 1001, ProjectID: 1, Tag: "tag", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now},
 		},
 		{
 			name:    "NG Invalid request",
-			input:   &finding.TagResourceRequest{ProjectId: 1, Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, TagKey: "", TagValue: "v"}},
+			input:   &finding.TagResourceRequest{ProjectId: 1, Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, Tag: "tag"}},
 			wantErr: true,
 		},
 		{
 			name:       "NG GetFindingTagByKey error",
-			input:      &finding.TagResourceRequest{ProjectId: 1, Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, TagKey: "k", TagValue: "v"}},
+			input:      &finding.TagResourceRequest{ProjectId: 1, Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, Tag: "tag"}},
 			wantErr:    true,
 			mockGetErr: gorm.ErrInvalidSQL,
 		},
 		{
 			name:        "NG TagFinding error",
-			input:       &finding.TagResourceRequest{ProjectId: 1, Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, TagKey: "k", TagValue: "v"}},
+			input:       &finding.TagResourceRequest{ProjectId: 1, Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, Tag: "tag"}},
 			wantErr:     true,
-			mockGetResp: &model.ResourceTag{ResourceTagID: 10011, ResourceID: 1001, TagKey: "k", TagValue: "v", CreatedAt: now, UpdatedAt: now},
+			mockGetResp: &model.ResourceTag{ResourceTagID: 10011, ResourceID: 1001, Tag: "tag", CreatedAt: now, UpdatedAt: now},
 			mockUpErr:   gorm.ErrInvalidSQL,
 		},
 	}
@@ -826,8 +826,8 @@ func TestConvertFindingTag(t *testing.T) {
 	}{
 		{
 			name:  "OK convert unix time",
-			input: &model.FindingTag{FindingTagID: 11111, FindingID: 10001, TagKey: "k", TagValue: "v", CreatedAt: now, UpdatedAt: now},
-			want:  &finding.FindingTag{FindingTagId: 11111, FindingId: 10001, TagKey: "k", TagValue: "v", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+			input: &model.FindingTag{FindingTagID: 11111, FindingID: 10001, Tag: "tag", CreatedAt: now, UpdatedAt: now},
+			want:  &finding.FindingTag{FindingTagId: 11111, FindingId: 10001, Tag: "tag", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 		},
 		{
 			name:  "OK empty",

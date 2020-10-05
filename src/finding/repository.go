@@ -219,26 +219,26 @@ func (f *findingDB) ListFindingTag(projectID uint32, findingID uint64) (*[]model
 
 const insertTagFinding = `
 INSERT INTO finding_tag
-  (finding_tag_id, finding_id, project_id, tag_key, tag_value)
+  (finding_tag_id, finding_id, project_id, tag)
 VALUES
-  (?, ?, ?, ?, ?)
+  (?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
-  tag_value=VALUES(tag_value)
+  tag=VALUES(tag)
 `
 
 func (f *findingDB) TagFinding(tag *model.FindingTag) (*model.FindingTag, error) {
 	if err := f.Master.Exec(insertTagFinding,
-		tag.FindingTagID, tag.FindingID, tag.ProjectID, tag.TagKey, tag.TagValue).Error; err != nil {
+		tag.FindingTagID, tag.FindingID, tag.ProjectID, tag.Tag).Error; err != nil {
 		return nil, err
 	}
-	return f.GetFindingTagByKey(tag.ProjectID, tag.FindingID, tag.TagKey)
+	return f.GetFindingTagByKey(tag.ProjectID, tag.FindingID, tag.Tag)
 }
 
-const selectGetFindingTagByKey = `select * from finding_tag where project_id = ? and finding_id = ? and tag_key = ?`
+const selectGetFindingTagByKey = `select * from finding_tag where project_id = ? and finding_id = ? and tag = ?`
 
-func (f *findingDB) GetFindingTagByKey(projectID uint32, findingID uint64, tagKey string) (*model.FindingTag, error) {
+func (f *findingDB) GetFindingTagByKey(projectID uint32, findingID uint64, tag string) (*model.FindingTag, error) {
 	var data model.FindingTag
-	if err := f.Slave.Raw(selectGetFindingTagByKey, projectID, findingID, tagKey).First(&data).Error; err != nil {
+	if err := f.Slave.Raw(selectGetFindingTagByKey, projectID, findingID, tag).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -322,11 +322,11 @@ func (f *findingDB) ListResourceTag(projectID uint32, resourceID uint64) (*[]mod
 	return &data, nil
 }
 
-const selectGetResourceTagByKey = `select * from resource_tag where project_id = ? and resource_id = ? and tag_key = ?`
+const selectGetResourceTagByKey = `select * from resource_tag where project_id = ? and resource_id = ? and tag = ?`
 
-func (f *findingDB) GetResourceTagByKey(projectID uint32, resourceID uint64, tagKey string) (*model.ResourceTag, error) {
+func (f *findingDB) GetResourceTagByKey(projectID uint32, resourceID uint64, tag string) (*model.ResourceTag, error) {
 	var data model.ResourceTag
-	if err := f.Slave.Raw(selectGetResourceTagByKey, projectID, resourceID, tagKey).First(&data).Error; err != nil {
+	if err := f.Slave.Raw(selectGetResourceTagByKey, projectID, resourceID, tag).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -344,19 +344,19 @@ func (f *findingDB) GetResourceTagByID(projectID uint32, resourceID uint64) (*mo
 
 const insertTagResource = `
 INSERT INTO resource_tag
-  (resource_tag_id, resource_id, project_id, tag_key, tag_value)
+  (resource_tag_id, resource_id, project_id, tag)
 VALUES
-  (?, ?, ?, ?, ?)
+  (?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
-  tag_value=VALUES(tag_value)
+  tag=VALUES(tag)
 `
 
 func (f *findingDB) TagResource(tag *model.ResourceTag) (*model.ResourceTag, error) {
 	if err := f.Master.Exec(insertTagResource,
-		tag.ResourceTagID, tag.ResourceID, tag.ProjectID, tag.TagKey, tag.TagValue).Error; err != nil {
+		tag.ResourceTagID, tag.ResourceID, tag.ProjectID, tag.Tag).Error; err != nil {
 		return nil, err
 	}
-	return f.GetResourceTagByKey(tag.ProjectID, tag.ResourceID, tag.TagKey)
+	return f.GetResourceTagByKey(tag.ProjectID, tag.ResourceID, tag.Tag)
 }
 
 const deleteUntagResource = `delete from resource_tag where project_id = ? and resource_tag_id = ?`

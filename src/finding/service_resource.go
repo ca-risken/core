@@ -134,7 +134,7 @@ func (f *findingService) TagResource(ctx context.Context, req *finding.TagResour
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	savedData, err := f.repository.GetResourceTagByKey(req.ProjectId, req.Tag.ResourceId, req.Tag.TagKey)
+	savedData, err := f.repository.GetResourceTagByKey(req.ProjectId, req.Tag.ResourceId, req.Tag.Tag)
 	noRecord := gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		return nil, err
@@ -149,8 +149,7 @@ func (f *findingService) TagResource(ctx context.Context, req *finding.TagResour
 		ResourceTagID: resourceTagID,
 		ResourceID:    req.Tag.ResourceId,
 		ProjectID:     req.Tag.ProjectId,
-		TagKey:        req.Tag.TagKey,
-		TagValue:      req.Tag.TagValue,
+		Tag:           req.Tag.Tag,
 	}
 	registerd, err := f.repository.TagResource(tag)
 	if err != nil {
@@ -191,8 +190,7 @@ func convertResourceTag(r *model.ResourceTag) *finding.ResourceTag {
 		ResourceTagId: r.ResourceTagID,
 		ResourceId:    r.ResourceID,
 		ProjectId:     r.ProjectID,
-		TagKey:        r.TagKey,
-		TagValue:      r.TagValue,
+		Tag:           r.Tag,
 		CreatedAt:     r.CreatedAt.Unix(),
 		UpdatedAt:     r.UpdatedAt.Unix(),
 	}
