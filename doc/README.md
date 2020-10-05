@@ -201,7 +201,7 @@ Alert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| alert_id | [uint64](#uint64) |  |  |
+| alert_id | [uint32](#uint32) |  |  |
 | alert_condition_id | [uint32](#uint32) |  |  |
 | description | [string](#string) |  |  |
 | severity | [string](#string) |  |  |
@@ -341,7 +341,7 @@ AlertForUpsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| alert_id | [uint64](#uint64) |  |  |
+| alert_id | [uint32](#uint32) |  |  |
 | alert_condition_id | [uint32](#uint32) |  |  |
 | description | [string](#string) |  |  |
 | severity | [string](#string) |  |  |
@@ -361,7 +361,7 @@ AlertHistory
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| alert_history_id | [uint64](#uint64) |  |  |
+| alert_history_id | [uint32](#uint32) |  |  |
 | history_type | [string](#string) |  |  |
 | alert_id | [uint32](#uint32) |  |  |
 | description | [string](#string) |  |  |
@@ -383,7 +383,7 @@ AlertHistoryForUpsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| alert_history_id | [uint64](#uint64) |  |  |
+| alert_history_id | [uint32](#uint32) |  |  |
 | history_type | [string](#string) |  |  |
 | alert_id | [uint32](#uint32) |  |  |
 | description | [string](#string) |  |  |
@@ -589,7 +589,7 @@ RelAlertFindingForUpsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
-| alert_condition_id | [uint64](#uint64) |  |  |
+| alert_condition_id | [uint32](#uint32) |  |  |
 
 
 
@@ -605,7 +605,7 @@ RelAlertFindingForUpsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
-| alert_history_id | [uint64](#uint64) |  |  |
+| alert_history_id | [uint32](#uint32) |  |  |
 
 
 
@@ -621,7 +621,7 @@ RelAlertFindingForUpsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
-| alert_id | [uint64](#uint64) |  |  |
+| alert_id | [uint32](#uint32) |  |  |
 
 
 
@@ -637,7 +637,7 @@ RelAlertFindingForUpsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
-| alert_rule_id | [uint64](#uint64) |  |  |
+| alert_rule_id | [uint32](#uint32) |  |  |
 
 
 
@@ -653,7 +653,7 @@ RelAlertFindingForUpsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
-| notification_id | [uint64](#uint64) |  |  |
+| notification_id | [uint32](#uint32) |  |  |
 
 
 
@@ -781,7 +781,7 @@ RelAlertFindingForUpsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
-| alert_history_id | [uint64](#uint64) |  |  |
+| alert_history_id | [uint32](#uint32) |  |  |
 
 
 
@@ -812,7 +812,7 @@ RelAlertFindingForUpsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
-| alert_id | [uint64](#uint64) |  |  |
+| alert_id | [uint32](#uint32) |  |  |
 
 
 
@@ -1567,8 +1567,7 @@ FindingTag
 | finding_tag_id | [uint64](#uint64) |  |  |
 | finding_id | [uint64](#uint64) |  |  |
 | project_id | [uint32](#uint32) |  |  |
-| tag_key | [string](#string) |  |  |
-| tag_value | [string](#string) |  |  |
+| tag | [string](#string) |  |  |
 | created_at | [int64](#int64) |  |  |
 | updated_at | [int64](#int64) |  |  |
 
@@ -1588,8 +1587,7 @@ FindingTag For Upsert
 | ----- | ---- | ----- | ----------- |
 | finding_id | [uint64](#uint64) |  |  |
 | project_id | [uint32](#uint32) |  |  |
-| tag_key | [string](#string) |  |  |
-| tag_value | [string](#string) |  |  |
+| tag | [string](#string) |  |  |
 
 
 
@@ -1643,8 +1641,7 @@ ResourceTag
 | resource_tag_id | [uint64](#uint64) |  |  |
 | resource_id | [uint64](#uint64) |  |  |
 | project_id | [uint32](#uint32) |  |  |
-| tag_key | [string](#string) |  |  |
-| tag_value | [string](#string) |  |  |
+| tag | [string](#string) |  |  |
 | created_at | [int64](#int64) |  |  |
 | updated_at | [int64](#int64) |  |  |
 
@@ -1664,8 +1661,7 @@ ResourceTag For upsert
 | ----- | ---- | ----- | ----------- |
 | resource_id | [uint64](#uint64) |  |  |
 | project_id | [uint32](#uint32) |  |  |
-| tag_key | [string](#string) |  |  |
-| tag_value | [string](#string) |  |  |
+| tag | [string](#string) |  |  |
 
 
 

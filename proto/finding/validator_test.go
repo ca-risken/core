@@ -229,7 +229,7 @@ func TestValidate_TagFindingRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &TagFindingRequest{ProjectId: 1, Tag: &FindingTagForUpsert{FindingId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
+			input:   &TagFindingRequest{ProjectId: 1, Tag: &FindingTagForUpsert{FindingId: 1001, ProjectId: 1, Tag: "tag"}},
 			wantErr: false,
 		},
 		{
@@ -239,12 +239,12 @@ func TestValidate_TagFindingRequest(t *testing.T) {
 		},
 		{
 			name:    "NG Required(project_id)",
-			input:   &TagFindingRequest{Tag: &FindingTagForUpsert{FindingId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
+			input:   &TagFindingRequest{Tag: &FindingTagForUpsert{FindingId: 1001, ProjectId: 1, Tag: "tag"}},
 			wantErr: true,
 		},
 		{
 			name:    "NG Not Equal(project_id != tag.project_id)",
-			input:   &TagFindingRequest{ProjectId: 999, Tag: &FindingTagForUpsert{FindingId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
+			input:   &TagFindingRequest{ProjectId: 999, Tag: &FindingTagForUpsert{FindingId: 1001, ProjectId: 1, Tag: "tag"}},
 			wantErr: true,
 		},
 	}
@@ -502,7 +502,7 @@ func TestValidate_TagResourceRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &TagResourceRequest{ProjectId: 1, Tag: &ResourceTagForUpsert{ResourceId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
+			input:   &TagResourceRequest{ProjectId: 1, Tag: &ResourceTagForUpsert{ResourceId: 1001, ProjectId: 1, Tag: "tag"}},
 			wantErr: false,
 		},
 		{
@@ -512,12 +512,12 @@ func TestValidate_TagResourceRequest(t *testing.T) {
 		},
 		{
 			name:    "NG Required(project_id)",
-			input:   &TagResourceRequest{Tag: &ResourceTagForUpsert{ResourceId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
+			input:   &TagResourceRequest{Tag: &ResourceTagForUpsert{ResourceId: 1001, ProjectId: 1, Tag: "tag"}},
 			wantErr: true,
 		},
 		{
 			name:    "NG Not Equal(project_id != tag.project_id)",
-			input:   &TagResourceRequest{ProjectId: 999, Tag: &ResourceTagForUpsert{ResourceId: 1001, ProjectId: 1, TagKey: "k", TagValue: "v"}},
+			input:   &TagResourceRequest{ProjectId: 999, Tag: &ResourceTagForUpsert{ResourceId: 1001, ProjectId: 1, Tag: "tag"}},
 			wantErr: true,
 		},
 	}
@@ -674,27 +674,22 @@ func TestValidate_FindingTagForUpsert(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &FindingTagForUpsert{FindingId: 1001, TagKey: "key", TagValue: "value"},
+			input:   &FindingTagForUpsert{FindingId: 1001, Tag: "tag"},
 			wantErr: false,
 		},
 		{
 			name:    "NG required FindingId",
-			input:   &FindingTagForUpsert{FindingId: 0, TagKey: "key", TagValue: "value"},
+			input:   &FindingTagForUpsert{FindingId: 0, Tag: "tag"},
 			wantErr: true,
 		},
 		{
-			name:    "NG required TagKey",
-			input:   &FindingTagForUpsert{FindingId: 1001, TagKey: "", TagValue: "value"},
+			name:    "NG required Tag",
+			input:   &FindingTagForUpsert{FindingId: 1001},
 			wantErr: true,
 		},
 		{
-			name:    "NG too long TagKey",
-			input:   &FindingTagForUpsert{FindingId: 1001, TagKey: "12345678901234567890123456789012345678901234567890123456789012345", TagValue: "value"},
-			wantErr: true,
-		},
-		{
-			name:    "NG too long TagValue",
-			input:   &FindingTagForUpsert{FindingId: 1001, TagKey: "key", TagValue: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=1"},
+			name:    "NG too long Tag",
+			input:   &FindingTagForUpsert{FindingId: 1001, Tag: "12345678901234567890123456789012345678901234567890123456789012345"},
 			wantErr: true,
 		},
 	}
@@ -747,27 +742,22 @@ func TestValidate_ResourceTagForUpsert(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &ResourceTagForUpsert{ResourceId: 1001, TagKey: "key", TagValue: "value"},
+			input:   &ResourceTagForUpsert{ResourceId: 1001, Tag: "tag"},
 			wantErr: false,
 		},
 		{
 			name:    "NG required FindingId",
-			input:   &ResourceTagForUpsert{ResourceId: 0, TagKey: "key", TagValue: "value"},
+			input:   &ResourceTagForUpsert{ResourceId: 0, Tag: "tag"},
 			wantErr: true,
 		},
 		{
-			name:    "NG required TagKey",
-			input:   &ResourceTagForUpsert{ResourceId: 1001, TagKey: "", TagValue: "value"},
+			name:    "NG required Tag",
+			input:   &ResourceTagForUpsert{ResourceId: 1001},
 			wantErr: true,
 		},
 		{
-			name:    "NG too long TagKey",
-			input:   &ResourceTagForUpsert{ResourceId: 1001, TagKey: "12345678901234567890123456789012345678901234567890123456789012345", TagValue: "value"},
-			wantErr: true,
-		},
-		{
-			name:    "NG too long TagValue",
-			input:   &ResourceTagForUpsert{ResourceId: 1001, TagKey: "key", TagValue: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=1"},
+			name:    "NG too long Tag",
+			input:   &ResourceTagForUpsert{ResourceId: 1001, Tag: "12345678901234567890123456789012345678901234567890123456789012345"},
 			wantErr: true,
 		},
 	}
