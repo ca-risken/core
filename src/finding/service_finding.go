@@ -151,7 +151,7 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	savedData, err := f.repository.GetFindingTagByKey(req.ProjectId, req.Tag.FindingId, req.Tag.TagKey)
+	savedData, err := f.repository.GetFindingTagByKey(req.ProjectId, req.Tag.FindingId, req.Tag.Tag)
 	noRecord := gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		return nil, err
@@ -167,8 +167,7 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 		FindingTagID: findingTagID,
 		FindingID:    req.Tag.FindingId,
 		ProjectID:    req.Tag.ProjectId,
-		TagKey:       req.Tag.TagKey,
-		TagValue:     req.Tag.TagValue,
+		Tag:          req.Tag.Tag,
 	}
 	registerd, err := f.repository.TagFinding(tag)
 	if err != nil {
@@ -215,8 +214,7 @@ func convertFindingTag(f *model.FindingTag) *finding.FindingTag {
 		FindingTagId: f.FindingTagID,
 		FindingId:    f.FindingID,
 		ProjectId:    f.ProjectID,
-		TagKey:       f.TagKey,
-		TagValue:     f.TagValue,
+		Tag:          f.Tag,
 		CreatedAt:    f.CreatedAt.Unix(),
 		UpdatedAt:    f.UpdatedAt.Unix(),
 	}

@@ -53,7 +53,7 @@ list-finding-tag:
 tag-finding:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "tag":{"finding_id":1001, "project_id":1001, "tag_key":"key", "tag_value":"value"}}' \
+		-d '{"project_id":1001, "tag":{"finding_id":1001, "project_id":1001, "tag":"tag"}}' \
 		localhost:8001 core.finding.FindingService.TagFinding
 
 .PHONY: untag-finding
@@ -102,7 +102,7 @@ list-resource-tag:
 tag-resource:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "tag":{"resource_id":1001, "project_id":1001, "tag_key":"key", "tag_value":"value"}}' \
+		-d '{"project_id":1001, "tag":{"resource_id":1001, "project_id":1001, "tag":"tag"}}' \
 		localhost:8001 core.finding.FindingService.TagResource
 
 .PHONY: untag-resource
