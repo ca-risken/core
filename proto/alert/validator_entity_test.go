@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestValidate_AlertForUpsert(t *testing.T) {
+func TestValidateAlertForUpsert(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *AlertForUpsert
@@ -55,7 +55,7 @@ func TestValidate_AlertForUpsert(t *testing.T) {
 	}
 }
 
-func TestValidate_AlertHistoryForUpsert(t *testing.T) {
+func TestValidateAlertHistoryForUpsert(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *AlertHistoryForUpsert
@@ -110,7 +110,7 @@ func TestValidate_AlertHistoryForUpsert(t *testing.T) {
 	}
 }
 
-func TestValidate_RelAlertFindingForUpsert(t *testing.T) {
+func TestValidateRelAlertFindingForUpsert(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *RelAlertFindingForUpsert
@@ -144,7 +144,7 @@ func TestValidate_RelAlertFindingForUpsert(t *testing.T) {
 	}
 }
 
-func TestValidate_AlertConditionForUpsert(t *testing.T) {
+func TestValidateAlertConditionForUpsert(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *AlertConditionForUpsert
@@ -177,7 +177,7 @@ func TestValidate_AlertConditionForUpsert(t *testing.T) {
 		},
 		{
 			name:    "NG required project_id",
-			input:   &AlertConditionForUpsert{Description: "test_alert_condition", Severity: "high", ProjectId: 1001, AndOr: "and", Enabled: true},
+			input:   &AlertConditionForUpsert{Description: "test_alert_condition", Severity: "high", AndOr: "and", Enabled: true},
 			wantErr: true,
 		},
 		{
@@ -188,11 +188,6 @@ func TestValidate_AlertConditionForUpsert(t *testing.T) {
 		{
 			name:    "NG required and_or",
 			input:   &AlertConditionForUpsert{Description: "test_alert_condition", Severity: "high", ProjectId: 1001, Enabled: true},
-			wantErr: true,
-		},
-		{
-			name:    "NG required and_or",
-			input:   &AlertConditionForUpsert{Description: "test_alert_condition", Severity: "high", ProjectId: 1001, AndOr: "and"},
 			wantErr: true,
 		},
 	}
@@ -208,7 +203,7 @@ func TestValidate_AlertConditionForUpsert(t *testing.T) {
 	}
 }
 
-func TestValidate_AlertRuleForUpsert(t *testing.T) {
+func TestValidateAlertRuleForUpsert(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *AlertRuleForUpsert
@@ -216,7 +211,7 @@ func TestValidate_AlertRuleForUpsert(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &AlertRuleForUpsert{Name: "test_alert_rule", Score: 1.0, ProjectId: 1001, ResourceName: "test_resource", Tag: "test_tag", FindingCnt: 1},
+			input:   &AlertRuleForUpsert{Name: "test_alert_rule", Score: 1.0, ProjectId: 1001, ResourceName: "test_resource", FindingCnt: 1},
 			wantErr: false,
 		},
 		{
@@ -231,17 +226,12 @@ func TestValidate_AlertRuleForUpsert(t *testing.T) {
 		},
 		{
 			name:    "NG too small value score",
-			input:   &AlertRuleForUpsert{Name: "test_alert_rule", Score: -1.0, ProjectId: 1001, ResourceName: "test_resource", Tag: "test_tag", FindingCnt: 1},
+			input:   &AlertRuleForUpsert{Name: "test_alert_rule", Score: -0.1, ProjectId: 1001, ResourceName: "test_resource", Tag: "test_tag", FindingCnt: 1},
 			wantErr: true,
 		},
 		{
 			name:    "NG too large value score",
 			input:   &AlertRuleForUpsert{Name: "test_alert_rule", Score: 1.1, ProjectId: 1001, ResourceName: "test_resource", Tag: "test_tag", FindingCnt: 1},
-			wantErr: true,
-		},
-		{
-			name:    "NG required score",
-			input:   &AlertRuleForUpsert{Name: "test_alert_rule", ProjectId: 1001, ResourceName: "test_resource", Tag: "test_tag", FindingCnt: 1},
 			wantErr: true,
 		},
 		{
@@ -255,23 +245,8 @@ func TestValidate_AlertRuleForUpsert(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG required resource_name",
-			input:   &AlertRuleForUpsert{Name: "test_alert_rule", Score: 1.0, ProjectId: 1001, Tag: "test_tag", FindingCnt: 1},
-			wantErr: true,
-		},
-		{
 			name:    "NG too long tag",
 			input:   &AlertRuleForUpsert{Name: "test_alert_rule", Score: 1.0, ProjectId: 1001, ResourceName: "test_resource", Tag: "12345678901234567890123456789012345678901234567890123456789012345", FindingCnt: 1},
-			wantErr: true,
-		},
-		{
-			name:    "NG required tag",
-			input:   &AlertRuleForUpsert{Name: "test_alert_rule", Score: 1.0, ProjectId: 1001, ResourceName: "test_resource", FindingCnt: 1},
-			wantErr: true,
-		},
-		{
-			name:    "NG required finding_cnt",
-			input:   &AlertRuleForUpsert{Name: "test_alert_rule", Score: 1.0, ProjectId: 1001, ResourceName: "test_resource", Tag: "test_tag"},
 			wantErr: true,
 		},
 	}
@@ -287,7 +262,7 @@ func TestValidate_AlertRuleForUpsert(t *testing.T) {
 	}
 }
 
-func TestValidate_AlertCondRuleForUpsert(t *testing.T) {
+func TestValidateAlertCondRuleForUpsert(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *AlertCondRuleForUpsert
@@ -326,7 +301,7 @@ func TestValidate_AlertCondRuleForUpsert(t *testing.T) {
 	}
 }
 
-func TestValidate_NotificationForUpsert(t *testing.T) {
+func TestValidateNotificationForUpsert(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *NotificationForUpsert
@@ -385,7 +360,7 @@ func TestValidate_NotificationForUpsert(t *testing.T) {
 	}
 }
 
-func TestValidate_AlertCondNotificationForUpsert(t *testing.T) {
+func TestValidateAlertCondNotificationForUpsert(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *AlertCondNotificationForUpsert

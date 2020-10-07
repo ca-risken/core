@@ -365,9 +365,9 @@ func (e *AlertRuleForUpsert) Validate() error {
 	return validation.ValidateStruct(e,
 		validation.Field(&e.ProjectId, validation.Required),
 		validation.Field(&e.Name, validation.Required, validation.Length(0, 200)),
-		validation.Field(&e.Score, validation.NilOrNotEmpty, validation.Min(0.0), validation.Max(1.0)),
-		validation.Field(&e.ResourceName, validation.NilOrNotEmpty, validation.Length(0, 255)),
-		validation.Field(&e.Tag, validation.NilOrNotEmpty, validation.Length(0, 64)),
+		validation.Field(&e.Score, validation.Min(0.0), validation.Max(1.0)),
+		validation.Field(&e.ResourceName, validation.Length(0, 255)),
+		validation.Field(&e.Tag, validation.Length(0, 64)),
 		validation.Field(&e.FindingCnt, validation.Min(uint(1))),
 	)
 }
@@ -385,8 +385,8 @@ func (e *AlertCondRuleForUpsert) Validate() error {
 func (e *NotificationForUpsert) Validate() error {
 	return validation.ValidateStruct(e,
 		validation.Field(&e.ProjectId, validation.Required),
-		validation.Field(&e.Type, validation.Required),
-		validation.Field(&e.Name, validation.Required),
+		validation.Field(&e.Type, validation.Required, validation.Length(0, 64)),
+		validation.Field(&e.Name, validation.Required, validation.Length(0, 200)),
 		validation.Field(&e.NotifySetting, validation.Required, is.JSON),
 	)
 }

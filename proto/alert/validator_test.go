@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestValidate_ListAlertRequest(t *testing.T) {
+func TestValidateListAlertRequest(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
 		name    string
@@ -47,7 +47,7 @@ func TestValidate_ListAlertRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_GetAlertRequest(t *testing.T) {
+func TestValidateGetAlertRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *GetAlertRequest
@@ -81,7 +81,7 @@ func TestValidate_GetAlertRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_PutAlertRequest(t *testing.T) {
+func TestValidatePutAlertRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *PutAlertRequest
@@ -116,7 +116,7 @@ func TestValidate_PutAlertRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_DeleteAlertRequest(t *testing.T) {
+func TestValidateDeleteAlertRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *DeleteAlertRequest
@@ -150,7 +150,7 @@ func TestValidate_DeleteAlertRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_ListAlertHistoryRequest(t *testing.T) {
+func TestValidateListAlertHistoryRequest(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
 		name    string
@@ -190,7 +190,7 @@ func TestValidate_ListAlertHistoryRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_GetAlertHistoryRequest(t *testing.T) {
+func TestValidateGetAlertHistoryRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *GetAlertHistoryRequest
@@ -224,7 +224,7 @@ func TestValidate_GetAlertHistoryRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_PutAlertHistoryRequest(t *testing.T) {
+func TestValidatePutAlertHistoryRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *PutAlertHistoryRequest
@@ -258,7 +258,7 @@ func TestValidate_PutAlertHistoryRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_DeleteAlertHistoryRequest(t *testing.T) {
+func TestValidateDeleteAlertHistoryRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *DeleteAlertHistoryRequest
@@ -292,7 +292,7 @@ func TestValidate_DeleteAlertHistoryRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_ListRelAlertFindingRequest(t *testing.T) {
+func TestValidateListRelAlertFindingRequest(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
 		name    string
@@ -322,7 +322,7 @@ func TestValidate_ListRelAlertFindingRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_GetRelAlertFindingRequest(t *testing.T) {
+func TestValidateGetRelAlertFindingRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *GetRelAlertFindingRequest
@@ -361,7 +361,7 @@ func TestValidate_GetRelAlertFindingRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_PutRelAlertFindingRequest(t *testing.T) {
+func TestValidatePutRelAlertFindingRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *PutRelAlertFindingRequest
@@ -395,7 +395,7 @@ func TestValidate_PutRelAlertFindingRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_DeleteRelAlertFindingRequest(t *testing.T) {
+func TestValidateDeleteRelAlertFindingRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *DeleteRelAlertFindingRequest
@@ -434,7 +434,7 @@ func TestValidate_DeleteRelAlertFindingRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_ListAlertConditionRequest(t *testing.T) {
+func TestValidateListAlertConditionRequest(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
 		name    string
@@ -469,7 +469,7 @@ func TestValidate_ListAlertConditionRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_GetAlertConditionRequest(t *testing.T) {
+func TestValidateGetAlertConditionRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *GetAlertConditionRequest
@@ -503,7 +503,7 @@ func TestValidate_GetAlertConditionRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_PutAlertConditionRequest(t *testing.T) {
+func TestValidatePutAlertConditionRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *PutAlertConditionRequest
@@ -537,7 +537,7 @@ func TestValidate_PutAlertConditionRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_DeleteAlertConditionRequest(t *testing.T) {
+func TestValidateDeleteAlertConditionRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *DeleteAlertConditionRequest
@@ -571,7 +571,7 @@ func TestValidate_DeleteAlertConditionRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_ListAlertRuleRequest(t *testing.T) {
+func TestValidateListAlertRuleRequest(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
 		name    string
@@ -601,7 +601,7 @@ func TestValidate_ListAlertRuleRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_GetAlertRuleRequest(t *testing.T) {
+func TestValidateGetAlertRuleRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *GetAlertRuleRequest
@@ -635,7 +635,7 @@ func TestValidate_GetAlertRuleRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_PutAlertRuleRequest(t *testing.T) {
+func TestValidatePutAlertRuleRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *PutAlertRuleRequest
@@ -669,7 +669,7 @@ func TestValidate_PutAlertRuleRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_DeleteAlertRuleRequest(t *testing.T) {
+func TestValidateDeleteAlertRuleRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *DeleteAlertRuleRequest
@@ -703,7 +703,7 @@ func TestValidate_DeleteAlertRuleRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_ListAlertCondRuleRequest(t *testing.T) {
+func TestValidateListAlertCondRuleRequest(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
 		name    string
@@ -733,7 +733,7 @@ func TestValidate_ListAlertCondRuleRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_GetAlertCondRuleRequest(t *testing.T) {
+func TestValidateGetAlertCondRuleRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *GetAlertCondRuleRequest
@@ -772,7 +772,7 @@ func TestValidate_GetAlertCondRuleRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_PutAlertCondRuleRequest(t *testing.T) {
+func TestValidatePutAlertCondRuleRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *PutAlertCondRuleRequest
@@ -806,7 +806,7 @@ func TestValidate_PutAlertCondRuleRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_DeleteAlertCondRuleRequest(t *testing.T) {
+func TestValidateDeleteAlertCondRuleRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *DeleteAlertCondRuleRequest
@@ -845,7 +845,7 @@ func TestValidate_DeleteAlertCondRuleRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_ListNotificationRequest(t *testing.T) {
+func TestValidateListNotificationRequest(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
 		name    string
@@ -875,7 +875,7 @@ func TestValidate_ListNotificationRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_GetNotificationRequest(t *testing.T) {
+func TestValidateGetNotificationRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *GetNotificationRequest
@@ -909,7 +909,7 @@ func TestValidate_GetNotificationRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_PutNotificationRequest(t *testing.T) {
+func TestValidatePutNotificationRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *PutNotificationRequest
@@ -943,7 +943,7 @@ func TestValidate_PutNotificationRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_DeleteNotificationRequest(t *testing.T) {
+func TestValidateDeleteNotificationRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *DeleteNotificationRequest
@@ -977,7 +977,7 @@ func TestValidate_DeleteNotificationRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_ListAlertCondNotificationRequest(t *testing.T) {
+func TestValidateListAlertCondNotificationRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *ListAlertCondNotificationRequest
@@ -1006,7 +1006,7 @@ func TestValidate_ListAlertCondNotificationRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_GetAlertCondNotificationRequest(t *testing.T) {
+func TestValidateGetAlertCondNotificationRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *GetAlertCondNotificationRequest
@@ -1045,7 +1045,7 @@ func TestValidate_GetAlertCondNotificationRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_PutAlertCondNotificationRequest(t *testing.T) {
+func TestValidatePutAlertCondNotificationRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *PutAlertCondNotificationRequest
@@ -1079,7 +1079,7 @@ func TestValidate_PutAlertCondNotificationRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_DeleteAlertCondNotificationRequest(t *testing.T) {
+func TestValidateDeleteAlertCondNotificationRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *DeleteAlertCondNotificationRequest
@@ -1118,7 +1118,7 @@ func TestValidate_DeleteAlertCondNotificationRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_AnalyzeAlertRequest(t *testing.T) {
+func TestValidateAnalyzeAlertRequest(t *testing.T) {
 	cases := []struct {
 		name    string
 		input   *AnalyzeAlertRequest
