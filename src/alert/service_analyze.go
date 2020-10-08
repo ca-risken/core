@@ -10,7 +10,6 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/alert"
-	"github.com/CyberAgent/mimosa-core/proto/finding"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jinzhu/gorm"
 	"github.com/vikyd/zero"
@@ -24,54 +23,66 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	// alertConditionの取得
-	// 存在しなければ終了
+	// 有効なalertConditionの取得
 	alertConditions, err := f.repository.ListAlertCondition(req.ProjectId, nil, true, 0, time.Now().Unix())
-	noRecordAlertCondition := gorm.IsRecordNotFoundError(err)
-	if err != nil && !noRecordAlertCondition {
+	noRecord := gorm.IsRecordNotFoundError(err)
+	if err != nil && !noRecord {
 		appLogger.Error(err)
 		return nil, err
 	}
 
 	// findingの取得
-	// 存在しなければ終了
-	findings, err := f.getFindings(ctx, req.ProjectId)
-	noRecordFinding := gorm.IsRecordNotFoundError(err)
-	if err != nil && !noRecordFinding {
+	findings, err := f.repository.ListFinding(req.ProjectId)
+	noRecord = gorm.IsRecordNotFoundError(err)
+	if err != nil && !noRecord {
 		appLogger.Error(err)
 		return nil, err
 	}
 
 	// マッチング
-
 	for _, alertCondition := range *alertConditions {
 		err := f.AnalyzeAlertByCondition(ctx, &alertCondition, findings)
 		if err != nil {
 			appLogger.Error(err)
-			return &empty.Empty{}, err
+			return nil, err
+		}
+	}
+
+	// 無効のalertConditionの取得
+	disabledAlertConditions, err := f.repository.ListAlertCondition(req.ProjectId, nil, false, 0, time.Now().Unix())
+	noRecord = gorm.IsRecordNotFoundError(err)
+	if err != nil && !noRecord {
+		appLogger.Error(err)
+		return nil, err
+	}
+	// 無効なalertConditionに紐づくAlertを削除
+	for _, alertCondition := range *disabledAlertConditions {
+		err := f.DeleteAlertByAnalyze(&alertCondition)
+		if err != nil {
+			appLogger.Error(err)
+			return nil, err
 		}
 	}
 	return &empty.Empty{}, nil
 }
 
-func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertCondition *model.AlertCondition, findings []*finding.Finding) error {
+func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertCondition *model.AlertCondition, findings *[]model.Finding) error {
 	isMatch := false
 
 	// AlertRuleの取得
-	// 存在しなければ終了
 	alertRules, err := f.repository.ListAlertRuleByAlertConditionID(alertCondition.ProjectID, alertCondition.AlertConditionID)
 	if err != nil {
-		appLogger.Error(err)
 		return err
 	}
 	var matchFindingIDs []uint64
 	for _, alertRule := range *alertRules {
-		appLogger.Info("alertRule:", alertRule)
-		isMatchRule, matchFindingIDsByAlert := analyzeAlertByRule(&alertRule, findings)
-		appLogger.Info("isMatchRule:", isMatchRule)
+		isMatchRule, matchFindingIDsByAlert, err := f.analyzeAlertByRule(ctx, &alertRule, findings)
+		if err != nil {
+			return err
+		}
 		if isMatchRule {
 			isMatch = true
-			matchFindingIDs = append(matchFindingIDs, matchFindingIDsByAlert...)
+			matchFindingIDs = append(matchFindingIDs, *matchFindingIDsByAlert...)
 		} else {
 			if alertCondition.AndOr == "and" {
 				isMatch = false
@@ -80,23 +91,18 @@ func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 		}
 	}
 	if isMatch {
-		appLogger.Info("isMatch:", isMatch)
-
 		alertID, err := f.RegistAlertByAnalyze(alertCondition, matchFindingIDs)
 		if err != nil {
-			appLogger.Error(err)
 			return err
 		}
 		// Matchしている場合はAlert通知を行う
-		errNoti := f.NotificationAlert(alertCondition, alertID)
-		if errNoti != nil {
-			return errNoti
+		err = f.NotificationAlert(alertCondition, alertID)
+		if err != nil {
+			return err
 		}
 	} else {
-		appLogger.Info("isMatch:", isMatch)
-		err := f.DeleteAlertByAnalyze(alertCondition)
+		err = f.DeleteAlertByAnalyze(alertCondition)
 		if err != nil {
-			appLogger.Error(err)
 			return err
 		}
 	}
@@ -141,14 +147,16 @@ func (f *alertService) RegistAlertByAnalyze(alertCondition *model.AlertCondition
 		Severity:    registerdData.Severity,
 		ProjectID:   registerdData.ProjectID,
 	}
-	_, errAlertHistory := f.repository.UpsertAlertHistory(dataAlertHistory)
-	if errAlertHistory != nil {
-		return 0, errAlertHistory
+	_, err = f.repository.UpsertAlertHistory(dataAlertHistory)
+	if err != nil {
+		return 0, err
 	}
 
-	//RelAlertFindingの登録
-	appLogger.Info(registerdData)
-
+	//RelAlertFindingの更新 (削除して再登録)
+	err = f.deleteRelAlertFindingByAlertID(registerdData.ProjectID, registerdData.AlertID)
+	if err != nil {
+		return 0, err
+	}
 	for _, findingID := range findingIDs {
 		data := &model.RelAlertFinding{
 			AlertID:   registerdData.AlertID,
@@ -174,7 +182,6 @@ func (f *alertService) DeleteAlertByAnalyze(alertCondition *model.AlertCondition
 	}
 
 	// レコードが存在しない、もしくはActivated出ない場合は何もしない
-	appLogger.Info("savedData:", savedData)
 	if noRecord || !savedData.Activated {
 		return nil
 	}
@@ -207,7 +214,24 @@ func (f *alertService) DeleteAlertByAnalyze(alertCondition *model.AlertCondition
 	}
 
 	//RelAlertFindingの削除
-	listRelAlertFinding, err := f.repository.ListRelAlertFinding(alertCondition.ProjectID, savedData.AlertID, uint32(0), 0, time.Now().Unix())
+	err = f.deleteRelAlertFindingByAlertID(savedData.ProjectID, savedData.AlertID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *alertService) getFindingTags(ctx context.Context, projectID uint32, findingID uint64) (*[]model.FindingTag, error) {
+	list, err := f.repository.ListFindingTag(projectID, findingID)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
+func (f *alertService) deleteRelAlertFindingByAlertID(projectID, alertID uint32) error {
+	listRelAlertFinding, err := f.repository.ListRelAlertFinding(projectID, alertID, uint32(0), 0, time.Now().Unix())
 	if err != nil {
 		return err
 	}
@@ -217,29 +241,7 @@ func (f *alertService) DeleteAlertByAnalyze(alertCondition *model.AlertCondition
 			return err
 		}
 	}
-
 	return nil
-}
-
-func (f *alertService) getFindings(ctx context.Context, projectID uint32) ([]*finding.Finding, error) {
-	req := &finding.ListFindingRequest{ProjectId: projectID}
-	list, err := f.findingClient.ListFinding(ctx, req)
-	if err != nil {
-		appLogger.Error(err)
-		return nil, err
-	}
-	var ret []*finding.Finding
-	findingIDs := list.FindingId
-	for _, findingID := range findingIDs {
-		req := &finding.GetFindingRequest{ProjectId: projectID, FindingId: findingID}
-		get, err := f.findingClient.GetFinding(ctx, req)
-		if err != nil {
-			appLogger.Error(err)
-			return nil, err
-		}
-		ret = append(ret, get.Finding)
-	}
-	return ret, nil
 }
 
 func (f *alertService) NotificationAlert(alertCondition *model.AlertCondition, alertID uint32) error {
@@ -260,44 +262,75 @@ func (f *alertService) NotificationAlert(alertCondition *model.AlertCondition, a
 		}
 		switch notification.Type {
 		case "slack":
-			errNoti := sendSlackNotification(notification.NotifySetting, alertID)
-			if errNoti != nil {
-				return errNoti
+			err = sendSlackNotification(notification.NotifySetting, alertID)
+			if err != nil {
+				return err
 			}
 		default:
 			appLogger.Warn("This notification_type is unimprement.", notification.Type)
 			break
 		}
+		// 通知時刻を更新する
+		dataAlertCondNotification := &model.AlertCondNotification{
+			AlertConditionID: alertCondNotification.AlertConditionID,
+			NotificationID:   alertCondNotification.NotificationID,
+			CacheSecond:      alertCondNotification.CacheSecond,
+			NotifiedAt:       time.Now(),
+			ProjectID:        alertCondNotification.ProjectID,
+		}
+		_, err = f.repository.UpsertAlertCondNotification(dataAlertCondNotification)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func analyzeAlertByRule(alertRule *model.AlertRule, findings []*finding.Finding) (bool, []uint64) {
-	var matchFindingIDs []uint64
-	for _, f := range findings {
-		if checkMatchAlertRuleFinding(alertRule, f) {
-			matchFindingIDs = append(matchFindingIDs, f.FindingId)
+func (f *alertService) analyzeAlertByRule(ctx context.Context, alertRule *model.AlertRule, findings *[]model.Finding) (bool, *[]uint64, error) {
+	matchFindingIDs := []uint64{}
+	for _, finding := range *findings {
+		isMatch, err := f.checkMatchAlertRuleFinding(ctx, alertRule, &finding)
+		if err != nil {
+			return false, &matchFindingIDs, err
+		}
+		if isMatch {
+			matchFindingIDs = append(matchFindingIDs, finding.FindingID)
 		}
 	}
 	isMatch := (len(matchFindingIDs) >= int(alertRule.FindingCnt))
-	return isMatch, matchFindingIDs
+	return isMatch, &matchFindingIDs, nil
 }
 
-func checkMatchAlertRuleFinding(alertRule *model.AlertRule, finding *finding.Finding) bool {
+func (f *alertService) checkMatchAlertRuleFinding(ctx context.Context, alertRule *model.AlertRule, finding *model.Finding) (bool, error) {
 	if alertRule.Score > finding.Score {
-		return false
+		return false, nil
 	}
 	if !zero.IsZeroVal(alertRule.ResourceName) && strings.Index(finding.ResourceName, alertRule.ResourceName) == -1 {
-		return false
+		return false, nil
 	}
-	//	if !zero.IsZeroVal(alertRule.Tag) and strings.Index(finding.ResourceName, alertRule.ResourceName) == -1 {
-	//		return false
-	//	}
-	return true
+	if !zero.IsZeroVal(alertRule.Tag) {
+		//findingIDがマッチするTagの収集
+		findingTags, err := f.getFindingTags(ctx, alertRule.ProjectID, finding.FindingID)
+		if err != nil {
+			return false, err
+		}
+		isMatchTag := false
+		for _, findingTag := range *findingTags {
+			if findingTag.Tag == alertRule.Tag {
+				isMatchTag = true
+				break
+			}
+		}
+		// findingとalertRuleのTagがマッチしなければfalseを返す
+		if !isMatchTag {
+			return false, nil
+		}
+	}
+	return true, nil
 }
 
 func getHistoryType(alertID uint32) string {
-	if !zero.IsZeroVal(alertID) {
+	if zero.IsZeroVal(alertID) {
 		return "created"
 	}
 	return "updated"
@@ -306,7 +339,7 @@ func getHistoryType(alertID uint32) string {
 func sendSlackNotification(notifySetting string, alertID uint32) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
-		panic(err)
+		return err
 	}
 	if zero.IsZeroVal(setting.WebhookURL) {
 		appLogger.Warn("Unset webhook_url")

@@ -40,18 +40,21 @@ go-test: build
 	cd proto/finding && go test ./...
 	cd proto/iam     && go test ./...
 	cd proto/project && go test ./...
+	cd proto/alert   && go test ./...
 	cd src/finding   && go test ./...
 	cd src/iam       && go test ./...
 	cd src/project   && go test ./...
+	cd src/alert     && go test ./...
 
 go-mod-tidy: build
 	cd proto/finding && go mod tidy
 	cd proto/iam     && go mod tidy
 	cd proto/project && go mod tidy
+	cd proto/alert   && go mod tidy
 	cd src/finding   && go mod tidy
 	cd src/iam       && go mod tidy
 	cd src/project && go mod tidy
-
+	cd src/alert     && go mod tidy
 go-mod-update:
 	cd src/finding \
 		&& go get -u \
@@ -64,6 +67,10 @@ go-mod-update:
 	cd src/project \
 		&& go get -u \
 			github.com/CyberAgent/mimosa-core/proto/project \
+			github.com/CyberAgent/mimosa-core/pkg/model
+	cd src/alert \
+		&& go get -u \
+			github.com/CyberAgent/mimosa-core/proto/alert \
 			github.com/CyberAgent/mimosa-core/pkg/model
 
 run: go-test network

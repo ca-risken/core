@@ -50,6 +50,8 @@ type alertRepository interface {
 	ListNotificationByAlertConditionID(uint32, uint32) (*[]model.Notification, error)
 	DeactivateAlert(*model.Alert) error
 	GetAlertByAlertConditionIDWithActivated(uint32, uint32, bool) (*model.Alert, error)
+	ListFinding(uint32) (*[]model.Finding, error)
+	ListFindingTag(uint32, uint64) (*[]model.FindingTag, error)
 }
 
 type alertDB struct {

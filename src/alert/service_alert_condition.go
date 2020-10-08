@@ -131,7 +131,7 @@ func convertListAlertRuleRequest(req *alert.ListAlertRuleRequest) *alert.ListAle
 		ToAt:      req.ToAt,
 	}
 	if converted.ToScore == 0 {
-		converted.ToAt = 1.0
+		converted.ToScore = 1.0
 	}
 	if converted.ToAt == 0 {
 		converted.ToAt = time.Now().Unix()
