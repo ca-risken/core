@@ -70,29 +70,29 @@ delete-alert_history:
 		-d '{"project_id":1001, "alert_history_id":1003}' \
 		localhost:8004 core.alert.AlertService.DeleteAlertHistory
 
-.PHONY: list-alert_history
-list-alert_history:
+.PHONY: list-rel_alert_finding
+list-rel_alert_finding:
 	grpcurl \
 		-plaintext \
 		-d '{"project_id":1001,"alert_id":1001, "finding_id":1001, "from_at":1560000000, "to_at":1660000000}' \
 		localhost:8004 core.alert.AlertService.ListRelAlertFinding
 
-.PHONY: get-alert_history
-get-alert_history:
+.PHONY: get-rel_alert_finding
+get-rel_alert_finding:
 	grpcurl \
 		-plaintext \
 		-d '{"project_id":1001,"alert_id":1001, "finding_id":1001}' \
 		localhost:8004 core.alert.AlertService.GetRelAlertFinding
 
-.PHONY: put-alert_history
-put-alert_history:
+.PHONY: put-rel_alert_finding
+put-rel_alert_finding:
 	grpcurl \
 		-plaintext \
 		-d '{"project_id":1001, "rel_alert_finding":{"project_id":1001,"alert_id":1003, "finding_id":1001}}' \
 		localhost:8004 core.alert.AlertService.PutRelAlertFinding
 
-.PHONY: delete-alert_history
-delete-alert_history:
+.PHONY: delete-rel_alert_finding
+delete-rel_alert_finding:
 	grpcurl \
 		-plaintext \
 		-d '{"project_id":1001,"alert_id":1003, "finding_id":1001}' \
@@ -144,7 +144,7 @@ get-alert_rule:
 put-alert_rule:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "alert_rule":{"name": "test_put_alert_rule", "score": 0.1, "resource_name": "test_resource", "tag": "test_tag", "finding_cnt":1, "project_id":1001}}' \
+		-d '{"project_id":1001, "alert_rule":{"name": "test_put_alert_rule", "score": 0.1, "project_id":1001}}' \
 		localhost:8004 core.alert.AlertService.PutAlertRule
 
 .PHONY: delete-alert_rule

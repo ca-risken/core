@@ -41,3 +41,19 @@ func (f *alertDB) GetAlertByAlertConditionIDWithActivated(projectID uint32, Aler
 	}
 	return &data, nil
 }
+
+func (f *alertDB) ListFinding(projectID uint32) (*[]model.Finding, error) {
+	var data []model.Finding
+	if err := f.Slave.Where("project_id = ?", projectID).Find(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (f *alertDB) ListFindingTag(projectID uint32, findingID uint64) (*[]model.FindingTag, error) {
+	var data []model.FindingTag
+	if err := f.Slave.Where("project_id = ? AND finding_id = ?", projectID, findingID).Find(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
