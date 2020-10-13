@@ -216,3 +216,31 @@ analyze-alert:
 		-plaintext \
 		-d '{"project_id":1001}' \
 		localhost:8004 core.alert.AlertService.AnalyzeAlert
+
+.PHONY: list-alert_cond_notification
+list-alert_cond_notification:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "alert_condition_id":1001, "notification_id":1001, "from_at":1560000000, "to_at":1660000000}' \
+		localhost:8004 core.alert.AlertService.ListAlertCondNotification
+
+.PHONY: get-alert_cond_notification
+get-alert_cond_notification:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "alert_condition_id":1001, "notification_id":1001}' \
+		localhost:8004 core.alert.AlertService.GetAlertCondNotification
+
+.PHONY: put-alert_cond_notification
+put-alert_cond_notification:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "alert_cond_notification":{"project_id":1001, "alert_condition_id":1003, "notification_id":1001,"cache_second":3600,"notified_at":1560000000}}' \
+		localhost:8004 core.alert.AlertService.PutAlertCondNotification
+
+.PHONY: delete-alert_cond_notification
+delete-alert_cond_notification:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "alert_condition_id":1003, "notification_id":1001}' \
+		localhost:8004 core.alert.AlertService.DeleteAlertCondNotification
