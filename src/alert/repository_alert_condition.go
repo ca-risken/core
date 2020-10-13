@@ -37,7 +37,8 @@ func (f *alertDB) GetAlertCondition(projectID uint32, alertConditionID uint32) (
 
 func (f *alertDB) UpsertAlertCondition(data *model.AlertCondition) (*model.AlertCondition, error) {
 	var retData model.AlertCondition
-	if err := f.Master.Where("project_id = ? AND alert_condition_id = ?", data.ProjectID, data.AlertConditionID).Assign(data).FirstOrCreate(&retData).Error; err != nil {
+	update := AlertConditionToMap(data)
+	if err := f.Master.Where("project_id = ? AND alert_condition_id = ?", data.ProjectID, data.AlertConditionID).Assign(update).FirstOrCreate(&retData).Error; err != nil {
 		return nil, err
 	}
 	return &retData, nil
@@ -205,4 +206,15 @@ func (f *alertDB) DeleteAlertCondNotification(projectID, alertConditionID, notif
 		return err
 	}
 	return nil
+}
+
+func AlertConditionToMap(jiraSetting *model.AlertCondition) map[string]interface{} {
+	return map[string]interface{}{
+		"alert_condition_id": jiraSetting.AlertConditionID,
+		"description":        jiraSetting.Description,
+		"severity":           jiraSetting.Severity,
+		"project_id":         jiraSetting.ProjectID,
+		"and_or":             jiraSetting.AndOr,
+		"enabled":            jiraSetting.Enabled,
+	}
 }

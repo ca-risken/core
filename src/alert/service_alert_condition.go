@@ -407,6 +407,8 @@ func (f *alertService) PutAlertCondNotification(ctx context.Context, req *alert.
 		AlertConditionID: req.AlertCondNotification.AlertConditionId,
 		NotificationID:   req.AlertCondNotification.NotificationId,
 		ProjectID:        req.AlertCondNotification.ProjectId,
+		CacheSecond:      req.AlertCondNotification.CacheSecond,
+		NotifiedAt:       time.Unix(req.AlertCondNotification.NotifiedAt, 0),
 	}
 
 	// Fiding upsert

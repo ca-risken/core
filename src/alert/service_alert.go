@@ -18,6 +18,7 @@ func (f *alertService) ListAlert(ctx context.Context, req *alert.ListAlertReques
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
+
 	converted := convertListAlertRequest(req)
 	list, err := f.repository.ListAlert(converted.ProjectId, converted.Activated, converted.Severity, converted.Description, converted.FromAt, converted.ToAt)
 	if err != nil {

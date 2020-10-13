@@ -652,7 +652,7 @@ func TestValidatePutAlertRuleRequest(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG Not Equal(project_id != tag.project_id)",
+			name:    "NG Not Equal(project_id != rule.project_id)",
 			input:   &PutAlertRuleRequest{ProjectId: 1000, AlertRule: &AlertRuleForUpsert{Name: "test_alert_rule", Score: 1.0, ProjectId: 1001, ResourceName: "test_resource", Tag: "test_tag", FindingCnt: 1}},
 			wantErr: true,
 		},
