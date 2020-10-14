@@ -67,7 +67,7 @@ message ListFindingTagRequest {
   uint64 finding_id = 2;
 }
 
-message ListFindingTagResponse { repeated string tag = 1; }
+message ListFindingTagResponse { repeated FindingTag tag = 1; }
 
 message ListFindingTagNameRequest {
   uint32 project_id = 1;
@@ -75,7 +75,7 @@ message ListFindingTagNameRequest {
   int64 to_at = 3;
 }
 
-message ListFindingTagNameResponse { repeated FindingTag tag = 1; }
+message ListFindingTagNameResponse { repeated string tag = 1; }
 
 message TagFindingRequest {
   uint32 project_id = 1;

@@ -1844,7 +1844,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| tag | [FindingTag](#core.finding.FindingTag) | repeated |  |
+| tag | [string](#string) | repeated |  |
 
 
 
@@ -1875,7 +1875,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| tag | [string](#string) | repeated |  |
+| tag | [FindingTag](#core.finding.FindingTag) | repeated |  |
 
 
 
