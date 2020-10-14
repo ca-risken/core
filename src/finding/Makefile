@@ -18,7 +18,7 @@ list-service:
 list-finding:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "from_score":0.0, "to_score":1.0, "from_at":0, "to_at":253402268399}' \
+		-d '{"project_id":1001, "from_score":0.0, "to_score":1.0, "from_at":0, "to_at":253402268399, "tag": ["tag", "tag:key"]}' \
 		localhost:8001 core.finding.FindingService.ListFinding
 
 .PHONY: get-finding
@@ -49,6 +49,13 @@ list-finding-tag:
 		-d '{"project_id":1001, "finding_id":1001}' \
 		localhost:8001 core.finding.FindingService.ListFindingTag
 
+.PHONY: list-finding-tag-name
+list-finding-tag-name:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001}' \
+		localhost:8001 core.finding.FindingService.ListFindingTagName
+
 .PHONY: tag-finding
 tag-finding:
 	grpcurl \
@@ -67,7 +74,7 @@ untag-finding:
 list-resource:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "resource_name":["rn"], "from_sum_score":0.0, "to_sum_score":999.9, "from_at":1560000000, "to_at":1660000000}' \
+		-d '{"project_id":1001, "from_sum_score":0.0, "to_sum_score":999.9, "from_at":1560000000, "to_at":253402268399, "tag": ["tag1", "tag:key"]}' \
 		localhost:8001 core.finding.FindingService.ListResource
 
 .PHONY: get-resource
@@ -97,6 +104,13 @@ list-resource-tag:
 		-plaintext \
 		-d '{"project_id":1001, "resource_id":1001}' \
 		localhost:8001 core.finding.FindingService.ListResourceTag
+
+.PHONY: list-resource-tag-name
+list-resource-tag-name:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001}' \
+		localhost:8001 core.finding.FindingService.ListResourceTagName
 
 .PHONY: tag-resource
 tag-resource:

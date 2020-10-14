@@ -43,6 +43,7 @@ func convertListFindingRequest(req *finding.ListFindingRequest) *finding.ListFin
 		ToScore:      req.ToScore,
 		FromAt:       req.FromAt,
 		ToAt:         req.ToAt,
+		Tag:          req.Tag,
 	}
 	if converted.ToScore == 0 {
 		converted.ToScore = 1.0
@@ -145,6 +146,36 @@ func (f *findingService) ListFindingTag(ctx context.Context, req *finding.ListFi
 		tags = append(tags, convertFindingTag(&tag))
 	}
 	return &finding.ListFindingTagResponse{Tag: tags}, nil
+}
+
+func (f *findingService) ListFindingTagName(ctx context.Context, req *finding.ListFindingTagNameRequest) (*finding.ListFindingTagNameResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	tags, err := f.repository.ListFindingTagName(convertListFindingTagNameRequest(req))
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return &finding.ListFindingTagNameResponse{}, nil
+		}
+		return nil, err
+	}
+	var tagNames []string
+	for _, tag := range *tags {
+		tagNames = append(tagNames, tag.Tag)
+	}
+	return &finding.ListFindingTagNameResponse{Tag: tagNames}, nil
+}
+
+func convertListFindingTagNameRequest(req *finding.ListFindingTagNameRequest) *finding.ListFindingTagNameRequest {
+	converted := finding.ListFindingTagNameRequest{
+		ProjectId: req.ProjectId,
+		FromAt:    req.FromAt,
+		ToAt:      req.ToAt,
+	}
+	if converted.ToAt == 0 {
+		converted.ToAt = time.Now().Unix()
+	}
+	return &converted
 }
 
 func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFindingRequest) (*finding.TagFindingResponse, error) {
