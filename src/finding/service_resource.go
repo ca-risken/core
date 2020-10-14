@@ -45,6 +45,7 @@ func convertListResourceRequest(req *finding.ListResourceRequest) *finding.ListR
 		ToSumScore:   req.ToSumScore,
 		FromAt:       req.FromAt,
 		ToAt:         req.ToAt,
+		Tag:          req.Tag,
 	}
 	if converted.ToSumScore == 0 {
 		converted.ToSumScore = maxSumScore

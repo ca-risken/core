@@ -43,6 +43,7 @@ func convertListFindingRequest(req *finding.ListFindingRequest) *finding.ListFin
 		ToScore:      req.ToScore,
 		FromAt:       req.FromAt,
 		ToAt:         req.ToAt,
+		Tag:          req.Tag,
 	}
 	if converted.ToScore == 0 {
 		converted.ToScore = 1.0
