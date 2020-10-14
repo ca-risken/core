@@ -23,7 +23,6 @@ fmt: proto/**/*.proto
 doc: fmt
 	protoc \
 		--proto_path=proto \
-		--proto_path=${GOPATH}/src \
 		--error_format=gcc \
 		--doc_out=markdown,README.md:doc \
 		proto/**/*.proto;
@@ -31,7 +30,6 @@ doc: fmt
 build: fmt
 	protoc \
 		--proto_path=proto \
-		--proto_path=${GOPATH}/src \
 		--error_format=gcc \
 		--go_out=plugins=grpc,paths=source_relative:proto \
 		proto/**/*.proto;
@@ -55,23 +53,20 @@ go-mod-tidy: build
 	cd src/iam       && go mod tidy
 	cd src/project && go mod tidy
 	cd src/alert     && go mod tidy
+
 go-mod-update:
 	cd src/finding \
 		&& go get -u \
-			github.com/CyberAgent/mimosa-core/proto/finding \
-			github.com/CyberAgent/mimosa-core/pkg/model
+			github.com/CyberAgent/mimosa-core/...
 	cd src/iam \
 		&& go get -u \
-			github.com/CyberAgent/mimosa-core/proto/iam \
-			github.com/CyberAgent/mimosa-core/pkg/model
+			github.com/CyberAgent/mimosa-core/...
 	cd src/project \
 		&& go get -u \
-			github.com/CyberAgent/mimosa-core/proto/project \
-			github.com/CyberAgent/mimosa-core/pkg/model
+			github.com/CyberAgent/mimosa-core/...
 	cd src/alert \
 		&& go get -u \
-			github.com/CyberAgent/mimosa-core/proto/alert \
-			github.com/CyberAgent/mimosa-core/pkg/model
+			github.com/CyberAgent/mimosa-core/...
 
 run: go-test network
 	. env.sh && docker-compose up -d --build

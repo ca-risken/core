@@ -101,10 +101,14 @@
     - [GetResourceResponse](#core.finding.GetResourceResponse)
     - [ListFindingRequest](#core.finding.ListFindingRequest)
     - [ListFindingResponse](#core.finding.ListFindingResponse)
+    - [ListFindingTagNameRequest](#core.finding.ListFindingTagNameRequest)
+    - [ListFindingTagNameResponse](#core.finding.ListFindingTagNameResponse)
     - [ListFindingTagRequest](#core.finding.ListFindingTagRequest)
     - [ListFindingTagResponse](#core.finding.ListFindingTagResponse)
     - [ListResourceRequest](#core.finding.ListResourceRequest)
     - [ListResourceResponse](#core.finding.ListResourceResponse)
+    - [ListResourceTagNameRequest](#core.finding.ListResourceTagNameRequest)
+    - [ListResourceTagNameResponse](#core.finding.ListResourceTagNameResponse)
     - [ListResourceTagRequest](#core.finding.ListResourceTagRequest)
     - [ListResourceTagResponse](#core.finding.ListResourceTagResponse)
     - [PutFindingRequest](#core.finding.PutFindingRequest)
@@ -1793,6 +1797,7 @@ ResourceTag For upsert
 | to_score | [float](#float) |  |  |
 | from_at | [int64](#int64) |  |  |
 | to_at | [int64](#int64) |  |  |
+| tag | [string](#string) | repeated |  |
 
 
 
@@ -1808,6 +1813,38 @@ ResourceTag For upsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | finding_id | [uint64](#uint64) | repeated |  |
+
+
+
+
+
+
+<a name="core.finding.ListFindingTagNameRequest"></a>
+
+### ListFindingTagNameRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| from_at | [int64](#int64) |  |  |
+| to_at | [int64](#int64) |  |  |
+
+
+
+
+
+
+<a name="core.finding.ListFindingTagNameResponse"></a>
+
+### ListFindingTagNameResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| tag | [FindingTag](#core.finding.FindingTag) | repeated |  |
 
 
 
@@ -1838,7 +1875,7 @@ ResourceTag For upsert
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| tag | [FindingTag](#core.finding.FindingTag) | repeated |  |
+| tag | [string](#string) | repeated |  |
 
 
 
@@ -1859,6 +1896,7 @@ ResourceTag For upsert
 | to_sum_score | [float](#float) |  |  |
 | from_at | [int64](#int64) |  |  |
 | to_at | [int64](#int64) |  |  |
+| tag | [string](#string) | repeated |  |
 
 
 
@@ -1874,6 +1912,38 @@ ResourceTag For upsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | resource_id | [uint64](#uint64) | repeated |  |
+
+
+
+
+
+
+<a name="core.finding.ListResourceTagNameRequest"></a>
+
+### ListResourceTagNameRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| from_at | [int64](#int64) |  |  |
+| to_at | [int64](#int64) |  |  |
+
+
+
+
+
+
+<a name="core.finding.ListResourceTagNameResponse"></a>
+
+### ListResourceTagNameResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| tag | [string](#string) | repeated |  |
 
 
 
@@ -2085,6 +2155,7 @@ ResourceTag For upsert
 | PutFinding | [PutFindingRequest](#core.finding.PutFindingRequest) | [PutFindingResponse](#core.finding.PutFindingResponse) |  |
 | DeleteFinding | [DeleteFindingRequest](#core.finding.DeleteFindingRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 | ListFindingTag | [ListFindingTagRequest](#core.finding.ListFindingTagRequest) | [ListFindingTagResponse](#core.finding.ListFindingTagResponse) |  |
+| ListFindingTagName | [ListFindingTagNameRequest](#core.finding.ListFindingTagNameRequest) | [ListFindingTagNameResponse](#core.finding.ListFindingTagNameResponse) |  |
 | TagFinding | [TagFindingRequest](#core.finding.TagFindingRequest) | [TagFindingResponse](#core.finding.TagFindingResponse) |  |
 | UntagFinding | [UntagFindingRequest](#core.finding.UntagFindingRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 | ListResource | [ListResourceRequest](#core.finding.ListResourceRequest) | [ListResourceResponse](#core.finding.ListResourceResponse) | resource |
@@ -2092,6 +2163,7 @@ ResourceTag For upsert
 | PutResource | [PutResourceRequest](#core.finding.PutResourceRequest) | [PutResourceResponse](#core.finding.PutResourceResponse) |  |
 | DeleteResource | [DeleteResourceRequest](#core.finding.DeleteResourceRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 | ListResourceTag | [ListResourceTagRequest](#core.finding.ListResourceTagRequest) | [ListResourceTagResponse](#core.finding.ListResourceTagResponse) |  |
+| ListResourceTagName | [ListResourceTagNameRequest](#core.finding.ListResourceTagNameRequest) | [ListResourceTagNameResponse](#core.finding.ListResourceTagNameResponse) |  |
 | TagResource | [TagResourceRequest](#core.finding.TagResourceRequest) | [TagResourceResponse](#core.finding.TagResourceResponse) |  |
 | UntagResource | [UntagResourceRequest](#core.finding.UntagResourceRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 

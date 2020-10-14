@@ -5,6 +5,12 @@ import (
 	"time"
 )
 
+const (
+	len65string  = "12345678901234567890123456789012345678901234567890123456789012345"
+	len201string = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=1"
+	len256string = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456"
+)
+
 func TestValidate_ListFindingRequest(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
@@ -24,52 +30,57 @@ func TestValidate_ListFindingRequest(t *testing.T) {
 		},
 		{
 			name:    "NG too long resource_name",
-			input:   &ListFindingRequest{ProjectId: 111, ResourceName: []string{"123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456"}},
+			input:   &ListFindingRequest{ProjectId: 1, ResourceName: []string{len256string}},
 			wantErr: true,
 		},
 		{
 			name:    "NG too long data_source",
-			input:   &ListFindingRequest{ProjectId: 111, DataSource: []string{"12345678901234567890123456789012345678901234567890123456789012345"}},
+			input:   &ListFindingRequest{ProjectId: 1, DataSource: []string{len65string}},
 			wantErr: true,
 		},
 		{
 			name:    "NG small from_score",
-			input:   &ListFindingRequest{ProjectId: 111, FromScore: -0.1},
+			input:   &ListFindingRequest{ProjectId: 1, FromScore: -0.1},
 			wantErr: true,
 		},
 		{
 			name:    "NG big from_score",
-			input:   &ListFindingRequest{ProjectId: 111, FromScore: 1.1},
+			input:   &ListFindingRequest{ProjectId: 1, FromScore: 1.1},
 			wantErr: true,
 		},
 		{
 			name:    "NG small to_score",
-			input:   &ListFindingRequest{ProjectId: 111, ToScore: -0.1},
+			input:   &ListFindingRequest{ProjectId: 1, ToScore: -0.1},
 			wantErr: true,
 		},
 		{
 			name:    "NG big to_score",
-			input:   &ListFindingRequest{ProjectId: 111, ToScore: 1.1},
+			input:   &ListFindingRequest{ProjectId: 1, ToScore: 1.1},
 			wantErr: true,
 		},
 		{
 			name:    "NG small from_at",
-			input:   &ListFindingRequest{ProjectId: 111, FromAt: -1},
+			input:   &ListFindingRequest{ProjectId: 1, FromAt: -1},
 			wantErr: true,
 		},
 		{
 			name:    "NG big from_at",
-			input:   &ListFindingRequest{ProjectId: 111, FromAt: 253402268400},
+			input:   &ListFindingRequest{ProjectId: 1, FromAt: 253402268400},
 			wantErr: true,
 		},
 		{
 			name:    "NG small to_at",
-			input:   &ListFindingRequest{ProjectId: 111, ToAt: -1},
+			input:   &ListFindingRequest{ProjectId: 1, ToAt: -1},
 			wantErr: true,
 		},
 		{
 			name:    "NG big to_at",
-			input:   &ListFindingRequest{ProjectId: 111, ToAt: 253402268400},
+			input:   &ListFindingRequest{ProjectId: 1, ToAt: 253402268400},
+			wantErr: true,
+		},
+		{
+			name:    "NG too long tag",
+			input:   &ListFindingRequest{ProjectId: 1, Tag: []string{len65string}},
 			wantErr: true,
 		},
 	}
@@ -221,6 +232,54 @@ func TestValidate_ListFindingTagRequest(t *testing.T) {
 	}
 }
 
+func TestValidate_ListFindingTagNameRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *ListFindingTagNameRequest
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &ListFindingTagNameRequest{ProjectId: 1, FromAt: 0, ToAt: 0},
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &ListFindingTagNameRequest{FromAt: 0, ToAt: 0},
+			wantErr: true,
+		},
+		{
+			name:    "NG small from_at",
+			input:   &ListFindingTagNameRequest{ProjectId: 1, FromAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG big from_at",
+			input:   &ListFindingTagNameRequest{ProjectId: 1, FromAt: 253402268400},
+			wantErr: true,
+		},
+		{
+			name:    "NG small to_at",
+			input:   &ListFindingTagNameRequest{ProjectId: 1, ToAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG big to_at",
+			input:   &ListFindingTagNameRequest{ProjectId: 1, ToAt: 253402268400},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
 func TestValidate_TagFindingRequest(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -311,8 +370,8 @@ func TestValidate_ListResourceRequest(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG Length(esource_name)",
-			input:   &ListResourceRequest{ProjectId: 1, ResourceName: []string{"123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456"}},
+			name:    "NG Length(resource_name)",
+			input:   &ListResourceRequest{ProjectId: 1, ResourceName: []string{len256string}},
 			wantErr: true,
 		},
 		{
@@ -343,6 +402,11 @@ func TestValidate_ListResourceRequest(t *testing.T) {
 		{
 			name:    "NG big to_at",
 			input:   &ListResourceRequest{ProjectId: 1, ToAt: 253402268400},
+			wantErr: true,
+		},
+		{
+			name:    "NG Length(tag)",
+			input:   &ListResourceRequest{ProjectId: 1, Tag: []string{len65string}},
 			wantErr: true,
 		},
 	}
@@ -494,6 +558,54 @@ func TestValidate_ListResourceTagRequest(t *testing.T) {
 	}
 }
 
+func TestValidate_ListResourceTagNameRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *ListResourceTagNameRequest
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &ListResourceTagNameRequest{ProjectId: 1, FromAt: 0, ToAt: 0},
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &ListResourceTagNameRequest{FromAt: 0, ToAt: 0},
+			wantErr: true,
+		},
+		{
+			name:    "NG small from_at",
+			input:   &ListResourceTagNameRequest{ProjectId: 1, FromAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG big from_at",
+			input:   &ListResourceTagNameRequest{ProjectId: 1, FromAt: 253402268400},
+			wantErr: true,
+		},
+		{
+			name:    "NG small to_at",
+			input:   &ListResourceTagNameRequest{ProjectId: 1, ToAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG big to_at",
+			input:   &ListResourceTagNameRequest{ProjectId: 1, ToAt: 253402268400},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
 func TestValidate_TagResourceRequest(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -580,7 +692,7 @@ func TestValidate_FindingForUpsert(t *testing.T) {
 		},
 		{
 			name:    "NG too long Description",
-			input:   &FindingForUpsert{Description: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=1", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   &FindingForUpsert{Description: len201string, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
@@ -590,7 +702,7 @@ func TestValidate_FindingForUpsert(t *testing.T) {
 		},
 		{
 			name:    "NG too long DataSource",
-			input:   &FindingForUpsert{Description: "desc", DataSource: "12345678901234567890123456789012345678901234567890123456789012345", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   &FindingForUpsert{Description: "desc", DataSource: len65string, DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
@@ -600,7 +712,7 @@ func TestValidate_FindingForUpsert(t *testing.T) {
 		},
 		{
 			name:    "NG too long DataSourceId",
-			input:   &FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=01234567890123456789012345678901234567890123456789123456", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   &FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: len256string, ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
@@ -610,7 +722,7 @@ func TestValidate_FindingForUpsert(t *testing.T) {
 		},
 		{
 			name:    "NG too long resource name",
-			input:   &FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   &FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: len256string, ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
@@ -689,7 +801,7 @@ func TestValidate_FindingTagForUpsert(t *testing.T) {
 		},
 		{
 			name:    "NG too long Tag",
-			input:   &FindingTagForUpsert{FindingId: 1001, Tag: "12345678901234567890123456789012345678901234567890123456789012345"},
+			input:   &FindingTagForUpsert{FindingId: 1001, Tag: len65string},
 			wantErr: true,
 		},
 	}
@@ -757,7 +869,7 @@ func TestValidate_ResourceTagForUpsert(t *testing.T) {
 		},
 		{
 			name:    "NG too long Tag",
-			input:   &ResourceTagForUpsert{ResourceId: 1001, Tag: "12345678901234567890123456789012345678901234567890123456789012345"},
+			input:   &ResourceTagForUpsert{ResourceId: 1001, Tag: len65string},
 			wantErr: true,
 		},
 	}
