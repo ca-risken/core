@@ -13,6 +13,8 @@ func (r *ListAlertRequest) Validate() error {
 		validation.Field(&r.ProjectId, validation.Required),
 		validation.Field(&r.Severity, validation.Each(validation.In("high", "medium", "low"))),
 		validation.Field(&r.Description, validation.Length(0, 200)),
+		validation.Field(&r.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&r.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 	)
 }
 
@@ -51,6 +53,8 @@ func (r *ListAlertHistoryRequest) Validate() error {
 		validation.Field(&r.ProjectId, validation.Required),
 		validation.Field(&r.HistoryType, validation.Each(validation.In("created", "updated", "deleted"))),
 		validation.Field(&r.Severity, validation.Each(validation.In("high", "medium", "low"))),
+		validation.Field(&r.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&r.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 	)
 }
 
@@ -87,6 +91,8 @@ func (r *DeleteAlertHistoryRequest) Validate() error {
 func (r *ListRelAlertFindingRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ProjectId, validation.Required),
+		validation.Field(&r.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&r.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 	)
 }
 
@@ -126,6 +132,8 @@ func (r *ListAlertConditionRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ProjectId, validation.Required),
 		validation.Field(&r.Severity, validation.Each(validation.In("high", "medium", "low"))),
+		validation.Field(&r.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&r.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 	)
 }
 
@@ -164,6 +172,8 @@ func (r *ListAlertRuleRequest) Validate() error {
 		validation.Field(&r.ProjectId, validation.Required),
 		validation.Field(&r.FromScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&r.ToScore, validation.Min(0.0), validation.Max(1.0)),
+		validation.Field(&r.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&r.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 	)
 }
 
@@ -200,6 +210,8 @@ func (r *DeleteAlertRuleRequest) Validate() error {
 func (r *ListAlertCondRuleRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ProjectId, validation.Required),
+		validation.Field(&r.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&r.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 	)
 }
 
@@ -238,6 +250,8 @@ func (r *DeleteAlertCondRuleRequest) Validate() error {
 func (r *ListNotificationRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ProjectId, validation.Required),
+		validation.Field(&r.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&r.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 	)
 }
 
@@ -274,6 +288,8 @@ func (r *DeleteNotificationRequest) Validate() error {
 func (r *ListAlertCondNotificationRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ProjectId, validation.Required),
+		validation.Field(&r.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&r.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 	)
 }
 
@@ -397,5 +413,6 @@ func (e *AlertCondNotificationForUpsert) Validate() error {
 		validation.Field(&e.ProjectId, validation.Required),
 		validation.Field(&e.NotificationId, validation.Required),
 		validation.Field(&e.AlertConditionId, validation.Required),
+		validation.Field(&e.NotifiedAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 	)
 }
