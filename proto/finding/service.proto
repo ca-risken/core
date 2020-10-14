@@ -13,6 +13,8 @@ service FindingService {
   rpc PutFinding(PutFindingRequest) returns (PutFindingResponse);
   rpc DeleteFinding(DeleteFindingRequest) returns (google.protobuf.Empty);
   rpc ListFindingTag(ListFindingTagRequest) returns (ListFindingTagResponse);
+  rpc ListFindingTagName(ListFindingTagNameRequest)
+      returns (ListFindingTagNameResponse);
   rpc TagFinding(TagFindingRequest) returns (TagFindingResponse);
   rpc UntagFinding(UntagFindingRequest) returns (google.protobuf.Empty);
 
@@ -22,6 +24,8 @@ service FindingService {
   rpc PutResource(PutResourceRequest) returns (PutResourceResponse);
   rpc DeleteResource(DeleteResourceRequest) returns (google.protobuf.Empty);
   rpc ListResourceTag(ListResourceTagRequest) returns (ListResourceTagResponse);
+  rpc ListResourceTagName(ListResourceTagNameRequest)
+      returns (ListResourceTagNameResponse);
   rpc TagResource(TagResourceRequest) returns (TagResourceResponse);
   rpc UntagResource(UntagResourceRequest) returns (google.protobuf.Empty);
 }
@@ -34,6 +38,7 @@ message ListFindingRequest {
   float to_score = 5;
   int64 from_at = 6;
   int64 to_at = 7;
+  repeated string tag = 8;
 }
 
 message ListFindingResponse { repeated uint64 finding_id = 1; }
@@ -62,7 +67,15 @@ message ListFindingTagRequest {
   uint64 finding_id = 2;
 }
 
-message ListFindingTagResponse { repeated FindingTag tag = 1; }
+message ListFindingTagResponse { repeated string tag = 1; }
+
+message ListFindingTagNameRequest {
+  uint32 project_id = 1;
+  int64 from_at = 2;
+  int64 to_at = 3;
+}
+
+message ListFindingTagNameResponse { repeated FindingTag tag = 1; }
 
 message TagFindingRequest {
   uint32 project_id = 1;
@@ -83,6 +96,7 @@ message ListResourceRequest {
   float to_sum_score = 4;
   int64 from_at = 5;
   int64 to_at = 6;
+  repeated string tag = 7;
 }
 
 message ListResourceResponse { repeated uint64 resource_id = 1; }
@@ -112,6 +126,14 @@ message ListResourceTagRequest {
 }
 
 message ListResourceTagResponse { repeated ResourceTag tag = 1; }
+
+message ListResourceTagNameRequest {
+  uint32 project_id = 1;
+  int64 from_at = 2;
+  int64 to_at = 3;
+}
+
+message ListResourceTagNameResponse { repeated string tag = 1; }
 
 message TagResourceRequest {
   uint32 project_id = 1;
