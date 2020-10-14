@@ -368,22 +368,32 @@ func TestValidateAlertCondNotificationForUpsert(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &AlertCondNotificationForUpsert{ProjectId: 1001, AlertConditionId: 1001, NotificationId: 1001},
+			input:   &AlertCondNotificationForUpsert{ProjectId: 1001, AlertConditionId: 1001, NotificationId: 1001, NotifiedAt: 1602660000},
 			wantErr: false,
 		},
 		{
 			name:    "NG required project_id",
-			input:   &AlertCondNotificationForUpsert{AlertConditionId: 1001, NotificationId: 1001},
+			input:   &AlertCondNotificationForUpsert{AlertConditionId: 1001, NotificationId: 1001, NotifiedAt: 1602660000},
 			wantErr: true,
 		},
 		{
 			name:    "NG required alert_condition_id",
-			input:   &AlertCondNotificationForUpsert{ProjectId: 1001, NotificationId: 1001},
+			input:   &AlertCondNotificationForUpsert{ProjectId: 1001, NotificationId: 1001, NotifiedAt: 1602660000},
 			wantErr: true,
 		},
 		{
 			name:    "NG required notification_id",
-			input:   &AlertCondNotificationForUpsert{ProjectId: 1001, AlertConditionId: 1001},
+			input:   &AlertCondNotificationForUpsert{ProjectId: 1001, AlertConditionId: 1001, NotifiedAt: 1602660000},
+			wantErr: true,
+		},
+		{
+			name:    "NG too small notified_at",
+			input:   &AlertCondNotificationForUpsert{ProjectId: 1001, AlertConditionId: 1001, NotifiedAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG required large notified_at",
+			input:   &AlertCondNotificationForUpsert{ProjectId: 1001, AlertConditionId: 1001, NotifiedAt: 253402268400},
 			wantErr: true,
 		},
 	}
