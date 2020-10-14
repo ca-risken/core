@@ -23,15 +23,33 @@ func TestValidateListAlertRequest(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:  "NG wrong severity",
-			input: &ListAlertRequest{ProjectId: 111, Severity: []string{"error"}, Description: "test_list_alert", FromAt: now.Unix(), ToAt: now.Unix()},
-
+			name:    "NG wrong severity",
+			input:   &ListAlertRequest{ProjectId: 111, Severity: []string{"error"}, Description: "test_list_alert", FromAt: now.Unix(), ToAt: now.Unix()},
 			wantErr: true,
 		},
 		{
-			name:  "NG too long description",
-			input: &ListAlertRequest{ProjectId: 111, Severity: []string{"high"}, Description: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901", FromAt: now.Unix(), ToAt: now.Unix()},
-
+			name:    "NG too long description",
+			input:   &ListAlertRequest{ProjectId: 111, Severity: []string{"high"}, Description: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901", FromAt: now.Unix(), ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too small from_at",
+			input:   &ListAlertRequest{ProjectId: 111, Severity: []string{"high"}, Description: "test_list_alert", FromAt: -1, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large from_at",
+			input:   &ListAlertRequest{ProjectId: 111, Severity: []string{"high"}, Description: "test_list_alert", FromAt: 253402268400, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too small to_at",
+			input:   &ListAlertRequest{ProjectId: 111, Severity: []string{"high"}, Description: "test_list_alert", FromAt: now.Unix(), ToAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large to_at",
+			input:   &ListAlertRequest{ProjectId: 111, Severity: []string{"high"}, Description: "test_list_alert", FromAt: now.Unix(), ToAt: 253402268400},
 			wantErr: true,
 		},
 	}
@@ -177,6 +195,26 @@ func TestValidateListAlertHistoryRequest(t *testing.T) {
 			input:   &ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"updated"}, Severity: []string{"info"}, FromAt: now.Unix(), ToAt: now.Unix()},
 			wantErr: true,
 		},
+		{
+			name:    "NG too small from_at",
+			input:   &ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"created"}, Severity: []string{"high"}, FromAt: -1, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large from_at",
+			input:   &ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"created"}, Severity: []string{"high"}, FromAt: 253402268400, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too small to_at",
+			input:   &ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"created"}, Severity: []string{"high"}, FromAt: now.Unix(), ToAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large to_at",
+			input:   &ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"created"}, Severity: []string{"high"}, FromAt: now.Unix(), ToAt: 253402268400},
+			wantErr: true,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -307,6 +345,26 @@ func TestValidateListRelAlertFindingRequest(t *testing.T) {
 		{
 			name:    "NG Required(project_id)",
 			input:   &ListRelAlertFindingRequest{AlertId: 1001, FindingId: 1001, FromAt: now.Unix(), ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too small from_at",
+			input:   &ListRelAlertFindingRequest{ProjectId: 1001, AlertId: 1001, FindingId: 1001, FromAt: -1, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large from_at",
+			input:   &ListRelAlertFindingRequest{ProjectId: 1001, AlertId: 1001, FindingId: 1001, FromAt: 253402268400, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too small to_at",
+			input:   &ListRelAlertFindingRequest{ProjectId: 1001, AlertId: 1001, FindingId: 1001, FromAt: now.Unix(), ToAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large to_at",
+			input:   &ListRelAlertFindingRequest{ProjectId: 1001, AlertId: 1001, FindingId: 1001, FromAt: now.Unix(), ToAt: 253402268400},
 			wantErr: true,
 		},
 	}
@@ -456,6 +514,26 @@ func TestValidateListAlertConditionRequest(t *testing.T) {
 			input:   &ListAlertConditionRequest{ProjectId: 1001, Severity: []string{"error"}, Enabled: true, FromAt: now.Unix(), ToAt: now.Unix()},
 			wantErr: true,
 		},
+		{
+			name:    "NG too small from_at",
+			input:   &ListAlertConditionRequest{ProjectId: 1001, Severity: []string{"high", "medium"}, Enabled: true, FromAt: -1, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large from_at",
+			input:   &ListAlertConditionRequest{ProjectId: 1001, Severity: []string{"high", "medium"}, Enabled: true, FromAt: 253402268400, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too small to_at",
+			input:   &ListAlertConditionRequest{ProjectId: 1001, Severity: []string{"high", "medium"}, Enabled: true, FromAt: now.Unix(), ToAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large to_at",
+			input:   &ListAlertConditionRequest{ProjectId: 1001, Severity: []string{"high", "medium"}, Enabled: true, FromAt: now.Unix(), ToAt: 253402268400},
+			wantErr: true,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -588,6 +666,26 @@ func TestValidateListAlertRuleRequest(t *testing.T) {
 			input:   &ListAlertRuleRequest{FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix()},
 			wantErr: true,
 		},
+		{
+			name:    "NG too small from_at",
+			input:   &ListAlertRuleRequest{ProjectId: 1001, FromScore: 0.0, ToScore: 1.0, FromAt: -1, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large from_at",
+			input:   &ListAlertRuleRequest{ProjectId: 1001, FromScore: 0.0, ToScore: 1.0, FromAt: 253402268400, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too small to_at",
+			input:   &ListAlertRuleRequest{ProjectId: 1001, FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large to_at",
+			input:   &ListAlertRuleRequest{ProjectId: 1001, FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: 253402268400},
+			wantErr: true,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -718,6 +816,26 @@ func TestValidateListAlertCondRuleRequest(t *testing.T) {
 		{
 			name:    "NG Required(project_id)",
 			input:   &ListAlertCondRuleRequest{AlertConditionId: 1001, AlertRuleId: 1001, FromAt: now.Unix(), ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too small from_at",
+			input:   &ListAlertCondRuleRequest{ProjectId: 1001, AlertConditionId: 1001, AlertRuleId: 1001, FromAt: -1, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large from_at",
+			input:   &ListAlertCondRuleRequest{ProjectId: 1001, AlertConditionId: 1001, AlertRuleId: 1001, FromAt: 253402268400, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too small to_at",
+			input:   &ListAlertCondRuleRequest{ProjectId: 1001, AlertConditionId: 1001, AlertRuleId: 1001, FromAt: now.Unix(), ToAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large to_at",
+			input:   &ListAlertCondRuleRequest{ProjectId: 1001, AlertConditionId: 1001, AlertRuleId: 1001, FromAt: now.Unix(), ToAt: 253402268400},
 			wantErr: true,
 		},
 	}
@@ -862,6 +980,26 @@ func TestValidateListNotificationRequest(t *testing.T) {
 			input:   &ListNotificationRequest{Type: "test_notification", FromAt: now.Unix(), ToAt: now.Unix()},
 			wantErr: true,
 		},
+		{
+			name:    "NG too small from_at",
+			input:   &ListNotificationRequest{ProjectId: 1001, Type: "test_notification", FromAt: -1, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large from_at",
+			input:   &ListNotificationRequest{ProjectId: 1001, Type: "test_notification", FromAt: 253402268400, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too small to_at",
+			input:   &ListNotificationRequest{ProjectId: 1001, Type: "test_notification", FromAt: now.Unix(), ToAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large to_at",
+			input:   &ListNotificationRequest{ProjectId: 1001, Type: "test_notification", FromAt: now.Unix(), ToAt: 253402268400},
+			wantErr: true,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -978,6 +1116,7 @@ func TestValidateDeleteNotificationRequest(t *testing.T) {
 }
 
 func TestValidateListAlertCondNotificationRequest(t *testing.T) {
+	now := time.Now()
 	cases := []struct {
 		name    string
 		input   *ListAlertCondNotificationRequest
@@ -985,12 +1124,32 @@ func TestValidateListAlertCondNotificationRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &ListAlertCondNotificationRequest{ProjectId: 1001, AlertConditionId: 1001, NotificationId: 1001},
+			input:   &ListAlertCondNotificationRequest{ProjectId: 1001, AlertConditionId: 1001, NotificationId: 1001, FromAt: now.Unix(), ToAt: now.Unix()},
 			wantErr: false,
 		},
 		{
 			name:    "NG Required(project_id)",
-			input:   &ListAlertCondNotificationRequest{AlertConditionId: 1001, NotificationId: 1001},
+			input:   &ListAlertCondNotificationRequest{AlertConditionId: 1001, NotificationId: 1001, FromAt: now.Unix(), ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too small from_at",
+			input:   &ListAlertCondNotificationRequest{ProjectId: 1001, AlertConditionId: 1001, NotificationId: 1001, FromAt: -1, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large from_at",
+			input:   &ListAlertCondNotificationRequest{ProjectId: 1001, AlertConditionId: 1001, NotificationId: 1001, FromAt: 253402268400, ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too small to_at",
+			input:   &ListAlertCondNotificationRequest{ProjectId: 1001, AlertConditionId: 1001, NotificationId: 1001, FromAt: now.Unix(), ToAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG too large to_at",
+			input:   &ListAlertCondNotificationRequest{ProjectId: 1001, AlertConditionId: 1001, NotificationId: 1001, FromAt: now.Unix(), ToAt: 253402268400},
 			wantErr: true,
 		},
 	}
