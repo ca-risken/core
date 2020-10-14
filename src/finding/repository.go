@@ -19,6 +19,7 @@ type findingRepository interface {
 	UpsertFinding(*model.Finding) (*model.Finding, error)
 	DeleteFinding(uint32, uint64) error
 	ListFindingTag(uint32, uint64) (*[]model.FindingTag, error)
+	ListFindingTagName(*finding.ListFindingTagNameRequest) (*[]TagName, error)
 	GetFindingTagByKey(uint32, uint64, string) (*model.FindingTag, error)
 	GetFindingTagByID(uint32, uint64) (*model.FindingTag, error)
 	TagFinding(*model.FindingTag) (*model.FindingTag, error)
@@ -31,6 +32,7 @@ type findingRepository interface {
 	UpsertResource(*model.Resource) (*model.Resource, error)
 	DeleteResource(uint32, uint64) error
 	ListResourceTag(uint32, uint64) (*[]model.ResourceTag, error)
+	ListResourceTagName(*finding.ListResourceTagNameRequest) (*[]TagName, error)
 	GetResourceTagByKey(uint32, uint64, string) (*model.ResourceTag, error)
 	GetResourceTagByID(uint32, uint64) (*model.ResourceTag, error)
 	TagResource(*model.ResourceTag) (*model.ResourceTag, error)
@@ -217,6 +219,29 @@ func (f *findingDB) ListFindingTag(projectID uint32, findingID uint64) (*[]model
 	return &data, nil
 }
 
+type TagName struct {
+	Tag string
+}
+
+func (f *findingDB) ListFindingTagName(req *finding.ListFindingTagNameRequest) (*[]TagName, error) {
+	query := `
+select
+  distinct tag
+from
+  finding_tag
+where
+  project_id = ?
+  and updated_at between ? and ?
+`
+	var params []interface{}
+	params = append(params, req.ProjectId, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
+	var data []TagName
+	if err := f.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
 const insertTagFinding = `
 INSERT INTO finding_tag
   (finding_tag_id, finding_id, project_id, tag)
@@ -317,6 +342,25 @@ const selectListResourceTag = `select * from resource_tag where project_id = ? a
 func (f *findingDB) ListResourceTag(projectID uint32, resourceID uint64) (*[]model.ResourceTag, error) {
 	var data []model.ResourceTag
 	if err := f.Slave.Raw(selectListResourceTag, projectID, resourceID).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (f *findingDB) ListResourceTagName(req *finding.ListResourceTagNameRequest) (*[]TagName, error) {
+	query := `
+select
+  distinct tag
+from
+  resource_tag
+where
+  project_id = ?
+  and updated_at between ? and ?
+`
+	var params []interface{}
+	params = append(params, req.ProjectId, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
+	var data []TagName
+	if err := f.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

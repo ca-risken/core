@@ -130,6 +130,35 @@ func (f *findingService) ListResourceTag(ctx context.Context, req *finding.ListR
 	return &finding.ListResourceTagResponse{Tag: tags}, nil
 }
 
+func (f *findingService) ListResourceTagName(ctx context.Context, req *finding.ListResourceTagNameRequest) (*finding.ListResourceTagNameResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	tags, err := f.repository.ListResourceTagName(convertListResourceTagNameRequest(req))
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return &finding.ListResourceTagNameResponse{}, nil
+		}
+		return nil, err
+	}
+	var tagNames []string
+	for _, tag := range *tags {
+		tagNames = append(tagNames, tag.Tag)
+	}
+	return &finding.ListResourceTagNameResponse{Tag: tagNames}, nil
+}
+
+func convertListResourceTagNameRequest(req *finding.ListResourceTagNameRequest) *finding.ListResourceTagNameRequest {
+	converted := finding.ListResourceTagNameRequest{
+		ProjectId: req.ProjectId,
+		FromAt:    req.FromAt,
+		ToAt:      req.ToAt,
+	}
+	if converted.ToAt == 0 {
+		converted.ToAt = time.Now().Unix()
+	}
+	return &converted
+}
 func (f *findingService) TagResource(ctx context.Context, req *finding.TagResourceRequest) (*finding.TagResourceResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err

@@ -49,6 +49,13 @@ list-finding-tag:
 		-d '{"project_id":1001, "finding_id":1001}' \
 		localhost:8001 core.finding.FindingService.ListFindingTag
 
+.PHONY: list-finding-tag-name
+list-finding-tag-name:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001}' \
+		localhost:8001 core.finding.FindingService.ListFindingTagName
+
 .PHONY: tag-finding
 tag-finding:
 	grpcurl \
@@ -97,6 +104,13 @@ list-resource-tag:
 		-plaintext \
 		-d '{"project_id":1001, "resource_id":1001}' \
 		localhost:8001 core.finding.FindingService.ListResourceTag
+
+.PHONY: list-resource-tag-name
+list-resource-tag-name:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001}' \
+		localhost:8001 core.finding.FindingService.ListResourceTagName
 
 .PHONY: tag-resource
 tag-resource:

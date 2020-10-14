@@ -2,8 +2,12 @@ cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20201013142011-4b0c8abaa585 h1:yrDzp5gWK7Q3+rlywqAVOJq4cMhVqdpYJCQvbU4CXiQ=
 github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20201013142011-4b0c8abaa585/go.mod h1:80ykoMm2T4VZhcHLOTLPxzL2ay6m7TFisWQ4k5CPWgc=
+github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20201014033227-7bd4a4b0822e h1:NECfSx1D8qAVK08359LG2yq8tew0kN9OrBut+VpCQZE=
+github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20201014033227-7bd4a4b0822e/go.mod h1:80ykoMm2T4VZhcHLOTLPxzL2ay6m7TFisWQ4k5CPWgc=
 github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20201013142011-4b0c8abaa585 h1:jnIgdkUY8vy9XsDKNm4CAnWo6OpH+2WrKp4v/SWAbh4=
 github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20201013142011-4b0c8abaa585/go.mod h1:ForogpnZ5NYX3S695FlcXcRzp3w4CTEeMYwA8dhyRU0=
+github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20201014033227-7bd4a4b0822e h1:pqLfKvz7BJPmccQzHTupHKx0FB3TGIdogtd2fqMJPIk=
+github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20201014033227-7bd4a4b0822e/go.mod h1:ForogpnZ5NYX3S695FlcXcRzp3w4CTEeMYwA8dhyRU0=
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
 github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 h1:zV3ejI06GQ59hwDQAvmK1qxOQGB3WuVTRoY0okPTAv0=
