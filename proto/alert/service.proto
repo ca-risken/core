@@ -330,4 +330,7 @@ message DeleteAlertCondNotificationRequest {
   uint32 notification_id = 3;
 }
 
-message AnalyzeAlertRequest { uint32 project_id = 1; }
+message AnalyzeAlertRequest {
+  uint32 project_id = 1;
+  repeated uint32 alert_condition_id = 2;
+}

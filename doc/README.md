@@ -544,6 +544,7 @@ RelAlertFindingForUpsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
+| alert_condition_id | [uint32](#uint32) | repeated |  |
 
 
 
