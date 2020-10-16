@@ -94,6 +94,7 @@ services:
       - DB_PORT=3306
       - DB_SCHEMA=mimosa
       - DB_LOG_MODE=${DB_LOG_MODE}
+      - NOTIFICATION_ALERT_URL=${NOTIFICATION_ALERT_URL}
     ports:
       - "8004:8004" # 本来はdocker-compose外にexposeする必要はない（grpcurlなどのDebug目的でhost側のportも開放）
 

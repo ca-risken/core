@@ -4,18 +4,29 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/kelseyhightower/envconfig"
 	"github.com/vikyd/zero"
 )
 
-type slackWebhookSetting struct {
-	Channel string
-	AlertID uint32
+type slackWebhookConfig struct {
+	Channel              string
+	NotificationAlertUrl string `split_words:"true"`
 }
 
-func (t *slackWebhookSetting) GetPayload() (string, error) {
+func newslackWebhookConfig(channel string) (*slackWebhookConfig, error) {
+	config := &slackWebhookConfig{}
+	if err := envconfig.Process("", config); err != nil {
+		return nil, err
+	}
+	config.Channel = channel
+	return config, nil
+}
+
+func (t *slackWebhookConfig) GetPayload() (string, error) {
 	text := fmt.Sprintf(`設定されたAlertに合致する結果を検知しました。
-AlertID: %v
-実際にはAlertに飛べるリンクなどつけるのが良さそう(画面できてから設定かな)`, t.AlertID)
+以下のリンクからご確認ください。
+%v
+`, t.NotificationAlertUrl)
 	payload := map[string]string{}
 	payload["text"] = text
 	if !zero.IsZeroVal(t.Channel) {

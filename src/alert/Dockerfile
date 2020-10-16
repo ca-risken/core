@@ -25,6 +25,7 @@ ENV PORT= \
     DB_SCHEMA=mimosa \
     DB_PORT=3306 \
     DB_LOG_MODE=false \
+    NOTIFICATION_ALERT_URL= \
     TZ=Asia/Tokyo
 WORKDIR /usr/local/alert
 ENTRYPOINT ["/usr/local/bin/env-injector"]
