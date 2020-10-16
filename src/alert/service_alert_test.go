@@ -1928,3 +1928,8 @@ func (m *mockAlertRepository) ListFindingTag(uint32, uint64) (*[]model.FindingTa
 	args := m.Called()
 	return args.Get(0).(*[]model.FindingTag), args.Error(1)
 }
+
+func (m *mockAlertRepository) ListDisabledAlertCondition(uint32) (*[]model.AlertCondition, error) {
+	args := m.Called()
+	return args.Get(0).(*[]model.AlertCondition), args.Error(1)
+}
