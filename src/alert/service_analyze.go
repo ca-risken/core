@@ -49,7 +49,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	}
 
 	// 無効のalertConditionの取得
-	disabledAlertConditions, err := f.repository.ListAlertCondition(req.ProjectId, nil, false, 0, time.Now().Unix())
+	disabledAlertConditions, err := f.repository.ListDisabledAlertCondition(req.ProjectId)
 	noRecord = gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		appLogger.Error(err)

@@ -23,23 +23,27 @@ func TestAnalyzeAlert(t *testing.T) {
 	mockDB := mockAlertRepository{}
 	svc := alertService{repository: &mockDB}
 	cases := []struct {
-		name                      string
-		input                     *alert.AnalyzeAlertRequest
-		want                      *empty.Empty
-		wantErr                   bool
-		mockListAlertCondition    *[]model.AlertCondition
-		mockListAlertConditionErr error
-		mockListFinding           *[]model.Finding
-		mockListFindingErr        error
-		mockListAlertRuleErr      error
+		name                              string
+		input                             *alert.AnalyzeAlertRequest
+		want                              *empty.Empty
+		wantErr                           bool
+		mockListAlertCondition            *[]model.AlertCondition
+		mockListAlertConditionErr         error
+		mockListFinding                   *[]model.Finding
+		mockListFindingErr                error
+		mockListAlertRuleErr              error
+		mockListDisabledAlertCondition    *[]model.AlertCondition
+		mockListDisabledAlertConditionErr error
 	}{
 		{
-			name:                   "OK",
-			input:                  &alert.AnalyzeAlertRequest{ProjectId: 1001},
-			want:                   &empty.Empty{},
-			wantErr:                false,
-			mockListAlertCondition: &[]model.AlertCondition{},
-			mockListFinding:        &[]model.Finding{},
+			name:                              "OK",
+			input:                             &alert.AnalyzeAlertRequest{ProjectId: 1001},
+			want:                              &empty.Empty{},
+			wantErr:                           false,
+			mockListAlertCondition:            &[]model.AlertCondition{},
+			mockListFinding:                   &[]model.Finding{},
+			mockListDisabledAlertCondition:    &[]model.AlertCondition{},
+			mockListDisabledAlertConditionErr: nil,
 		},
 		{
 			name:                      "NG ListAlertConditionErr",
@@ -78,9 +82,10 @@ func TestAnalyzeAlert(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			mockDB = mockAlertRepository{}
-			mockDB.On("ListAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Twice()
+			mockDB.On("ListAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
 			mockDB.On("ListFinding").Return(c.mockListFinding, c.mockListFindingErr).Once()
 			mockDB.On("ListAlertRuleByAlertConditionID").Return(&[]model.AlertRule{}, c.mockListAlertRuleErr).Once()
+			mockDB.On("ListDisabledAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
 			got, err := svc.AnalyzeAlert(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
