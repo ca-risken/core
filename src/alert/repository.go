@@ -52,7 +52,8 @@ type alertRepository interface {
 	GetAlertByAlertConditionIDWithActivated(uint32, uint32, bool) (*model.Alert, error)
 	ListFinding(uint32) (*[]model.Finding, error)
 	ListFindingTag(uint32, uint64) (*[]model.FindingTag, error)
-	ListDisabledAlertCondition(uint32) (*[]model.AlertCondition, error)
+	ListEnabledAlertCondition(uint32, []uint32) (*[]model.AlertCondition, error)
+	ListDisabledAlertCondition(uint32, []uint32) (*[]model.AlertCondition, error)
 }
 
 type alertDB struct {

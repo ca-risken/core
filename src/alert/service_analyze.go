@@ -24,7 +24,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 		return nil, err
 	}
 	// 有効なalertConditionの取得
-	alertConditions, err := f.repository.ListAlertCondition(req.ProjectId, nil, true, 0, time.Now().Unix())
+	alertConditions, err := f.repository.ListEnabledAlertCondition(req.ProjectId, req.AlertConditionId)
 	noRecord := gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		appLogger.Error(err)
@@ -49,7 +49,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	}
 
 	// 無効のalertConditionの取得
-	disabledAlertConditions, err := f.repository.ListDisabledAlertCondition(req.ProjectId)
+	disabledAlertConditions, err := f.repository.ListDisabledAlertCondition(req.ProjectId, req.AlertConditionId)
 	noRecord = gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		appLogger.Error(err)
@@ -349,7 +349,10 @@ func sendSlackNotification(notifySetting string, alertID uint32) error {
 	if !zero.IsZeroVal(setting.Data["channel"]) {
 		channel = setting.Data["channel"]
 	}
-	slackAlert := slackWebhookSetting{Channel: channel, AlertID: alertID}
+	slackAlert, err := newslackWebhookConfig(channel)
+	if err != nil {
+		return err
+	}
 	payload, err := slackAlert.GetPayload()
 	if err != nil {
 		return err

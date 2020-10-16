@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/vikyd/zero"
 )
 
 func (f *alertDB) ListAlertRuleByAlertConditionID(projectID, alertConditionID uint32) (*[]model.AlertRule, error) {
@@ -58,11 +59,29 @@ func (f *alertDB) ListFindingTag(projectID uint32, findingID uint64) (*[]model.F
 	return &data, nil
 }
 
-func (f *alertDB) ListDisabledAlertCondition(projectID uint32) (*[]model.AlertCondition, error) {
+func (f *alertDB) ListEnabledAlertCondition(projectID uint32, alertConditionID []uint32) (*[]model.AlertCondition, error) {
+	query := `select * from alert_condition where project_id = ? and enabled = ?`
+	var params []interface{}
+	params = append(params, projectID, true)
+	if !zero.IsZeroVal(alertConditionID) {
+		query += " and alert_condition_id in (?)"
+		params = append(params, alertConditionID)
+	}
+	var data []model.AlertCondition
+	if err := f.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (f *alertDB) ListDisabledAlertCondition(projectID uint32, alertConditionID []uint32) (*[]model.AlertCondition, error) {
 	query := `select * from alert_condition where project_id = ? and enabled = ?`
 	var params []interface{}
 	params = append(params, projectID, false)
-
+	if !zero.IsZeroVal(alertConditionID) {
+		query += " and alert_condition_id in (?)"
+		params = append(params, alertConditionID)
+	}
 	var data []model.AlertCondition
 	if err := f.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
