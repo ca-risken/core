@@ -82,7 +82,7 @@ func TestAnalyzeAlert(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			mockDB = mockAlertRepository{}
-			mockDB.On("ListAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
+			mockDB.On("ListEnabledAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
 			mockDB.On("ListFinding").Return(c.mockListFinding, c.mockListFindingErr).Once()
 			mockDB.On("ListAlertRuleByAlertConditionID").Return(&[]model.AlertRule{}, c.mockListAlertRuleErr).Once()
 			mockDB.On("ListDisabledAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
