@@ -1097,7 +1097,7 @@ Status
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
-| activated | [Status](#core.alert.Status) | repeated |  |
+| status | [Status](#core.alert.Status) | repeated |  |
 | severity | [string](#string) | repeated |  |
 | description | [string](#string) |  |  |
 | from_at | [int64](#int64) |  |  |
