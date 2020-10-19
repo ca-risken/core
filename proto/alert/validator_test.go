@@ -107,7 +107,7 @@ func TestValidatePutAlertRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &PutAlertRequest{ProjectId: 1001, Alert: &AlertForUpsert{AlertConditionId: 1001, Description: "test_alert", Severity: "high", Activated: true, ProjectId: 1001}},
+			input:   &PutAlertRequest{ProjectId: 1001, Alert: &AlertForUpsert{AlertConditionId: 1001, Description: "test_alert", Severity: "high", Status: Status_ACTIVE, ProjectId: 1001}},
 			wantErr: false,
 		},
 		{
@@ -117,7 +117,7 @@ func TestValidatePutAlertRequest(t *testing.T) {
 		},
 		{
 			name:  "NG Not Equal(project_id != tag.project_id)",
-			input: &PutAlertRequest{ProjectId: 1000, Alert: &AlertForUpsert{AlertConditionId: 1001, Description: "test_alert", Severity: "high", Activated: true, ProjectId: 1001}},
+			input: &PutAlertRequest{ProjectId: 1000, Alert: &AlertForUpsert{AlertConditionId: 1001, Description: "test_alert", Severity: "high", Status: Status_ACTIVE, ProjectId: 1001}},
 
 			wantErr: true,
 		},

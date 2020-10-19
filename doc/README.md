@@ -21,6 +21,8 @@
     - [RelAlertFinding](#core.alert.RelAlertFinding)
     - [RelAlertFindingForUpsert](#core.alert.RelAlertFindingForUpsert)
   
+    - [Status](#core.alert.Status)
+  
 - [alert/service.proto](#alert/service.proto)
     - [AnalyzeAlertRequest](#core.alert.AnalyzeAlertRequest)
     - [DeleteAlertCondNotificationRequest](#core.alert.DeleteAlertCondNotificationRequest)
@@ -210,7 +212,7 @@ Alert
 | description | [string](#string) |  |  |
 | severity | [string](#string) |  |  |
 | project_id | [uint32](#uint32) |  |  |
-| activated | [bool](#bool) |  |  |
+| status | [Status](#core.alert.Status) |  |  |
 | created_at | [int64](#int64) |  |  |
 | updated_at | [int64](#int64) |  |  |
 
@@ -350,7 +352,7 @@ AlertForUpsert
 | description | [string](#string) |  |  |
 | severity | [string](#string) |  |  |
 | project_id | [uint32](#uint32) |  |  |
-| activated | [bool](#bool) |  |  |
+| status | [Status](#core.alert.Status) |  |  |
 
 
 
@@ -370,6 +372,7 @@ AlertHistory
 | alert_id | [uint32](#uint32) |  |  |
 | description | [string](#string) |  |  |
 | severity | [string](#string) |  |  |
+| finding_history | [string](#string) |  |  |
 | project_id | [uint32](#uint32) |  |  |
 | created_at | [int64](#int64) |  |  |
 | updated_at | [int64](#int64) |  |  |
@@ -392,6 +395,7 @@ AlertHistoryForUpsert
 | alert_id | [uint32](#uint32) |  |  |
 | description | [string](#string) |  |  |
 | severity | [string](#string) |  |  |
+| finding_history | [string](#string) |  |  |
 | project_id | [uint32](#uint32) |  |  |
 
 
@@ -519,6 +523,20 @@ RelAlertFindingForUpsert
 
 
  
+
+
+<a name="core.alert.Status"></a>
+
+### Status
+Status
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| UNKNOWN | 0 |  |
+| ACTIVE | 1 |  |
+| PENDING | 2 |  |
+| DEACTIVE | 3 |  |
+
 
  
 
@@ -1079,7 +1097,7 @@ RelAlertFindingForUpsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
-| activated | [bool](#bool) |  |  |
+| activated | [Status](#core.alert.Status) | repeated |  |
 | severity | [string](#string) | repeated |  |
 | description | [string](#string) |  |  |
 | from_at | [int64](#int64) |  |  |

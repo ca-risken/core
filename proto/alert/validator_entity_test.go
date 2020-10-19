@@ -12,34 +12,34 @@ func TestValidateAlertForUpsert(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &AlertForUpsert{AlertConditionId: 1001, Description: "test_alert", Severity: "high", Activated: true, ProjectId: 1001},
+			input:   &AlertForUpsert{AlertConditionId: 1001, Description: "test_alert", Severity: "high", Status: Status_ACTIVE, ProjectId: 1001},
 			wantErr: false,
 		},
 		{
 			name:  "NG too long Description",
-			input: &AlertForUpsert{AlertConditionId: 1001, Description: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901", Severity: "high", Activated: true, ProjectId: 1001},
+			input: &AlertForUpsert{AlertConditionId: 1001, Description: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901", Severity: "high", Status: Status_ACTIVE, ProjectId: 1001},
 
 			wantErr: true,
 		},
 		{
 			name:    "NG required Description",
-			input:   &AlertForUpsert{AlertConditionId: 1001, Description: "", Severity: "high", Activated: true, ProjectId: 1001},
+			input:   &AlertForUpsert{AlertConditionId: 1001, Description: "", Severity: "high", Status: Status_ACTIVE, ProjectId: 1001},
 			wantErr: true,
 		},
 		{
 			name:  "NG wrong severity",
-			input: &AlertForUpsert{AlertConditionId: 1001, Description: "test_alert", Severity: "error", Activated: true, ProjectId: 1001},
+			input: &AlertForUpsert{AlertConditionId: 1001, Description: "test_alert", Severity: "error", Status: Status_ACTIVE, ProjectId: 1001},
 
 			wantErr: true,
 		},
 		{
 			name:    "NG required severity",
-			input:   &AlertForUpsert{AlertConditionId: 1001, Description: "test_alert", Activated: true, ProjectId: 1001},
+			input:   &AlertForUpsert{AlertConditionId: 1001, Description: "test_alert", Status: Status_ACTIVE, ProjectId: 1001},
 			wantErr: true,
 		},
 		{
-			name:    "NG required activated",
-			input:   &AlertForUpsert{AlertConditionId: 1001, Description: "test_alert", Activated: true, ProjectId: 1001},
+			name:    "NG required status",
+			input:   &AlertForUpsert{AlertConditionId: 1001, Description: "test_alert", Severity: "high", ProjectId: 1001},
 			wantErr: true,
 		},
 	}
@@ -95,6 +95,11 @@ func TestValidateAlertHistoryForUpsert(t *testing.T) {
 		{
 			name:    "NG required severity",
 			input:   &AlertHistoryForUpsert{AlertId: 1001, HistoryType: "created", Description: "test_alert", ProjectId: 1001},
+			wantErr: true,
+		},
+		{
+			name:    "NG invalid json finding_history",
+			input:   &AlertHistoryForUpsert{AlertId: 1001, HistoryType: "created", Description: "test_alert", Severity: "high", FindingHistory: "hogehoge", ProjectId: 1001},
 			wantErr: true,
 		},
 	}
