@@ -10,7 +10,7 @@ message Alert {
   string description = 3;
   string severity = 4;
   uint32 project_id = 5;
-  bool activated = 6;
+  Status status = 6;
   int64 created_at = 7;
   int64 updated_at = 8;
 }
@@ -22,7 +22,7 @@ message AlertForUpsert {
   string description = 3;
   string severity = 4;
   uint32 project_id = 5;
-  bool activated = 6;
+  Status status = 6;
 }
 
 // AlertHistory
@@ -32,9 +32,10 @@ message AlertHistory {
   uint32 alert_id = 3;
   string description = 4;
   string severity = 5;
-  uint32 project_id = 6;
-  int64 created_at = 7;
-  int64 updated_at = 8;
+  string finding_history = 6;
+  uint32 project_id = 7;
+  int64 created_at = 8;
+  int64 updated_at = 9;
 }
 
 // AlertHistoryForUpsert
@@ -44,7 +45,8 @@ message AlertHistoryForUpsert {
   uint32 alert_id = 3;
   string description = 4;
   string severity = 5;
-  uint32 project_id = 6;
+  string finding_history = 6;
+  uint32 project_id = 7;
 }
 
 // RelAlertFinding
@@ -163,4 +165,12 @@ message AlertCondNotificationForUpsert {
   uint32 project_id = 3;
   uint32 cache_second = 4;
   int64 notified_at = 5;
+}
+
+// Status
+enum Status {
+  UNKNOWN = 0;
+  ACTIVE = 1;
+  PENDING = 2;
+  DEACTIVE = 3;
 }

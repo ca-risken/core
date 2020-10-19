@@ -9,7 +9,7 @@ type Alert struct {
 	Description      string
 	Severity         string
 	ProjectID        uint32
-	Activated        bool
+	Status           string
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 }
@@ -18,6 +18,7 @@ type Alert struct {
 type AlertHistory struct {
 	AlertHistoryID uint32 `gorm:"primary_key"`
 	HistoryType    string
+	FindingHistory string
 	AlertID        uint32
 	Description    string
 	Severity       string

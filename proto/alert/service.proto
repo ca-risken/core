@@ -81,7 +81,7 @@ service AlertService {
 
 message ListAlertRequest {
   uint32 project_id = 1;
-  bool activated = 2;
+  repeated Status activated = 2;
   repeated string severity = 3;
   string description = 4;
   int64 from_at = 5;

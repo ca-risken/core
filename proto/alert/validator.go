@@ -341,7 +341,7 @@ func (e *AlertForUpsert) Validate() error {
 		validation.Field(&e.AlertConditionId, validation.Required),
 		validation.Field(&e.Description, validation.Required, validation.Length(0, 200)),
 		validation.Field(&e.Severity, validation.Required, validation.In("high", "medium", "low")),
-		validation.Field(&e.Activated, validation.Required),
+		validation.Field(&e.Status, validation.Required),
 		validation.Field(&e.ProjectId, validation.Required),
 	)
 }
@@ -354,6 +354,7 @@ func (e *AlertHistoryForUpsert) Validate() error {
 		validation.Field(&e.Severity, validation.Required, validation.In("high", "medium", "low")),
 		validation.Field(&e.AlertId, validation.Required),
 		validation.Field(&e.ProjectId, validation.Required),
+		validation.Field(&e.FindingHistory, is.JSON),
 	)
 }
 
