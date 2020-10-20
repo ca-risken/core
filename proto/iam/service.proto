@@ -32,6 +32,8 @@ service IAMService {
 
   // 認可（ユーザがリクエストしたアクションや、リソースに対しての認可を行います）
   rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
+  // 特定プロジェクトに依存しない管理者権限を持っているかどうかを返します
+  rpc IsAdmin(IsAdminRequest) returns (IsAdminResponse);
 }
 
 // IsAuthorizedRequest
@@ -46,3 +48,9 @@ message IsAuthorizedRequest {
 }
 
 message IsAuthorizedResponse { bool ok = 1; }
+
+// IsAdminRequest
+// 特定プロジェクトに依存しない管理者権限を持っているかどうかを返します
+message IsAdminRequest { uint32 user_id = 1; }
+
+message IsAdminResponse { bool ok = 1; }

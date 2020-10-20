@@ -729,3 +729,32 @@ func TestValidate_IsAuthorizedRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestValidate_IsAdminRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *IsAdminRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &IsAdminRequest{UserId: 1},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(userID)",
+			input:   &IsAdminRequest{UserId: 0},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
