@@ -24,7 +24,7 @@ func (i *iamService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequ
 		return nil, err
 	}
 
-	policies, err := i.repository.GetUserPoicy(req.UserId)
+	policies, err := i.repository.GetUserPolicy(req.UserId)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return &iam.IsAuthorizedResponse{Ok: false}, nil
@@ -51,4 +51,20 @@ func (i *iamService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequ
 		}
 	}
 	return &iam.IsAuthorizedResponse{Ok: isAuthorized}, nil
+}
+
+func (i *iamService) IsAdmin(ctx context.Context, req *iam.IsAdminRequest) (*iam.IsAdminResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	policy, err := i.repository.GetAdminPolicy(req.UserId)
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return &iam.IsAdminResponse{Ok: false}, nil
+		}
+		return nil, err
+	}
+	appLogger.Debugf("user(%d) is admin, policy_id: %d", req.UserId, policy.PolicyID)
+	return &iam.IsAdminResponse{Ok: true}, nil
 }

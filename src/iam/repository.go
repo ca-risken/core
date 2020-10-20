@@ -14,7 +14,6 @@ type iamRepository interface {
 	ListUser(activated bool, projectID uint32, name string) (*[]model.User, error)
 	GetUser(uint32, string) (*model.User, error)
 	GetUserBySub(string) (*model.User, error)
-	GetUserPoicy(uint32) (*[]model.Policy, error)
 	PutUser(*model.User) (*model.User, error)
 
 	// Role
@@ -27,6 +26,8 @@ type iamRepository interface {
 	DetachRole(uint32, uint32, uint32) error
 
 	// Policy
+	GetUserPolicy(uint32) (*[]model.Policy, error)
+	GetAdminPolicy(uint32) (*model.Policy, error)
 	ListPolicy(uint32, string, uint32) (*[]model.Policy, error)
 	GetPolicy(uint32, uint32) (*model.Policy, error)
 	GetPolicyByName(uint32, string) (*model.Policy, error)
