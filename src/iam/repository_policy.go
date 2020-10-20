@@ -33,11 +33,13 @@ select
   p.* 
 from
   user u
-  inner join user_role ur using(user_id)
+	inner join user_role ur using(user_id)
+	inner join role r using(role_id)
   inner join role_policy rp using(role_id)
   inner join policy p using(policy_id) 
 where
 	u.activated = 'true'
+	and r.project_id is null
 	and p.project_id is null
   and u.user_id = ?
 `

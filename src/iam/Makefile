@@ -21,6 +21,13 @@ is-authorized:
 		-d '{"user_id":1001, "project_id":1001, "action_name":"finding/GetFinding", "resource_name":"aws:guardduty/s3-bucket-name"}' \
 		localhost:8002 core.iam.IAMService.IsAuthorized
 
+.PHONY: is-admin
+is-admin:
+	grpcurl \
+		-plaintext \
+		-d '{"user_id":1001}' \
+		localhost:8002 core.iam.IAMService.IsAdmin
+
 .PHONY: list-user
 list-user:
 	grpcurl \
