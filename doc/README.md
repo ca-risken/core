@@ -161,6 +161,8 @@
     - [PutRoleResponse](#core.iam.PutRoleResponse)
   
 - [iam/service.proto](#iam/service.proto)
+    - [IsAdminRequest](#core.iam.IsAdminRequest)
+    - [IsAdminResponse](#core.iam.IsAdminResponse)
     - [IsAuthorizedRequest](#core.iam.IsAuthorizedRequest)
     - [IsAuthorizedResponse](#core.iam.IsAuthorizedResponse)
   
@@ -2713,6 +2715,37 @@ UserRole
 
 
 
+<a name="core.iam.IsAdminRequest"></a>
+
+### IsAdminRequest
+IsAdminRequest
+特定プロジェクトに依存しない管理者権限を持っているかどうかを返します
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| user_id | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="core.iam.IsAdminResponse"></a>
+
+### IsAdminResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ok | [bool](#bool) |  |  |
+
+
+
+
+
+
 <a name="core.iam.IsAuthorizedRequest"></a>
 
 ### IsAuthorizedRequest
@@ -2776,6 +2809,7 @@ IsAuthorizedRequest
 | AttachPolicy | [AttachPolicyRequest](#core.iam.AttachPolicyRequest) | [AttachPolicyResponse](#core.iam.AttachPolicyResponse) |  |
 | DetachPolicy | [DetachPolicyRequest](#core.iam.DetachPolicyRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 | IsAuthorized | [IsAuthorizedRequest](#core.iam.IsAuthorizedRequest) | [IsAuthorizedResponse](#core.iam.IsAuthorizedResponse) | 認可（ユーザがリクエストしたアクションや、リソースに対しての認可を行います） |
+| IsAdmin | [IsAdminRequest](#core.iam.IsAdminRequest) | [IsAdminResponse](#core.iam.IsAdminResponse) | 特定プロジェクトに依存しない管理者権限を持っているかどうかを返します |
 
  
 
