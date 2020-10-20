@@ -11,7 +11,7 @@ import (
 
 type alertRepository interface {
 	// Alert
-	ListAlert(uint32, bool, []string, string, int64, int64) (*[]model.Alert, error)
+	ListAlert(uint32, []string, []string, string, int64, int64) (*[]model.Alert, error)
 	GetAlert(uint32, uint32) (*model.Alert, error)
 	GetAlertByAlertConditionID(uint32, uint32) (*model.Alert, error)
 	UpsertAlert(*model.Alert) (*model.Alert, error)
@@ -49,7 +49,7 @@ type alertRepository interface {
 	ListAlertRuleByAlertConditionID(uint32, uint32) (*[]model.AlertRule, error)
 	ListNotificationByAlertConditionID(uint32, uint32) (*[]model.Notification, error)
 	DeactivateAlert(*model.Alert) error
-	GetAlertByAlertConditionIDWithActivated(uint32, uint32, bool) (*model.Alert, error)
+	GetAlertByAlertConditionIDStatus(uint32, uint32, []string) (*model.Alert, error)
 	ListFinding(uint32) (*[]model.Finding, error)
 	ListFindingTag(uint32, uint64) (*[]model.FindingTag, error)
 	ListEnabledAlertCondition(uint32, []uint32) (*[]model.AlertCondition, error)

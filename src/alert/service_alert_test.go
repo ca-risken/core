@@ -30,13 +30,13 @@ func TestListAlert(t *testing.T) {
 	}{
 		{
 			name:         "OK",
-			input:        &alert.ListAlertRequest{ProjectId: 1, Activated: false, Severity: []string{"high"}, Description: ""},
+			input:        &alert.ListAlertRequest{ProjectId: 1, Status: []alert.Status{alert.Status_ACTIVE}, Severity: []string{"high"}, Description: ""},
 			want:         &alert.ListAlertResponse{Alert: []*alert.Alert{{AlertId: 1001, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}, {AlertId: 1002, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}}},
 			mockResponce: &[]model.Alert{{AlertID: 1001, CreatedAt: now, UpdatedAt: now}, {AlertID: 1002, CreatedAt: now, UpdatedAt: now}},
 		},
 		{
 			name:      "NG Record not found",
-			input:     &alert.ListAlertRequest{ProjectId: 1, Activated: false, Severity: []string{"high"}, Description: ""},
+			input:     &alert.ListAlertRequest{ProjectId: 1, Status: []alert.Status{alert.Status_ACTIVE}, Severity: []string{"high"}, Description: ""},
 			want:      &alert.ListAlertResponse{},
 			mockError: gorm.ErrRecordNotFound,
 		},
@@ -66,8 +66,8 @@ func TestConvertListAlertRequest(t *testing.T) {
 	}{
 		{
 			name:  "OK full-set",
-			input: &alert.ListAlertRequest{ProjectId: 1, Severity: []string{"high"}, Description: "desc", Activated: true, FromAt: now.Unix(), ToAt: now.Unix()},
-			want:  &alert.ListAlertRequest{ProjectId: 1, Severity: []string{"high"}, Description: "desc", Activated: true, FromAt: now.Unix(), ToAt: now.Unix()},
+			input: &alert.ListAlertRequest{ProjectId: 1, Severity: []string{"high"}, Description: "desc", Status: []alert.Status{alert.Status_ACTIVE}, FromAt: now.Unix(), ToAt: now.Unix()},
+			want:  &alert.ListAlertRequest{ProjectId: 1, Severity: []string{"high"}, Description: "desc", Status: []alert.Status{alert.Status_ACTIVE}, FromAt: now.Unix(), ToAt: now.Unix()},
 		},
 	}
 	for _, c := range cases {
@@ -139,17 +139,17 @@ func TestPutAlert(t *testing.T) {
 	}{
 		{
 			name:       "OK Insert",
-			input:      &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Activated: true}},
-			want:       &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Activated: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			input:      &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
+			want:       &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetErr: gorm.ErrRecordNotFound,
-			mockUpResp: &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Activated: true, CreatedAt: now, UpdatedAt: now},
+			mockUpResp: &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:        "OK Update",
-			input:       &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Activated: true}},
-			want:        &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Activated: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockGetResp: &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Activated: true, CreatedAt: now, UpdatedAt: now},
-			mockUpResp:  &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Activated: true, CreatedAt: now, UpdatedAt: now},
+			input:       &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
+			want:        &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp: &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+			mockUpResp:  &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 		},
 	}
 	for _, c := range cases {
@@ -1769,7 +1769,7 @@ type mockAlertRepository struct {
 
 // Alert
 
-func (m *mockAlertRepository) ListAlert(uint32, bool, []string, string, int64, int64) (*[]model.Alert, error) {
+func (m *mockAlertRepository) ListAlert(uint32, []string, []string, string, int64, int64) (*[]model.Alert, error) {
 	args := m.Called()
 	return args.Get(0).(*[]model.Alert), args.Error(1)
 }
@@ -1914,7 +1914,7 @@ func (m *mockAlertRepository) DeactivateAlert(*model.Alert) error {
 	args := m.Called()
 	return args.Error(0)
 }
-func (m *mockAlertRepository) GetAlertByAlertConditionIDWithActivated(uint32, uint32, bool) (*model.Alert, error) {
+func (m *mockAlertRepository) GetAlertByAlertConditionIDStatus(uint32, uint32, []string) (*model.Alert, error) {
 	args := m.Called()
 	return args.Get(0).(*model.Alert), args.Error(1)
 }

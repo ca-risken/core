@@ -91,14 +91,16 @@ func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 		}
 	}
 	if isMatch {
-		alertID, err := f.RegistAlertByAnalyze(alertCondition, matchFindingIDs)
+		registAlert, err := f.RegistAlertByAnalyze(alertCondition, matchFindingIDs)
 		if err != nil {
 			return err
 		}
-		// Matchしている場合はAlert通知を行う
-		err = f.NotificationAlert(alertCondition, alertID)
-		if err != nil {
-			return err
+		// AlertがACTIVE、かつMatchしている場合はAlert通知を行う
+		if registAlert.Status == alert.Status_ACTIVE.String() {
+			err = f.NotificationAlert(alertCondition, registAlert.AlertID)
+			if err != nil {
+				return err
+			}
 		}
 	} else {
 		err = f.DeleteAlertByAnalyze(alertCondition)
@@ -109,19 +111,22 @@ func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 	return nil
 }
 
-func (f *alertService) RegistAlertByAnalyze(alertCondition *model.AlertCondition, findingIDs []uint64) (uint32, error) {
+func (f *alertService) RegistAlertByAnalyze(alertCondition *model.AlertCondition, findingIDs []uint64) (*model.Alert, error) {
 
 	// Alertの登録
-	savedData, err := f.repository.GetAlertByAlertConditionIDWithActivated(alertCondition.ProjectID, alertCondition.AlertConditionID, true)
+	savedData, err := f.repository.GetAlertByAlertConditionIDStatus(alertCondition.ProjectID, alertCondition.AlertConditionID, []string{"ACTIVE", "PENDING"})
 	noRecord := gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
-		return 0, err
+		return nil, err
 	}
 
 	// 既に登録済みの場合はalertIDを取得
+	// 登録済みかつStatusがPENDINGの場合、PENDING
+	var status string
 	var alertID uint32
 	if !noRecord {
 		alertID = savedData.AlertID
+		status = savedData.Status
 	}
 
 	data := &model.Alert{
@@ -130,32 +135,39 @@ func (f *alertService) RegistAlertByAnalyze(alertCondition *model.AlertCondition
 		Description:      alertCondition.Description,
 		Severity:         alertCondition.Severity,
 		ProjectID:        alertCondition.ProjectID,
-		Activated:        true,
+		Status:           status,
 	}
 	// insert Alert
 	registerdData, err := f.repository.UpsertAlert(data)
 	if err != nil {
-		return 0, err
+		return nil, err
+	}
+
+	// AlertHistoryに登録するための現在のRelAlertFindingを整形
+	findingHistory, err := makeFindingIDs(findingIDs)
+	if err != nil {
+		return nil, err
 	}
 
 	historyType := getHistoryType(alertID)
 	// AlertHistoryの登録
 	dataAlertHistory := &model.AlertHistory{
-		HistoryType: historyType,
-		AlertID:     registerdData.AlertID,
-		Description: registerdData.Description,
-		Severity:    registerdData.Severity,
-		ProjectID:   registerdData.ProjectID,
+		HistoryType:    historyType,
+		AlertID:        registerdData.AlertID,
+		Description:    registerdData.Description,
+		FindingHistory: findingHistory,
+		Severity:       registerdData.Severity,
+		ProjectID:      registerdData.ProjectID,
 	}
 	_, err = f.repository.UpsertAlertHistory(dataAlertHistory)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	//RelAlertFindingの更新 (削除して再登録)
 	err = f.deleteRelAlertFindingByAlertID(registerdData.ProjectID, registerdData.AlertID)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	for _, findingID := range findingIDs {
 		data := &model.RelAlertFinding{
@@ -165,24 +177,23 @@ func (f *alertService) RegistAlertByAnalyze(alertCondition *model.AlertCondition
 		}
 		_, err := f.repository.UpsertRelAlertFinding(data)
 		if err != nil {
-			return 0, err
+			return nil, err
 		}
 	}
 
-	return registerdData.AlertID, nil
+	return registerdData, nil
 }
 
 func (f *alertService) DeleteAlertByAnalyze(alertCondition *model.AlertCondition) error {
 
 	// Alertの削除
-	savedData, err := f.repository.GetAlertByAlertConditionIDWithActivated(alertCondition.ProjectID, alertCondition.AlertConditionID, true)
+	savedData, err := f.repository.GetAlertByAlertConditionIDStatus(alertCondition.ProjectID, alertCondition.AlertConditionID, []string{"ACTIVE", "PENDING"})
 	noRecord := gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		return err
 	}
-
-	// レコードが存在しない、もしくはActivated出ない場合は何もしない
-	if noRecord || !savedData.Activated {
+	// レコードが存在しない場合何もしない
+	if noRecord {
 		return nil
 	}
 
@@ -192,21 +203,30 @@ func (f *alertService) DeleteAlertByAnalyze(alertCondition *model.AlertCondition
 		Description:      alertCondition.Description,
 		Severity:         alertCondition.Severity,
 		ProjectID:        alertCondition.ProjectID,
-		Activated:        false,
+		Status:           alert.Status_DEACTIVE.String(),
 	}
 	// update Alert
-	errDeactivate := f.repository.DeactivateAlert(data)
-	if errDeactivate != nil {
-		return errDeactivate
+	err = f.repository.DeactivateAlert(data)
+	appLogger.Info("koko1", err)
+	if err != nil {
+		appLogger.Info("koko2", err)
+		return err
+	}
+
+	// AlertHistoryに登録するための現在のRelAlertFindingを整形
+	findingHistory, err := makeFindingIDs([]uint64{})
+	if err != nil {
+		return err
 	}
 
 	// AlertHistoryの登録
 	dataAlertHistory := &model.AlertHistory{
-		HistoryType: "deleted",
-		AlertID:     savedData.AlertID,
-		Description: savedData.Description,
-		Severity:    savedData.Severity,
-		ProjectID:   savedData.ProjectID,
+		HistoryType:    "deleted",
+		AlertID:        savedData.AlertID,
+		Description:    savedData.Description,
+		Severity:       savedData.Severity,
+		FindingHistory: findingHistory,
+		ProjectID:      savedData.ProjectID,
 	}
 	_, errAlertHistory := f.repository.UpsertAlertHistory(dataAlertHistory)
 	if errAlertHistory != nil {
@@ -327,6 +347,16 @@ func (f *alertService) checkMatchAlertRuleFinding(ctx context.Context, alertRule
 		}
 	}
 	return true, nil
+}
+
+func makeFindingIDs(findingIDs []uint64) (string, error) {
+	mapFindingIDs := map[string][]uint64{"FindingID": findingIDs}
+	bytes, err := json.Marshal(mapFindingIDs)
+	if err != nil {
+		appLogger.Error("JSON marshal error when making FindingIDs ", err)
+		return "", err
+	}
+	return string(bytes), nil
 }
 
 func getHistoryType(alertID uint32) string {

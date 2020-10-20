@@ -11,6 +11,7 @@ import (
 	"github.com/CyberAgent/mimosa-core/proto/alert"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jarcoal/httpmock"
+	"github.com/jinzhu/gorm"
 )
 
 /*
@@ -393,93 +394,93 @@ func TestDeleteAlertByAnalyze(t *testing.T) {
 	mockDB := mockAlertRepository{}
 	svc := alertService{repository: &mockDB}
 	cases := []struct {
-		name                                           string
-		alertCondition                                 *model.AlertCondition
-		wantErr                                        bool
-		mockGetAlertByAlertConditionIDWithActivated    *model.Alert
-		mockGetAlertByAlertConditionIDWithActivatedErr error
-		mockDeactivateAlertErr                         error
-		mockUpsertAlertHistory                         *model.AlertHistory
-		mockUpsertAlertHistoryErr                      error
-		mockListRelAlertFinding                        *[]model.RelAlertFinding
-		mockListRelAlertFindingErr                     error
-		mockListDeleteAlertFindingErr                  error
+		name                                    string
+		alertCondition                          *model.AlertCondition
+		wantErr                                 bool
+		mockGetAlertByAlertConditionIDStatus    *model.Alert
+		mockGetAlertByAlertConditionIDStatusErr error
+		mockDeactivateAlertErr                  error
+		mockUpsertAlertHistory                  *model.AlertHistory
+		mockUpsertAlertHistoryErr               error
+		mockListRelAlertFinding                 *[]model.RelAlertFinding
+		mockListRelAlertFindingErr              error
+		mockListDeleteAlertFindingErr           error
 	}{
 		{
-			name:           "OK 0 Alert",
-			alertCondition: &model.AlertCondition{AlertConditionID: 1},
-			wantErr:        false,
-			mockGetAlertByAlertConditionIDWithActivated:    &model.Alert{},
-			mockGetAlertByAlertConditionIDWithActivatedErr: nil,
+			name:                                    "OK 0 Alert",
+			alertCondition:                          &model.AlertCondition{ProjectID: 1, AlertConditionID: 1},
+			wantErr:                                 false,
+			mockGetAlertByAlertConditionIDStatus:    nil,
+			mockGetAlertByAlertConditionIDStatusErr: gorm.ErrRecordNotFound,
 		},
 		{
-			name:           "OK Deactivate Alert Success",
-			alertCondition: &model.AlertCondition{AlertConditionID: 1},
-			wantErr:        false,
-			mockGetAlertByAlertConditionIDWithActivated:    &model.Alert{AlertID: 1},
-			mockGetAlertByAlertConditionIDWithActivatedErr: nil,
-			mockDeactivateAlertErr:                         nil,
-			mockUpsertAlertHistory:                         &model.AlertHistory{},
-			mockUpsertAlertHistoryErr:                      nil,
-			mockListRelAlertFinding:                        &[]model.RelAlertFinding{},
-			mockListRelAlertFindingErr:                     nil,
-			mockListDeleteAlertFindingErr:                  nil,
+			name:                                    "OK Deactivate Alert Success",
+			alertCondition:                          &model.AlertCondition{AlertConditionID: 1},
+			wantErr:                                 false,
+			mockGetAlertByAlertConditionIDStatus:    &model.Alert{AlertID: 1},
+			mockGetAlertByAlertConditionIDStatusErr: nil,
+			mockDeactivateAlertErr:                  nil,
+			mockUpsertAlertHistory:                  &model.AlertHistory{},
+			mockUpsertAlertHistoryErr:               nil,
+			mockListRelAlertFinding:                 &[]model.RelAlertFinding{},
+			mockListRelAlertFindingErr:              nil,
+			mockListDeleteAlertFindingErr:           nil,
 		},
 		{
-			name:           "Error GetAlertByAlertConditionIDWithActivated",
-			alertCondition: &model.AlertCondition{AlertConditionID: 1},
-			wantErr:        true,
-			mockGetAlertByAlertConditionIDWithActivated:    nil,
-			mockGetAlertByAlertConditionIDWithActivatedErr: errors.New("Something error occured"),
+			name:                                    "Error GetAlertByAlertConditionIDStatus",
+			alertCondition:                          &model.AlertCondition{AlertConditionID: 1},
+			wantErr:                                 true,
+			mockGetAlertByAlertConditionIDStatus:    nil,
+			mockGetAlertByAlertConditionIDStatusErr: errors.New("Something error occured"),
 		},
 		{
-			name:           "Error DeactivateAlert",
-			alertCondition: &model.AlertCondition{AlertConditionID: 1},
-			wantErr:        true,
-			mockGetAlertByAlertConditionIDWithActivated:    &model.Alert{AlertID: 1, Activated: true},
-			mockGetAlertByAlertConditionIDWithActivatedErr: nil,
-			mockDeactivateAlertErr:                         errors.New("Something error occured"),
+			name:                                    "Error DeactivateAlert",
+			alertCondition:                          &model.AlertCondition{AlertConditionID: 1},
+			wantErr:                                 true,
+			mockGetAlertByAlertConditionIDStatus:    &model.Alert{AlertID: 1, Status: "ACTIVE"},
+			mockGetAlertByAlertConditionIDStatusErr: nil,
+			mockDeactivateAlertErr:                  gorm.ErrCantStartTransaction,
 		},
 		{
-			name:           "Error UpsertAlertHistory",
-			alertCondition: &model.AlertCondition{AlertConditionID: 1},
-			wantErr:        true,
-			mockGetAlertByAlertConditionIDWithActivated:    &model.Alert{AlertID: 1, Activated: true},
-			mockGetAlertByAlertConditionIDWithActivatedErr: nil,
-			mockDeactivateAlertErr:                         nil,
-			mockUpsertAlertHistory:                         nil,
-			mockUpsertAlertHistoryErr:                      errors.New("Something error occured"),
+			name:                                    "Error UpsertAlertHistory",
+			alertCondition:                          &model.AlertCondition{AlertConditionID: 1},
+			wantErr:                                 true,
+			mockGetAlertByAlertConditionIDStatus:    &model.Alert{AlertID: 1, Status: "ACTIVE"},
+			mockGetAlertByAlertConditionIDStatusErr: nil,
+			mockDeactivateAlertErr:                  nil,
+			mockUpsertAlertHistory:                  nil,
+			mockUpsertAlertHistoryErr:               errors.New("Something error occured"),
 		},
 		{
-			name:           "Error ListRelAlertFinding",
-			alertCondition: &model.AlertCondition{AlertConditionID: 1},
-			wantErr:        true,
-			mockGetAlertByAlertConditionIDWithActivated:    &model.Alert{AlertID: 1, Activated: true},
-			mockGetAlertByAlertConditionIDWithActivatedErr: nil,
-			mockDeactivateAlertErr:                         nil,
-			mockUpsertAlertHistory:                         &model.AlertHistory{},
-			mockUpsertAlertHistoryErr:                      nil,
-			mockListRelAlertFinding:                        nil,
-			mockListRelAlertFindingErr:                     errors.New("Something error occured"),
+			name:                                    "Error ListRelAlertFinding",
+			alertCondition:                          &model.AlertCondition{AlertConditionID: 1},
+			wantErr:                                 true,
+			mockGetAlertByAlertConditionIDStatus:    &model.Alert{AlertID: 1, Status: "ACTIVE"},
+			mockGetAlertByAlertConditionIDStatusErr: nil,
+			mockDeactivateAlertErr:                  nil,
+			mockUpsertAlertHistory:                  &model.AlertHistory{},
+			mockUpsertAlertHistoryErr:               nil,
+			mockListRelAlertFinding:                 nil,
+			mockListRelAlertFindingErr:              errors.New("Something error occured"),
 		},
 		{
-			name:           "Error DeleteAlertFinding",
-			alertCondition: &model.AlertCondition{AlertConditionID: 1},
-			wantErr:        true,
-			mockGetAlertByAlertConditionIDWithActivated:    &model.Alert{AlertID: 1, Activated: true},
-			mockGetAlertByAlertConditionIDWithActivatedErr: nil,
-			mockDeactivateAlertErr:                         nil,
-			mockUpsertAlertHistory:                         &model.AlertHistory{},
-			mockUpsertAlertHistoryErr:                      nil,
-			mockListRelAlertFinding:                        &[]model.RelAlertFinding{{AlertID: 1, FindingID: 1, ProjectID: 1}},
-			mockListRelAlertFindingErr:                     nil,
-			mockListDeleteAlertFindingErr:                  errors.New("Something error occured"),
+			name:                                    "Error DeleteAlertFinding",
+			alertCondition:                          &model.AlertCondition{AlertConditionID: 1},
+			wantErr:                                 true,
+			mockGetAlertByAlertConditionIDStatus:    &model.Alert{AlertID: 1, Status: "ACTIVE"},
+			mockGetAlertByAlertConditionIDStatusErr: nil,
+			mockDeactivateAlertErr:                  nil,
+			mockUpsertAlertHistory:                  &model.AlertHistory{},
+			mockUpsertAlertHistoryErr:               nil,
+			mockListRelAlertFinding:                 &[]model.RelAlertFinding{{AlertID: 1, FindingID: 1, ProjectID: 1}},
+			mockListRelAlertFindingErr:              nil,
+			mockListDeleteAlertFindingErr:           errors.New("Something error occured"),
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			mockDB = mockAlertRepository{}
-			mockDB.On("GetAlertByAlertConditionIDWithActivated").Return(c.mockGetAlertByAlertConditionIDWithActivated, c.mockGetAlertByAlertConditionIDWithActivatedErr).Once()
+			mockDB.On("GetAlertByAlertConditionIDStatus").Return(c.mockGetAlertByAlertConditionIDStatus, c.mockGetAlertByAlertConditionIDStatusErr).Once()
 			mockDB.On("DeactivateAlert").Return(c.mockDeactivateAlertErr).Once()
 			mockDB.On("UpsertAlertHistory").Return(c.mockUpsertAlertHistory, c.mockUpsertAlertHistoryErr).Once()
 			mockDB.On("ListRelAlertFinding").Return(c.mockListRelAlertFinding, c.mockListRelAlertFindingErr).Once()
@@ -497,94 +498,94 @@ func TestRegistAlertByAnalyze(t *testing.T) {
 	mockDB := mockAlertRepository{}
 	svc := alertService{repository: &mockDB}
 	cases := []struct {
-		name                                           string
-		alertCondition                                 *model.AlertCondition
-		findingIDs                                     []uint64
-		want                                           uint32
-		wantErr                                        bool
-		mockGetAlertByAlertConditionIDWithActivated    *model.Alert
-		mockGetAlertByAlertConditionIDWithActivatedErr error
-		mockUpsertAlert                                *model.Alert
-		mockUpsertAlertErr                             error
-		mockUpsertAlertHistory                         *model.AlertHistory
-		mockUpsertAlertHistoryErr                      error
-		mockListRelAlertFinding                        *[]model.RelAlertFinding
-		mockListRelAlertFindingErr                     error
-		mockUpsertRelAlertFinding                      *model.RelAlertFinding
-		mockUpsertRelAlertFindingErr                   error
+		name                                    string
+		alertCondition                          *model.AlertCondition
+		findingIDs                              []uint64
+		want                                    *model.Alert
+		wantErr                                 bool
+		mockGetAlertByAlertConditionIDStatus    *model.Alert
+		mockGetAlertByAlertConditionIDStatusErr error
+		mockUpsertAlert                         *model.Alert
+		mockUpsertAlertErr                      error
+		mockUpsertAlertHistory                  *model.AlertHistory
+		mockUpsertAlertHistoryErr               error
+		mockListRelAlertFinding                 *[]model.RelAlertFinding
+		mockListRelAlertFindingErr              error
+		mockUpsertRelAlertFinding               *model.RelAlertFinding
+		mockUpsertRelAlertFindingErr            error
 	}{
 		{
-			name:           "OK Register Alert Success",
-			alertCondition: &model.AlertCondition{AlertConditionID: 1},
-			findingIDs:     []uint64{1},
-			want:           1,
-			wantErr:        false,
-			mockGetAlertByAlertConditionIDWithActivated:    &model.Alert{},
-			mockGetAlertByAlertConditionIDWithActivatedErr: nil,
-			mockUpsertAlert:              &model.Alert{AlertID: 1},
-			mockUpsertAlertErr:           nil,
-			mockUpsertAlertHistory:       &model.AlertHistory{},
-			mockUpsertAlertHistoryErr:    nil,
-			mockListRelAlertFinding:      &[]model.RelAlertFinding{},
-			mockListRelAlertFindingErr:   nil,
-			mockUpsertRelAlertFinding:    &model.RelAlertFinding{},
-			mockUpsertRelAlertFindingErr: nil,
+			name:                                    "OK Register Alert Success",
+			alertCondition:                          &model.AlertCondition{AlertConditionID: 1},
+			findingIDs:                              []uint64{1},
+			want:                                    &model.Alert{AlertID: 1},
+			wantErr:                                 false,
+			mockGetAlertByAlertConditionIDStatus:    &model.Alert{},
+			mockGetAlertByAlertConditionIDStatusErr: nil,
+			mockUpsertAlert:                         &model.Alert{AlertID: 1},
+			mockUpsertAlertErr:                      nil,
+			mockUpsertAlertHistory:                  &model.AlertHistory{},
+			mockUpsertAlertHistoryErr:               nil,
+			mockListRelAlertFinding:                 &[]model.RelAlertFinding{},
+			mockListRelAlertFindingErr:              nil,
+			mockUpsertRelAlertFinding:               &model.RelAlertFinding{},
+			mockUpsertRelAlertFindingErr:            nil,
 		},
 		{
-			name:           "Error GetAlertByAlertConditionIDWithActivated",
-			alertCondition: &model.AlertCondition{AlertConditionID: 1},
-			findingIDs:     []uint64{1},
-			want:           0,
-			wantErr:        true,
-			mockGetAlertByAlertConditionIDWithActivated:    nil,
-			mockGetAlertByAlertConditionIDWithActivatedErr: errors.New("Something error occured"),
+			name:                                    "Error GetAlertByAlertConditionIDStatus",
+			alertCondition:                          &model.AlertCondition{AlertConditionID: 1},
+			findingIDs:                              []uint64{1},
+			want:                                    nil,
+			wantErr:                                 true,
+			mockGetAlertByAlertConditionIDStatus:    nil,
+			mockGetAlertByAlertConditionIDStatusErr: errors.New("Something error occured"),
 		},
 		{
-			name:           "Error UpsertAlert",
-			alertCondition: &model.AlertCondition{AlertConditionID: 1},
-			findingIDs:     []uint64{1},
-			want:           0,
-			wantErr:        true,
-			mockGetAlertByAlertConditionIDWithActivated:    &model.Alert{},
-			mockGetAlertByAlertConditionIDWithActivatedErr: nil,
-			mockUpsertAlert:    nil,
-			mockUpsertAlertErr: errors.New("Something error occured"),
+			name:                                    "Error UpsertAlert",
+			alertCondition:                          &model.AlertCondition{AlertConditionID: 1},
+			findingIDs:                              []uint64{1},
+			want:                                    nil,
+			wantErr:                                 true,
+			mockGetAlertByAlertConditionIDStatus:    &model.Alert{},
+			mockGetAlertByAlertConditionIDStatusErr: nil,
+			mockUpsertAlert:                         nil,
+			mockUpsertAlertErr:                      errors.New("Something error occured"),
 		},
 		{
-			name:           "Error UpsertAlert",
-			alertCondition: &model.AlertCondition{AlertConditionID: 1},
-			findingIDs:     []uint64{1},
-			want:           0,
-			wantErr:        true,
-			mockGetAlertByAlertConditionIDWithActivated:    &model.Alert{},
-			mockGetAlertByAlertConditionIDWithActivatedErr: nil,
-			mockUpsertAlert:           &model.Alert{AlertID: 1},
-			mockUpsertAlertErr:        nil,
-			mockUpsertAlertHistory:    nil,
-			mockUpsertAlertHistoryErr: errors.New("Something error occured"),
+			name:                                    "Error UpsertAlert",
+			alertCondition:                          &model.AlertCondition{AlertConditionID: 1},
+			findingIDs:                              []uint64{1},
+			want:                                    nil,
+			wantErr:                                 true,
+			mockGetAlertByAlertConditionIDStatus:    &model.Alert{},
+			mockGetAlertByAlertConditionIDStatusErr: nil,
+			mockUpsertAlert:                         &model.Alert{AlertID: 1},
+			mockUpsertAlertErr:                      nil,
+			mockUpsertAlertHistory:                  nil,
+			mockUpsertAlertHistoryErr:               errors.New("Something error occured"),
 		},
 		{
-			name:           "Error UpsertRelAlertFinding",
-			alertCondition: &model.AlertCondition{AlertConditionID: 1},
-			findingIDs:     []uint64{1},
-			want:           0,
-			wantErr:        true,
-			mockGetAlertByAlertConditionIDWithActivated:    &model.Alert{},
-			mockGetAlertByAlertConditionIDWithActivatedErr: nil,
-			mockUpsertAlert:              &model.Alert{AlertID: 1},
-			mockUpsertAlertErr:           nil,
-			mockUpsertAlertHistory:       &model.AlertHistory{},
-			mockUpsertAlertHistoryErr:    nil,
-			mockUpsertRelAlertFinding:    nil,
-			mockUpsertRelAlertFindingErr: errors.New("Something error occured"),
-			mockListRelAlertFinding:      &[]model.RelAlertFinding{},
-			mockListRelAlertFindingErr:   nil,
+			name:                                    "Error UpsertRelAlertFinding",
+			alertCondition:                          &model.AlertCondition{AlertConditionID: 1},
+			findingIDs:                              []uint64{1},
+			want:                                    nil,
+			wantErr:                                 true,
+			mockGetAlertByAlertConditionIDStatus:    &model.Alert{},
+			mockGetAlertByAlertConditionIDStatusErr: nil,
+			mockUpsertAlert:                         &model.Alert{AlertID: 1},
+			mockUpsertAlertErr:                      nil,
+			mockUpsertAlertHistory:                  &model.AlertHistory{},
+			mockUpsertAlertHistoryErr:               nil,
+			mockUpsertRelAlertFinding:               nil,
+			mockUpsertRelAlertFindingErr:            errors.New("Something error occured"),
+			mockListRelAlertFinding:                 &[]model.RelAlertFinding{},
+			mockListRelAlertFindingErr:              nil,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			mockDB = mockAlertRepository{}
-			mockDB.On("GetAlertByAlertConditionIDWithActivated").Return(c.mockGetAlertByAlertConditionIDWithActivated, c.mockGetAlertByAlertConditionIDWithActivatedErr).Once()
+			mockDB.On("GetAlertByAlertConditionIDStatus").Return(c.mockGetAlertByAlertConditionIDStatus, c.mockGetAlertByAlertConditionIDStatusErr).Once()
 			mockDB.On("UpsertAlert").Return(c.mockUpsertAlert, c.mockUpsertAlertErr).Once()
 			mockDB.On("UpsertAlertHistory").Return(c.mockUpsertAlertHistory, c.mockUpsertAlertHistoryErr).Once()
 			mockDB.On("ListRelAlertFinding").Return(c.mockListRelAlertFinding, c.mockListRelAlertFindingErr).Once()
