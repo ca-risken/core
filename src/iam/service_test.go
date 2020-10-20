@@ -80,9 +80,61 @@ func TestIsAuthorized(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("GetUserPoicy").Return(c.mockResponce, c.mockError).Once()
+				mock.On("GetUserPolicy").Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.IsAuthorized(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestIsAdmin(t *testing.T) {
+	var ctx context.Context
+	mock := mockIAMRepository{}
+	svc := iamService{repository: &mock}
+	cases := []struct {
+		name         string
+		input        *iam.IsAdminRequest
+		want         *iam.IsAdminResponse
+		wantErr      bool
+		mockResponce *model.Policy
+		mockError    error
+	}{
+		{
+			name:         "OK Admin",
+			input:        &iam.IsAdminRequest{UserId: 1},
+			want:         &iam.IsAdminResponse{Ok: true},
+			mockResponce: &model.Policy{PolicyID: 1, Name: "no-project-policy", ProjectID: 0, ActionPtn: ".*", ResourcePtn: ".*"},
+		},
+		{
+			name:      "OK Not Admin",
+			input:     &iam.IsAdminRequest{UserId: 1},
+			want:      &iam.IsAdminResponse{Ok: false},
+			mockError: gorm.ErrRecordNotFound,
+		},
+		{
+			name:    "NG Invalid parameter (invalid actionName format)",
+			input:   &iam.IsAdminRequest{UserId: 0},
+			wantErr: true,
+		},
+		{
+			name:      "NG DB error",
+			input:     &iam.IsAdminRequest{UserId: 1},
+			wantErr:   true,
+			mockError: gorm.ErrInvalidSQL,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if c.mockResponce != nil || c.mockError != nil {
+				mock.On("GetAdminPolicy").Return(c.mockResponce, c.mockError).Once()
+			}
+			got, err := svc.IsAdmin(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -112,7 +164,7 @@ func (m *mockIAMRepository) GetUserBySub(string) (*model.User, error) {
 	args := m.Called()
 	return args.Get(0).(*model.User), args.Error(1)
 }
-func (m *mockIAMRepository) GetUserPoicy(uint32) (*[]model.Policy, error) {
+func (m *mockIAMRepository) GetUserPolicy(uint32) (*[]model.Policy, error) {
 	args := m.Called()
 	return args.Get(0).(*[]model.Policy), args.Error(1)
 }
@@ -175,4 +227,9 @@ func (m *mockIAMRepository) AttachPolicy(uint32, uint32, uint32) (*model.RolePol
 func (m *mockIAMRepository) DetachPolicy(uint32, uint32, uint32) error {
 	args := m.Called()
 	return args.Error(0)
+}
+
+func (m *mockIAMRepository) GetAdminPolicy(uint32) (*model.Policy, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Policy), args.Error(1)
 }
