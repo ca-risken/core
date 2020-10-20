@@ -8,7 +8,7 @@ import (
 	"github.com/vikyd/zero"
 )
 
-func (f *alertDB) ListAlert(projectID uint32, activated bool, severity []string, description string, fromAt, toAt int64) (*[]model.Alert, error) {
+func (f *alertDB) ListAlert(projectID uint32, status []string, severity []string, description string, fromAt, toAt int64) (*[]model.Alert, error) {
 	query := `select * from alert where project_id = ? and updated_at between ? and ?`
 	var params []interface{}
 	params = append(params, projectID, time.Unix(fromAt, 0), time.Unix(toAt, 0))
@@ -16,9 +16,9 @@ func (f *alertDB) ListAlert(projectID uint32, activated bool, severity []string,
 		query += " and severity in (?)"
 		params = append(params, severity)
 	}
-	if !zero.IsZeroVal(activated) {
-		query += " and activated = ?"
-		params = append(params, activated)
+	if !zero.IsZeroVal(status) {
+		query += " and status in (?)"
+		params = append(params, status)
 	}
 	if !zero.IsZeroVal(description) {
 		query += " and description = ?"

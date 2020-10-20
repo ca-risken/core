@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
@@ -20,7 +21,7 @@ func (f *alertService) ListAlert(ctx context.Context, req *alert.ListAlertReques
 	}
 
 	converted := convertListAlertRequest(req)
-	list, err := f.repository.ListAlert(converted.ProjectId, converted.Activated, converted.Severity, converted.Description, converted.FromAt, converted.ToAt)
+	list, err := f.repository.ListAlert(converted.ProjectId, getStrings(converted.Status), converted.Severity, converted.Description, converted.FromAt, converted.ToAt)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return &alert.ListAlertResponse{}, nil
@@ -37,7 +38,7 @@ func (f *alertService) ListAlert(ctx context.Context, req *alert.ListAlertReques
 func convertListAlertRequest(req *alert.ListAlertRequest) *alert.ListAlertRequest {
 	converted := alert.ListAlertRequest{
 		ProjectId:   req.ProjectId,
-		Activated:   req.Activated,
+		Status:      req.Status,
 		Severity:    req.Severity,
 		Description: req.Description,
 		FromAt:      req.FromAt,
@@ -84,7 +85,7 @@ func (f *alertService) PutAlert(ctx context.Context, req *alert.PutAlertRequest)
 		Description:      req.Alert.Description,
 		Severity:         req.Alert.Severity,
 		ProjectID:        req.Alert.ProjectId,
-		Activated:        req.Alert.Activated,
+		Status:           req.Alert.Status.String(),
 	}
 
 	// Fiding upsert
@@ -283,7 +284,7 @@ func convertAlert(f *model.Alert) *alert.Alert {
 		Description:      f.Description,
 		Severity:         f.Severity,
 		ProjectId:        f.ProjectID,
-		Activated:        f.Activated,
+		Status:           getStatus(f.Status),
 		CreatedAt:        f.CreatedAt.Unix(),
 		UpdatedAt:        f.UpdatedAt.Unix(),
 	}
@@ -316,4 +317,32 @@ func convertRelAlertFinding(f *model.RelAlertFinding) *alert.RelAlertFinding {
 		CreatedAt: f.CreatedAt.Unix(),
 		UpdatedAt: f.UpdatedAt.Unix(),
 	}
+}
+
+func getStatus(s string) alert.Status {
+	statusKey := strings.ToUpper(s)
+	if _, ok := alert.Status_value[statusKey]; !ok {
+		return alert.Status_UNKNOWN
+	}
+	switch statusKey {
+	case alert.Status_ACTIVE.String():
+		return alert.Status_ACTIVE
+	case alert.Status_PENDING.String():
+		return alert.Status_PENDING
+	case alert.Status_DEACTIVE.String():
+		return alert.Status_DEACTIVE
+	default:
+		return alert.Status_UNKNOWN
+	}
+}
+
+func getStrings(statusSlice []alert.Status) []string {
+	if len(statusSlice) == 0 {
+		return nil
+	}
+	ret := []string{}
+	for _, status := range statusSlice {
+		ret = append(ret, status.String())
+	}
+	return ret
 }

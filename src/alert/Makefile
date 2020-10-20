@@ -18,7 +18,7 @@ list-service:
 list-alert:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "activated": true, "description": "", "severity":["high","medium"], "from_at":1560000000, "to_at":1660000000}' \
+		-d '{"project_id":1001, "description": "", "status":["ACTIVE","PENDING"], "severity":["high","medium","low"],"from_at":1560000000, "to_at":1660000000}' \
 		localhost:8004 core.alert.AlertService.ListAlert
 
 .PHONY: get-alert
@@ -32,7 +32,7 @@ get-alert:
 put-alert:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "alert":{"alert_condition_id": 1003, "description":"test_put_alert", "severity": "low", "activated": true, "project_id":1001}}' \
+		-d '{"project_id":1001, "alert":{"alert_condition_id": 1003, "description":"test_put_alert", "severity": "low", "status": "ACTIVE", "project_id":1001}}' \
 		localhost:8004 core.alert.AlertService.PutAlert
 
 .PHONY: delete-alert

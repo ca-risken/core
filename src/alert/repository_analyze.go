@@ -29,15 +29,15 @@ func (f *alertDB) ListNotificationByAlertConditionID(projectID, alertConditionID
 }
 
 func (f *alertDB) DeactivateAlert(data *model.Alert) error {
-	if err := f.Master.Model(&model.Alert{}).Where("project_id = ? AND alert_id = ?", data.ProjectID, data.AlertID).Update("activated", false).Error; err != nil {
+	if err := f.Master.Model(&model.Alert{}).Where("project_id = ? AND alert_id = ?", data.ProjectID, data.AlertID).Update("status", "DEACTIVE").Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (f *alertDB) GetAlertByAlertConditionIDWithActivated(projectID uint32, AlertConditionID uint32, activated bool) (*model.Alert, error) {
+func (f *alertDB) GetAlertByAlertConditionIDStatus(projectID uint32, AlertConditionID uint32, status []string) (*model.Alert, error) {
 	var data model.Alert
-	if err := f.Slave.Where("project_id = ? AND alert_condition_id = ? AND activated = ?", projectID, AlertConditionID, activated).First(&data).Error; err != nil {
+	if err := f.Slave.Where("project_id = ? AND alert_condition_id = ? AND status in (?)", projectID, AlertConditionID, status).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
