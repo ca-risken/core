@@ -1,6 +1,7 @@
 package alert
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -38,6 +39,11 @@ func TestValidateAlertForUpsert(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "NG invalid status",
+			input:   &AlertForUpsert{AlertConditionId: 1001, Description: "test_alert", Severity: "high", Status: Status_DEACTIVE, ProjectId: 1001},
+			wantErr: true,
+		},
+		{
 			name:    "NG required status",
 			input:   &AlertForUpsert{AlertConditionId: 1001, Description: "test_alert", Severity: "high", ProjectId: 1001},
 			wantErr: true,
@@ -45,6 +51,7 @@ func TestValidateAlertForUpsert(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			fmt.Printf("Status: %v\n", c.input.Status)
 			err := c.input.Validate()
 			if c.wantErr && err == nil {
 				t.Fatal("unexpected no error")

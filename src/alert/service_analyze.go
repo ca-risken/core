@@ -350,7 +350,7 @@ func (f *alertService) checkMatchAlertRuleFinding(ctx context.Context, alertRule
 }
 
 func makeFindingIDs(findingIDs []uint64) (string, error) {
-	mapFindingIDs := map[string][]uint64{"FindingID": findingIDs}
+	mapFindingIDs := map[string][]uint64{"finding_id": findingIDs}
 	bytes, err := json.Marshal(mapFindingIDs)
 	if err != nil {
 		appLogger.Error("JSON marshal error when making FindingIDs ", err)
