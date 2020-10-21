@@ -127,6 +127,8 @@ func (f *alertService) RegistAlertByAnalyze(alertCondition *model.AlertCondition
 	if !noRecord {
 		alertID = savedData.AlertID
 		status = savedData.Status
+	} else {
+		status = "ACTIVE"
 	}
 
 	data := &model.Alert{
