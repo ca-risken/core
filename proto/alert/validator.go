@@ -341,6 +341,7 @@ func (e *AlertForUpsert) Validate() error {
 		validation.Field(&e.AlertConditionId, validation.Required),
 		validation.Field(&e.Description, validation.Required, validation.Length(0, 200)),
 		validation.Field(&e.Severity, validation.Required, validation.In("high", "medium", "low")),
+		validation.Field(&e.Status, validation.Required, validation.In(Status_ACTIVE, Status_PENDING)),
 		validation.Field(&e.Status, validation.Required),
 		validation.Field(&e.ProjectId, validation.Required),
 	)
