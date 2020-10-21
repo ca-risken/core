@@ -32,7 +32,7 @@ get-alert:
 put-alert:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "alert":{"alert_condition_id": 1003, "description":"test_put_alert", "severity": "low", "status": "ACTIVE", "project_id":1001}}' \
+		-d '{"project_id":1001, "alert":{"alert_condition_id": 1003, "description":"test_put_alert", "severity": "low", "status": 2, "project_id":1001}}' \
 		localhost:8004 core.alert.AlertService.PutAlert
 
 .PHONY: delete-alert
@@ -60,7 +60,7 @@ get-alert_history:
 put-alert_history:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "alert_history":{"alert_id": 1003, "history_type":"created","description":"test_put_alert_history", "severity": "low", "project_id":1001}}' \
+		-d '{"project_id":1001, "alert_history":{"alert_id": 1003, "history_type":"created","description":"test_put_alert_history","finding_history":"{\"finding_id\":[1001,1002]}", "severity": "low", "project_id":1001}}' \
 		localhost:8004 core.alert.AlertService.PutAlertHistory
 
 .PHONY: delete-alert_history

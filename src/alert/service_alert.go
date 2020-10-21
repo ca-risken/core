@@ -164,11 +164,12 @@ func (f *alertService) PutAlertHistory(ctx context.Context, req *alert.PutAlertH
 	}
 
 	data := &model.AlertHistory{
-		AlertID:     req.AlertHistory.AlertId,
-		HistoryType: req.AlertHistory.HistoryType,
-		Description: req.AlertHistory.Description,
-		Severity:    req.AlertHistory.Severity,
-		ProjectID:   req.AlertHistory.ProjectId,
+		AlertID:        req.AlertHistory.AlertId,
+		HistoryType:    req.AlertHistory.HistoryType,
+		Description:    req.AlertHistory.Description,
+		Severity:       req.AlertHistory.Severity,
+		FindingHistory: req.AlertHistory.FindingHistory,
+		ProjectID:      req.AlertHistory.ProjectId,
 	}
 
 	// Fiding upsert
@@ -300,6 +301,7 @@ func convertAlertHistory(f *model.AlertHistory) *alert.AlertHistory {
 		HistoryType:    f.HistoryType,
 		Description:    f.Description,
 		Severity:       f.Severity,
+		FindingHistory: f.FindingHistory,
 		ProjectId:      f.ProjectID,
 		CreatedAt:      f.CreatedAt.Unix(),
 		UpdatedAt:      f.UpdatedAt.Unix(),
