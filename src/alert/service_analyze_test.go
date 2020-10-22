@@ -106,37 +106,37 @@ func TestSendSlackNotification(t *testing.T) {
 	cases := []struct {
 		name          string
 		notifySetting string
-		alertID       uint32
+		alert         *model.Alert
 		wantErr       bool
 	}{
 		{
 			name:          "OK",
 			notifySetting: `{"webhook_url":"http://hogehoge.com"}`,
-			alertID:       1,
+			alert:         &model.Alert{},
 			wantErr:       false,
 		},
 		{
 			name:          "NG Json.Marshal Error",
 			notifySetting: `{"webhook_url":http://hogehoge.com"}`,
-			alertID:       1,
+			alert:         &model.Alert{},
 			wantErr:       true,
 		},
 		{
 			name:          "Warn webhook_url not set",
 			notifySetting: `{}`,
-			alertID:       1,
+			alert:         &model.Alert{},
 			wantErr:       false,
 		},
 		{
 			name:          "HTTP Error",
 			notifySetting: `{"webhook_url":"http://fugafuga.com"}`,
-			alertID:       1,
+			alert:         &model.Alert{},
 			wantErr:       true,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := sendSlackNotification(c.notifySetting, c.alertID)
+			got := sendSlackNotification(c.notifySetting, c.alert)
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
 			}
@@ -156,7 +156,7 @@ func TestNotificationAlert(t *testing.T) {
 	cases := []struct {
 		name                               string
 		alertCondition                     *model.AlertCondition
-		alertID                            uint32
+		alert                              *model.Alert
 		wantErr                            bool
 		mockListAlertCondNotification      *[]model.AlertCondNotification
 		mockListAlertCondNotificationErr   error
@@ -168,7 +168,7 @@ func TestNotificationAlert(t *testing.T) {
 		{
 			name:                             "OK 0 AlertCondNotification",
 			alertCondition:                   &model.AlertCondition{AlertConditionID: 1},
-			alertID:                          1,
+			alert:                            &model.Alert{},
 			wantErr:                          false,
 			mockListAlertCondNotification:    &[]model.AlertCondNotification{},
 			mockListAlertCondNotificationErr: nil,
@@ -176,7 +176,7 @@ func TestNotificationAlert(t *testing.T) {
 		{
 			name:                               "OK Notification Success",
 			alertCondition:                     &model.AlertCondition{AlertConditionID: 1},
-			alertID:                            1,
+			alert:                              &model.Alert{},
 			wantErr:                            false,
 			mockListAlertCondNotification:      &[]model.AlertCondNotification{{AlertConditionID: 1, NotificationID: 1}},
 			mockListAlertCondNotificationErr:   nil,
@@ -188,7 +188,7 @@ func TestNotificationAlert(t *testing.T) {
 		{
 			name:                             "OK Don't send Notification caused NotifedAt",
 			alertCondition:                   &model.AlertCondition{AlertConditionID: 1},
-			alertID:                          1,
+			alert:                            &model.Alert{},
 			wantErr:                          false,
 			mockListAlertCondNotification:    &[]model.AlertCondNotification{{AlertConditionID: 1, NotificationID: 1, CacheSecond: 30, NotifiedAt: now}},
 			mockListAlertCondNotificationErr: nil,
@@ -198,7 +198,7 @@ func TestNotificationAlert(t *testing.T) {
 		{
 			name:                             "Error ListAlertCondNotification Failed",
 			alertCondition:                   &model.AlertCondition{AlertConditionID: 1},
-			alertID:                          1,
+			alert:                            &model.Alert{},
 			wantErr:                          true,
 			mockListAlertCondNotification:    nil,
 			mockListAlertCondNotificationErr: errors.New("Somethinng error occured"),
@@ -206,7 +206,7 @@ func TestNotificationAlert(t *testing.T) {
 		{
 			name:                             "Error GetNotification Failed",
 			alertCondition:                   &model.AlertCondition{AlertConditionID: 1},
-			alertID:                          1,
+			alert:                            &model.Alert{},
 			wantErr:                          true,
 			mockListAlertCondNotification:    &[]model.AlertCondNotification{{AlertConditionID: 1, NotificationID: 1}},
 			mockListAlertCondNotificationErr: nil,
@@ -216,7 +216,7 @@ func TestNotificationAlert(t *testing.T) {
 		{
 			name:                               "Error UpsertAlertCondNotification Failed",
 			alertCondition:                     &model.AlertCondition{AlertConditionID: 1},
-			alertID:                            1,
+			alert:                              &model.Alert{},
 			wantErr:                            true,
 			mockListAlertCondNotification:      &[]model.AlertCondNotification{{AlertConditionID: 1, NotificationID: 1}},
 			mockListAlertCondNotificationErr:   nil,
@@ -232,7 +232,7 @@ func TestNotificationAlert(t *testing.T) {
 			mockDB.On("ListAlertCondNotification").Return(c.mockListAlertCondNotification, c.mockListAlertCondNotificationErr).Once()
 			mockDB.On("GetNotification").Return(c.mockGetNotification, c.mockGetNotificationErr).Once()
 			mockDB.On("UpsertAlertCondNotification").Return(c.mockUpsertAlertCondNotification, c.mockUpsertAlertCondNotificationErr).Once()
-			got := svc.NotificationAlert(c.alertCondition, c.alertID)
+			got := svc.NotificationAlert(c.alertCondition, c.alert)
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
 			}

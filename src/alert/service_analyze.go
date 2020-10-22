@@ -97,7 +97,7 @@ func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 		}
 		// AlertがACTIVE、かつMatchしている場合はAlert通知を行う
 		if registAlert.Status == alert.Status_ACTIVE.String() {
-			err = f.NotificationAlert(alertCondition, registAlert.AlertID)
+			err = f.NotificationAlert(alertCondition, registAlert)
 			if err != nil {
 				return err
 			}
@@ -266,7 +266,7 @@ func (f *alertService) deleteRelAlertFindingByAlertID(projectID, alertID uint32)
 	return nil
 }
 
-func (f *alertService) NotificationAlert(alertCondition *model.AlertCondition, alertID uint32) error {
+func (f *alertService) NotificationAlert(alertCondition *model.AlertCondition, alert *model.Alert) error {
 
 	alertCondNotifications, err := f.repository.ListAlertCondNotification(alertCondition.ProjectID, alertCondition.AlertConditionID, 0, 0, time.Now().Unix())
 	if err != nil {
@@ -284,7 +284,7 @@ func (f *alertService) NotificationAlert(alertCondition *model.AlertCondition, a
 		}
 		switch notification.Type {
 		case "slack":
-			err = sendSlackNotification(notification.NotifySetting, alertID)
+			err = sendSlackNotification(notification.NotifySetting, alert)
 			if err != nil {
 				return err
 			}
@@ -368,7 +368,7 @@ func getHistoryType(alertID uint32) string {
 	return "updated"
 }
 
-func sendSlackNotification(notifySetting string, alertID uint32) error {
+func sendSlackNotification(notifySetting string, alert *model.Alert) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
@@ -385,7 +385,7 @@ func sendSlackNotification(notifySetting string, alertID uint32) error {
 	if err != nil {
 		return err
 	}
-	payload, err := slackAlert.GetPayload()
+	payload, err := slackAlert.GetPayload(alert)
 	if err != nil {
 		return err
 	}
