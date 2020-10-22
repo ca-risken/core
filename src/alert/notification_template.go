@@ -23,18 +23,22 @@ func newslackWebhookConfig(channel string) (*slackWebhookConfig, error) {
 	return config, nil
 }
 
-func (t *slackWebhookConfig) GetPayload(alert *model.Alert) (string, error) {
+func (t *slackWebhookConfig) GetPayload(alert *model.Alert, projectName string) (string, error) {
 	now := time.Now().Unix()
 	text := "設定されたAlertに合致する結果を検知しました。"
 	attachments := []interface{}{
 		map[string]interface{}{
 			"color":      getColor(alert.Severity),
-			"title":      alert.AlertID,
+			"title":      projectName,
 			"title_link": t.NotificationAlertUrl,
 			"fields": []interface{}{
 				map[string]string{
 					"title": "Severity",
 					"value": alert.Severity,
+				},
+				map[string]string{
+					"title": "Description",
+					"value": alert.Description,
 				},
 			},
 			"footer": "Send from RISKEN",

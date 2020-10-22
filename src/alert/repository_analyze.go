@@ -88,3 +88,11 @@ func (f *alertDB) ListDisabledAlertCondition(projectID uint32, alertConditionID 
 	}
 	return &data, nil
 }
+
+func (f *alertDB) GetProject(projectID uint32) (*model.Project, error) {
+	var data model.Project
+	if err := f.Slave.Where("project_id = ?", projectID).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}

@@ -284,7 +284,11 @@ func (f *alertService) NotificationAlert(alertCondition *model.AlertCondition, a
 		}
 		switch notification.Type {
 		case "slack":
-			err = sendSlackNotification(notification.NotifySetting, alert)
+			project, err := f.repository.GetProject(alert.ProjectID)
+			if err != nil {
+				return err
+			}
+			err = sendSlackNotification(notification.NotifySetting, alert, project)
 			if err != nil {
 				return err
 			}
@@ -368,7 +372,7 @@ func getHistoryType(alertID uint32) string {
 	return "updated"
 }
 
-func sendSlackNotification(notifySetting string, alert *model.Alert) error {
+func sendSlackNotification(notifySetting string, alert *model.Alert, project *model.Project) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
@@ -385,7 +389,8 @@ func sendSlackNotification(notifySetting string, alert *model.Alert) error {
 	if err != nil {
 		return err
 	}
-	payload, err := slackAlert.GetPayload(alert)
+
+	payload, err := slackAlert.GetPayload(alert, project.Name)
 	if err != nil {
 		return err
 	}

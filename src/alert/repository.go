@@ -54,6 +54,7 @@ type alertRepository interface {
 	ListFindingTag(uint32, uint64) (*[]model.FindingTag, error)
 	ListEnabledAlertCondition(uint32, []uint32) (*[]model.AlertCondition, error)
 	ListDisabledAlertCondition(uint32, []uint32) (*[]model.AlertCondition, error)
+	GetProject(uint32) (*model.Project, error)
 }
 
 type alertDB struct {
