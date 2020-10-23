@@ -1938,3 +1938,8 @@ func (m *mockAlertRepository) ListDisabledAlertCondition(uint32, []uint32) (*[]m
 	args := m.Called()
 	return args.Get(0).(*[]model.AlertCondition), args.Error(1)
 }
+
+func (m *mockAlertRepository) GetProject(uint32) (*model.Project, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Project), args.Error(1)
+}

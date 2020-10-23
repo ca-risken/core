@@ -107,36 +107,41 @@ func TestSendSlackNotification(t *testing.T) {
 		name          string
 		notifySetting string
 		alert         *model.Alert
+		project       *model.Project
 		wantErr       bool
 	}{
 		{
 			name:          "OK",
 			notifySetting: `{"webhook_url":"http://hogehoge.com"}`,
 			alert:         &model.Alert{},
+			project:       &model.Project{},
 			wantErr:       false,
 		},
 		{
 			name:          "NG Json.Marshal Error",
 			notifySetting: `{"webhook_url":http://hogehoge.com"}`,
 			alert:         &model.Alert{},
+			project:       &model.Project{},
 			wantErr:       true,
 		},
 		{
 			name:          "Warn webhook_url not set",
 			notifySetting: `{}`,
 			alert:         &model.Alert{},
+			project:       &model.Project{},
 			wantErr:       false,
 		},
 		{
 			name:          "HTTP Error",
 			notifySetting: `{"webhook_url":"http://fugafuga.com"}`,
 			alert:         &model.Alert{},
+			project:       &model.Project{},
 			wantErr:       true,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := sendSlackNotification(c.notifySetting, c.alert)
+			got := sendSlackNotification(c.notifySetting, c.alert, c.project)
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
 			}
@@ -162,6 +167,8 @@ func TestNotificationAlert(t *testing.T) {
 		mockListAlertCondNotificationErr   error
 		mockGetNotification                *model.Notification
 		mockGetNotificationErr             error
+		mockGetProject                     *model.Project
+		mockGetProjectErr                  error
 		mockUpsertAlertCondNotification    *model.AlertCondNotification
 		mockUpsertAlertCondNotificationErr error
 	}{
@@ -182,6 +189,8 @@ func TestNotificationAlert(t *testing.T) {
 			mockListAlertCondNotificationErr:   nil,
 			mockGetNotification:                &model.Notification{Type: "slack", NotifySetting: `{"webhook_url":"http://hogehoge.com"}`},
 			mockGetNotificationErr:             nil,
+			mockGetProject:                     &model.Project{},
+			mockGetProjectErr:                  nil,
 			mockUpsertAlertCondNotification:    &model.AlertCondNotification{},
 			mockUpsertAlertCondNotificationErr: nil,
 		},
@@ -214,6 +223,18 @@ func TestNotificationAlert(t *testing.T) {
 			mockGetNotificationErr:           errors.New("Somethinng error occured"),
 		},
 		{
+			name:                             "Error GetNotification Failed",
+			alertCondition:                   &model.AlertCondition{AlertConditionID: 1},
+			alert:                            &model.Alert{},
+			wantErr:                          true,
+			mockListAlertCondNotification:    &[]model.AlertCondNotification{{AlertConditionID: 1, NotificationID: 1}},
+			mockListAlertCondNotificationErr: nil,
+			mockGetNotification:              nil,
+			mockGetNotificationErr:           errors.New("Somethinng error occured"),
+			mockGetProject:                   nil,
+			mockGetProjectErr:                errors.New("Somethinng error occured"),
+		},
+		{
 			name:                               "Error UpsertAlertCondNotification Failed",
 			alertCondition:                     &model.AlertCondition{AlertConditionID: 1},
 			alert:                              &model.Alert{},
@@ -222,6 +243,8 @@ func TestNotificationAlert(t *testing.T) {
 			mockListAlertCondNotificationErr:   nil,
 			mockGetNotification:                &model.Notification{Type: "slack", NotifySetting: `{"webhook_url":"http://hogehoge.com"}`},
 			mockGetNotificationErr:             nil,
+			mockGetProject:                     &model.Project{},
+			mockGetProjectErr:                  nil,
 			mockUpsertAlertCondNotification:    nil,
 			mockUpsertAlertCondNotificationErr: errors.New("Somethinng error occured"),
 		},
@@ -232,6 +255,7 @@ func TestNotificationAlert(t *testing.T) {
 			mockDB.On("ListAlertCondNotification").Return(c.mockListAlertCondNotification, c.mockListAlertCondNotificationErr).Once()
 			mockDB.On("GetNotification").Return(c.mockGetNotification, c.mockGetNotificationErr).Once()
 			mockDB.On("UpsertAlertCondNotification").Return(c.mockUpsertAlertCondNotification, c.mockUpsertAlertCondNotificationErr).Once()
+			mockDB.On("GetProject").Return(c.mockGetProject, c.mockGetProjectErr).Once()
 			got := svc.NotificationAlert(c.alertCondition, c.alert)
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
