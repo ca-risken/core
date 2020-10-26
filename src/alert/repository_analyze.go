@@ -18,7 +18,7 @@ func (f *alertDB) ListAlertRuleByAlertConditionID(projectID, alertConditionID ui
 }
 
 func (f *alertDB) ListNotificationByAlertConditionID(projectID, alertConditionID uint32) (*[]model.Notification, error) {
-	query := `select * from notification where alert_rule_id = any (select alert_rule_id from alert_cond_rule where project_id = ? and alert_condition_id = ?);`
+	query := `select * from notification where notification_id = any (select notification_id from alert_cond_notification where project_id = ? and alert_condition_id = ?);`
 	var params []interface{}
 	params = append(params, projectID, alertConditionID)
 	var data []model.Notification
