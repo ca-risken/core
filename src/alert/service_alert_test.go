@@ -151,11 +151,18 @@ func TestPutAlert(t *testing.T) {
 			mockGetResp: &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 			mockUpResp:  &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 		},
+		{
+			name:       "NG No record found with alertId",
+			input:      &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
+			want:       nil,
+			wantErr:    true,
+			mockGetErr: gorm.ErrRecordNotFound,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			if c.mockGetResp != nil || c.mockGetErr != nil {
-				mockDB.On("GetAlertByAlertConditionID").Return(c.mockGetResp, c.mockGetErr).Once()
+				mockDB.On("GetAlert").Return(c.mockGetResp, c.mockGetErr).Once()
 			}
 			if c.mockUpResp != nil || c.mockUpErr != nil {
 				mockDB.On("UpsertAlert").Return(c.mockUpResp, c.mockUpErr).Once()

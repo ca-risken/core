@@ -9,6 +9,7 @@ import (
 	"github.com/CyberAgent/mimosa-core/proto/alert"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jinzhu/gorm"
+	"github.com/vikyd/zero"
 )
 
 /**
@@ -68,17 +69,17 @@ func (f *alertService) PutAlert(ctx context.Context, req *alert.PutAlertRequest)
 	if err := req.Alert.Validate(); err != nil {
 		return nil, err
 	}
-	savedData, err := f.repository.GetAlertByAlertConditionID(req.Alert.ProjectId, req.Alert.AlertConditionId)
-	noRecord := gorm.IsRecordNotFoundError(err)
-	if err != nil && !noRecord {
-		return nil, err
-	}
-
-	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
 	var alertID uint32
-	if !noRecord {
+	// AlertIdのパラメータがリクエストに存在する場合、レコードの存在チェック
+	// 存在しなければエラー終了
+	if !zero.IsZeroVal(req.Alert.AlertId) {
+		savedData, err := f.repository.GetAlert(req.Alert.ProjectId, req.Alert.AlertId)
+		if err != nil {
+			return nil, err
+		}
 		alertID = savedData.AlertID
 	}
+
 	data := &model.Alert{
 		AlertID:          alertID,
 		AlertConditionID: req.Alert.AlertConditionId,
