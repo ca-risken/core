@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
@@ -25,20 +26,30 @@ func newslackWebhookConfig(channel string) (*slackWebhookConfig, error) {
 
 func (t *slackWebhookConfig) GetPayload(alert *model.Alert, projectName string) (string, error) {
 	now := time.Now().Unix()
-	text := "設定されたAlertに合致する結果を検知しました。"
+	text := fmt.Sprintf("%v設定されたAlertに合致する結果を検知しました。", getMention(alert.Severity))
 	attachments := []interface{}{
 		map[string]interface{}{
-			"color":      getColor(alert.Severity),
-			"title":      projectName,
-			"title_link": t.NotificationAlertUrl,
+			"color": getColor(alert.Severity),
 			"fields": []interface{}{
+				map[string]string{
+					"title": "Project",
+					"value": projectName,
+					"short": "true",
+				},
 				map[string]string{
 					"title": "Severity",
 					"value": alert.Severity,
+					"short": "true",
+				},
+				map[string]string{
+					"title": "Link",
+					"value": fmt.Sprintf("<%s|詳細はこちらから>", t.NotificationAlertUrl),
+					"short": "true",
 				},
 				map[string]string{
 					"title": "Description",
 					"value": alert.Description,
+					"short": "true",
 				},
 			},
 			"footer": "Send from RISKEN",
@@ -70,5 +81,18 @@ func getColor(severity string) string {
 		return "good"
 	default:
 		return "good"
+	}
+}
+
+func getMention(severity string) string {
+	switch severity {
+	case "high":
+		return "<!channel> \n"
+	case "medium":
+		return "<!here> \n"
+	case "low":
+		return ""
+	default:
+		return ""
 	}
 }

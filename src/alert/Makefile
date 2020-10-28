@@ -32,7 +32,7 @@ get-alert:
 put-alert:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "alert":{"alert_condition_id": 1003, "description":"test_put_alert", "severity": "low", "status": 2, "project_id":1001}}' \
+		-d '{"project_id":1001, "alert":{"alert_condition_id": 1001, "description":"hogehoge", "severity": "low", "status": 1, "project_id":1001}}' \
 		localhost:8004 core.alert.AlertService.PutAlert
 
 .PHONY: delete-alert
@@ -200,7 +200,7 @@ get-notification:
 put-notification:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001,"notification":{"project_id":1001, "name":"test_notification","type":"slack", "notify_setting":"{\"hoge\":\"fuga\"}"}}' \
+		-d '{"project_id":1001,"notification":{"project_id":1001, "name":"test_notification","type":"slack", "notify_setting":"{\"webhook_url\":\"http://hogehoge.com/fuga/piyo\"}"}}' \
 		localhost:8004 core.alert.AlertService.PutNotification
 
 .PHONY: delete-notification

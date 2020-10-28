@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/alert"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jinzhu/gorm"
+	"github.com/vikyd/zero"
 )
 
 /**
@@ -485,12 +487,17 @@ func convertNotification(f *model.Notification) *alert.Notification {
 	if f == nil {
 		return &alert.Notification{}
 	}
+	maskingSetting, err := maskingNotifySetting(f.Type, f.NotifySetting)
+	if err != nil {
+		appLogger.Errorf("Failed to masking notify setting. %v", err)
+		maskingSetting = f.NotifySetting
+	}
 	return &alert.Notification{
 		NotificationId: f.NotificationID,
 		Name:           f.Name,
 		ProjectId:      f.ProjectID,
 		Type:           f.Type,
-		NotifySetting:  f.NotifySetting,
+		NotifySetting:  maskingSetting,
 		CreatedAt:      f.CreatedAt.Unix(),
 		UpdatedAt:      f.UpdatedAt.Unix(),
 	}
@@ -509,4 +516,34 @@ func convertAlertCondNotification(f *model.AlertCondNotification) *alert.AlertCo
 		CreatedAt:        f.CreatedAt.Unix(),
 		UpdatedAt:        f.UpdatedAt.Unix(),
 	}
+}
+
+func maskingNotifySetting(notificationType, notifySetting string) (string, error) {
+	switch notificationType {
+	case "slack":
+		var setting slackNotifySetting
+		if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
+			return "", err
+		}
+		//　通常webhook_urlは存在するはずだが、万が一ない場合はそのまま返す
+		if zero.IsZeroVal(setting.WebhookURL) {
+			return notifySetting, nil
+		}
+		setting.WebhookURL = maskRight(setting.WebhookURL, len(setting.WebhookURL)/2)
+		ret, err := json.Marshal(setting)
+		if err != nil {
+			return notifySetting, err
+		}
+		return string(ret), err
+	default:
+		return notifySetting, nil
+	}
+}
+
+func maskRight(s string, num int) string {
+	rs := []rune(s)
+	for i := num; i < len(rs); i++ {
+		rs[i] = '*'
+	}
+	return string(rs)
 }
