@@ -40,7 +40,7 @@ const selectGetRoleByName = `select * from role where project_id = ? and name =?
 
 func (i *iamDB) GetRoleByName(projectID uint32, name string) (*model.Role, error) {
 	var data model.Role
-	if err := i.Slave.Raw(selectGetRoleByName, projectID, name).First(&data).Error; err != nil {
+	if err := i.Master.Raw(selectGetRoleByName, projectID, name).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -73,7 +73,7 @@ const selectGetUserRole = `select * from user_role where project_id = ? and user
 
 func (i *iamDB) GetUserRole(projectID, userID, roleID uint32) (*model.UserRole, error) {
 	var data model.UserRole
-	if err := i.Slave.Raw(selectGetUserRole, projectID, userID, roleID).First(&data).Error; err != nil {
+	if err := i.Master.Raw(selectGetUserRole, projectID, userID, roleID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

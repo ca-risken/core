@@ -55,7 +55,7 @@ const selectGetUserBySub = `select * from user where sub = ?`
 
 func (i *iamDB) GetUserBySub(sub string) (*model.User, error) {
 	var data model.User
-	if err := i.Slave.Raw(selectGetUserBySub, sub).First(&data).Error; err != nil {
+	if err := i.Master.Raw(selectGetUserBySub, sub).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

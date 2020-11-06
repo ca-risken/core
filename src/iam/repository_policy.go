@@ -85,7 +85,7 @@ const selectGetPolicyByName = `select * from policy where project_id = ? and nam
 
 func (i *iamDB) GetPolicyByName(projectID uint32, name string) (*model.Policy, error) {
 	var data model.Policy
-	if err := i.Slave.Raw(selectGetPolicyByName, projectID, name).First(&data).Error; err != nil {
+	if err := i.Master.Raw(selectGetPolicyByName, projectID, name).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -120,7 +120,7 @@ const selectGetRolePolicy = `select * from role_policy where project_id = ? and 
 
 func (i *iamDB) GetRolePolicy(projectID, roleID, policyID uint32) (*model.RolePolicy, error) {
 	var data model.RolePolicy
-	if err := i.Slave.Raw(selectGetRolePolicy, projectID, roleID, policyID).First(&data).Error; err != nil {
+	if err := i.Master.Raw(selectGetRolePolicy, projectID, roleID, policyID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

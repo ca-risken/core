@@ -77,7 +77,7 @@ const selectGetFindingByDataSource = `select * from finding where project_id = ?
 
 func (f *findingDB) GetFindingByDataSource(projectID uint32, dataSource, dataSourceID string) (*model.Finding, error) {
 	var result model.Finding
-	if err := f.Slave.Raw(selectGetFindingByDataSource,
+	if err := f.Master.Raw(selectGetFindingByDataSource,
 		projectID, dataSource, dataSourceID).First(&result).Error; err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ const selectGetResourceByName = `select * from resource where project_id = ? and
 
 func (f *findingDB) GetResourceByName(projectID uint32, resourceName string) (*model.Resource, error) {
 	var data model.Resource
-	if err := f.Slave.Raw(selectGetResourceByName, projectID, resourceName).First(&data).Error; err != nil {
+	if err := f.Master.Raw(selectGetResourceByName, projectID, resourceName).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -177,7 +177,7 @@ const selectGetFindingTagByKey = `select * from finding_tag where project_id = ?
 
 func (f *findingDB) GetFindingTagByKey(projectID uint32, findingID uint64, tag string) (*model.FindingTag, error) {
 	var data model.FindingTag
-	if err := f.Slave.Raw(selectGetFindingTagByKey, projectID, findingID, tag).First(&data).Error; err != nil {
+	if err := f.Master.Raw(selectGetFindingTagByKey, projectID, findingID, tag).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
