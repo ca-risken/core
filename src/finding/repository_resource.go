@@ -97,7 +97,7 @@ const selectGetResourceTagByKey = `select * from resource_tag where project_id =
 
 func (f *findingDB) GetResourceTagByKey(projectID uint32, resourceID uint64, tag string) (*model.ResourceTag, error) {
 	var data model.ResourceTag
-	if err := f.Slave.Raw(selectGetResourceTagByKey, projectID, resourceID, tag).First(&data).Error; err != nil {
+	if err := f.Master.Raw(selectGetResourceTagByKey, projectID, resourceID, tag).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

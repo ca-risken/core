@@ -97,7 +97,7 @@ const selectGetProjectByName = `select * from project where name = ?`
 
 func (p *projectDB) GetProjectByName(name string) (*model.Project, error) {
 	var data model.Project
-	if err := p.Slave.Raw(selectGetProjectByName, name).First(&data).Error; err != nil {
+	if err := p.Master.Raw(selectGetProjectByName, name).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
