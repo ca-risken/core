@@ -30,7 +30,7 @@ const selectGetRole = `select * from role where project_id = ? and role_id =?`
 
 func (i *iamDB) GetRole(projectID, roleID uint32) (*model.Role, error) {
 	var data model.Role
-	if err := i.Slave.Raw(selectGetRole, projectID, roleID).First(&data).Error; err != nil {
+	if err := i.Master.Raw(selectGetRole, projectID, roleID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

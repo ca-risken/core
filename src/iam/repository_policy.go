@@ -75,7 +75,7 @@ const selectGetPolicy = `select * from policy where project_id = ? and policy_id
 
 func (i *iamDB) GetPolicy(projectID, policyID uint32) (*model.Policy, error) {
 	var data model.Policy
-	if err := i.Slave.Raw(selectGetPolicy, projectID, policyID).First(&data).Error; err != nil {
+	if err := i.Master.Raw(selectGetPolicy, projectID, policyID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
