@@ -45,7 +45,7 @@ func (i *iamDB) GetUser(userID uint32, sub string) (*model.User, error) {
 		params = append(params, sub)
 	}
 	var data model.User
-	if err := i.Slave.Raw(query, params...).First(&data).Error; err != nil {
+	if err := i.Master.Raw(query, params...).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
