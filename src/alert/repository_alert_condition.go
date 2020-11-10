@@ -73,7 +73,8 @@ func (f *alertDB) GetAlertRule(projectID uint32, alertRuleID uint32) (*model.Ale
 
 func (f *alertDB) UpsertAlertRule(data *model.AlertRule) (*model.AlertRule, error) {
 	var retData model.AlertRule
-	if err := f.Master.Where("project_id = ? AND alert_rule_id = ?", data.ProjectID, data.AlertRuleID).Assign(data).FirstOrCreate(&retData).Error; err != nil {
+	update := alertRuleToMap(data)
+	if err := f.Master.Where("project_id = ? AND alert_rule_id = ?", data.ProjectID, data.AlertRuleID).Assign(update).FirstOrCreate(&retData).Error; err != nil {
 		return nil, err
 	}
 	return &retData, nil
@@ -216,5 +217,17 @@ func alertConditionToMap(alertCondition *model.AlertCondition) map[string]interf
 		"project_id":         alertCondition.ProjectID,
 		"and_or":             alertCondition.AndOr,
 		"enabled":            alertCondition.Enabled,
+	}
+}
+
+func alertRuleToMap(alertRule *model.AlertRule) map[string]interface{} {
+	return map[string]interface{}{
+		"alert_rule_id": alertRule.AlertRuleID,
+		"name":          alertRule.Name,
+		"project_id":    alertRule.ProjectID,
+		"score":         alertRule.Score,
+		"resource_name": alertRule.ResourceName,
+		"tag":           alertRule.Tag,
+		"finding_cnt":   alertRule.FindingCnt,
 	}
 }
