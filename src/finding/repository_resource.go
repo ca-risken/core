@@ -93,6 +93,35 @@ where
 	return &data, nil
 }
 
+const insertUpsertResource = `
+INSERT INTO resource
+  (resource_id, resource_name, project_id)
+VALUES
+  (?, ?, ?)
+ON DUPLICATE KEY UPDATE
+  resource_name=VALUES(resource_name),
+	project_id=VALUES(project_id),
+	updated_at=NOW()
+`
+
+func (f *findingDB) UpsertResource(data *model.Resource) (*model.Resource, error) {
+	if err := f.Master.Exec(insertUpsertResource,
+		data.ResourceID, data.ResourceName, data.ProjectID).Error; err != nil {
+		return nil, err
+	}
+	return f.GetResourceByName(data.ProjectID, data.ResourceName)
+}
+
+const selectGetResourceByName = `select * from resource where project_id = ? and resource_name = ?`
+
+func (f *findingDB) GetResourceByName(projectID uint32, resourceName string) (*model.Resource, error) {
+	var data model.Resource
+	if err := f.Master.Raw(selectGetResourceByName, projectID, resourceName).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
 const selectGetResourceTagByKey = `select * from resource_tag where project_id = ? and resource_id = ? and tag = ?`
 
 func (f *findingDB) GetResourceTagByKey(projectID uint32, resourceID uint64, tag string) (*model.ResourceTag, error) {
