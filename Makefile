@@ -71,6 +71,18 @@ go-mod-update:
 run: go-test network
 	. env.sh && docker-compose up -d --build
 
+run-finding: go-test network
+	. env.sh && docker-compose up -d --build finding
+
+run-iam: go-test network
+	. env.sh && docker-compose up -d --build iam
+
+run-alert: go-test network
+	. env.sh && docker-compose up -d --build alert
+
+run-project: go-test network
+	. env.sh && docker-compose up -d --build project
+
 log:
 	. env.sh && docker-compose logs -f
 

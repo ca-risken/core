@@ -61,7 +61,8 @@ ON DUPLICATE KEY UPDATE
   project_id=VALUES(project_id),
   original_score=VALUES(original_score),
   score=VALUES(score),
-  data=VALUES(data)
+	data=VALUES(data),
+	updated_at=NOW()
 `
 
 func (f *findingDB) UpsertFinding(data *model.Finding) (*model.Finding, error) {
@@ -82,34 +83,6 @@ func (f *findingDB) GetFindingByDataSource(projectID uint32, dataSource, dataSou
 		return nil, err
 	}
 	return &result, nil
-}
-
-const insertUpsertResource = `
-INSERT INTO resource
-  (resource_id, resource_name, project_id)
-VALUES
-  (?, ?, ?)
-ON DUPLICATE KEY UPDATE
-  resource_name=VALUES(resource_name),
-  project_id=VALUES(project_id);
-`
-
-func (f *findingDB) UpsertResource(data *model.Resource) (*model.Resource, error) {
-	if err := f.Master.Exec(insertUpsertResource,
-		data.ResourceID, data.ResourceName, data.ProjectID).Error; err != nil {
-		return nil, err
-	}
-	return f.GetResourceByName(data.ProjectID, data.ResourceName)
-}
-
-const selectGetResourceByName = `select * from resource where project_id = ? and resource_name = ?`
-
-func (f *findingDB) GetResourceByName(projectID uint32, resourceName string) (*model.Resource, error) {
-	var data model.Resource
-	if err := f.Master.Raw(selectGetResourceByName, projectID, resourceName).First(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
 }
 
 const deleteDeleteFinding = `delete from finding where project_id = ? and finding_id = ?`
