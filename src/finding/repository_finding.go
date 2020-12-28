@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
@@ -22,12 +23,12 @@ where
 	var params []interface{}
 	params = append(params, req.ProjectId, req.FromScore, req.ToScore, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
 	if len(req.DataSource) != 0 {
-		query += " and f.data_source in (?)"
-		params = append(params, req.DataSource)
+		query += " and f.data_source regexp ?"
+		params = append(params, strings.Join(req.DataSource, "|"))
 	}
 	if len(req.ResourceName) != 0 {
-		query += " and f.resource_name in (?)"
-		params = append(params, req.ResourceName)
+		query += " and f.resource_name regexp ?"
+		params = append(params, strings.Join(req.ResourceName, "|"))
 	}
 	if len(req.Tag) != 0 {
 		query += " and exists (select * from finding_tag ft where ft.finding_id=f.finding_id and ft.tag in (?))"
