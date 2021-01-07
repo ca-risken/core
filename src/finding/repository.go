@@ -23,6 +23,9 @@ type findingRepository interface {
 	GetFindingTagByID(uint32, uint64) (*model.FindingTag, error)
 	TagFinding(*model.FindingTag) (*model.FindingTag, error)
 	UntagFinding(uint32, uint64) error
+	GetPendFinding(projectID uint32, findingID uint64) (*model.PendFinding, error)
+	UpsertPendFinding(findingID uint64, projectID uint32) (*model.PendFinding, error)
+	DeletePendFinding(projectID uint32, findingID uint64) error
 
 	// Resource
 	ListResource(*finding.ListResourceRequest) (*[]model.Resource, error)

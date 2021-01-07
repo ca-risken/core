@@ -43,9 +43,19 @@ func (f *alertDB) GetAlertByAlertConditionIDStatus(projectID uint32, AlertCondit
 	return &data, nil
 }
 
+const selectListFinding string = `
+select
+  * 
+from
+  finding f 
+where
+  f.project_id = ?
+  and not exists(select * from pend_finding pf where pf.finding_id=f.finding_id)
+`
+
 func (f *alertDB) ListFinding(projectID uint32) (*[]model.Finding, error) {
 	var data []model.Finding
-	if err := f.Slave.Where("project_id = ?", projectID).Find(&data).Error; err != nil {
+	if err := f.Slave.Raw(selectListFinding, projectID).Find(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
