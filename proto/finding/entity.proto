@@ -87,3 +87,17 @@ message ResourceTagForUpsert {
   uint32 project_id = 2;
   string tag = 3;
 }
+
+// PendFinding
+message PendFinding {
+  uint64 finding_id = 1;
+  uint32 project_id = 2;
+  int64 created_at = 3;
+  int64 updated_at = 4;
+}
+
+// PendFinding For upsert
+message PendFindingForUpsert {
+  uint64 finding_id = 1;
+  uint32 project_id = 2;
+}

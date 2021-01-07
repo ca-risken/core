@@ -1578,6 +1578,265 @@ func (x *UntagResourceRequest) GetResourceTagId() uint64 {
 	return 0
 }
 
+type GetPendFindingRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ProjectId uint32 `protobuf:"varint,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	FindingId uint64 `protobuf:"varint,2,opt,name=finding_id,json=findingId,proto3" json:"finding_id,omitempty"`
+}
+
+func (x *GetPendFindingRequest) Reset() {
+	*x = GetPendFindingRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_finding_service_proto_msgTypes[28]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetPendFindingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPendFindingRequest) ProtoMessage() {}
+
+func (x *GetPendFindingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_finding_service_proto_msgTypes[28]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPendFindingRequest.ProtoReflect.Descriptor instead.
+func (*GetPendFindingRequest) Descriptor() ([]byte, []int) {
+	return file_finding_service_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *GetPendFindingRequest) GetProjectId() uint32 {
+	if x != nil {
+		return x.ProjectId
+	}
+	return 0
+}
+
+func (x *GetPendFindingRequest) GetFindingId() uint64 {
+	if x != nil {
+		return x.FindingId
+	}
+	return 0
+}
+
+type GetPendFindingResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	PendFinding *PendFinding `protobuf:"bytes,1,opt,name=pend_finding,json=pendFinding,proto3" json:"pend_finding,omitempty"`
+}
+
+func (x *GetPendFindingResponse) Reset() {
+	*x = GetPendFindingResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_finding_service_proto_msgTypes[29]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetPendFindingResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPendFindingResponse) ProtoMessage() {}
+
+func (x *GetPendFindingResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_finding_service_proto_msgTypes[29]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPendFindingResponse.ProtoReflect.Descriptor instead.
+func (*GetPendFindingResponse) Descriptor() ([]byte, []int) {
+	return file_finding_service_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *GetPendFindingResponse) GetPendFinding() *PendFinding {
+	if x != nil {
+		return x.PendFinding
+	}
+	return nil
+}
+
+type PutPendFindingRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ProjectId   uint32                `protobuf:"varint,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	PendFinding *PendFindingForUpsert `protobuf:"bytes,2,opt,name=pend_finding,json=pendFinding,proto3" json:"pend_finding,omitempty"`
+}
+
+func (x *PutPendFindingRequest) Reset() {
+	*x = PutPendFindingRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_finding_service_proto_msgTypes[30]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PutPendFindingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PutPendFindingRequest) ProtoMessage() {}
+
+func (x *PutPendFindingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_finding_service_proto_msgTypes[30]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PutPendFindingRequest.ProtoReflect.Descriptor instead.
+func (*PutPendFindingRequest) Descriptor() ([]byte, []int) {
+	return file_finding_service_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *PutPendFindingRequest) GetProjectId() uint32 {
+	if x != nil {
+		return x.ProjectId
+	}
+	return 0
+}
+
+func (x *PutPendFindingRequest) GetPendFinding() *PendFindingForUpsert {
+	if x != nil {
+		return x.PendFinding
+	}
+	return nil
+}
+
+type PutPendFindingResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	PendFinding *PendFinding `protobuf:"bytes,1,opt,name=pend_finding,json=pendFinding,proto3" json:"pend_finding,omitempty"`
+}
+
+func (x *PutPendFindingResponse) Reset() {
+	*x = PutPendFindingResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_finding_service_proto_msgTypes[31]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PutPendFindingResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PutPendFindingResponse) ProtoMessage() {}
+
+func (x *PutPendFindingResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_finding_service_proto_msgTypes[31]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PutPendFindingResponse.ProtoReflect.Descriptor instead.
+func (*PutPendFindingResponse) Descriptor() ([]byte, []int) {
+	return file_finding_service_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *PutPendFindingResponse) GetPendFinding() *PendFinding {
+	if x != nil {
+		return x.PendFinding
+	}
+	return nil
+}
+
+type DeletePendFindingRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ProjectId uint32 `protobuf:"varint,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	FindingId uint64 `protobuf:"varint,2,opt,name=finding_id,json=findingId,proto3" json:"finding_id,omitempty"`
+}
+
+func (x *DeletePendFindingRequest) Reset() {
+	*x = DeletePendFindingRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_finding_service_proto_msgTypes[32]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DeletePendFindingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeletePendFindingRequest) ProtoMessage() {}
+
+func (x *DeletePendFindingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_finding_service_proto_msgTypes[32]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeletePendFindingRequest.ProtoReflect.Descriptor instead.
+func (*DeletePendFindingRequest) Descriptor() ([]byte, []int) {
+	return file_finding_service_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *DeletePendFindingRequest) GetProjectId() uint32 {
+	if x != nil {
+		return x.ProjectId
+	}
+	return 0
+}
+
+func (x *DeletePendFindingRequest) GetFindingId() uint64 {
+	if x != nil {
+		return x.FindingId
+	}
+	return 0
+}
+
 var File_finding_service_proto protoreflect.FileDescriptor
 
 var file_finding_service_proto_rawDesc = []byte{
@@ -1749,7 +2008,37 @@ var file_finding_service_proto_rawDesc = []byte{
 	0x20, 0x01, 0x28, 0x0d, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12,
 	0x26, 0x0a, 0x0f, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x5f, 0x74, 0x61, 0x67, 0x5f,
 	0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0d, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72,
-	0x63, 0x65, 0x54, 0x61, 0x67, 0x49, 0x64, 0x32, 0xf0, 0x0a, 0x0a, 0x0e, 0x46, 0x69, 0x6e, 0x64,
+	0x63, 0x65, 0x54, 0x61, 0x67, 0x49, 0x64, 0x22, 0x55, 0x0a, 0x15, 0x47, 0x65, 0x74, 0x50, 0x65,
+	0x6e, 0x64, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x1d, 0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0d, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12,
+	0x1d, 0x0a, 0x0a, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x04, 0x52, 0x09, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x49, 0x64, 0x22, 0x56,
+	0x0a, 0x16, 0x47, 0x65, 0x74, 0x50, 0x65, 0x6e, 0x64, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3c, 0x0a, 0x0c, 0x70, 0x65, 0x6e, 0x64,
+	0x5f, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19,
+	0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x50, 0x65,
+	0x6e, 0x64, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x52, 0x0b, 0x70, 0x65, 0x6e, 0x64, 0x46,
+	0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x22, 0x7d, 0x0a, 0x15, 0x50, 0x75, 0x74, 0x50, 0x65, 0x6e,
+	0x64, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x1d, 0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0d, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x45,
+	0x0a, 0x0c, 0x70, 0x65, 0x6e, 0x64, 0x5f, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x22, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x66, 0x69, 0x6e, 0x64,
+	0x69, 0x6e, 0x67, 0x2e, 0x50, 0x65, 0x6e, 0x64, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x46,
+	0x6f, 0x72, 0x55, 0x70, 0x73, 0x65, 0x72, 0x74, 0x52, 0x0b, 0x70, 0x65, 0x6e, 0x64, 0x46, 0x69,
+	0x6e, 0x64, 0x69, 0x6e, 0x67, 0x22, 0x56, 0x0a, 0x16, 0x50, 0x75, 0x74, 0x50, 0x65, 0x6e, 0x64,
+	0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
+	0x3c, 0x0a, 0x0c, 0x70, 0x65, 0x6e, 0x64, 0x5f, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x66, 0x69, 0x6e,
+	0x64, 0x69, 0x6e, 0x67, 0x2e, 0x50, 0x65, 0x6e, 0x64, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67,
+	0x52, 0x0b, 0x70, 0x65, 0x6e, 0x64, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x22, 0x58, 0x0a,
+	0x18, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x50, 0x65, 0x6e, 0x64, 0x46, 0x69, 0x6e, 0x64, 0x69,
+	0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x70, 0x72, 0x6f,
+	0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x09, 0x70,
+	0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x66, 0x69, 0x6e, 0x64,
+	0x69, 0x6e, 0x67, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x09, 0x66, 0x69,
+	0x6e, 0x64, 0x69, 0x6e, 0x67, 0x49, 0x64, 0x32, 0xff, 0x0c, 0x0a, 0x0e, 0x46, 0x69, 0x6e, 0x64,
 	0x69, 0x6e, 0x67, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x52, 0x0a, 0x0b, 0x4c, 0x69,
 	0x73, 0x74, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x12, 0x20, 0x2e, 0x63, 0x6f, 0x72, 0x65,
 	0x2e, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x46, 0x69, 0x6e,
@@ -1836,11 +2125,28 @@ var file_finding_service_proto_rawDesc = []byte{
 	0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x55, 0x6e,
 	0x74, 0x61, 0x67, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65,
 	0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x42, 0x31, 0x5a, 0x2f, 0x67, 0x69,
-	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x43, 0x79, 0x62, 0x65, 0x72, 0x41, 0x67,
-	0x65, 0x6e, 0x74, 0x2f, 0x6d, 0x69, 0x6d, 0x6f, 0x73, 0x61, 0x2d, 0x63, 0x6f, 0x72, 0x65, 0x2f,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x5b, 0x0a, 0x0e, 0x47, 0x65,
+	0x74, 0x50, 0x65, 0x6e, 0x64, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x12, 0x23, 0x2e, 0x63,
+	0x6f, 0x72, 0x65, 0x2e, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x47, 0x65, 0x74, 0x50,
+	0x65, 0x6e, 0x64, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x24, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67,
+	0x2e, 0x47, 0x65, 0x74, 0x50, 0x65, 0x6e, 0x64, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x5b, 0x0a, 0x0e, 0x50, 0x75, 0x74, 0x50, 0x65,
+	0x6e, 0x64, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x12, 0x23, 0x2e, 0x63, 0x6f, 0x72, 0x65,
+	0x2e, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x50, 0x75, 0x74, 0x50, 0x65, 0x6e, 0x64,
+	0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x24,
+	0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x50, 0x75,
+	0x74, 0x50, 0x65, 0x6e, 0x64, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x53, 0x0a, 0x11, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x50, 0x65,
+	0x6e, 0x64, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x12, 0x26, 0x2e, 0x63, 0x6f, 0x72, 0x65,
+	0x2e, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x50,
+	0x65, 0x6e, 0x64, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x42, 0x31, 0x5a, 0x2f, 0x67, 0x69, 0x74,
+	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x43, 0x79, 0x62, 0x65, 0x72, 0x41, 0x67, 0x65,
+	0x6e, 0x74, 0x2f, 0x6d, 0x69, 0x6d, 0x6f, 0x73, 0x61, 0x2d, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x62, 0x06, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1855,7 +2161,7 @@ func file_finding_service_proto_rawDescGZIP() []byte {
 	return file_finding_service_proto_rawDescData
 }
 
-var file_finding_service_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
+var file_finding_service_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
 var file_finding_service_proto_goTypes = []interface{}{
 	(*ListFindingRequest)(nil),          // 0: core.finding.ListFindingRequest
 	(*ListFindingResponse)(nil),         // 1: core.finding.ListFindingResponse
@@ -1885,66 +2191,82 @@ var file_finding_service_proto_goTypes = []interface{}{
 	(*TagResourceRequest)(nil),          // 25: core.finding.TagResourceRequest
 	(*TagResourceResponse)(nil),         // 26: core.finding.TagResourceResponse
 	(*UntagResourceRequest)(nil),        // 27: core.finding.UntagResourceRequest
-	(*Finding)(nil),                     // 28: core.finding.Finding
-	(*FindingForUpsert)(nil),            // 29: core.finding.FindingForUpsert
-	(*FindingTag)(nil),                  // 30: core.finding.FindingTag
-	(*FindingTagForUpsert)(nil),         // 31: core.finding.FindingTagForUpsert
-	(*Resource)(nil),                    // 32: core.finding.Resource
-	(*ResourceForUpsert)(nil),           // 33: core.finding.ResourceForUpsert
-	(*ResourceTag)(nil),                 // 34: core.finding.ResourceTag
-	(*ResourceTagForUpsert)(nil),        // 35: core.finding.ResourceTagForUpsert
-	(*empty.Empty)(nil),                 // 36: google.protobuf.Empty
+	(*GetPendFindingRequest)(nil),       // 28: core.finding.GetPendFindingRequest
+	(*GetPendFindingResponse)(nil),      // 29: core.finding.GetPendFindingResponse
+	(*PutPendFindingRequest)(nil),       // 30: core.finding.PutPendFindingRequest
+	(*PutPendFindingResponse)(nil),      // 31: core.finding.PutPendFindingResponse
+	(*DeletePendFindingRequest)(nil),    // 32: core.finding.DeletePendFindingRequest
+	(*Finding)(nil),                     // 33: core.finding.Finding
+	(*FindingForUpsert)(nil),            // 34: core.finding.FindingForUpsert
+	(*FindingTag)(nil),                  // 35: core.finding.FindingTag
+	(*FindingTagForUpsert)(nil),         // 36: core.finding.FindingTagForUpsert
+	(*Resource)(nil),                    // 37: core.finding.Resource
+	(*ResourceForUpsert)(nil),           // 38: core.finding.ResourceForUpsert
+	(*ResourceTag)(nil),                 // 39: core.finding.ResourceTag
+	(*ResourceTagForUpsert)(nil),        // 40: core.finding.ResourceTagForUpsert
+	(*PendFinding)(nil),                 // 41: core.finding.PendFinding
+	(*PendFindingForUpsert)(nil),        // 42: core.finding.PendFindingForUpsert
+	(*empty.Empty)(nil),                 // 43: google.protobuf.Empty
 }
 var file_finding_service_proto_depIdxs = []int32{
-	28, // 0: core.finding.GetFindingResponse.finding:type_name -> core.finding.Finding
-	29, // 1: core.finding.PutFindingRequest.finding:type_name -> core.finding.FindingForUpsert
-	28, // 2: core.finding.PutFindingResponse.finding:type_name -> core.finding.Finding
-	30, // 3: core.finding.ListFindingTagResponse.tag:type_name -> core.finding.FindingTag
-	31, // 4: core.finding.TagFindingRequest.tag:type_name -> core.finding.FindingTagForUpsert
-	30, // 5: core.finding.TagFindingResponse.tag:type_name -> core.finding.FindingTag
-	32, // 6: core.finding.GetResourceResponse.resource:type_name -> core.finding.Resource
-	33, // 7: core.finding.PutResourceRequest.resource:type_name -> core.finding.ResourceForUpsert
-	32, // 8: core.finding.PutResourceResponse.resource:type_name -> core.finding.Resource
-	34, // 9: core.finding.ListResourceTagResponse.tag:type_name -> core.finding.ResourceTag
-	35, // 10: core.finding.TagResourceRequest.tag:type_name -> core.finding.ResourceTagForUpsert
-	34, // 11: core.finding.TagResourceResponse.tag:type_name -> core.finding.ResourceTag
-	0,  // 12: core.finding.FindingService.ListFinding:input_type -> core.finding.ListFindingRequest
-	2,  // 13: core.finding.FindingService.GetFinding:input_type -> core.finding.GetFindingRequest
-	4,  // 14: core.finding.FindingService.PutFinding:input_type -> core.finding.PutFindingRequest
-	6,  // 15: core.finding.FindingService.DeleteFinding:input_type -> core.finding.DeleteFindingRequest
-	7,  // 16: core.finding.FindingService.ListFindingTag:input_type -> core.finding.ListFindingTagRequest
-	9,  // 17: core.finding.FindingService.ListFindingTagName:input_type -> core.finding.ListFindingTagNameRequest
-	11, // 18: core.finding.FindingService.TagFinding:input_type -> core.finding.TagFindingRequest
-	13, // 19: core.finding.FindingService.UntagFinding:input_type -> core.finding.UntagFindingRequest
-	14, // 20: core.finding.FindingService.ListResource:input_type -> core.finding.ListResourceRequest
-	16, // 21: core.finding.FindingService.GetResource:input_type -> core.finding.GetResourceRequest
-	18, // 22: core.finding.FindingService.PutResource:input_type -> core.finding.PutResourceRequest
-	20, // 23: core.finding.FindingService.DeleteResource:input_type -> core.finding.DeleteResourceRequest
-	21, // 24: core.finding.FindingService.ListResourceTag:input_type -> core.finding.ListResourceTagRequest
-	23, // 25: core.finding.FindingService.ListResourceTagName:input_type -> core.finding.ListResourceTagNameRequest
-	25, // 26: core.finding.FindingService.TagResource:input_type -> core.finding.TagResourceRequest
-	27, // 27: core.finding.FindingService.UntagResource:input_type -> core.finding.UntagResourceRequest
-	1,  // 28: core.finding.FindingService.ListFinding:output_type -> core.finding.ListFindingResponse
-	3,  // 29: core.finding.FindingService.GetFinding:output_type -> core.finding.GetFindingResponse
-	5,  // 30: core.finding.FindingService.PutFinding:output_type -> core.finding.PutFindingResponse
-	36, // 31: core.finding.FindingService.DeleteFinding:output_type -> google.protobuf.Empty
-	8,  // 32: core.finding.FindingService.ListFindingTag:output_type -> core.finding.ListFindingTagResponse
-	10, // 33: core.finding.FindingService.ListFindingTagName:output_type -> core.finding.ListFindingTagNameResponse
-	12, // 34: core.finding.FindingService.TagFinding:output_type -> core.finding.TagFindingResponse
-	36, // 35: core.finding.FindingService.UntagFinding:output_type -> google.protobuf.Empty
-	15, // 36: core.finding.FindingService.ListResource:output_type -> core.finding.ListResourceResponse
-	17, // 37: core.finding.FindingService.GetResource:output_type -> core.finding.GetResourceResponse
-	19, // 38: core.finding.FindingService.PutResource:output_type -> core.finding.PutResourceResponse
-	36, // 39: core.finding.FindingService.DeleteResource:output_type -> google.protobuf.Empty
-	22, // 40: core.finding.FindingService.ListResourceTag:output_type -> core.finding.ListResourceTagResponse
-	24, // 41: core.finding.FindingService.ListResourceTagName:output_type -> core.finding.ListResourceTagNameResponse
-	26, // 42: core.finding.FindingService.TagResource:output_type -> core.finding.TagResourceResponse
-	36, // 43: core.finding.FindingService.UntagResource:output_type -> google.protobuf.Empty
-	28, // [28:44] is the sub-list for method output_type
-	12, // [12:28] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	33, // 0: core.finding.GetFindingResponse.finding:type_name -> core.finding.Finding
+	34, // 1: core.finding.PutFindingRequest.finding:type_name -> core.finding.FindingForUpsert
+	33, // 2: core.finding.PutFindingResponse.finding:type_name -> core.finding.Finding
+	35, // 3: core.finding.ListFindingTagResponse.tag:type_name -> core.finding.FindingTag
+	36, // 4: core.finding.TagFindingRequest.tag:type_name -> core.finding.FindingTagForUpsert
+	35, // 5: core.finding.TagFindingResponse.tag:type_name -> core.finding.FindingTag
+	37, // 6: core.finding.GetResourceResponse.resource:type_name -> core.finding.Resource
+	38, // 7: core.finding.PutResourceRequest.resource:type_name -> core.finding.ResourceForUpsert
+	37, // 8: core.finding.PutResourceResponse.resource:type_name -> core.finding.Resource
+	39, // 9: core.finding.ListResourceTagResponse.tag:type_name -> core.finding.ResourceTag
+	40, // 10: core.finding.TagResourceRequest.tag:type_name -> core.finding.ResourceTagForUpsert
+	39, // 11: core.finding.TagResourceResponse.tag:type_name -> core.finding.ResourceTag
+	41, // 12: core.finding.GetPendFindingResponse.pend_finding:type_name -> core.finding.PendFinding
+	42, // 13: core.finding.PutPendFindingRequest.pend_finding:type_name -> core.finding.PendFindingForUpsert
+	41, // 14: core.finding.PutPendFindingResponse.pend_finding:type_name -> core.finding.PendFinding
+	0,  // 15: core.finding.FindingService.ListFinding:input_type -> core.finding.ListFindingRequest
+	2,  // 16: core.finding.FindingService.GetFinding:input_type -> core.finding.GetFindingRequest
+	4,  // 17: core.finding.FindingService.PutFinding:input_type -> core.finding.PutFindingRequest
+	6,  // 18: core.finding.FindingService.DeleteFinding:input_type -> core.finding.DeleteFindingRequest
+	7,  // 19: core.finding.FindingService.ListFindingTag:input_type -> core.finding.ListFindingTagRequest
+	9,  // 20: core.finding.FindingService.ListFindingTagName:input_type -> core.finding.ListFindingTagNameRequest
+	11, // 21: core.finding.FindingService.TagFinding:input_type -> core.finding.TagFindingRequest
+	13, // 22: core.finding.FindingService.UntagFinding:input_type -> core.finding.UntagFindingRequest
+	14, // 23: core.finding.FindingService.ListResource:input_type -> core.finding.ListResourceRequest
+	16, // 24: core.finding.FindingService.GetResource:input_type -> core.finding.GetResourceRequest
+	18, // 25: core.finding.FindingService.PutResource:input_type -> core.finding.PutResourceRequest
+	20, // 26: core.finding.FindingService.DeleteResource:input_type -> core.finding.DeleteResourceRequest
+	21, // 27: core.finding.FindingService.ListResourceTag:input_type -> core.finding.ListResourceTagRequest
+	23, // 28: core.finding.FindingService.ListResourceTagName:input_type -> core.finding.ListResourceTagNameRequest
+	25, // 29: core.finding.FindingService.TagResource:input_type -> core.finding.TagResourceRequest
+	27, // 30: core.finding.FindingService.UntagResource:input_type -> core.finding.UntagResourceRequest
+	28, // 31: core.finding.FindingService.GetPendFinding:input_type -> core.finding.GetPendFindingRequest
+	30, // 32: core.finding.FindingService.PutPendFinding:input_type -> core.finding.PutPendFindingRequest
+	32, // 33: core.finding.FindingService.DeletePendFinding:input_type -> core.finding.DeletePendFindingRequest
+	1,  // 34: core.finding.FindingService.ListFinding:output_type -> core.finding.ListFindingResponse
+	3,  // 35: core.finding.FindingService.GetFinding:output_type -> core.finding.GetFindingResponse
+	5,  // 36: core.finding.FindingService.PutFinding:output_type -> core.finding.PutFindingResponse
+	43, // 37: core.finding.FindingService.DeleteFinding:output_type -> google.protobuf.Empty
+	8,  // 38: core.finding.FindingService.ListFindingTag:output_type -> core.finding.ListFindingTagResponse
+	10, // 39: core.finding.FindingService.ListFindingTagName:output_type -> core.finding.ListFindingTagNameResponse
+	12, // 40: core.finding.FindingService.TagFinding:output_type -> core.finding.TagFindingResponse
+	43, // 41: core.finding.FindingService.UntagFinding:output_type -> google.protobuf.Empty
+	15, // 42: core.finding.FindingService.ListResource:output_type -> core.finding.ListResourceResponse
+	17, // 43: core.finding.FindingService.GetResource:output_type -> core.finding.GetResourceResponse
+	19, // 44: core.finding.FindingService.PutResource:output_type -> core.finding.PutResourceResponse
+	43, // 45: core.finding.FindingService.DeleteResource:output_type -> google.protobuf.Empty
+	22, // 46: core.finding.FindingService.ListResourceTag:output_type -> core.finding.ListResourceTagResponse
+	24, // 47: core.finding.FindingService.ListResourceTagName:output_type -> core.finding.ListResourceTagNameResponse
+	26, // 48: core.finding.FindingService.TagResource:output_type -> core.finding.TagResourceResponse
+	43, // 49: core.finding.FindingService.UntagResource:output_type -> google.protobuf.Empty
+	29, // 50: core.finding.FindingService.GetPendFinding:output_type -> core.finding.GetPendFindingResponse
+	31, // 51: core.finding.FindingService.PutPendFinding:output_type -> core.finding.PutPendFindingResponse
+	43, // 52: core.finding.FindingService.DeletePendFinding:output_type -> google.protobuf.Empty
+	34, // [34:53] is the sub-list for method output_type
+	15, // [15:34] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_finding_service_proto_init() }
@@ -2290,6 +2612,66 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
+		file_finding_service_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetPendFindingRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_finding_service_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetPendFindingResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_finding_service_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PutPendFindingRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_finding_service_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PutPendFindingResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_finding_service_proto_msgTypes[32].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DeletePendFindingRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -2297,7 +2679,7 @@ func file_finding_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_finding_service_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   28,
+			NumMessages:   33,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -2341,6 +2723,10 @@ type FindingServiceClient interface {
 	ListResourceTagName(ctx context.Context, in *ListResourceTagNameRequest, opts ...grpc.CallOption) (*ListResourceTagNameResponse, error)
 	TagResource(ctx context.Context, in *TagResourceRequest, opts ...grpc.CallOption) (*TagResourceResponse, error)
 	UntagResource(ctx context.Context, in *UntagResourceRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// pend_finding
+	GetPendFinding(ctx context.Context, in *GetPendFindingRequest, opts ...grpc.CallOption) (*GetPendFindingResponse, error)
+	PutPendFinding(ctx context.Context, in *PutPendFindingRequest, opts ...grpc.CallOption) (*PutPendFindingResponse, error)
+	DeletePendFinding(ctx context.Context, in *DeletePendFindingRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type findingServiceClient struct {
@@ -2495,6 +2881,33 @@ func (c *findingServiceClient) UntagResource(ctx context.Context, in *UntagResou
 	return out, nil
 }
 
+func (c *findingServiceClient) GetPendFinding(ctx context.Context, in *GetPendFindingRequest, opts ...grpc.CallOption) (*GetPendFindingResponse, error) {
+	out := new(GetPendFindingResponse)
+	err := c.cc.Invoke(ctx, "/core.finding.FindingService/GetPendFinding", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *findingServiceClient) PutPendFinding(ctx context.Context, in *PutPendFindingRequest, opts ...grpc.CallOption) (*PutPendFindingResponse, error) {
+	out := new(PutPendFindingResponse)
+	err := c.cc.Invoke(ctx, "/core.finding.FindingService/PutPendFinding", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *findingServiceClient) DeletePendFinding(ctx context.Context, in *DeletePendFindingRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/core.finding.FindingService/DeletePendFinding", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FindingServiceServer is the server API for FindingService service.
 type FindingServiceServer interface {
 	// fiding
@@ -2515,6 +2928,10 @@ type FindingServiceServer interface {
 	ListResourceTagName(context.Context, *ListResourceTagNameRequest) (*ListResourceTagNameResponse, error)
 	TagResource(context.Context, *TagResourceRequest) (*TagResourceResponse, error)
 	UntagResource(context.Context, *UntagResourceRequest) (*empty.Empty, error)
+	// pend_finding
+	GetPendFinding(context.Context, *GetPendFindingRequest) (*GetPendFindingResponse, error)
+	PutPendFinding(context.Context, *PutPendFindingRequest) (*PutPendFindingResponse, error)
+	DeletePendFinding(context.Context, *DeletePendFindingRequest) (*empty.Empty, error)
 }
 
 // UnimplementedFindingServiceServer can be embedded to have forward compatible implementations.
@@ -2568,6 +2985,15 @@ func (*UnimplementedFindingServiceServer) TagResource(context.Context, *TagResou
 }
 func (*UnimplementedFindingServiceServer) UntagResource(context.Context, *UntagResourceRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UntagResource not implemented")
+}
+func (*UnimplementedFindingServiceServer) GetPendFinding(context.Context, *GetPendFindingRequest) (*GetPendFindingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPendFinding not implemented")
+}
+func (*UnimplementedFindingServiceServer) PutPendFinding(context.Context, *PutPendFindingRequest) (*PutPendFindingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PutPendFinding not implemented")
+}
+func (*UnimplementedFindingServiceServer) DeletePendFinding(context.Context, *DeletePendFindingRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePendFinding not implemented")
 }
 
 func RegisterFindingServiceServer(s *grpc.Server, srv FindingServiceServer) {
@@ -2862,6 +3288,60 @@ func _FindingService_UntagResource_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FindingService_GetPendFinding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPendFindingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FindingServiceServer).GetPendFinding(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.finding.FindingService/GetPendFinding",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FindingServiceServer).GetPendFinding(ctx, req.(*GetPendFindingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FindingService_PutPendFinding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutPendFindingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FindingServiceServer).PutPendFinding(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.finding.FindingService/PutPendFinding",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FindingServiceServer).PutPendFinding(ctx, req.(*PutPendFindingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FindingService_DeletePendFinding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePendFindingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FindingServiceServer).DeletePendFinding(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.finding.FindingService/DeletePendFinding",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FindingServiceServer).DeletePendFinding(ctx, req.(*DeletePendFindingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _FindingService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "core.finding.FindingService",
 	HandlerType: (*FindingServiceServer)(nil),
@@ -2929,6 +3409,18 @@ var _FindingService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UntagResource",
 			Handler:    _FindingService_UntagResource_Handler,
+		},
+		{
+			MethodName: "GetPendFinding",
+			Handler:    _FindingService_GetPendFinding_Handler,
+		},
+		{
+			MethodName: "PutPendFinding",
+			Handler:    _FindingService_PutPendFinding_Handler,
+		},
+		{
+			MethodName: "DeletePendFinding",
+			Handler:    _FindingService_DeletePendFinding_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
