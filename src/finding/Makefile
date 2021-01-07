@@ -125,3 +125,24 @@ untag-resource:
 		-plaintext \
 		-d '{"project_id":1001, "resource_tag_id":1003}' \
 		localhost:8001 core.finding.FindingService.UntagResource
+
+.PHONY: get-pend-finding
+get-pend-finding:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001,"finding_id":1001}' \
+		localhost:8001 core.finding.FindingService.GetPendFinding
+
+.PHONY: put-pend-finding
+put-pend-finding:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "pend_finding":{"finding_id":1001, "project_id":1001}}' \
+		localhost:8001 core.finding.FindingService.PutPendFinding
+
+.PHONY: delete-pend-finding
+delete-pend-finding:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "finding_id":1001}' \
+		localhost:8001 core.finding.FindingService.DeletePendFinding
