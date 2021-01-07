@@ -679,6 +679,108 @@ func TestValidate_UntagResourceRequest(t *testing.T) {
 	}
 }
 
+func TestValidate_GetPendFindingRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *GetPendFindingRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &GetPendFindingRequest{ProjectId: 1, FindingId: 1},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &GetPendFindingRequest{FindingId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG required(finding_id)",
+			input:   &GetPendFindingRequest{ProjectId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_PutPendFindingRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *PutPendFindingRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &PutPendFindingRequest{ProjectId: 1, PendFinding: &PendFindingForUpsert{FindingId: 1, ProjectId: 1}},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(pend_finding)",
+			input:   &PutPendFindingRequest{ProjectId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Not Equal(project_id)",
+			input:   &PutPendFindingRequest{ProjectId: 999, PendFinding: &PendFindingForUpsert{FindingId: 1, ProjectId: 1}},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_DeletePendFindingRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *DeletePendFindingRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &DeletePendFindingRequest{ProjectId: 1, FindingId: 1},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &DeletePendFindingRequest{FindingId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG required(finding_id)",
+			input:   &DeletePendFindingRequest{ProjectId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
 func TestValidate_FindingForUpsert(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -870,6 +972,40 @@ func TestValidate_ResourceTagForUpsert(t *testing.T) {
 		{
 			name:    "NG too long Tag",
 			input:   &ResourceTagForUpsert{ResourceId: 1001, Tag: len65string},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_PendFindingForUpsert(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *PendFindingForUpsert
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &PendFindingForUpsert{FindingId: 1, ProjectId: 1},
+			wantErr: false,
+		},
+		{
+			name:    "NG required FindingId",
+			input:   &PendFindingForUpsert{ProjectId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG required PendingId",
+			input:   &PendFindingForUpsert{FindingId: 1},
 			wantErr: true,
 		},
 	}

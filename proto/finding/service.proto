@@ -28,6 +28,12 @@ service FindingService {
       returns (ListResourceTagNameResponse);
   rpc TagResource(TagResourceRequest) returns (TagResourceResponse);
   rpc UntagResource(UntagResourceRequest) returns (google.protobuf.Empty);
+
+  // pend_finding
+  rpc GetPendFinding(GetPendFindingRequest) returns (GetPendFindingResponse);
+  rpc PutPendFinding(PutPendFindingRequest) returns (PutPendFindingResponse);
+  rpc DeletePendFinding(DeletePendFindingRequest)
+      returns (google.protobuf.Empty);
 }
 
 message ListFindingRequest {
@@ -145,4 +151,23 @@ message TagResourceResponse { ResourceTag tag = 1; }
 message UntagResourceRequest {
   uint32 project_id = 1;
   uint64 resource_tag_id = 3;
+}
+
+message GetPendFindingRequest {
+  uint32 project_id = 1;
+  uint64 finding_id = 2;
+}
+
+message GetPendFindingResponse { PendFinding pend_finding = 1; }
+
+message PutPendFindingRequest {
+  uint32 project_id = 1;
+  PendFindingForUpsert pend_finding = 2;
+}
+
+message PutPendFindingResponse { PendFinding pend_finding = 1; }
+
+message DeletePendFindingRequest {
+  uint32 project_id = 1;
+  uint64 finding_id = 2;
 }

@@ -89,6 +89,8 @@
     - [FindingForUpsert](#core.finding.FindingForUpsert)
     - [FindingTag](#core.finding.FindingTag)
     - [FindingTagForUpsert](#core.finding.FindingTagForUpsert)
+    - [PendFinding](#core.finding.PendFinding)
+    - [PendFindingForUpsert](#core.finding.PendFindingForUpsert)
     - [Resource](#core.finding.Resource)
     - [ResourceForUpsert](#core.finding.ResourceForUpsert)
     - [ResourceTag](#core.finding.ResourceTag)
@@ -96,9 +98,12 @@
   
 - [finding/service.proto](#finding/service.proto)
     - [DeleteFindingRequest](#core.finding.DeleteFindingRequest)
+    - [DeletePendFindingRequest](#core.finding.DeletePendFindingRequest)
     - [DeleteResourceRequest](#core.finding.DeleteResourceRequest)
     - [GetFindingRequest](#core.finding.GetFindingRequest)
     - [GetFindingResponse](#core.finding.GetFindingResponse)
+    - [GetPendFindingRequest](#core.finding.GetPendFindingRequest)
+    - [GetPendFindingResponse](#core.finding.GetPendFindingResponse)
     - [GetResourceRequest](#core.finding.GetResourceRequest)
     - [GetResourceResponse](#core.finding.GetResourceResponse)
     - [ListFindingRequest](#core.finding.ListFindingRequest)
@@ -115,6 +120,8 @@
     - [ListResourceTagResponse](#core.finding.ListResourceTagResponse)
     - [PutFindingRequest](#core.finding.PutFindingRequest)
     - [PutFindingResponse](#core.finding.PutFindingResponse)
+    - [PutPendFindingRequest](#core.finding.PutPendFindingRequest)
+    - [PutPendFindingResponse](#core.finding.PutPendFindingResponse)
     - [PutResourceRequest](#core.finding.PutResourceRequest)
     - [PutResourceResponse](#core.finding.PutResourceResponse)
     - [TagFindingRequest](#core.finding.TagFindingRequest)
@@ -1619,6 +1626,40 @@ FindingTag For Upsert
 
 
 
+<a name="core.finding.PendFinding"></a>
+
+### PendFinding
+PendFinding
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| finding_id | [uint64](#uint64) |  |  |
+| project_id | [uint32](#uint32) |  |  |
+| created_at | [int64](#int64) |  |  |
+| updated_at | [int64](#int64) |  |  |
+
+
+
+
+
+
+<a name="core.finding.PendFindingForUpsert"></a>
+
+### PendFindingForUpsert
+PendFinding For upsert
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| finding_id | [uint64](#uint64) |  |  |
+| project_id | [uint32](#uint32) |  |  |
+
+
+
+
+
+
 <a name="core.finding.Resource"></a>
 
 ### Resource
@@ -1725,6 +1766,22 @@ ResourceTag For upsert
 
 
 
+<a name="core.finding.DeletePendFindingRequest"></a>
+
+### DeletePendFindingRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| finding_id | [uint64](#uint64) |  |  |
+
+
+
+
+
+
 <a name="core.finding.DeleteResourceRequest"></a>
 
 ### DeleteResourceRequest
@@ -1766,6 +1823,37 @@ ResourceTag For upsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | finding | [Finding](#core.finding.Finding) |  |  |
+
+
+
+
+
+
+<a name="core.finding.GetPendFindingRequest"></a>
+
+### GetPendFindingRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| finding_id | [uint64](#uint64) |  |  |
+
+
+
+
+
+
+<a name="core.finding.GetPendFindingResponse"></a>
+
+### GetPendFindingResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| pend_finding | [PendFinding](#core.finding.PendFinding) |  |  |
 
 
 
@@ -2033,6 +2121,37 @@ ResourceTag For upsert
 
 
 
+<a name="core.finding.PutPendFindingRequest"></a>
+
+### PutPendFindingRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| pend_finding | [PendFindingForUpsert](#core.finding.PendFindingForUpsert) |  |  |
+
+
+
+
+
+
+<a name="core.finding.PutPendFindingResponse"></a>
+
+### PutPendFindingResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| pend_finding | [PendFinding](#core.finding.PendFinding) |  |  |
+
+
+
+
+
+
 <a name="core.finding.PutResourceRequest"></a>
 
 ### PutResourceRequest
@@ -2187,6 +2306,9 @@ ResourceTag For upsert
 | ListResourceTagName | [ListResourceTagNameRequest](#core.finding.ListResourceTagNameRequest) | [ListResourceTagNameResponse](#core.finding.ListResourceTagNameResponse) |  |
 | TagResource | [TagResourceRequest](#core.finding.TagResourceRequest) | [TagResourceResponse](#core.finding.TagResourceResponse) |  |
 | UntagResource | [UntagResourceRequest](#core.finding.UntagResourceRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
+| GetPendFinding | [GetPendFindingRequest](#core.finding.GetPendFindingRequest) | [GetPendFindingResponse](#core.finding.GetPendFindingResponse) | pend_finding |
+| PutPendFinding | [PutPendFindingRequest](#core.finding.PutPendFindingRequest) | [PutPendFindingResponse](#core.finding.PutPendFindingResponse) |  |
+| DeletePendFinding | [DeletePendFindingRequest](#core.finding.DeletePendFindingRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 
  
 

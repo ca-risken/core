@@ -45,3 +45,11 @@ type ResourceTag struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 }
+
+// PendFinding entity model
+type PendFinding struct {
+	FindingID uint64
+	ProjectID uint32
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}

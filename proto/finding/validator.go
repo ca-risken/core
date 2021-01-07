@@ -168,6 +168,35 @@ func (u *UntagResourceRequest) Validate() error {
 	)
 }
 
+// Validate for GetPendFindingRequest
+func (g *GetPendFindingRequest) Validate() error {
+	return validation.ValidateStruct(g,
+		validation.Field(&g.ProjectId, validation.Required),
+		validation.Field(&g.FindingId, validation.Required),
+	)
+}
+
+// Validate for PutPendFindingRequest
+func (p *PutPendFindingRequest) Validate() error {
+	if validation.IsEmpty(p.PendFinding) {
+		return errors.New("Required pend_finding parameter")
+	}
+	if err := validation.ValidateStruct(p,
+		validation.Field(&p.ProjectId, validation.In(p.PendFinding.ProjectId)),
+	); err != nil {
+		return err
+	}
+	return p.PendFinding.Validate()
+}
+
+// Validate for DeletePendFindingRequest
+func (d *DeletePendFindingRequest) Validate() error {
+	return validation.ValidateStruct(d,
+		validation.Field(&d.ProjectId, validation.Required),
+		validation.Field(&d.FindingId, validation.Required),
+	)
+}
+
 /*
  * entities
 **/
@@ -205,5 +234,13 @@ func (r *ResourceTagForUpsert) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ResourceId, validation.Required),
 		validation.Field(&r.Tag, validation.Required, validation.Length(0, 64)),
+	)
+}
+
+// Validate for PendFindingForUpsert
+func (r *PendFindingForUpsert) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.FindingId, validation.Required),
+		validation.Field(&r.ProjectId, validation.Required),
 	)
 }
