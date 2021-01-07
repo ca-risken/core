@@ -12,7 +12,7 @@ import (
 
 type slackWebhookConfig struct {
 	Channel              string
-	NotificationAlertUrl string `split_words:"true"`
+	NotificationAlertURL string `split_words:"true"`
 }
 
 func newslackWebhookConfig(channel string) (*slackWebhookConfig, error) {
@@ -26,7 +26,7 @@ func newslackWebhookConfig(channel string) (*slackWebhookConfig, error) {
 
 func (t *slackWebhookConfig) GetPayload(alert *model.Alert, projectName string) (string, error) {
 	now := time.Now().Unix()
-	text := fmt.Sprintf("%v設定されたAlertに合致する結果を検知しました。", getMention(alert.Severity))
+	text := fmt.Sprintf("%vアラートを検知しました。", getMention(alert.Severity))
 	attachments := []interface{}{
 		map[string]interface{}{
 			"color": getColor(alert.Severity),
@@ -43,7 +43,7 @@ func (t *slackWebhookConfig) GetPayload(alert *model.Alert, projectName string) 
 				},
 				map[string]string{
 					"title": "Link",
-					"value": fmt.Sprintf("<%s|詳細はこちらから>", t.NotificationAlertUrl),
+					"value": fmt.Sprintf("<%s|詳細はこちらから>", t.NotificationAlertURL),
 					"short": "true",
 				},
 				map[string]string{
@@ -87,9 +87,9 @@ func getColor(severity string) string {
 func getMention(severity string) string {
 	switch severity {
 	case "high":
-		return "<!channel> \n"
+		return "<!channel> "
 	case "medium":
-		return "<!here> \n"
+		return "<!here> "
 	case "low":
 		return ""
 	default:

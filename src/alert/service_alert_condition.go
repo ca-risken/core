@@ -16,10 +16,6 @@ import (
  * AlertCondition
  */
 
-/**
- * AlertCondition
- */
-
 func (f *alertService) ListAlertCondition(ctx context.Context, req *alert.ListAlertConditionRequest) (*alert.ListAlertConditionResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
