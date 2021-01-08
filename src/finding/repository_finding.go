@@ -177,7 +177,7 @@ const selectGetPendFinding = `select * from pend_finding where project_id = ? an
 
 func (f *findingDB) GetPendFinding(projectID uint32, findingID uint64) (*model.PendFinding, error) {
 	var data model.PendFinding
-	if err := f.Slave.Raw(selectGetPendFinding, projectID, findingID).First(&data).Error; err != nil {
+	if err := f.Master.Raw(selectGetPendFinding, projectID, findingID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
