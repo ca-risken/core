@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package core.report;
+option go_package = "github.com/CyberAgent/mimosa-core/proto/report";
+
+import "google/protobuf/empty.proto";
+import "report/entity.proto";
+
+service ReportService {
+  // report
+  rpc GetReportFinding(GetReportFindingRequest)
+      returns (GetReportFindingResponse);
+  rpc GetReportFindingAll(GetReportFindingAllRequest)
+      returns (GetReportFindingAllResponse);
+  rpc CollectReportFinding(google.protobuf.Empty)
+      returns (google.protobuf.Empty);
+}
+
+message GetReportFindingRequest { uint32 project_id = 1; }
+
+message GetReportFindingResponse { repeated ReportFinding report_finding = 1; }
+
+message GetReportFindingAllRequest { uint32 project_id = 1; }
+
+message GetReportFindingAllResponse {
+  repeated ReportFinding report_finding = 1;
+}
