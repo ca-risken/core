@@ -6,7 +6,7 @@ import "time"
 type ReportFinding struct {
 	ReportFindingID uint32 `gorm:"primary_key"`
 	ReportDate      string
-	Description     string
+	ProjectID       uint32
 	Score           float32
 	Count           uint32
 	CreatedAt       time.Time
