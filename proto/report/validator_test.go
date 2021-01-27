@@ -7,17 +7,17 @@ import (
 func TestValidateGetReportRequest(t *testing.T) {
 	cases := []struct {
 		name    string
-		input   *GetReportRequest
+		input   *GetReportFindingRequest
 		wantErr bool
 	}{
 		{
 			name:    "OK",
-			input:   &GetReportRequest{ProjectId: 111},
+			input:   &GetReportFindingRequest{ProjectId: 111},
 			wantErr: false,
 		},
 		{
 			name:    "NG (required ProjectId)",
-			input:   &GetReportRequest{},
+			input:   &GetReportFindingRequest{},
 			wantErr: true,
 		},
 	}

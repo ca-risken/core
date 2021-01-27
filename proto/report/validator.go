@@ -5,7 +5,7 @@ import (
 )
 
 // Validate GetReportRequest
-func (r *GetReportRequest) Validate() error {
+func (r *GetReportFindingRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ProjectId, validation.Required),
 	)
