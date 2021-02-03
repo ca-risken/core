@@ -34,6 +34,15 @@ build: fmt
 		--go_out=plugins=grpc,paths=source_relative:proto \
 		proto/**/*.proto;
 
+build-validate: fmt
+	protoc \
+		--proto_path=proto \
+		--error_format=gcc \
+		-I $GOPATH/src/github.com/envoyproxy/protoc-gen-validate \
+		--go_out=plugins=grpc,paths=source_relative:proto \
+		--validate_out="lang=go,paths=source_relative:proto" \
+		proto/**/*.proto;
+
 go-test: build
 	cd proto/finding && go test ./...
 	cd proto/iam     && go test ./...

@@ -5,6 +5,7 @@ option go_package = "github.com/CyberAgent/mimosa-core/proto/report";
 
 import "google/protobuf/empty.proto";
 import "report/entity.proto";
+import "validate/validate.proto";
 
 service ReportService {
   // report
@@ -16,11 +17,25 @@ service ReportService {
       returns (google.protobuf.Empty);
 }
 
-message GetReportFindingRequest { uint32 project_id = 1; }
+message GetReportFindingRequest {
+  uint32 project_id = 1 [ (validate.rules).uint32.gte = 1 ];
+  string from_date = 2
+      [ (validate.rules).string.pattern = "^(|[0-9]{4}-[0-9]{2}-[0-9]{2})$" ];
+  string to_date = 3
+      [ (validate.rules).string.pattern = "^(|[0-9]{4}-[0-9]{2}-[0-9]{2})$" ];
+  float score = 4 [ (validate.rules).float = {gte : 0, lte : 1} ];
+}
 
 message GetReportFindingResponse { repeated ReportFinding report_finding = 1; }
 
-message GetReportFindingAllRequest { uint32 project_id = 1; }
+message GetReportFindingAllRequest {
+  uint32 project_id = 1;
+  string from_date = 2
+      [ (validate.rules).string.pattern = "^(|[0-9]{4}-[0-9]{2}-[0-9]{2})$" ];
+  string to_date = 3
+      [ (validate.rules).string.pattern = "^(|[0-9]{4}-[0-9]{2}-[0-9]{2})$" ];
+  float score = 4 [ (validate.rules).float = {gte : 0, lte : 1} ];
+}
 
 message GetReportFindingAllResponse {
   repeated ReportFinding report_finding = 1;
