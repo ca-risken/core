@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package core.report;
+option go_package = "github.com/CyberAgent/mimosa-core/proto/report";
+
+// Report
+message ReportFinding {
+  uint32 report_finding_id = 1;
+  string report_date = 2;
+  uint32 project_id = 3;
+  string data_source = 4;
+  float score = 5;
+  uint32 count = 6;
+}
