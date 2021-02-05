@@ -23,8 +23,8 @@ where
 		params = append(params, projectID)
 	}
 	if !zero.IsZeroVal(name) {
-		query += " and u.name = ?"
-		params = append(params, name)
+		query += " and u.name like ?"
+		params = append(params, "%"+name+"%")
 	}
 	var data []model.User
 	if err := i.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
