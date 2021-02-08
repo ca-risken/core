@@ -6,6 +6,7 @@ env:
     IMAGE_IAM: "core/iam"
     IMAGE_PROJECT: "core/project"
     IMAGE_ALERT: "core/alert"
+    IMAGE_REPORT: "core/report"
   parameter-store:
     GITHUB_USER: "/build/GITHUB_USER"
     GITHUB_TOKEN: "/build/GITHUB_TOKEN"
@@ -30,6 +31,7 @@ phases:
       - cd ${SRC}/iam     && go test ./...
       - cd ${SRC}/project && go test ./...
       - cd ${SRC}/alert   && go test ./...
+      - cd ${SRC}/report  && go test ./...
 
       - echo Logging in to Amazon ECR...
       - $(aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION})
@@ -41,3 +43,4 @@ phases:
       - cd ${SRC}/iam     && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_IAM}:${TAG} .
       - cd ${SRC}/project && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_PROJECT}:${TAG} .
       - cd ${SRC}/alert   && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_ALERT}:${TAG} .
+      - cd ${SRC}/report  && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_REPORT}:${TAG} .

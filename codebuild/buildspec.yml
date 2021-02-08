@@ -6,6 +6,7 @@ env:
     IMAGE_IAM: "core/iam"
     IMAGE_PROJECT: "core/project"
     IMAGE_ALERT: "core/alert"
+    IMAGE_REPORT: "core/report"
   parameter-store:
     GITHUB_USER: "/build/GITHUB_USER"
     GITHUB_TOKEN: "/build/GITHUB_TOKEN"
@@ -32,6 +33,7 @@ phases:
       - cd ${SRC}/iam     && go test ./...
       - cd ${SRC}/project && go test ./...
       - cd ${SRC}/alert   && go test ./...
+      - cd ${SRC}/report  && go test ./...
 
       - echo Logging in to Amazon ECR...
       - $(aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION})
@@ -43,6 +45,7 @@ phases:
       - cd ${SRC}/iam     && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_IAM}:${TAG} .
       - cd ${SRC}/project && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_PROJECT}:${TAG} .
       - cd ${SRC}/alert   && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_ALERT}:${TAG} .
+      - cd ${SRC}/report  && docker build ${BUILD_OPT} --build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t ${IMAGE_REPORT}:${TAG} .
 
       - echo Tagging the images...
       # tag the specific version
@@ -50,12 +53,14 @@ phases:
       - docker tag ${IMAGE_IAM}:${TAG}     ${REGISTORY}/${IMAGE_IAM}:${TAG}
       - docker tag ${IMAGE_PROJECT}:${TAG} ${REGISTORY}/${IMAGE_PROJECT}:${TAG}
       - docker tag ${IMAGE_ALERT}:${TAG}   ${REGISTORY}/${IMAGE_ALERT}:${TAG}
+      - docker tag ${IMAGE_REPORT}:${TAG}   ${REGISTORY}/${IMAGE_REPORT}:${TAG}
 
       # update latest version 
       - docker tag ${IMAGE_FINDING}:${TAG} ${REGISTORY}/${IMAGE_FINDING}:latest
       - docker tag ${IMAGE_IAM}:${TAG}     ${REGISTORY}/${IMAGE_IAM}:latest
       - docker tag ${IMAGE_PROJECT}:${TAG} ${REGISTORY}/${IMAGE_PROJECT}:latest
       - docker tag ${IMAGE_ALERT}:${TAG}   ${REGISTORY}/${IMAGE_ALERT}:latest
+      - docker tag ${IMAGE_REPORT}:${TAG}   ${REGISTORY}/${IMAGE_REPORT}:latest
   post_build:
     commands:
       - echo Build completed on `date`
@@ -66,9 +71,11 @@ phases:
       - docker push ${REGISTORY}/${IMAGE_IAM}:${TAG}
       - docker push ${REGISTORY}/${IMAGE_PROJECT}:${TAG}
       - docker push ${REGISTORY}/${IMAGE_ALERT}:${TAG}
+      - docker push ${REGISTORY}/${IMAGE_REPORT}:${TAG}
 
       # latest version
       - docker push ${REGISTORY}/${IMAGE_FINDING}:latest
       - docker push ${REGISTORY}/${IMAGE_IAM}:latest
       - docker push ${REGISTORY}/${IMAGE_PROJECT}:latest
       - docker push ${REGISTORY}/${IMAGE_ALERT}:latest
+      - docker push ${REGISTORY}/${IMAGE_REPORT}:latest
