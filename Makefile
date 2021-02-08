@@ -27,6 +27,7 @@ doc: fmt
 		--doc_out=markdown,README.md:doc \
 		proto/**/*.proto;
 
+# temporary build for protoc-gen-validate
 build: fmt
 	protoc \
 		--proto_path=proto \
@@ -34,11 +35,27 @@ build: fmt
 		--go_out=plugins=grpc,paths=source_relative:proto \
 		proto/**/*.proto;
 
+build-tmp: fmt
+	ls -aR proto/**/*.proto | \
+		grep -v report | \
+		xargs protoc \
+			--proto_path=proto \
+			--error_format=gcc \
+			--go_out=plugins=grpc,paths=source_relative:proto
+	protoc \
+		--proto_path=proto \
+		--error_format=gcc \
+		-I $(GOPATH)/src/github.com/envoyproxy/protoc-gen-validate \
+		--go_out=plugins=grpc,paths=source_relative:proto \
+		--validate_out="lang=go,paths=source_relative:proto" \
+		proto/report/*.proto;
+
+
 build-validate: fmt
 	protoc \
 		--proto_path=proto \
 		--error_format=gcc \
-		-I $GOPATH/src/github.com/envoyproxy/protoc-gen-validate \
+		-I $(GOPATH)/src/github.com/envoyproxy/protoc-gen-validate \
 		--go_out=plugins=grpc,paths=source_relative:proto \
 		--validate_out="lang=go,paths=source_relative:proto" \
 		proto/**/*.proto;
