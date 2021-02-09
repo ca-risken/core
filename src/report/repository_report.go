@@ -8,7 +8,7 @@ import (
 )
 
 func (f *reportDB) GetReportFinding(projectID uint32, dataSource []string, fromDate, toDate string, score float32) (*[]model.ReportFinding, error) {
-	query := `select * from report_finding where project_id = ? and score > ?`
+	query := `select r.*,p.name as project_name from report_finding as r, project as p where r.project_id = ? and r.project_id = p.project_id and score > ?`
 	var params []interface{}
 	params = append(params, projectID, score)
 	if len(dataSource) != 0 {
@@ -31,7 +31,7 @@ func (f *reportDB) GetReportFinding(projectID uint32, dataSource []string, fromD
 }
 
 func (f *reportDB) GetReportFindingAll(dataSource []string, fromDate, toDate string, score float32) (*[]model.ReportFinding, error) {
-	query := `select * from report_finding where score > ?`
+	query := `select r.*,p.name as project_name from report_finding as r, project as p where r.project_id = p.project_id and score > ?`
 	var params []interface{}
 	params = append(params, score)
 	if len(dataSource) != 0 {

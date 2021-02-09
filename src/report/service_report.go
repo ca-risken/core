@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"strings"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/report"
@@ -71,6 +72,8 @@ func convertReportFinding(f *model.ReportFinding) *report.ReportFinding {
 		ReportFindingId: f.ReportFindingID,
 		ReportDate:      f.ReportDate,
 		ProjectId:       f.ProjectID,
+		ProjectName:     f.ProjectName,
+		Category:        strings.Split(f.DataSource, ":")[0],
 		DataSource:      f.DataSource,
 		Score:           f.Score,
 		Count:           f.Count,

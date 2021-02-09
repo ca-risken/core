@@ -15,7 +15,6 @@ RUN apk add --no-cache ca-certificates tzdata \
   && tar xvfz env-injector_0.0.5_linux_amd64.tar.gz && mv env-injector /usr/local/bin/ && rm /tmp/*
 COPY --from=builder /go/bin/report /usr/local/report/bin/
 ENV PORT= \
-    FINDING_SVC_ADDR= \
     DB_MASTER_HOST= \
     DB_MASTER_USER= \
     DB_MASTER_PASSWORD= \
