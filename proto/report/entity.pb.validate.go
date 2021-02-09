@@ -47,6 +47,10 @@ func (m *ReportFinding) Validate() error {
 
 	// no validation rules for ProjectId
 
+	// no validation rules for ProjectName
+
+	// no validation rules for Category
+
 	// no validation rules for DataSource
 
 	// no validation rules for Score

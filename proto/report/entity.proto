@@ -8,7 +8,9 @@ message ReportFinding {
   uint32 report_finding_id = 1;
   string report_date = 2;
   uint32 project_id = 3;
-  string data_source = 4;
-  float score = 5;
-  uint32 count = 6;
+  string project_name = 4;
+  string category = 5;
+  string data_source = 6;
+  float score = 7;
+  uint32 count = 8;
 }
