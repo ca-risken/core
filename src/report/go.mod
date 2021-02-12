@@ -3,9 +3,9 @@ module github.com/CyberAgent/mimosa-core/src/report
 go 1.15
 
 require (
-	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210209104417-2487b497b0aa
+	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210209130947-d62cdfdeadec
 	github.com/CyberAgent/mimosa-core/proto/alert v0.0.0-20210126121918-f1127f3fa07a
-	github.com/CyberAgent/mimosa-core/proto/report v0.0.0-20210209104417-2487b497b0aa
+	github.com/CyberAgent/mimosa-core/proto/report v0.0.0-20210209130947-d62cdfdeadec
 	github.com/envoyproxy/protoc-gen-validate v0.4.1 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/protobuf v1.4.3
