@@ -55,12 +55,12 @@ func (f *reportDB) GetReportFindingAll(dataSource []string, fromDate, toDate str
 
 func (f *reportDB) CollectReportFinding() error {
 	query := `insert into report_finding (report_date, project_id, data_source, score, count) 
-	select DATE_ADD(CURRENT_DATE, INTERVAL -1 DAY) as report_date, project_id, data_source, score, count(*) as count 
-	from finding f
-	where f.finding_id not in (select finding_id from pend_finding)
-	group by f.project_id, data_source, score ON DUPLICATE KEY UPDATE count=values(count)`
+select DATE_ADD(CURRENT_DATE, INTERVAL -1 DAY) as report_date, project_id, data_source, score , count(*) as count 
+from finding f
+where not exists (select pend_finding.finding_id from pend_finding where f.finding_id = pend_finding.finding_id) 
+group by f.project_id, data_source, score ON DUPLICATE KEY UPDATE count=values(count)`
 	var data []model.ReportFinding
-	if err := f.Slave.Raw(query).Scan(&data).Error; err != nil {
+	if err := f.Master.Raw(query).Scan(&data).Error; err != nil {
 		return err
 	}
 	return nil
