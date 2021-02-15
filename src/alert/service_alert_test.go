@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"testing"
 	"time"
@@ -128,35 +129,66 @@ func TestPutAlert(t *testing.T) {
 	svc := alertService{repository: &mockDB}
 
 	cases := []struct {
-		name        string
-		input       *alert.PutAlertRequest
-		want        *alert.PutAlertResponse
-		wantErr     bool
-		mockGetResp *model.Alert
-		mockGetErr  error
-		mockUpResp  *model.Alert
-		mockUpErr   error
+		name                        string
+		input                       *alert.PutAlertRequest
+		want                        *alert.PutAlertResponse
+		wantErr                     bool
+		mockGetResp                 *model.Alert
+		mockGetErr                  error
+		mockUpResp                  *model.Alert
+		mockUpErr                   error
+		mockListRelAlertFindingResp *[]model.RelAlertFinding
+		mockListRelAlertFindingErr  error
+		mockUpHistoryResp           *model.AlertHistory
+		mockUpHistoryErr            error
 	}{
 		{
-			name:       "OK Insert",
-			input:      &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
-			want:       &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockGetErr: gorm.ErrRecordNotFound,
-			mockUpResp: &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+			name:                        "OK Insert",
+			input:                       &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
+			want:                        &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockUpResp:                  &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+			mockListRelAlertFindingResp: &[]model.RelAlertFinding{model.RelAlertFinding{FindingID: 1001, ProjectID: 1001}},
+			mockUpHistoryResp:           &model.AlertHistory{AlertHistoryID: 1001, HistoryType: "created"},
 		},
 		{
-			name:        "OK Update",
-			input:       &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
-			want:        &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockGetResp: &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
-			mockUpResp:  &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+			name:                        "OK Update",
+			input:                       &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
+			want:                        &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp:                 &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+			mockUpResp:                  &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+			mockListRelAlertFindingResp: &[]model.RelAlertFinding{model.RelAlertFinding{FindingID: 1001, ProjectID: 1001}},
+			mockListRelAlertFindingErr:  nil,
+			mockUpHistoryResp:           &model.AlertHistory{AlertHistoryID: 1001, HistoryType: "updated"},
+			mockUpHistoryErr:            nil,
 		},
 		{
-			name:       "NG No record found with alertId",
+			name:       "NG No record found with alertID",
 			input:      &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
 			want:       nil,
 			wantErr:    true,
 			mockGetErr: gorm.ErrRecordNotFound,
+		},
+		{
+			name:                        "NG failed listRelAlertFinding",
+			input:                       &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
+			want:                        &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			wantErr:                     true,
+			mockGetErr:                  gorm.ErrRecordNotFound,
+			mockUpResp:                  &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+			mockListRelAlertFindingResp: nil,
+			mockListRelAlertFindingErr:  errors.New("something error"),
+		},
+		{
+			name:                        "NG failed putAlertHistory",
+			input:                       &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
+			want:                        &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			wantErr:                     true,
+			mockGetErr:                  gorm.ErrRecordNotFound,
+			mockUpResp:                  &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+			mockListRelAlertFindingResp: &[]model.RelAlertFinding{model.RelAlertFinding{FindingID: 1001, ProjectID: 1001}},
+			mockListRelAlertFindingErr:  nil,
+			mockUpHistoryResp:           nil,
+			mockUpHistoryErr:            errors.New("something error"),
 		},
 	}
 	for _, c := range cases {
@@ -166,6 +198,12 @@ func TestPutAlert(t *testing.T) {
 			}
 			if c.mockUpResp != nil || c.mockUpErr != nil {
 				mockDB.On("UpsertAlert").Return(c.mockUpResp, c.mockUpErr).Once()
+			}
+			if c.mockListRelAlertFindingResp != nil || c.mockListRelAlertFindingErr != nil {
+				mockDB.On("ListRelAlertFinding").Return(c.mockListRelAlertFindingResp, c.mockListRelAlertFindingErr).Once()
+			}
+			if c.mockUpHistoryResp != nil || c.mockUpHistoryErr != nil {
+				mockDB.On("UpsertAlertHistory").Return(c.mockUpHistoryResp, c.mockUpHistoryErr).Once()
 			}
 			got, err := svc.PutAlert(ctx, c.input)
 			if err != nil && !c.wantErr {

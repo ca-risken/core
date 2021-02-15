@@ -80,6 +80,7 @@ func (f *alertDB) ListAlertHistory(projectID, alertID uint32, HistoryType, sever
 		query += " and severity in (?)"
 		params = append(params, severity)
 	}
+	query += " order by alert_history_id desc"
 	var data []model.AlertHistory
 	if err := f.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
