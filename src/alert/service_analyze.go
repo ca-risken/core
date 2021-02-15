@@ -113,18 +113,25 @@ func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 
 func (f *alertService) RegistAlertByAnalyze(alertCondition *model.AlertCondition, findingIDs []uint64) (*model.Alert, error) {
 
-	// Alertの登録
+	// AlertConditionに該当するAlertが既に存在しているか確認
 	savedData, err := f.repository.GetAlertByAlertConditionIDStatus(alertCondition.ProjectID, alertCondition.AlertConditionID, []string{"ACTIVE", "PENDING"})
 	noRecord := gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		return nil, err
 	}
 
-	// 既に登録済みの場合はalertIDを取得
+	// 既に登録済みの場合は登録済みのAlertと内容が一致しているか確認
+	// 一致している場合処理を終了する
 	// 登録済みかつStatusがPENDINGの場合、PENDING
 	var status string
 	var alertID uint32
+	var isMatchExisting bool
 	if !noRecord {
+		isMatchExisting, err = f.isMatchExistingAlert(savedData, alertCondition, findingIDs)
+		if err != nil {
+			return nil, err
+		}
+
 		alertID = savedData.AlertID
 		status = savedData.Status
 	} else {
@@ -139,10 +146,15 @@ func (f *alertService) RegistAlertByAnalyze(alertCondition *model.AlertCondition
 		ProjectID:        alertCondition.ProjectID,
 		Status:           status,
 	}
-	// insert Alert
+	// upsert Alert
 	registerdData, err := f.repository.UpsertAlert(data)
 	if err != nil {
 		return nil, err
+	}
+
+	// 過去のアラートと状態が同じなら以下の処理はスキップ
+	if isMatchExisting {
+		return registerdData, nil
 	}
 
 	// AlertHistoryに登録するための現在のRelAlertFindingを整形
@@ -209,9 +221,7 @@ func (f *alertService) DeleteAlertByAnalyze(alertCondition *model.AlertCondition
 	}
 	// update Alert
 	err = f.repository.DeactivateAlert(data)
-	appLogger.Info("koko1", err)
 	if err != nil {
-		appLogger.Info("koko2", err)
 		return err
 	}
 
@@ -355,6 +365,30 @@ func (f *alertService) checkMatchAlertRuleFinding(ctx context.Context, alertRule
 	return true, nil
 }
 
+func (f *alertService) isMatchExistingAlert(savedAlert *model.Alert, alertCondition *model.AlertCondition, findingIDs []uint64) (bool, error) {
+	if savedAlert.Description != alertCondition.Description {
+		return false, nil
+	}
+	if savedAlert.Severity != alertCondition.Severity {
+		return false, nil
+	}
+	now := time.Now().Unix()
+	relAlertFindings, err := f.repository.ListRelAlertFinding(savedAlert.ProjectID, savedAlert.AlertID, 0, 0, now)
+	if err != nil {
+		return false, err
+	}
+	if len(*relAlertFindings) != len(findingIDs) {
+		return false, nil
+	}
+	for _, relAlertFinding := range *relAlertFindings {
+		if !isContainsFindings(uint64(relAlertFinding.FindingID), findingIDs) {
+			return false, nil
+		}
+	}
+
+	return true, nil
+}
+
 func makeFindingIDs(findingIDs []uint64) (string, error) {
 	mapFindingIDs := map[string][]uint64{"finding_id": findingIDs}
 	bytes, err := json.Marshal(mapFindingIDs)
@@ -363,6 +397,15 @@ func makeFindingIDs(findingIDs []uint64) (string, error) {
 		return "", err
 	}
 	return string(bytes), nil
+}
+
+func isContainsFindings(targetID uint64, findingIDs []uint64) bool {
+	for _, findingID := range findingIDs {
+		if findingID == targetID {
+			return true
+		}
+	}
+	return false
 }
 
 func getHistoryType(alertID uint32) string {

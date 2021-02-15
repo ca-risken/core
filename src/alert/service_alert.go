@@ -70,6 +70,7 @@ func (f *alertService) PutAlert(ctx context.Context, req *alert.PutAlertRequest)
 		return nil, err
 	}
 	var alertID uint32
+	alertHistoryStatus := "created"
 	// AlertIdのパラメータがリクエストに存在する場合、レコードの存在チェック
 	// 存在しなければエラー終了
 	if !zero.IsZeroVal(req.Alert.AlertId) {
@@ -78,6 +79,7 @@ func (f *alertService) PutAlert(ctx context.Context, req *alert.PutAlertRequest)
 			return nil, err
 		}
 		alertID = savedData.AlertID
+		alertHistoryStatus = "updated"
 	}
 
 	data := &model.Alert{
@@ -90,12 +92,44 @@ func (f *alertService) PutAlert(ctx context.Context, req *alert.PutAlertRequest)
 	}
 
 	// Fiding upsert
-	registerdData, err := f.repository.UpsertAlert(data)
+	registeredData, err := f.repository.UpsertAlert(data)
 	if err != nil {
 		return nil, err
 	}
 
-	return &alert.PutAlertResponse{Alert: convertAlert(registerdData)}, nil
+	now := time.Now().Unix()
+	// list RelAlertFinding
+	relAlertFindings, err := f.repository.ListRelAlertFinding(registeredData.ProjectID, registeredData.AlertID, 0, 0, now)
+	if err != nil {
+		appLogger.Errorf("Failed listRelAlertFinding when PutAlert. err: %v", err)
+		return &alert.PutAlertResponse{Alert: convertAlert(registeredData)}, err
+	}
+	findingIDs := []uint64{}
+	for _, relAlertFinding := range *relAlertFindings {
+		findingIDs = append(findingIDs, uint64(relAlertFinding.FindingID))
+	}
+	findingHistory, err := makeFindingIDs(findingIDs)
+	if err != nil {
+		appLogger.Errorf("Failed makeFindingIDs when PutAlert. err: %v", err)
+		return &alert.PutAlertResponse{Alert: convertAlert(registeredData)}, err
+	}
+	dataHistory := &model.AlertHistory{
+		AlertID:        registeredData.AlertID,
+		HistoryType:    alertHistoryStatus,
+		Description:    registeredData.Description,
+		Severity:       registeredData.Severity,
+		FindingHistory: findingHistory,
+		ProjectID:      registeredData.ProjectID,
+	}
+
+	// Fiding upsert
+	_, err = f.repository.UpsertAlertHistory(dataHistory)
+	if err != nil {
+		appLogger.Errorf("Failed PutAlertHistory when PutAlert. err: %v", err)
+		return &alert.PutAlertResponse{Alert: convertAlert(registeredData)}, err
+	}
+
+	return &alert.PutAlertResponse{Alert: convertAlert(registeredData)}, nil
 }
 
 func (f *alertService) DeleteAlert(ctx context.Context, req *alert.DeleteAlertRequest) (*empty.Empty, error) {
@@ -174,12 +208,12 @@ func (f *alertService) PutAlertHistory(ctx context.Context, req *alert.PutAlertH
 	}
 
 	// Fiding upsert
-	registerdData, err := f.repository.UpsertAlertHistory(data)
+	registeredData, err := f.repository.UpsertAlertHistory(data)
 	if err != nil {
 		return nil, err
 	}
 
-	return &alert.PutAlertHistoryResponse{AlertHistory: convertAlertHistory(registerdData)}, nil
+	return &alert.PutAlertHistoryResponse{AlertHistory: convertAlertHistory(registeredData)}, nil
 }
 
 func (f *alertService) DeleteAlertHistory(ctx context.Context, req *alert.DeleteAlertHistoryRequest) (*empty.Empty, error) {
@@ -253,12 +287,12 @@ func (f *alertService) PutRelAlertFinding(ctx context.Context, req *alert.PutRel
 	}
 
 	// Fiding upsert
-	registerdData, err := f.repository.UpsertRelAlertFinding(data)
+	registeredData, err := f.repository.UpsertRelAlertFinding(data)
 	if err != nil {
 		return nil, err
 	}
 
-	return &alert.PutRelAlertFindingResponse{RelAlertFinding: convertRelAlertFinding(registerdData)}, nil
+	return &alert.PutRelAlertFindingResponse{RelAlertFinding: convertRelAlertFinding(registeredData)}, nil
 }
 
 func (f *alertService) DeleteRelAlertFinding(ctx context.Context, req *alert.DeleteRelAlertFindingRequest) (*empty.Empty, error) {
