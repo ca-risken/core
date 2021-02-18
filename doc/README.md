@@ -197,6 +197,17 @@
   
     - [ProjectService](#core.project.ProjectService)
   
+- [report/entity.proto](#report/entity.proto)
+    - [ReportFinding](#core.report.ReportFinding)
+  
+- [report/service.proto](#report/service.proto)
+    - [GetReportFindingAllRequest](#core.report.GetReportFindingAllRequest)
+    - [GetReportFindingAllResponse](#core.report.GetReportFindingAllResponse)
+    - [GetReportFindingRequest](#core.report.GetReportFindingRequest)
+    - [GetReportFindingResponse](#core.report.GetReportFindingResponse)
+  
+    - [ReportService](#core.report.ReportService)
+  
 - [Scalar Value Types](#scalar-value-types)
 
 
@@ -3213,6 +3224,140 @@ Project
 | CreateProject | [CreateProjectRequest](#core.project.CreateProjectRequest) | [CreateProjectResponse](#core.project.CreateProjectResponse) |  |
 | UpdateProject | [UpdateProjectRequest](#core.project.UpdateProjectRequest) | [UpdateProjectResponse](#core.project.UpdateProjectResponse) |  |
 | DeleteProject | [DeleteProjectRequest](#core.project.DeleteProjectRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
+
+ 
+
+
+
+<a name="report/entity.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## report/entity.proto
+
+
+
+<a name="core.report.ReportFinding"></a>
+
+### ReportFinding
+Report
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| report_finding_id | [uint32](#uint32) |  |  |
+| report_date | [string](#string) |  |  |
+| project_id | [uint32](#uint32) |  |  |
+| project_name | [string](#string) |  |  |
+| category | [string](#string) |  |  |
+| data_source | [string](#string) |  |  |
+| score | [float](#float) |  |  |
+| count | [uint32](#uint32) |  |  |
+
+
+
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+<a name="report/service.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## report/service.proto
+
+
+
+<a name="core.report.GetReportFindingAllRequest"></a>
+
+### GetReportFindingAllRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| from_date | [string](#string) |  |  |
+| to_date | [string](#string) |  |  |
+| score | [float](#float) |  |  |
+| data_source | [string](#string) | repeated |  |
+
+
+
+
+
+
+<a name="core.report.GetReportFindingAllResponse"></a>
+
+### GetReportFindingAllResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| report_finding | [ReportFinding](#core.report.ReportFinding) | repeated |  |
+
+
+
+
+
+
+<a name="core.report.GetReportFindingRequest"></a>
+
+### GetReportFindingRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| from_date | [string](#string) |  |  |
+| to_date | [string](#string) |  |  |
+| score | [float](#float) |  |  |
+| data_source | [string](#string) | repeated |  |
+
+
+
+
+
+
+<a name="core.report.GetReportFindingResponse"></a>
+
+### GetReportFindingResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| report_finding | [ReportFinding](#core.report.ReportFinding) | repeated |  |
+
+
+
+
+
+ 
+
+ 
+
+ 
+
+
+<a name="core.report.ReportService"></a>
+
+### ReportService
+
+
+| Method Name | Request Type | Response Type | Description |
+| ----------- | ------------ | ------------- | ------------|
+| GetReportFinding | [GetReportFindingRequest](#core.report.GetReportFindingRequest) | [GetReportFindingResponse](#core.report.GetReportFindingResponse) | report |
+| GetReportFindingAll | [GetReportFindingAllRequest](#core.report.GetReportFindingAllRequest) | [GetReportFindingAllResponse](#core.report.GetReportFindingAllResponse) |  |
+| CollectReportFinding | [.google.protobuf.Empty](#google.protobuf.Empty) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 
  
 
