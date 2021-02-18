@@ -24,7 +24,7 @@ func newslackWebhookConfig(channel string) (*slackWebhookConfig, error) {
 	return config, nil
 }
 
-func (t *slackWebhookConfig) GetPayload(alert *model.Alert, projectName string) (string, error) {
+func (t *slackWebhookConfig) GetPayload(alert *model.Alert, project *model.Project) (string, error) {
 	now := time.Now().Unix()
 	text := fmt.Sprintf("%vアラートを検知しました。", getMention(alert.Severity))
 	attachments := []interface{}{
@@ -33,7 +33,7 @@ func (t *slackWebhookConfig) GetPayload(alert *model.Alert, projectName string) 
 			"fields": []interface{}{
 				map[string]string{
 					"title": "Project",
-					"value": projectName,
+					"value": project.Name,
 					"short": "true",
 				},
 				map[string]string{
@@ -43,7 +43,7 @@ func (t *slackWebhookConfig) GetPayload(alert *model.Alert, projectName string) 
 				},
 				map[string]string{
 					"title": "Link",
-					"value": fmt.Sprintf("<%s|詳細はこちらから>", t.NotificationAlertURL),
+					"value": fmt.Sprintf("<%s?project_id=%d|詳細はこちらから>", t.NotificationAlertURL, project.ProjectID),
 					"short": "true",
 				},
 				map[string]string{

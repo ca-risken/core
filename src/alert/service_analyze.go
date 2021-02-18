@@ -433,7 +433,7 @@ func sendSlackNotification(notifySetting string, alert *model.Alert, project *mo
 		return err
 	}
 
-	payload, err := slackAlert.GetPayload(alert, project.Name)
+	payload, err := slackAlert.GetPayload(alert, project)
 	if err != nil {
 		return err
 	}
