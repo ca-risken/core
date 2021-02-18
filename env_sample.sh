@@ -24,4 +24,4 @@ export IAM_SVC_ADDR="iam:8002"
 export FINDING_SVC_ADDR="finding:8001"
 
 # notification alert url
-export NOTIFICATION_ALERT_URL="http://example.com/fuga/piyo"
+export NOTIFICATION_ALERT_URL="http://localhost:8080/#/alert/alert"

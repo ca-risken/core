@@ -5,6 +5,7 @@ install:
 	go get \
 		google.golang.org/grpc \
 		github.com/golang/protobuf/protoc-gen-go \
+		github.com/envoyproxy/protoc-gen-validate \
 		github.com/grpc-ecosystem/go-grpc-middleware
 
 clean:
@@ -24,61 +25,55 @@ doc: fmt
 	protoc \
 		--proto_path=proto \
 		--error_format=gcc \
+		-I $(GOPATH)/src/github.com/envoyproxy/protoc-gen-validate \
 		--doc_out=markdown,README.md:doc \
 		proto/**/*.proto;
 
-# temporary build for protoc-gen-validate
-build: fmt
-	protoc \
-		--proto_path=proto \
-		--error_format=gcc \
-		--go_out=plugins=grpc,paths=source_relative:proto \
-		proto/**/*.proto;
-
-build-tmp: fmt
-	ls -aR proto/**/*.proto | \
-		grep -v report | \
-		xargs protoc \
+# build without protoc-gen-validate
+build: fmt doc
+	for svc in "alert" "finding" "iam" "project"; do \
+		protoc \
 			--proto_path=proto \
 			--error_format=gcc \
-			--go_out=plugins=grpc,paths=source_relative:proto
-	protoc \
-		--proto_path=proto \
-		--error_format=gcc \
-		-I $(GOPATH)/src/github.com/envoyproxy/protoc-gen-validate \
-		--go_out=plugins=grpc,paths=source_relative:proto \
-		--validate_out="lang=go,paths=source_relative:proto" \
-		proto/report/*.proto;
+			--go_out=plugins=grpc,paths=source_relative:proto \
+			proto/$$svc/*.proto; \
+	done
 
+# build with protoc-gen-validate
+build-validate: fmt doc
+	for svc in "report"; do \
+		protoc \
+			--proto_path=proto \
+			--error_format=gcc \
+			-I $(GOPATH)/src/github.com/envoyproxy/protoc-gen-validate \
+			--go_out=plugins=grpc,paths=source_relative:proto \
+			--validate_out="lang=go,paths=source_relative:proto" \
+			proto/$$svc/*.proto; \
+	done
 
-build-validate: fmt
-	protoc \
-		--proto_path=proto \
-		--error_format=gcc \
-		-I $(GOPATH)/src/github.com/envoyproxy/protoc-gen-validate \
-		--go_out=plugins=grpc,paths=source_relative:proto \
-		--validate_out="lang=go,paths=source_relative:proto" \
-		proto/**/*.proto;
-
-go-test: build
+go-test: build build-validate
 	cd proto/finding && go test ./...
 	cd proto/iam     && go test ./...
 	cd proto/project && go test ./...
 	cd proto/alert   && go test ./...
+	cd proto/report  && go test ./...
 	cd src/finding   && go test ./...
 	cd src/iam       && go test ./...
 	cd src/project   && go test ./...
 	cd src/alert     && go test ./...
+	cd src/report    && go test ./...
 
 go-mod-tidy: build
 	cd proto/finding && go mod tidy
 	cd proto/iam     && go mod tidy
 	cd proto/project && go mod tidy
 	cd proto/alert   && go mod tidy
+	cd proto/report  && go mod tidy
 	cd src/finding   && go mod tidy
 	cd src/iam       && go mod tidy
-	cd src/project && go mod tidy
+	cd src/project   && go mod tidy
 	cd src/alert     && go mod tidy
+	cd src/report    && go mod tidy
 
 go-mod-update:
 	cd src/finding \
@@ -91,6 +86,9 @@ go-mod-update:
 		&& go get -u \
 			github.com/CyberAgent/mimosa-core/...
 	cd src/alert \
+		&& go get -u \
+			github.com/CyberAgent/mimosa-core/...
+	cd src/report \
 		&& go get -u \
 			github.com/CyberAgent/mimosa-core/...
 
