@@ -18,6 +18,11 @@ func (l *ListFindingRequest) Validate() error {
 		validation.Field(&l.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 		validation.Field(&l.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 		validation.Field(&l.Tag, validation.Each(validation.Length(0, 64))),
+		validation.Field(&l.Sort, validation.In(
+			"finding_id", "description", "data_source", "resource_name", "score", "updated_at")),
+		validation.Field(&l.Direction, validation.In("asc", "desc")),
+		validation.Field(&l.Offset, validation.Min(0)),
+		validation.Field(&l.Limit, validation.Min(0), validation.Max(200)),
 	)
 }
 
@@ -55,6 +60,11 @@ func (l *ListFindingTagRequest) Validate() error {
 	return validation.ValidateStruct(l,
 		validation.Field(&l.ProjectId, validation.Required),
 		validation.Field(&l.FindingId, validation.Required),
+		validation.Field(&l.Sort, validation.In(
+			"finding_tag_id", "tag", "updated_at")),
+		validation.Field(&l.Direction, validation.In("asc", "desc")),
+		validation.Field(&l.Offset, validation.Min(0)),
+		validation.Field(&l.Limit, validation.Min(0), validation.Max(200)),
 	)
 }
 
@@ -64,6 +74,11 @@ func (l *ListFindingTagNameRequest) Validate() error {
 		validation.Field(&l.ProjectId, validation.Required),
 		validation.Field(&l.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 		validation.Field(&l.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&l.Sort, validation.In(
+			"finding_tag_id", "tag", "updated_at")),
+		validation.Field(&l.Direction, validation.In("asc", "desc")),
+		validation.Field(&l.Offset, validation.Min(0)),
+		validation.Field(&l.Limit, validation.Min(0), validation.Max(200)),
 	)
 }
 
@@ -98,6 +113,11 @@ func (l *ListResourceRequest) Validate() error {
 		validation.Field(&l.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 		validation.Field(&l.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 		validation.Field(&l.Tag, validation.Each(validation.Length(0, 64))),
+		validation.Field(&l.Sort, validation.In(
+			"resource_id", "resource_name", "updated_at")),
+		validation.Field(&l.Direction, validation.In("asc", "desc")),
+		validation.Field(&l.Offset, validation.Min(0)),
+		validation.Field(&l.Limit, validation.Min(0), validation.Max(200)),
 	)
 }
 
@@ -135,6 +155,11 @@ func (l *ListResourceTagRequest) Validate() error {
 	return validation.ValidateStruct(l,
 		validation.Field(&l.ProjectId, validation.Required),
 		validation.Field(&l.ResourceId, validation.Required),
+		validation.Field(&l.Sort, validation.In(
+			"resource_tag_id", "tag", "updated_at")),
+		validation.Field(&l.Direction, validation.In("asc", "desc")),
+		validation.Field(&l.Offset, validation.Min(0)),
+		validation.Field(&l.Limit, validation.Min(0), validation.Max(200)),
 	)
 }
 
@@ -144,6 +169,11 @@ func (l *ListResourceTagNameRequest) Validate() error {
 		validation.Field(&l.ProjectId, validation.Required),
 		validation.Field(&l.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 		validation.Field(&l.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&l.Sort, validation.In(
+			"resource_tag_id", "tag", "updated_at")),
+		validation.Field(&l.Direction, validation.In("asc", "desc")),
+		validation.Field(&l.Offset, validation.Min(0)),
+		validation.Field(&l.Limit, validation.Min(0), validation.Max(200)),
 	)
 }
 

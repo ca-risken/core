@@ -1,6 +1,6 @@
 module github.com/CyberAgent/mimosa-core/src/finding
 
-go 1.15
+go 1.16
 
 require (
 	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210107131614-07d85aeff853
