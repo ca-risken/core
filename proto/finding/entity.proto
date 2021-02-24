@@ -101,3 +101,24 @@ message PendFindingForUpsert {
   uint64 finding_id = 1;
   uint32 project_id = 2;
 }
+
+// // SortDirection
+// enum SortDirection {
+//   DIRECTION_UNKNOWN = 0;
+//   ASC = 1;
+//   DESC = 2;
+// }
+
+// // SortKey
+// enum SortKey {
+//   SORT_KEY_UNKNOWN = 0;
+//   FINDING_ID = 1;
+//   FINDING_TAG_ID = 2;
+//   RESOURCE_ID = 3;
+//   RESOURCE_TAG_ID = 4;
+//   DATA_SOURCE = 5;
+//   RESOURCE_NAME = 6;
+//   SCORE = 7;
+//   TAG = 8;
+//   UPDATED_AT = 9;
+// }

@@ -1,6 +1,6 @@
 module github.com/CyberAgent/mimosa-core/src/iam
 
-go 1.15
+go 1.16
 
 require (
 	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20201020092450-6e5f5ed02c79

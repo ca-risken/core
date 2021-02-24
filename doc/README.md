@@ -1918,6 +1918,10 @@ ResourceTag For upsert
 | from_at | [int64](#int64) |  |  |
 | to_at | [int64](#int64) |  |  |
 | tag | [string](#string) | repeated |  |
+| sort | [string](#string) |  |  |
+| direction | [string](#string) |  |  |
+| offset | [int32](#int32) |  |  |
+| limit | [int32](#int32) |  |  |
 
 
 
@@ -1933,6 +1937,8 @@ ResourceTag For upsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | finding_id | [uint64](#uint64) | repeated |  |
+| count | [uint32](#uint32) |  |  |
+| total | [uint32](#uint32) |  |  |
 
 
 
@@ -1950,6 +1956,10 @@ ResourceTag For upsert
 | project_id | [uint32](#uint32) |  |  |
 | from_at | [int64](#int64) |  |  |
 | to_at | [int64](#int64) |  |  |
+| sort | [string](#string) |  |  |
+| direction | [string](#string) |  |  |
+| offset | [int32](#int32) |  |  |
+| limit | [int32](#int32) |  |  |
 
 
 
@@ -1981,6 +1991,10 @@ ResourceTag For upsert
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
 | finding_id | [uint64](#uint64) |  |  |
+| sort | [string](#string) |  |  |
+| direction | [string](#string) |  |  |
+| offset | [int32](#int32) |  |  |
+| limit | [int32](#int32) |  |  |
 
 
 
@@ -1996,6 +2010,8 @@ ResourceTag For upsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | tag | [FindingTag](#core.finding.FindingTag) | repeated |  |
+| count | [uint32](#uint32) |  |  |
+| total | [uint32](#uint32) |  |  |
 
 
 
@@ -2017,6 +2033,10 @@ ResourceTag For upsert
 | from_at | [int64](#int64) |  |  |
 | to_at | [int64](#int64) |  |  |
 | tag | [string](#string) | repeated |  |
+| sort | [string](#string) |  |  |
+| direction | [string](#string) |  |  |
+| offset | [int32](#int32) |  |  |
+| limit | [int32](#int32) |  |  |
 
 
 
@@ -2032,6 +2052,8 @@ ResourceTag For upsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | resource_id | [uint64](#uint64) | repeated |  |
+| count | [uint32](#uint32) |  |  |
+| total | [uint32](#uint32) |  |  |
 
 
 
@@ -2049,6 +2071,10 @@ ResourceTag For upsert
 | project_id | [uint32](#uint32) |  |  |
 | from_at | [int64](#int64) |  |  |
 | to_at | [int64](#int64) |  |  |
+| sort | [string](#string) |  |  |
+| direction | [string](#string) |  |  |
+| offset | [int32](#int32) |  |  |
+| limit | [int32](#int32) |  |  |
 
 
 
@@ -2064,6 +2090,8 @@ ResourceTag For upsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | tag | [string](#string) | repeated |  |
+| count | [uint32](#uint32) |  |  |
+| total | [uint32](#uint32) |  |  |
 
 
 
@@ -2080,6 +2108,10 @@ ResourceTag For upsert
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
 | resource_id | [uint64](#uint64) |  |  |
+| sort | [string](#string) |  |  |
+| direction | [string](#string) |  |  |
+| offset | [int32](#int32) |  |  |
+| limit | [int32](#int32) |  |  |
 
 
 
@@ -2095,6 +2127,8 @@ ResourceTag For upsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | tag | [ResourceTag](#core.finding.ResourceTag) | repeated |  |
+| count | [uint32](#uint32) |  |  |
+| total | [uint32](#uint32) |  |  |
 
 
 
@@ -2219,6 +2253,8 @@ ResourceTag For upsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | tag | [FindingTag](#core.finding.FindingTag) |  |  |
+| count | [uint32](#uint32) |  |  |
+| total | [uint32](#uint32) |  |  |
 
 
 

@@ -45,9 +45,17 @@ message ListFindingRequest {
   int64 from_at = 6;
   int64 to_at = 7;
   repeated string tag = 8;
+  string sort = 9;
+  string direction = 10;
+  int32 offset = 11;
+  int32 limit = 12;
 }
 
-message ListFindingResponse { repeated uint64 finding_id = 1; }
+message ListFindingResponse {
+  repeated uint64 finding_id = 1;
+  uint32 count = 2;
+  uint32 total = 3;
+}
 
 message GetFindingRequest {
   uint32 project_id = 1;
@@ -71,14 +79,26 @@ message DeleteFindingRequest {
 message ListFindingTagRequest {
   uint32 project_id = 1;
   uint64 finding_id = 2;
+  string sort = 3;
+  string direction = 4;
+  int32 offset = 5;
+  int32 limit = 6;
 }
 
-message ListFindingTagResponse { repeated FindingTag tag = 1; }
+message ListFindingTagResponse {
+  repeated FindingTag tag = 1;
+  uint32 count = 2;
+  uint32 total = 3;
+}
 
 message ListFindingTagNameRequest {
   uint32 project_id = 1;
   int64 from_at = 2;
   int64 to_at = 3;
+  string sort = 4;
+  string direction = 5;
+  int32 offset = 6;
+  int32 limit = 7;
 }
 
 message ListFindingTagNameResponse { repeated string tag = 1; }
@@ -88,7 +108,11 @@ message TagFindingRequest {
   FindingTagForUpsert tag = 2;
 }
 
-message TagFindingResponse { FindingTag tag = 1; }
+message TagFindingResponse {
+  FindingTag tag = 1;
+  uint32 count = 2;
+  uint32 total = 3;
+}
 
 message UntagFindingRequest {
   uint32 project_id = 1;
@@ -103,9 +127,17 @@ message ListResourceRequest {
   int64 from_at = 5;
   int64 to_at = 6;
   repeated string tag = 7;
+  string sort = 8;
+  string direction = 9;
+  int32 offset = 10;
+  int32 limit = 11;
 }
 
-message ListResourceResponse { repeated uint64 resource_id = 1; }
+message ListResourceResponse {
+  repeated uint64 resource_id = 1;
+  uint32 count = 2;
+  uint32 total = 3;
+}
 
 message GetResourceRequest {
   uint32 project_id = 1;
@@ -129,17 +161,33 @@ message DeleteResourceRequest {
 message ListResourceTagRequest {
   uint32 project_id = 1;
   uint64 resource_id = 2;
+  string sort = 3;
+  string direction = 4;
+  int32 offset = 5;
+  int32 limit = 6;
 }
 
-message ListResourceTagResponse { repeated ResourceTag tag = 1; }
+message ListResourceTagResponse {
+  repeated ResourceTag tag = 1;
+  uint32 count = 2;
+  uint32 total = 3;
+}
 
 message ListResourceTagNameRequest {
   uint32 project_id = 1;
   int64 from_at = 2;
   int64 to_at = 3;
+  string sort = 4;
+  string direction = 5;
+  int32 offset = 6;
+  int32 limit = 7;
 }
 
-message ListResourceTagNameResponse { repeated string tag = 1; }
+message ListResourceTagNameResponse {
+  repeated string tag = 1;
+  uint32 count = 2;
+  uint32 total = 3;
+}
 
 message TagResourceRequest {
   uint32 project_id = 1;
@@ -150,7 +198,7 @@ message TagResourceResponse { ResourceTag tag = 1; }
 
 message UntagResourceRequest {
   uint32 project_id = 1;
-  uint64 resource_tag_id = 3;
+  uint64 resource_tag_id = 2;
 }
 
 message GetPendFindingRequest {

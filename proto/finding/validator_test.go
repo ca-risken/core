@@ -6,9 +6,10 @@ import (
 )
 
 const (
-	len65string  = "12345678901234567890123456789012345678901234567890123456789012345"
-	len201string = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=1"
-	len256string = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456"
+	len65string  string = "12345678901234567890123456789012345678901234567890123456789012345"
+	len201string string = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=1"
+	len256string string = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456"
+	maxLimit     int32  = 200
 )
 
 func TestValidate_ListFindingRequest(t *testing.T) {
@@ -19,9 +20,8 @@ func TestValidate_ListFindingRequest(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "OK",
-			input:   &ListFindingRequest{ProjectId: 111, DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix()},
-			wantErr: false,
+			name:  "OK",
+			input: &ListFindingRequest{ProjectId: 1, DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix(), Sort: "finding_id", Direction: "asc", Offset: 0, Limit: maxLimit},
 		},
 		{
 			name:    "NG Required(project_id)",
@@ -81,6 +81,31 @@ func TestValidate_ListFindingRequest(t *testing.T) {
 		{
 			name:    "NG too long tag",
 			input:   &ListFindingRequest{ProjectId: 1, Tag: []string{len65string}},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid sort",
+			input:   &ListFindingRequest{ProjectId: 1, Sort: "unknown_key"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid sort direction",
+			input:   &ListFindingRequest{ProjectId: 1, Direction: "unknown_direction"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Min offset",
+			input:   &ListFindingRequest{ProjectId: 1, Offset: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Min limit",
+			input:   &ListFindingRequest{ProjectId: 1, Limit: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Max limit",
+			input:   &ListFindingRequest{ProjectId: 1, Limit: maxLimit + 1},
 			wantErr: true,
 		},
 	}
@@ -206,17 +231,42 @@ func TestValidate_ListFindingTagRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &ListFindingTagRequest{ProjectId: 1, FindingId: 1001},
+			input:   &ListFindingTagRequest{ProjectId: 1, FindingId: 1, Sort: "finding_tag_id", Direction: "desc", Offset: 0, Limit: maxLimit},
 			wantErr: false,
 		},
 		{
 			name:    "NG Required(project_id)",
-			input:   &ListFindingTagRequest{FindingId: 1001},
+			input:   &ListFindingTagRequest{FindingId: 1},
 			wantErr: true,
 		},
 		{
 			name:    "NG Required(finding_id)",
 			input:   &ListFindingTagRequest{ProjectId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid sort",
+			input:   &ListFindingTagRequest{ProjectId: 1, Sort: "unknown_key"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid sort direction",
+			input:   &ListFindingTagRequest{ProjectId: 1, Direction: "unknown_direction"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Min offset",
+			input:   &ListFindingTagRequest{ProjectId: 1, Offset: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Min limit",
+			input:   &ListFindingTagRequest{ProjectId: 1, Limit: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Max limit",
+			input:   &ListFindingTagRequest{ProjectId: 1, Limit: maxLimit + 1},
 			wantErr: true,
 		},
 	}
@@ -240,7 +290,7 @@ func TestValidate_ListFindingTagNameRequest(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: &ListFindingTagNameRequest{ProjectId: 1, FromAt: 0, ToAt: 0},
+			input: &ListFindingTagNameRequest{ProjectId: 1, FromAt: 0, ToAt: 0, Sort: "finding_tag_id", Direction: "desc", Offset: 0, Limit: maxLimit},
 		},
 		{
 			name:    "NG Required(project_id)",
@@ -265,6 +315,31 @@ func TestValidate_ListFindingTagNameRequest(t *testing.T) {
 		{
 			name:    "NG big to_at",
 			input:   &ListFindingTagNameRequest{ProjectId: 1, ToAt: 253402268400},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid sort",
+			input:   &ListFindingTagNameRequest{ProjectId: 1, Sort: "unknown_key"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid sort direction",
+			input:   &ListFindingTagNameRequest{ProjectId: 1, Direction: "unknown_direction"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Min offset",
+			input:   &ListFindingTagNameRequest{ProjectId: 1, Offset: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Min limit",
+			input:   &ListFindingTagNameRequest{ProjectId: 1, Limit: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Max limit",
+			input:   &ListFindingTagNameRequest{ProjectId: 1, Limit: maxLimit + 1},
 			wantErr: true,
 		},
 	}
@@ -361,7 +436,7 @@ func TestValidate_ListResourceRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &ListResourceRequest{ProjectId: 1},
+			input:   &ListResourceRequest{ProjectId: 1, Sort: "resource_id", Direction: "desc", Offset: 0, Limit: maxLimit},
 			wantErr: false,
 		},
 		{
@@ -407,6 +482,31 @@ func TestValidate_ListResourceRequest(t *testing.T) {
 		{
 			name:    "NG Length(tag)",
 			input:   &ListResourceRequest{ProjectId: 1, Tag: []string{len65string}},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid sort",
+			input:   &ListResourceRequest{ProjectId: 1, Sort: "unknown_key"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid sort direction",
+			input:   &ListResourceRequest{ProjectId: 1, Direction: "unknown_direction"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Min offset",
+			input:   &ListResourceRequest{ProjectId: 1, Offset: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Min limit",
+			input:   &ListResourceRequest{ProjectId: 1, Limit: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Max limit",
+			input:   &ListResourceRequest{ProjectId: 1, Limit: maxLimit + 1},
 			wantErr: true,
 		},
 	}
@@ -532,7 +632,7 @@ func TestValidate_ListResourceTagRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &ListResourceTagRequest{ProjectId: 1, ResourceId: 1001},
+			input:   &ListResourceTagRequest{ProjectId: 1, ResourceId: 1001, Sort: "resource_tag_id", Direction: "desc", Offset: 0, Limit: maxLimit},
 			wantErr: false,
 		},
 		{
@@ -543,6 +643,31 @@ func TestValidate_ListResourceTagRequest(t *testing.T) {
 		{
 			name:    "NG Required(resource_id)",
 			input:   &ListResourceTagRequest{ProjectId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid sort",
+			input:   &ListResourceTagRequest{ProjectId: 1, Sort: "unknown_key"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid sort direction",
+			input:   &ListResourceTagRequest{ProjectId: 1, Direction: "unknown_direction"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Min offset",
+			input:   &ListResourceTagRequest{ProjectId: 1, Offset: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Min limit",
+			input:   &ListResourceTagRequest{ProjectId: 1, Limit: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Max limit",
+			input:   &ListResourceTagRequest{ProjectId: 1, Limit: maxLimit + 1},
 			wantErr: true,
 		},
 	}
@@ -566,7 +691,7 @@ func TestValidate_ListResourceTagNameRequest(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: &ListResourceTagNameRequest{ProjectId: 1, FromAt: 0, ToAt: 0},
+			input: &ListResourceTagNameRequest{ProjectId: 1, FromAt: 0, ToAt: 0, Sort: "resource_tag_id", Direction: "desc", Offset: 0, Limit: maxLimit},
 		},
 		{
 			name:    "NG Required(project_id)",
@@ -591,6 +716,31 @@ func TestValidate_ListResourceTagNameRequest(t *testing.T) {
 		{
 			name:    "NG big to_at",
 			input:   &ListResourceTagNameRequest{ProjectId: 1, ToAt: 253402268400},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid sort",
+			input:   &ListResourceTagNameRequest{ProjectId: 1, Sort: "unknown_key"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid sort direction",
+			input:   &ListResourceTagNameRequest{ProjectId: 1, Direction: "unknown_direction"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Min offset",
+			input:   &ListResourceTagNameRequest{ProjectId: 1, Offset: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Min limit",
+			input:   &ListResourceTagNameRequest{ProjectId: 1, Limit: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Max limit",
+			input:   &ListResourceTagNameRequest{ProjectId: 1, Limit: maxLimit + 1},
 			wantErr: true,
 		},
 	}

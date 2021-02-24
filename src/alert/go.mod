@@ -1,6 +1,6 @@
 module github.com/CyberAgent/mimosa-core/src/alert
 
-go 1.15
+go 1.16
 
 require (
 	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20201109010929-7490e601945e

@@ -1,6 +1,6 @@
 module github.com/CyberAgent/mimosa-core/src/report
 
-go 1.15
+go 1.16
 
 require (
 	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210209130947-d62cdfdeadec
