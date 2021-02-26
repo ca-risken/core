@@ -101,18 +101,18 @@ message ListFindingTagNameRequest {
   int32 limit = 7;
 }
 
-message ListFindingTagNameResponse { repeated string tag = 1; }
+message ListFindingTagNameResponse {
+  repeated string tag = 1;
+  uint32 count = 2;
+  uint32 total = 3;
+}
 
 message TagFindingRequest {
   uint32 project_id = 1;
   FindingTagForUpsert tag = 2;
 }
 
-message TagFindingResponse {
-  FindingTag tag = 1;
-  uint32 count = 2;
-  uint32 total = 3;
-}
+message TagFindingResponse { FindingTag tag = 1; }
 
 message UntagFindingRequest {
   uint32 project_id = 1;
