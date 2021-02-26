@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -22,23 +23,56 @@ where
 `
 	var params []interface{}
 	params = append(params, req.ProjectId, req.FromScore, req.ToScore, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
-	if len(req.DataSource) != 0 {
+	if len(req.DataSource) > 0 {
 		query += " and f.data_source regexp ?"
 		params = append(params, strings.Join(req.DataSource, "|"))
 	}
-	if len(req.ResourceName) != 0 {
+	if len(req.ResourceName) > 0 {
 		query += " and f.resource_name regexp ?"
 		params = append(params, strings.Join(req.ResourceName, "|"))
 	}
-	if len(req.Tag) != 0 {
+	if len(req.Tag) > 0 {
 		query += " and exists (select * from finding_tag ft where ft.finding_id=f.finding_id and ft.tag in (?))"
 		params = append(params, req.Tag)
 	}
+	query += fmt.Sprintf(" order by %s %s", req.Sort, req.Direction)
+	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
 	var data []model.Finding
 	if err := f.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
+}
+
+func (f *findingDB) ListFindingCount(req *finding.ListFindingRequest) (uint32, error) {
+	query := `
+select count(*)
+from finding f
+where
+  f.project_id = ?
+  and f.score between ? and ?
+  and f.updated_at between ? and ?
+`
+	var params []interface{}
+	// where
+	params = append(params, req.ProjectId, req.FromScore, req.ToScore, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
+	if len(req.DataSource) > 0 {
+		query += " and f.data_source regexp ?"
+		params = append(params, strings.Join(req.DataSource, "|"))
+	}
+	if len(req.ResourceName) > 0 {
+		query += " and f.resource_name regexp ?"
+		params = append(params, strings.Join(req.ResourceName, "|"))
+	}
+	if len(req.Tag) > 0 {
+		query += " and exists (select * from finding_tag ft where ft.finding_id=f.finding_id and ft.tag in (?))"
+		params = append(params, req.Tag)
+	}
+	var count uint32
+	if err := f.Slave.Raw(query, params...).Count(&count).Error; err != nil {
+		return count, err
+	}
+	return count, nil
 }
 
 const selectGetFinding = `select * from finding where project_id = ? and finding_id = ?`
@@ -101,18 +135,29 @@ func (f *findingDB) DeleteTagByFindingID(projectID uint32, findingID uint64) err
 	return f.Master.Exec(deleteDeleteTagByFindingID, projectID, findingID).Error
 }
 
-const selectListFindingTag = `select * from finding_tag where project_id = ? and finding_id = ?`
+const selectListFindingTag = `select * from finding_tag where project_id = ? and finding_id = ? order by %s %s limit %d, %d`
 
-func (f *findingDB) ListFindingTag(projectID uint32, findingID uint64) (*[]model.FindingTag, error) {
+func (f *findingDB) ListFindingTag(param *finding.ListFindingTagRequest) (*[]model.FindingTag, error) {
 	var data []model.FindingTag
-	if err := f.Slave.Raw(selectListFindingTag, projectID, findingID).Scan(&data).Error; err != nil {
+	if err := f.Slave.Raw(
+		fmt.Sprintf(selectListFindingTag, param.Sort, param.Direction, param.Offset, param.Limit),
+		param.ProjectId, param.FindingId).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
-func (f *findingDB) ListFindingTagName(req *finding.ListFindingTagNameRequest) (*[]tagName, error) {
-	query := `
+const selectListFindingTagCount = `select count(*) from finding_tag where project_id = ? and finding_id = ?`
+
+func (f *findingDB) ListFindingTagCount(param *finding.ListFindingTagRequest) (uint32, error) {
+	var count uint32
+	if err := f.Slave.Raw(selectListFindingTagCount, param.ProjectId, param.FindingId).Count(&count).Error; err != nil {
+		return count, err
+	}
+	return count, nil
+}
+
+const selectListFindingTagName = `
 select
   distinct tag
 from
@@ -120,14 +165,35 @@ from
 where
   project_id = ?
   and updated_at between ? and ?
+order by %s %s limit %d, %d
 `
-	var params []interface{}
-	params = append(params, req.ProjectId, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
+
+func (f *findingDB) ListFindingTagName(param *finding.ListFindingTagNameRequest) (*[]tagName, error) {
 	var data []tagName
-	if err := f.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
+	if err := f.Slave.Raw(
+		fmt.Sprintf(selectListFindingTagName, param.Sort, param.Direction, param.Offset, param.Limit),
+		param.ProjectId, time.Unix(param.FromAt, 0), time.Unix(param.ToAt, 0)).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
+}
+
+const selectListFindingTagNameCount = `
+select count(*) from (
+  select tag
+  from finding_tag
+  where project_id = ? and updated_at between ? and ?
+	group by project_id, tag
+) tag
+`
+
+func (f *findingDB) ListFindingTagNameCount(param *finding.ListFindingTagNameRequest) (uint32, error) {
+	var count uint32
+	if err := f.Slave.Raw(selectListFindingTagNameCount,
+		param.ProjectId, time.Unix(param.FromAt, 0), time.Unix(param.ToAt, 0)).Count(&count).Error; err != nil {
+		return count, err
+	}
+	return count, nil
 }
 
 const insertTagFinding = `

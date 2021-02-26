@@ -17,39 +17,44 @@ func TestListResource(t *testing.T) {
 	mockDB := mockFindingRepository{}
 	svc := findingService{repository: &mockDB}
 	cases := []struct {
-		name     string
-		input    *finding.ListResourceRequest
-		want     *finding.ListResourceResponse
-		wantErr  bool
-		mockResp *[]model.Resource
-		mockErr  error
+		name       string
+		input      *finding.ListResourceRequest
+		want       *finding.ListResourceResponse
+		wantErr    bool
+		mockResp   *[]model.Resource
+		mockErr    error
+		totalCount uint32
 	}{
 		{
-			name:     "OK",
-			input:    &finding.ListResourceRequest{ProjectId: 1, ResourceName: []string{"rn"}, FromSumScore: 0.0, ToSumScore: 100.0, FromAt: now.Unix(), ToAt: now.Unix()},
-			want:     &finding.ListResourceResponse{ResourceId: []uint64{1001, 1002}},
-			mockResp: &[]model.Resource{{ResourceID: 1001}, {ResourceID: 1002}},
+			name:       "OK",
+			input:      &finding.ListResourceRequest{ProjectId: 1, ResourceName: []string{"rn"}, FromSumScore: 0.0, ToSumScore: 100.0, FromAt: now.Unix(), ToAt: now.Unix()},
+			want:       &finding.ListResourceResponse{ResourceId: []uint64{1001, 1002}, Count: 2, Total: 999},
+			mockResp:   &[]model.Resource{{ResourceID: 1001}, {ResourceID: 1002}},
+			totalCount: 999,
 		},
 		{
-			name:    "OK Not found",
-			input:   &finding.ListResourceRequest{ProjectId: 1},
-			want:    &finding.ListResourceResponse{},
-			mockErr: gorm.ErrRecordNotFound,
+			name:       "OK Not found",
+			input:      &finding.ListResourceRequest{ProjectId: 1},
+			want:       &finding.ListResourceResponse{ResourceId: []uint64{}, Count: 0, Total: 0},
+			totalCount: 0,
 		},
 		{
-			name:    "NG Invalid request",
-			input:   &finding.ListResourceRequest{ProjectId: 1, FromSumScore: -0.1},
-			wantErr: true,
+			name:       "NG Invalid request",
+			input:      &finding.ListResourceRequest{ProjectId: 1, FromSumScore: -0.1},
+			wantErr:    true,
+			totalCount: 999,
 		},
 		{
-			name:    "NG DB error",
-			input:   &finding.ListResourceRequest{ProjectId: 1},
-			wantErr: true,
-			mockErr: gorm.ErrUnaddressable,
+			name:       "NG DB error",
+			input:      &finding.ListResourceRequest{ProjectId: 1},
+			wantErr:    true,
+			mockErr:    gorm.ErrUnaddressable,
+			totalCount: 999,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB.On("ListResourceCount").Return(c.totalCount, nil).Once()
 			if c.mockResp != nil || c.mockErr != nil {
 				mockDB.On("ListResource").Return(c.mockResp, c.mockErr).Once()
 			}
@@ -216,46 +221,52 @@ func TestListResourceTag(t *testing.T) {
 	mockDB := mockFindingRepository{}
 	svc := findingService{repository: &mockDB}
 	cases := []struct {
-		name     string
-		input    *finding.ListResourceTagRequest
-		want     *finding.ListResourceTagResponse
-		wantErr  bool
-		mockResp *[]model.ResourceTag
-		mockErr  error
+		name       string
+		input      *finding.ListResourceTagRequest
+		want       *finding.ListResourceTagResponse
+		wantErr    bool
+		mockResp   *[]model.ResourceTag
+		mockErr    error
+		totalCount uint32
 	}{
 		{
 			name:  "OK",
 			input: &finding.ListResourceTagRequest{ProjectId: 1, ResourceId: 1001},
-			want: &finding.ListResourceTagResponse{Tag: []*finding.ResourceTag{
-				{ResourceTagId: 1, ResourceId: 111, Tag: "tag1", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-				{ResourceTagId: 2, ResourceId: 111, Tag: "tag2", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-			}},
+			want: &finding.ListResourceTagResponse{Count: 2, Total: 999,
+				Tag: []*finding.ResourceTag{
+					{ResourceTagId: 1, ResourceId: 111, Tag: "tag1", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+					{ResourceTagId: 2, ResourceId: 111, Tag: "tag2", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+				},
+			},
 			mockResp: &[]model.ResourceTag{
 				{ResourceTagID: 1, ResourceID: 111, Tag: "tag1", CreatedAt: now, UpdatedAt: now},
 				{ResourceTagID: 2, ResourceID: 111, Tag: "tag2", CreatedAt: now, UpdatedAt: now},
 			},
+			totalCount: 999,
 		},
 		{
-			name:    "OK Record Not Found",
-			input:   &finding.ListResourceTagRequest{ProjectId: 1, ResourceId: 1001},
-			want:    &finding.ListResourceTagResponse{},
-			wantErr: false,
-			mockErr: gorm.ErrRecordNotFound,
+			name:       "OK Record Not Found",
+			input:      &finding.ListResourceTagRequest{ProjectId: 1, ResourceId: 1001},
+			want:       &finding.ListResourceTagResponse{Tag: []*finding.ResourceTag{}, Count: 0, Total: 0},
+			totalCount: 0,
 		},
 		{
-			name:    "NG Invalid Request",
-			input:   &finding.ListResourceTagRequest{ProjectId: 1, ResourceId: 0},
-			wantErr: true,
+			name:       "NG Invalid Request",
+			input:      &finding.ListResourceTagRequest{ProjectId: 1, ResourceId: 0},
+			wantErr:    true,
+			totalCount: 999,
 		},
 		{
-			name:    "NG DB error",
-			input:   &finding.ListResourceTagRequest{ProjectId: 1, ResourceId: 1001},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidSQL,
+			name:       "NG DB error",
+			input:      &finding.ListResourceTagRequest{ProjectId: 1, ResourceId: 1001},
+			wantErr:    true,
+			mockErr:    gorm.ErrInvalidSQL,
+			totalCount: 999,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB.On("ListResourceTagCount").Return(c.totalCount, nil).Once()
 			if c.mockResp != nil || c.mockErr != nil {
 				mockDB.On("ListResourceTag").Return(c.mockResp, c.mockErr).Once()
 			}
@@ -276,39 +287,44 @@ func TestListResourceTagName(t *testing.T) {
 	mockDB := mockFindingRepository{}
 	svc := findingService{repository: &mockDB}
 	cases := []struct {
-		name     string
-		input    *finding.ListResourceTagNameRequest
-		want     *finding.ListResourceTagNameResponse
-		wantErr  bool
-		mockResp *[]tagName
-		mockErr  error
+		name       string
+		input      *finding.ListResourceTagNameRequest
+		want       *finding.ListResourceTagNameResponse
+		wantErr    bool
+		mockResp   *[]tagName
+		mockErr    error
+		totalCount uint32
 	}{
 		{
-			name:     "OK",
-			input:    &finding.ListResourceTagNameRequest{ProjectId: 1, FromAt: 0, ToAt: now.Unix()},
-			want:     &finding.ListResourceTagNameResponse{Tag: []string{"tag1", "tag2"}},
-			mockResp: &[]tagName{{Tag: "tag1"}, {Tag: "tag2"}},
+			name:       "OK",
+			input:      &finding.ListResourceTagNameRequest{ProjectId: 1, FromAt: 0, ToAt: now.Unix()},
+			want:       &finding.ListResourceTagNameResponse{Tag: []string{"tag1", "tag2"}, Count: 2, Total: 999},
+			mockResp:   &[]tagName{{Tag: "tag1"}, {Tag: "tag2"}},
+			totalCount: 999,
 		},
 		{
-			name:    "OK Record Not Found",
-			input:   &finding.ListResourceTagNameRequest{ProjectId: 1},
-			want:    &finding.ListResourceTagNameResponse{},
-			mockErr: gorm.ErrRecordNotFound,
+			name:       "OK Record Not Found",
+			input:      &finding.ListResourceTagNameRequest{ProjectId: 1},
+			want:       &finding.ListResourceTagNameResponse{Tag: []string{}, Count: 0, Total: 0},
+			totalCount: 0,
 		},
 		{
-			name:    "NG Invalid Request",
-			input:   &finding.ListResourceTagNameRequest{},
-			wantErr: true,
+			name:       "NG Invalid Request",
+			input:      &finding.ListResourceTagNameRequest{},
+			wantErr:    true,
+			totalCount: 999,
 		},
 		{
-			name:    "NG DB error",
-			input:   &finding.ListResourceTagNameRequest{ProjectId: 1},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidSQL,
+			name:       "NG DB error",
+			input:      &finding.ListResourceTagNameRequest{ProjectId: 1},
+			wantErr:    true,
+			mockErr:    gorm.ErrInvalidSQL,
+			totalCount: 999,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB.On("ListResourceTagNameCount").Return(c.totalCount, nil).Once()
 			if c.mockResp != nil || c.mockErr != nil {
 				mockDB.On("ListResourceTagName").Return(c.mockResp, c.mockErr).Once()
 			}
@@ -423,62 +439,6 @@ func TestUntagResource(t *testing.T) {
 			_, err := svc.UntagResource(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
-			}
-		})
-	}
-}
-
-func TestConvertListResourceRequest(t *testing.T) {
-	now := time.Now()
-	cases := []struct {
-		name  string
-		input *finding.ListResourceRequest
-		want  *finding.ListResourceRequest
-	}{
-		{
-			name:  "OK full-set",
-			input: &finding.ListResourceRequest{ProjectId: 1, ResourceName: []string{"rn"}, FromSumScore: 0.3, ToSumScore: 0.9, FromAt: now.Unix(), ToAt: now.Unix()},
-			want:  &finding.ListResourceRequest{ProjectId: 1, ResourceName: []string{"rn"}, FromSumScore: 0.3, ToSumScore: 0.9, FromAt: now.Unix(), ToAt: now.Unix()},
-		},
-		{
-			name:  "OK convert ToSumScore",
-			input: &finding.ListResourceRequest{ProjectId: 1, ToAt: now.Unix()},
-			want:  &finding.ListResourceRequest{ProjectId: 1, ToSumScore: maxSumScore, ToAt: now.Unix()},
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			got := convertListResourceRequest(c.input)
-			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected convert: got=%+v, want: %+v", got, c.want)
-			}
-		})
-	}
-}
-
-func TestConvertResource(t *testing.T) {
-	now := time.Now()
-	cases := []struct {
-		name  string
-		input *model.Resource
-		want  *finding.Resource
-	}{
-		{
-			name:  "OK convert unix time",
-			input: &model.Resource{ResourceID: 10001, ResourceName: "rn", ProjectID: 111, CreatedAt: now, UpdatedAt: now},
-			want:  &finding.Resource{ResourceId: 10001, ResourceName: "rn", ProjectId: 111, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-		},
-		{
-			name:  "OK empty",
-			input: nil,
-			want:  &finding.Resource{},
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			got := convertResource(c.input)
-			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
 			}
 		})
 	}
