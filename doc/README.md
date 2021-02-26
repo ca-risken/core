@@ -1975,6 +1975,8 @@ ResourceTag For upsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | tag | [string](#string) | repeated |  |
+| count | [uint32](#uint32) |  |  |
+| total | [uint32](#uint32) |  |  |
 
 
 
@@ -2253,8 +2255,6 @@ ResourceTag For upsert
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | tag | [FindingTag](#core.finding.FindingTag) |  |  |
-| count | [uint32](#uint32) |  |  |
-| total | [uint32](#uint32) |  |  |
 
 
 
