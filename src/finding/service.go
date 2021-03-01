@@ -6,7 +6,7 @@ import (
 
 const (
 	defaultSortDirection string = "asc"
-	defaultLimit         int32  = 2
+	defaultLimit         int32  = 200
 )
 
 type findingService struct {
