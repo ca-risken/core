@@ -44,13 +44,14 @@ where
 
 func (f *findingDB) ListResourceCount(req *finding.ListResourceRequest) (uint32, error) {
 	query := `
-select count(*)
-from
-  resource r
-  left outer join finding f using(resource_name)
-where
-  r.project_id = ?
-  and r.updated_at between ? and ?
+select count(*) from (
+  select *
+  from
+    resource r
+    left outer join finding f using(resource_name)
+  where
+    r.project_id = ?
+    and r.updated_at between ? and ?
 `
 	var params []interface{}
 	params = append(params, req.ProjectId, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
@@ -63,6 +64,7 @@ where
 		params = append(params, req.Tag)
 	}
 	query += " group by r.resource_id having sum(COALESCE(f.score, 0)) between ? and ?"
+	query += ") resource"
 	params = append(params, req.FromSumScore, req.ToSumScore)
 	var count uint32
 	if err := f.Slave.Raw(query, params...).Count(&count).Error; err != nil {
