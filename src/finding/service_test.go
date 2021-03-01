@@ -54,6 +54,10 @@ func (m *mockFindingRepository) ListFinding(*finding.ListFindingRequest) (*[]mod
 	args := m.Called()
 	return args.Get(0).(*[]model.Finding), args.Error(1)
 }
+func (m *mockFindingRepository) ListFindingCount(req *finding.ListFindingRequest) (uint32, error) {
+	args := m.Called()
+	return args.Get(0).(uint32), args.Error(1)
+}
 func (m *mockFindingRepository) GetFinding(uint32, uint64) (*model.Finding, error) {
 	args := m.Called()
 	return args.Get(0).(*model.Finding), args.Error(1)
@@ -70,13 +74,21 @@ func (m *mockFindingRepository) DeleteFinding(uint32, uint64) error {
 	args := m.Called()
 	return args.Error(0)
 }
-func (m *mockFindingRepository) ListFindingTag(uint32, uint64) (*[]model.FindingTag, error) {
+func (m *mockFindingRepository) ListFindingTag(param *finding.ListFindingTagRequest) (*[]model.FindingTag, error) {
 	args := m.Called()
 	return args.Get(0).(*[]model.FindingTag), args.Error(1)
 }
-func (m *mockFindingRepository) ListFindingTagName(*finding.ListFindingTagNameRequest) (*[]tagName, error) {
+func (m *mockFindingRepository) ListFindingTagCount(param *finding.ListFindingTagRequest) (uint32, error) {
+	args := m.Called()
+	return args.Get(0).(uint32), args.Error(1)
+}
+func (m *mockFindingRepository) ListFindingTagName(param *finding.ListFindingTagNameRequest) (*[]tagName, error) {
 	args := m.Called()
 	return args.Get(0).(*[]tagName), args.Error(1)
+}
+func (m *mockFindingRepository) ListFindingTagNameCount(param *finding.ListFindingTagNameRequest) (uint32, error) {
+	args := m.Called()
+	return args.Get(0).(uint32), args.Error(1)
 }
 func (m *mockFindingRepository) GetFindingTagByKey(uint32, uint64, string) (*model.FindingTag, error) {
 	args := m.Called()
@@ -113,6 +125,10 @@ func (m *mockFindingRepository) ListResource(*finding.ListResourceRequest) (*[]m
 	args := m.Called()
 	return args.Get(0).(*[]model.Resource), args.Error(1)
 }
+func (m *mockFindingRepository) ListResourceCount(req *finding.ListResourceRequest) (uint32, error) {
+	args := m.Called()
+	return args.Get(0).(uint32), args.Error(1)
+}
 func (m *mockFindingRepository) GetResource(uint32, uint64) (*model.Resource, error) {
 	args := m.Called()
 	return args.Get(0).(*model.Resource), args.Error(1)
@@ -129,13 +145,21 @@ func (m *mockFindingRepository) DeleteResource(uint32, uint64) error {
 	args := m.Called()
 	return args.Error(0)
 }
-func (m *mockFindingRepository) ListResourceTag(uint32, uint64) (*[]model.ResourceTag, error) {
+func (m *mockFindingRepository) ListResourceTag(param *finding.ListResourceTagRequest) (*[]model.ResourceTag, error) {
 	args := m.Called()
 	return args.Get(0).(*[]model.ResourceTag), args.Error(1)
 }
-func (m *mockFindingRepository) ListResourceTagName(*finding.ListResourceTagNameRequest) (*[]tagName, error) {
+func (m *mockFindingRepository) ListResourceTagCount(param *finding.ListResourceTagRequest) (uint32, error) {
+	args := m.Called()
+	return args.Get(0).(uint32), args.Error(1)
+}
+func (m *mockFindingRepository) ListResourceTagName(param *finding.ListResourceTagNameRequest) (*[]tagName, error) {
 	args := m.Called()
 	return args.Get(0).(*[]tagName), args.Error(1)
+}
+func (m *mockFindingRepository) ListResourceTagNameCount(param *finding.ListResourceTagNameRequest) (uint32, error) {
+	args := m.Called()
+	return args.Get(0).(uint32), args.Error(1)
 }
 func (m *mockFindingRepository) GetResourceTagByKey(uint32, uint64, string) (*model.ResourceTag, error) {
 	args := m.Called()

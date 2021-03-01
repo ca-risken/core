@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -22,22 +23,54 @@ where
 `
 	var params []interface{}
 	params = append(params, req.ProjectId, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
-	if len(req.ResourceName) != 0 {
+	if len(req.ResourceName) > 0 {
 		query += " and r.resource_name regexp ?"
 		params = append(params, strings.Join(req.ResourceName, "|"))
 	}
-	if len(req.Tag) != 0 {
+	if len(req.Tag) > 0 {
 		query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag in (?) )"
 		params = append(params, req.Tag)
 	}
 	query += " group by r.resource_id having sum(COALESCE(f.score, 0)) between ? and ?"
 	params = append(params, req.FromSumScore, req.ToSumScore)
-
+	query += fmt.Sprintf(" order by %s %s", req.Sort, req.Direction)
+	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
 	var data []model.Resource
 	if err := f.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
+}
+
+func (f *findingDB) ListResourceCount(req *finding.ListResourceRequest) (uint32, error) {
+	query := `
+select count(*) from (
+  select *
+  from
+    resource r
+    left outer join finding f using(resource_name)
+  where
+    r.project_id = ?
+    and r.updated_at between ? and ?
+`
+	var params []interface{}
+	params = append(params, req.ProjectId, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
+	if len(req.ResourceName) > 0 {
+		query += " and r.resource_name regexp ?"
+		params = append(params, strings.Join(req.ResourceName, "|"))
+	}
+	if len(req.Tag) > 0 {
+		query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag in (?) )"
+		params = append(params, req.Tag)
+	}
+	query += " group by r.resource_id having sum(COALESCE(f.score, 0)) between ? and ?"
+	query += ") resource"
+	params = append(params, req.FromSumScore, req.ToSumScore)
+	var count uint32
+	if err := f.Slave.Raw(query, params...).Count(&count).Error; err != nil {
+		return count, err
+	}
+	return count, nil
 }
 
 const selectGetResource = `select * from resource where project_id = ? and resource_id = ?`
@@ -65,18 +98,29 @@ func (f *findingDB) DeleteTagByResourceID(projectID uint32, resourceID uint64) e
 	return f.Master.Exec(deleteDeleteTagByResourceID, projectID, resourceID).Error
 }
 
-const selectListResourceTag = `select * from resource_tag where project_id = ? and resource_id = ?`
+const selectListResourceTag = `select * from resource_tag where project_id = ? and resource_id = ? order by %s %s limit %d, %d`
 
-func (f *findingDB) ListResourceTag(projectID uint32, resourceID uint64) (*[]model.ResourceTag, error) {
+func (f *findingDB) ListResourceTag(param *finding.ListResourceTagRequest) (*[]model.ResourceTag, error) {
 	var data []model.ResourceTag
-	if err := f.Slave.Raw(selectListResourceTag, projectID, resourceID).Scan(&data).Error; err != nil {
+	if err := f.Slave.Raw(
+		fmt.Sprintf(selectListResourceTag, param.Sort, param.Direction, param.Offset, param.Limit),
+		param.ProjectId, param.ResourceId).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
-func (f *findingDB) ListResourceTagName(req *finding.ListResourceTagNameRequest) (*[]tagName, error) {
-	query := `
+const selectListResourceTagCount = `select count(*) from resource_tag where project_id = ? and resource_id = ?`
+
+func (f *findingDB) ListResourceTagCount(param *finding.ListResourceTagRequest) (uint32, error) {
+	var count uint32
+	if err := f.Slave.Raw(selectListResourceTagCount, param.ProjectId, param.ResourceId).Count(&count).Error; err != nil {
+		return count, err
+	}
+	return count, nil
+}
+
+const selectListResourceTagName = `
 select
   distinct tag
 from
@@ -84,14 +128,35 @@ from
 where
   project_id = ?
   and updated_at between ? and ?
+order by %s %s limit %d, %d
 `
-	var params []interface{}
-	params = append(params, req.ProjectId, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
+
+func (f *findingDB) ListResourceTagName(param *finding.ListResourceTagNameRequest) (*[]tagName, error) {
 	var data []tagName
-	if err := f.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
+	if err := f.Slave.Raw(
+		fmt.Sprintf(selectListResourceTagName, param.Sort, param.Direction, param.Offset, param.Limit),
+		param.ProjectId, time.Unix(param.FromAt, 0), time.Unix(param.ToAt, 0)).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
+}
+
+const selectListResourceTagNameCount = `
+select count(*) from (
+	select tag
+	from resource_tag
+	where project_id = ? and updated_at between ? and ?
+	group by project_id, tag
+) tag
+`
+
+func (f *findingDB) ListResourceTagNameCount(param *finding.ListResourceTagNameRequest) (uint32, error) {
+	var count uint32
+	if err := f.Slave.Raw(selectListResourceTagNameCount,
+		param.ProjectId, time.Unix(param.FromAt, 0), time.Unix(param.ToAt, 0)).Count(&count).Error; err != nil {
+		return count, err
+	}
+	return count, nil
 }
 
 const insertUpsertResource = `

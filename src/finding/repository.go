@@ -13,12 +13,15 @@ import (
 type findingRepository interface {
 	// Finding
 	ListFinding(*finding.ListFindingRequest) (*[]model.Finding, error)
+	ListFindingCount(req *finding.ListFindingRequest) (uint32, error)
 	GetFinding(uint32, uint64) (*model.Finding, error)
 	GetFindingByDataSource(uint32, string, string) (*model.Finding, error)
 	UpsertFinding(*model.Finding) (*model.Finding, error)
 	DeleteFinding(uint32, uint64) error
-	ListFindingTag(uint32, uint64) (*[]model.FindingTag, error)
-	ListFindingTagName(*finding.ListFindingTagNameRequest) (*[]tagName, error)
+	ListFindingTag(param *finding.ListFindingTagRequest) (*[]model.FindingTag, error)
+	ListFindingTagCount(param *finding.ListFindingTagRequest) (uint32, error)
+	ListFindingTagName(param *finding.ListFindingTagNameRequest) (*[]tagName, error)
+	ListFindingTagNameCount(param *finding.ListFindingTagNameRequest) (uint32, error)
 	GetFindingTagByKey(uint32, uint64, string) (*model.FindingTag, error)
 	GetFindingTagByID(uint32, uint64) (*model.FindingTag, error)
 	TagFinding(*model.FindingTag) (*model.FindingTag, error)
@@ -29,12 +32,15 @@ type findingRepository interface {
 
 	// Resource
 	ListResource(*finding.ListResourceRequest) (*[]model.Resource, error)
+	ListResourceCount(req *finding.ListResourceRequest) (uint32, error)
 	GetResource(uint32, uint64) (*model.Resource, error)
 	GetResourceByName(uint32, string) (*model.Resource, error)
 	UpsertResource(*model.Resource) (*model.Resource, error)
 	DeleteResource(uint32, uint64) error
-	ListResourceTag(uint32, uint64) (*[]model.ResourceTag, error)
-	ListResourceTagName(*finding.ListResourceTagNameRequest) (*[]tagName, error)
+	ListResourceTag(param *finding.ListResourceTagRequest) (*[]model.ResourceTag, error)
+	ListResourceTagCount(param *finding.ListResourceTagRequest) (uint32, error)
+	ListResourceTagName(param *finding.ListResourceTagNameRequest) (*[]tagName, error)
+	ListResourceTagNameCount(param *finding.ListResourceTagNameRequest) (uint32, error)
 	GetResourceTagByKey(uint32, uint64, string) (*model.ResourceTag, error)
 	GetResourceTagByID(uint32, uint64) (*model.ResourceTag, error)
 	TagResource(*model.ResourceTag) (*model.ResourceTag, error)

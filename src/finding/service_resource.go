@@ -8,6 +8,7 @@ import (
 	"github.com/CyberAgent/mimosa-core/proto/finding"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jinzhu/gorm"
+	"github.com/vikyd/zero"
 )
 
 const (
@@ -22,38 +23,43 @@ func (f *findingService) ListResource(ctx context.Context, req *finding.ListReso
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := f.repository.ListResource(convertListResourceRequest(req))
+	param := convertListResourceRequest(req)
+	total, err := f.repository.ListResourceCount(param)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			return &finding.ListResourceResponse{}, nil
-		}
 		return nil, err
 	}
-
+	if total == 0 {
+		return &finding.ListResourceResponse{ResourceId: []uint64{}, Count: 0, Total: total}, nil
+	}
+	list, err := f.repository.ListResource(param)
+	if err != nil {
+		return nil, err
+	}
 	var ids []uint64
 	for _, data := range *list {
 		ids = append(ids, uint64(data.ResourceID))
 	}
-	return &finding.ListResourceResponse{ResourceId: ids}, nil
+	return &finding.ListResourceResponse{ResourceId: ids, Count: uint32(len(ids)), Total: total}, nil
 }
 
 func convertListResourceRequest(req *finding.ListResourceRequest) *finding.ListResourceRequest {
-	converted := finding.ListResourceRequest{
-		ProjectId:    req.ProjectId,
-		ResourceName: req.ResourceName,
-		FromSumScore: req.FromSumScore,
-		ToSumScore:   req.ToSumScore,
-		FromAt:       req.FromAt,
-		ToAt:         req.ToAt,
-		Tag:          req.Tag,
-	}
+	converted := req
 	if converted.ToSumScore == 0 {
 		converted.ToSumScore = maxSumScore
 	}
 	if converted.ToAt == 0 {
 		converted.ToAt = time.Now().Unix()
 	}
-	return &converted
+	if zero.IsZeroVal(converted.Sort) {
+		converted.Sort = "resource_id"
+	}
+	if zero.IsZeroVal(converted.Direction) {
+		converted.Direction = defaultSortDirection
+	}
+	if zero.IsZeroVal(converted.Limit) {
+		converted.Limit = defaultLimit
+	}
+	return converted
 }
 
 func (f *findingService) GetResource(ctx context.Context, req *finding.GetResourceRequest) (*finding.GetResourceResponse, error) {
@@ -117,48 +123,77 @@ func (f *findingService) ListResourceTag(ctx context.Context, req *finding.ListR
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := f.repository.ListResourceTag(req.ProjectId, req.ResourceId)
+	param := convertListResourceTagRequest(req)
+	total, err := f.repository.ListResourceTagCount(param)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			return &finding.ListResourceTagResponse{}, nil
-		}
+		return nil, err
+	}
+	if total == 0 {
+		return &finding.ListResourceTagResponse{Tag: []*finding.ResourceTag{}, Count: 0, Total: total}, nil
+	}
+	list, err := f.repository.ListResourceTag(param)
+	if err != nil {
 		return nil, err
 	}
 	var tags []*finding.ResourceTag
 	for _, tag := range *list {
 		tags = append(tags, convertResourceTag(&tag))
 	}
-	return &finding.ListResourceTagResponse{Tag: tags}, nil
+	return &finding.ListResourceTagResponse{Tag: tags, Count: uint32(len(tags)), Total: total}, nil
+}
+
+func convertListResourceTagRequest(req *finding.ListResourceTagRequest) *finding.ListResourceTagRequest {
+	converted := req
+	if zero.IsZeroVal(converted.Sort) {
+		converted.Sort = "tag"
+	}
+	if zero.IsZeroVal(converted.Direction) {
+		converted.Direction = defaultSortDirection
+	}
+	if zero.IsZeroVal(converted.Limit) {
+		converted.Limit = defaultLimit
+	}
+	return converted
 }
 
 func (f *findingService) ListResourceTagName(ctx context.Context, req *finding.ListResourceTagNameRequest) (*finding.ListResourceTagNameResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	tags, err := f.repository.ListResourceTagName(convertListResourceTagNameRequest(req))
+	param := convertListResourceTagNameRequest(req)
+	total, err := f.repository.ListResourceTagNameCount(param)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			return &finding.ListResourceTagNameResponse{}, nil
-		}
+		return nil, err
+	}
+	if total == 0 {
+		return &finding.ListResourceTagNameResponse{Tag: []string{}, Count: 0, Total: total}, nil
+	}
+	tags, err := f.repository.ListResourceTagName(param)
+	if err != nil {
 		return nil, err
 	}
 	var tagNames []string
 	for _, tag := range *tags {
 		tagNames = append(tagNames, tag.Tag)
 	}
-	return &finding.ListResourceTagNameResponse{Tag: tagNames}, nil
+	return &finding.ListResourceTagNameResponse{Tag: tagNames, Count: uint32(len(tagNames)), Total: total}, nil
 }
 
 func convertListResourceTagNameRequest(req *finding.ListResourceTagNameRequest) *finding.ListResourceTagNameRequest {
-	converted := finding.ListResourceTagNameRequest{
-		ProjectId: req.ProjectId,
-		FromAt:    req.FromAt,
-		ToAt:      req.ToAt,
-	}
+	converted := req
 	if converted.ToAt == 0 {
 		converted.ToAt = time.Now().Unix()
 	}
-	return &converted
+	if zero.IsZeroVal(converted.Sort) {
+		converted.Sort = "tag"
+	}
+	if zero.IsZeroVal(converted.Direction) {
+		converted.Direction = defaultSortDirection
+	}
+	if zero.IsZeroVal(converted.Limit) {
+		converted.Limit = defaultLimit
+	}
+	return converted
 }
 func (f *findingService) TagResource(ctx context.Context, req *finding.TagResourceRequest) (*finding.TagResourceResponse, error) {
 	if err := req.Validate(); err != nil {

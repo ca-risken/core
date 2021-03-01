@@ -19,33 +19,44 @@ func TestListFinding(t *testing.T) {
 		name         string
 		input        *finding.ListFindingRequest
 		want         *finding.ListFindingResponse
+		wantErr      bool
+		totalCount   uint32
 		mockResponce *[]model.Finding
 		mockError    error
 	}{
 		{
 			name:         "OK",
 			input:        &finding.ListFindingRequest{ProjectId: 1, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"hoge"}, FromScore: 0.0, ToScore: 1.0},
-			want:         &finding.ListFindingResponse{FindingId: []uint64{111, 222}},
+			want:         &finding.ListFindingResponse{FindingId: []uint64{111, 222}, Count: 2, Total: 999},
+			totalCount:   999,
 			mockResponce: &[]model.Finding{{FindingID: 111}, {FindingID: 222}},
 		},
 		{
-			name:      "NG Record not found",
-			input:     &finding.ListFindingRequest{ProjectId: 1, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"hoge"}, FromScore: 0.0, ToScore: 1.0},
-			want:      &finding.ListFindingResponse{},
-			mockError: gorm.ErrRecordNotFound,
+			name:       "OK zero list",
+			input:      &finding.ListFindingRequest{ProjectId: 1, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"hoge"}, FromScore: 0.0, ToScore: 1.0},
+			want:       &finding.ListFindingResponse{FindingId: []uint64{}, Count: 0, Total: 0},
+			totalCount: 0,
+		},
+		{
+			name:       "NG DB error",
+			input:      &finding.ListFindingRequest{ProjectId: 1, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"hoge"}, FromScore: 0.0, ToScore: 1.0},
+			totalCount: 999,
+			mockError:  gorm.ErrInvalidSQL,
+			wantErr:    true,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB.On("ListFindingCount").Return(c.totalCount, nil).Once()
 			if c.mockResponce != nil || c.mockError != nil {
 				mockDB.On("ListFinding").Return(c.mockResponce, c.mockError).Once()
 			}
-			result, err := svc.ListFinding(ctx, c.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %+v", err)
+			got, err := svc.ListFinding(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
 			}
-			if !reflect.DeepEqual(result, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
 			}
 		})
 	}
@@ -208,47 +219,52 @@ func TestListFindingTag(t *testing.T) {
 	mockDB := mockFindingRepository{}
 	svc := findingService{repository: &mockDB}
 	cases := []struct {
-		name     string
-		input    *finding.ListFindingTagRequest
-		want     *finding.ListFindingTagResponse
-		wantErr  bool
-		mockResp *[]model.FindingTag
-		mockErr  error
+		name       string
+		input      *finding.ListFindingTagRequest
+		want       *finding.ListFindingTagResponse
+		wantErr    bool
+		mockResp   *[]model.FindingTag
+		mockErr    error
+		totalCount uint32
 	}{
 		{
 			name:  "OK",
 			input: &finding.ListFindingTagRequest{ProjectId: 1, FindingId: 1001},
-			want: &finding.ListFindingTagResponse{Tag: []*finding.FindingTag{
-				{FindingTagId: 1, FindingId: 111, Tag: "tag1", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-				{FindingTagId: 2, FindingId: 111, Tag: "tag2", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-			}},
+			want: &finding.ListFindingTagResponse{Count: 2, Total: 999,
+				Tag: []*finding.FindingTag{
+					{FindingTagId: 1, FindingId: 111, Tag: "tag1", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+					{FindingTagId: 2, FindingId: 111, Tag: "tag2", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+				},
+			},
 			mockResp: &[]model.FindingTag{
 				{FindingTagID: 1, FindingID: 111, Tag: "tag1", CreatedAt: now, UpdatedAt: now},
 				{FindingTagID: 2, FindingID: 111, Tag: "tag2", CreatedAt: now, UpdatedAt: now},
 			},
-			mockErr: nil,
+			totalCount: 999,
 		},
 		{
-			name:    "OK Record Not Found",
-			input:   &finding.ListFindingTagRequest{ProjectId: 1, FindingId: 1001},
-			want:    &finding.ListFindingTagResponse{},
-			wantErr: false,
-			mockErr: gorm.ErrRecordNotFound,
+			name:       "OK Record Not Found",
+			input:      &finding.ListFindingTagRequest{ProjectId: 1, FindingId: 1001},
+			want:       &finding.ListFindingTagResponse{Tag: []*finding.FindingTag{}, Count: 0, Total: 0},
+			totalCount: 0,
 		},
 		{
-			name:    "NG Invalid Request",
-			input:   &finding.ListFindingTagRequest{ProjectId: 1, FindingId: 0},
-			wantErr: true,
+			name:       "NG Invalid Request",
+			input:      &finding.ListFindingTagRequest{ProjectId: 1, FindingId: 0},
+			wantErr:    true,
+			totalCount: 999,
 		},
 		{
-			name:    "NG DB error",
-			input:   &finding.ListFindingTagRequest{ProjectId: 1, FindingId: 1001},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidSQL,
+			name:       "NG DB error",
+			input:      &finding.ListFindingTagRequest{ProjectId: 1, FindingId: 1001},
+			wantErr:    true,
+			mockErr:    gorm.ErrInvalidSQL,
+			totalCount: 999,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB.On("ListFindingTagCount").Return(c.totalCount, nil).Once()
 			if c.mockResp != nil || c.mockErr != nil {
 				mockDB.On("ListFindingTag").Return(c.mockResp, c.mockErr).Once()
 			}
@@ -269,39 +285,45 @@ func TestListFindingTagName(t *testing.T) {
 	mockDB := mockFindingRepository{}
 	svc := findingService{repository: &mockDB}
 	cases := []struct {
-		name     string
-		input    *finding.ListFindingTagNameRequest
-		want     *finding.ListFindingTagNameResponse
-		wantErr  bool
-		mockResp *[]tagName
-		mockErr  error
+		name       string
+		input      *finding.ListFindingTagNameRequest
+		want       *finding.ListFindingTagNameResponse
+		wantErr    bool
+		mockResp   *[]tagName
+		mockErr    error
+		totalCount uint32
 	}{
 		{
-			name:     "OK",
-			input:    &finding.ListFindingTagNameRequest{ProjectId: 1, FromAt: 0, ToAt: now.Unix()},
-			want:     &finding.ListFindingTagNameResponse{Tag: []string{"tag1", "tag2"}},
-			mockResp: &[]tagName{{Tag: "tag1"}, {Tag: "tag2"}},
+			name:  "OK",
+			input: &finding.ListFindingTagNameRequest{ProjectId: 1, FromAt: 0, ToAt: now.Unix()},
+			want: &finding.ListFindingTagNameResponse{Count: 2, Total: 999,
+				Tag: []string{"tag1", "tag2"}},
+			mockResp:   &[]tagName{{Tag: "tag1"}, {Tag: "tag2"}},
+			totalCount: 999,
 		},
 		{
-			name:    "OK Record Not Found",
-			input:   &finding.ListFindingTagNameRequest{ProjectId: 1},
-			want:    &finding.ListFindingTagNameResponse{},
-			mockErr: gorm.ErrRecordNotFound,
+			name:       "OK Record Not Found",
+			input:      &finding.ListFindingTagNameRequest{ProjectId: 1},
+			want:       &finding.ListFindingTagNameResponse{Tag: []string{}, Count: 0, Total: 0},
+			totalCount: 0,
 		},
 		{
-			name:    "NG Invalid Request",
-			input:   &finding.ListFindingTagNameRequest{},
-			wantErr: true,
+			name:       "NG Invalid Request",
+			input:      &finding.ListFindingTagNameRequest{},
+			wantErr:    true,
+			totalCount: 999,
 		},
 		{
-			name:    "NG DB error",
-			input:   &finding.ListFindingTagNameRequest{ProjectId: 1},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidSQL,
+			name:       "NG DB error",
+			input:      &finding.ListFindingTagNameRequest{ProjectId: 1},
+			wantErr:    true,
+			mockErr:    gorm.ErrInvalidSQL,
+			totalCount: 999,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB.On("ListFindingTagNameCount").Return(c.totalCount, nil).Once()
 			if c.mockResp != nil || c.mockErr != nil {
 				mockDB.On("ListFindingTagName").Return(c.mockResp, c.mockErr).Once()
 			}
@@ -504,118 +526,6 @@ func TestGetPendFinding(t *testing.T) {
 			}
 			if !reflect.DeepEqual(result, c.want) {
 				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
-			}
-		})
-	}
-}
-
-func TestConvertListFindingRequest(t *testing.T) {
-	now := time.Now()
-	cases := []struct {
-		name  string
-		input *finding.ListFindingRequest
-		want  *finding.ListFindingRequest
-	}{
-		{
-			name:  "OK full-set",
-			input: &finding.ListFindingRequest{ProjectId: 1, DataSource: []string{"ds"}, ResourceName: []string{"rn"}, FromScore: 0.3, ToScore: 0.9, FromAt: now.Unix(), ToAt: now.Unix()},
-			want:  &finding.ListFindingRequest{ProjectId: 1, DataSource: []string{"ds"}, ResourceName: []string{"rn"}, FromScore: 0.3, ToScore: 0.9, FromAt: now.Unix(), ToAt: now.Unix()},
-		},
-		{
-			name:  "OK convert ToScore",
-			input: &finding.ListFindingRequest{ProjectId: 1, ToAt: now.Unix()},
-			want:  &finding.ListFindingRequest{ProjectId: 1, ToScore: 1.0, ToAt: now.Unix()},
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			got := convertListFindingRequest(c.input)
-			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected convert: got=%+v, want: %+v", got, c.want)
-			}
-		})
-	}
-}
-
-func TestConvertFinding(t *testing.T) {
-	now := time.Now()
-	cases := []struct {
-		name  string
-		input *model.Finding
-		want  *finding.Finding
-	}{
-		{
-			name:  "OK convert unix time",
-			input: &model.Finding{FindingID: 10001, CreatedAt: now, UpdatedAt: now},
-			want:  &finding.Finding{FindingId: 10001, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-		},
-		{
-			name:  "OK empty",
-			input: nil,
-			want:  &finding.Finding{},
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			got := convertFinding(c.input)
-			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
-			}
-		})
-	}
-}
-
-func TestConvertFindingTag(t *testing.T) {
-	now := time.Now()
-	cases := []struct {
-		name  string
-		input *model.FindingTag
-		want  *finding.FindingTag
-	}{
-		{
-			name:  "OK convert unix time",
-			input: &model.FindingTag{FindingTagID: 11111, FindingID: 10001, Tag: "tag", CreatedAt: now, UpdatedAt: now},
-			want:  &finding.FindingTag{FindingTagId: 11111, FindingId: 10001, Tag: "tag", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-		},
-		{
-			name:  "OK empty",
-			input: nil,
-			want:  &finding.FindingTag{},
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			got := convertFindingTag(c.input)
-			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
-			}
-		})
-	}
-}
-
-func TestConvertPnedFinding(t *testing.T) {
-	now := time.Now()
-	cases := []struct {
-		name  string
-		input *model.PendFinding
-		want  *finding.PendFinding
-	}{
-		{
-			name:  "OK convert unix time",
-			input: &model.PendFinding{FindingID: 1, ProjectID: 1, CreatedAt: now, UpdatedAt: now},
-			want:  &finding.PendFinding{FindingId: 1, ProjectId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-		},
-		{
-			name:  "OK empty",
-			input: nil,
-			want:  &finding.PendFinding{},
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			got := convertPendFinding(c.input)
-			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
 			}
 		})
 	}

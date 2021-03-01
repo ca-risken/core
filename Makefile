@@ -110,5 +110,8 @@ run-project: go-test network
 log:
 	. env.sh && docker-compose logs -f
 
+log-finding:
+	. env.sh && docker-compose logs -f finding
+
 stop:
 	. env.sh && docker-compose down
