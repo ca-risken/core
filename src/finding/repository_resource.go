@@ -45,7 +45,7 @@ where
 func (f *findingDB) ListResourceCount(req *finding.ListResourceRequest) (uint32, error) {
 	query := `
 select count(*) from (
-  select *
+  select r.*
   from
     resource r
     left outer join finding f using(resource_name)

@@ -113,5 +113,8 @@ log:
 log-finding:
 	. env.sh && docker-compose logs -f finding
 
+log-report:
+	. env.sh && docker-compose logs -f report
+
 stop:
 	. env.sh && docker-compose down
