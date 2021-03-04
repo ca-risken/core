@@ -11,30 +11,9 @@ import (
 )
 
 func (f *findingDB) ListFinding(req *finding.ListFindingRequest) (*[]model.Finding, error) {
-	query := `
-select
-  *
-from
-  finding f
-where
-  f.project_id = ?
-  and f.score between ? and ?
-  and f.updated_at between ? and ?
-`
-	var params []interface{}
-	params = append(params, req.ProjectId, req.FromScore, req.ToScore, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
-	if len(req.DataSource) > 0 {
-		query += " and f.data_source regexp ?"
-		params = append(params, strings.Join(req.DataSource, "|"))
-	}
-	if len(req.ResourceName) > 0 {
-		query += " and f.resource_name regexp ?"
-		params = append(params, strings.Join(req.ResourceName, "|"))
-	}
-	if len(req.Tag) > 0 {
-		query += " and exists (select * from finding_tag ft where ft.finding_id=f.finding_id and ft.tag in (?))"
-		params = append(params, req.Tag)
-	}
+	query := "select * from finding "
+	where, params := generateListFindingWhereSQL(req)
+	query += where
 	query += fmt.Sprintf(" order by %s %s", req.Sort, req.Direction)
 	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
 	var data []model.Finding
@@ -45,34 +24,44 @@ where
 }
 
 func (f *findingDB) ListFindingCount(req *finding.ListFindingRequest) (uint32, error) {
-	query := `
-select count(*)
-from finding f
-where
-  f.project_id = ?
-  and f.score between ? and ?
-  and f.updated_at between ? and ?
-`
-	var params []interface{}
-	// where
-	params = append(params, req.ProjectId, req.FromScore, req.ToScore, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
-	if len(req.DataSource) > 0 {
-		query += " and f.data_source regexp ?"
-		params = append(params, strings.Join(req.DataSource, "|"))
-	}
-	if len(req.ResourceName) > 0 {
-		query += " and f.resource_name regexp ?"
-		params = append(params, strings.Join(req.ResourceName, "|"))
-	}
-	if len(req.Tag) > 0 {
-		query += " and exists (select * from finding_tag ft where ft.finding_id=f.finding_id and ft.tag in (?))"
-		params = append(params, req.Tag)
-	}
+	query := "select count(*) from finding "
+	where, params := generateListFindingWhereSQL(req)
+	query += where
 	var count uint32
 	if err := f.Slave.Raw(query, params...).Count(&count).Error; err != nil {
 		return count, err
 	}
 	return count, nil
+}
+
+func generateListFindingWhereSQL(req *finding.ListFindingRequest) (string, []interface{}) {
+	query := `
+where
+  finding.project_id = ?
+  and finding.score between ? and ?
+  and finding.updated_at between ? and ?
+`
+	var params []interface{}
+	params = append(params, req.ProjectId, req.FromScore, req.ToScore, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
+	if len(req.DataSource) > 0 {
+		query += " and finding.data_source regexp ?"
+		params = append(params, strings.Join(req.DataSource, "|"))
+	}
+	if len(req.ResourceName) > 0 {
+		query += " and finding.resource_name regexp ?"
+		params = append(params, strings.Join(req.ResourceName, "|"))
+	}
+	if len(req.Tag) > 0 {
+		query += " and exists (select * from finding_tag ft where ft.finding_id=finding.finding_id and ft.tag in (?))"
+		params = append(params, req.Tag)
+	}
+	if req.Status == finding.FindingStatus_FINDING_ACTIVE {
+		query += " and not exists (select * from pend_finding pf where pf.finding_id=finding.finding_id)"
+	}
+	if req.Status == finding.FindingStatus_FINDING_PENDING {
+		query += " and exists (select * from pend_finding pf where pf.finding_id=finding.finding_id)"
+	}
+	return query, params
 }
 
 const selectGetFinding = `select * from finding where project_id = ? and finding_id = ?`
