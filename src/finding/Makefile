@@ -18,7 +18,7 @@ list-service:
 list-finding:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "sort": "finding_id", "direction": "desc", "offset":0, "limit":1}' \
+		-d '{"project_id":1001, "status":0, "sort": "finding_id", "direction": "desc", "offset":0, "limit":1}' \
 		localhost:8001 core.finding.FindingService.ListFinding
 
 .PHONY: get-finding
