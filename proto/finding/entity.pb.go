@@ -25,6 +25,56 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
+// FindingStatus
+type FindingStatus int32
+
+const (
+	FindingStatus_FINDING_UNKNOWN FindingStatus = 0
+	FindingStatus_FINDING_ACTIVE  FindingStatus = 1
+	FindingStatus_FINDING_PENDING FindingStatus = 2
+)
+
+// Enum value maps for FindingStatus.
+var (
+	FindingStatus_name = map[int32]string{
+		0: "FINDING_UNKNOWN",
+		1: "FINDING_ACTIVE",
+		2: "FINDING_PENDING",
+	}
+	FindingStatus_value = map[string]int32{
+		"FINDING_UNKNOWN": 0,
+		"FINDING_ACTIVE":  1,
+		"FINDING_PENDING": 2,
+	}
+)
+
+func (x FindingStatus) Enum() *FindingStatus {
+	p := new(FindingStatus)
+	*p = x
+	return p
+}
+
+func (x FindingStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (FindingStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_finding_entity_proto_enumTypes[0].Descriptor()
+}
+
+func (FindingStatus) Type() protoreflect.EnumType {
+	return &file_finding_entity_proto_enumTypes[0]
+}
+
+func (x FindingStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use FindingStatus.Descriptor instead.
+func (FindingStatus) EnumDescriptor() ([]byte, []int) {
+	return file_finding_entity_proto_rawDescGZIP(), []int{0}
+}
+
 // Finding
 type Finding struct {
 	state         protoimpl.MessageState
@@ -954,11 +1004,16 @@ var file_finding_entity_proto_rawDesc = []byte{
 	0x0a, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
 	0x04, 0x52, 0x09, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a,
 	0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d,
-	0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x42, 0x31, 0x5a, 0x2f, 0x67,
-	0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x43, 0x79, 0x62, 0x65, 0x72, 0x41,
-	0x67, 0x65, 0x6e, 0x74, 0x2f, 0x6d, 0x69, 0x6d, 0x6f, 0x73, 0x61, 0x2d, 0x63, 0x6f, 0x72, 0x65,
-	0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x62, 0x06,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x2a, 0x4d, 0x0a, 0x0d, 0x46,
+	0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x13, 0x0a, 0x0f,
+	0x46, 0x49, 0x4e, 0x44, 0x49, 0x4e, 0x47, 0x5f, 0x55, 0x4e, 0x4b, 0x4e, 0x4f, 0x57, 0x4e, 0x10,
+	0x00, 0x12, 0x12, 0x0a, 0x0e, 0x46, 0x49, 0x4e, 0x44, 0x49, 0x4e, 0x47, 0x5f, 0x41, 0x43, 0x54,
+	0x49, 0x56, 0x45, 0x10, 0x01, 0x12, 0x13, 0x0a, 0x0f, 0x46, 0x49, 0x4e, 0x44, 0x49, 0x4e, 0x47,
+	0x5f, 0x50, 0x45, 0x4e, 0x44, 0x49, 0x4e, 0x47, 0x10, 0x02, 0x42, 0x31, 0x5a, 0x2f, 0x67, 0x69,
+	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x43, 0x79, 0x62, 0x65, 0x72, 0x41, 0x67,
+	0x65, 0x6e, 0x74, 0x2f, 0x6d, 0x69, 0x6d, 0x6f, 0x73, 0x61, 0x2d, 0x63, 0x6f, 0x72, 0x65, 0x2f,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x62, 0x06, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -973,18 +1028,20 @@ func file_finding_entity_proto_rawDescGZIP() []byte {
 	return file_finding_entity_proto_rawDescData
 }
 
+var file_finding_entity_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_finding_entity_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_finding_entity_proto_goTypes = []interface{}{
-	(*Finding)(nil),              // 0: core.finding.Finding
-	(*FindingForUpsert)(nil),     // 1: core.finding.FindingForUpsert
-	(*FindingTag)(nil),           // 2: core.finding.FindingTag
-	(*FindingTagForUpsert)(nil),  // 3: core.finding.FindingTagForUpsert
-	(*Resource)(nil),             // 4: core.finding.Resource
-	(*ResourceForUpsert)(nil),    // 5: core.finding.ResourceForUpsert
-	(*ResourceTag)(nil),          // 6: core.finding.ResourceTag
-	(*ResourceTagForUpsert)(nil), // 7: core.finding.ResourceTagForUpsert
-	(*PendFinding)(nil),          // 8: core.finding.PendFinding
-	(*PendFindingForUpsert)(nil), // 9: core.finding.PendFindingForUpsert
+	(FindingStatus)(0),           // 0: core.finding.FindingStatus
+	(*Finding)(nil),              // 1: core.finding.Finding
+	(*FindingForUpsert)(nil),     // 2: core.finding.FindingForUpsert
+	(*FindingTag)(nil),           // 3: core.finding.FindingTag
+	(*FindingTagForUpsert)(nil),  // 4: core.finding.FindingTagForUpsert
+	(*Resource)(nil),             // 5: core.finding.Resource
+	(*ResourceForUpsert)(nil),    // 6: core.finding.ResourceForUpsert
+	(*ResourceTag)(nil),          // 7: core.finding.ResourceTag
+	(*ResourceTagForUpsert)(nil), // 8: core.finding.ResourceTagForUpsert
+	(*PendFinding)(nil),          // 9: core.finding.PendFinding
+	(*PendFindingForUpsert)(nil), // 10: core.finding.PendFindingForUpsert
 }
 var file_finding_entity_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -1126,13 +1183,14 @@ func file_finding_entity_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_finding_entity_proto_rawDesc,
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_finding_entity_proto_goTypes,
 		DependencyIndexes: file_finding_entity_proto_depIdxs,
+		EnumInfos:         file_finding_entity_proto_enumTypes,
 		MessageInfos:      file_finding_entity_proto_msgTypes,
 	}.Build()
 	File_finding_entity_proto = out.File

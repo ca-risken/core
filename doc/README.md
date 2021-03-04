@@ -96,6 +96,8 @@
     - [ResourceTag](#core.finding.ResourceTag)
     - [ResourceTagForUpsert](#core.finding.ResourceTagForUpsert)
   
+    - [FindingStatus](#core.finding.FindingStatus)
+  
 - [finding/service.proto](#finding/service.proto)
     - [DeleteFindingRequest](#core.finding.DeleteFindingRequest)
     - [DeletePendFindingRequest](#core.finding.DeletePendFindingRequest)
@@ -1746,6 +1748,19 @@ ResourceTag For upsert
 
  
 
+
+<a name="core.finding.FindingStatus"></a>
+
+### FindingStatus
+FindingStatus
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| FINDING_UNKNOWN | 0 |  |
+| FINDING_ACTIVE | 1 |  |
+| FINDING_PENDING | 2 |  |
+
+
  
 
  
@@ -1922,6 +1937,7 @@ ResourceTag For upsert
 | direction | [string](#string) |  |  |
 | offset | [int32](#int32) |  |  |
 | limit | [int32](#int32) |  |  |
+| status | [FindingStatus](#core.finding.FindingStatus) |  |  |
 
 
 

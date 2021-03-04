@@ -122,3 +122,10 @@ message PendFindingForUpsert {
 //   TAG = 8;
 //   UPDATED_AT = 9;
 // }
+
+// FindingStatus
+enum FindingStatus {
+  FINDING_UNKNOWN = 0;
+  FINDING_ACTIVE = 1;
+  FINDING_PENDING = 2;
+}
