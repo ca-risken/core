@@ -113,6 +113,9 @@ log:
 log-finding:
 	. env.sh && docker-compose logs -f finding
 
+log-project:
+	. env.sh && docker-compose logs -f project
+
 log-report:
 	. env.sh && docker-compose logs -f report
 
