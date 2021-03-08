@@ -119,6 +119,8 @@ func (m *ProjectTag) Validate() error {
 
 	// no validation rules for Tag
 
+	// no validation rules for Color
+
 	// no validation rules for CreatedAt
 
 	// no validation rules for UpdatedAt

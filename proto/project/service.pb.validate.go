@@ -608,6 +608,13 @@ func (m *TagProjectRequest) Validate() error {
 		}
 	}
 
+	if l := utf8.RuneCountInString(m.GetColor()); l < 0 || l > 32 {
+		return TagProjectRequestValidationError{
+			field:  "Color",
+			reason: "value length must be between 0 and 32 runes, inclusive",
+		}
+	}
+
 	return nil
 }
 
@@ -675,10 +682,10 @@ func (m *TagProjectResponse) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetProject()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetProjectTag()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return TagProjectResponseValidationError{
-				field:  "Project",
+				field:  "ProjectTag",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}

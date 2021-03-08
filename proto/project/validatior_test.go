@@ -143,7 +143,11 @@ func TestValidate_TagProjectRequest(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:  "OK",
+			name:  "OK(full)",
+			input: &TagProjectRequest{ProjectId: 1, Tag: "tag", Color: "color"},
+		},
+		{
+			name:  "OK(minimum)",
 			input: &TagProjectRequest{ProjectId: 1, Tag: "tag"},
 		},
 		{
@@ -152,13 +156,18 @@ func TestValidate_TagProjectRequest(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG Required(name)",
+			name:    "NG Required(tag)",
 			input:   &TagProjectRequest{ProjectId: 1},
 			wantErr: true,
 		},
 		{
-			name:    "NG Length",
+			name:    "NG Length(tag)",
 			input:   &TagProjectRequest{ProjectId: 1, Tag: "12345678901234567890123456789012345678901234567890123456789012345"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Length(color)",
+			input:   &TagProjectRequest{ProjectId: 1, Tag: "tag", Color: "123456789012345678901234567890123"},
 			wantErr: true,
 		},
 	}

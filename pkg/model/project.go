@@ -14,6 +14,7 @@ type Project struct {
 type ProjectTag struct {
 	ProjectID uint32
 	Tag       string
+	Color     string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
