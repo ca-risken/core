@@ -3130,7 +3130,7 @@ Project
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
 | name | [string](#string) |  |  |
-| tag | [string](#string) | repeated |  |
+| tag | [ProjectTag](#core.project.ProjectTag) | repeated |  |
 | created_at | [int64](#int64) |  |  |
 | updated_at | [int64](#int64) |  |  |
 
