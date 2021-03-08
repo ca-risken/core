@@ -9,3 +9,11 @@ type Project struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+// ProjectTag entity model
+type ProjectTag struct {
+	ProjectID uint32
+	Tag       string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}

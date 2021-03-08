@@ -187,6 +187,7 @@
   
 - [project/entity.proto](#project/entity.proto)
     - [Project](#core.project.Project)
+    - [ProjectTag](#core.project.ProjectTag)
   
 - [project/service.proto](#project/service.proto)
     - [CreateProjectRequest](#core.project.CreateProjectRequest)
@@ -194,6 +195,9 @@
     - [DeleteProjectRequest](#core.project.DeleteProjectRequest)
     - [ListProjectRequest](#core.project.ListProjectRequest)
     - [ListProjectResponse](#core.project.ListProjectResponse)
+    - [TagProjectRequest](#core.project.TagProjectRequest)
+    - [TagProjectResponse](#core.project.TagProjectResponse)
+    - [UntagProjectRequest](#core.project.UntagProjectRequest)
     - [UpdateProjectRequest](#core.project.UpdateProjectRequest)
     - [UpdateProjectResponse](#core.project.UpdateProjectResponse)
   
@@ -3126,6 +3130,25 @@ Project
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
 | name | [string](#string) |  |  |
+| tag | [string](#string) | repeated |  |
+| created_at | [int64](#int64) |  |  |
+| updated_at | [int64](#int64) |  |  |
+
+
+
+
+
+
+<a name="core.project.ProjectTag"></a>
+
+### ProjectTag
+ProjectTag
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| tag | [string](#string) |  |  |
 | created_at | [int64](#int64) |  |  |
 | updated_at | [int64](#int64) |  |  |
 
@@ -3228,6 +3251,53 @@ Project
 
 
 
+<a name="core.project.TagProjectRequest"></a>
+
+### TagProjectRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| tag | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="core.project.TagProjectResponse"></a>
+
+### TagProjectResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project | [ProjectTag](#core.project.ProjectTag) |  |  |
+
+
+
+
+
+
+<a name="core.project.UntagProjectRequest"></a>
+
+### UntagProjectRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| tag | [string](#string) |  |  |
+
+
+
+
+
+
 <a name="core.project.UpdateProjectRequest"></a>
 
 ### UpdateProjectRequest
@@ -3276,6 +3346,8 @@ Project
 | CreateProject | [CreateProjectRequest](#core.project.CreateProjectRequest) | [CreateProjectResponse](#core.project.CreateProjectResponse) |  |
 | UpdateProject | [UpdateProjectRequest](#core.project.UpdateProjectRequest) | [UpdateProjectResponse](#core.project.UpdateProjectResponse) |  |
 | DeleteProject | [DeleteProjectRequest](#core.project.DeleteProjectRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
+| TagProject | [TagProjectRequest](#core.project.TagProjectRequest) | [TagProjectResponse](#core.project.TagProjectResponse) | project_tag |
+| UntagProject | [UntagProjectRequest](#core.project.UntagProjectRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 
  
 

@@ -31,7 +31,7 @@ doc: fmt
 
 # build without protoc-gen-validate
 build: fmt doc
-	for svc in "alert" "finding" "iam" "project"; do \
+	for svc in "alert" "finding" "iam"; do \
 		protoc \
 			--proto_path=proto \
 			--error_format=gcc \
@@ -41,7 +41,7 @@ build: fmt doc
 
 # build with protoc-gen-validate
 build-validate: fmt doc
-	for svc in "report"; do \
+	for svc in "project" "report"; do \
 		protoc \
 			--proto_path=proto \
 			--error_format=gcc \
