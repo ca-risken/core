@@ -5,6 +5,7 @@ option go_package = "github.com/CyberAgent/mimosa-core/proto/project";
 
 import "google/protobuf/empty.proto";
 import "project/entity.proto";
+import "validate/validate.proto";
 
 service ProjectService {
   // project
@@ -17,23 +18,25 @@ service ProjectService {
 message ListProjectRequest {
   uint32 user_id = 1;
   uint32 project_id = 2;
-  string name = 3;
+  string name = 3 [ (validate.rules).string.max_len = 64 ];
 }
 
 message ListProjectResponse { repeated Project project = 1; }
 
 message CreateProjectRequest {
-  uint32 user_id = 1; // project owner
-  string name = 2;
+  uint32 user_id = 1 [ (validate.rules).uint32.gt = 0 ]; // project owner
+  string name = 2 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
 }
 
 message CreateProjectResponse { Project project = 1; }
 
 message UpdateProjectRequest {
-  uint32 project_id = 1;
-  string name = 2;
+  uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  string name = 2 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
 }
 
 message UpdateProjectResponse { Project project = 1; }
 
-message DeleteProjectRequest { uint32 project_id = 1; }
+message DeleteProjectRequest {
+  uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ];
+}
