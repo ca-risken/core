@@ -135,3 +135,74 @@ func TestValidate_DeleteProjectRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestValidate_TagProjectRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *TagProjectRequest
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &TagProjectRequest{ProjectId: 1, Tag: "tag"},
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &TagProjectRequest{Tag: "tag"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(name)",
+			input:   &TagProjectRequest{ProjectId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Length",
+			input:   &TagProjectRequest{ProjectId: 1, Tag: "12345678901234567890123456789012345678901234567890123456789012345"},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_UntagProjectRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *UntagProjectRequest
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &UntagProjectRequest{ProjectId: 1, Tag: "tag"},
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &UntagProjectRequest{Tag: "tag"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(tag)",
+			input:   &UntagProjectRequest{ProjectId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}

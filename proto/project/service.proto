@@ -13,6 +13,10 @@ service ProjectService {
   rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse);
   rpc UpdateProject(UpdateProjectRequest) returns (UpdateProjectResponse);
   rpc DeleteProject(DeleteProjectRequest) returns (google.protobuf.Empty);
+
+  // project_tag
+  rpc TagProject(TagProjectRequest) returns (TagProjectResponse);
+  rpc UntagProject(UntagProjectRequest) returns (google.protobuf.Empty);
 }
 
 message ListProjectRequest {
@@ -39,4 +43,16 @@ message UpdateProjectResponse { Project project = 1; }
 
 message DeleteProjectRequest {
   uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ];
+}
+
+message TagProjectRequest {
+  uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  string tag = 2 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
+}
+
+message TagProjectResponse { ProjectTag project = 1; }
+
+message UntagProjectRequest {
+  uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  string tag = 2 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
 }

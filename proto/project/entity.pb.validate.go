@@ -107,3 +107,75 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ProjectValidationError{}
+
+// Validate checks the field values on ProjectTag with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *ProjectTag) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for ProjectId
+
+	// no validation rules for Tag
+
+	// no validation rules for CreatedAt
+
+	// no validation rules for UpdatedAt
+
+	return nil
+}
+
+// ProjectTagValidationError is the validation error returned by
+// ProjectTag.Validate if the designated constraints aren't met.
+type ProjectTagValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ProjectTagValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ProjectTagValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ProjectTagValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ProjectTagValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ProjectTagValidationError) ErrorName() string { return "ProjectTagValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ProjectTagValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sProjectTag.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ProjectTagValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ProjectTagValidationError{}

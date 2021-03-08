@@ -585,3 +585,242 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DeleteProjectRequestValidationError{}
+
+// Validate checks the field values on TagProjectRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *TagProjectRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if m.GetProjectId() <= 0 {
+		return TagProjectRequestValidationError{
+			field:  "ProjectId",
+			reason: "value must be greater than 0",
+		}
+	}
+
+	if l := utf8.RuneCountInString(m.GetTag()); l < 1 || l > 64 {
+		return TagProjectRequestValidationError{
+			field:  "Tag",
+			reason: "value length must be between 1 and 64 runes, inclusive",
+		}
+	}
+
+	return nil
+}
+
+// TagProjectRequestValidationError is the validation error returned by
+// TagProjectRequest.Validate if the designated constraints aren't met.
+type TagProjectRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e TagProjectRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e TagProjectRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e TagProjectRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e TagProjectRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e TagProjectRequestValidationError) ErrorName() string {
+	return "TagProjectRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e TagProjectRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sTagProjectRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = TagProjectRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = TagProjectRequestValidationError{}
+
+// Validate checks the field values on TagProjectResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *TagProjectResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if v, ok := interface{}(m.GetProject()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return TagProjectResponseValidationError{
+				field:  "Project",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	return nil
+}
+
+// TagProjectResponseValidationError is the validation error returned by
+// TagProjectResponse.Validate if the designated constraints aren't met.
+type TagProjectResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e TagProjectResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e TagProjectResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e TagProjectResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e TagProjectResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e TagProjectResponseValidationError) ErrorName() string {
+	return "TagProjectResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e TagProjectResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sTagProjectResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = TagProjectResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = TagProjectResponseValidationError{}
+
+// Validate checks the field values on UntagProjectRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *UntagProjectRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if m.GetProjectId() <= 0 {
+		return UntagProjectRequestValidationError{
+			field:  "ProjectId",
+			reason: "value must be greater than 0",
+		}
+	}
+
+	if l := utf8.RuneCountInString(m.GetTag()); l < 1 || l > 64 {
+		return UntagProjectRequestValidationError{
+			field:  "Tag",
+			reason: "value length must be between 1 and 64 runes, inclusive",
+		}
+	}
+
+	return nil
+}
+
+// UntagProjectRequestValidationError is the validation error returned by
+// UntagProjectRequest.Validate if the designated constraints aren't met.
+type UntagProjectRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UntagProjectRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UntagProjectRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UntagProjectRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UntagProjectRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UntagProjectRequestValidationError) ErrorName() string {
+	return "UntagProjectRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UntagProjectRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUntagProjectRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UntagProjectRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UntagProjectRequestValidationError{}
