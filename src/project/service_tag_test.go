@@ -28,9 +28,9 @@ func TestTagProject(t *testing.T) {
 	}{
 		{
 			name:         "OK",
-			input:        &project.TagProjectRequest{ProjectId: 1, Tag: "tag"},
-			want:         &project.TagProjectResponse{Project: &project.ProjectTag{ProjectId: 1, Tag: "tag", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockResponce: &model.ProjectTag{ProjectID: 1, Tag: "tag", CreatedAt: now, UpdatedAt: now},
+			input:        &project.TagProjectRequest{ProjectId: 1, Tag: "tag", Color: "blue"},
+			want:         &project.TagProjectResponse{ProjectTag: &project.ProjectTag{ProjectId: 1, Tag: "tag", Color: "blue", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockResponce: &model.ProjectTag{ProjectID: 1, Tag: "tag", Color: "blue", CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:    "NG Invalid params",

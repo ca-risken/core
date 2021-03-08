@@ -58,7 +58,7 @@ type projectRepository interface {
 	UpdateProject(projectID uint32, name string) (*model.Project, error)
 
 	ListProjectTag(projectID uint32) (*[]model.ProjectTag, error)
-	TagProject(projectID uint32, tag string) (*model.ProjectTag, error)
+	TagProject(projectID uint32, tag, color string) (*model.ProjectTag, error)
 	UntagProject(projectID uint32, tag string) error
 }
 

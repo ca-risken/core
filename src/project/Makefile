@@ -46,14 +46,14 @@ delete-project:
 tag-project:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "tag":"key:value"}' \
+		-d '{"project_id":1001, "tag":"key:value", "color":"blue"}' \
 		localhost:8003 core.project.ProjectService.TagProject
 
 .PHONY: tag-project2
 tag-project2:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "tag":"key:value2"}' \
+		-d '{"project_id":1001, "tag":"key:value2", "color":"green"}' \
 		localhost:8003 core.project.ProjectService.TagProject
 
 .PHONY: untag-project

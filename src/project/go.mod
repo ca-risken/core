@@ -3,9 +3,9 @@ module github.com/CyberAgent/src/project
 go 1.16
 
 require (
-	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210308084022-523df78e8f76
-	github.com/CyberAgent/mimosa-core/proto/iam v0.0.0-20210308084022-523df78e8f76
-	github.com/CyberAgent/mimosa-core/proto/project v0.0.0-20210308084022-523df78e8f76
+	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210308154506-ce27f6a7b93d
+	github.com/CyberAgent/mimosa-core/proto/iam v0.0.0-20210308154506-ce27f6a7b93d
+	github.com/CyberAgent/mimosa-core/proto/project v0.0.0-20210308154506-ce27f6a7b93d
 	github.com/envoyproxy/protoc-gen-validate v0.4.1 // indirect
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
 	github.com/go-sql-driver/mysql v1.5.0

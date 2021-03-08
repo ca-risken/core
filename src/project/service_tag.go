@@ -12,6 +12,7 @@ func convertProjectTag(p *model.ProjectTag) *project.ProjectTag {
 	return &project.ProjectTag{
 		ProjectId: p.ProjectID,
 		Tag:       p.Tag,
+		Color:     p.Color,
 		CreatedAt: p.CreatedAt.Unix(),
 		UpdatedAt: p.UpdatedAt.Unix(),
 	}
@@ -21,11 +22,11 @@ func (p *projectService) TagProject(ctx context.Context, req *project.TagProject
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	tag, err := p.repository.TagProject(req.ProjectId, req.Tag)
+	tag, err := p.repository.TagProject(req.ProjectId, req.Tag, req.Color)
 	if err != nil {
 		return nil, err
 	}
-	return &project.TagProjectResponse{Project: convertProjectTag(tag)}, nil
+	return &project.TagProjectResponse{ProjectTag: convertProjectTag(tag)}, nil
 }
 
 func (p *projectService) UntagProject(ctx context.Context, req *project.UntagProjectRequest) (*empty.Empty, error) {
