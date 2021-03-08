@@ -48,9 +48,10 @@ message DeleteProjectRequest {
 message TagProjectRequest {
   uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ];
   string tag = 2 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
+  string color = 3 [ (validate.rules).string = {min_len : 0, max_len : 32} ];
 }
 
-message TagProjectResponse { ProjectTag project = 1; }
+message TagProjectResponse { ProjectTag project_tag = 1; }
 
 message UntagProjectRequest {
   uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ];

@@ -3149,6 +3149,7 @@ ProjectTag
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
 | tag | [string](#string) |  |  |
+| color | [string](#string) |  |  |
 | created_at | [int64](#int64) |  |  |
 | updated_at | [int64](#int64) |  |  |
 
@@ -3261,6 +3262,7 @@ ProjectTag
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
 | tag | [string](#string) |  |  |
+| color | [string](#string) |  |  |
 
 
 
@@ -3275,7 +3277,7 @@ ProjectTag
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| project | [ProjectTag](#core.project.ProjectTag) |  |  |
+| project_tag | [ProjectTag](#core.project.ProjectTag) |  |  |
 
 
 
