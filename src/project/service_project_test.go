@@ -33,8 +33,8 @@ func TestListProject(t *testing.T) {
 			want: &project.ListProjectResponse{
 				Project: []*project.Project{
 					{ProjectId: 1, Name: "a", Tag: []*project.ProjectTag{
-						{ProjectId: 1, Tag: "tag1", Color: "red", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-						{ProjectId: 1, Tag: "tag2", Color: "pink", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+						{ProjectId: 1, Tag: "tag1", Color: "red"},
+						{ProjectId: 1, Tag: "tag2", Color: "pink"},
 					}, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 					{ProjectId: 2, Name: "b", Tag: []*project.ProjectTag{}, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 				},

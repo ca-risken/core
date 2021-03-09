@@ -20,8 +20,8 @@ func convertProjectWithTag(p *projectWithTag) *project.Project {
 				ProjectId: t.ProjectID,
 				Tag:       t.Tag,
 				Color:     t.Color,
-				CreatedAt: t.CreatedAt.Unix(),
-				UpdatedAt: t.UpdatedAt.Unix(),
+				// CreatedAt: t.CreatedAt.Unix(), // Reduce the API response size
+				// UpdatedAt: t.UpdatedAt.Unix(),
 			})
 		}
 	}
