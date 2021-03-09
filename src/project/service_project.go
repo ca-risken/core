@@ -13,10 +13,16 @@ func convertProjectWithTag(p *projectWithTag) *project.Project {
 	if p == nil {
 		return &project.Project{}
 	}
-	tags := []string{}
+	tags := []*project.ProjectTag{}
 	if p.Tag != nil {
 		for _, t := range *p.Tag {
-			tags = append(tags, t.Tag)
+			tags = append(tags, &project.ProjectTag{
+				ProjectId: t.ProjectID,
+				Tag:       t.Tag,
+				Color:     t.Color,
+				// CreatedAt: t.CreatedAt.Unix(), // Reduce the API response size
+				// UpdatedAt: t.UpdatedAt.Unix(),
+			})
 		}
 	}
 	return &project.Project{

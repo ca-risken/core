@@ -30,7 +30,7 @@ func (m *mockRepository) ListProjectTag(projectID uint32) (*[]model.ProjectTag, 
 	args := m.Called()
 	return args.Get(0).(*[]model.ProjectTag), args.Error(1)
 }
-func (m *mockRepository) TagProject(projectID uint32, tag string) (*model.ProjectTag, error) {
+func (m *mockRepository) TagProject(projectID uint32, tag, color string) (*model.ProjectTag, error) {
 	args := m.Called()
 	return args.Get(0).(*model.ProjectTag), args.Error(1)
 }

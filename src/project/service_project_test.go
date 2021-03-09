@@ -32,12 +32,18 @@ func TestListProject(t *testing.T) {
 			input: &project.ListProjectRequest{UserId: 1},
 			want: &project.ListProjectResponse{
 				Project: []*project.Project{
-					{ProjectId: 1, Name: "a", Tag: []string{"tag1", "tag2"}, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-					{ProjectId: 2, Name: "b", Tag: []string{}, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+					{ProjectId: 1, Name: "a", Tag: []*project.ProjectTag{
+						{ProjectId: 1, Tag: "tag1", Color: "red"},
+						{ProjectId: 1, Tag: "tag2", Color: "pink"},
+					}, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+					{ProjectId: 2, Name: "b", Tag: []*project.ProjectTag{}, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 				},
 			},
 			mockResponce: &[]projectWithTag{
-				{ProjectID: 1, Name: "a", Tag: &[]model.ProjectTag{{ProjectID: 1, Tag: "tag1"}, {ProjectID: 1, Tag: "tag2"}}, CreatedAt: now, UpdatedAt: now},
+				{ProjectID: 1, Name: "a", Tag: &[]model.ProjectTag{
+					{ProjectID: 1, Tag: "tag1", Color: "red", CreatedAt: now, UpdatedAt: now},
+					{ProjectID: 1, Tag: "tag2", Color: "pink", CreatedAt: now, UpdatedAt: now},
+				}, CreatedAt: now, UpdatedAt: now},
 				{ProjectID: 2, Name: "b", CreatedAt: now, UpdatedAt: now},
 			},
 		},

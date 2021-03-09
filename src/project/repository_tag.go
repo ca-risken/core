@@ -27,14 +27,15 @@ func (p *projectDB) GetProjectTag(projectID uint32, tag string) (*model.ProjectT
 
 const insertTagProject string = `
 insert into project_tag
-  (project_id, tag)
+  (project_id, tag, color)
 values
-  (?, ?)
+  (?, ?, ?)
 on duplicate key update
+  color=VALUES(color),
   updated_at=NOW()`
 
-func (p *projectDB) TagProject(projectID uint32, tag string) (*model.ProjectTag, error) {
-	if err := p.Master.Exec(insertTagProject, projectID, tag).Error; err != nil {
+func (p *projectDB) TagProject(projectID uint32, tag, color string) (*model.ProjectTag, error) {
+	if err := p.Master.Exec(insertTagProject, projectID, tag, color).Error; err != nil {
 		return nil, err
 	}
 	return p.GetProjectTag(projectID, tag)
