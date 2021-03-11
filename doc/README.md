@@ -87,6 +87,8 @@
 - [finding/entity.proto](#finding/entity.proto)
     - [Finding](#core.finding.Finding)
     - [FindingForUpsert](#core.finding.FindingForUpsert)
+    - [FindingSetting](#core.finding.FindingSetting)
+    - [FindingSettingForUpsert](#core.finding.FindingSettingForUpsert)
     - [FindingTag](#core.finding.FindingTag)
     - [FindingTagForUpsert](#core.finding.FindingTagForUpsert)
     - [PendFinding](#core.finding.PendFinding)
@@ -96,20 +98,26 @@
     - [ResourceTag](#core.finding.ResourceTag)
     - [ResourceTagForUpsert](#core.finding.ResourceTagForUpsert)
   
+    - [FindingSettingStatus](#core.finding.FindingSettingStatus)
     - [FindingStatus](#core.finding.FindingStatus)
   
 - [finding/service.proto](#finding/service.proto)
     - [DeleteFindingRequest](#core.finding.DeleteFindingRequest)
+    - [DeleteFindingSettingRequest](#core.finding.DeleteFindingSettingRequest)
     - [DeletePendFindingRequest](#core.finding.DeletePendFindingRequest)
     - [DeleteResourceRequest](#core.finding.DeleteResourceRequest)
     - [GetFindingRequest](#core.finding.GetFindingRequest)
     - [GetFindingResponse](#core.finding.GetFindingResponse)
+    - [GetFindingSettingRequest](#core.finding.GetFindingSettingRequest)
+    - [GetFindingSettingResponse](#core.finding.GetFindingSettingResponse)
     - [GetPendFindingRequest](#core.finding.GetPendFindingRequest)
     - [GetPendFindingResponse](#core.finding.GetPendFindingResponse)
     - [GetResourceRequest](#core.finding.GetResourceRequest)
     - [GetResourceResponse](#core.finding.GetResourceResponse)
     - [ListFindingRequest](#core.finding.ListFindingRequest)
     - [ListFindingResponse](#core.finding.ListFindingResponse)
+    - [ListFindingSettingRequest](#core.finding.ListFindingSettingRequest)
+    - [ListFindingSettingResponse](#core.finding.ListFindingSettingResponse)
     - [ListFindingTagNameRequest](#core.finding.ListFindingTagNameRequest)
     - [ListFindingTagNameResponse](#core.finding.ListFindingTagNameResponse)
     - [ListFindingTagRequest](#core.finding.ListFindingTagRequest)
@@ -122,6 +130,8 @@
     - [ListResourceTagResponse](#core.finding.ListResourceTagResponse)
     - [PutFindingRequest](#core.finding.PutFindingRequest)
     - [PutFindingResponse](#core.finding.PutFindingResponse)
+    - [PutFindingSettingRequest](#core.finding.PutFindingSettingRequest)
+    - [PutFindingSettingResponse](#core.finding.PutFindingSettingResponse)
     - [PutPendFindingRequest](#core.finding.PutPendFindingRequest)
     - [PutPendFindingResponse](#core.finding.PutPendFindingResponse)
     - [PutResourceRequest](#core.finding.PutResourceRequest)
@@ -1605,6 +1615,45 @@ Finding For Upsert
 
 
 
+<a name="core.finding.FindingSetting"></a>
+
+### FindingSetting
+FindingSetting
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| finding_setting_id | [uint32](#uint32) |  |  |
+| project_id | [uint32](#uint32) |  |  |
+| resource_name | [string](#string) |  |  |
+| setting | [string](#string) |  |  |
+| status | [FindingSettingStatus](#core.finding.FindingSettingStatus) |  |  |
+| created_at | [int64](#int64) |  |  |
+| updated_at | [int64](#int64) |  |  |
+
+
+
+
+
+
+<a name="core.finding.FindingSettingForUpsert"></a>
+
+### FindingSettingForUpsert
+FindingSettingForUpsert
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| resource_name | [string](#string) |  |  |
+| setting | [string](#string) |  |  |
+| status | [FindingSettingStatus](#core.finding.FindingSettingStatus) |  |  |
+
+
+
+
+
+
 <a name="core.finding.FindingTag"></a>
 
 ### FindingTag
@@ -1753,6 +1802,19 @@ ResourceTag For upsert
  
 
 
+<a name="core.finding.FindingSettingStatus"></a>
+
+### FindingSettingStatus
+FindingSettingStatus
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| SETTING_UNKNOWN | 0 |  |
+| SETTING_ACTIVE | 1 |  |
+| SETTING_DEACTIVE | 2 |  |
+
+
+
 <a name="core.finding.FindingStatus"></a>
 
 ### FindingStatus
@@ -1790,6 +1852,22 @@ FindingStatus
 | ----- | ---- | ----- | ----------- |
 | project_id | [uint32](#uint32) |  |  |
 | finding_id | [uint64](#uint64) |  |  |
+
+
+
+
+
+
+<a name="core.finding.DeleteFindingSettingRequest"></a>
+
+### DeleteFindingSettingRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| finding_setting_id | [uint32](#uint32) |  |  |
 
 
 
@@ -1853,6 +1931,38 @@ FindingStatus
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | finding | [Finding](#core.finding.Finding) |  |  |
+
+
+
+
+
+
+<a name="core.finding.GetFindingSettingRequest"></a>
+
+### GetFindingSettingRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| finding_setting_id | [uint32](#uint32) |  |  |
+| status | [FindingSettingStatus](#core.finding.FindingSettingStatus) |  |  |
+
+
+
+
+
+
+<a name="core.finding.GetFindingSettingResponse"></a>
+
+### GetFindingSettingResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| finding_setting | [FindingSetting](#core.finding.FindingSetting) |  |  |
 
 
 
@@ -1959,6 +2069,37 @@ FindingStatus
 | finding_id | [uint64](#uint64) | repeated |  |
 | count | [uint32](#uint32) |  |  |
 | total | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="core.finding.ListFindingSettingRequest"></a>
+
+### ListFindingSettingRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| status | [FindingSettingStatus](#core.finding.FindingSettingStatus) |  |  |
+
+
+
+
+
+
+<a name="core.finding.ListFindingSettingResponse"></a>
+
+### ListFindingSettingResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| finding_setting | [FindingSetting](#core.finding.FindingSetting) | repeated |  |
 
 
 
@@ -2188,6 +2329,37 @@ FindingStatus
 
 
 
+<a name="core.finding.PutFindingSettingRequest"></a>
+
+### PutFindingSettingRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| finding_setting | [FindingSettingForUpsert](#core.finding.FindingSettingForUpsert) |  |  |
+
+
+
+
+
+
+<a name="core.finding.PutFindingSettingResponse"></a>
+
+### PutFindingSettingResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| finding_setting | [FindingSetting](#core.finding.FindingSetting) |  |  |
+
+
+
+
+
+
 <a name="core.finding.PutPendFindingRequest"></a>
 
 ### PutPendFindingRequest
@@ -2376,6 +2548,10 @@ FindingStatus
 | GetPendFinding | [GetPendFindingRequest](#core.finding.GetPendFindingRequest) | [GetPendFindingResponse](#core.finding.GetPendFindingResponse) | pend_finding |
 | PutPendFinding | [PutPendFindingRequest](#core.finding.PutPendFindingRequest) | [PutPendFindingResponse](#core.finding.PutPendFindingResponse) |  |
 | DeletePendFinding | [DeletePendFindingRequest](#core.finding.DeletePendFindingRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
+| ListFindingSetting | [ListFindingSettingRequest](#core.finding.ListFindingSettingRequest) | [ListFindingSettingResponse](#core.finding.ListFindingSettingResponse) | finding_setting |
+| GetFindingSetting | [GetFindingSettingRequest](#core.finding.GetFindingSettingRequest) | [GetFindingSettingResponse](#core.finding.GetFindingSettingResponse) |  |
+| PutFindingSetting | [PutFindingSettingRequest](#core.finding.PutFindingSettingRequest) | [PutFindingSettingResponse](#core.finding.PutFindingSettingResponse) |  |
+| DeleteFindingSetting | [DeleteFindingSettingRequest](#core.finding.DeleteFindingSettingRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 
  
 

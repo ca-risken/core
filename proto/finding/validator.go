@@ -3,8 +3,8 @@ package finding
 import (
 	"errors"
 
-	"github.com/go-ozzo/ozzo-validation/is"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
 // Validate ListFindingRequest
@@ -227,6 +227,42 @@ func (d *DeletePendFindingRequest) Validate() error {
 	)
 }
 
+// Validate for ListFindingSettingRequest
+func (l *ListFindingSettingRequest) Validate() error {
+	return validation.ValidateStruct(l,
+		validation.Field(&l.ProjectId, validation.Required),
+	)
+}
+
+// Validate for GetFindingSettingRequest
+func (g *GetFindingSettingRequest) Validate() error {
+	return validation.ValidateStruct(g,
+		validation.Field(&g.ProjectId, validation.Required),
+		validation.Field(&g.FindingSettingId, validation.Required),
+	)
+}
+
+// Validate for PutFindingSettingRequest
+func (p *PutFindingSettingRequest) Validate() error {
+	if validation.IsEmpty(p.FindingSetting) {
+		return errors.New("Required finding_setting parameter")
+	}
+	if err := validation.ValidateStruct(p,
+		validation.Field(&p.ProjectId, validation.In(p.FindingSetting.ProjectId)),
+	); err != nil {
+		return err
+	}
+	return p.FindingSetting.Validate()
+}
+
+// Validate for DeleteFindingSettingRequest
+func (d *DeleteFindingSettingRequest) Validate() error {
+	return validation.ValidateStruct(d,
+		validation.Field(&d.ProjectId, validation.Required),
+		validation.Field(&d.FindingSettingId, validation.Required),
+	)
+}
+
 /*
  * entities
 **/
@@ -268,9 +304,18 @@ func (r *ResourceTagForUpsert) Validate() error {
 }
 
 // Validate for PendFindingForUpsert
-func (r *PendFindingForUpsert) Validate() error {
-	return validation.ValidateStruct(r,
-		validation.Field(&r.FindingId, validation.Required),
-		validation.Field(&r.ProjectId, validation.Required),
+func (p *PendFindingForUpsert) Validate() error {
+	return validation.ValidateStruct(p,
+		validation.Field(&p.FindingId, validation.Required),
+		validation.Field(&p.ProjectId, validation.Required),
+	)
+}
+
+// Validate for FindingSettingForUpsert
+func (f *FindingSettingForUpsert) Validate() error {
+	return validation.ValidateStruct(f,
+		validation.Field(&f.ProjectId, validation.Required),
+		validation.Field(&f.ResourceName, validation.Required),
+		validation.Field(&f.Setting, validation.Required, is.JSON),
 	)
 }

@@ -931,6 +931,141 @@ func TestValidate_DeletePendFindingRequest(t *testing.T) {
 	}
 }
 
+func TestValidate_ListFindingSettingRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *ListFindingSettingRequest
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &ListFindingSettingRequest{ProjectId: 1, Status: FindingSettingStatus_SETTING_ACTIVE},
+		},
+		{
+			name:  "OK status unknown",
+			input: &ListFindingSettingRequest{ProjectId: 1, Status: FindingSettingStatus_SETTING_UNKNOWN},
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &ListFindingSettingRequest{Status: FindingSettingStatus_SETTING_ACTIVE},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_GetFindingSettingRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *GetFindingSettingRequest
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &GetFindingSettingRequest{ProjectId: 1, FindingSettingId: 1, Status: FindingSettingStatus_SETTING_ACTIVE},
+		},
+		{
+			name:  "OK status unknown",
+			input: &GetFindingSettingRequest{ProjectId: 1, FindingSettingId: 1, Status: FindingSettingStatus_SETTING_UNKNOWN},
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &GetFindingSettingRequest{FindingSettingId: 1, Status: FindingSettingStatus_SETTING_ACTIVE},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(finding_setting_id)",
+			input:   &GetFindingSettingRequest{ProjectId: 1, Status: FindingSettingStatus_SETTING_ACTIVE},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_PutFindingSettingRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *PutFindingSettingRequest
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &PutFindingSettingRequest{ProjectId: 1, FindingSetting: &FindingSettingForUpsert{ProjectId: 1, ResourceName: "rn", Setting: `{"k":"v"}`, Status: FindingSettingStatus_SETTING_ACTIVE}},
+		},
+		{
+			name:    "NG Required(finding_setting)",
+			input:   &PutFindingSettingRequest{ProjectId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Not Equal(project_id)",
+			input:   &PutFindingSettingRequest{ProjectId: 999, FindingSetting: &FindingSettingForUpsert{ProjectId: 1, ResourceName: "rn", Setting: `{"k":"v"}`, Status: FindingSettingStatus_SETTING_ACTIVE}},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_DeleteFindingSettingRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *DeleteFindingSettingRequest
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &DeleteFindingSettingRequest{ProjectId: 1, FindingSettingId: 1},
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &DeleteFindingSettingRequest{FindingSettingId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG required(finding_setting_id)",
+			input:   &DeleteFindingSettingRequest{ProjectId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
 func TestValidate_FindingForUpsert(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -1156,6 +1291,49 @@ func TestValidate_PendFindingForUpsert(t *testing.T) {
 		{
 			name:    "NG required PendingId",
 			input:   &PendFindingForUpsert{FindingId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_FindingSettingForUpsert(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *FindingSettingForUpsert
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &FindingSettingForUpsert{ProjectId: 1, ResourceName: "rn", Setting: "{}", Status: FindingSettingStatus_SETTING_ACTIVE},
+		},
+		{
+			name:    "NG required ProjectId",
+			input:   &FindingSettingForUpsert{ResourceName: "rn", Setting: "{}", Status: FindingSettingStatus_SETTING_ACTIVE},
+			wantErr: true,
+		},
+		{
+			name:    "NG required ProjectId",
+			input:   &FindingSettingForUpsert{ProjectId: 1, Setting: "{}", Status: FindingSettingStatus_SETTING_ACTIVE},
+			wantErr: true,
+		},
+		{
+			name:    "NG required Setting",
+			input:   &FindingSettingForUpsert{ProjectId: 1, ResourceName: "rn", Status: FindingSettingStatus_SETTING_ACTIVE},
+			wantErr: true,
+		},
+		{
+			name:    "NG is not JSON Setting",
+			input:   &FindingSettingForUpsert{ProjectId: 1, ResourceName: "rn", Setting: "{", Status: FindingSettingStatus_SETTING_ACTIVE},
 			wantErr: true,
 		},
 	}

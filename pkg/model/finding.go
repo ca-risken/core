@@ -4,7 +4,7 @@ import "time"
 
 // Finding entity model
 type Finding struct {
-	FindingID     uint64
+	FindingID     uint64 `gorm:"primary_key"`
 	Description   string
 	DataSource    string
 	DataSourceID  string
@@ -19,7 +19,7 @@ type Finding struct {
 
 // FindingTag entity model
 type FindingTag struct {
-	FindingTagID uint64
+	FindingTagID uint64 `gorm:"primary_key"`
 	FindingID    uint64
 	ProjectID    uint32
 	Tag          string
@@ -29,7 +29,7 @@ type FindingTag struct {
 
 // Resource entity model
 type Resource struct {
-	ResourceID   uint64
+	ResourceID   uint64 `gorm:"primary_key"`
 	ResourceName string
 	ProjectID    uint32
 	CreatedAt    time.Time
@@ -38,7 +38,7 @@ type Resource struct {
 
 // ResourceTag entity model
 type ResourceTag struct {
-	ResourceTagID uint64
+	ResourceTagID uint64 `gorm:"primary_key"`
 	ResourceID    uint64
 	ProjectID     uint32
 	Tag           string
@@ -48,8 +48,19 @@ type ResourceTag struct {
 
 // PendFinding entity model
 type PendFinding struct {
-	FindingID uint64
+	FindingID uint64 `gorm:"primary_key"`
 	ProjectID uint32
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+// FindingSetting entity model
+type FindingSetting struct {
+	FindingSettingID uint32 `gorm:"primary_key"`
+	ProjectID        uint32
+	ResourceName     string
+	Setting          string
+	Status           string
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
