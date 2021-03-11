@@ -11,22 +11,33 @@ import (
 )
 
 type slackWebhookConfig struct {
-	Channel              string
 	NotificationAlertURL string `split_words:"true"`
 }
 
-func newslackWebhookConfig(channel string) (*slackWebhookConfig, error) {
+func newslackWebhookConfig() (*slackWebhookConfig, error) {
 	config := &slackWebhookConfig{}
 	if err := envconfig.Process("", config); err != nil {
 		return nil, err
 	}
-	config.Channel = channel
 	return config, nil
 }
 
-func (t *slackWebhookConfig) GetPayload(alert *model.Alert, project *model.Project) (string, error) {
-	now := time.Now().Unix()
+func (t *slackWebhookConfig) GetPayload(channel, message string, alert *model.Alert, project *model.Project) (string, error) {
+	payload := map[string]interface{}{}
+	// text
 	text := fmt.Sprintf("%vアラートを検知しました。", getMention(alert.Severity))
+	if !zero.IsZeroVal(message) {
+		text = message // update message
+	}
+	payload["text"] = text
+
+	// channel
+	if !zero.IsZeroVal(channel) {
+		payload["channel"] = channel
+	}
+
+	// attachments
+	now := time.Now().Unix()
 	attachments := []interface{}{
 		map[string]interface{}{
 			"color": getColor(alert.Severity),
@@ -56,19 +67,13 @@ func (t *slackWebhookConfig) GetPayload(alert *model.Alert, project *model.Proje
 			"ts":     now,
 		},
 	}
-	payload := map[string]interface{}{}
-	payload["text"] = text
-
 	payload["attachments"] = attachments
-	if !zero.IsZeroVal(t.Channel) {
-		payload["channel"] = t.Channel
-	}
-	p, err := json.Marshal(payload)
-	appLogger.Infof("json: %v", string(p))
+	buf, err := json.Marshal(payload)
 	if err != nil {
 		return "", err
 	}
-	return string(p), err
+	appLogger.Debugf("Slack Webhook contents: %s", string(buf))
+	return string(buf), err
 }
 
 func getColor(severity string) string {
