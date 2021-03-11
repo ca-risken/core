@@ -424,16 +424,20 @@ func sendSlackNotification(notifySetting string, alert *model.Alert, project *mo
 		appLogger.Warn("Unset webhook_url")
 		return nil
 	}
-	var channel string
+	channel := ""
 	if !zero.IsZeroVal(setting.Data["channel"]) {
 		channel = setting.Data["channel"]
 	}
-	slackAlert, err := newslackWebhookConfig(channel)
+	message := ""
+	if !zero.IsZeroVal(setting.Data["message"]) {
+		message = setting.Data["message"]
+	}
+	slackConfig, err := newslackWebhookConfig()
 	if err != nil {
 		return err
 	}
 
-	payload, err := slackAlert.GetPayload(alert, project)
+	payload, err := slackConfig.GetPayload(channel, message, alert, project)
 	if err != nil {
 		return err
 	}

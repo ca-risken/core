@@ -93,7 +93,7 @@ go-mod-update:
 			github.com/CyberAgent/mimosa-core/...
 
 run: go-test network
-	. env.sh && docker-compose up -d
+	. env.sh && docker-compose up -d --build 
 
 run-finding: go-test network
 	. env.sh && docker-compose up -d --build finding
@@ -115,6 +115,9 @@ log-finding:
 
 log-project:
 	. env.sh && docker-compose logs -f project
+
+log-alert:
+	. env.sh && docker-compose logs -f alert
 
 log-report:
 	. env.sh && docker-compose logs -f report
