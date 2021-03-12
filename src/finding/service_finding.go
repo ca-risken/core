@@ -12,10 +12,6 @@ import (
 	"github.com/vikyd/zero"
 )
 
-/**
- * Finding
- */
-
 func (f *findingService) ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*finding.ListFindingResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
@@ -89,6 +85,10 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 	if !noRecord {
 		findingID = savedData.FindingID
 	}
+	fs, err := f.getFindingSettingByResource(req.ProjectId, req.Finding.ResourceName)
+	if err != nil {
+		return nil, err
+	}
 	data := &model.Finding{
 		FindingID:     findingID,
 		Description:   req.Finding.Description,
@@ -97,7 +97,7 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 		ResourceName:  req.Finding.ResourceName,
 		ProjectID:     req.Finding.ProjectId,
 		OriginalScore: req.Finding.OriginalScore,
-		Score:         calculateScore(req.Finding.OriginalScore, req.Finding.OriginalMaxScore),
+		Score:         calculateScore(req.Finding.OriginalScore, req.Finding.OriginalMaxScore, fs),
 		Data:          req.Finding.Data,
 	}
 
@@ -130,10 +130,6 @@ func (f *findingService) DeleteFinding(ctx context.Context, req *finding.DeleteF
 	}
 	return &empty.Empty{}, nil
 }
-
-/**
- * FindingTag
- */
 
 func (f *findingService) ListFindingTag(ctx context.Context, req *finding.ListFindingTagRequest) (*finding.ListFindingTagResponse, error) {
 	if err := req.Validate(); err != nil {
@@ -252,41 +248,6 @@ func (f *findingService) UntagFinding(ctx context.Context, req *finding.UntagFin
 	return &empty.Empty{}, nil
 }
 
-func (f *findingService) GetPendFinding(ctx context.Context, req *finding.GetPendFindingRequest) (*finding.GetPendFindingResponse, error) {
-	if err := req.Validate(); err != nil {
-		return nil, err
-	}
-	data, err := f.repository.GetPendFinding(req.ProjectId, req.FindingId)
-	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			return &finding.GetPendFindingResponse{}, nil
-		}
-		return nil, err
-	}
-	return &finding.GetPendFindingResponse{PendFinding: convertPendFinding(data)}, nil
-}
-
-func (f *findingService) PutPendFinding(ctx context.Context, req *finding.PutPendFindingRequest) (*finding.PutPendFindingResponse, error) {
-	if err := req.Validate(); err != nil {
-		return nil, err
-	}
-	registerd, err := f.repository.UpsertPendFinding(req.PendFinding.FindingId, req.PendFinding.ProjectId)
-	if err != nil {
-		return nil, err
-	}
-	return &finding.PutPendFindingResponse{PendFinding: convertPendFinding(registerd)}, nil
-}
-
-func (f *findingService) DeletePendFinding(ctx context.Context, req *finding.DeletePendFindingRequest) (*empty.Empty, error) {
-	if err := req.Validate(); err != nil {
-		return nil, err
-	}
-	if err := f.repository.DeletePendFinding(req.ProjectId, req.FindingId); err != nil {
-		return nil, err
-	}
-	return &empty.Empty{}, nil
-}
-
 func convertFinding(f *model.Finding) *finding.Finding {
 	if f == nil {
 		return &finding.Finding{}
@@ -320,18 +281,17 @@ func convertFindingTag(f *model.FindingTag) *finding.FindingTag {
 	}
 }
 
-func convertPendFinding(f *model.PendFinding) *finding.PendFinding {
-	if f == nil {
-		return &finding.PendFinding{}
+func calculateScore(score, maxScore float32, setting *findingSetting) float32 {
+	baseScore := float32(math.Round(float64(score/maxScore*100)) / 100)
+	if setting == nil || zero.IsZeroVal(setting.ScoreCoefficient) {
+		return baseScore
 	}
-	return &finding.PendFinding{
-		FindingId: f.FindingID,
-		ProjectId: f.ProjectID,
-		CreatedAt: f.CreatedAt.Unix(),
-		UpdatedAt: f.UpdatedAt.Unix(),
+	calculated := baseScore * setting.ScoreCoefficient
+	if calculated > 1.0 {
+		return 1.0
 	}
-}
-
-func calculateScore(score, maxScore float32) float32 {
-	return float32(math.Round(float64(score/maxScore*100)) / 100)
+	if calculated < 0 {
+		return 0.0
+	}
+	return calculated
 }

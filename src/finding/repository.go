@@ -26,9 +26,6 @@ type findingRepository interface {
 	GetFindingTagByID(uint32, uint64) (*model.FindingTag, error)
 	TagFinding(*model.FindingTag) (*model.FindingTag, error)
 	UntagFinding(uint32, uint64) error
-	GetPendFinding(projectID uint32, findingID uint64) (*model.PendFinding, error)
-	UpsertPendFinding(findingID uint64, projectID uint32) (*model.PendFinding, error)
-	DeletePendFinding(projectID uint32, findingID uint64) error
 
 	// Resource
 	ListResource(*finding.ListResourceRequest) (*[]model.Resource, error)
@@ -45,6 +42,18 @@ type findingRepository interface {
 	GetResourceTagByID(uint32, uint64) (*model.ResourceTag, error)
 	TagResource(*model.ResourceTag) (*model.ResourceTag, error)
 	UntagResource(uint32, uint64) error
+
+	// PendFinding
+	GetPendFinding(projectID uint32, findingID uint64) (*model.PendFinding, error)
+	UpsertPendFinding(findingID uint64, projectID uint32) (*model.PendFinding, error)
+	DeletePendFinding(projectID uint32, findingID uint64) error
+
+	// FindingSetting
+	ListFindingSetting(req *finding.ListFindingSettingRequest) (*[]model.FindingSetting, error)
+	GetFindingSetting(projectID uint32, findingSettingID uint32) (*model.FindingSetting, error)
+	GetFindingSettingByResource(projectID uint32, resourceName string) (*model.FindingSetting, error)
+	UpsertFindingSetting(data *model.FindingSetting) (*model.FindingSetting, error)
+	DeleteFindingSetting(projectID uint32, findingSettingID uint32) error
 }
 
 type findingDB struct {
