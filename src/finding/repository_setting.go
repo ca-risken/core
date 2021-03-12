@@ -12,7 +12,7 @@ func (f *findingDB) ListFindingSetting(req *finding.ListFindingSettingRequest) (
 	param = append(param, req.ProjectId)
 	if req.Status != finding.FindingSettingStatus_SETTING_UNKNOWN {
 		query += " and status=?"
-		param = append(param, req.Status.String())
+		param = append(param, getStatusString(req.Status))
 	}
 	var data []model.FindingSetting
 	if err := f.Slave.Raw(query, param...).Scan(&data).Error; err != nil {
