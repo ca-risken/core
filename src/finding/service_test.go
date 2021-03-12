@@ -11,9 +11,10 @@ import (
 
 func TestCalculateScore(t *testing.T) {
 	cases := []struct {
-		name  string
-		input [2]float32
-		want  float32
+		name    string
+		input   [2]float32
+		setting *findingSetting
+		want    float32
 	}{
 		{
 			name:  "OK Score 1%",
@@ -26,14 +27,38 @@ func TestCalculateScore(t *testing.T) {
 			want:  1.00,
 		},
 		{
-			name:  "ok Score 0%",
+			name:  "OK Score 0%",
 			input: [2]float32{0, 100.0},
 			want:  0.00,
+		},
+		{
+			name:    "OK Setting x1",
+			input:   [2]float32{0.1, 1.0},
+			setting: &findingSetting{ScoreCoefficient: 1.0},
+			want:    0.1,
+		},
+		{
+			name:    "OK Setting x1.5",
+			input:   [2]float32{0.1, 1.0},
+			setting: &findingSetting{ScoreCoefficient: 1.5},
+			want:    0.15,
+		},
+		{
+			name:    "OK Setting x100",
+			input:   [2]float32{0.1, 1.0},
+			setting: &findingSetting{ScoreCoefficient: 100},
+			want:    1.0,
+		},
+		{
+			name:    "OK Setting x-1",
+			input:   [2]float32{0.1, 1.0},
+			setting: &findingSetting{ScoreCoefficient: -1},
+			want:    0.0,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := calculateScore(c.input[0], c.input[1])
+			got := calculateScore(c.input[0], c.input[1], c.setting)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected result: want=%+v, got=%+v", c.want, got)
 			}
@@ -106,18 +131,6 @@ func (m *mockFindingRepository) UntagFinding(uint32, uint64) error {
 	args := m.Called()
 	return args.Error(0)
 }
-func (m *mockFindingRepository) GetPendFinding(uint32, uint64) (*model.PendFinding, error) {
-	args := m.Called()
-	return args.Get(0).(*model.PendFinding), args.Error(1)
-}
-func (m *mockFindingRepository) UpsertPendFinding(uint64, uint32) (*model.PendFinding, error) {
-	args := m.Called()
-	return args.Get(0).(*model.PendFinding), args.Error(1)
-}
-func (m *mockFindingRepository) DeletePendFinding(uint32, uint64) error {
-	args := m.Called()
-	return args.Error(0)
-}
 
 // Resource
 
@@ -174,6 +187,44 @@ func (m *mockFindingRepository) TagResource(*model.ResourceTag) (*model.Resource
 	return args.Get(0).(*model.ResourceTag), args.Error(1)
 }
 func (m *mockFindingRepository) UntagResource(uint32, uint64) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+// PendFinding
+
+func (m *mockFindingRepository) GetPendFinding(uint32, uint64) (*model.PendFinding, error) {
+	args := m.Called()
+	return args.Get(0).(*model.PendFinding), args.Error(1)
+}
+func (m *mockFindingRepository) UpsertPendFinding(uint64, uint32) (*model.PendFinding, error) {
+	args := m.Called()
+	return args.Get(0).(*model.PendFinding), args.Error(1)
+}
+func (m *mockFindingRepository) DeletePendFinding(uint32, uint64) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+// FindingSetting
+
+func (m *mockFindingRepository) ListFindingSetting(req *finding.ListFindingSettingRequest) (*[]model.FindingSetting, error) {
+	args := m.Called()
+	return args.Get(0).(*[]model.FindingSetting), args.Error(1)
+}
+func (m *mockFindingRepository) GetFindingSetting(projectID uint32, findingSettingID uint32) (*model.FindingSetting, error) {
+	args := m.Called()
+	return args.Get(0).(*model.FindingSetting), args.Error(1)
+}
+func (m *mockFindingRepository) GetFindingSettingByResource(projectID uint32, resourceName string) (*model.FindingSetting, error) {
+	args := m.Called()
+	return args.Get(0).(*model.FindingSetting), args.Error(1)
+}
+func (m *mockFindingRepository) UpsertFindingSetting(data *model.FindingSetting) (*model.FindingSetting, error) {
+	args := m.Called()
+	return args.Get(0).(*model.FindingSetting), args.Error(1)
+}
+func (m *mockFindingRepository) DeleteFindingSetting(projectID uint32, findingSettingID uint32) error {
 	args := m.Called()
 	return args.Error(0)
 }

@@ -146,3 +146,31 @@ delete-pend-finding:
 		-plaintext \
 		-d '{"project_id":1001, "finding_id":1001}' \
 		localhost:8001 core.finding.FindingService.DeletePendFinding
+
+.PHONY: list-finding-setting
+list-finding-setting:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001}' \
+		localhost:8001 core.finding.FindingService.ListFindingSetting
+
+.PHONY: get-finding-setting
+get-finding-setting:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001,"finding_setting_id":1003}' \
+		localhost:8001 core.finding.FindingService.GetFindingSetting
+
+.PHONY: put-finding-setting
+put-finding-setting:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "finding_setting":{"project_id":1001, "resource_name":"rn", "status":1, "setting": "{}"}}' \
+		localhost:8001 core.finding.FindingService.PutFindingSetting
+
+.PHONY: delete-finding-setting
+delete-finding-setting:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "finding_setting_id":1001}' \
+		localhost:8001 core.finding.FindingService.DeleteFindingSetting
