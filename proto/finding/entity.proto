@@ -102,30 +102,35 @@ message PendFindingForUpsert {
   uint32 project_id = 2;
 }
 
-// // SortDirection
-// enum SortDirection {
-//   DIRECTION_UNKNOWN = 0;
-//   ASC = 1;
-//   DESC = 2;
-// }
-
-// // SortKey
-// enum SortKey {
-//   SORT_KEY_UNKNOWN = 0;
-//   FINDING_ID = 1;
-//   FINDING_TAG_ID = 2;
-//   RESOURCE_ID = 3;
-//   RESOURCE_TAG_ID = 4;
-//   DATA_SOURCE = 5;
-//   RESOURCE_NAME = 6;
-//   SCORE = 7;
-//   TAG = 8;
-//   UPDATED_AT = 9;
-// }
-
 // FindingStatus
 enum FindingStatus {
   FINDING_UNKNOWN = 0;
   FINDING_ACTIVE = 1;
   FINDING_PENDING = 2;
+}
+
+// FindingSetting
+message FindingSetting {
+  uint32 finding_setting_id = 1;
+  uint32 project_id = 2;
+  string resource_name = 3;
+  string setting = 4;
+  FindingSettingStatus status = 5;
+  int64 created_at = 6;
+  int64 updated_at = 7;
+}
+
+// FindingSettingForUpsert
+message FindingSettingForUpsert {
+  uint32 project_id = 1;
+  string resource_name = 2;
+  string setting = 3;
+  FindingSettingStatus status = 4;
+}
+
+// FindingSettingStatus
+enum FindingSettingStatus {
+  SETTING_UNKNOWN = 0;
+  SETTING_ACTIVE = 1;
+  SETTING_DEACTIVE = 2;
 }

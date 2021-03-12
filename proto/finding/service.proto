@@ -34,6 +34,16 @@ service FindingService {
   rpc PutPendFinding(PutPendFindingRequest) returns (PutPendFindingResponse);
   rpc DeletePendFinding(DeletePendFindingRequest)
       returns (google.protobuf.Empty);
+
+  // finding_setting
+  rpc ListFindingSetting(ListFindingSettingRequest)
+      returns (ListFindingSettingResponse);
+  rpc GetFindingSetting(GetFindingSettingRequest)
+      returns (GetFindingSettingResponse);
+  rpc PutFindingSetting(PutFindingSettingRequest)
+      returns (PutFindingSettingResponse);
+  rpc DeleteFindingSetting(DeleteFindingSettingRequest)
+      returns (google.protobuf.Empty);
 }
 
 message ListFindingRequest {
@@ -219,4 +229,33 @@ message PutPendFindingResponse { PendFinding pend_finding = 1; }
 message DeletePendFindingRequest {
   uint32 project_id = 1;
   uint64 finding_id = 2;
+}
+
+message ListFindingSettingRequest {
+  uint32 project_id = 1;
+  FindingSettingStatus status = 2;
+}
+
+message ListFindingSettingResponse {
+  repeated FindingSetting finding_setting = 1;
+}
+
+message GetFindingSettingRequest {
+  uint32 project_id = 1;
+  uint32 finding_setting_id = 2;
+  FindingSettingStatus status = 3;
+}
+
+message GetFindingSettingResponse { FindingSetting finding_setting = 1; }
+
+message PutFindingSettingRequest {
+  uint32 project_id = 1;
+  FindingSettingForUpsert finding_setting = 2;
+}
+
+message PutFindingSettingResponse { FindingSetting finding_setting = 1; }
+
+message DeleteFindingSettingRequest {
+  uint32 project_id = 1;
+  uint32 finding_setting_id = 2;
 }
