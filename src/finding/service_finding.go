@@ -85,7 +85,7 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 	if !noRecord {
 		findingID = savedData.FindingID
 	}
-	fs, err := f.getFindingSettingByResource(req.ProjectId, req.Finding.ResourceName)
+	fs, err := f.getFindingSettingByResource(req.Finding.ProjectId, req.Finding.ResourceName)
 	if err != nil {
 		return nil, err
 	}

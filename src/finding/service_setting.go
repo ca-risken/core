@@ -119,6 +119,9 @@ func (f *findingService) getFindingSettingByResource(projectID uint32, resourceN
 	} else if err != nil {
 		return nil, err
 	}
+	if fs.Status != "ACTIVE" {
+		return &findingSetting{}, nil
+	}
 	var setting findingSetting
 	if err := json.Unmarshal([]byte(fs.Setting), &setting); err != nil {
 		appLogger.Warnf("Failed to unmarshal finding setting JSON, projectID=%d, resourceName=%s, err=%+v", projectID, resourceName, err)
