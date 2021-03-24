@@ -30,8 +30,10 @@ where
 		query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag in (?) )"
 		params = append(params, req.Tag)
 	}
-	query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
-	params = append(params, req.FromSumScore, req.ToSumScore)
+	if req.FromSumScore > 0 {
+		query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
+		params = append(params, req.FromSumScore, req.ToSumScore)
+	}
 	query += fmt.Sprintf(" order by %s %s", req.Sort, req.Direction)
 	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
 	var data []model.Resource
@@ -61,8 +63,10 @@ select count(*) from (
 		query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag in (?) )"
 		params = append(params, req.Tag)
 	}
-	query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
-	params = append(params, req.FromSumScore, req.ToSumScore)
+	if req.FromSumScore > 0 {
+		query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
+		params = append(params, req.FromSumScore, req.ToSumScore)
+	}
 	query += ") as resource"
 	var count uint32
 	if err := f.Slave.Raw(query, params...).Count(&count).Error; err != nil {
