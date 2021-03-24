@@ -16,7 +16,6 @@ select
   r.*
 from
   resource r
-  left outer join finding f using(resource_name)
 where
   r.project_id = ?
   and r.updated_at between ? and ?
@@ -31,7 +30,7 @@ where
 		query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag in (?) )"
 		params = append(params, req.Tag)
 	}
-	query += " group by r.resource_id having sum(COALESCE(f.score, 0)) between ? and ?"
+	query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
 	params = append(params, req.FromSumScore, req.ToSumScore)
 	query += fmt.Sprintf(" order by %s %s", req.Sort, req.Direction)
 	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
@@ -48,7 +47,6 @@ select count(*) from (
   select r.*
   from
     resource r
-    left outer join finding f using(resource_name)
   where
     r.project_id = ?
     and r.updated_at between ? and ?
@@ -63,9 +61,9 @@ select count(*) from (
 		query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag in (?) )"
 		params = append(params, req.Tag)
 	}
-	query += " group by r.resource_id having sum(COALESCE(f.score, 0)) between ? and ?"
-	query += ") resource"
+	query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
 	params = append(params, req.FromSumScore, req.ToSumScore)
+	query += ") as resource"
 	var count uint32
 	if err := f.Slave.Raw(query, params...).Count(&count).Error; err != nil {
 		return count, err
