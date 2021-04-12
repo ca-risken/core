@@ -94,5 +94,6 @@ func (p *projectService) DeleteProject(ctx context.Context, req *project.DeleteP
 	if err := p.iamClient.DeleteAllProjectRole(ctx, req.ProjectId); err != nil {
 		return nil, err
 	}
+	appLogger.Infof("Project deleted: project=%+v", req.ProjectId)
 	return &empty.Empty{}, nil
 }
