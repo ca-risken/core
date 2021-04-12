@@ -22,7 +22,7 @@ func (p *projectDB) ListProject(userID, projectID uint32, name string) (*[]proje
 	query := `select p.* from project p where 1 = 1` // プログラム構造をシンプルに保つために必ずtrueとなるwhere条件を入れとく（and条件のみなので一旦これで）
 	var params []interface{}
 	if !zero.IsZeroVal(userID) {
-		query += " and exists (select * from user_role ur where ur.project_id = p.project_id and user_id = ?)"
+		query += " and exists (select * from user_role ur inner join role r using(project_id, role_id) where ur.project_id = p.project_id and user_id = ?)"
 		params = append(params, userID)
 	}
 	if !zero.IsZeroVal(projectID) {
