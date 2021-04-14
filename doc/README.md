@@ -2052,6 +2052,7 @@ FindingStatus
 | offset | [int32](#int32) |  |  |
 | limit | [int32](#int32) |  |  |
 | status | [FindingStatus](#core.finding.FindingStatus) |  |  |
+| finding_id | [uint64](#uint64) |  |  |
 
 
 
@@ -2200,6 +2201,7 @@ FindingStatus
 | direction | [string](#string) |  |  |
 | offset | [int32](#int32) |  |  |
 | limit | [int32](#int32) |  |  |
+| resource_id | [uint64](#uint64) |  |  |
 
 
 
