@@ -60,6 +60,7 @@ message ListFindingRequest {
   int32 offset = 11;
   int32 limit = 12;
   FindingStatus status = 13;
+  uint64 finding_id = 14;
 }
 
 message ListFindingResponse {
@@ -142,6 +143,7 @@ message ListResourceRequest {
   string direction = 9;
   int32 offset = 10;
   int32 limit = 11;
+  uint64 resource_id = 12;
 }
 
 message ListResourceResponse {
