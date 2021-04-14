@@ -18,7 +18,7 @@ list-service:
 list-finding:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "status":0, "sort": "finding_id", "direction": "desc", "offset":0, "limit":1}' \
+		-d '{"finding_id": "1040", "project_id":1001, "status":0, "sort": "finding_id", "direction": "desc", "offset":0, "limit":10}' \
 		localhost:8001 core.finding.FindingService.ListFinding
 
 .PHONY: get-finding
@@ -74,7 +74,7 @@ untag-finding:
 list-resource:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "from_sum_score":0.0, "to_sum_score":999.9, "from_at":1560000000, "to_at":253402268399, "tag": ["tag1", "tag:key"],"sort": "resource_id", "direction": "desc", "offset":0, "limit":1}' \
+		-d '{"resource_id":"1001", "project_id":1001, "from_sum_score":0.0, "to_sum_score":999.9, "from_at":1560000000, "to_at":253402268399, "tag": ["tag1", "tag:key"],"sort": "resource_id", "direction": "desc", "offset":0, "limit":10}' \
 		localhost:8001 core.finding.FindingService.ListResource
 
 .PHONY: get-resource

@@ -8,6 +8,7 @@ import (
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/vikyd/zero"
 )
 
 func (f *findingDB) ListResource(req *finding.ListResourceRequest) (*[]model.Resource, error) {
@@ -22,6 +23,10 @@ where
 `
 	var params []interface{}
 	params = append(params, req.ProjectId, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
+	if !zero.IsZeroVal(req.ResourceId) {
+		query += " and r.resource_id = ?"
+		params = append(params, req.ResourceId)
+	}
 	if len(req.ResourceName) > 0 {
 		query += " and r.resource_name regexp ?"
 		params = append(params, strings.Join(req.ResourceName, "|"))
@@ -55,6 +60,10 @@ select count(*) from (
 `
 	var params []interface{}
 	params = append(params, req.ProjectId, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
+	if !zero.IsZeroVal(req.ResourceId) {
+		query += " and r.resource_id = ?"
+		params = append(params, req.ResourceId)
+	}
 	if len(req.ResourceName) > 0 {
 		query += " and r.resource_name regexp ?"
 		params = append(params, strings.Join(req.ResourceName, "|"))

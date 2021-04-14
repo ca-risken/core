@@ -8,6 +8,7 @@ import (
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/vikyd/zero"
 )
 
 func (f *findingDB) ListFinding(req *finding.ListFindingRequest) (*[]model.Finding, error) {
@@ -43,6 +44,10 @@ where
 `
 	var params []interface{}
 	params = append(params, req.ProjectId, req.FromScore, req.ToScore, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
+	if !zero.IsZeroVal(req.FindingId) {
+		query += " and finding.finding_id = ?"
+		params = append(params, req.FindingId)
+	}
 	if len(req.DataSource) > 0 {
 		query += " and finding.data_source regexp ?"
 		params = append(params, strings.Join(req.DataSource, "|"))
