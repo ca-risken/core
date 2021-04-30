@@ -40,7 +40,7 @@ func TestListUser(t *testing.T) {
 			mockError: gorm.ErrRecordNotFound,
 		},
 		{
-			name:    "NG Invalid param",
+			name:    "NG Invalid param (Name)",
 			input:   &iam.ListUserRequest{ProjectId: 1, Activated: true, Name: "12345678901234567890123456789012345678901234567890123456789012345"},
 			wantErr: true,
 		},

@@ -11,7 +11,7 @@ import (
 
 type iamRepository interface {
 	// User
-	ListUser(activated bool, projectID uint32, name string) (*[]model.User, error)
+	ListUser(activated bool, projectID uint32, name string, userID uint32) (*[]model.User, error)
 	GetUser(uint32, string) (*model.User, error)
 	GetUserBySub(string) (*model.User, error)
 	PutUser(*model.User) (*model.User, error)

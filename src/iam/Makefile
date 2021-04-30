@@ -32,7 +32,7 @@ is-admin:
 list-user:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "activated":"true", "name":"alice"}' \
+		-d '{"project_id":1001, "activated":"true", "name":"john"}' \
 		localhost:8002 core.iam.IAMService.ListUser
 
 .PHONY: get-user
