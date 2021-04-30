@@ -152,7 +152,7 @@ type mockIAMRepository struct {
 	mock.Mock
 }
 
-func (m *mockIAMRepository) ListUser(activated bool, projectID uint32, name string) (*[]model.User, error) {
+func (m *mockIAMRepository) ListUser(activated bool, projectID uint32, name string, userID uint32) (*[]model.User, error) {
 	args := m.Called()
 	return args.Get(0).(*[]model.User), args.Error(1)
 }

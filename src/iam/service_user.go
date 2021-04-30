@@ -12,7 +12,7 @@ func (i *iamService) ListUser(ctx context.Context, req *iam.ListUserRequest) (*i
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := i.repository.ListUser(req.Activated, req.ProjectId, req.Name)
+	list, err := i.repository.ListUser(req.Activated, req.ProjectId, req.Name, req.UserId)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return &iam.ListUserResponse{}, nil

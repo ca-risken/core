@@ -7,7 +7,7 @@ import (
 	"github.com/vikyd/zero"
 )
 
-func (i *iamDB) ListUser(activated bool, projectID uint32, name string) (*[]model.User, error) {
+func (i *iamDB) ListUser(activated bool, projectID uint32, name string, userID uint32) (*[]model.User, error) {
 	query := `
 select
   u.*
@@ -25,6 +25,10 @@ where
 	if !zero.IsZeroVal(name) {
 		query += " and u.name like ?"
 		params = append(params, "%"+name+"%")
+	}
+	if !zero.IsZeroVal(userID) {
+		query += " and u.user_id = ?"
+		params = append(params, userID)
 	}
 	var data []model.User
 	if err := i.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
