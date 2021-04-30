@@ -3231,6 +3231,7 @@ IsAuthorizedRequest
 | project_id | [uint32](#uint32) |  |  |
 | name | [string](#string) |  |  |
 | activated | [bool](#bool) |  |  |
+| user_id | [uint32](#uint32) |  |  |
 
 
 
