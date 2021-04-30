@@ -9,6 +9,7 @@ message ListUserRequest {
   uint32 project_id = 1;
   string name = 2;
   bool activated = 3;
+  uint32 user_id = 4;
 }
 
 message ListUserResponse { repeated uint32 user_id = 1; }
