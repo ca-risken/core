@@ -227,7 +227,7 @@ func (r *GetAlertCondRuleRequest) Validate() error {
 // Validate PutAlertCondRuleRequest
 func (r *PutAlertCondRuleRequest) Validate() error {
 	if validation.IsEmpty(r.AlertCondRule) {
-		return errors.New("Required alert_rule parameter")
+		return errors.New("Required alert_condition_rule parameter")
 	}
 	if err := validation.ValidateStruct(r,
 		validation.Field(&r.ProjectId, validation.In(r.AlertCondRule.ProjectId)),
@@ -266,7 +266,7 @@ func (r *GetNotificationRequest) Validate() error {
 // Validate PutNotificationRequest
 func (r *PutNotificationRequest) Validate() error {
 	if validation.IsEmpty(r.Notification) {
-		return errors.New("Required alert_rule parameter")
+		return errors.New("Required notification parameter")
 	}
 	if err := validation.ValidateStruct(r,
 		validation.Field(&r.ProjectId, validation.In(r.Notification.ProjectId)),
@@ -278,6 +278,14 @@ func (r *PutNotificationRequest) Validate() error {
 
 // Validate DeleteNotificationRequest
 func (r *DeleteNotificationRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.ProjectId, validation.Required),
+		validation.Field(&r.NotificationId, validation.Required),
+	)
+}
+
+// Validate TestNotificationRequest
+func (r *TestNotificationRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ProjectId, validation.Required),
 		validation.Field(&r.NotificationId, validation.Required),
@@ -305,7 +313,7 @@ func (r *GetAlertCondNotificationRequest) Validate() error {
 // Validate PutAlertCondNotificationRequest
 func (r *PutAlertCondNotificationRequest) Validate() error {
 	if validation.IsEmpty(r.AlertCondNotification) {
-		return errors.New("Required alert_rule parameter")
+		return errors.New("Required rel_put_alert_condition_notification parameter")
 	}
 	if err := validation.ValidateStruct(r,
 		validation.Field(&r.ProjectId, validation.In(r.AlertCondNotification.ProjectId)),
