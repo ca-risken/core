@@ -1115,6 +1115,40 @@ func TestValidateDeleteNotificationRequest(t *testing.T) {
 	}
 }
 
+func TestValidateTestNotificationRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *TestNotificationRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &TestNotificationRequest{ProjectId: 1001, NotificationId: 1001},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &TestNotificationRequest{NotificationId: 1001},
+			wantErr: true,
+		},
+		{
+			name:    "NG required(notification_id)",
+			input:   &TestNotificationRequest{ProjectId: 1001},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
 func TestValidateListAlertCondNotificationRequest(t *testing.T) {
 	now := time.Now()
 	cases := []struct {

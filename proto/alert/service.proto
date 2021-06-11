@@ -64,6 +64,7 @@ service AlertService {
   rpc PutNotification(PutNotificationRequest) returns (PutNotificationResponse);
   rpc DeleteNotification(DeleteNotificationRequest)
       returns (google.protobuf.Empty);
+  rpc TestNotification(TestNotificationRequest) returns (google.protobuf.Empty);
 
   // alert_cond_notification
   rpc ListAlertCondNotification(ListAlertCondNotificationRequest)
@@ -289,6 +290,11 @@ message PutNotificationRequest {
 message PutNotificationResponse { Notification notification = 1; }
 
 message DeleteNotificationRequest {
+  uint32 project_id = 1;
+  uint32 notification_id = 2;
+}
+
+message TestNotificationRequest {
   uint32 project_id = 1;
   uint32 notification_id = 2;
 }
