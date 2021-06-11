@@ -316,8 +316,19 @@ func (f *alertService) GetNotification(ctx context.Context, req *alert.GetNotifi
 }
 
 func (f *alertService) PutNotification(ctx context.Context, req *alert.PutNotificationRequest) (*alert.PutNotificationResponse, error) {
-	if err := req.Notification.Validate(); err != nil {
+	err := req.Notification.Validate()
+	if err != nil {
 		return nil, err
+	}
+	var existData *model.Notification
+	if !zero.IsZeroVal(req.Notification.NotificationId) {
+		existData, err = f.repository.GetNotification(req.ProjectId, req.Notification.NotificationId)
+		if err != nil {
+			if gorm.IsRecordNotFoundError(err) {
+				return &alert.PutNotificationResponse{}, nil
+			}
+			return nil, err
+		}
 	}
 
 	data := &model.Notification{
@@ -326,6 +337,26 @@ func (f *alertService) PutNotification(ctx context.Context, req *alert.PutNotifi
 		ProjectID:      req.Notification.ProjectId,
 		Type:           req.Notification.Type,
 		NotifySetting:  req.Notification.NotifySetting,
+	}
+
+	if !zero.IsZeroVal(existData) {
+		switch existData.Type {
+		case "slack":
+			convertedNotifySetting, err := replaceSlackNotifySetting(existData.NotifySetting, data.NotifySetting)
+			if err != nil {
+				return nil, err
+			}
+			newNotifySetting, err := json.Marshal(convertedNotifySetting)
+			if err != nil {
+				appLogger.Errorf("Error occured when marshal update.NotifySetting. err: %v", err)
+				return nil, err
+			}
+			data.NotifySetting = string(newNotifySetting)
+			break
+		default:
+			appLogger.Warnf("This notification_type is unimprement. type: %v", existData.Type)
+			break
+		}
 	}
 
 	// Fiding upsert
@@ -337,6 +368,29 @@ func (f *alertService) PutNotification(ctx context.Context, req *alert.PutNotifi
 	return &alert.PutNotificationResponse{Notification: convertNotification(registerdData)}, nil
 }
 
+func replaceSlackNotifySetting(jsonNotifySettingExist, jsonNotifySettingUpdate string) (slackNotifySetting, error) {
+	var notifySettingUpdate slackNotifySetting
+	if err := json.Unmarshal([]byte(jsonNotifySettingUpdate), &notifySettingUpdate); err != nil {
+		if err != nil {
+			appLogger.Errorf("Error occured when unmarshal update.NotifySetting. err: %v", err)
+			return slackNotifySetting{}, err
+		}
+	}
+	var notifySettingExist slackNotifySetting
+	if err := json.Unmarshal([]byte(jsonNotifySettingExist), &notifySettingExist); err != nil {
+		if err != nil {
+			appLogger.Errorf("Error occured when unmarshal exist.NotifySetting. err: %v", err)
+			return slackNotifySetting{}, err
+		}
+	}
+	if !zero.IsZeroVal(notifySettingUpdate.WebhookURL) {
+		return notifySettingUpdate, nil
+	}
+	notifySettingUpdate.WebhookURL = notifySettingExist.WebhookURL
+
+	return notifySettingUpdate, nil
+}
+
 func (f *alertService) DeleteNotification(ctx context.Context, req *alert.DeleteNotificationRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
@@ -344,6 +398,32 @@ func (f *alertService) DeleteNotification(ctx context.Context, req *alert.Delete
 	err := f.repository.DeleteNotification(req.ProjectId, req.NotificationId)
 	if err != nil {
 		return nil, err
+	}
+	return &empty.Empty{}, nil
+}
+
+func (f *alertService) TestNotification(ctx context.Context, req *alert.TestNotificationRequest) (*empty.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	notification, err := f.repository.GetNotification(req.ProjectId, req.NotificationId)
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return &empty.Empty{}, nil
+		}
+		return nil, err
+	}
+	switch notification.Type {
+	case "slack":
+		err = sendSlackTestNotification(notification.NotifySetting)
+		if err != nil {
+			appLogger.Errorf("Error occured when sending test slack notification. err: %v", err)
+			return nil, err
+		}
+		break
+	default:
+		appLogger.Warnf("This notification_type is unimprement. type: %v", notification.Type)
+		break
 	}
 	return &empty.Empty{}, nil
 }
