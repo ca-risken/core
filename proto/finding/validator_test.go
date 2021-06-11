@@ -1113,11 +1113,6 @@ func TestValidate_FindingForUpsert(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG nil OriginalScore",
-			input:   &FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
-			wantErr: true,
-		},
-		{
 			name:    "NG too small OriginalScore",
 			input:   &FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: -0.1, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
