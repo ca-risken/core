@@ -76,6 +76,21 @@ func (t *slackWebhookConfig) GetPayload(channel, message string, alert *model.Al
 	return string(buf), err
 }
 
+func (t *slackWebhookConfig) GetTestPayload(channel string) (string, error) {
+	payload := map[string]interface{}{}
+	// text
+	text := "RISKENからのテスト通知です"
+	payload["text"] = text
+
+	// channel
+	if !zero.IsZeroVal(channel) {
+		payload["channel"] = channel
+	}
+
+	buf, err := json.Marshal(payload)
+	return string(buf), err
+}
+
 func getColor(severity string) string {
 	switch severity {
 	case "high":
