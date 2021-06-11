@@ -67,30 +67,38 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 }
 
 func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertCondition *model.AlertCondition, findings *[]model.Finding) error {
-	isMatch := false
-
 	// AlertRuleの取得
 	alertRules, err := f.repository.ListAlertRuleByAlertConditionID(alertCondition.ProjectID, alertCondition.AlertConditionID)
 	if err != nil {
 		return err
 	}
 	var matchFindingIDs []uint64
+	isFirst := true
 	for _, alertRule := range *alertRules {
 		isMatchRule, matchFindingIDsByAlert, err := f.analyzeAlertByRule(ctx, &alertRule, findings)
 		if err != nil {
 			return err
 		}
 		if isMatchRule {
-			isMatch = true
-			matchFindingIDs = append(matchFindingIDs, *matchFindingIDsByAlert...)
+			if !isFirst && alertCondition.AndOr == "and" {
+				var newMatchFindingIDs []uint64
+				for _, matchFindingID := range *matchFindingIDsByAlert {
+					if isContainsFindings(matchFindingID, matchFindingIDs) {
+						newMatchFindingIDs = append(newMatchFindingIDs, matchFindingID)
+					}
+				}
+				matchFindingIDs = newMatchFindingIDs
+			} else {
+				matchFindingIDs = append(matchFindingIDs, *matchFindingIDsByAlert...)
+			}
 		} else {
 			if alertCondition.AndOr == "and" {
-				isMatch = false
 				break
 			}
 		}
+		isFirst = false
 	}
-	if isMatch {
+	if len(matchFindingIDs) > 0 {
 		registAlert, err := f.RegistAlertByAnalyze(alertCondition, matchFindingIDs)
 		if err != nil {
 			return err
@@ -438,6 +446,36 @@ func sendSlackNotification(notifySetting string, alert *model.Alert, project *mo
 	}
 
 	payload, err := slackConfig.GetPayload(channel, message, alert, project)
+	if err != nil {
+		return err
+	}
+	resp, err := http.PostForm(setting.WebhookURL, url.Values{"payload": {string(payload)}})
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
+}
+
+func sendSlackTestNotification(notifySetting string) error {
+	var setting slackNotifySetting
+	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
+		return err
+	}
+	if zero.IsZeroVal(setting.WebhookURL) {
+		appLogger.Warn("Unset webhook_url")
+		return nil
+	}
+	channel := ""
+	if !zero.IsZeroVal(setting.Data["channel"]) {
+		channel = setting.Data["channel"]
+	}
+	slackConfig, err := newslackWebhookConfig()
+	if err != nil {
+		return err
+	}
+
+	payload, err := slackConfig.GetTestPayload(channel)
 	if err != nil {
 		return err
 	}

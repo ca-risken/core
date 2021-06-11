@@ -210,6 +210,13 @@ delete-notification:
 		-d '{"project_id":1001, "notification_id":1003}' \
 		localhost:8004 core.alert.AlertService.DeleteNotification
 
+.PHONY: test-notification
+test-notification:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1001, "notification_id":1001}' \
+		localhost:8004 core.alert.AlertService.TestNotification
+
 .PHONY: analyze-alert
 analyze-alert:
 	grpcurl \

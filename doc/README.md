@@ -81,6 +81,7 @@
     - [PutNotificationResponse](#core.alert.PutNotificationResponse)
     - [PutRelAlertFindingRequest](#core.alert.PutRelAlertFindingRequest)
     - [PutRelAlertFindingResponse](#core.alert.PutRelAlertFindingResponse)
+    - [TestNotificationRequest](#core.alert.TestNotificationRequest)
   
     - [AlertService](#core.alert.AlertService)
   
@@ -1507,6 +1508,22 @@ Status
 
 
 
+
+<a name="core.alert.TestNotificationRequest"></a>
+
+### TestNotificationRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| project_id | [uint32](#uint32) |  |  |
+| notification_id | [uint32](#uint32) |  |  |
+
+
+
+
+
  
 
  
@@ -1549,6 +1566,7 @@ Status
 | GetNotification | [GetNotificationRequest](#core.alert.GetNotificationRequest) | [GetNotificationResponse](#core.alert.GetNotificationResponse) |  |
 | PutNotification | [PutNotificationRequest](#core.alert.PutNotificationRequest) | [PutNotificationResponse](#core.alert.PutNotificationResponse) |  |
 | DeleteNotification | [DeleteNotificationRequest](#core.alert.DeleteNotificationRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
+| TestNotification | [TestNotificationRequest](#core.alert.TestNotificationRequest) | [.google.protobuf.Empty](#google.protobuf.Empty) |  |
 | ListAlertCondNotification | [ListAlertCondNotificationRequest](#core.alert.ListAlertCondNotificationRequest) | [ListAlertCondNotificationResponse](#core.alert.ListAlertCondNotificationResponse) | alert_cond_notification |
 | GetAlertCondNotification | [GetAlertCondNotificationRequest](#core.alert.GetAlertCondNotificationRequest) | [GetAlertCondNotificationResponse](#core.alert.GetAlertCondNotificationResponse) |  |
 | PutAlertCondNotification | [PutAlertCondNotificationRequest](#core.alert.PutAlertCondNotificationRequest) | [PutAlertCondNotificationResponse](#core.alert.PutAlertCondNotificationResponse) |  |

@@ -1501,10 +1501,25 @@ func TestPutNotification(t *testing.T) {
 		mockUpErr   error
 	}{
 		{
-			name:       "OK Upsert",
+			name:       "OK Insert",
 			input:      &alert.PutNotificationRequest{Notification: &alert.NotificationForUpsert{ProjectId: 1001, Name: "name", Type: "type", NotifySetting: `{"hoge":"fuga"}`}},
 			want:       &alert.PutNotificationResponse{Notification: &alert.Notification{ProjectId: 1001, Name: "name", Type: "type", NotifySetting: `{"hoge":"fuga"}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockUpResp: &model.Notification{ProjectID: 1001, Name: "name", Type: "type", NotifySetting: `{"hoge":"fuga"}`, CreatedAt: now, UpdatedAt: now},
+		},
+		{
+			name:        "OK Update",
+			input:       &alert.PutNotificationRequest{Notification: &alert.NotificationForUpsert{NotificationId: 1001, ProjectId: 1001, Name: "name", Type: "type", NotifySetting: `{"hoge":"fuga"}`}},
+			want:        &alert.PutNotificationResponse{Notification: &alert.Notification{NotificationId: 1001, ProjectId: 1001, Name: "name", Type: "type", NotifySetting: `{"hoge":"fuga"}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp: &model.Notification{NotificationID: 1001, ProjectID: 1001, Name: "name", Type: "type", NotifySetting: `{"hoge":"fuga"}`, CreatedAt: now, UpdatedAt: now},
+			mockUpResp:  &model.Notification{NotificationID: 1001, ProjectID: 1001, Name: "name", Type: "type", NotifySetting: `{"hoge":"fuga"}`, CreatedAt: now, UpdatedAt: now},
+		},
+		{
+			name:        "NG Update (Notification Not Found)",
+			input:       &alert.PutNotificationRequest{Notification: &alert.NotificationForUpsert{NotificationId: 1001, ProjectId: 1001, Name: "name", Type: "type", NotifySetting: `{"hoge":"fuga"}`}},
+			want:        &alert.PutNotificationResponse{},
+			wantErr:     true,
+			mockGetResp: &model.Notification{},
+			mockGetErr:  gorm.ErrRecordNotFound,
 		},
 	}
 	for _, c := range cases {
@@ -1512,7 +1527,57 @@ func TestPutNotification(t *testing.T) {
 			if c.mockUpResp != nil || c.mockUpErr != nil {
 				mockDB.On("UpsertNotification").Return(c.mockUpResp, c.mockUpErr).Once()
 			}
+			if c.mockGetResp != nil || c.mockGetErr != nil {
+				mockDB.On("GetNotification").Return(c.mockGetResp, c.mockGetErr).Once()
+			}
+
 			got, err := svc.PutNotification(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestReplaceSlackNotifySetting(t *testing.T) {
+	cases := []struct {
+		name        string
+		inputExist  string
+		inputUpdate string
+		want        slackNotifySetting
+		wantErr     bool
+	}{
+		{
+			name:        "OK no replacing",
+			inputExist:  "{\"webhook_url\":\"hoge1\", \"data\":{\"hoge\":\"fuga\"}}",
+			inputUpdate: "{\"data\":{\"hoge\":\"fuga\"}}",
+			want: slackNotifySetting{
+				WebhookURL: "hoge1",
+				Data:       map[string]string{"hoge": "fuga"},
+			},
+			wantErr: false,
+		},
+		{
+			name:        "OK replace webhook_url",
+			inputExist:  "{\"webhook_url\":\"hoge1\",\"data\":{\"hoge\":\"fuga\"}}",
+			inputUpdate: "{\"webhook_url\":\"hoge2\"}",
+			want:        slackNotifySetting{WebhookURL: "hoge2"},
+			wantErr:     false,
+		},
+		{
+			name:        "OK blank",
+			inputExist:  "{}",
+			inputUpdate: "{}",
+			want:        slackNotifySetting{},
+			wantErr:     false,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got, err := replaceSlackNotifySetting(c.inputExist, c.inputUpdate)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
