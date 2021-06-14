@@ -30,7 +30,7 @@ doc: fmt
 		proto/**/*.proto;
 
 # build without protoc-gen-validate
-build: fmt doc
+proto-without-validate: fmt
 	for svc in "alert" "finding" "iam"; do \
 		protoc \
 			--proto_path=proto \
@@ -40,7 +40,7 @@ build: fmt doc
 	done
 
 # build with protoc-gen-validate
-build-validate: fmt doc
+proto-validate: fmt
 	for svc in "project" "report"; do \
 		protoc \
 			--proto_path=proto \
@@ -51,7 +51,9 @@ build-validate: fmt doc
 			proto/$$svc/*.proto; \
 	done
 
-go-test: build build-validate
+proto : proto-without-validate proto-validate
+
+go-test: proto
 	cd proto/finding && go test ./...
 	cd proto/iam     && go test ./...
 	cd proto/project && go test ./...
@@ -91,6 +93,9 @@ go-mod-update:
 	cd src/report \
 		&& go get -u \
 			github.com/CyberAgent/mimosa-core/...
+
+build: go-test
+	source env.sh && docker-compose build
 
 run: go-test network
 	. env.sh && docker-compose up -d --build 
