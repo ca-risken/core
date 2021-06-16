@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/CyberAgent/mimosa-core/pkg/model"
+	"github.com/CyberAgent/mimosa-core/proto/finding"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -17,18 +18,18 @@ func (f *findingDB) GetPendFinding(projectID uint32, findingID uint64) (*model.P
 
 const insertPendFinding = `
 INSERT INTO pend_finding
-  (finding_id, project_id)
+  (finding_id, project_id, note)
 VALUES
-  (?, ?)
+  (?, ?, ?)
 ON DUPLICATE KEY UPDATE
   updated_at = CURRENT_TIMESTAMP()
 `
 
-func (f *findingDB) UpsertPendFinding(findingID uint64, projectID uint32) (*model.PendFinding, error) {
-	if err := f.Master.Exec(insertPendFinding, findingID, projectID).Error; err != nil {
+func (f *findingDB) UpsertPendFinding(pend *finding.PendFindingForUpsert) (*model.PendFinding, error) {
+	if err := f.Master.Exec(insertPendFinding, pend.FindingId, pend.ProjectId, pend.Note).Error; err != nil {
 		return nil, err
 	}
-	return f.GetPendFinding(projectID, findingID)
+	return f.GetPendFinding(pend.ProjectId, pend.FindingId)
 }
 
 const deletePendFinding = `delete from pend_finding where project_id = ? and finding_id = ?`

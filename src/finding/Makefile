@@ -137,7 +137,7 @@ get-pend-finding:
 put-pend-finding:
 	grpcurl \
 		-plaintext \
-		-d '{"project_id":1001, "pend_finding":{"finding_id":1001, "project_id":1001}}' \
+		-d '{"project_id":1001, "pend_finding":{"finding_id":1001, "project_id":1001, "note":"note"}}' \
 		localhost:8001 core.finding.FindingService.PutPendFinding
 
 .PHONY: delete-pend-finding

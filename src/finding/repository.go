@@ -45,7 +45,7 @@ type findingRepository interface {
 
 	// PendFinding
 	GetPendFinding(projectID uint32, findingID uint64) (*model.PendFinding, error)
-	UpsertPendFinding(findingID uint64, projectID uint32) (*model.PendFinding, error)
+	UpsertPendFinding(pend *finding.PendFindingForUpsert) (*model.PendFinding, error)
 	DeletePendFinding(projectID uint32, findingID uint64) error
 
 	// FindingSetting

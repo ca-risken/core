@@ -197,7 +197,7 @@ func (m *mockFindingRepository) GetPendFinding(uint32, uint64) (*model.PendFindi
 	args := m.Called()
 	return args.Get(0).(*model.PendFinding), args.Error(1)
 }
-func (m *mockFindingRepository) UpsertPendFinding(uint64, uint32) (*model.PendFinding, error) {
+func (m *mockFindingRepository) UpsertPendFinding(*finding.PendFindingForUpsert) (*model.PendFinding, error) {
 	args := m.Called()
 	return args.Get(0).(*model.PendFinding), args.Error(1)
 }
