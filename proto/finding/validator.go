@@ -308,6 +308,7 @@ func (p *PendFindingForUpsert) Validate() error {
 	return validation.ValidateStruct(p,
 		validation.Field(&p.FindingId, validation.Required),
 		validation.Field(&p.ProjectId, validation.Required),
+		validation.Field(&p.Note, validation.Length(0, 128)),
 	)
 }
 
