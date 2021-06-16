@@ -27,7 +27,7 @@ func (f *findingService) PutPendFinding(ctx context.Context, req *finding.PutPen
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	registerd, err := f.repository.UpsertPendFinding(req.PendFinding.FindingId, req.PendFinding.ProjectId)
+	registerd, err := f.repository.UpsertPendFinding(req.PendFinding)
 	if err != nil {
 		return nil, err
 	}
@@ -51,6 +51,7 @@ func convertPendFinding(f *model.PendFinding) *finding.PendFinding {
 	return &finding.PendFinding{
 		FindingId: f.FindingID,
 		ProjectId: f.ProjectID,
+		Note:      f.Note,
 		CreatedAt: f.CreatedAt.Unix(),
 		UpdatedAt: f.UpdatedAt.Unix(),
 	}
