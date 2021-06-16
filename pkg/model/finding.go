@@ -50,6 +50,7 @@ type ResourceTag struct {
 type PendFinding struct {
 	FindingID uint64 `gorm:"primary_key"`
 	ProjectID uint32
+	Note      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
