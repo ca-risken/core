@@ -21,6 +21,24 @@ type UserRole struct {
 	UpdatedAt time.Time
 }
 
+// ExtUser entity model
+type ExtUser struct {
+	ExtUserProviderID string
+	ExtUserID         string
+	UserID            uint32
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+
+// ExtUserRole entity model
+type ExtUserRole struct {
+	ExtUserProviderID string
+	ExtUserID         string
+	RoleID            uint32
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+
 // Role entity model
 type Role struct {
 	RoleID    uint32
