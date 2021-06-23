@@ -19,7 +19,7 @@ where
 	var params []interface{}
 	params = append(params, fmt.Sprintf("%t", activated))
 	if !zero.IsZeroVal(projectID) {
-		query += " and exists (select * from user_role ur where ur.user_id = u.user_id and ur.project_id = ?)"
+		query += " and exists (select * from user_role ur inner join role r using(role_id) where ur.user_id = u.user_id and r.project_id = ?)"
 		params = append(params, projectID)
 	}
 	if !zero.IsZeroVal(name) {
