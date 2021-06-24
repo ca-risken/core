@@ -70,6 +70,7 @@ func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 	// AlertRuleの取得
 	alertRules, err := f.repository.ListAlertRuleByAlertConditionID(alertCondition.ProjectID, alertCondition.AlertConditionID)
 	if err != nil {
+		appLogger.Errorf("Failed list AlertRule by AlertConditionID. alertConditionID: %v, err: %v", alertCondition.AlertConditionID, err)
 		return err
 	}
 	var matchFindingIDs []uint64
@@ -157,6 +158,7 @@ func (f *alertService) RegistAlertByAnalyze(alertCondition *model.AlertCondition
 	// upsert Alert
 	registerdData, err := f.repository.UpsertAlert(data)
 	if err != nil {
+		appLogger.Errorf("Error occured when upsert alert. alertConditionID: %v, err: %v", alertCondition.AlertConditionID, err)
 		return nil, err
 	}
 
@@ -183,6 +185,7 @@ func (f *alertService) RegistAlertByAnalyze(alertCondition *model.AlertCondition
 	}
 	_, err = f.repository.UpsertAlertHistory(dataAlertHistory)
 	if err != nil {
+		appLogger.Errorf("Error occured when upsert AlertHistory. err: %v", err)
 		return nil, err
 	}
 
@@ -212,6 +215,7 @@ func (f *alertService) DeleteAlertByAnalyze(alertCondition *model.AlertCondition
 	savedData, err := f.repository.GetAlertByAlertConditionIDStatus(alertCondition.ProjectID, alertCondition.AlertConditionID, []string{"ACTIVE", "PENDING"})
 	noRecord := gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
+		appLogger.Errorf("Failed get alert by alertConditionIDStatus, err: %v", err)
 		return err
 	}
 	// レコードが存在しない場合何もしない
