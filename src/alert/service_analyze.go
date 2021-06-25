@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -34,7 +37,11 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	}
 
 	// マッチング
-	appLogger.Info("start matching")
+	analyzeID, err := MakeRandomStr(10)
+	if err != nil {
+		analyzeID = fmt.Sprintf("%v:%v", req.ProjectId, req.AlertConditionId)
+	}
+	appLogger.Infof("start matching ID: %v", analyzeID)
 	for _, alertCondition := range *alertConditions {
 		err := f.AnalyzeAlertByCondition(ctx, &alertCondition)
 		if err != nil {
@@ -42,7 +49,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 			return nil, err
 		}
 	}
-	appLogger.Info("finish matching")
+	appLogger.Infof("finish matching ID: %v", analyzeID)
 
 	// 無効のalertConditionの取得
 	appLogger.Info("start ListDisabledAlertCondition")
@@ -479,4 +486,23 @@ func sendSlackTestNotification(notifySetting string) error {
 type slackNotifySetting struct {
 	WebhookURL string            `json:"webhook_url"`
 	Data       map[string]string `json:"data"`
+}
+
+// for Logging
+func MakeRandomStr(digit uint32) (string, error) {
+	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+	// 乱数を生成
+	b := make([]byte, digit)
+	if _, err := rand.Read(b); err != nil {
+		return "", errors.New("unexpected error...")
+	}
+
+	// letters からランダムに取り出して文字列を生成
+	var result string
+	for _, v := range b {
+		// index が letters の長さに収まるように調整
+		result += string(letters[int(v)%len(letters)])
+	}
+	return result, nil
 }
