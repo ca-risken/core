@@ -9,6 +9,7 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/alert"
+	"github.com/CyberAgent/mimosa-core/proto/finding"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jarcoal/httpmock"
 	"github.com/jinzhu/gorm"
@@ -30,8 +31,6 @@ func TestAnalyzeAlert(t *testing.T) {
 		wantErr                           bool
 		mockListAlertCondition            *[]model.AlertCondition
 		mockListAlertConditionErr         error
-		mockListFinding                   *[]model.Finding
-		mockListFindingErr                error
 		mockListAlertRuleErr              error
 		mockListDisabledAlertCondition    *[]model.AlertCondition
 		mockListDisabledAlertConditionErr error
@@ -42,7 +41,6 @@ func TestAnalyzeAlert(t *testing.T) {
 			want:                              &empty.Empty{},
 			wantErr:                           false,
 			mockListAlertCondition:            &[]model.AlertCondition{},
-			mockListFinding:                   &[]model.Finding{},
 			mockListDisabledAlertCondition:    &[]model.AlertCondition{},
 			mockListDisabledAlertConditionErr: nil,
 		},
@@ -53,19 +51,6 @@ func TestAnalyzeAlert(t *testing.T) {
 			wantErr:                   true,
 			mockListAlertCondition:    nil,
 			mockListAlertConditionErr: errors.New("Something error occured listAlertCondition"),
-			mockListFinding:           &[]model.Finding{},
-			mockListFindingErr:        nil,
-			mockListAlertRuleErr:      nil,
-		},
-		{
-			name:                      "NG ListFindingErr",
-			input:                     &alert.AnalyzeAlertRequest{ProjectId: 1001},
-			want:                      nil,
-			wantErr:                   true,
-			mockListAlertCondition:    &[]model.AlertCondition{},
-			mockListAlertConditionErr: nil,
-			mockListFinding:           nil,
-			mockListFindingErr:        errors.New("Something error occured listFinding"),
 			mockListAlertRuleErr:      nil,
 		},
 		{
@@ -75,8 +60,6 @@ func TestAnalyzeAlert(t *testing.T) {
 			wantErr:                   true,
 			mockListAlertCondition:    &[]model.AlertCondition{{AlertConditionID: 1001, CreatedAt: now, UpdatedAt: now}},
 			mockListAlertConditionErr: nil,
-			mockListFinding:           &[]model.Finding{},
-			mockListFindingErr:        nil,
 			mockListAlertRuleErr:      errors.New("Something error occured ListAlertRule"),
 		},
 	}
@@ -84,7 +67,6 @@ func TestAnalyzeAlert(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			mockDB = mockAlertRepository{}
 			mockDB.On("ListEnabledAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
-			mockDB.On("ListFinding").Return(c.mockListFinding, c.mockListFindingErr).Once()
 			mockDB.On("ListAlertRuleByAlertConditionID").Return(&[]model.AlertRule{}, c.mockListAlertRuleErr).Once()
 			mockDB.On("ListDisabledAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
 			got, err := svc.AnalyzeAlert(ctx, c.input)
@@ -264,142 +246,62 @@ func TestNotificationAlert(t *testing.T) {
 	}
 }
 
-func TestCheckMatchAlertRuleFinding(t *testing.T) {
-	var ctx context.Context
-	now := time.Now()
-	mockDB := mockAlertRepository{}
-	svc := alertService{repository: &mockDB}
-	cases := []struct {
-		name                  string
-		inputAlertRule        *model.AlertRule
-		inputFinding          *model.Finding
-		want                  bool
-		wantErr               bool
-		mockListFindingTag    *[]model.FindingTag
-		mockListFindingTagErr error
-	}{
-		{
-			name:                  "OK Not Match Score",
-			inputAlertRule:        &model.AlertRule{Score: 1.0, CreatedAt: now, UpdatedAt: now},
-			inputFinding:          &model.Finding{Score: 0.5, CreatedAt: now, UpdatedAt: now},
-			want:                  false,
-			wantErr:               false,
-			mockListFindingTag:    nil,
-			mockListFindingTagErr: nil,
-		},
-		{
-			name:                  "OK Not Match ResourceName",
-			inputAlertRule:        &model.AlertRule{Score: 0.1, ResourceName: "piyo", CreatedAt: now, UpdatedAt: now},
-			inputFinding:          &model.Finding{Score: 0.5, ResourceName: "hogefuga", CreatedAt: now, UpdatedAt: now},
-			want:                  false,
-			wantErr:               false,
-			mockListFindingTag:    nil,
-			mockListFindingTagErr: nil,
-		},
-		{
-			name:                  "OK Not Match FindingTag",
-			inputAlertRule:        &model.AlertRule{Score: 0.1, ResourceName: "hoge", Tag: "hoge", CreatedAt: now, UpdatedAt: now},
-			inputFinding:          &model.Finding{FindingID: 1, Score: 0.5, ResourceName: "hogefuga", CreatedAt: now, UpdatedAt: now},
-			want:                  false,
-			wantErr:               false,
-			mockListFindingTag:    &[]model.FindingTag{{FindingID: 1, Tag: "fuga"}, {FindingID: 1, Tag: "piyo"}},
-			mockListFindingTagErr: nil,
-		},
-		{
-			name:                  "OK Match All",
-			inputAlertRule:        &model.AlertRule{Score: 0.1, ResourceName: "hoge", Tag: "hoge", CreatedAt: now, UpdatedAt: now},
-			inputFinding:          &model.Finding{FindingID: 1, Score: 0.5, ResourceName: "hogefuga", CreatedAt: now, UpdatedAt: now},
-			want:                  true,
-			wantErr:               false,
-			mockListFindingTag:    &[]model.FindingTag{{FindingID: 1, Tag: "fuga"}, {FindingID: 1, Tag: "hoge"}},
-			mockListFindingTagErr: nil,
-		},
-		{
-			name:                  "NG ListFinding Error",
-			inputAlertRule:        &model.AlertRule{Score: 0.1, ResourceName: "hoge", Tag: "hoge", CreatedAt: now, UpdatedAt: now},
-			inputFinding:          &model.Finding{FindingID: 1, Score: 0.5, ResourceName: "hogefuga", CreatedAt: now, UpdatedAt: now},
-			want:                  false,
-			wantErr:               true,
-			mockListFindingTag:    nil,
-			mockListFindingTagErr: errors.New("Somthing error occured"),
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			mockDB = mockAlertRepository{}
-			mockDB.On("ListFindingTag").Return(c.mockListFindingTag, c.mockListFindingTagErr).Once()
-			got, err := svc.checkMatchAlertRuleFinding(ctx, c.inputAlertRule, c.inputFinding)
-			if err != nil && !c.wantErr {
-				t.Fatalf("Unexpected error: %+v", err)
-			}
-			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
-			}
-		})
-	}
-}
-
 func TestAnalyzeAlertByRule(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mockAlertRepository{}
-	svc := alertService{repository: &mockDB}
+	mockFinding := mockFindingClient{}
+	svc := alertService{findingClient: &mockFinding}
 	cases := []struct {
-		name                  string
-		inputAlertRule        *model.AlertRule
-		inputFindings         *[]model.Finding
-		wantBool              bool
-		wantIntArr            *[]uint64
-		wantErr               bool
-		mockListFindingTag    *[]model.FindingTag
-		mockListFindingTagErr error
+		name               string
+		inputAlertRule     *model.AlertRule
+		wantBool           bool
+		wantIntArr         *[]uint64
+		wantErr            bool
+		mockListFinding    *finding.ListFindingResponse
+		mockListFindingErr error
 	}{
 		{
-			name:                  "OK Not Match 0 Findings",
-			inputAlertRule:        &model.AlertRule{Score: 1.0, CreatedAt: now, UpdatedAt: now, FindingCnt: 1},
-			inputFindings:         &[]model.Finding{},
-			wantBool:              false,
-			wantIntArr:            &[]uint64{},
-			wantErr:               false,
-			mockListFindingTag:    nil,
-			mockListFindingTagErr: nil,
+			name:               "OK Not Match 0 Findings",
+			inputAlertRule:     &model.AlertRule{Score: 1.0, CreatedAt: now, UpdatedAt: now, FindingCnt: 1},
+			wantBool:           false,
+			wantIntArr:         &[]uint64{},
+			wantErr:            false,
+			mockListFinding:    &finding.ListFindingResponse{FindingId: []uint64{}, Total: 0, Count: 0},
+			mockListFindingErr: nil,
 		},
 		{
-			name:                  "OK FindingCnt <= Match Findings",
-			inputAlertRule:        &model.AlertRule{Score: 0.1, CreatedAt: now, UpdatedAt: now, FindingCnt: 2},
-			inputFindings:         &[]model.Finding{{FindingID: 1, Score: 0.5}, {FindingID: 2, Score: 1.0}},
-			wantBool:              true,
-			wantIntArr:            &[]uint64{1, 2},
-			wantErr:               false,
-			mockListFindingTag:    nil,
-			mockListFindingTagErr: nil,
+			name:               "OK FindingCnt <= Match Findings",
+			inputAlertRule:     &model.AlertRule{Score: 0.1, CreatedAt: now, UpdatedAt: now, FindingCnt: 2},
+			wantBool:           true,
+			wantIntArr:         &[]uint64{1, 2},
+			wantErr:            false,
+			mockListFinding:    &finding.ListFindingResponse{FindingId: []uint64{1, 2}, Total: 2, Count: 2},
+			mockListFindingErr: nil,
 		},
 		{
-			name:                  "OK FindingCnt > Match Findings",
-			inputAlertRule:        &model.AlertRule{Score: 0.1, CreatedAt: now, UpdatedAt: now, FindingCnt: 2},
-			inputFindings:         &[]model.Finding{{FindingID: 1, Score: 0.5}},
-			wantBool:              false,
-			wantIntArr:            &[]uint64{1},
-			wantErr:               false,
-			mockListFindingTag:    nil,
-			mockListFindingTagErr: nil,
+			name:               "OK FindingCnt > Match Findings",
+			inputAlertRule:     &model.AlertRule{Score: 0.1, CreatedAt: now, UpdatedAt: now, FindingCnt: 2},
+			wantBool:           false,
+			wantIntArr:         &[]uint64{1},
+			wantErr:            false,
+			mockListFinding:    &finding.ListFindingResponse{FindingId: []uint64{1}, Total: 1, Count: 1},
+			mockListFindingErr: nil,
 		},
 		{
-			name:                  "NG DB Error",
-			inputAlertRule:        &model.AlertRule{Score: 0.1, ResourceName: "hoge", Tag: "fuga", CreatedAt: now, UpdatedAt: now, FindingCnt: 1},
-			inputFindings:         &[]model.Finding{{FindingID: 1, Score: 0.5, ResourceName: "hoge"}},
-			wantBool:              false,
-			wantIntArr:            &[]uint64{},
-			wantErr:               true,
-			mockListFindingTag:    nil,
-			mockListFindingTagErr: errors.New("something error occured"),
+			name:               "NG DB Error",
+			inputAlertRule:     &model.AlertRule{Score: 0.1, ResourceName: "hoge", Tag: "fuga", CreatedAt: now, UpdatedAt: now, FindingCnt: 1},
+			wantBool:           false,
+			wantIntArr:         &[]uint64{},
+			wantErr:            true,
+			mockListFinding:    nil,
+			mockListFindingErr: errors.New("something error occured"),
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB = mockAlertRepository{}
-			mockDB.On("ListFindingTag").Return(c.mockListFindingTag, c.mockListFindingTagErr).Once()
-			gotBool, gotArr, err := svc.analyzeAlertByRule(ctx, c.inputAlertRule, c.inputFindings)
+
+			mockFinding.On("ListFinding").Return(c.mockListFinding, c.mockListFindingErr).Once()
+			gotBool, gotArr, err := svc.analyzeAlertByRule(ctx, c.inputAlertRule)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}

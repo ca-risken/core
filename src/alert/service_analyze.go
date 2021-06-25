@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/alert"
+	"github.com/CyberAgent/mimosa-core/proto/finding"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jinzhu/gorm"
 	"github.com/vikyd/zero"
@@ -31,17 +31,9 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 		return nil, err
 	}
 
-	// findingの取得
-	findings, err := f.repository.ListFinding(req.ProjectId)
-	noRecord = gorm.IsRecordNotFoundError(err)
-	if err != nil && !noRecord {
-		appLogger.Error(err)
-		return nil, err
-	}
-
 	// マッチング
 	for _, alertCondition := range *alertConditions {
-		err := f.AnalyzeAlertByCondition(ctx, &alertCondition, findings)
+		err := f.AnalyzeAlertByCondition(ctx, &alertCondition)
 		if err != nil {
 			appLogger.Error(err)
 			return nil, err
@@ -66,7 +58,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	return &empty.Empty{}, nil
 }
 
-func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertCondition *model.AlertCondition, findings *[]model.Finding) error {
+func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertCondition *model.AlertCondition) error {
 	// AlertRuleの取得
 	alertRules, err := f.repository.ListAlertRuleByAlertConditionID(alertCondition.ProjectID, alertCondition.AlertConditionID)
 	if err != nil {
@@ -76,7 +68,7 @@ func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 	var matchFindingIDs []uint64
 	isFirst := true
 	for _, alertRule := range *alertRules {
-		isMatchRule, matchFindingIDsByAlert, err := f.analyzeAlertByRule(ctx, &alertRule, findings)
+		isMatchRule, matchFindingIDsByAlert, err := f.analyzeAlertByRule(ctx, &alertRule)
 		if err != nil {
 			return err
 		}
@@ -121,7 +113,6 @@ func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 }
 
 func (f *alertService) RegistAlertByAnalyze(alertCondition *model.AlertCondition, findingIDs []uint64) (*model.Alert, error) {
-
 	// AlertConditionに該当するAlertが既に存在しているか確認
 	savedData, err := f.repository.GetAlertByAlertConditionIDStatus(alertCondition.ProjectID, alertCondition.AlertConditionID, []string{"ACTIVE", "PENDING"})
 	noRecord := gorm.IsRecordNotFoundError(err)
@@ -210,7 +201,6 @@ func (f *alertService) RegistAlertByAnalyze(alertCondition *model.AlertCondition
 }
 
 func (f *alertService) DeleteAlertByAnalyze(alertCondition *model.AlertCondition) error {
-
 	// Alertの削除
 	savedData, err := f.repository.GetAlertByAlertConditionIDStatus(alertCondition.ProjectID, alertCondition.AlertConditionID, []string{"ACTIVE", "PENDING"})
 	noRecord := gorm.IsRecordNotFoundError(err)
@@ -266,14 +256,6 @@ func (f *alertService) DeleteAlertByAnalyze(alertCondition *model.AlertCondition
 	return nil
 }
 
-func (f *alertService) getFindingTags(ctx context.Context, projectID uint32, findingID uint64) (*[]model.FindingTag, error) {
-	list, err := f.repository.ListFindingTag(projectID, findingID)
-	if err != nil {
-		return nil, err
-	}
-	return list, nil
-}
-
 func (f *alertService) deleteRelAlertFindingByAlertID(projectID, alertID uint32) error {
 	listRelAlertFinding, err := f.repository.ListRelAlertFinding(projectID, alertID, uint32(0), 0, time.Now().Unix())
 	if err != nil {
@@ -289,7 +271,6 @@ func (f *alertService) deleteRelAlertFindingByAlertID(projectID, alertID uint32)
 }
 
 func (f *alertService) NotificationAlert(alertCondition *model.AlertCondition, alert *model.Alert) error {
-
 	alertCondNotifications, err := f.repository.ListAlertCondNotification(alertCondition.ProjectID, alertCondition.AlertConditionID, 0, 0, time.Now().Unix())
 	if err != nil {
 		return err
@@ -334,47 +315,29 @@ func (f *alertService) NotificationAlert(alertCondition *model.AlertCondition, a
 	return nil
 }
 
-func (f *alertService) analyzeAlertByRule(ctx context.Context, alertRule *model.AlertRule, findings *[]model.Finding) (bool, *[]uint64, error) {
+func (f *alertService) analyzeAlertByRule(ctx context.Context, alertRule *model.AlertRule) (bool, *[]uint64, error) {
 	matchFindingIDs := []uint64{}
-	for _, finding := range *findings {
-		isMatch, err := f.checkMatchAlertRuleFinding(ctx, alertRule, &finding)
+	var offset int32
+	for {
+		resp, err := f.findingClient.ListFinding(ctx, &finding.ListFindingRequest{
+			ProjectId:    alertRule.ProjectID,
+			ResourceName: []string{alertRule.ResourceName},
+			FromScore:    alertRule.Score,
+			Tag:          []string{alertRule.Tag},
+			Offset:       offset,
+			Limit:        200, // max
+		})
 		if err != nil {
-			return false, &matchFindingIDs, err
+			return false, &[]uint64{}, err
 		}
-		if isMatch {
-			matchFindingIDs = append(matchFindingIDs, finding.FindingID)
+		matchFindingIDs = append(matchFindingIDs, resp.FindingId...)
+		if uint32(offset+int32(resp.Count)) >= resp.Total {
+			break
 		}
+		offset += int32(resp.Count)
 	}
 	isMatch := (len(matchFindingIDs) >= int(alertRule.FindingCnt))
 	return isMatch, &matchFindingIDs, nil
-}
-
-func (f *alertService) checkMatchAlertRuleFinding(ctx context.Context, alertRule *model.AlertRule, finding *model.Finding) (bool, error) {
-	if alertRule.Score > finding.Score {
-		return false, nil
-	}
-	if !zero.IsZeroVal(alertRule.ResourceName) && strings.Index(finding.ResourceName, alertRule.ResourceName) == -1 {
-		return false, nil
-	}
-	if !zero.IsZeroVal(alertRule.Tag) {
-		//findingIDがマッチするTagの収集
-		findingTags, err := f.getFindingTags(ctx, alertRule.ProjectID, finding.FindingID)
-		if err != nil {
-			return false, err
-		}
-		isMatchTag := false
-		for _, findingTag := range *findingTags {
-			if findingTag.Tag == alertRule.Tag {
-				isMatchTag = true
-				break
-			}
-		}
-		// findingとalertRuleのTagがマッチしなければfalseを返す
-		if !isMatchTag {
-			return false, nil
-		}
-	}
-	return true, nil
 }
 
 func (f *alertService) isMatchExistingAlert(savedAlert *model.Alert, alertCondition *model.AlertCondition, findingIDs []uint64) (bool, error) {
@@ -397,7 +360,6 @@ func (f *alertService) isMatchExistingAlert(savedAlert *model.Alert, alertCondit
 			return false, nil
 		}
 	}
-
 	return true, nil
 }
 
