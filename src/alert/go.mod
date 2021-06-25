@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210616080225-23e5135ede14
 	github.com/CyberAgent/mimosa-core/proto/alert v0.0.0-20210616080225-23e5135ede14
+	github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20210625075136-9f7378b1ce8a
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
@@ -12,7 +13,6 @@ require (
 	github.com/jarcoal/httpmock v1.0.6
 	github.com/jinzhu/gorm v1.9.16
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/magefile/mage v1.11.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.6.1
 	github.com/vikyd/zero v0.0.0-20190921142904-0f738d0bc858
