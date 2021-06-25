@@ -83,6 +83,7 @@ func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 		}
 		if !isMatchRule {
 			if alertCondition.AndOr == "and" {
+				matchFindingIDs = []uint64{} // clear
 				break
 			} else {
 				continue
