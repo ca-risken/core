@@ -12,9 +12,9 @@ import (
 )
 
 func (f *findingDB) ListFinding(req *finding.ListFindingRequest) (*[]model.Finding, error) {
-	query := "select * from finding "
-	where, params := generateListFindingWhereSQL(req)
-	query += where
+	query := "select finding.* from finding "
+	cond, params := generateListFindingCondition(req)
+	query += cond
 	query += fmt.Sprintf(" order by %s %s", req.Sort, req.Direction)
 	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
 	var data []model.Finding
@@ -26,8 +26,8 @@ func (f *findingDB) ListFinding(req *finding.ListFindingRequest) (*[]model.Findi
 
 func (f *findingDB) ListFindingCount(req *finding.ListFindingRequest) (uint32, error) {
 	query := "select count(*) from finding "
-	where, params := generateListFindingWhereSQL(req)
-	query += where
+	cond, params := generateListFindingCondition(req)
+	query += cond
 	var count uint32
 	if err := f.Slave.Raw(query, params...).Count(&count).Error; err != nil {
 		return count, err
@@ -35,7 +35,8 @@ func (f *findingDB) ListFindingCount(req *finding.ListFindingRequest) (uint32, e
 	return count, nil
 }
 
-func generateListFindingWhereSQL(req *finding.ListFindingRequest) (string, []interface{}) {
+func generateListFindingCondition(req *finding.ListFindingRequest) (string, []interface{}) {
+	join := ""
 	query := `
 where
   finding.project_id = ?
@@ -56,17 +57,20 @@ where
 		query += " and finding.resource_name regexp ?"
 		params = append(params, strings.Join(req.ResourceName, "|"))
 	}
+	// EXISTS and NOT EXISTS subquery cause performance slow so used join clause instead
 	if len(req.Tag) > 0 {
-		query += " and exists (select * from finding_tag ft where ft.finding_id=finding.finding_id and ft.tag in (?))"
+		join += " inner join finding_tag ft using(finding_id)"
+		query += " and ft.tag in (?)"
 		params = append(params, req.Tag)
 	}
 	if req.Status == finding.FindingStatus_FINDING_ACTIVE {
-		query += " and not exists (select * from pend_finding pf where pf.finding_id=finding.finding_id)"
+		join += " left join pend_finding pf using(finding_id)"
+		query += " and pf.finding_id is null"
 	}
 	if req.Status == finding.FindingStatus_FINDING_PENDING {
-		query += " and exists (select * from pend_finding pf where pf.finding_id=finding.finding_id)"
+		join += " inner join pend_finding using(finding_id)"
 	}
-	return query, params
+	return join + query, params
 }
 
 const selectGetFinding = `select * from finding where project_id = ? and finding_id = ?`

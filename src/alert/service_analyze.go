@@ -24,7 +24,9 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 		return nil, err
 	}
 	// 有効なalertConditionの取得
+	appLogger.Info("start ListEnabledAlertCondition")
 	alertConditions, err := f.repository.ListEnabledAlertCondition(req.ProjectId, req.AlertConditionId)
+	appLogger.Info("finish ListEnabledAlertCondition")
 	noRecord := gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		appLogger.Error(err)
@@ -32,6 +34,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	}
 
 	// マッチング
+	appLogger.Info("start matching")
 	for _, alertCondition := range *alertConditions {
 		err := f.AnalyzeAlertByCondition(ctx, &alertCondition)
 		if err != nil {
@@ -39,15 +42,19 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 			return nil, err
 		}
 	}
+	appLogger.Info("finish matching")
 
 	// 無効のalertConditionの取得
+	appLogger.Info("start ListDisabledAlertCondition")
 	disabledAlertConditions, err := f.repository.ListDisabledAlertCondition(req.ProjectId, req.AlertConditionId)
+	appLogger.Info("finish ListDisabledAlertCondition")
 	noRecord = gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		appLogger.Error(err)
 		return nil, err
 	}
 	// 無効なalertConditionに紐づくAlertを削除
+	appLogger.Info("start DeleteAlertByAnalyze")
 	for _, alertCondition := range *disabledAlertConditions {
 		err := f.DeleteAlertByAnalyze(&alertCondition)
 		if err != nil {
@@ -55,6 +62,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 			return nil, err
 		}
 	}
+	appLogger.Info("finish DeleteAlertByAnalyze")
 	return &empty.Empty{}, nil
 }
 
@@ -67,30 +75,36 @@ func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 	}
 	var matchFindingIDs []uint64
 	isFirst := true
+	appLogger.Info("start matching per rule")
 	for _, alertRule := range *alertRules {
 		isMatchRule, matchFindingIDsByAlert, err := f.analyzeAlertByRule(ctx, &alertRule)
 		if err != nil {
 			return err
 		}
-		if isMatchRule {
-			if !isFirst && alertCondition.AndOr == "and" {
-				var newMatchFindingIDs []uint64
-				for _, matchFindingID := range *matchFindingIDsByAlert {
-					if isContainsFindings(matchFindingID, matchFindingIDs) {
-						newMatchFindingIDs = append(newMatchFindingIDs, matchFindingID)
-					}
-				}
-				matchFindingIDs = newMatchFindingIDs
-			} else {
-				matchFindingIDs = append(matchFindingIDs, *matchFindingIDsByAlert...)
-			}
-		} else {
+		if !isMatchRule {
 			if alertCondition.AndOr == "and" {
 				break
+			} else {
+				continue
 			}
 		}
-		isFirst = false
+		if alertCondition.AndOr == "or" || isFirst {
+			matchFindingIDs = append(matchFindingIDs, *matchFindingIDsByAlert...)
+			isFirst = false
+			continue
+		}
+		var andMatchFindingIDs []uint64
+		for _, id := range *matchFindingIDsByAlert {
+			if isContainsFindings(id, matchFindingIDs) {
+				andMatchFindingIDs = append(andMatchFindingIDs, id)
+			}
+		}
+		if len(andMatchFindingIDs) == 0 {
+			break
+		}
+		matchFindingIDs = andMatchFindingIDs
 	}
+	appLogger.Info("finish matching per rule")
 	if len(matchFindingIDs) > 0 {
 		registAlert, err := f.RegistAlertByAnalyze(alertCondition, matchFindingIDs)
 		if err != nil {
@@ -319,25 +333,33 @@ func (f *alertService) analyzeAlertByRule(ctx context.Context, alertRule *model.
 	matchFindingIDs := []uint64{}
 	var offset int32
 	for {
-		resp, err := f.findingClient.ListFinding(ctx, &finding.ListFindingRequest{
-			ProjectId:    alertRule.ProjectID,
-			ResourceName: []string{alertRule.ResourceName},
-			FromScore:    alertRule.Score,
-			Tag:          []string{alertRule.Tag},
-			Offset:       offset,
-			Limit:        200, // max
-		})
+		param := &finding.ListFindingRequest{
+			ProjectId: alertRule.ProjectID,
+			FromScore: alertRule.Score,
+			Status:    finding.FindingStatus_FINDING_ACTIVE,
+			Offset:    offset,
+			Limit:     200, // max
+		}
+		if alertRule.ResourceName != "" {
+			param.ResourceName = []string{alertRule.ResourceName}
+		}
+		if alertRule.Tag != "" {
+			param.Tag = []string{alertRule.Tag}
+		}
+
+		resp, err := f.findingClient.ListFinding(ctx, param)
 		if err != nil {
+			appLogger.Errorf("Failed to ListFinding, request=%+v, err=%+v", param, err)
 			return false, &[]uint64{}, err
 		}
+		appLogger.Infof("Got ListFinding, request=%+v, IDs=%d", param, len(resp.FindingId)) // Debug
 		matchFindingIDs = append(matchFindingIDs, resp.FindingId...)
 		if uint32(offset+int32(resp.Count)) >= resp.Total {
 			break
 		}
 		offset += int32(resp.Count)
 	}
-	isMatch := (len(matchFindingIDs) >= int(alertRule.FindingCnt))
-	return isMatch, &matchFindingIDs, nil
+	return len(matchFindingIDs) >= int(alertRule.FindingCnt), &matchFindingIDs, nil
 }
 
 func (f *alertService) isMatchExistingAlert(savedAlert *model.Alert, alertCondition *model.AlertCondition, findingIDs []uint64) (bool, error) {

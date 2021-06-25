@@ -6,13 +6,11 @@ require (
 	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210616080225-23e5135ede14
 	github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20210616080225-23e5135ede14
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
-	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible // indirect
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/protobuf v1.5.2
 	github.com/jinzhu/gorm v1.9.16
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/magefile/mage v1.11.0 // indirect
 	github.com/mattn/go-sqlite3 v2.0.1+incompatible // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/objx v0.3.0 // indirect
