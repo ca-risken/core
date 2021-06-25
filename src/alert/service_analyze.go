@@ -100,6 +100,7 @@ func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 			}
 		}
 		if len(andMatchFindingIDs) == 0 {
+			matchFindingIDs = []uint64{} // clear
 			break
 		}
 		matchFindingIDs = andMatchFindingIDs
