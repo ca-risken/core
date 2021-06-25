@@ -24,7 +24,9 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 		return nil, err
 	}
 	// 有効なalertConditionの取得
+	appLogger.Info("start ListEnabledAlertCondition")
 	alertConditions, err := f.repository.ListEnabledAlertCondition(req.ProjectId, req.AlertConditionId)
+	appLogger.Info("finish ListEnabledAlertCondition")
 	noRecord := gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		appLogger.Error(err)
@@ -32,7 +34,9 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	}
 
 	// findingの取得
+	appLogger.Info("start ListFinding")
 	findings, err := f.repository.ListFinding(req.ProjectId)
+	appLogger.Info("finish ListFinding")
 	noRecord = gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		appLogger.Error(err)
@@ -40,6 +44,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	}
 
 	// マッチング
+	appLogger.Info("start matching")
 	for _, alertCondition := range *alertConditions {
 		err := f.AnalyzeAlertByCondition(ctx, &alertCondition, findings)
 		if err != nil {
@@ -47,15 +52,19 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 			return nil, err
 		}
 	}
+	appLogger.Info("finish matching")
 
 	// 無効のalertConditionの取得
+	appLogger.Info("start ListDisabledAlertCondition")
 	disabledAlertConditions, err := f.repository.ListDisabledAlertCondition(req.ProjectId, req.AlertConditionId)
+	appLogger.Info("finish ListDisabledAlertCondition")
 	noRecord = gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		appLogger.Error(err)
 		return nil, err
 	}
 	// 無効なalertConditionに紐づくAlertを削除
+	appLogger.Info("start DeleteAlertByAnalyze")
 	for _, alertCondition := range *disabledAlertConditions {
 		err := f.DeleteAlertByAnalyze(&alertCondition)
 		if err != nil {
@@ -63,6 +72,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 			return nil, err
 		}
 	}
+	appLogger.Info("finish DeleteAlertByAnalyze")
 	return &empty.Empty{}, nil
 }
 
@@ -75,6 +85,7 @@ func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 	}
 	var matchFindingIDs []uint64
 	isFirst := true
+	appLogger.Info("start matching per rule")
 	for _, alertRule := range *alertRules {
 		isMatchRule, matchFindingIDsByAlert, err := f.analyzeAlertByRule(ctx, &alertRule, findings)
 		if err != nil {
@@ -99,6 +110,7 @@ func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 		}
 		isFirst = false
 	}
+	appLogger.Info("finish matching per rule")
 	if len(matchFindingIDs) > 0 {
 		registAlert, err := f.RegistAlertByAnalyze(alertCondition, matchFindingIDs)
 		if err != nil {
