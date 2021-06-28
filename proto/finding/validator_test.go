@@ -122,6 +122,90 @@ func TestValidate_ListFindingRequest(t *testing.T) {
 	}
 }
 
+func TestValidate_BatchListFindingRequest(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name    string
+		input   *BatchListFindingRequest
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &BatchListFindingRequest{ProjectId: 1, DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix()},
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &BatchListFindingRequest{DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix()},
+			wantErr: true,
+		},
+		{
+			name:    "NG too long resource_name",
+			input:   &BatchListFindingRequest{ProjectId: 1, ResourceName: []string{len256string}},
+			wantErr: true,
+		},
+		{
+			name:    "NG too long data_source",
+			input:   &BatchListFindingRequest{ProjectId: 1, DataSource: []string{len65string}},
+			wantErr: true,
+		},
+		{
+			name:    "NG small from_score",
+			input:   &BatchListFindingRequest{ProjectId: 1, FromScore: -0.1},
+			wantErr: true,
+		},
+		{
+			name:    "NG big from_score",
+			input:   &BatchListFindingRequest{ProjectId: 1, FromScore: 1.1},
+			wantErr: true,
+		},
+		{
+			name:    "NG small to_score",
+			input:   &BatchListFindingRequest{ProjectId: 1, ToScore: -0.1},
+			wantErr: true,
+		},
+		{
+			name:    "NG big to_score",
+			input:   &BatchListFindingRequest{ProjectId: 1, ToScore: 1.1},
+			wantErr: true,
+		},
+		{
+			name:    "NG small from_at",
+			input:   &BatchListFindingRequest{ProjectId: 1, FromAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG big from_at",
+			input:   &BatchListFindingRequest{ProjectId: 1, FromAt: 253402268400},
+			wantErr: true,
+		},
+		{
+			name:    "NG small to_at",
+			input:   &BatchListFindingRequest{ProjectId: 1, ToAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG big to_at",
+			input:   &BatchListFindingRequest{ProjectId: 1, ToAt: 253402268400},
+			wantErr: true,
+		},
+		{
+			name:    "NG too long tag",
+			input:   &BatchListFindingRequest{ProjectId: 1, Tag: []string{len65string}},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
 func TestValidate_GetFindingRequest(t *testing.T) {
 	cases := []struct {
 		name    string

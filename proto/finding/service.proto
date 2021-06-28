@@ -9,6 +9,8 @@ import "finding/entity.proto";
 service FindingService {
   // fiding
   rpc ListFinding(ListFindingRequest) returns (ListFindingResponse);
+  rpc BatchListFinding(BatchListFindingRequest)
+      returns (BatchListFindingResponse);
   rpc GetFinding(GetFindingRequest) returns (GetFindingResponse);
   rpc PutFinding(PutFindingRequest) returns (PutFindingResponse);
   rpc DeleteFinding(DeleteFindingRequest) returns (google.protobuf.Empty);
@@ -64,6 +66,25 @@ message ListFindingRequest {
 }
 
 message ListFindingResponse {
+  repeated uint64 finding_id = 1;
+  uint32 count = 2;
+  uint32 total = 3;
+}
+
+message BatchListFindingRequest {
+  uint32 project_id = 1;
+  repeated string data_source = 2;
+  repeated string resource_name = 3;
+  float from_score = 4;
+  float to_score = 5;
+  int64 from_at = 6;
+  int64 to_at = 7;
+  repeated string tag = 8;
+  FindingStatus status = 9;
+  uint64 finding_id = 10;
+}
+
+message BatchListFindingResponse {
   repeated uint64 finding_id = 1;
   uint32 count = 2;
   uint32 total = 3;

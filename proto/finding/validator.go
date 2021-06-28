@@ -26,6 +26,20 @@ func (l *ListFindingRequest) Validate() error {
 	)
 }
 
+// Validate BatchListFindingRequest
+func (b *BatchListFindingRequest) Validate() error {
+	return validation.ValidateStruct(b,
+		validation.Field(&b.ProjectId, validation.Required),
+		validation.Field(&b.DataSource, validation.Each(validation.Length(0, 64))),
+		validation.Field(&b.ResourceName, validation.Each(validation.Length(0, 255))),
+		validation.Field(&b.FromScore, validation.Min(0.0), validation.Max(1.0)),
+		validation.Field(&b.ToScore, validation.Min(0.0), validation.Max(1.0)),
+		validation.Field(&b.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&b.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&b.Tag, validation.Each(validation.Length(0, 64))),
+	)
+}
+
 // Validate GetFinding
 func (g *GetFindingRequest) Validate() error {
 	return validation.ValidateStruct(g,
