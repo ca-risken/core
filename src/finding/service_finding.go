@@ -17,7 +17,13 @@ func (f *findingService) ListFinding(ctx context.Context, req *finding.ListFindi
 		return nil, err
 	}
 	param := convertListFindingRequest(req)
-	total, err := f.repository.ListFindingCount(param)
+	total, err := f.repository.ListFindingCount(
+		param.ProjectId,
+		param.FromScore, param.ToScore,
+		param.FromAt, param.ToAt,
+		param.FindingId,
+		param.DataSource, param.ResourceName, param.Tag,
+		param.Status)
 	if err != nil {
 		return nil, err
 	}
@@ -51,6 +57,46 @@ func convertListFindingRequest(req *finding.ListFindingRequest) *finding.ListFin
 	}
 	if zero.IsZeroVal(converted.Limit) {
 		converted.Limit = defaultLimit
+	}
+	return converted
+}
+
+func (f *findingService) BatchListFinding(ctx context.Context, req *finding.BatchListFindingRequest) (*finding.BatchListFindingResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	param := convertBatchListFindingRequest(req)
+	total, err := f.repository.ListFindingCount(
+		param.ProjectId,
+		param.FromScore, param.ToScore,
+		param.FromAt, param.ToAt,
+		param.FindingId,
+		param.DataSource, param.ResourceName, param.Tag,
+		param.Status)
+	if err != nil {
+		return nil, err
+	}
+	if total == 0 {
+		return &finding.BatchListFindingResponse{FindingId: []uint64{}, Count: 0, Total: total}, nil
+	}
+	list, err := f.repository.BatchListFinding(param)
+	if err != nil {
+		return nil, err
+	}
+	var ids []uint64
+	for _, data := range *list {
+		ids = append(ids, uint64(data.FindingID))
+	}
+	return &finding.BatchListFindingResponse{FindingId: ids, Count: uint32(len(ids)), Total: total}, nil
+}
+
+func convertBatchListFindingRequest(req *finding.BatchListFindingRequest) *finding.BatchListFindingRequest {
+	converted := req
+	if zero.IsZeroVal(converted.ToScore) {
+		converted.ToScore = 1.0
+	}
+	if zero.IsZeroVal(converted.ToAt) {
+		converted.ToAt = time.Now().Unix()
 	}
 	return converted
 }

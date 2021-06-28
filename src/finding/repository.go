@@ -13,7 +13,14 @@ import (
 type findingRepository interface {
 	// Finding
 	ListFinding(*finding.ListFindingRequest) (*[]model.Finding, error)
-	ListFindingCount(req *finding.ListFindingRequest) (uint32, error)
+	BatchListFinding(*finding.BatchListFindingRequest) (*[]model.Finding, error)
+	ListFindingCount(
+		projectID uint32,
+		fromScore, toScore float32,
+		fromAt, toAt int64,
+		findingID uint64,
+		dataSources, resourceNames, tags []string,
+		status finding.FindingStatus) (uint32, error)
 	GetFinding(uint32, uint64) (*model.Finding, error)
 	GetFindingByDataSource(uint32, string, string) (*model.Finding, error)
 	UpsertFinding(*model.Finding) (*model.Finding, error)

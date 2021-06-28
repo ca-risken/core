@@ -62,6 +62,57 @@ func TestListFinding(t *testing.T) {
 	}
 }
 
+func TestBatchListFinding(t *testing.T) {
+	var ctx context.Context
+	mockDB := mockFindingRepository{}
+	svc := findingService{repository: &mockDB}
+	cases := []struct {
+		name         string
+		input        *finding.BatchListFindingRequest
+		want         *finding.BatchListFindingResponse
+		wantErr      bool
+		totalCount   uint32
+		mockResponce *[]model.Finding
+		mockError    error
+	}{
+		{
+			name:         "OK",
+			input:        &finding.BatchListFindingRequest{ProjectId: 1, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"hoge"}, FromScore: 0.0, ToScore: 1.0},
+			want:         &finding.BatchListFindingResponse{FindingId: []uint64{111, 222}, Count: 2, Total: 2},
+			totalCount:   2,
+			mockResponce: &[]model.Finding{{FindingID: 111}, {FindingID: 222}},
+		},
+		{
+			name:       "OK zero list",
+			input:      &finding.BatchListFindingRequest{ProjectId: 1, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"hoge"}, FromScore: 0.0, ToScore: 1.0},
+			want:       &finding.BatchListFindingResponse{FindingId: []uint64{}, Count: 0, Total: 0},
+			totalCount: 0,
+		},
+		{
+			name:       "NG DB error",
+			input:      &finding.BatchListFindingRequest{ProjectId: 1, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"hoge"}, FromScore: 0.0, ToScore: 1.0},
+			totalCount: 999,
+			mockError:  gorm.ErrInvalidSQL,
+			wantErr:    true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mockDB.On("ListFindingCount").Return(c.totalCount, nil).Once()
+			if c.mockResponce != nil || c.mockError != nil {
+				mockDB.On("BatchListFinding").Return(c.mockResponce, c.mockError).Once()
+			}
+			got, err := svc.BatchListFinding(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
 func TestGetFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()

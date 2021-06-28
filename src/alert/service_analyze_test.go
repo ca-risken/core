@@ -257,7 +257,7 @@ func TestAnalyzeAlertByRule(t *testing.T) {
 		wantBool           bool
 		wantIntArr         *[]uint64
 		wantErr            bool
-		mockListFinding    *finding.ListFindingResponse
+		mockListFinding    *finding.BatchListFindingResponse
 		mockListFindingErr error
 	}{
 		{
@@ -266,7 +266,7 @@ func TestAnalyzeAlertByRule(t *testing.T) {
 			wantBool:           false,
 			wantIntArr:         &[]uint64{},
 			wantErr:            false,
-			mockListFinding:    &finding.ListFindingResponse{FindingId: []uint64{}, Total: 0, Count: 0},
+			mockListFinding:    &finding.BatchListFindingResponse{FindingId: []uint64{}, Total: 0, Count: 0},
 			mockListFindingErr: nil,
 		},
 		{
@@ -275,7 +275,7 @@ func TestAnalyzeAlertByRule(t *testing.T) {
 			wantBool:           true,
 			wantIntArr:         &[]uint64{1, 2},
 			wantErr:            false,
-			mockListFinding:    &finding.ListFindingResponse{FindingId: []uint64{1, 2}, Total: 2, Count: 2},
+			mockListFinding:    &finding.BatchListFindingResponse{FindingId: []uint64{1, 2}, Total: 2, Count: 2},
 			mockListFindingErr: nil,
 		},
 		{
@@ -284,7 +284,7 @@ func TestAnalyzeAlertByRule(t *testing.T) {
 			wantBool:           false,
 			wantIntArr:         &[]uint64{1},
 			wantErr:            false,
-			mockListFinding:    &finding.ListFindingResponse{FindingId: []uint64{1}, Total: 1, Count: 1},
+			mockListFinding:    &finding.BatchListFindingResponse{FindingId: []uint64{1}, Total: 1, Count: 1},
 			mockListFindingErr: nil,
 		},
 		{
@@ -300,7 +300,7 @@ func TestAnalyzeAlertByRule(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 
-			mockFinding.On("ListFinding").Return(c.mockListFinding, c.mockListFindingErr).Once()
+			mockFinding.On("BatchListFinding").Return(c.mockListFinding, c.mockListFindingErr).Once()
 			gotBool, gotArr, err := svc.analyzeAlertByRule(ctx, c.inputAlertRule)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
