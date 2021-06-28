@@ -26,10 +26,11 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
+	requestID := getRequestID(req.ProjectId)
 	// 有効なalertConditionの取得
-	appLogger.Info("start ListEnabledAlertCondition")
+	appLogger.Infof("start ListEnabledAlertCondition: RequestID=%s", requestID)
 	alertConditions, err := f.repository.ListEnabledAlertCondition(req.ProjectId, req.AlertConditionId)
-	appLogger.Info("finish ListEnabledAlertCondition")
+	appLogger.Infof("finish ListEnabledAlertCondition: RequestID=%s", requestID)
 	noRecord := gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		appLogger.Error(err)
@@ -37,11 +38,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	}
 
 	// マッチング
-	analyzeID, err := MakeRandomStr(10)
-	if err != nil {
-		analyzeID = fmt.Sprintf("%v:%v", req.ProjectId, req.AlertConditionId)
-	}
-	appLogger.Infof("start matching ID: %v", analyzeID)
+	appLogger.Infof("start matching: RequestID=%s", requestID)
 	for _, alertCondition := range *alertConditions {
 		err := f.AnalyzeAlertByCondition(ctx, &alertCondition)
 		if err != nil {
@@ -49,19 +46,19 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 			return nil, err
 		}
 	}
-	appLogger.Infof("finish matching ID: %v", analyzeID)
+	appLogger.Infof("finish matching: RequestID=%s", requestID)
 
 	// 無効のalertConditionの取得
-	appLogger.Info("start ListDisabledAlertCondition")
+	appLogger.Infof("start ListDisabledAlertCondition: RequestID=%s", requestID)
 	disabledAlertConditions, err := f.repository.ListDisabledAlertCondition(req.ProjectId, req.AlertConditionId)
-	appLogger.Info("finish ListDisabledAlertCondition")
+	appLogger.Infof("finish ListDisabledAlertCondition: RequestID=%s", requestID)
 	noRecord = gorm.IsRecordNotFoundError(err)
 	if err != nil && !noRecord {
 		appLogger.Error(err)
 		return nil, err
 	}
 	// 無効なalertConditionに紐づくAlertを削除
-	appLogger.Info("start DeleteAlertByAnalyze")
+	appLogger.Infof("start DeleteAlertByAnalyze: RequestID=%s", requestID)
 	for _, alertCondition := range *disabledAlertConditions {
 		err := f.DeleteAlertByAnalyze(&alertCondition)
 		if err != nil {
@@ -69,7 +66,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 			return nil, err
 		}
 	}
-	appLogger.Info("finish DeleteAlertByAnalyze")
+	appLogger.Infof("finish DeleteAlertByAnalyze: RequestID=%s", requestID)
 	return &empty.Empty{}, nil
 }
 
@@ -478,7 +475,7 @@ type slackNotifySetting struct {
 }
 
 // for Logging
-func MakeRandomStr(digit uint32) (string, error) {
+func makeRandomStr(digit uint32) (string, error) {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 	// 乱数を生成
@@ -494,4 +491,12 @@ func MakeRandomStr(digit uint32) (string, error) {
 		result += string(letters[int(v)%len(letters)])
 	}
 	return result, nil
+}
+
+func getRequestID(projectID uint32) string {
+	rand, err := makeRandomStr(10)
+	if err != nil {
+		appLogger.Warnf("Failed to make random string, err=%+v", err)
+	}
+	return fmt.Sprintf("%d-%s", projectID, rand)
 }
