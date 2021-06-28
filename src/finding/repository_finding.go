@@ -13,7 +13,9 @@ import (
 
 func (f *findingDB) ListFinding(req *finding.ListFindingRequest) (*[]model.Finding, error) {
 	query := "select finding.* from finding "
-	cond, params := generateListFindingCondition(req)
+	cond, params := generateListFindingCondition(req.ProjectId,
+		req.FromScore, req.ToScore, req.FromAt, req.ToAt,
+		req.FindingId, req.DataSource, req.ResourceName, req.Tag, req.Status)
 	query += cond
 	query += fmt.Sprintf(" order by %s %s", req.Sort, req.Direction)
 	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
@@ -24,9 +26,30 @@ func (f *findingDB) ListFinding(req *finding.ListFindingRequest) (*[]model.Findi
 	return &data, nil
 }
 
-func (f *findingDB) ListFindingCount(req *finding.ListFindingRequest) (uint32, error) {
+func (f *findingDB) BatchListFinding(req *finding.BatchListFindingRequest) (*[]model.Finding, error) {
+	query := "select finding.* from finding "
+	cond, params := generateListFindingCondition(req.ProjectId,
+		req.FromScore, req.ToScore, req.FromAt, req.ToAt,
+		req.FindingId, req.DataSource, req.ResourceName, req.Tag, req.Status)
+	query += cond
+	var data []model.Finding
+	if err := f.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (f *findingDB) ListFindingCount(
+	projectID uint32,
+	fromScore, toScore float32,
+	fromAt, toAt int64,
+	findingID uint64,
+	dataSources, resourceNames, tags []string,
+	status finding.FindingStatus) (uint32, error) {
 	query := "select count(*) from finding "
-	cond, params := generateListFindingCondition(req)
+	cond, params := generateListFindingCondition(projectID,
+		fromScore, toScore, fromAt, toAt,
+		findingID, dataSources, resourceNames, tags, status)
 	query += cond
 	var count uint32
 	if err := f.Slave.Raw(query, params...).Count(&count).Error; err != nil {
@@ -35,7 +58,13 @@ func (f *findingDB) ListFindingCount(req *finding.ListFindingRequest) (uint32, e
 	return count, nil
 }
 
-func generateListFindingCondition(req *finding.ListFindingRequest) (string, []interface{}) {
+func generateListFindingCondition(
+	projectID uint32,
+	fromScore, toScore float32,
+	fromAt, toAt int64,
+	findingID uint64,
+	dataSources, resourceNames, tags []string,
+	status finding.FindingStatus) (string, []interface{}) {
 	join := ""
 	query := `
 where
@@ -44,30 +73,30 @@ where
   and finding.updated_at between ? and ?
 `
 	var params []interface{}
-	params = append(params, req.ProjectId, req.FromScore, req.ToScore, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
-	if !zero.IsZeroVal(req.FindingId) {
+	params = append(params, projectID, fromScore, toScore, time.Unix(fromAt, 0), time.Unix(toAt, 0))
+	if !zero.IsZeroVal(findingID) {
 		query += " and finding.finding_id = ?"
-		params = append(params, req.FindingId)
+		params = append(params, findingID)
 	}
-	if len(req.DataSource) > 0 {
+	if len(dataSources) > 0 {
 		query += " and finding.data_source regexp ?"
-		params = append(params, strings.Join(req.DataSource, "|"))
+		params = append(params, strings.Join(dataSources, "|"))
 	}
-	if len(req.ResourceName) > 0 {
+	if len(resourceNames) > 0 {
 		query += " and finding.resource_name regexp ?"
-		params = append(params, strings.Join(req.ResourceName, "|"))
+		params = append(params, strings.Join(resourceNames, "|"))
 	}
 	// EXISTS and NOT EXISTS subquery cause performance slow so used join clause instead
-	if len(req.Tag) > 0 {
+	if len(tags) > 0 {
 		join += " inner join finding_tag ft using(finding_id)"
 		query += " and ft.tag in (?)"
-		params = append(params, req.Tag)
+		params = append(params, tags)
 	}
-	if req.Status == finding.FindingStatus_FINDING_ACTIVE {
+	if status == finding.FindingStatus_FINDING_ACTIVE {
 		join += " left join pend_finding pf using(finding_id)"
 		query += " and pf.finding_id is null"
 	}
-	if req.Status == finding.FindingStatus_FINDING_PENDING {
+	if status == finding.FindingStatus_FINDING_PENDING {
 		join += " inner join pend_finding using(finding_id)"
 	}
 	return join + query, params

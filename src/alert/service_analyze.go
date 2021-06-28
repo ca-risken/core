@@ -339,36 +339,24 @@ func (f *alertService) NotificationAlert(alertCondition *model.AlertCondition, a
 }
 
 func (f *alertService) analyzeAlertByRule(ctx context.Context, alertRule *model.AlertRule) (bool, *[]uint64, error) {
-	matchFindingIDs := []uint64{}
-	var offset int32
-	for {
-		param := &finding.ListFindingRequest{
-			ProjectId: alertRule.ProjectID,
-			FromScore: alertRule.Score,
-			Status:    finding.FindingStatus_FINDING_ACTIVE,
-			Offset:    offset,
-			Limit:     200, // max
-		}
-		if alertRule.ResourceName != "" {
-			param.ResourceName = []string{alertRule.ResourceName}
-		}
-		if alertRule.Tag != "" {
-			param.Tag = []string{alertRule.Tag}
-		}
-
-		resp, err := f.findingClient.ListFinding(ctx, param)
-		if err != nil {
-			appLogger.Errorf("Failed to ListFinding, request=%+v, err=%+v", param, err)
-			return false, &[]uint64{}, err
-		}
-		appLogger.Infof("Got ListFinding, request=%+v, IDs=%d", param, len(resp.FindingId)) // Debug
-		matchFindingIDs = append(matchFindingIDs, resp.FindingId...)
-		if uint32(offset+int32(resp.Count)) >= resp.Total {
-			break
-		}
-		offset += int32(resp.Count)
+	param := &finding.BatchListFindingRequest{
+		ProjectId: alertRule.ProjectID,
+		FromScore: alertRule.Score,
+		Status:    finding.FindingStatus_FINDING_ACTIVE,
 	}
-	return len(matchFindingIDs) >= int(alertRule.FindingCnt), &matchFindingIDs, nil
+	if alertRule.ResourceName != "" {
+		param.ResourceName = []string{alertRule.ResourceName}
+	}
+	if alertRule.Tag != "" {
+		param.Tag = []string{alertRule.Tag}
+	}
+	resp, err := f.findingClient.BatchListFinding(ctx, param)
+	if err != nil {
+		appLogger.Errorf("Failed to BatchListFinding, request=%+v, err=%+v", param, err)
+		return false, &[]uint64{}, err
+	}
+	appLogger.Infof("Got BatchListFinding, request=%+v, count=%d", param, resp.Count) // Debug
+	return resp.Count >= alertRule.FindingCnt, &resp.FindingId, nil
 }
 
 func (f *alertService) isMatchExistingAlert(savedAlert *model.Alert, alertCondition *model.AlertCondition, findingIDs []uint64) (bool, error) {

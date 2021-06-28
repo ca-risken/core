@@ -79,7 +79,17 @@ func (m *mockFindingRepository) ListFinding(*finding.ListFindingRequest) (*[]mod
 	args := m.Called()
 	return args.Get(0).(*[]model.Finding), args.Error(1)
 }
-func (m *mockFindingRepository) ListFindingCount(req *finding.ListFindingRequest) (uint32, error) {
+func (m *mockFindingRepository) BatchListFinding(*finding.BatchListFindingRequest) (*[]model.Finding, error) {
+	args := m.Called()
+	return args.Get(0).(*[]model.Finding), args.Error(1)
+}
+func (m *mockFindingRepository) ListFindingCount(
+	projectID uint32,
+	fromScore, toScore float32,
+	fromAt, toAt int64,
+	findingID uint64,
+	dataSources, resourceNames, tags []string,
+	status finding.FindingStatus) (uint32, error) {
 	args := m.Called()
 	return args.Get(0).(uint32), args.Error(1)
 }

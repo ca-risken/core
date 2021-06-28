@@ -18,6 +18,8 @@ github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210616024441-fd97b5355aab h
 github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210616024441-fd97b5355aab/go.mod h1:80ykoMm2T4VZhcHLOTLPxzL2ay6m7TFisWQ4k5CPWgc=
 github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210616080225-23e5135ede14 h1:ZcUot9MDxUxphqaXtNvjiPCoQDQas/j12XCNPiQ9YOg=
 github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210616080225-23e5135ede14/go.mod h1:80ykoMm2T4VZhcHLOTLPxzL2ay6m7TFisWQ4k5CPWgc=
+github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210628032046-7e6a43522da4 h1:go/0N4xseQiHrECUyhal0f1s6bYf17GsVZltNoQuzGM=
+github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210628032046-7e6a43522da4/go.mod h1:80ykoMm2T4VZhcHLOTLPxzL2ay6m7TFisWQ4k5CPWgc=
 github.com/CyberAgent/mimosa-core/proto/report v0.0.0-20210209130947-d62cdfdeadec h1:fBucQLbV0LigRUCPez6j1ZwXfwdTjFBWps60DlDhW7M=
 github.com/CyberAgent/mimosa-core/proto/report v0.0.0-20210209130947-d62cdfdeadec/go.mod h1:78OVMBIGSvO1RumPtWxwpTFLoZxLjDtZ81ODEsVYwRA=
 github.com/CyberAgent/mimosa-core/proto/report v0.0.0-20210226074139-3992ddae22ff h1:0Fi/cW2dpoSujpcZT74dl/amVE6rb3bjDy95Efy8uj0=
@@ -36,6 +38,8 @@ github.com/CyberAgent/mimosa-core/proto/report v0.0.0-20210616024441-fd97b5355aa
 github.com/CyberAgent/mimosa-core/proto/report v0.0.0-20210616024441-fd97b5355aab/go.mod h1:1cVKC1tilQQTPtLr3zjyge2e5VKudZabPp4EwlMrTHs=
 github.com/CyberAgent/mimosa-core/proto/report v0.0.0-20210616080225-23e5135ede14 h1:YynqJeQG7MPXBW9UZiQOw90wra+2aN9Y2IEE3Bt5sp8=
 github.com/CyberAgent/mimosa-core/proto/report v0.0.0-20210616080225-23e5135ede14/go.mod h1:1cVKC1tilQQTPtLr3zjyge2e5VKudZabPp4EwlMrTHs=
+github.com/CyberAgent/mimosa-core/proto/report v0.0.0-20210628032046-7e6a43522da4 h1:y1SAiqDjTgy+duD2QM4YIy2Tt+d79soIpVVXKQDmv4k=
+github.com/CyberAgent/mimosa-core/proto/report v0.0.0-20210628032046-7e6a43522da4/go.mod h1:1cVKC1tilQQTPtLr3zjyge2e5VKudZabPp4EwlMrTHs=
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
 github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496/go.mod h1:oGkLhpf+kjZl6xBf758TQhh5XrAeiJv/7FRz/2spLIg=
@@ -213,6 +217,8 @@ golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 h1:SrN+KX8Art/Sf4HNj6Zcz06G7
 golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20210616045830-e2b7044e8c71 h1:X/2sJAybVknnUnV7AD2HdT6rm2p5BP6eH2j+igduWgk=
 golang.org/x/sys v0.0.0-20210616045830-e2b7044e8c71/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20210616094352-59db8d763f22 h1:RqytpXGR1iVNX7psjB3ff8y7sNFinVFvkx1c8SjBkio=
+golang.org/x/sys v0.0.0-20210616094352-59db8d763f22/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.3/go.mod h1:5Zoc/QRtKVWzQhOtBMvqHzDpF6irO9z98xDceosuGiQ=
@@ -255,6 +261,8 @@ google.golang.org/genproto v0.0.0-20210611144927-798beca9d670 h1:M9c2dapWGIISuWa
 google.golang.org/genproto v0.0.0-20210611144927-798beca9d670/go.mod h1:UODoCrxHCcBojKKwX1terBiRUaqAsFqJiF615XL43r0=
 google.golang.org/genproto v0.0.0-20210614182748-5b3b54cad159 h1:7TIh9IZzwv/Gxqf+uYm45KzZTG1BlkZzb3yOa9GqgVE=
 google.golang.org/genproto v0.0.0-20210614182748-5b3b54cad159/go.mod h1:SzzZ/N+nwJDaO1kznhnlzqS8ocJICar6hYhVyhi++24=
+google.golang.org/genproto v0.0.0-20210624195500-8bfb893ecb84 h1:R1r5J0u6Cx+RNl/6mezTw6oA14cmKC96FeUwL6A9bd4=
+google.golang.org/genproto v0.0.0-20210624195500-8bfb893ecb84/go.mod h1:SzzZ/N+nwJDaO1kznhnlzqS8ocJICar6hYhVyhi++24=
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.23.0/go.mod h1:Y5yQAOtifL1yxbo5wqy6BxZv8vAUGQwXBOALyacEbxg=
 google.golang.org/grpc v1.25.1/go.mod h1:c3i+UQWmh7LiEpx4sFZnkU36qjEYZ0imhYfXVyQciAY=
@@ -282,6 +290,8 @@ google.golang.org/protobuf v1.25.0/go.mod h1:9JNX74DMeImyA3h4bdi1ymwjUzf21/xIlba
 google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp09yW+WbY/TyQbw=
 google.golang.org/protobuf v1.26.0 h1:bxAC2xTBsZGibn2RTntX0oH50xLsqy1OxA9tTL3p/lk=
 google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
+google.golang.org/protobuf v1.27.0 h1:KhgSLlr/moiqjv0qUsSnLvdUL7NH7PHW8aZGn7Jpjko=
+google.golang.org/protobuf v1.27.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
