@@ -12,12 +12,12 @@ import (
 )
 
 func (f *findingDB) ListFinding(req *finding.ListFindingRequest) (*[]model.Finding, error) {
-	query := "select finding.* from finding "
+	query := "select finding.* from finding inner join finding f_alias using(finding_id) "
 	cond, params := generateListFindingCondition(req.ProjectId,
 		req.FromScore, req.ToScore, req.FromAt, req.ToAt,
 		req.FindingId, req.DataSource, req.ResourceName, req.Tag, req.Status)
 	query += cond
-	query += fmt.Sprintf(" order by %s %s", req.Sort, req.Direction)
+	query += fmt.Sprintf(" order by f_alias.%s %s", req.Sort, req.Direction)
 	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
 	var data []model.Finding
 	if err := f.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
