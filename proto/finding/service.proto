@@ -102,7 +102,10 @@ message PutFindingRequest {
   FindingForUpsert finding = 2;
 }
 
-message PutFindingResponse { Finding finding = 1; }
+message PutFindingResponse {
+  Finding finding = 1;
+  bool updated = 2;
+}
 
 message DeleteFindingRequest {
   uint32 project_id = 1;
