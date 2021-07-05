@@ -27,6 +27,7 @@ phases:
       - TAG=v0.0.${CODEBUILD_BUILD_NUMBER}
       - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
       - REGISTORY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+      - AWS_XRAY_SDK_DISABLED=TRUE
 
       - echo Testing the sources...
       - cd ${SRC}/finding && go test ./...

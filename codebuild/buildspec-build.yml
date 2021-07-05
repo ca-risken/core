@@ -25,6 +25,7 @@ phases:
       - SRC=${CODEBUILD_SRC_DIR}/src
       - BUILD_OPT="--no-cache --pull"
       - TAG=v0.0.${CODEBUILD_BUILD_NUMBER}
+      - AWS_XRAY_SDK_DISABLED=TRUE
 
       - echo Testing the sources...
       - cd ${SRC}/finding && go test ./...
