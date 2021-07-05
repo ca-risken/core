@@ -20,7 +20,6 @@ import (
  */
 
 func TestAnalyzeAlert(t *testing.T) {
-	var ctx context.Context
 	now := time.Now()
 	mockDB := mockAlertRepository{}
 	svc := alertService{repository: &mockDB}
@@ -69,7 +68,7 @@ func TestAnalyzeAlert(t *testing.T) {
 			mockDB.On("ListEnabledAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
 			mockDB.On("ListAlertRuleByAlertConditionID").Return(&[]model.AlertRule{}, c.mockListAlertRuleErr).Once()
 			mockDB.On("ListDisabledAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
-			got, err := svc.AnalyzeAlert(ctx, c.input)
+			got, err := svc.AnalyzeAlert(context.Background(), c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -238,7 +237,7 @@ func TestNotificationAlert(t *testing.T) {
 			mockDB.On("GetNotification").Return(c.mockGetNotification, c.mockGetNotificationErr).Once()
 			mockDB.On("UpsertAlertCondNotification").Return(c.mockUpsertAlertCondNotification, c.mockUpsertAlertCondNotificationErr).Once()
 			mockDB.On("GetProject").Return(c.mockGetProject, c.mockGetProjectErr).Once()
-			got := svc.NotificationAlert(c.alertCondition, c.alert)
+			got := svc.NotificationAlert(context.Background(), c.alertCondition, c.alert)
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
 			}
@@ -247,7 +246,6 @@ func TestNotificationAlert(t *testing.T) {
 }
 
 func TestAnalyzeAlertByRule(t *testing.T) {
-	var ctx context.Context
 	now := time.Now()
 	mockFinding := mockFindingClient{}
 	svc := alertService{findingClient: &mockFinding}
@@ -301,7 +299,7 @@ func TestAnalyzeAlertByRule(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 
 			mockFinding.On("BatchListFinding").Return(c.mockListFinding, c.mockListFindingErr).Once()
-			gotBool, gotArr, err := svc.analyzeAlertByRule(ctx, c.inputAlertRule)
+			gotBool, gotArr, err := svc.analyzeAlertByRule(context.Background(), c.inputAlertRule)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -411,7 +409,7 @@ func TestDeleteAlertByAnalyze(t *testing.T) {
 			mockDB.On("UpsertAlertHistory").Return(c.mockUpsertAlertHistory, c.mockUpsertAlertHistoryErr).Once()
 			mockDB.On("ListRelAlertFinding").Return(c.mockListRelAlertFinding, c.mockListRelAlertFindingErr).Once()
 			mockDB.On("DeleteRelAlertFinding").Return(c.mockListDeleteAlertFindingErr).Once()
-			got := svc.DeleteAlertByAnalyze(c.alertCondition)
+			got := svc.DeleteAlertByAnalyze(context.Background(), c.alertCondition)
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
 			}
@@ -503,7 +501,7 @@ func TestRegistAlertByAnalyze(t *testing.T) {
 			mockDB.On("UpsertAlertHistory").Return(c.mockUpsertAlertHistory, c.mockUpsertAlertHistoryErr).Once()
 			mockDB.On("ListRelAlertFinding").Return(c.mockListRelAlertFinding, c.mockListRelAlertFindingErr).Once()
 			mockDB.On("UpsertRelAlertFinding").Return(c.mockUpsertRelAlertFinding, c.mockUpsertRelAlertFindingErr).Once()
-			got, err := svc.RegistAlertByAnalyze(c.alertCondition, c.findingIDs)
+			got, err := svc.RegistAlertByAnalyze(context.Background(), c.alertCondition, c.findingIDs)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", got)
 			}
