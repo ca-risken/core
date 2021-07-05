@@ -17,7 +17,6 @@ type alertConf struct {
 
 func initXRay() {
 	xray.Configure(xray.Config{
-		DaemonAddr:     "xray-service.default:2000",
 		ServiceVersion: "TODO",
 	})
 }
