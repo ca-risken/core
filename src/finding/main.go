@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/CyberAgent/mimosa-core/proto/finding"
+	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -12,6 +13,10 @@ import (
 
 type findingConf struct {
 	Port string `default:"8001"`
+}
+
+func initXRay() {
+	xray.Configure(xray.Config{})
 }
 
 func main() {
@@ -26,7 +31,10 @@ func main() {
 		appLogger.Fatal(err)
 	}
 
-	server := grpc.NewServer()
+	initXRay()
+
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(xray.UnaryServerInterceptor()))
 	findingServer := newFindingService() // DI service & repository
 	finding.RegisterFindingServiceServer(server, findingServer)
 
