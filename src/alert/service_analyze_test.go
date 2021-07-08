@@ -12,7 +12,7 @@ import (
 	"github.com/CyberAgent/mimosa-core/proto/finding"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jarcoal/httpmock"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 /*
@@ -363,7 +363,7 @@ func TestDeleteAlertByAnalyze(t *testing.T) {
 			wantErr:                                 true,
 			mockGetAlertByAlertConditionIDStatus:    &model.Alert{AlertID: 1, Status: "ACTIVE"},
 			mockGetAlertByAlertConditionIDStatusErr: nil,
-			mockDeactivateAlertErr:                  gorm.ErrCantStartTransaction,
+			mockDeactivateAlertErr:                  gorm.ErrInvalidDB,
 		},
 		{
 			name:                                    "Error UpsertAlertHistory",

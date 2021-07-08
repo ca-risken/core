@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/alert"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/jinzhu/gorm"
 	"github.com/vikyd/zero"
+	"gorm.io/gorm"
 )
 
 /**
@@ -24,7 +25,7 @@ func (f *alertService) ListAlert(ctx context.Context, req *alert.ListAlertReques
 	converted := convertListAlertRequest(req)
 	list, err := f.repository.ListAlert(converted.ProjectId, getStrings(converted.Status), converted.Severity, converted.Description, converted.FromAt, converted.ToAt)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListAlertResponse{}, nil
 		}
 		return nil, err
@@ -57,7 +58,7 @@ func (f *alertService) GetAlert(ctx context.Context, req *alert.GetAlertRequest)
 	}
 	data, err := f.repository.GetAlert(req.ProjectId, req.AlertId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetAlertResponse{}, nil
 		}
 		return nil, err
@@ -151,7 +152,7 @@ func (f *alertService) ListAlertHistory(ctx context.Context, req *alert.ListAler
 	converted := convertListAlertHistoryRequest(req)
 	list, err := f.repository.ListAlertHistory(converted.ProjectId, converted.AlertId, converted.HistoryType, converted.Severity, converted.FromAt, converted.ToAt)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListAlertHistoryResponse{}, nil
 		}
 		return nil, err
@@ -185,7 +186,7 @@ func (f *alertService) GetAlertHistory(ctx context.Context, req *alert.GetAlertH
 
 	data, err := f.repository.GetAlertHistory(req.ProjectId, req.AlertHistoryId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetAlertHistoryResponse{}, nil
 		}
 		return nil, err
@@ -235,7 +236,7 @@ func (f *alertService) ListRelAlertFinding(ctx context.Context, req *alert.ListR
 	converted := convertListRelAlertFindingRequest(req)
 	list, err := f.repository.ListRelAlertFinding(converted.ProjectId, converted.AlertId, converted.FindingId, converted.FromAt, converted.ToAt)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListRelAlertFindingResponse{}, nil
 		}
 		return nil, err
@@ -268,7 +269,7 @@ func (f *alertService) GetRelAlertFinding(ctx context.Context, req *alert.GetRel
 
 	data, err := f.repository.GetRelAlertFinding(req.ProjectId, req.AlertId, req.FindingId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetRelAlertFindingResponse{}, nil
 		}
 		return nil, err

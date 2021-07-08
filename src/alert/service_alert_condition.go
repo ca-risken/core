@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/alert"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/jinzhu/gorm"
 	"github.com/vikyd/zero"
+	"gorm.io/gorm"
 )
 
 /**
@@ -23,7 +24,7 @@ func (f *alertService) ListAlertCondition(ctx context.Context, req *alert.ListAl
 	converted := convertListAlertConditionRequest(req)
 	list, err := f.repository.ListAlertCondition(converted.ProjectId, converted.Severity, converted.Enabled, converted.FromAt, converted.ToAt)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListAlertConditionResponse{}, nil
 		}
 		return nil, err
@@ -55,7 +56,7 @@ func (f *alertService) GetAlertCondition(ctx context.Context, req *alert.GetAler
 	}
 	data, err := f.repository.GetAlertCondition(req.ProjectId, req.AlertConditionId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetAlertConditionResponse{}, nil
 		}
 		return nil, err
@@ -108,7 +109,7 @@ func (f *alertService) ListAlertRule(ctx context.Context, req *alert.ListAlertRu
 	converted := convertListAlertRuleRequest(req)
 	list, err := f.repository.ListAlertRule(converted.ProjectId, converted.FromScore, converted.ToScore, converted.FromAt, converted.ToAt)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListAlertRuleResponse{}, nil
 		}
 		return nil, err
@@ -143,7 +144,7 @@ func (f *alertService) GetAlertRule(ctx context.Context, req *alert.GetAlertRule
 	}
 	data, err := f.repository.GetAlertRule(req.ProjectId, req.AlertRuleId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetAlertRuleResponse{}, nil
 		}
 		return nil, err
@@ -194,7 +195,7 @@ func (f *alertService) ListAlertCondRule(ctx context.Context, req *alert.ListAle
 	converted := convertListAlertCondRuleRequest(req)
 	list, err := f.repository.ListAlertCondRule(converted.ProjectId, converted.AlertConditionId, converted.AlertRuleId, converted.FromAt, converted.ToAt)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListAlertCondRuleResponse{}, nil
 		}
 		return nil, err
@@ -227,7 +228,7 @@ func (f *alertService) GetAlertCondRule(ctx context.Context, req *alert.GetAlert
 
 	data, err := f.repository.GetAlertCondRule(req.ProjectId, req.AlertConditionId, req.AlertRuleId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetAlertCondRuleResponse{}, nil
 		}
 		return nil, err
@@ -276,7 +277,7 @@ func (f *alertService) ListNotification(ctx context.Context, req *alert.ListNoti
 	converted := convertListNotificationRequest(req)
 	list, err := f.repository.ListNotification(converted.ProjectId, converted.Type, converted.FromAt, converted.ToAt)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListNotificationResponse{}, nil
 		}
 		return nil, err
@@ -307,7 +308,7 @@ func (f *alertService) GetNotification(ctx context.Context, req *alert.GetNotifi
 	}
 	data, err := f.repository.GetNotification(req.ProjectId, req.NotificationId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetNotificationResponse{}, nil
 		}
 		return nil, err
@@ -324,7 +325,7 @@ func (f *alertService) PutNotification(ctx context.Context, req *alert.PutNotifi
 	if !zero.IsZeroVal(req.Notification.NotificationId) {
 		existData, err = f.repository.GetNotification(req.ProjectId, req.Notification.NotificationId)
 		if err != nil {
-			if gorm.IsRecordNotFoundError(err) {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return &alert.PutNotificationResponse{}, nil
 			}
 			return nil, err
@@ -408,7 +409,7 @@ func (f *alertService) TestNotification(ctx context.Context, req *alert.TestNoti
 	}
 	notification, err := f.repository.GetNotification(req.ProjectId, req.NotificationId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &empty.Empty{}, nil
 		}
 		return nil, err
@@ -436,7 +437,7 @@ func (f *alertService) ListAlertCondNotification(ctx context.Context, req *alert
 	converted := convertListAlertCondNotificationRequest(req)
 	list, err := f.repository.ListAlertCondNotification(converted.ProjectId, converted.AlertConditionId, converted.NotificationId, converted.FromAt, converted.ToAt)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListAlertCondNotificationResponse{}, nil
 		}
 		return nil, err
@@ -469,7 +470,7 @@ func (f *alertService) GetAlertCondNotification(ctx context.Context, req *alert.
 
 	data, err := f.repository.GetAlertCondNotification(req.ProjectId, req.AlertConditionId, req.NotificationId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetAlertCondNotificationResponse{}, nil
 		}
 		return nil, err

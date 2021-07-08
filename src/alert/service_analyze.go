@@ -15,8 +15,8 @@ import (
 	"github.com/CyberAgent/mimosa-core/proto/finding"
 	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/jinzhu/gorm"
 	"github.com/vikyd/zero"
+	"gorm.io/gorm"
 )
 
 /**
@@ -34,7 +34,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	alertConditions, err := f.repository.ListEnabledAlertCondition(req.ProjectId, req.AlertConditionId)
 	ss.Close(err)
 	appLogger.Infof("finish ListEnabledAlertCondition: RequestID=%s", requestID)
-	noRecord := gorm.IsRecordNotFoundError(err)
+	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		appLogger.Error(err)
 		return nil, err
@@ -57,7 +57,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	disabledAlertConditions, err := f.repository.ListDisabledAlertCondition(req.ProjectId, req.AlertConditionId)
 	ss.Close(err)
 	appLogger.Infof("finish ListDisabledAlertCondition: RequestID=%s", requestID)
-	noRecord = gorm.IsRecordNotFoundError(err)
+	noRecord = errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		appLogger.Error(err)
 		return nil, err
@@ -144,7 +144,7 @@ func (f *alertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 	_, ss := xray.BeginSubsegment(ctx, "GetAlertByAlertConditionIDStatus")
 	savedData, err := f.repository.GetAlertByAlertConditionIDStatus(alertCondition.ProjectID, alertCondition.AlertConditionID, []string{"ACTIVE", "PENDING"})
 	ss.Close(err)
-	noRecord := gorm.IsRecordNotFoundError(err)
+	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
 	}
@@ -242,7 +242,7 @@ func (f *alertService) DeleteAlertByAnalyze(ctx context.Context, alertCondition 
 	_, ss := xray.BeginSubsegment(ctx, "GetAlertByAlertConditionIDStatus")
 	savedData, err := f.repository.GetAlertByAlertConditionIDStatus(alertCondition.ProjectID, alertCondition.AlertConditionID, []string{"ACTIVE", "PENDING"})
 	ss.Close(err)
-	noRecord := gorm.IsRecordNotFoundError(err)
+	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		appLogger.Errorf("Failed get alert by alertConditionIDStatus, err: %v", err)
 		return err

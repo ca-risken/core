@@ -9,7 +9,7 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/alert"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 /*
@@ -237,10 +237,10 @@ func TestDeleteAlert(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &alert.DeleteAlertRequest{ProjectId: 1, AlertId: 1001},
 			wantErr: true,
-			mockErr: gorm.ErrCantStartTransaction,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -459,10 +459,10 @@ func TestDeleteAlertHistory(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &alert.DeleteAlertHistoryRequest{ProjectId: 1, AlertHistoryId: 1001},
 			wantErr: true,
-			mockErr: gorm.ErrCantStartTransaction,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -674,10 +674,10 @@ func TestDeleteRelAlertFinding(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &alert.DeleteRelAlertFindingRequest{ProjectId: 1, AlertId: 1001, FindingId: 1001},
 			wantErr: true,
-			mockErr: gorm.ErrCantStartTransaction,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -889,10 +889,10 @@ func TestDeleteAlertCondition(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &alert.DeleteAlertConditionRequest{ProjectId: 1, AlertConditionId: 1001},
 			wantErr: true,
-			mockErr: gorm.ErrCantStartTransaction,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -1109,10 +1109,10 @@ func TestDeleteAlertRule(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &alert.DeleteAlertRuleRequest{ProjectId: 1, AlertRuleId: 1001},
 			wantErr: true,
-			mockErr: gorm.ErrCantStartTransaction,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -1324,10 +1324,10 @@ func TestDeleteAlertCondRule(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &alert.DeleteAlertCondRuleRequest{ProjectId: 1, AlertConditionId: 1001, AlertRuleId: 1001},
 			wantErr: true,
-			mockErr: gorm.ErrCantStartTransaction,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -1609,10 +1609,10 @@ func TestDeleteNotification(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &alert.DeleteNotificationRequest{ProjectId: 1, NotificationId: 1001},
 			wantErr: true,
-			mockErr: gorm.ErrCantStartTransaction,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -1824,10 +1824,10 @@ func TestDeleteAlertCondNotification(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &alert.DeleteAlertCondNotificationRequest{ProjectId: 1, AlertConditionId: 1001, NotificationId: 1001},
 			wantErr: true,
-			mockErr: gorm.ErrCantStartTransaction,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
