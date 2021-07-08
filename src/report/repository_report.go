@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func (f *reportDB) GetReportFinding(projectID uint32, dataSource []string, fromDate, toDate string, score float32) (*[]model.ReportFinding, error) {
