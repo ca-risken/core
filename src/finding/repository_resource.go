@@ -7,7 +7,6 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/vikyd/zero"
 )
 
@@ -48,7 +47,7 @@ where
 	return &data, nil
 }
 
-func (f *findingDB) ListResourceCount(req *finding.ListResourceRequest) (uint32, error) {
+func (f *findingDB) ListResourceCount(req *finding.ListResourceRequest) (int64, error) {
 	query := `
 select count(*) from (
   select r.*
@@ -77,7 +76,7 @@ select count(*) from (
 		params = append(params, req.FromSumScore, req.ToSumScore)
 	}
 	query += ") as resource"
-	var count uint32
+	var count int64
 	if err := f.Slave.Raw(query, params...).Count(&count).Error; err != nil {
 		return count, err
 	}
@@ -123,8 +122,8 @@ func (f *findingDB) ListResourceTag(param *finding.ListResourceTagRequest) (*[]m
 
 const selectListResourceTagCount = `select count(*) from resource_tag where project_id = ? and resource_id = ?`
 
-func (f *findingDB) ListResourceTagCount(param *finding.ListResourceTagRequest) (uint32, error) {
-	var count uint32
+func (f *findingDB) ListResourceTagCount(param *finding.ListResourceTagRequest) (int64, error) {
+	var count int64
 	if err := f.Slave.Raw(selectListResourceTagCount, param.ProjectId, param.ResourceId).Count(&count).Error; err != nil {
 		return count, err
 	}
@@ -161,8 +160,8 @@ select count(*) from (
 ) tag
 `
 
-func (f *findingDB) ListResourceTagNameCount(param *finding.ListResourceTagNameRequest) (uint32, error) {
-	var count uint32
+func (f *findingDB) ListResourceTagNameCount(param *finding.ListResourceTagNameRequest) (int64, error) {
+	var count int64
 	if err := f.Slave.Raw(selectListResourceTagNameCount,
 		param.ProjectId, time.Unix(param.FromAt, 0), time.Unix(param.ToAt, 0)).Count(&count).Error; err != nil {
 		return count, err

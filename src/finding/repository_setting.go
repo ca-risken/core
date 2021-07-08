@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func (f *findingDB) ListFindingSetting(req *finding.ListFindingSettingRequest) (*[]model.FindingSetting, error) {

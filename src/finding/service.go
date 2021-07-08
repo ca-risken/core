@@ -18,3 +18,8 @@ func newFindingService() finding.FindingServiceServer {
 		repository: newFindingRepository(),
 	}
 }
+
+// TODO remove after fix response interface type change to int64 from uint32
+func convertToUint32(v int64) uint32 {
+	return uint32(v)
+}

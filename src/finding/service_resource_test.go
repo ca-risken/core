@@ -8,7 +8,7 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func TestListResource(t *testing.T) {
@@ -23,7 +23,7 @@ func TestListResource(t *testing.T) {
 		wantErr    bool
 		mockResp   *[]model.Resource
 		mockErr    error
-		totalCount uint32
+		totalCount int64
 	}{
 		{
 			name:       "OK",
@@ -45,10 +45,10 @@ func TestListResource(t *testing.T) {
 			totalCount: 999,
 		},
 		{
-			name:       "NG DB error",
+			name:       "Invalid DB error",
 			input:      &finding.ListResourceRequest{ProjectId: 1},
 			wantErr:    true,
-			mockErr:    gorm.ErrUnaddressable,
+			mockErr:    gorm.ErrInvalidDB,
 			totalCount: 999,
 		},
 	}
@@ -148,14 +148,14 @@ func TestPutResource(t *testing.T) {
 			name:       "NG GetResourceByName error",
 			input:      &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceName: "", ProjectId: 111}},
 			wantErr:    true,
-			mockGetErr: gorm.ErrCantStartTransaction,
+			mockGetErr: gorm.ErrInvalidDB,
 		},
 		{
 			name:        "NG UpsertResource error",
 			input:       &finding.PutResourceRequest{Resource: &finding.ResourceForUpsert{ResourceName: "rn", ProjectId: 111}},
 			wantErr:     true,
 			mockGetResp: &model.Resource{ResourceID: 1001, ResourceName: "rn", ProjectID: 111, CreatedAt: now, UpdatedAt: now},
-			mockUpErr:   gorm.ErrInvalidSQL,
+			mockUpErr:   gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -198,10 +198,10 @@ func TestDeleteResource(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &finding.DeleteResourceRequest{ProjectId: 1, ResourceId: 1001},
 			wantErr: true,
-			mockErr: gorm.ErrCantStartTransaction,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -227,7 +227,7 @@ func TestListResourceTag(t *testing.T) {
 		wantErr    bool
 		mockResp   *[]model.ResourceTag
 		mockErr    error
-		totalCount uint32
+		totalCount int64
 	}{
 		{
 			name:  "OK",
@@ -257,10 +257,10 @@ func TestListResourceTag(t *testing.T) {
 			totalCount: 999,
 		},
 		{
-			name:       "NG DB error",
+			name:       "Invalid DB error",
 			input:      &finding.ListResourceTagRequest{ProjectId: 1, ResourceId: 1001},
 			wantErr:    true,
-			mockErr:    gorm.ErrInvalidSQL,
+			mockErr:    gorm.ErrInvalidDB,
 			totalCount: 999,
 		},
 	}
@@ -293,7 +293,7 @@ func TestListResourceTagName(t *testing.T) {
 		wantErr    bool
 		mockResp   *[]tagName
 		mockErr    error
-		totalCount uint32
+		totalCount int64
 	}{
 		{
 			name:       "OK",
@@ -315,10 +315,10 @@ func TestListResourceTagName(t *testing.T) {
 			totalCount: 999,
 		},
 		{
-			name:       "NG DB error",
+			name:       "Invalid DB error",
 			input:      &finding.ListResourceTagNameRequest{ProjectId: 1},
 			wantErr:    true,
-			mockErr:    gorm.ErrInvalidSQL,
+			mockErr:    gorm.ErrInvalidDB,
 			totalCount: 999,
 		},
 	}
@@ -377,14 +377,14 @@ func TestTagResource(t *testing.T) {
 			name:       "NG GetFindingTagByKey error",
 			input:      &finding.TagResourceRequest{ProjectId: 1, Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, Tag: "tag"}},
 			wantErr:    true,
-			mockGetErr: gorm.ErrInvalidSQL,
+			mockGetErr: gorm.ErrInvalidDB,
 		},
 		{
 			name:        "NG TagFinding error",
 			input:       &finding.TagResourceRequest{ProjectId: 1, Tag: &finding.ResourceTagForUpsert{ResourceId: 1001, Tag: "tag"}},
 			wantErr:     true,
 			mockGetResp: &model.ResourceTag{ResourceTagID: 10011, ResourceID: 1001, Tag: "tag", CreatedAt: now, UpdatedAt: now},
-			mockUpErr:   gorm.ErrInvalidSQL,
+			mockUpErr:   gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -427,10 +427,10 @@ func TestUntagResource(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &finding.UntagResourceRequest{ProjectId: 1, ResourceTagId: 1001},
 			wantErr: true,
-			mockErr: gorm.ErrCantStartTransaction,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {

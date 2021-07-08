@@ -5,9 +5,11 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
 	"github.com/kelseyhightower/envconfig"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
 )
 
 type findingRepository interface {
@@ -20,15 +22,15 @@ type findingRepository interface {
 		fromAt, toAt int64,
 		findingID uint64,
 		dataSources, resourceNames, tags []string,
-		status finding.FindingStatus) (uint32, error)
+		status finding.FindingStatus) (int64, error)
 	GetFinding(uint32, uint64) (*model.Finding, error)
 	GetFindingByDataSource(uint32, string, string) (*model.Finding, error)
 	UpsertFinding(*model.Finding) (*model.Finding, error)
 	DeleteFinding(uint32, uint64) error
 	ListFindingTag(param *finding.ListFindingTagRequest) (*[]model.FindingTag, error)
-	ListFindingTagCount(param *finding.ListFindingTagRequest) (uint32, error)
+	ListFindingTagCount(param *finding.ListFindingTagRequest) (int64, error)
 	ListFindingTagName(param *finding.ListFindingTagNameRequest) (*[]tagName, error)
-	ListFindingTagNameCount(param *finding.ListFindingTagNameRequest) (uint32, error)
+	ListFindingTagNameCount(param *finding.ListFindingTagNameRequest) (int64, error)
 	GetFindingTagByKey(uint32, uint64, string) (*model.FindingTag, error)
 	GetFindingTagByID(uint32, uint64) (*model.FindingTag, error)
 	TagFinding(*model.FindingTag) (*model.FindingTag, error)
@@ -36,15 +38,15 @@ type findingRepository interface {
 
 	// Resource
 	ListResource(*finding.ListResourceRequest) (*[]model.Resource, error)
-	ListResourceCount(req *finding.ListResourceRequest) (uint32, error)
+	ListResourceCount(req *finding.ListResourceRequest) (int64, error)
 	GetResource(uint32, uint64) (*model.Resource, error)
 	GetResourceByName(uint32, string) (*model.Resource, error)
 	UpsertResource(*model.Resource) (*model.Resource, error)
 	DeleteResource(uint32, uint64) error
 	ListResourceTag(param *finding.ListResourceTagRequest) (*[]model.ResourceTag, error)
-	ListResourceTagCount(param *finding.ListResourceTagRequest) (uint32, error)
+	ListResourceTagCount(param *finding.ListResourceTagRequest) (int64, error)
 	ListResourceTagName(param *finding.ListResourceTagNameRequest) (*[]tagName, error)
-	ListResourceTagNameCount(param *finding.ListResourceTagNameRequest) (uint32, error)
+	ListResourceTagNameCount(param *finding.ListResourceTagNameRequest) (int64, error)
 	GetResourceTagByKey(uint32, uint64, string) (*model.ResourceTag, error)
 	GetResourceTagByID(uint32, uint64) (*model.ResourceTag, error)
 	TagResource(*model.ResourceTag) (*model.ResourceTag, error)
@@ -105,15 +107,16 @@ func initDB(isMaster bool) *gorm.DB {
 		host = conf.SlaveHost
 	}
 
-	db, err := gorm.Open("mysql",
-		fmt.Sprintf("%s:%s@tcp([%s]:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
-			user, pass, host, conf.Port, conf.Schema))
+	dsn := fmt.Sprintf("%s:%s@tcp([%s]:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
+		user, pass, host, conf.Port, conf.Schema)
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
 	if err != nil {
 		appLogger.Fatalf("Failed to open DB. isMaster: %t, err: %+v", isMaster, err)
 		return nil
 	}
-	db.LogMode(conf.LogMode)
-	db.SingularTable(true) // if set this to true, `User`'s default table name will be `user`
+	if conf.LogMode {
+		db.Logger.LogMode(logger.Info)
+	}
 	appLogger.Infof("Connected to Database. isMaster: %t", isMaster)
 	return db
 }

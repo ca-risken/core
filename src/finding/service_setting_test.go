@@ -8,7 +8,7 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func TestListFindingSetting(t *testing.T) {
@@ -48,9 +48,9 @@ func TestListFindingSetting(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG DB error",
+			name:      "Invalid DB error",
 			input:     &finding.ListFindingSettingRequest{ProjectId: 1},
-			mockError: gorm.ErrCantStartTransaction,
+			mockError: gorm.ErrInvalidDB,
 			wantErr:   true,
 		},
 	}
@@ -101,9 +101,9 @@ func TestGetFindingSetting(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG DB error",
+			name:      "Invalid DB error",
 			input:     &finding.GetFindingSettingRequest{ProjectId: 1, FindingSettingId: 1},
-			mockError: gorm.ErrCantStartTransaction,
+			mockError: gorm.ErrInvalidDB,
 			wantErr:   true,
 		},
 	}
@@ -148,10 +148,10 @@ func TestPutFindingSetting(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &finding.PutFindingSettingRequest{ProjectId: 1, FindingSetting: &finding.FindingSettingForUpsert{ProjectId: 1, ResourceName: "rn", Setting: "{}", Status: finding.FindingSettingStatus_SETTING_ACTIVE}},
 			wantErr: true,
-			mockErr: gorm.ErrInvalidSQL,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -191,10 +191,10 @@ func TestDeleteFindingSetting(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &finding.DeleteFindingSettingRequest{ProjectId: 1, FindingSettingId: 1},
 			wantErr: true,
-			mockErr: gorm.ErrCantStartTransaction,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
