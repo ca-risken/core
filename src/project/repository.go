@@ -4,9 +4,11 @@ import (
 	"fmt"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
 	"github.com/kelseyhightower/envconfig"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
 )
 
 type dbConfig struct {
@@ -39,15 +41,16 @@ func initDB(isMaster bool) *gorm.DB {
 		host = conf.SlaveHost
 	}
 
-	db, err := gorm.Open("mysql",
-		fmt.Sprintf("%s:%s@tcp([%s]:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
-			user, pass, host, conf.Port, conf.Schema))
+	dsn := fmt.Sprintf("%s:%s@tcp([%s]:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
+		user, pass, host, conf.Port, conf.Schema)
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
 	if err != nil {
 		appLogger.Fatalf("Failed to open DB. isMaster: %t, err: %+v", isMaster, err)
 		return nil
 	}
-	db.LogMode(conf.LogMode)
-	db.SingularTable(true) // if set this to true, `User`'s default table name will be `user`
+	if conf.LogMode {
+		db.Logger.LogMode(logger.Info)
+	}
 	appLogger.Infof("Connected to Database. isMaster: %t", isMaster)
 	return db
 }

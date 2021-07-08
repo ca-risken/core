@@ -1,13 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
 	"github.com/vikyd/zero"
+	"gorm.io/gorm"
 )
 
 type projectWithTag struct {
@@ -63,7 +63,7 @@ func (p *projectDB) CreateProject(name string) (*model.Project, error) {
 	// Handring duplicated name error
 	if pr, err := p.GetProjectByName(name); err == nil {
 		return nil, fmt.Errorf("Project name already registerd: project_id=%d, name=%s", pr.ProjectID, pr.Name)
-	} else if !gorm.IsRecordNotFoundError(err) {
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, fmt.Errorf("Could not get project data: err=%+v", err)
 	}
 	if err := p.Master.Exec(insertCreateProject, name).Error; err != nil {

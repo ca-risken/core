@@ -9,7 +9,7 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/project"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func TestListProject(t *testing.T) {
@@ -59,9 +59,9 @@ func TestListProject(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG DB error",
+			name:      "Invalid DB error",
 			input:     &project.ListProjectRequest{UserId: 1},
-			mockError: gorm.ErrCantStartTransaction,
+			mockError: gorm.ErrInvalidDB,
 			wantErr:   true,
 		},
 	}
@@ -111,9 +111,9 @@ func TestCreateProject(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG DB error",
+			name:      "Invalid DB error",
 			input:     &project.CreateProjectRequest{UserId: 1},
-			mockError: gorm.ErrCantStartTransaction,
+			mockError: gorm.ErrInvalidDB,
 			wantErr:   true,
 		},
 		{
@@ -168,9 +168,9 @@ func TestUpdateProject(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG DB error",
+			name:      "Invalid DB error",
 			input:     &project.UpdateProjectRequest{ProjectId: 1, Name: "fix-name"},
-			mockError: gorm.ErrCantStartTransaction,
+			mockError: gorm.ErrInvalidDB,
 			wantErr:   true,
 		},
 	}
