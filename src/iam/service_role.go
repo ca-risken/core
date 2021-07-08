@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/iam"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func (i *iamService) ListRole(ctx context.Context, req *iam.ListRoleRequest) (*iam.ListRoleResponse, error) {
@@ -15,7 +16,7 @@ func (i *iamService) ListRole(ctx context.Context, req *iam.ListRoleRequest) (*i
 	}
 	list, err := i.repository.ListRole(req.ProjectId, req.Name, req.UserId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &iam.ListRoleResponse{}, nil
 		}
 		return nil, err
@@ -33,7 +34,7 @@ func (i *iamService) GetRole(ctx context.Context, req *iam.GetRoleRequest) (*iam
 	}
 	role, err := i.repository.GetRole(req.ProjectId, req.RoleId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &iam.GetRoleResponse{}, nil
 		}
 		return nil, err
@@ -56,7 +57,7 @@ func (i *iamService) PutRole(ctx context.Context, req *iam.PutRoleRequest) (*iam
 		return nil, err
 	}
 	savedData, err := i.repository.GetRoleByName(req.Role.ProjectId, req.Role.Name)
-	noRecord := gorm.IsRecordNotFoundError(err)
+	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
 	}

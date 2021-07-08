@@ -7,8 +7,8 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/iam"
-	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 )
 
 func TestIsAuthorized(t *testing.T) {
@@ -71,10 +71,10 @@ func TestIsAuthorized(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG DB error",
+			name:      "Invalid DB error",
 			input:     &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
 			wantErr:   true,
-			mockError: gorm.ErrInvalidSQL,
+			mockError: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -123,10 +123,10 @@ func TestIsAdmin(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG DB error",
+			name:      "Invalid DB error",
 			input:     &iam.IsAdminRequest{UserId: 1},
 			wantErr:   true,
-			mockError: gorm.ErrInvalidSQL,
+			mockError: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {

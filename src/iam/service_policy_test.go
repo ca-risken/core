@@ -8,7 +8,7 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/iam"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func TestListPolicy(t *testing.T) {
@@ -45,10 +45,10 @@ func TestListPolicy(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG SQL error",
+			name:      "Invalid DB error",
 			input:     &iam.ListPolicyRequest{ProjectId: 1, Name: "nm"},
 			wantErr:   true,
-			mockError: gorm.ErrInvalidSQL,
+			mockError: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -98,10 +98,10 @@ func TestGetPolicy(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG DB error",
+			name:      "Invalid DB error",
 			input:     &iam.GetPolicyRequest{PolicyId: 111, ProjectId: 123},
 			wantErr:   true,
-			mockError: gorm.ErrInvalidSQL,
+			mockError: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -208,10 +208,10 @@ func TestDeletePolicy(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &iam.DeletePolicyRequest{ProjectId: 1, PolicyId: 1},
 			wantErr: true,
-			mockErr: gorm.ErrCantStartTransaction,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -250,9 +250,9 @@ func TestAttachPolicy(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &iam.AttachPolicyRequest{ProjectId: 1, RoleId: 2, PolicyId: 3},
-			mockErr: gorm.ErrInvalidSQL,
+			mockErr: gorm.ErrInvalidDB,
 			wantErr: true,
 		},
 	}
@@ -292,9 +292,9 @@ func TestDetachPolicy(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &iam.DetachPolicyRequest{ProjectId: 1, RoleId: 2, PolicyId: 3},
-			mockErr: gorm.ErrInvalidSQL,
+			mockErr: gorm.ErrInvalidDB,
 			wantErr: true,
 		},
 	}

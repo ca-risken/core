@@ -8,7 +8,7 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/iam"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func TestListUser(t *testing.T) {
@@ -45,10 +45,10 @@ func TestListUser(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG SQL error",
+			name:      "Invalid SQL error",
 			input:     &iam.ListUserRequest{ProjectId: 1, Activated: true, Name: "12345678901234567890123456789012345678901234567890123456789012345"},
 			wantErr:   true,
-			mockError: gorm.ErrInvalidSQL,
+			mockError: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -98,10 +98,10 @@ func TestGetUser(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG DB error",
+			name:      "Invalid DB error",
 			input:     &iam.GetUserRequest{UserId: 111, Sub: "sub"},
 			wantErr:   true,
-			mockError: gorm.ErrInvalidSQL,
+			mockError: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
