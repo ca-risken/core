@@ -13,7 +13,7 @@ import (
 type projectWithTag struct {
 	ProjectID uint32
 	Name      string
-	Tag       *[]model.ProjectTag
+	Tag       *[]model.ProjectTag `gorm:"-"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
