@@ -8,7 +8,7 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/project"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func TestTagProject(t *testing.T) {
@@ -38,9 +38,9 @@ func TestTagProject(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG DB error",
+			name:      "Invalid DB error",
 			input:     &project.TagProjectRequest{ProjectId: 1, Tag: "tag"},
-			mockError: gorm.ErrCantStartTransaction,
+			mockError: gorm.ErrInvalidDB,
 			wantErr:   true,
 		},
 	}
@@ -82,9 +82,9 @@ func TestUntagProject(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG IAM service error",
+			name:      "Invalid DB error",
 			input:     &project.UntagProjectRequest{},
-			mockError: gorm.ErrCantStartTransaction,
+			mockError: gorm.ErrInvalidDB,
 			wantErr:   true,
 		},
 	}

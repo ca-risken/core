@@ -9,11 +9,9 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/aws/aws-xray-sdk-go v1.5.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
-	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.2
 	github.com/jarcoal/httpmock v1.0.6
-	github.com/jinzhu/gorm v1.9.16
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.6.1
@@ -23,4 +21,6 @@ require (
 	google.golang.org/genproto v0.0.0-20210624195500-8bfb893ecb84 // indirect
 	google.golang.org/grpc v1.38.0
 	google.golang.org/protobuf v1.27.0 // indirect
+	gorm.io/driver/mysql v1.1.1
+	gorm.io/gorm v1.21.11
 )

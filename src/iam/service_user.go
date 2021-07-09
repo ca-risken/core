@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
+	"errors"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/iam"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func (i *iamService) ListUser(ctx context.Context, req *iam.ListUserRequest) (*iam.ListUserResponse, error) {
@@ -14,7 +15,7 @@ func (i *iamService) ListUser(ctx context.Context, req *iam.ListUserRequest) (*i
 	}
 	list, err := i.repository.ListUser(req.Activated, req.ProjectId, req.Name, req.UserId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &iam.ListUserResponse{}, nil
 		}
 		return nil, err
@@ -32,7 +33,7 @@ func (i *iamService) GetUser(ctx context.Context, req *iam.GetUserRequest) (*iam
 	}
 	user, err := i.repository.GetUser(req.UserId, req.Sub)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			appLogger.Infof("[GetUser]User not found: GetUserRequest=%+v", req)
 			return &iam.GetUserResponse{}, nil
 		}
@@ -46,7 +47,7 @@ func (i *iamService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 		return nil, err
 	}
 	savedData, err := i.repository.GetUserBySub(req.User.Sub)
-	noRecord := gorm.IsRecordNotFoundError(err)
+	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
 	}

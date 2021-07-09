@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/CyberAgent/mimosa-core/pkg/model"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 const selectListProjectTag string = `select * from project_tag where project_id=? order by tag`

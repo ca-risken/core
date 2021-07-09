@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/jinzhu/gorm"
 	"github.com/vikyd/zero"
+	"gorm.io/gorm"
 )
 
 const (
@@ -29,7 +30,7 @@ func (f *findingService) ListResource(ctx context.Context, req *finding.ListReso
 		return nil, err
 	}
 	if total == 0 {
-		return &finding.ListResourceResponse{ResourceId: []uint64{}, Count: 0, Total: total}, nil
+		return &finding.ListResourceResponse{ResourceId: []uint64{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
 	list, err := f.repository.ListResource(param)
 	if err != nil {
@@ -39,7 +40,7 @@ func (f *findingService) ListResource(ctx context.Context, req *finding.ListReso
 	for _, data := range *list {
 		ids = append(ids, uint64(data.ResourceID))
 	}
-	return &finding.ListResourceResponse{ResourceId: ids, Count: uint32(len(ids)), Total: total}, nil
+	return &finding.ListResourceResponse{ResourceId: ids, Count: uint32(len(ids)), Total: convertToUint32(total)}, nil
 }
 
 func convertListResourceRequest(req *finding.ListResourceRequest) *finding.ListResourceRequest {
@@ -68,7 +69,7 @@ func (f *findingService) GetResource(ctx context.Context, req *finding.GetResour
 	}
 	data, err := f.repository.GetResource(req.ProjectId, req.ResourceId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &finding.GetResourceResponse{}, nil
 		}
 		return nil, err
@@ -81,7 +82,7 @@ func (f *findingService) PutResource(ctx context.Context, req *finding.PutResour
 		return nil, err
 	}
 	savedData, err := f.repository.GetResourceByName(req.Resource.ProjectId, req.Resource.ResourceName)
-	noRecord := gorm.IsRecordNotFoundError(err)
+	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
 	}
@@ -129,7 +130,7 @@ func (f *findingService) ListResourceTag(ctx context.Context, req *finding.ListR
 		return nil, err
 	}
 	if total == 0 {
-		return &finding.ListResourceTagResponse{Tag: []*finding.ResourceTag{}, Count: 0, Total: total}, nil
+		return &finding.ListResourceTagResponse{Tag: []*finding.ResourceTag{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
 	list, err := f.repository.ListResourceTag(param)
 	if err != nil {
@@ -139,7 +140,7 @@ func (f *findingService) ListResourceTag(ctx context.Context, req *finding.ListR
 	for _, tag := range *list {
 		tags = append(tags, convertResourceTag(&tag))
 	}
-	return &finding.ListResourceTagResponse{Tag: tags, Count: uint32(len(tags)), Total: total}, nil
+	return &finding.ListResourceTagResponse{Tag: tags, Count: uint32(len(tags)), Total: convertToUint32(total)}, nil
 }
 
 func convertListResourceTagRequest(req *finding.ListResourceTagRequest) *finding.ListResourceTagRequest {
@@ -166,7 +167,7 @@ func (f *findingService) ListResourceTagName(ctx context.Context, req *finding.L
 		return nil, err
 	}
 	if total == 0 {
-		return &finding.ListResourceTagNameResponse{Tag: []string{}, Count: 0, Total: total}, nil
+		return &finding.ListResourceTagNameResponse{Tag: []string{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
 	tags, err := f.repository.ListResourceTagName(param)
 	if err != nil {
@@ -176,7 +177,7 @@ func (f *findingService) ListResourceTagName(ctx context.Context, req *finding.L
 	for _, tag := range *tags {
 		tagNames = append(tagNames, tag.Tag)
 	}
-	return &finding.ListResourceTagNameResponse{Tag: tagNames, Count: uint32(len(tagNames)), Total: total}, nil
+	return &finding.ListResourceTagNameResponse{Tag: tagNames, Count: uint32(len(tagNames)), Total: convertToUint32(total)}, nil
 }
 
 func convertListResourceTagNameRequest(req *finding.ListResourceTagNameRequest) *finding.ListResourceTagNameRequest {
@@ -200,7 +201,7 @@ func (f *findingService) TagResource(ctx context.Context, req *finding.TagResour
 		return nil, err
 	}
 	savedData, err := f.repository.GetResourceTagByKey(req.ProjectId, req.Tag.ResourceId, req.Tag.Tag)
-	noRecord := gorm.IsRecordNotFoundError(err)
+	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
 	}

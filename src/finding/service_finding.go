@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
+	"errors"
 	"math"
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/jinzhu/gorm"
 	"github.com/vikyd/zero"
+	"gorm.io/gorm"
 )
 
 func (f *findingService) ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*finding.ListFindingResponse, error) {
@@ -28,7 +29,7 @@ func (f *findingService) ListFinding(ctx context.Context, req *finding.ListFindi
 		return nil, err
 	}
 	if total == 0 {
-		return &finding.ListFindingResponse{FindingId: []uint64{}, Count: 0, Total: total}, nil
+		return &finding.ListFindingResponse{FindingId: []uint64{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
 	list, err := f.repository.ListFinding(param)
 	if err != nil {
@@ -38,7 +39,7 @@ func (f *findingService) ListFinding(ctx context.Context, req *finding.ListFindi
 	for _, data := range *list {
 		ids = append(ids, uint64(data.FindingID))
 	}
-	return &finding.ListFindingResponse{FindingId: ids, Count: uint32(len(ids)), Total: total}, nil
+	return &finding.ListFindingResponse{FindingId: ids, Count: uint32(len(ids)), Total: convertToUint32(total)}, nil
 }
 
 func convertListFindingRequest(req *finding.ListFindingRequest) *finding.ListFindingRequest {
@@ -77,7 +78,7 @@ func (f *findingService) BatchListFinding(ctx context.Context, req *finding.Batc
 		return nil, err
 	}
 	if total == 0 {
-		return &finding.BatchListFindingResponse{FindingId: []uint64{}, Count: 0, Total: total}, nil
+		return &finding.BatchListFindingResponse{FindingId: []uint64{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
 	list, err := f.repository.BatchListFinding(param)
 	if err != nil {
@@ -87,7 +88,7 @@ func (f *findingService) BatchListFinding(ctx context.Context, req *finding.Batc
 	for _, data := range *list {
 		ids = append(ids, uint64(data.FindingID))
 	}
-	return &finding.BatchListFindingResponse{FindingId: ids, Count: uint32(len(ids)), Total: total}, nil
+	return &finding.BatchListFindingResponse{FindingId: ids, Count: uint32(len(ids)), Total: convertToUint32(total)}, nil
 }
 
 func convertBatchListFindingRequest(req *finding.BatchListFindingRequest) *finding.BatchListFindingRequest {
@@ -107,7 +108,7 @@ func (f *findingService) GetFinding(ctx context.Context, req *finding.GetFinding
 	}
 	data, err := f.repository.GetFinding(req.ProjectId, req.FindingId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &finding.GetFindingResponse{}, nil
 		}
 		return nil, err
@@ -121,7 +122,7 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 	}
 	savedData, err := f.repository.GetFindingByDataSource(
 		req.Finding.ProjectId, req.Finding.DataSource, req.Finding.DataSourceId)
-	noRecord := gorm.IsRecordNotFoundError(err)
+	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
 	}
@@ -187,7 +188,7 @@ func (f *findingService) ListFindingTag(ctx context.Context, req *finding.ListFi
 		return nil, err
 	}
 	if total == 0 {
-		return &finding.ListFindingTagResponse{Tag: []*finding.FindingTag{}, Count: 0, Total: total}, nil
+		return &finding.ListFindingTagResponse{Tag: []*finding.FindingTag{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
 	list, err := f.repository.ListFindingTag(param)
 	if err != nil {
@@ -197,7 +198,7 @@ func (f *findingService) ListFindingTag(ctx context.Context, req *finding.ListFi
 	for _, tag := range *list {
 		tags = append(tags, convertFindingTag(&tag))
 	}
-	return &finding.ListFindingTagResponse{Tag: tags, Count: uint32(len(tags)), Total: total}, nil
+	return &finding.ListFindingTagResponse{Tag: tags, Count: uint32(len(tags)), Total: convertToUint32(total)}, nil
 }
 
 func convertListFindingTagRequest(req *finding.ListFindingTagRequest) *finding.ListFindingTagRequest {
@@ -224,7 +225,7 @@ func (f *findingService) ListFindingTagName(ctx context.Context, req *finding.Li
 		return nil, err
 	}
 	if total == 0 {
-		return &finding.ListFindingTagNameResponse{Tag: []string{}, Count: 0, Total: total}, nil
+		return &finding.ListFindingTagNameResponse{Tag: []string{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
 	tags, err := f.repository.ListFindingTagName(param)
 	if err != nil {
@@ -234,7 +235,7 @@ func (f *findingService) ListFindingTagName(ctx context.Context, req *finding.Li
 	for _, tag := range *tags {
 		tagNames = append(tagNames, tag.Tag)
 	}
-	return &finding.ListFindingTagNameResponse{Tag: tagNames, Count: uint32(len(tagNames)), Total: total}, nil
+	return &finding.ListFindingTagNameResponse{Tag: tagNames, Count: uint32(len(tagNames)), Total: convertToUint32(total)}, nil
 }
 
 func convertListFindingTagNameRequest(req *finding.ListFindingTagNameRequest) *finding.ListFindingTagNameRequest {
@@ -259,7 +260,7 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 		return nil, err
 	}
 	savedData, err := f.repository.GetFindingTagByKey(req.ProjectId, req.Tag.FindingId, req.Tag.Tag)
-	noRecord := gorm.IsRecordNotFoundError(err)
+	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
 	}

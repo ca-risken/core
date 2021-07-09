@@ -8,7 +8,7 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func TestGetPendFinding(t *testing.T) {
@@ -77,10 +77,10 @@ func TestPutPendFinding(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &finding.PutPendFindingRequest{ProjectId: 1, PendFinding: &finding.PendFindingForUpsert{FindingId: 1, ProjectId: 1}},
 			wantErr: true,
-			mockErr: gorm.ErrInvalidSQL,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -120,10 +120,10 @@ func TestDeletePendFinding(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &finding.DeletePendFindingRequest{ProjectId: 1, FindingId: 1},
 			wantErr: true,
-			mockErr: gorm.ErrCantStartTransaction,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {

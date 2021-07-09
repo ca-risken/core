@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/project"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func convertProjectWithTag(p *projectWithTag) *project.Project {
@@ -40,7 +41,7 @@ func (p *projectService) ListProject(ctx context.Context, req *project.ListProje
 	}
 	list, err := p.repository.ListProject(req.UserId, req.ProjectId, req.Name)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &project.ListProjectResponse{}, nil
 		}
 		return nil, err

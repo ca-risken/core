@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 const selectGetPendFinding = `select * from pend_finding where project_id = ? and finding_id = ?`

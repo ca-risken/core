@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strings"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func (f *findingService) ListFindingSetting(ctx context.Context, req *finding.ListFindingSettingRequest) (*finding.ListFindingSettingResponse, error) {
@@ -17,7 +18,7 @@ func (f *findingService) ListFindingSetting(ctx context.Context, req *finding.Li
 	}
 	list, err := f.repository.ListFindingSetting(req)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &finding.ListFindingSettingResponse{}, nil
 		}
 		return nil, err
@@ -62,7 +63,7 @@ func (f *findingService) GetFindingSetting(ctx context.Context, req *finding.Get
 	}
 	data, err := f.repository.GetFindingSetting(req.ProjectId, req.FindingSettingId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &finding.GetFindingSettingResponse{}, nil
 		}
 		return nil, err
@@ -114,7 +115,7 @@ type findingSetting struct {
 
 func (f *findingService) getFindingSettingByResource(projectID uint32, resourceName string) (*findingSetting, error) {
 	fs, err := f.repository.GetFindingSettingByResource(projectID, resourceName)
-	if gorm.IsRecordNotFoundError(err) {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return &findingSetting{}, nil
 	} else if err != nil {
 		return nil, err

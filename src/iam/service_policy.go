@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/iam"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func (i *iamService) ListPolicy(ctx context.Context, req *iam.ListPolicyRequest) (*iam.ListPolicyResponse, error) {
@@ -15,7 +16,7 @@ func (i *iamService) ListPolicy(ctx context.Context, req *iam.ListPolicyRequest)
 	}
 	list, err := i.repository.ListPolicy(req.ProjectId, req.Name, req.RoleId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &iam.ListPolicyResponse{}, nil
 		}
 		return nil, err
@@ -33,7 +34,7 @@ func (i *iamService) GetPolicy(ctx context.Context, req *iam.GetPolicyRequest) (
 	}
 	p, err := i.repository.GetPolicy(req.ProjectId, req.PolicyId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &iam.GetPolicyResponse{}, nil
 		}
 		return nil, err
@@ -58,7 +59,7 @@ func (i *iamService) PutPolicy(ctx context.Context, req *iam.PutPolicyRequest) (
 		return nil, err
 	}
 	savedData, err := i.repository.GetPolicyByName(req.Policy.ProjectId, req.Policy.Name)
-	noRecord := gorm.IsRecordNotFoundError(err)
+	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
 	}

@@ -8,7 +8,7 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func TestListFinding(t *testing.T) {
@@ -20,7 +20,7 @@ func TestListFinding(t *testing.T) {
 		input        *finding.ListFindingRequest
 		want         *finding.ListFindingResponse
 		wantErr      bool
-		totalCount   uint32
+		totalCount   int64
 		mockResponce *[]model.Finding
 		mockError    error
 	}{
@@ -38,10 +38,10 @@ func TestListFinding(t *testing.T) {
 			totalCount: 0,
 		},
 		{
-			name:       "NG DB error",
+			name:       "Invalid DB error",
 			input:      &finding.ListFindingRequest{ProjectId: 1, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"hoge"}, FromScore: 0.0, ToScore: 1.0},
 			totalCount: 999,
-			mockError:  gorm.ErrInvalidSQL,
+			mockError:  gorm.ErrInvalidDB,
 			wantErr:    true,
 		},
 	}
@@ -71,7 +71,7 @@ func TestBatchListFinding(t *testing.T) {
 		input        *finding.BatchListFindingRequest
 		want         *finding.BatchListFindingResponse
 		wantErr      bool
-		totalCount   uint32
+		totalCount   int64
 		mockResponce *[]model.Finding
 		mockError    error
 	}{
@@ -89,10 +89,10 @@ func TestBatchListFinding(t *testing.T) {
 			totalCount: 0,
 		},
 		{
-			name:       "NG DB error",
+			name:       "Invalid DB error",
 			input:      &finding.BatchListFindingRequest{ProjectId: 1, DataSource: []string{"aws:guardduty"}, ResourceName: []string{"hoge"}, FromScore: 0.0, ToScore: 1.0},
 			totalCount: 999,
-			mockError:  gorm.ErrInvalidSQL,
+			mockError:  gorm.ErrInvalidDB,
 			wantErr:    true,
 		},
 	}
@@ -197,14 +197,14 @@ func TestPutFinding(t *testing.T) {
 			name:       "NG GetFindingByDataSource error",
 			input:      &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
 			wantErr:    true,
-			mockGetErr: gorm.ErrInvalidSQL,
+			mockGetErr: gorm.ErrInvalidDB,
 		},
 		{
 			name:        "NG UpsertFinding error",
 			input:       &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
 			wantErr:     true,
 			mockGetResp: &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 10.00, Score: 0.1, CreatedAt: now, UpdatedAt: now},
-			mockUpErr:   gorm.ErrInvalidSQL,
+			mockUpErr:   gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -248,10 +248,10 @@ func TestDeleteFinding(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &finding.DeleteFindingRequest{ProjectId: 1, FindingId: 1001},
 			wantErr: true,
-			mockErr: gorm.ErrCantStartTransaction,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -277,7 +277,7 @@ func TestListFindingTag(t *testing.T) {
 		wantErr    bool
 		mockResp   *[]model.FindingTag
 		mockErr    error
-		totalCount uint32
+		totalCount int64
 	}{
 		{
 			name:  "OK",
@@ -307,10 +307,10 @@ func TestListFindingTag(t *testing.T) {
 			totalCount: 999,
 		},
 		{
-			name:       "NG DB error",
+			name:       "Invalid DB error",
 			input:      &finding.ListFindingTagRequest{ProjectId: 1, FindingId: 1001},
 			wantErr:    true,
-			mockErr:    gorm.ErrInvalidSQL,
+			mockErr:    gorm.ErrInvalidDB,
 			totalCount: 999,
 		},
 	}
@@ -343,7 +343,7 @@ func TestListFindingTagName(t *testing.T) {
 		wantErr    bool
 		mockResp   *[]tagName
 		mockErr    error
-		totalCount uint32
+		totalCount int64
 	}{
 		{
 			name:  "OK",
@@ -366,10 +366,10 @@ func TestListFindingTagName(t *testing.T) {
 			totalCount: 999,
 		},
 		{
-			name:       "NG DB error",
+			name:       "Invalid DB error",
 			input:      &finding.ListFindingTagNameRequest{ProjectId: 1},
 			wantErr:    true,
-			mockErr:    gorm.ErrInvalidSQL,
+			mockErr:    gorm.ErrInvalidDB,
 			totalCount: 999,
 		},
 	}
@@ -428,14 +428,14 @@ func TestTagFinding(t *testing.T) {
 			name:       "NG GetFindingTagByKey error",
 			input:      &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, Tag: "tag"}},
 			wantErr:    true,
-			mockGetErr: gorm.ErrInvalidSQL,
+			mockGetErr: gorm.ErrInvalidDB,
 		},
 		{
 			name:        "NG TagFinding error",
 			input:       &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, Tag: "tag"}},
 			wantErr:     true,
 			mockGetResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, Tag: "tag", CreatedAt: now, UpdatedAt: now},
-			mockUpErr:   gorm.ErrInvalidSQL,
+			mockUpErr:   gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {

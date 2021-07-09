@@ -1,12 +1,15 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
 	"github.com/kelseyhightower/envconfig"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
 )
 
 type iamRepository interface {
@@ -79,21 +82,22 @@ func initDB(isMaster bool) *gorm.DB {
 		host = conf.SlaveHost
 	}
 
-	db, err := gorm.Open("mysql",
-		fmt.Sprintf("%s:%s@tcp([%s]:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
-			user, pass, host, conf.Port, conf.Schema))
+	dsn := fmt.Sprintf("%s:%s@tcp([%s]:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
+		user, pass, host, conf.Port, conf.Schema)
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
 	if err != nil {
 		appLogger.Fatalf("Failed to open DB. isMaster: %t, err: %+v", isMaster, err)
 		return nil
 	}
-	db.LogMode(conf.LogMode)
-	db.SingularTable(true) // if set this to true, `User`'s default table name will be `user`
+	if conf.LogMode {
+		db.Logger.LogMode(logger.Info)
+	}
 	appLogger.Infof("Connected to Database. isMaster: %t", isMaster)
 	return db
 }
 
 func (i *iamDB) userExists(userID uint32) bool {
-	if _, err := i.GetUser(userID, ""); gorm.IsRecordNotFoundError(err) {
+	if _, err := i.GetUser(userID, ""); errors.Is(err, gorm.ErrRecordNotFound) {
 		return false
 
 	} else if err != nil {
@@ -104,7 +108,7 @@ func (i *iamDB) userExists(userID uint32) bool {
 }
 
 func (i *iamDB) roleExists(projectID, roleID uint32) bool {
-	if _, err := i.GetRole(projectID, roleID); gorm.IsRecordNotFoundError(err) {
+	if _, err := i.GetRole(projectID, roleID); errors.Is(err, gorm.ErrRecordNotFound) {
 		return false
 	} else if err != nil {
 		appLogger.Errorf("[roleExists]DB error: project_id=%d, role_id=%d", projectID, roleID)
@@ -114,7 +118,7 @@ func (i *iamDB) roleExists(projectID, roleID uint32) bool {
 }
 
 func (i *iamDB) policyExists(projectID, policyID uint32) bool {
-	if _, err := i.GetPolicy(projectID, policyID); gorm.IsRecordNotFoundError(err) {
+	if _, err := i.GetPolicy(projectID, policyID); errors.Is(err, gorm.ErrRecordNotFound) {
 		return false
 	} else if err != nil {
 		appLogger.Errorf("[policyExists]DB error: project_id=%d, policy_id=%d", projectID, policyID)

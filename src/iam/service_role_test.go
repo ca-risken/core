@@ -8,7 +8,7 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/iam"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func TestListRole(t *testing.T) {
@@ -45,10 +45,10 @@ func TestListRole(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG SQL error",
+			name:      "Invalid SQL error",
 			input:     &iam.ListRoleRequest{ProjectId: 1, Name: "nm"},
 			wantErr:   true,
-			mockError: gorm.ErrInvalidSQL,
+			mockError: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -98,10 +98,10 @@ func TestGetRole(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG DB error",
+			name:      "invalid DB error",
 			input:     &iam.GetRoleRequest{RoleId: 111, ProjectId: 123},
 			wantErr:   true,
-			mockError: gorm.ErrInvalidSQL,
+			mockError: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -208,10 +208,10 @@ func TestDeleteRole(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &iam.DeleteRoleRequest{ProjectId: 1, RoleId: 1},
 			wantErr: true,
-			mockErr: gorm.ErrCantStartTransaction,
+			mockErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -250,9 +250,9 @@ func TestAttachRole(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &iam.AttachRoleRequest{ProjectId: 123, UserId: 1, RoleId: 1},
-			mockErr: gorm.ErrInvalidSQL,
+			mockErr: gorm.ErrInvalidDB,
 			wantErr: true,
 		},
 	}
@@ -292,9 +292,9 @@ func TestDetachRole(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG DB error",
+			name:    "Invalid DB error",
 			input:   &iam.DetachRoleRequest{ProjectId: 123, UserId: 1, RoleId: 1},
-			mockErr: gorm.ErrInvalidSQL,
+			mockErr: gorm.ErrInvalidDB,
 			wantErr: true,
 		},
 	}

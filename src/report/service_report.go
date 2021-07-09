@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/report"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 /**
@@ -20,7 +21,7 @@ func (f *reportService) GetReportFinding(ctx context.Context, req *report.GetRep
 	}
 	list, err := f.repository.GetReportFinding(req.ProjectId, req.DataSource, req.FromDate, req.ToDate, req.Score)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &report.GetReportFindingResponse{}, nil
 		}
 		return nil, err
@@ -38,7 +39,7 @@ func (f *reportService) GetReportFindingAll(ctx context.Context, req *report.Get
 	}
 	list, err := f.repository.GetReportFindingAll(req.DataSource, req.FromDate, req.ToDate, req.Score)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &report.GetReportFindingAllResponse{}, nil
 		}
 		return nil, err

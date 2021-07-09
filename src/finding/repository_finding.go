@@ -7,7 +7,6 @@ import (
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/vikyd/zero"
 )
 
@@ -45,13 +44,13 @@ func (f *findingDB) ListFindingCount(
 	fromAt, toAt int64,
 	findingID uint64,
 	dataSources, resourceNames, tags []string,
-	status finding.FindingStatus) (uint32, error) {
+	status finding.FindingStatus) (int64, error) {
 	query := "select count(*) from finding "
 	cond, params := generateListFindingCondition(projectID,
 		fromScore, toScore, fromAt, toAt,
 		findingID, dataSources, resourceNames, tags, status)
 	query += cond
-	var count uint32
+	var count int64
 	if err := f.Slave.Raw(query, params...).Count(&count).Error; err != nil {
 		return count, err
 	}
@@ -176,8 +175,8 @@ func (f *findingDB) ListFindingTag(param *finding.ListFindingTagRequest) (*[]mod
 
 const selectListFindingTagCount = `select count(*) from finding_tag where project_id = ? and finding_id = ?`
 
-func (f *findingDB) ListFindingTagCount(param *finding.ListFindingTagRequest) (uint32, error) {
-	var count uint32
+func (f *findingDB) ListFindingTagCount(param *finding.ListFindingTagRequest) (int64, error) {
+	var count int64
 	if err := f.Slave.Raw(selectListFindingTagCount, param.ProjectId, param.FindingId).Count(&count).Error; err != nil {
 		return count, err
 	}
@@ -214,8 +213,8 @@ select count(*) from (
 ) tag
 `
 
-func (f *findingDB) ListFindingTagNameCount(param *finding.ListFindingTagNameRequest) (uint32, error) {
-	var count uint32
+func (f *findingDB) ListFindingTagNameCount(param *finding.ListFindingTagNameRequest) (int64, error) {
+	var count int64
 	if err := f.Slave.Raw(selectListFindingTagNameCount,
 		param.ProjectId, time.Unix(param.FromAt, 0), time.Unix(param.ToAt, 0)).Count(&count).Error; err != nil {
 		return count, err

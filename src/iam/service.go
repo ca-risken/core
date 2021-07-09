@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 	"regexp"
 
 	"github.com/CyberAgent/mimosa-core/proto/iam"
-	"github.com/jinzhu/gorm"
 	"github.com/vikyd/zero"
+	"gorm.io/gorm"
 )
 
 type iamService struct {
@@ -26,7 +27,7 @@ func (i *iamService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequ
 
 	policies, err := i.repository.GetUserPolicy(req.UserId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &iam.IsAuthorizedResponse{Ok: false}, nil
 		}
 		return nil, err
@@ -60,7 +61,7 @@ func (i *iamService) IsAdmin(ctx context.Context, req *iam.IsAdminRequest) (*iam
 
 	policy, err := i.repository.GetAdminPolicy(req.UserId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &iam.IsAdminResponse{Ok: false}, nil
 		}
 		return nil, err
