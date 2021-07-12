@@ -15,18 +15,19 @@ RUN apk add --no-cache ca-certificates tzdata \
   && tar xvfz env-injector_0.0.6_Linux_x86_64.tar.gz && mv env-injector /usr/local/bin/ && rm -rf /tmp/*
 COPY --from=builder /go/bin/alert /usr/local/alert/bin/
 ENV PORT= \
-    FINDING_SVC_ADDR= \
-    DB_MASTER_HOST= \
-    DB_MASTER_USER= \
-    DB_MASTER_PASSWORD= \
-    DB_SLAVE_HOST= \
-    DB_SLAVE_USER= \
-    DB_SLAVE_PASSWORD= \
-    DB_SCHEMA=mimosa \
-    DB_PORT=3306 \
-    DB_LOG_MODE=false \
-    NOTIFICATION_ALERT_URL= \
-    TZ=Asia/Tokyo
+  FINDING_SVC_ADDR= \
+  PROJECT_SVC_ADDR= \
+  DB_MASTER_HOST= \
+  DB_MASTER_USER= \
+  DB_MASTER_PASSWORD= \
+  DB_SLAVE_HOST= \
+  DB_SLAVE_USER= \
+  DB_SLAVE_PASSWORD= \
+  DB_SCHEMA=mimosa \
+  DB_PORT=3306 \
+  DB_LOG_MODE=false \
+  NOTIFICATION_ALERT_URL= \
+  TZ=Asia/Tokyo
 WORKDIR /usr/local/alert
 ENTRYPOINT ["/usr/local/bin/env-injector"]
 CMD ["bin/alert"]

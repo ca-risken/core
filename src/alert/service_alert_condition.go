@@ -17,12 +17,12 @@ import (
  * AlertCondition
  */
 
-func (f *alertService) ListAlertCondition(ctx context.Context, req *alert.ListAlertConditionRequest) (*alert.ListAlertConditionResponse, error) {
+func (a *alertService) ListAlertCondition(ctx context.Context, req *alert.ListAlertConditionRequest) (*alert.ListAlertConditionResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 	converted := convertListAlertConditionRequest(req)
-	list, err := f.repository.ListAlertCondition(converted.ProjectId, converted.Severity, converted.Enabled, converted.FromAt, converted.ToAt)
+	list, err := a.repository.ListAlertCondition(converted.ProjectId, converted.Severity, converted.Enabled, converted.FromAt, converted.ToAt)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListAlertConditionResponse{}, nil
@@ -50,11 +50,11 @@ func convertListAlertConditionRequest(req *alert.ListAlertConditionRequest) *ale
 	return &converted
 }
 
-func (f *alertService) GetAlertCondition(ctx context.Context, req *alert.GetAlertConditionRequest) (*alert.GetAlertConditionResponse, error) {
+func (a *alertService) GetAlertCondition(ctx context.Context, req *alert.GetAlertConditionRequest) (*alert.GetAlertConditionResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	data, err := f.repository.GetAlertCondition(req.ProjectId, req.AlertConditionId)
+	data, err := a.repository.GetAlertCondition(req.ProjectId, req.AlertConditionId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetAlertConditionResponse{}, nil
@@ -64,7 +64,7 @@ func (f *alertService) GetAlertCondition(ctx context.Context, req *alert.GetAler
 	return &alert.GetAlertConditionResponse{AlertCondition: convertAlertCondition(data)}, nil
 }
 
-func (f *alertService) PutAlertCondition(ctx context.Context, req *alert.PutAlertConditionRequest) (*alert.PutAlertConditionResponse, error) {
+func (a *alertService) PutAlertCondition(ctx context.Context, req *alert.PutAlertConditionRequest) (*alert.PutAlertConditionResponse, error) {
 	if err := req.AlertCondition.Validate(); err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (f *alertService) PutAlertCondition(ctx context.Context, req *alert.PutAler
 	}
 
 	// Fiding upsert
-	registerdData, err := f.repository.UpsertAlertCondition(data)
+	registerdData, err := a.repository.UpsertAlertCondition(data)
 	if err != nil {
 		return nil, err
 	}
@@ -87,11 +87,11 @@ func (f *alertService) PutAlertCondition(ctx context.Context, req *alert.PutAler
 	return &alert.PutAlertConditionResponse{AlertCondition: convertAlertCondition(registerdData)}, nil
 }
 
-func (f *alertService) DeleteAlertCondition(ctx context.Context, req *alert.DeleteAlertConditionRequest) (*empty.Empty, error) {
+func (a *alertService) DeleteAlertCondition(ctx context.Context, req *alert.DeleteAlertConditionRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	err := f.repository.DeleteAlertCondition(req.ProjectId, req.AlertConditionId)
+	err := a.repository.DeleteAlertCondition(req.ProjectId, req.AlertConditionId)
 	if err != nil {
 		return nil, err
 	}
@@ -102,12 +102,12 @@ func (f *alertService) DeleteAlertCondition(ctx context.Context, req *alert.Dele
  * AlertRule
  */
 
-func (f *alertService) ListAlertRule(ctx context.Context, req *alert.ListAlertRuleRequest) (*alert.ListAlertRuleResponse, error) {
+func (a *alertService) ListAlertRule(ctx context.Context, req *alert.ListAlertRuleRequest) (*alert.ListAlertRuleResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 	converted := convertListAlertRuleRequest(req)
-	list, err := f.repository.ListAlertRule(converted.ProjectId, converted.FromScore, converted.ToScore, converted.FromAt, converted.ToAt)
+	list, err := a.repository.ListAlertRule(converted.ProjectId, converted.FromScore, converted.ToScore, converted.FromAt, converted.ToAt)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListAlertRuleResponse{}, nil
@@ -138,11 +138,11 @@ func convertListAlertRuleRequest(req *alert.ListAlertRuleRequest) *alert.ListAle
 	return &converted
 }
 
-func (f *alertService) GetAlertRule(ctx context.Context, req *alert.GetAlertRuleRequest) (*alert.GetAlertRuleResponse, error) {
+func (a *alertService) GetAlertRule(ctx context.Context, req *alert.GetAlertRuleRequest) (*alert.GetAlertRuleResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	data, err := f.repository.GetAlertRule(req.ProjectId, req.AlertRuleId)
+	data, err := a.repository.GetAlertRule(req.ProjectId, req.AlertRuleId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetAlertRuleResponse{}, nil
@@ -152,7 +152,7 @@ func (f *alertService) GetAlertRule(ctx context.Context, req *alert.GetAlertRule
 	return &alert.GetAlertRuleResponse{AlertRule: convertAlertRule(data)}, nil
 }
 
-func (f *alertService) PutAlertRule(ctx context.Context, req *alert.PutAlertRuleRequest) (*alert.PutAlertRuleResponse, error) {
+func (a *alertService) PutAlertRule(ctx context.Context, req *alert.PutAlertRuleRequest) (*alert.PutAlertRuleResponse, error) {
 	if err := req.AlertRule.Validate(); err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ func (f *alertService) PutAlertRule(ctx context.Context, req *alert.PutAlertRule
 	}
 
 	// Fiding upsert
-	registerdData, err := f.repository.UpsertAlertRule(data)
+	registerdData, err := a.repository.UpsertAlertRule(data)
 	if err != nil {
 		return nil, err
 	}
@@ -176,11 +176,11 @@ func (f *alertService) PutAlertRule(ctx context.Context, req *alert.PutAlertRule
 	return &alert.PutAlertRuleResponse{AlertRule: convertAlertRule(registerdData)}, nil
 }
 
-func (f *alertService) DeleteAlertRule(ctx context.Context, req *alert.DeleteAlertRuleRequest) (*empty.Empty, error) {
+func (a *alertService) DeleteAlertRule(ctx context.Context, req *alert.DeleteAlertRuleRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	err := f.repository.DeleteAlertRule(req.ProjectId, req.AlertRuleId)
+	err := a.repository.DeleteAlertRule(req.ProjectId, req.AlertRuleId)
 	if err != nil {
 		return nil, err
 	}
@@ -191,9 +191,9 @@ func (f *alertService) DeleteAlertRule(ctx context.Context, req *alert.DeleteAle
  * AlertCondRule
  */
 
-func (f *alertService) ListAlertCondRule(ctx context.Context, req *alert.ListAlertCondRuleRequest) (*alert.ListAlertCondRuleResponse, error) {
+func (a *alertService) ListAlertCondRule(ctx context.Context, req *alert.ListAlertCondRuleRequest) (*alert.ListAlertCondRuleResponse, error) {
 	converted := convertListAlertCondRuleRequest(req)
-	list, err := f.repository.ListAlertCondRule(converted.ProjectId, converted.AlertConditionId, converted.AlertRuleId, converted.FromAt, converted.ToAt)
+	list, err := a.repository.ListAlertCondRule(converted.ProjectId, converted.AlertConditionId, converted.AlertRuleId, converted.FromAt, converted.ToAt)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListAlertCondRuleResponse{}, nil
@@ -221,12 +221,12 @@ func convertListAlertCondRuleRequest(req *alert.ListAlertCondRuleRequest) *alert
 	return &converted
 }
 
-func (f *alertService) GetAlertCondRule(ctx context.Context, req *alert.GetAlertCondRuleRequest) (*alert.GetAlertCondRuleResponse, error) {
+func (a *alertService) GetAlertCondRule(ctx context.Context, req *alert.GetAlertCondRuleRequest) (*alert.GetAlertCondRuleResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 
-	data, err := f.repository.GetAlertCondRule(req.ProjectId, req.AlertConditionId, req.AlertRuleId)
+	data, err := a.repository.GetAlertCondRule(req.ProjectId, req.AlertConditionId, req.AlertRuleId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetAlertCondRuleResponse{}, nil
@@ -236,7 +236,7 @@ func (f *alertService) GetAlertCondRule(ctx context.Context, req *alert.GetAlert
 	return &alert.GetAlertCondRuleResponse{AlertCondRule: convertAlertCondRule(data)}, nil
 }
 
-func (f *alertService) PutAlertCondRule(ctx context.Context, req *alert.PutAlertCondRuleRequest) (*alert.PutAlertCondRuleResponse, error) {
+func (a *alertService) PutAlertCondRule(ctx context.Context, req *alert.PutAlertCondRuleRequest) (*alert.PutAlertCondRuleResponse, error) {
 	if err := req.AlertCondRule.Validate(); err != nil {
 		return nil, err
 	}
@@ -247,7 +247,7 @@ func (f *alertService) PutAlertCondRule(ctx context.Context, req *alert.PutAlert
 	}
 
 	// Fiding upsert
-	registerdData, err := f.repository.UpsertAlertCondRule(data)
+	registerdData, err := a.repository.UpsertAlertCondRule(data)
 	if err != nil {
 		return nil, err
 	}
@@ -255,11 +255,11 @@ func (f *alertService) PutAlertCondRule(ctx context.Context, req *alert.PutAlert
 	return &alert.PutAlertCondRuleResponse{AlertCondRule: convertAlertCondRule(registerdData)}, nil
 }
 
-func (f *alertService) DeleteAlertCondRule(ctx context.Context, req *alert.DeleteAlertCondRuleRequest) (*empty.Empty, error) {
+func (a *alertService) DeleteAlertCondRule(ctx context.Context, req *alert.DeleteAlertCondRuleRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	err := f.repository.DeleteAlertCondRule(req.ProjectId, req.AlertConditionId, req.AlertRuleId)
+	err := a.repository.DeleteAlertCondRule(req.ProjectId, req.AlertConditionId, req.AlertRuleId)
 	if err != nil {
 		return nil, err
 	}
@@ -270,12 +270,12 @@ func (f *alertService) DeleteAlertCondRule(ctx context.Context, req *alert.Delet
  * Notification
  */
 
-func (f *alertService) ListNotification(ctx context.Context, req *alert.ListNotificationRequest) (*alert.ListNotificationResponse, error) {
+func (a *alertService) ListNotification(ctx context.Context, req *alert.ListNotificationRequest) (*alert.ListNotificationResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 	converted := convertListNotificationRequest(req)
-	list, err := f.repository.ListNotification(converted.ProjectId, converted.Type, converted.FromAt, converted.ToAt)
+	list, err := a.repository.ListNotification(converted.ProjectId, converted.Type, converted.FromAt, converted.ToAt)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListNotificationResponse{}, nil
@@ -302,11 +302,11 @@ func convertListNotificationRequest(req *alert.ListNotificationRequest) *alert.L
 	return &converted
 }
 
-func (f *alertService) GetNotification(ctx context.Context, req *alert.GetNotificationRequest) (*alert.GetNotificationResponse, error) {
+func (a *alertService) GetNotification(ctx context.Context, req *alert.GetNotificationRequest) (*alert.GetNotificationResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	data, err := f.repository.GetNotification(req.ProjectId, req.NotificationId)
+	data, err := a.repository.GetNotification(req.ProjectId, req.NotificationId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetNotificationResponse{}, nil
@@ -316,14 +316,14 @@ func (f *alertService) GetNotification(ctx context.Context, req *alert.GetNotifi
 	return &alert.GetNotificationResponse{Notification: convertNotification(data)}, nil
 }
 
-func (f *alertService) PutNotification(ctx context.Context, req *alert.PutNotificationRequest) (*alert.PutNotificationResponse, error) {
+func (a *alertService) PutNotification(ctx context.Context, req *alert.PutNotificationRequest) (*alert.PutNotificationResponse, error) {
 	err := req.Notification.Validate()
 	if err != nil {
 		return nil, err
 	}
 	var existData *model.Notification
 	if !zero.IsZeroVal(req.Notification.NotificationId) {
-		existData, err = f.repository.GetNotification(req.ProjectId, req.Notification.NotificationId)
+		existData, err = a.repository.GetNotification(req.ProjectId, req.Notification.NotificationId)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return &alert.PutNotificationResponse{}, nil
@@ -361,7 +361,7 @@ func (f *alertService) PutNotification(ctx context.Context, req *alert.PutNotifi
 	}
 
 	// Fiding upsert
-	registerdData, err := f.repository.UpsertNotification(data)
+	registerdData, err := a.repository.UpsertNotification(data)
 	if err != nil {
 		return nil, err
 	}
@@ -392,22 +392,22 @@ func replaceSlackNotifySetting(jsonNotifySettingExist, jsonNotifySettingUpdate s
 	return notifySettingUpdate, nil
 }
 
-func (f *alertService) DeleteNotification(ctx context.Context, req *alert.DeleteNotificationRequest) (*empty.Empty, error) {
+func (a *alertService) DeleteNotification(ctx context.Context, req *alert.DeleteNotificationRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	err := f.repository.DeleteNotification(req.ProjectId, req.NotificationId)
+	err := a.repository.DeleteNotification(req.ProjectId, req.NotificationId)
 	if err != nil {
 		return nil, err
 	}
 	return &empty.Empty{}, nil
 }
 
-func (f *alertService) TestNotification(ctx context.Context, req *alert.TestNotificationRequest) (*empty.Empty, error) {
+func (a *alertService) TestNotification(ctx context.Context, req *alert.TestNotificationRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	notification, err := f.repository.GetNotification(req.ProjectId, req.NotificationId)
+	notification, err := a.repository.GetNotification(req.ProjectId, req.NotificationId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &empty.Empty{}, nil
@@ -433,9 +433,9 @@ func (f *alertService) TestNotification(ctx context.Context, req *alert.TestNoti
  * AlertCondNotification
  */
 
-func (f *alertService) ListAlertCondNotification(ctx context.Context, req *alert.ListAlertCondNotificationRequest) (*alert.ListAlertCondNotificationResponse, error) {
+func (a *alertService) ListAlertCondNotification(ctx context.Context, req *alert.ListAlertCondNotificationRequest) (*alert.ListAlertCondNotificationResponse, error) {
 	converted := convertListAlertCondNotificationRequest(req)
-	list, err := f.repository.ListAlertCondNotification(converted.ProjectId, converted.AlertConditionId, converted.NotificationId, converted.FromAt, converted.ToAt)
+	list, err := a.repository.ListAlertCondNotification(converted.ProjectId, converted.AlertConditionId, converted.NotificationId, converted.FromAt, converted.ToAt)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListAlertCondNotificationResponse{}, nil
@@ -463,12 +463,12 @@ func convertListAlertCondNotificationRequest(req *alert.ListAlertCondNotificatio
 	return &converted
 }
 
-func (f *alertService) GetAlertCondNotification(ctx context.Context, req *alert.GetAlertCondNotificationRequest) (*alert.GetAlertCondNotificationResponse, error) {
+func (a *alertService) GetAlertCondNotification(ctx context.Context, req *alert.GetAlertCondNotificationRequest) (*alert.GetAlertCondNotificationResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 
-	data, err := f.repository.GetAlertCondNotification(req.ProjectId, req.AlertConditionId, req.NotificationId)
+	data, err := a.repository.GetAlertCondNotification(req.ProjectId, req.AlertConditionId, req.NotificationId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetAlertCondNotificationResponse{}, nil
@@ -478,7 +478,7 @@ func (f *alertService) GetAlertCondNotification(ctx context.Context, req *alert.
 	return &alert.GetAlertCondNotificationResponse{AlertCondNotification: convertAlertCondNotification(data)}, nil
 }
 
-func (f *alertService) PutAlertCondNotification(ctx context.Context, req *alert.PutAlertCondNotificationRequest) (*alert.PutAlertCondNotificationResponse, error) {
+func (a *alertService) PutAlertCondNotification(ctx context.Context, req *alert.PutAlertCondNotificationRequest) (*alert.PutAlertCondNotificationResponse, error) {
 	if err := req.AlertCondNotification.Validate(); err != nil {
 		return nil, err
 	}
@@ -491,7 +491,7 @@ func (f *alertService) PutAlertCondNotification(ctx context.Context, req *alert.
 	}
 
 	// Fiding upsert
-	registerdData, err := f.repository.UpsertAlertCondNotification(data)
+	registerdData, err := a.repository.UpsertAlertCondNotification(data)
 	if err != nil {
 		return nil, err
 	}
@@ -499,11 +499,11 @@ func (f *alertService) PutAlertCondNotification(ctx context.Context, req *alert.
 	return &alert.PutAlertCondNotificationResponse{AlertCondNotification: convertAlertCondNotification(registerdData)}, nil
 }
 
-func (f *alertService) DeleteAlertCondNotification(ctx context.Context, req *alert.DeleteAlertCondNotificationRequest) (*empty.Empty, error) {
+func (a *alertService) DeleteAlertCondNotification(ctx context.Context, req *alert.DeleteAlertCondNotificationRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	err := f.repository.DeleteAlertCondNotification(req.ProjectId, req.AlertConditionId, req.NotificationId)
+	err := a.repository.DeleteAlertCondNotification(req.ProjectId, req.AlertConditionId, req.NotificationId)
 	if err != nil {
 		return nil, err
 	}
@@ -514,84 +514,84 @@ func (f *alertService) DeleteAlertCondNotification(ctx context.Context, req *ale
  * Converter
  */
 
-func convertAlertCondition(f *model.AlertCondition) *alert.AlertCondition {
-	if f == nil {
+func convertAlertCondition(a *model.AlertCondition) *alert.AlertCondition {
+	if a == nil {
 		return &alert.AlertCondition{}
 	}
 	return &alert.AlertCondition{
-		AlertConditionId: f.AlertConditionID,
-		Description:      f.Description,
-		Severity:         f.Severity,
-		ProjectId:        f.ProjectID,
-		AndOr:            f.AndOr,
-		Enabled:          f.Enabled,
-		CreatedAt:        f.CreatedAt.Unix(),
-		UpdatedAt:        f.UpdatedAt.Unix(),
+		AlertConditionId: a.AlertConditionID,
+		Description:      a.Description,
+		Severity:         a.Severity,
+		ProjectId:        a.ProjectID,
+		AndOr:            a.AndOr,
+		Enabled:          a.Enabled,
+		CreatedAt:        a.CreatedAt.Unix(),
+		UpdatedAt:        a.UpdatedAt.Unix(),
 	}
 }
 
-func convertAlertRule(f *model.AlertRule) *alert.AlertRule {
-	if f == nil {
+func convertAlertRule(a *model.AlertRule) *alert.AlertRule {
+	if a == nil {
 		return &alert.AlertRule{}
 	}
 	return &alert.AlertRule{
-		AlertRuleId:  f.AlertRuleID,
-		Name:         f.Name,
-		Score:        f.Score,
-		ProjectId:    f.ProjectID,
-		ResourceName: f.ResourceName,
-		Tag:          f.Tag,
-		FindingCnt:   f.FindingCnt,
-		CreatedAt:    f.CreatedAt.Unix(),
-		UpdatedAt:    f.UpdatedAt.Unix(),
+		AlertRuleId:  a.AlertRuleID,
+		Name:         a.Name,
+		Score:        a.Score,
+		ProjectId:    a.ProjectID,
+		ResourceName: a.ResourceName,
+		Tag:          a.Tag,
+		FindingCnt:   a.FindingCnt,
+		CreatedAt:    a.CreatedAt.Unix(),
+		UpdatedAt:    a.UpdatedAt.Unix(),
 	}
 }
 
-func convertAlertCondRule(f *model.AlertCondRule) *alert.AlertCondRule {
-	if f == nil {
+func convertAlertCondRule(a *model.AlertCondRule) *alert.AlertCondRule {
+	if a == nil {
 		return &alert.AlertCondRule{}
 	}
 	return &alert.AlertCondRule{
-		AlertConditionId: f.AlertConditionID,
-		AlertRuleId:      f.AlertRuleID,
-		ProjectId:        f.ProjectID,
-		CreatedAt:        f.CreatedAt.Unix(),
-		UpdatedAt:        f.UpdatedAt.Unix(),
+		AlertConditionId: a.AlertConditionID,
+		AlertRuleId:      a.AlertRuleID,
+		ProjectId:        a.ProjectID,
+		CreatedAt:        a.CreatedAt.Unix(),
+		UpdatedAt:        a.UpdatedAt.Unix(),
 	}
 }
 
-func convertNotification(f *model.Notification) *alert.Notification {
-	if f == nil {
+func convertNotification(n *model.Notification) *alert.Notification {
+	if n == nil {
 		return &alert.Notification{}
 	}
-	maskingSetting, err := maskingNotifySetting(f.Type, f.NotifySetting)
+	maskingSetting, err := maskingNotifySetting(n.Type, n.NotifySetting)
 	if err != nil {
 		appLogger.Errorf("Failed to masking notify setting. %v", err)
-		maskingSetting = f.NotifySetting
+		maskingSetting = n.NotifySetting
 	}
 	return &alert.Notification{
-		NotificationId: f.NotificationID,
-		Name:           f.Name,
-		ProjectId:      f.ProjectID,
-		Type:           f.Type,
+		NotificationId: n.NotificationID,
+		Name:           n.Name,
+		ProjectId:      n.ProjectID,
+		Type:           n.Type,
 		NotifySetting:  maskingSetting,
-		CreatedAt:      f.CreatedAt.Unix(),
-		UpdatedAt:      f.UpdatedAt.Unix(),
+		CreatedAt:      n.CreatedAt.Unix(),
+		UpdatedAt:      n.UpdatedAt.Unix(),
 	}
 }
 
-func convertAlertCondNotification(f *model.AlertCondNotification) *alert.AlertCondNotification {
-	if f == nil {
+func convertAlertCondNotification(a *model.AlertCondNotification) *alert.AlertCondNotification {
+	if a == nil {
 		return &alert.AlertCondNotification{}
 	}
 	return &alert.AlertCondNotification{
-		AlertConditionId: f.AlertConditionID,
-		NotificationId:   f.NotificationID,
-		ProjectId:        f.ProjectID,
-		CacheSecond:      f.CacheSecond,
-		NotifiedAt:       f.NotifiedAt.Unix(),
-		CreatedAt:        f.CreatedAt.Unix(),
-		UpdatedAt:        f.UpdatedAt.Unix(),
+		AlertConditionId: a.AlertConditionID,
+		NotificationId:   a.NotificationID,
+		ProjectId:        a.ProjectID,
+		CacheSecond:      a.CacheSecond,
+		NotifiedAt:       a.NotifiedAt.Unix(),
+		CreatedAt:        a.CreatedAt.Unix(),
+		UpdatedAt:        a.UpdatedAt.Unix(),
 	}
 }
 
