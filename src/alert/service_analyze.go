@@ -8,11 +8,13 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/alert"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
+	"github.com/CyberAgent/mimosa-core/proto/project"
 	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
@@ -538,4 +540,33 @@ func getRequestID(projectID uint32) string {
 		appLogger.Warnf("Failed to make random string, err=%+v", err)
 	}
 	return fmt.Sprintf("%d-%s", projectID, rand)
+}
+
+func (a *alertService) AnalyzeAlertAll(ctx context.Context, _ *empty.Empty) (*empty.Empty, error) {
+	appLogger.Info("start AnalyzeAlertAll")
+	list, err := a.projectClient.ListProject(ctx, &project.ListProjectRequest{})
+	if err != nil {
+		appLogger.Errorf("Failed to list project API, err=%+v", err)
+		return nil, err
+	}
+	projectNum := len(list.Project)
+	if projectNum < 1 {
+		appLogger.Warn("There are no project")
+		return &empty.Empty{}, nil
+	}
+	var wg sync.WaitGroup
+	wg.Add(projectNum)
+	for i := range list.Project {
+		// launch goroutine
+		go func(p *project.Project) {
+			defer wg.Done()
+			if _, err := a.AnalyzeAlert(ctx, &alert.AnalyzeAlertRequest{ProjectId: p.ProjectId}); err != nil {
+				appLogger.Warnf("Failed to AnalyzeAlert, project_id=%d, err=%+v", p.ProjectId, err)
+			}
+			time.Sleep(1 * time.Second)
+		}(list.Project[i])
+	}
+	wg.Wait()
+	appLogger.Info("end AnalyzeAlertAll")
+	return &empty.Empty{}, nil
 }

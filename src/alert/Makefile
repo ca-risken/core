@@ -251,3 +251,9 @@ delete-alert_cond_notification:
 		-plaintext \
 		-d '{"project_id":1001, "alert_condition_id":1003, "notification_id":1001}' \
 		localhost:8004 core.alert.AlertService.DeleteAlertCondNotification
+
+.PHONY: analyze-alert-all
+analyze-alert:
+	grpcurl \
+		-plaintext \
+		localhost:8004 core.alert.AlertService.AnalyzeAlertAll

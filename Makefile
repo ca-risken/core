@@ -65,7 +65,7 @@ go-test: proto
 	cd src/alert     && AWS_XRAY_SDK_DISABLED=TRUE go test ./...
 	cd src/report    && go test ./...
 
-go-mod-tidy: build
+go-mod-tidy: proto
 	cd proto/finding && go mod tidy
 	cd proto/iam     && go mod tidy
 	cd proto/project && go mod tidy
