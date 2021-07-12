@@ -3,11 +3,12 @@ module github.com/CyberAgent/mimosa-core/src/alert
 go 1.16
 
 require (
+	github.com/CyberAgent/mimosa-common/pkg/xray v0.0.0-20210709182517-c12a4e8eed4d
 	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210628032046-7e6a43522da4
 	github.com/CyberAgent/mimosa-core/proto/alert v0.0.0-20210628032046-7e6a43522da4
 	github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20210628032046-7e6a43522da4
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
-	github.com/aws/aws-xray-sdk-go v1.5.0
+	github.com/aws/aws-xray-sdk-go v1.6.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.2

@@ -13,7 +13,6 @@ import (
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/alert"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
-	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
 	"gorm.io/gorm"
@@ -30,9 +29,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	requestID := getRequestID(req.ProjectId)
 	// 有効なalertConditionの取得
 	appLogger.Infof("start ListEnabledAlertCondition: RequestID=%s", requestID)
-	_, ss := xray.BeginSubsegment(ctx, "ListEnabledAlertCondition")
 	alertConditions, err := f.repository.ListEnabledAlertCondition(req.ProjectId, req.AlertConditionId)
-	ss.Close(err)
 	appLogger.Infof("finish ListEnabledAlertCondition: RequestID=%s", requestID)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
@@ -53,9 +50,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 
 	// 無効のalertConditionの取得
 	appLogger.Infof("start ListDisabledAlertCondition: RequestID=%s", requestID)
-	_, ss = xray.BeginSubsegment(ctx, "ListDisabledAlertCondition")
 	disabledAlertConditions, err := f.repository.ListDisabledAlertCondition(req.ProjectId, req.AlertConditionId)
-	ss.Close(err)
 	appLogger.Infof("finish ListDisabledAlertCondition: RequestID=%s", requestID)
 	noRecord = errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
@@ -77,9 +72,7 @@ func (f *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 
 func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertCondition *model.AlertCondition) error {
 	// AlertRuleの取得
-	_, ss := xray.BeginSubsegment(ctx, "ListAlertRuleByAlertConditionID")
 	alertRules, err := f.repository.ListAlertRuleByAlertConditionID(alertCondition.ProjectID, alertCondition.AlertConditionID)
-	ss.Close(err)
 	if err != nil {
 		appLogger.Errorf("Failed list AlertRule by AlertConditionID. alertConditionID: %v, err: %v", alertCondition.AlertConditionID, err)
 		return err
@@ -141,9 +134,7 @@ func (f *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 
 func (f *alertService) RegistAlertByAnalyze(ctx context.Context, alertCondition *model.AlertCondition, findingIDs []uint64) (*model.Alert, error) {
 	// AlertConditionに該当するAlertが既に存在しているか確認
-	_, ss := xray.BeginSubsegment(ctx, "GetAlertByAlertConditionIDStatus")
 	savedData, err := f.repository.GetAlertByAlertConditionIDStatus(alertCondition.ProjectID, alertCondition.AlertConditionID, []string{"ACTIVE", "PENDING"})
-	ss.Close(err)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
@@ -156,9 +147,7 @@ func (f *alertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 	var alertID uint32
 	var isMatchExisting bool
 	if !noRecord {
-		_, ss = xray.BeginSubsegment(ctx, "isMatchExistingAlert")
 		isMatchExisting, err = f.isMatchExistingAlert(savedData, alertCondition, findingIDs)
-		ss.Close(err)
 		if err != nil {
 			return nil, err
 		}
@@ -178,9 +167,7 @@ func (f *alertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 		Status:           status,
 	}
 	// upsert Alert
-	_, ss = xray.BeginSubsegment(ctx, "UpsertAlert")
 	registerdData, err := f.repository.UpsertAlert(data)
-	ss.Close(err)
 	if err != nil {
 		appLogger.Errorf("Error occured when upsert alert. alertConditionID: %v, err: %v", alertCondition.AlertConditionID, err)
 		return nil, err
@@ -207,9 +194,7 @@ func (f *alertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 		Severity:       registerdData.Severity,
 		ProjectID:      registerdData.ProjectID,
 	}
-	_, ss = xray.BeginSubsegment(ctx, "UpsertAlertHistory")
 	_, err = f.repository.UpsertAlertHistory(dataAlertHistory)
-	ss.Close(err)
 	if err != nil {
 		appLogger.Errorf("Error occured when upsert AlertHistory. err: %v", err)
 		return nil, err
@@ -226,9 +211,7 @@ func (f *alertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 			FindingID: uint32(findingID),
 			ProjectID: registerdData.ProjectID,
 		}
-		_, ss = xray.BeginSubsegment(ctx, "UpsertRelAlertFinding")
 		_, err := f.repository.UpsertRelAlertFinding(data)
-		ss.Close(err)
 		if err != nil {
 			return nil, err
 		}
@@ -239,9 +222,7 @@ func (f *alertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 
 func (f *alertService) DeleteAlertByAnalyze(ctx context.Context, alertCondition *model.AlertCondition) error {
 	// Alertの削除
-	_, ss := xray.BeginSubsegment(ctx, "GetAlertByAlertConditionIDStatus")
 	savedData, err := f.repository.GetAlertByAlertConditionIDStatus(alertCondition.ProjectID, alertCondition.AlertConditionID, []string{"ACTIVE", "PENDING"})
-	ss.Close(err)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		appLogger.Errorf("Failed get alert by alertConditionIDStatus, err: %v", err)
@@ -261,9 +242,7 @@ func (f *alertService) DeleteAlertByAnalyze(ctx context.Context, alertCondition 
 		Status:           alert.Status_DEACTIVE.String(),
 	}
 	// update Alert
-	_, ss = xray.BeginSubsegment(ctx, "DeactivateAlert")
 	err = f.repository.DeactivateAlert(data)
-	ss.Close(err)
 	if err != nil {
 		return err
 	}
@@ -283,9 +262,7 @@ func (f *alertService) DeleteAlertByAnalyze(ctx context.Context, alertCondition 
 		FindingHistory: findingHistory,
 		ProjectID:      savedData.ProjectID,
 	}
-	_, ss = xray.BeginSubsegment(ctx, "UpsertAlertHistory")
 	_, errAlertHistory := f.repository.UpsertAlertHistory(dataAlertHistory)
-	ss.Close(err)
 	if errAlertHistory != nil {
 		return errAlertHistory
 	}
@@ -300,16 +277,12 @@ func (f *alertService) DeleteAlertByAnalyze(ctx context.Context, alertCondition 
 }
 
 func (f *alertService) deleteRelAlertFindingByAlertID(ctx context.Context, projectID, alertID uint32) error {
-	_, ss := xray.BeginSubsegment(ctx, "ListRelAlertFinding")
 	listRelAlertFinding, err := f.repository.ListRelAlertFinding(projectID, alertID, uint32(0), 0, time.Now().Unix())
-	ss.Close(err)
 	if err != nil {
 		return err
 	}
 	for _, relAlertFinding := range *listRelAlertFinding {
-		_, ss = xray.BeginSubsegment(ctx, "DeleteRelAlertFinding")
 		err := f.repository.DeleteRelAlertFinding(relAlertFinding.ProjectID, relAlertFinding.AlertID, relAlertFinding.FindingID)
-		ss.Close(err)
 		if err != nil {
 			return err
 		}
@@ -318,9 +291,7 @@ func (f *alertService) deleteRelAlertFindingByAlertID(ctx context.Context, proje
 }
 
 func (f *alertService) NotificationAlert(ctx context.Context, alertCondition *model.AlertCondition, alert *model.Alert) error {
-	_, ss := xray.BeginSubsegment(ctx, "ListAlertCondNotification")
 	alertCondNotifications, err := f.repository.ListAlertCondNotification(alertCondition.ProjectID, alertCondition.AlertConditionID, 0, 0, time.Now().Unix())
-	ss.Close(err)
 	if err != nil {
 		return err
 	}
@@ -330,23 +301,17 @@ func (f *alertService) NotificationAlert(ctx context.Context, alertCondition *mo
 			continue
 		}
 
-		_, ss = xray.BeginSubsegment(ctx, "GetNotification")
 		notification, err := f.repository.GetNotification(alertCondition.ProjectID, alertCondNotification.NotificationID)
-		ss.Close(err)
 		if err != nil {
 			return err
 		}
 		switch notification.Type {
 		case "slack":
-			_, ss = xray.BeginSubsegment(ctx, "GetProject")
 			project, err := f.repository.GetProject(alert.ProjectID)
-			ss.Close(err)
 			if err != nil {
 				return err
 			}
-			_, ss = xray.BeginSubsegment(ctx, "sendSlackNotification")
 			err = sendSlackNotification(notification.NotifySetting, alert, project)
-			ss.Close(err)
 			if err != nil {
 				return err
 			}
@@ -362,9 +327,7 @@ func (f *alertService) NotificationAlert(ctx context.Context, alertCondition *mo
 			NotifiedAt:       time.Now(),
 			ProjectID:        alertCondNotification.ProjectID,
 		}
-		_, ss = xray.BeginSubsegment(ctx, "UpsertAlertCondNotification")
 		_, err = f.repository.UpsertAlertCondNotification(dataAlertCondNotification)
-		ss.Close(err)
 		if err != nil {
 			return err
 		}
@@ -384,9 +347,7 @@ func (f *alertService) analyzeAlertByRule(ctx context.Context, alertRule *model.
 	if alertRule.Tag != "" {
 		param.Tag = []string{alertRule.Tag}
 	}
-	_, ss := xray.BeginSubsegment(ctx, "BatchListFinding")
 	resp, err := f.findingClient.BatchListFinding(ctx, param)
-	ss.Close(err)
 	if err != nil {
 		appLogger.Errorf("Failed to BatchListFinding, request=%+v, err=%+v", param, err)
 		return false, &[]uint64{}, err
