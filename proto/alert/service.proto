@@ -78,6 +78,8 @@ service AlertService {
 
   // AnalyzeAlert
   rpc AnalyzeAlert(AnalyzeAlertRequest) returns (google.protobuf.Empty);
+  rpc AnalyzeAlertAll(google.protobuf.Empty)
+      returns (google.protobuf.Empty); // For scheduled job
 }
 
 message ListAlertRequest {
