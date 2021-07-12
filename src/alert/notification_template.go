@@ -22,7 +22,7 @@ func newslackWebhookConfig() (*slackWebhookConfig, error) {
 	return config, nil
 }
 
-func (t *slackWebhookConfig) GetPayload(channel, message string, alert *model.Alert, project *model.Project) (string, error) {
+func (s *slackWebhookConfig) GetPayload(channel, message string, alert *model.Alert, project *model.Project) (string, error) {
 	payload := map[string]interface{}{}
 	// text
 	text := fmt.Sprintf("%vアラートを検知しました。", getMention(alert.Severity))
@@ -54,7 +54,7 @@ func (t *slackWebhookConfig) GetPayload(channel, message string, alert *model.Al
 				},
 				map[string]string{
 					"title": "Link",
-					"value": fmt.Sprintf("<%s?project_id=%d|詳細はこちらから>", t.NotificationAlertURL, project.ProjectID),
+					"value": fmt.Sprintf("<%s?project_id=%d|詳細はこちらから>", s.NotificationAlertURL, project.ProjectID),
 					"short": "true",
 				},
 				map[string]string{
@@ -76,7 +76,7 @@ func (t *slackWebhookConfig) GetPayload(channel, message string, alert *model.Al
 	return string(buf), err
 }
 
-func (t *slackWebhookConfig) GetTestPayload(channel string) (string, error) {
+func (s *slackWebhookConfig) GetTestPayload(channel string) (string, error) {
 	payload := map[string]interface{}{}
 	// text
 	text := "RISKENからのテスト通知です"
