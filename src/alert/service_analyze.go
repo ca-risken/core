@@ -127,7 +127,7 @@ func (a *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 		}
 		// AlertがACTIVE、かつMatchしている場合はAlert通知を行う
 		if registAlert.Status == alert.Status_ACTIVE.String() {
-			err = a.NotificationAlert(ctx, alertCondition, registAlert)
+			err = a.NotificationAlert(ctx, alertCondition, registAlert, alertRules)
 			if err != nil {
 				return err
 			}
@@ -319,7 +319,7 @@ func (a *alertService) deleteRelAlertFindingByAlertID(ctx context.Context, proje
 	return nil
 }
 
-func (a *alertService) NotificationAlert(ctx context.Context, alertCondition *model.AlertCondition, alert *model.Alert) error {
+func (a *alertService) NotificationAlert(ctx context.Context, alertCondition *model.AlertCondition, alert *model.Alert, rules *[]model.AlertRule) error {
 	_, ss := xray.BeginSubsegment(ctx, "ListAlertCondNotification")
 	alertCondNotifications, err := a.repository.ListAlertCondNotification(alertCondition.ProjectID, alertCondition.AlertConditionID, 0, 0, time.Now().Unix())
 	ss.Close(err)
@@ -347,7 +347,7 @@ func (a *alertService) NotificationAlert(ctx context.Context, alertCondition *mo
 				return err
 			}
 			_, ss = xray.BeginSubsegment(ctx, "sendSlackNotification")
-			err = sendSlackNotification(notification.NotifySetting, alert, project)
+			err = sendSlackNotification(notification.NotifySetting, alert, project, rules)
 			ss.Close(err)
 			if err != nil {
 				return err
@@ -446,7 +446,7 @@ func getHistoryType(alertID uint32) string {
 	return "updated"
 }
 
-func sendSlackNotification(notifySetting string, alert *model.Alert, project *model.Project) error {
+func sendSlackNotification(notifySetting string, alert *model.Alert, project *model.Project, rules *[]model.AlertRule) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
@@ -468,7 +468,7 @@ func sendSlackNotification(notifySetting string, alert *model.Alert, project *mo
 		return err
 	}
 
-	payload, err := slackConfig.GetPayload(channel, message, alert, project)
+	payload, err := slackConfig.GetPayload(channel, message, alert, project, rules)
 	if err != nil {
 		return err
 	}
