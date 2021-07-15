@@ -1,9 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-
 	"github.com/CyberAgent/mimosa-core/pkg/model"
+	"github.com/go-sql-driver/mysql"
 	"github.com/vikyd/zero"
 )
 
@@ -69,7 +70,19 @@ func (i *iamDB) DeleteRole(projectID, roleID uint32) error {
 	return i.Master.Exec(deleteDeleteRole, projectID, roleID).Error
 }
 
-const selectGetUserRole = `select * from user_role where project_id = ? and user_id =? and role_id = ?`
+const selectGetUserRole = `
+select
+  ur.*,
+  r.project_id
+from
+  user_role ur
+inner join
+  role r using(role_id)
+where
+  r.project_id = ?
+  and ur.user_id = ?
+  and ur.role_id = ?
+`
 
 func (i *iamDB) GetUserRole(projectID, userID, roleID uint32) (*model.UserRole, error) {
 	var data model.UserRole
@@ -81,11 +94,9 @@ func (i *iamDB) GetUserRole(projectID, userID, roleID uint32) (*model.UserRole, 
 
 const insertAttachRole = `
 INSERT INTO user_role
-  (user_id, role_id, project_id)
+  (user_id, role_id)
 VALUES
-  (?, ?, ?)
-ON DUPLICATE KEY UPDATE
-  project_id=VALUES(project_id)
+  (?, ?)
 `
 
 func (i *iamDB) AttachRole(projectID, roleID, userID uint32) (*model.UserRole, error) {
@@ -93,18 +104,24 @@ func (i *iamDB) AttachRole(projectID, roleID, userID uint32) (*model.UserRole, e
 		return nil, fmt.Errorf(
 			"Not found user or role: user_id=%d, role_id=%d, project_id=%d", userID, roleID, projectID)
 	}
-	if err := i.Master.Exec(insertAttachRole, userID, roleID, projectID).Error; err != nil {
-		return nil, err
+	if err := i.Master.Exec(insertAttachRole, userID, roleID).Error; err != nil {
+		// ignore error when duplicate entry exist
+		// https://github.com/go-gorm/gorm/issues/4037#issuecomment-771499867
+		var mySQLErr *mysql.MySQLError
+		isMysqlErr := errors.As(err, &mySQLErr)
+		if !isMysqlErr || mySQLErr.Number != 1062 {
+			return nil, err
+		}
 	}
 	return i.GetUserRole(projectID, userID, roleID)
 }
 
-const deleteDetachRole = `delete from user_role where user_id = ? and role_id = ? and project_id = ?`
+const deleteDetachRole = `delete from user_role where user_id = ? and role_id = ?`
 
 func (i *iamDB) DetachRole(projectID, roleID, userID uint32) error {
 	if !i.userExists(userID) || !i.roleExists(projectID, roleID) {
 		return fmt.Errorf(
 			"Not found user or role: user_id=%d, role_id=%d, project_id=%d", userID, roleID, projectID)
 	}
-	return i.Master.Exec(deleteDetachRole, userID, roleID, projectID).Error
+	return i.Master.Exec(deleteDetachRole, userID, roleID).Error
 }
