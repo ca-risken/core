@@ -22,7 +22,7 @@ func newslackWebhookConfig() (*slackWebhookConfig, error) {
 	return config, nil
 }
 
-func (s *slackWebhookConfig) GetPayload(channel, message string, alert *model.Alert, project *model.Project) (string, error) {
+func (s *slackWebhookConfig) GetPayload(channel, message string, alert *model.Alert, project *model.Project, rules *[]model.AlertRule) (string, error) {
 	payload := map[string]interface{}{}
 	// text
 	text := fmt.Sprintf("%vアラートを検知しました。", getMention(alert.Severity))
@@ -53,14 +53,18 @@ func (s *slackWebhookConfig) GetPayload(channel, message string, alert *model.Al
 					"short": "true",
 				},
 				map[string]string{
+					"title": "Description",
+					"value": alert.Description,
+					"short": "true",
+				},
+				map[string]string{
 					"title": "Link",
 					"value": fmt.Sprintf("<%s?project_id=%d|詳細はこちらから>", s.NotificationAlertURL, project.ProjectID),
 					"short": "true",
 				},
 				map[string]string{
-					"title": "Description",
-					"value": alert.Description,
-					"short": "true",
+					"title": "Rules",
+					"value": generateRuleList(rules),
 				},
 			},
 			"footer": "Send from RISKEN",
@@ -115,4 +119,23 @@ func getMention(severity string) string {
 	default:
 		return ""
 	}
+}
+
+func generateRuleList(rules *[]model.AlertRule) string {
+	if rules == nil {
+		return ""
+	}
+	list := ""
+	for idx, rule := range *rules {
+		if idx == 0 {
+			list = fmt.Sprintf("- %s", rule.Name)
+			continue
+		}
+		list = fmt.Sprintf("%s\n- %s", list, rule.Name)
+		if idx >= 4 {
+			list = fmt.Sprintf("%s\n- %s", list, "...")
+			break
+		}
+	}
+	return list
 }
