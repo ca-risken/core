@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
+	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/kelseyhightower/envconfig"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -13,50 +15,50 @@ import (
 
 type alertRepository interface {
 	// Alert
-	ListAlert(uint32, []string, []string, string, int64, int64) (*[]model.Alert, error)
-	GetAlert(uint32, uint32) (*model.Alert, error)
-	GetAlertByAlertConditionID(uint32, uint32) (*model.Alert, error)
-	UpsertAlert(*model.Alert) (*model.Alert, error)
-	DeleteAlert(uint32, uint32) error
-	ListAlertHistory(uint32, uint32, []string, []string, int64, int64) (*[]model.AlertHistory, error)
-	GetAlertHistory(uint32, uint32) (*model.AlertHistory, error)
-	UpsertAlertHistory(*model.AlertHistory) (*model.AlertHistory, error)
-	DeleteAlertHistory(uint32, uint32) error
-	ListRelAlertFinding(uint32, uint32, uint32, int64, int64) (*[]model.RelAlertFinding, error)
-	GetRelAlertFinding(uint32, uint32, uint32) (*model.RelAlertFinding, error)
-	UpsertRelAlertFinding(*model.RelAlertFinding) (*model.RelAlertFinding, error)
-	DeleteRelAlertFinding(uint32, uint32, uint32) error
-	ListAlertCondition(uint32, []string, bool, int64, int64) (*[]model.AlertCondition, error)
-	GetAlertCondition(uint32, uint32) (*model.AlertCondition, error)
-	UpsertAlertCondition(*model.AlertCondition) (*model.AlertCondition, error)
-	DeleteAlertCondition(uint32, uint32) error
-	ListAlertRule(uint32, float32, float32, int64, int64) (*[]model.AlertRule, error)
-	GetAlertRule(uint32, uint32) (*model.AlertRule, error)
-	UpsertAlertRule(*model.AlertRule) (*model.AlertRule, error)
-	DeleteAlertRule(uint32, uint32) error
-	ListAlertCondRule(uint32, uint32, uint32, int64, int64) (*[]model.AlertCondRule, error)
-	GetAlertCondRule(uint32, uint32, uint32) (*model.AlertCondRule, error)
-	UpsertAlertCondRule(*model.AlertCondRule) (*model.AlertCondRule, error)
-	DeleteAlertCondRule(uint32, uint32, uint32) error
-	ListNotification(uint32, string, int64, int64) (*[]model.Notification, error)
-	GetNotification(uint32, uint32) (*model.Notification, error)
-	UpsertNotification(*model.Notification) (*model.Notification, error)
-	DeleteNotification(uint32, uint32) error
-	ListAlertCondNotification(uint32, uint32, uint32, int64, int64) (*[]model.AlertCondNotification, error)
-	GetAlertCondNotification(uint32, uint32, uint32) (*model.AlertCondNotification, error)
-	UpsertAlertCondNotification(*model.AlertCondNotification) (*model.AlertCondNotification, error)
-	DeleteAlertCondNotification(uint32, uint32, uint32) error
+	ListAlert(context.Context, uint32, []string, []string, string, int64, int64) (*[]model.Alert, error)
+	GetAlert(context.Context, uint32, uint32) (*model.Alert, error)
+	GetAlertByAlertConditionID(context.Context, uint32, uint32) (*model.Alert, error)
+	UpsertAlert(context.Context, *model.Alert) (*model.Alert, error)
+	DeleteAlert(context.Context, uint32, uint32) error
+	ListAlertHistory(context.Context, uint32, uint32, []string, []string, int64, int64) (*[]model.AlertHistory, error)
+	GetAlertHistory(context.Context, uint32, uint32) (*model.AlertHistory, error)
+	UpsertAlertHistory(context.Context, *model.AlertHistory) (*model.AlertHistory, error)
+	DeleteAlertHistory(context.Context, uint32, uint32) error
+	ListRelAlertFinding(context.Context, uint32, uint32, uint32, int64, int64) (*[]model.RelAlertFinding, error)
+	GetRelAlertFinding(context.Context, uint32, uint32, uint32) (*model.RelAlertFinding, error)
+	UpsertRelAlertFinding(context.Context, *model.RelAlertFinding) (*model.RelAlertFinding, error)
+	DeleteRelAlertFinding(context.Context, uint32, uint32, uint32) error
+	ListAlertCondition(context.Context, uint32, []string, bool, int64, int64) (*[]model.AlertCondition, error)
+	GetAlertCondition(context.Context, uint32, uint32) (*model.AlertCondition, error)
+	UpsertAlertCondition(context.Context, *model.AlertCondition) (*model.AlertCondition, error)
+	DeleteAlertCondition(context.Context, uint32, uint32) error
+	ListAlertRule(context.Context, uint32, float32, float32, int64, int64) (*[]model.AlertRule, error)
+	GetAlertRule(context.Context, uint32, uint32) (*model.AlertRule, error)
+	UpsertAlertRule(context.Context, *model.AlertRule) (*model.AlertRule, error)
+	DeleteAlertRule(context.Context, uint32, uint32) error
+	ListAlertCondRule(context.Context, uint32, uint32, uint32, int64, int64) (*[]model.AlertCondRule, error)
+	GetAlertCondRule(context.Context, uint32, uint32, uint32) (*model.AlertCondRule, error)
+	UpsertAlertCondRule(context.Context, *model.AlertCondRule) (*model.AlertCondRule, error)
+	DeleteAlertCondRule(context.Context, uint32, uint32, uint32) error
+	ListNotification(context.Context, uint32, string, int64, int64) (*[]model.Notification, error)
+	GetNotification(context.Context, uint32, uint32) (*model.Notification, error)
+	UpsertNotification(context.Context, *model.Notification) (*model.Notification, error)
+	DeleteNotification(context.Context, uint32, uint32) error
+	ListAlertCondNotification(context.Context, uint32, uint32, uint32, int64, int64) (*[]model.AlertCondNotification, error)
+	GetAlertCondNotification(context.Context, uint32, uint32, uint32) (*model.AlertCondNotification, error)
+	UpsertAlertCondNotification(context.Context, *model.AlertCondNotification) (*model.AlertCondNotification, error)
+	DeleteAlertCondNotification(context.Context, uint32, uint32, uint32) error
 
 	// forAnalyze
-	ListAlertRuleByAlertConditionID(uint32, uint32) (*[]model.AlertRule, error)
-	ListNotificationByAlertConditionID(uint32, uint32) (*[]model.Notification, error)
-	DeactivateAlert(*model.Alert) error
-	GetAlertByAlertConditionIDStatus(uint32, uint32, []string) (*model.Alert, error)
-	ListFinding(uint32) (*[]model.Finding, error)
-	ListFindingTag(uint32, uint64) (*[]model.FindingTag, error)
-	ListEnabledAlertCondition(uint32, []uint32) (*[]model.AlertCondition, error)
-	ListDisabledAlertCondition(uint32, []uint32) (*[]model.AlertCondition, error)
-	GetProject(uint32) (*model.Project, error)
+	ListAlertRuleByAlertConditionID(context.Context, uint32, uint32) (*[]model.AlertRule, error)
+	ListNotificationByAlertConditionID(context.Context, uint32, uint32) (*[]model.Notification, error)
+	DeactivateAlert(context.Context, *model.Alert) error
+	GetAlertByAlertConditionIDStatus(context.Context, uint32, uint32, []string) (*model.Alert, error)
+	ListFinding(context.Context, uint32) (*[]model.Finding, error)
+	ListFindingTag(context.Context, uint32, uint64) (*[]model.FindingTag, error)
+	ListEnabledAlertCondition(context.Context, uint32, []uint32) (*[]model.AlertCondition, error)
+	ListDisabledAlertCondition(context.Context, uint32, []uint32) (*[]model.AlertCondition, error)
+	GetProject(context.Context, uint32) (*model.Project, error)
 }
 
 type alertDB struct {
@@ -103,7 +105,13 @@ func initDB(isMaster bool) *gorm.DB {
 
 	dsn := fmt.Sprintf("%s:%s@tcp([%s]:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
 		user, pass, host, conf.Port, conf.Schema)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
+	instrumentedDB, err := xray.SQLContext("mysql", dsn)
+	if err != nil {
+		appLogger.Fatalf("Failed to open and wrap DB. isMaster: %t, err: %+v", isMaster, err)
+	}
+	db, err := gorm.Open(mysql.New(mysql.Config{
+		Conn: instrumentedDB,
+	}), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
 	if err != nil {
 		appLogger.Fatalf("Failed to open DB. isMaster: %t, err: %+v", isMaster, err)
 		return nil
