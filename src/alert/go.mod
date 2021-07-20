@@ -3,6 +3,7 @@ module github.com/CyberAgent/mimosa-core/src/alert
 go 1.16
 
 require (
+	github.com/CyberAgent/mimosa-common/pkg/xray v0.0.0-20210720072141-2b45736a6034
 	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210712023706-882d5424f2f1
 	github.com/CyberAgent/mimosa-core/proto/alert v0.0.0-20210712023706-882d5424f2f1
 	github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20210712023706-882d5424f2f1
@@ -19,7 +20,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/klauspost/compress v1.13.1 // indirect
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	github.com/valyala/fasthttp v1.28.0 // indirect
 	github.com/vikyd/zero v0.0.0-20190921142904-0f738d0bc858
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect

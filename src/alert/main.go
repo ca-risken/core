@@ -1,10 +1,10 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net"
 
+	mimosaxray "github.com/CyberAgent/mimosa-common/pkg/xray"
 	"github.com/CyberAgent/mimosa-core/proto/alert"
 	"github.com/aws/aws-xray-sdk-go/xray"
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -18,20 +18,13 @@ type alertConf struct {
 	EnvName string `default:"default" split_words:"true"`
 }
 
-func initXRay() {
-	xray.Configure(xray.Config{
-		ServiceVersion: "TODO",
-	})
-}
-
 func main() {
 	var conf alertConf
 	err := envconfig.Process("", &conf)
 	if err != nil {
 		appLogger.Fatal(err.Error())
 	}
-	// TODO toggle XRay
-	initXRay()
+	mimosaxray.InitXRay(xray.Config{})
 
 	l, err := net.Listen("tcp", fmt.Sprintf(":%s", conf.Port))
 	if err != nil {
@@ -42,7 +35,7 @@ func main() {
 		grpc.UnaryInterceptor(
 			grpcmiddleware.ChainUnaryServer(
 				xray.UnaryServerInterceptor(),
-				annotateEnvTracingInterceptor(conf.EnvName))))
+				mimosaxray.AnnotateEnvTracingUnaryServerInterceptor(conf.EnvName))))
 	alertServer := newAlertService() // DI service & repository
 	alert.RegisterAlertServiceServer(server, alertServer)
 
@@ -50,15 +43,5 @@ func main() {
 	appLogger.Infof("Starting gRPC server at :%s", conf.Port)
 	if err := server.Serve(l); err != nil {
 		appLogger.Fatalf("Failed to gRPC serve: %v", err)
-	}
-}
-
-// TODO refactor
-func annotateEnvTracingInterceptor(env string) grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		if err := xray.AddAnnotation(ctx, "env", env); err != nil {
-			appLogger.Warnf("failed to annotate environment to x-ray: %+v", err)
-		}
-		return handler(ctx, req)
 	}
 }
