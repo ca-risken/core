@@ -25,14 +25,14 @@ func (f *findingService) ListResource(ctx context.Context, req *finding.ListReso
 		return nil, err
 	}
 	param := convertListResourceRequest(req)
-	total, err := f.repository.ListResourceCount(param)
+	total, err := f.repository.ListResourceCount(ctx, param)
 	if err != nil {
 		return nil, err
 	}
 	if total == 0 {
 		return &finding.ListResourceResponse{ResourceId: []uint64{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
-	list, err := f.repository.ListResource(param)
+	list, err := f.repository.ListResource(ctx, param)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (f *findingService) GetResource(ctx context.Context, req *finding.GetResour
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	data, err := f.repository.GetResource(req.ProjectId, req.ResourceId)
+	data, err := f.repository.GetResource(ctx, req.ProjectId, req.ResourceId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &finding.GetResourceResponse{}, nil
@@ -81,7 +81,7 @@ func (f *findingService) PutResource(ctx context.Context, req *finding.PutResour
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	savedData, err := f.repository.GetResourceByName(req.Resource.ProjectId, req.Resource.ResourceName)
+	savedData, err := f.repository.GetResourceByName(ctx, req.Resource.ProjectId, req.Resource.ResourceName)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
@@ -98,7 +98,7 @@ func (f *findingService) PutResource(ctx context.Context, req *finding.PutResour
 		ProjectID:    req.Resource.ProjectId,
 	}
 	// upsert
-	registerdData, err := f.repository.UpsertResource(data)
+	registerdData, err := f.repository.UpsertResource(ctx, data)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (f *findingService) DeleteResource(ctx context.Context, req *finding.Delete
 	if err := req.Validate(); err != nil {
 		return &empty.Empty{}, err
 	}
-	err := f.repository.DeleteResource(req.ProjectId, req.ResourceId)
+	err := f.repository.DeleteResource(ctx, req.ProjectId, req.ResourceId)
 	if err != nil {
 		return nil, err
 	}
@@ -125,14 +125,14 @@ func (f *findingService) ListResourceTag(ctx context.Context, req *finding.ListR
 		return nil, err
 	}
 	param := convertListResourceTagRequest(req)
-	total, err := f.repository.ListResourceTagCount(param)
+	total, err := f.repository.ListResourceTagCount(ctx, param)
 	if err != nil {
 		return nil, err
 	}
 	if total == 0 {
 		return &finding.ListResourceTagResponse{Tag: []*finding.ResourceTag{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
-	list, err := f.repository.ListResourceTag(param)
+	list, err := f.repository.ListResourceTag(ctx, param)
 	if err != nil {
 		return nil, err
 	}
@@ -162,14 +162,14 @@ func (f *findingService) ListResourceTagName(ctx context.Context, req *finding.L
 		return nil, err
 	}
 	param := convertListResourceTagNameRequest(req)
-	total, err := f.repository.ListResourceTagNameCount(param)
+	total, err := f.repository.ListResourceTagNameCount(ctx, param)
 	if err != nil {
 		return nil, err
 	}
 	if total == 0 {
 		return &finding.ListResourceTagNameResponse{Tag: []string{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
-	tags, err := f.repository.ListResourceTagName(param)
+	tags, err := f.repository.ListResourceTagName(ctx, param)
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +200,7 @@ func (f *findingService) TagResource(ctx context.Context, req *finding.TagResour
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	savedData, err := f.repository.GetResourceTagByKey(req.ProjectId, req.Tag.ResourceId, req.Tag.Tag)
+	savedData, err := f.repository.GetResourceTagByKey(ctx, req.ProjectId, req.Tag.ResourceId, req.Tag.Tag)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
@@ -217,7 +217,7 @@ func (f *findingService) TagResource(ctx context.Context, req *finding.TagResour
 		ProjectID:     req.Tag.ProjectId,
 		Tag:           req.Tag.Tag,
 	}
-	registerd, err := f.repository.TagResource(tag)
+	registerd, err := f.repository.TagResource(ctx, tag)
 	if err != nil {
 		return nil, err
 	}
@@ -228,7 +228,7 @@ func (f *findingService) UntagResource(ctx context.Context, req *finding.UntagRe
 	if err := req.Validate(); err != nil {
 		return &empty.Empty{}, err
 	}
-	err := f.repository.UntagResource(req.ProjectId, req.ResourceTagId)
+	err := f.repository.UntagResource(ctx, req.ProjectId, req.ResourceTagId)
 	if err != nil {
 		return nil, err
 	}

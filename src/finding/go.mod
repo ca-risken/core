@@ -3,6 +3,8 @@ module github.com/CyberAgent/mimosa-core/src/finding
 go 1.16
 
 require (
+	github.com/CyberAgent/mimosa-common/pkg/database v0.0.0-20210721063343-44cefe7f590e
+	github.com/CyberAgent/mimosa-common/pkg/xray v0.0.0-20210721063343-44cefe7f590e
 	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210712023706-882d5424f2f1
 	github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20210712023706-882d5424f2f1
 	github.com/andybalholm/brotli v1.0.3 // indirect
@@ -11,6 +13,7 @@ require (
 	github.com/aws/aws-xray-sdk-go v1.6.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
 	github.com/golang/protobuf v1.5.2
+	github.com/grpc-ecosystem/go-grpc-middleware v1.2.2
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/klauspost/compress v1.13.1 // indirect
 	github.com/sirupsen/logrus v1.8.1
@@ -23,5 +26,5 @@ require (
 	google.golang.org/grpc v1.39.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	gorm.io/driver/mysql v1.1.1
-	gorm.io/gorm v1.21.11
+	gorm.io/gorm v1.21.12
 )
