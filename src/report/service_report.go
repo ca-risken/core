@@ -19,7 +19,7 @@ func (f *reportService) GetReportFinding(ctx context.Context, req *report.GetRep
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := f.repository.GetReportFinding(req.ProjectId, req.DataSource, req.FromDate, req.ToDate, req.Score)
+	list, err := f.repository.GetReportFinding(ctx, req.ProjectId, req.DataSource, req.FromDate, req.ToDate, req.Score)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &report.GetReportFindingResponse{}, nil
@@ -37,7 +37,7 @@ func (f *reportService) GetReportFindingAll(ctx context.Context, req *report.Get
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := f.repository.GetReportFindingAll(req.DataSource, req.FromDate, req.ToDate, req.Score)
+	list, err := f.repository.GetReportFindingAll(ctx, req.DataSource, req.FromDate, req.ToDate, req.Score)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &report.GetReportFindingAllResponse{}, nil
@@ -52,7 +52,7 @@ func (f *reportService) GetReportFindingAll(ctx context.Context, req *report.Get
 }
 
 func (f *reportService) CollectReportFinding(ctx context.Context, req *empty.Empty) (*empty.Empty, error) {
-	err := f.repository.CollectReportFinding()
+	err := f.repository.CollectReportFinding(ctx)
 	if err != nil {
 		appLogger.Errorf("Failed collectReportFinding. %v", err)
 		return nil, err

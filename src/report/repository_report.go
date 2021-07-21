@@ -1,12 +1,13 @@
 package main
 
 import (
+	"context"
 	"strings"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 )
 
-func (f *reportDB) GetReportFinding(projectID uint32, dataSource []string, fromDate, toDate string, score float32) (*[]model.ReportFinding, error) {
+func (f *reportDB) GetReportFinding(ctx context.Context, projectID uint32, dataSource []string, fromDate, toDate string, score float32) (*[]model.ReportFinding, error) {
 	query := `select r.*,p.name as project_name from report_finding as r, project as p where r.project_id = ? and r.project_id = p.project_id and score > ?`
 	var params []interface{}
 	params = append(params, projectID, score)
@@ -23,13 +24,13 @@ func (f *reportDB) GetReportFinding(projectID uint32, dataSource []string, fromD
 		params = append(params, toDate)
 	}
 	var data []model.ReportFinding
-	if err := f.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
+	if err := f.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
-func (f *reportDB) GetReportFindingAll(dataSource []string, fromDate, toDate string, score float32) (*[]model.ReportFinding, error) {
+func (f *reportDB) GetReportFindingAll(ctx context.Context, dataSource []string, fromDate, toDate string, score float32) (*[]model.ReportFinding, error) {
 	query := `select r.*,p.name as project_name from report_finding as r, project as p where r.project_id = p.project_id and score > ?`
 	var params []interface{}
 	params = append(params, score)
@@ -46,20 +47,20 @@ func (f *reportDB) GetReportFindingAll(dataSource []string, fromDate, toDate str
 		params = append(params, toDate)
 	}
 	var data []model.ReportFinding
-	if err := f.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
+	if err := f.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
-func (f *reportDB) CollectReportFinding() error {
+func (f *reportDB) CollectReportFinding(ctx context.Context) error {
 	query := `insert into report_finding (report_date, project_id, data_source, score, count) 
 select DATE_ADD(CURRENT_DATE, INTERVAL -1 DAY) as report_date, project_id, data_source, score , count(*) as count 
 from finding f
 where not exists (select pend_finding.finding_id from pend_finding where f.finding_id = pend_finding.finding_id) 
 group by f.project_id, data_source, score ON DUPLICATE KEY UPDATE count=values(count)`
 	var data []model.ReportFinding
-	if err := f.Master.Raw(query).Scan(&data).Error; err != nil {
+	if err := f.Master.WithContext(ctx).Raw(query).Scan(&data).Error; err != nil {
 		return err
 	}
 	return nil
