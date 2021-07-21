@@ -1,14 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
+	mimosasql "github.com/CyberAgent/mimosa-common/pkg/database/sql"
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/kelseyhightower/envconfig"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-	"gorm.io/gorm/schema"
 )
 
 type dbConfig struct {
@@ -43,26 +42,22 @@ func initDB(isMaster bool) *gorm.DB {
 
 	dsn := fmt.Sprintf("%s:%s@tcp([%s]:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
 		user, pass, host, conf.Port, conf.Schema)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
+	db, err := mimosasql.Open(dsn, conf.LogMode)
 	if err != nil {
 		appLogger.Fatalf("Failed to open DB. isMaster: %t, err: %+v", isMaster, err)
-		return nil
-	}
-	if conf.LogMode {
-		db.Logger.LogMode(logger.Info)
 	}
 	appLogger.Infof("Connected to Database. isMaster: %t", isMaster)
 	return db
 }
 
 type projectRepository interface {
-	ListProject(userID, projectID uint32, name string) (*[]projectWithTag, error)
-	CreateProject(name string) (*model.Project, error)
-	UpdateProject(projectID uint32, name string) (*model.Project, error)
+	ListProject(ctx context.Context, userID, projectID uint32, name string) (*[]projectWithTag, error)
+	CreateProject(ctx context.Context, name string) (*model.Project, error)
+	UpdateProject(ctx context.Context, projectID uint32, name string) (*model.Project, error)
 
-	ListProjectTag(projectID uint32) (*[]model.ProjectTag, error)
-	TagProject(projectID uint32, tag, color string) (*model.ProjectTag, error)
-	UntagProject(projectID uint32, tag string) error
+	ListProjectTag(ctx context.Context, projectID uint32) (*[]model.ProjectTag, error)
+	TagProject(ctx context.Context, projectID uint32, tag, color string) (*model.ProjectTag, error)
+	UntagProject(ctx context.Context, projectID uint32, tag string) error
 }
 
 type projectDB struct {

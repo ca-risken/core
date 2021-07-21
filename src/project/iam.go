@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/proto/iam"
+	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
 )
@@ -28,7 +29,8 @@ func newIAMService() iamService {
 }
 
 func getGRPCConn(ctx context.Context, addr string) *grpc.ClientConn {
-	conn, err := grpc.DialContext(ctx, addr, grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
+	conn, err := grpc.DialContext(ctx, addr,
+		grpc.WithUnaryInterceptor(xray.UnaryClientInterceptor()), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
 	if err != nil {
 		appLogger.Fatalf("Failed to connect backend gRPC server, addr=%s, err=%+v", addr, err)
 	}
