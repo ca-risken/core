@@ -1,43 +1,42 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
+	mimosasql "github.com/CyberAgent/mimosa-common/pkg/database/sql"
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/kelseyhightower/envconfig"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-	"gorm.io/gorm/schema"
 )
 
 type iamRepository interface {
 	// User
-	ListUser(activated bool, projectID uint32, name string, userID uint32) (*[]model.User, error)
-	GetUser(uint32, string) (*model.User, error)
-	GetUserBySub(string) (*model.User, error)
-	PutUser(*model.User) (*model.User, error)
+	ListUser(ctx context.Context, activated bool, projectID uint32, name string, userID uint32) (*[]model.User, error)
+	GetUser(context.Context, uint32, string) (*model.User, error)
+	GetUserBySub(context.Context, string) (*model.User, error)
+	PutUser(context.Context, *model.User) (*model.User, error)
 
 	// Role
-	ListRole(uint32, string, uint32) (*[]model.Role, error)
-	GetRole(uint32, uint32) (*model.Role, error)
-	GetRoleByName(uint32, string) (*model.Role, error)
-	PutRole(r *model.Role) (*model.Role, error)
-	DeleteRole(uint32, uint32) error
-	AttachRole(uint32, uint32, uint32) (*model.UserRole, error)
-	DetachRole(uint32, uint32, uint32) error
+	ListRole(context.Context, uint32, string, uint32) (*[]model.Role, error)
+	GetRole(context.Context, uint32, uint32) (*model.Role, error)
+	GetRoleByName(context.Context, uint32, string) (*model.Role, error)
+	PutRole(ctx context.Context, r *model.Role) (*model.Role, error)
+	DeleteRole(context.Context, uint32, uint32) error
+	AttachRole(context.Context, uint32, uint32, uint32) (*model.UserRole, error)
+	DetachRole(context.Context, uint32, uint32, uint32) error
 
 	// Policy
-	GetUserPolicy(uint32) (*[]model.Policy, error)
-	GetAdminPolicy(uint32) (*model.Policy, error)
-	ListPolicy(uint32, string, uint32) (*[]model.Policy, error)
-	GetPolicy(uint32, uint32) (*model.Policy, error)
-	GetPolicyByName(uint32, string) (*model.Policy, error)
-	PutPolicy(*model.Policy) (*model.Policy, error)
-	DeletePolicy(uint32, uint32) error
-	AttachPolicy(uint32, uint32, uint32) (*model.RolePolicy, error)
-	DetachPolicy(uint32, uint32, uint32) error
+	GetUserPolicy(context.Context, uint32) (*[]model.Policy, error)
+	GetAdminPolicy(context.Context, uint32) (*model.Policy, error)
+	ListPolicy(context.Context, uint32, string, uint32) (*[]model.Policy, error)
+	GetPolicy(context.Context, uint32, uint32) (*model.Policy, error)
+	GetPolicyByName(context.Context, uint32, string) (*model.Policy, error)
+	PutPolicy(context.Context, *model.Policy) (*model.Policy, error)
+	DeletePolicy(context.Context, uint32, uint32) error
+	AttachPolicy(context.Context, uint32, uint32, uint32) (*model.RolePolicy, error)
+	DetachPolicy(context.Context, uint32, uint32, uint32) error
 }
 
 type iamDB struct {
@@ -84,20 +83,16 @@ func initDB(isMaster bool) *gorm.DB {
 
 	dsn := fmt.Sprintf("%s:%s@tcp([%s]:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
 		user, pass, host, conf.Port, conf.Schema)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
+	db, err := mimosasql.Open(dsn, conf.LogMode)
 	if err != nil {
 		appLogger.Fatalf("Failed to open DB. isMaster: %t, err: %+v", isMaster, err)
-		return nil
-	}
-	if conf.LogMode {
-		db.Logger.LogMode(logger.Info)
 	}
 	appLogger.Infof("Connected to Database. isMaster: %t", isMaster)
 	return db
 }
 
-func (i *iamDB) userExists(userID uint32) bool {
-	if _, err := i.GetUser(userID, ""); errors.Is(err, gorm.ErrRecordNotFound) {
+func (i *iamDB) userExists(ctx context.Context, userID uint32) bool {
+	if _, err := i.GetUser(ctx, userID, ""); errors.Is(err, gorm.ErrRecordNotFound) {
 		return false
 
 	} else if err != nil {
@@ -107,8 +102,8 @@ func (i *iamDB) userExists(userID uint32) bool {
 	return true
 }
 
-func (i *iamDB) roleExists(projectID, roleID uint32) bool {
-	if _, err := i.GetRole(projectID, roleID); errors.Is(err, gorm.ErrRecordNotFound) {
+func (i *iamDB) roleExists(ctx context.Context, projectID, roleID uint32) bool {
+	if _, err := i.GetRole(ctx, projectID, roleID); errors.Is(err, gorm.ErrRecordNotFound) {
 		return false
 	} else if err != nil {
 		appLogger.Errorf("[roleExists]DB error: project_id=%d, role_id=%d", projectID, roleID)
@@ -117,8 +112,8 @@ func (i *iamDB) roleExists(projectID, roleID uint32) bool {
 	return true
 }
 
-func (i *iamDB) policyExists(projectID, policyID uint32) bool {
-	if _, err := i.GetPolicy(projectID, policyID); errors.Is(err, gorm.ErrRecordNotFound) {
+func (i *iamDB) policyExists(ctx context.Context, projectID, policyID uint32) bool {
+	if _, err := i.GetPolicy(ctx, projectID, policyID); errors.Is(err, gorm.ErrRecordNotFound) {
 		return false
 	} else if err != nil {
 		appLogger.Errorf("[policyExists]DB error: project_id=%d, policy_id=%d", projectID, policyID)

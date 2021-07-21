@@ -14,7 +14,7 @@ func (i *iamService) ListRole(ctx context.Context, req *iam.ListRoleRequest) (*i
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := i.repository.ListRole(req.ProjectId, req.Name, req.UserId)
+	list, err := i.repository.ListRole(ctx, req.ProjectId, req.Name, req.UserId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &iam.ListRoleResponse{}, nil
@@ -32,7 +32,7 @@ func (i *iamService) GetRole(ctx context.Context, req *iam.GetRoleRequest) (*iam
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	role, err := i.repository.GetRole(req.ProjectId, req.RoleId)
+	role, err := i.repository.GetRole(ctx, req.ProjectId, req.RoleId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &iam.GetRoleResponse{}, nil
@@ -56,7 +56,7 @@ func (i *iamService) PutRole(ctx context.Context, req *iam.PutRoleRequest) (*iam
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	savedData, err := i.repository.GetRoleByName(req.Role.ProjectId, req.Role.Name)
+	savedData, err := i.repository.GetRoleByName(ctx, req.Role.ProjectId, req.Role.Name)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
@@ -74,7 +74,7 @@ func (i *iamService) PutRole(ctx context.Context, req *iam.PutRoleRequest) (*iam
 	}
 
 	// upsert
-	registerdData, err := i.repository.PutRole(r)
+	registerdData, err := i.repository.PutRole(ctx, r)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (i *iamService) DeleteRole(ctx context.Context, req *iam.DeleteRoleRequest)
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if err := i.repository.DeleteRole(req.ProjectId, req.RoleId); err != nil {
+	if err := i.repository.DeleteRole(ctx, req.ProjectId, req.RoleId); err != nil {
 		return nil, err
 	}
 	return &empty.Empty{}, nil
@@ -95,7 +95,7 @@ func (i *iamService) AttachRole(ctx context.Context, req *iam.AttachRoleRequest)
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	ur, err := i.repository.AttachRole(req.ProjectId, req.RoleId, req.UserId)
+	ur, err := i.repository.AttachRole(ctx, req.ProjectId, req.RoleId, req.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func (i *iamService) DetachRole(ctx context.Context, req *iam.DetachRoleRequest)
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if err := i.repository.DetachRole(req.ProjectId, req.RoleId, req.UserId); err != nil {
+	if err := i.repository.DetachRole(ctx, req.ProjectId, req.RoleId, req.UserId); err != nil {
 		return nil, err
 	}
 	return &empty.Empty{}, nil

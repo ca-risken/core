@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
@@ -20,9 +21,9 @@ where
   and u.user_id = ?
 `
 
-func (i *iamDB) GetUserPolicy(userID uint32) (*[]model.Policy, error) {
+func (i *iamDB) GetUserPolicy(ctx context.Context, userID uint32) (*[]model.Policy, error) {
 	var data []model.Policy
-	if err := i.Slave.Raw(selectGetUserPolicy, userID).Scan(&data).Error; err != nil {
+	if err := i.Slave.WithContext(ctx).Raw(selectGetUserPolicy, userID).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -44,15 +45,15 @@ where
   and u.user_id = ?
 `
 
-func (i *iamDB) GetAdminPolicy(userID uint32) (*model.Policy, error) {
+func (i *iamDB) GetAdminPolicy(ctx context.Context, userID uint32) (*model.Policy, error) {
 	var data model.Policy
-	if err := i.Slave.Raw(selectGetAdminPolicy, userID).First(&data).Error; err != nil {
+	if err := i.Slave.WithContext(ctx).Raw(selectGetAdminPolicy, userID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
-func (i *iamDB) ListPolicy(projectID uint32, name string, roleID uint32) (*[]model.Policy, error) {
+func (i *iamDB) ListPolicy(ctx context.Context, projectID uint32, name string, roleID uint32) (*[]model.Policy, error) {
 	query := `select * from policy p where p.project_id = ?`
 	var params []interface{}
 	params = append(params, projectID)
@@ -65,7 +66,7 @@ func (i *iamDB) ListPolicy(projectID uint32, name string, roleID uint32) (*[]mod
 		params = append(params, roleID)
 	}
 	var data []model.Policy
-	if err := i.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
+	if err := i.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -73,9 +74,9 @@ func (i *iamDB) ListPolicy(projectID uint32, name string, roleID uint32) (*[]mod
 
 const selectGetPolicy = `select * from policy where project_id = ? and policy_id =?`
 
-func (i *iamDB) GetPolicy(projectID, policyID uint32) (*model.Policy, error) {
+func (i *iamDB) GetPolicy(ctx context.Context, projectID, policyID uint32) (*model.Policy, error) {
 	var data model.Policy
-	if err := i.Master.Raw(selectGetPolicy, projectID, policyID).First(&data).Error; err != nil {
+	if err := i.Master.WithContext(ctx).Raw(selectGetPolicy, projectID, policyID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -83,9 +84,9 @@ func (i *iamDB) GetPolicy(projectID, policyID uint32) (*model.Policy, error) {
 
 const selectGetPolicyByName = `select * from policy where project_id = ? and name =?`
 
-func (i *iamDB) GetPolicyByName(projectID uint32, name string) (*model.Policy, error) {
+func (i *iamDB) GetPolicyByName(ctx context.Context, projectID uint32, name string) (*model.Policy, error) {
 	var data model.Policy
-	if err := i.Master.Raw(selectGetPolicyByName, projectID, name).First(&data).Error; err != nil {
+	if err := i.Master.WithContext(ctx).Raw(selectGetPolicyByName, projectID, name).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -103,24 +104,24 @@ ON DUPLICATE KEY UPDATE
   resource_ptn=VALUES(resource_ptn)
 `
 
-func (i *iamDB) PutPolicy(p *model.Policy) (*model.Policy, error) {
-	if err := i.Master.Exec(insertPutPolicy, p.PolicyID, p.Name, p.ProjectID, p.ActionPtn, p.ResourcePtn).Error; err != nil {
+func (i *iamDB) PutPolicy(ctx context.Context, p *model.Policy) (*model.Policy, error) {
+	if err := i.Master.WithContext(ctx).Exec(insertPutPolicy, p.PolicyID, p.Name, p.ProjectID, p.ActionPtn, p.ResourcePtn).Error; err != nil {
 		return nil, err
 	}
-	return i.GetPolicyByName(p.ProjectID, p.Name)
+	return i.GetPolicyByName(ctx, p.ProjectID, p.Name)
 }
 
 const deleteDeletePolicy = `delete from policy where project_id = ? and policy_id = ?`
 
-func (i *iamDB) DeletePolicy(projectID, policyID uint32) error {
-	return i.Master.Exec(deleteDeletePolicy, projectID, policyID).Error
+func (i *iamDB) DeletePolicy(ctx context.Context, projectID, policyID uint32) error {
+	return i.Master.WithContext(ctx).Exec(deleteDeletePolicy, projectID, policyID).Error
 }
 
 const selectGetRolePolicy = `select * from role_policy where project_id = ? and role_id = ? and policy_id =?`
 
-func (i *iamDB) GetRolePolicy(projectID, roleID, policyID uint32) (*model.RolePolicy, error) {
+func (i *iamDB) GetRolePolicy(ctx context.Context, projectID, roleID, policyID uint32) (*model.RolePolicy, error) {
 	var data model.RolePolicy
-	if err := i.Master.Raw(selectGetRolePolicy, projectID, roleID, policyID).First(&data).Error; err != nil {
+	if err := i.Master.WithContext(ctx).Raw(selectGetRolePolicy, projectID, roleID, policyID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -135,23 +136,23 @@ ON DUPLICATE KEY UPDATE
   project_id=VALUES(project_id)
 `
 
-func (i *iamDB) AttachPolicy(projectID, roleID, policyID uint32) (*model.RolePolicy, error) {
-	if !i.roleExists(projectID, roleID) || !i.policyExists(projectID, policyID) {
+func (i *iamDB) AttachPolicy(ctx context.Context, projectID, roleID, policyID uint32) (*model.RolePolicy, error) {
+	if !i.roleExists(ctx, projectID, roleID) || !i.policyExists(ctx, projectID, policyID) {
 		return nil, fmt.Errorf(
 			"Not found role or policy: role_id=%d, policy_id=%d, project_id=%d", roleID, policyID, projectID)
 	}
-	if err := i.Master.Exec(insertAttachPolicy, roleID, policyID, projectID).Error; err != nil {
+	if err := i.Master.WithContext(ctx).Exec(insertAttachPolicy, roleID, policyID, projectID).Error; err != nil {
 		return nil, err
 	}
-	return i.GetRolePolicy(projectID, roleID, policyID)
+	return i.GetRolePolicy(ctx, projectID, roleID, policyID)
 }
 
 const deleteDetachPolicy = `delete from role_policy where role_id = ? and policy_id = ? and project_id = ?`
 
-func (i *iamDB) DetachPolicy(projectID, roleID, policyID uint32) error {
-	if !i.roleExists(projectID, roleID) || !i.policyExists(projectID, policyID) {
+func (i *iamDB) DetachPolicy(ctx context.Context, projectID, roleID, policyID uint32) error {
+	if !i.roleExists(ctx, projectID, roleID) || !i.policyExists(ctx, projectID, policyID) {
 		return fmt.Errorf(
 			"Not found role or policy: role_id=%d, policy_id=%d, project_id=%d", roleID, policyID, projectID)
 	}
-	return i.Master.Exec(deleteDetachPolicy, roleID, policyID, projectID).Error
+	return i.Master.WithContext(ctx).Exec(deleteDetachPolicy, roleID, policyID, projectID).Error
 }
