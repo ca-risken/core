@@ -4,19 +4,18 @@ import (
 	"fmt"
 	"net"
 
+	mimosaxray "github.com/CyberAgent/mimosa-common/pkg/xray"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
 	"github.com/aws/aws-xray-sdk-go/xray"
+	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 type findingConf struct {
-	Port string `default:"8001"`
-}
-
-func initXRay() {
-	xray.Configure(xray.Config{})
+	Port    string `default:"8001"`
+	EnvName string `default:"default" split_words:"true"`
 }
 
 func main() {
@@ -25,16 +24,18 @@ func main() {
 	if err != nil {
 		appLogger.Fatal(err.Error())
 	}
+	mimosaxray.InitXRay(xray.Config{})
 
 	l, err := net.Listen("tcp", fmt.Sprintf(":%s", conf.Port))
 	if err != nil {
 		appLogger.Fatal(err)
 	}
 
-	initXRay()
-
 	server := grpc.NewServer(
-		grpc.UnaryInterceptor(xray.UnaryServerInterceptor()))
+		grpc.UnaryInterceptor(
+			grpcmiddleware.ChainUnaryServer(
+				xray.UnaryServerInterceptor(),
+				mimosaxray.AnnotateEnvTracingUnaryServerInterceptor(conf.EnvName))))
 	findingServer := newFindingService() // DI service & repository
 	finding.RegisterFindingServiceServer(server, findingServer)
 

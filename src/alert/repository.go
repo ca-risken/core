@@ -4,13 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	mimosasql "github.com/CyberAgent/mimosa-common/pkg/database/sql"
 	"github.com/CyberAgent/mimosa-core/pkg/model"
-	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/kelseyhightower/envconfig"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-	"gorm.io/gorm/schema"
 )
 
 type alertRepository interface {
@@ -105,19 +102,9 @@ func initDB(isMaster bool) *gorm.DB {
 
 	dsn := fmt.Sprintf("%s:%s@tcp([%s]:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
 		user, pass, host, conf.Port, conf.Schema)
-	instrumentedDB, err := xray.SQLContext("mysql", dsn)
-	if err != nil {
-		appLogger.Fatalf("Failed to open and wrap DB. isMaster: %t, err: %+v", isMaster, err)
-	}
-	db, err := gorm.Open(mysql.New(mysql.Config{
-		Conn: instrumentedDB,
-	}), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
+	db, err := mimosasql.Open(dsn, conf.LogMode)
 	if err != nil {
 		appLogger.Fatalf("Failed to open DB. isMaster: %t, err: %+v", isMaster, err)
-		return nil
-	}
-	if conf.LogMode {
-		db.Logger.LogMode(logger.Info)
 	}
 	appLogger.Infof("Connected to Database. isMaster: %t", isMaster)
 	return db

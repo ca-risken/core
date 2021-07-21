@@ -104,15 +104,15 @@ type mockReportRepository struct {
 
 // Report
 
-func (m *mockReportRepository) GetReportFinding(uint32, []string, string, string, float32) (*[]model.ReportFinding, error) {
+func (m *mockReportRepository) GetReportFinding(context.Context, uint32, []string, string, string, float32) (*[]model.ReportFinding, error) {
 	args := m.Called()
 	return args.Get(0).(*[]model.ReportFinding), args.Error(1)
 }
-func (m *mockReportRepository) GetReportFindingAll([]string, string, string, float32) (*[]model.ReportFinding, error) {
+func (m *mockReportRepository) GetReportFindingAll(context.Context, []string, string, string, float32) (*[]model.ReportFinding, error) {
 	args := m.Called()
 	return args.Get(0).(*[]model.ReportFinding), args.Error(1)
 }
-func (m *mockReportRepository) CollectReportFinding() error {
+func (m *mockReportRepository) CollectReportFinding(ctx context.Context) error {
 	args := m.Called()
 	return args.Error(1)
 }

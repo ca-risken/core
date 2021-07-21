@@ -19,6 +19,7 @@ func (f *findingService) ListFinding(ctx context.Context, req *finding.ListFindi
 	}
 	param := convertListFindingRequest(req)
 	total, err := f.repository.ListFindingCount(
+		ctx,
 		param.ProjectId,
 		param.FromScore, param.ToScore,
 		param.FromAt, param.ToAt,
@@ -31,7 +32,7 @@ func (f *findingService) ListFinding(ctx context.Context, req *finding.ListFindi
 	if total == 0 {
 		return &finding.ListFindingResponse{FindingId: []uint64{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
-	list, err := f.repository.ListFinding(param)
+	list, err := f.repository.ListFinding(ctx, param)
 	if err != nil {
 		return nil, err
 	}
@@ -68,6 +69,7 @@ func (f *findingService) BatchListFinding(ctx context.Context, req *finding.Batc
 	}
 	param := convertBatchListFindingRequest(req)
 	total, err := f.repository.ListFindingCount(
+		ctx,
 		param.ProjectId,
 		param.FromScore, param.ToScore,
 		param.FromAt, param.ToAt,
@@ -80,7 +82,7 @@ func (f *findingService) BatchListFinding(ctx context.Context, req *finding.Batc
 	if total == 0 {
 		return &finding.BatchListFindingResponse{FindingId: []uint64{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
-	list, err := f.repository.BatchListFinding(param)
+	list, err := f.repository.BatchListFinding(ctx, param)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +108,7 @@ func (f *findingService) GetFinding(ctx context.Context, req *finding.GetFinding
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	data, err := f.repository.GetFinding(req.ProjectId, req.FindingId)
+	data, err := f.repository.GetFinding(ctx, req.ProjectId, req.FindingId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &finding.GetFindingResponse{}, nil
@@ -121,7 +123,7 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 		return nil, err
 	}
 	savedData, err := f.repository.GetFindingByDataSource(
-		req.Finding.ProjectId, req.Finding.DataSource, req.Finding.DataSourceId)
+		ctx, req.Finding.ProjectId, req.Finding.DataSource, req.Finding.DataSourceId)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
@@ -132,7 +134,7 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 	if !noRecord {
 		findingID = savedData.FindingID
 	}
-	fs, err := f.getFindingSettingByResource(req.Finding.ProjectId, req.Finding.ResourceName)
+	fs, err := f.getFindingSettingByResource(ctx, req.Finding.ProjectId, req.Finding.ResourceName)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +151,7 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 	}
 
 	// Fiding upsert
-	registerdData, err := f.repository.UpsertFinding(data)
+	registerdData, err := f.repository.UpsertFinding(ctx, data)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +173,7 @@ func (f *findingService) DeleteFinding(ctx context.Context, req *finding.DeleteF
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	err := f.repository.DeleteFinding(req.ProjectId, req.FindingId)
+	err := f.repository.DeleteFinding(ctx, req.ProjectId, req.FindingId)
 	if err != nil {
 		return nil, err
 	}
@@ -183,14 +185,14 @@ func (f *findingService) ListFindingTag(ctx context.Context, req *finding.ListFi
 		return nil, err
 	}
 	param := convertListFindingTagRequest(req)
-	total, err := f.repository.ListFindingTagCount(param)
+	total, err := f.repository.ListFindingTagCount(ctx, param)
 	if err != nil {
 		return nil, err
 	}
 	if total == 0 {
 		return &finding.ListFindingTagResponse{Tag: []*finding.FindingTag{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
-	list, err := f.repository.ListFindingTag(param)
+	list, err := f.repository.ListFindingTag(ctx, param)
 	if err != nil {
 		return nil, err
 	}
@@ -220,14 +222,14 @@ func (f *findingService) ListFindingTagName(ctx context.Context, req *finding.Li
 		return nil, err
 	}
 	param := convertListFindingTagNameRequest(req)
-	total, err := f.repository.ListFindingTagNameCount(param)
+	total, err := f.repository.ListFindingTagNameCount(ctx, param)
 	if err != nil {
 		return nil, err
 	}
 	if total == 0 {
 		return &finding.ListFindingTagNameResponse{Tag: []string{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
-	tags, err := f.repository.ListFindingTagName(param)
+	tags, err := f.repository.ListFindingTagName(ctx, param)
 	if err != nil {
 		return nil, err
 	}
@@ -259,7 +261,7 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	savedData, err := f.repository.GetFindingTagByKey(req.ProjectId, req.Tag.FindingId, req.Tag.Tag)
+	savedData, err := f.repository.GetFindingTagByKey(ctx, req.ProjectId, req.Tag.FindingId, req.Tag.Tag)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
@@ -277,7 +279,7 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 		ProjectID:    req.Tag.ProjectId,
 		Tag:          req.Tag.Tag,
 	}
-	registerd, err := f.repository.TagFinding(tag)
+	registerd, err := f.repository.TagFinding(ctx, tag)
 	if err != nil {
 		return nil, err
 	}
@@ -288,7 +290,7 @@ func (f *findingService) UntagFinding(ctx context.Context, req *finding.UntagFin
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	err := f.repository.UntagFinding(req.ProjectId, req.FindingTagId)
+	err := f.repository.UntagFinding(ctx, req.ProjectId, req.FindingTagId)
 	if err != nil {
 		return nil, err
 	}

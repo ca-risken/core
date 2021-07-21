@@ -14,7 +14,7 @@ func (f *findingService) GetPendFinding(ctx context.Context, req *finding.GetPen
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	data, err := f.repository.GetPendFinding(req.ProjectId, req.FindingId)
+	data, err := f.repository.GetPendFinding(ctx, req.ProjectId, req.FindingId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &finding.GetPendFindingResponse{}, nil
@@ -28,7 +28,7 @@ func (f *findingService) PutPendFinding(ctx context.Context, req *finding.PutPen
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	registerd, err := f.repository.UpsertPendFinding(req.PendFinding)
+	registerd, err := f.repository.UpsertPendFinding(ctx, req.PendFinding)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (f *findingService) DeletePendFinding(ctx context.Context, req *finding.Del
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if err := f.repository.DeletePendFinding(req.ProjectId, req.FindingId); err != nil {
+	if err := f.repository.DeletePendFinding(ctx, req.ProjectId, req.FindingId); err != nil {
 		return nil, err
 	}
 	return &empty.Empty{}, nil

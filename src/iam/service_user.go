@@ -13,7 +13,7 @@ func (i *iamService) ListUser(ctx context.Context, req *iam.ListUserRequest) (*i
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := i.repository.ListUser(req.Activated, req.ProjectId, req.Name, req.UserId)
+	list, err := i.repository.ListUser(ctx, req.Activated, req.ProjectId, req.Name, req.UserId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &iam.ListUserResponse{}, nil
@@ -31,7 +31,7 @@ func (i *iamService) GetUser(ctx context.Context, req *iam.GetUserRequest) (*iam
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	user, err := i.repository.GetUser(req.UserId, req.Sub)
+	user, err := i.repository.GetUser(ctx, req.UserId, req.Sub)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			appLogger.Infof("[GetUser]User not found: GetUserRequest=%+v", req)
@@ -46,7 +46,7 @@ func (i *iamService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	savedData, err := i.repository.GetUserBySub(req.User.Sub)
+	savedData, err := i.repository.GetUserBySub(ctx, req.User.Sub)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
@@ -65,7 +65,7 @@ func (i *iamService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 	}
 
 	// upsert
-	registerdData, err := i.repository.PutUser(u)
+	registerdData, err := i.repository.PutUser(ctx, u)
 	if err != nil {
 		return nil, err
 	}

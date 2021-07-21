@@ -3,6 +3,7 @@ module github.com/CyberAgent/mimosa-core/src/alert
 go 1.16
 
 require (
+	github.com/CyberAgent/mimosa-common/pkg/database v0.0.0-20210721063343-44cefe7f590e
 	github.com/CyberAgent/mimosa-common/pkg/xray v0.0.0-20210720072141-2b45736a6034
 	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210712023706-882d5424f2f1
 	github.com/CyberAgent/mimosa-core/proto/alert v0.0.0-20210712023706-882d5424f2f1
@@ -26,6 +27,5 @@ require (
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	google.golang.org/genproto v0.0.0-20210708141623-e76da96a951f // indirect
 	google.golang.org/grpc v1.39.0
-	gorm.io/driver/mysql v1.1.1
-	gorm.io/gorm v1.21.11
+	gorm.io/gorm v1.21.12
 )
