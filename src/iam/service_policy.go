@@ -14,7 +14,7 @@ func (i *iamService) ListPolicy(ctx context.Context, req *iam.ListPolicyRequest)
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := i.repository.ListPolicy(req.ProjectId, req.Name, req.RoleId)
+	list, err := i.repository.ListPolicy(ctx, req.ProjectId, req.Name, req.RoleId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &iam.ListPolicyResponse{}, nil
@@ -32,7 +32,7 @@ func (i *iamService) GetPolicy(ctx context.Context, req *iam.GetPolicyRequest) (
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	p, err := i.repository.GetPolicy(req.ProjectId, req.PolicyId)
+	p, err := i.repository.GetPolicy(ctx, req.ProjectId, req.PolicyId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &iam.GetPolicyResponse{}, nil
@@ -58,7 +58,7 @@ func (i *iamService) PutPolicy(ctx context.Context, req *iam.PutPolicyRequest) (
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	savedData, err := i.repository.GetPolicyByName(req.Policy.ProjectId, req.Policy.Name)
+	savedData, err := i.repository.GetPolicyByName(ctx, req.Policy.ProjectId, req.Policy.Name)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
@@ -78,7 +78,7 @@ func (i *iamService) PutPolicy(ctx context.Context, req *iam.PutPolicyRequest) (
 	}
 
 	// upsert
-	registerdData, err := i.repository.PutPolicy(p)
+	registerdData, err := i.repository.PutPolicy(ctx, p)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (i *iamService) DeletePolicy(ctx context.Context, req *iam.DeletePolicyRequ
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if err := i.repository.DeletePolicy(req.ProjectId, req.PolicyId); err != nil {
+	if err := i.repository.DeletePolicy(ctx, req.ProjectId, req.PolicyId); err != nil {
 		return nil, err
 	}
 	return &empty.Empty{}, nil
@@ -99,7 +99,7 @@ func (i *iamService) AttachPolicy(ctx context.Context, req *iam.AttachPolicyRequ
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	rp, err := i.repository.AttachPolicy(req.ProjectId, req.RoleId, req.PolicyId)
+	rp, err := i.repository.AttachPolicy(ctx, req.ProjectId, req.RoleId, req.PolicyId)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (i *iamService) DetachPolicy(ctx context.Context, req *iam.DetachPolicyRequ
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if err := i.repository.DetachPolicy(req.ProjectId, req.RoleId, req.PolicyId); err != nil {
+	if err := i.repository.DetachPolicy(ctx, req.ProjectId, req.RoleId, req.PolicyId); err != nil {
 		return nil, err
 	}
 	return &empty.Empty{}, nil

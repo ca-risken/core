@@ -22,7 +22,7 @@ func (p *projectService) TagProject(ctx context.Context, req *project.TagProject
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	tag, err := p.repository.TagProject(req.ProjectId, req.Tag, req.Color)
+	tag, err := p.repository.TagProject(ctx, req.ProjectId, req.Tag, req.Color)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func (p *projectService) UntagProject(ctx context.Context, req *project.UntagPro
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if err := p.repository.UntagProject(req.ProjectId, req.Tag); err != nil {
+	if err := p.repository.UntagProject(ctx, req.ProjectId, req.Tag); err != nil {
 		return nil, err
 	}
 	return &empty.Empty{}, nil

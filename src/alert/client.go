@@ -50,7 +50,6 @@ func newProjectClient() project.ProjectServiceClient {
 }
 
 func getGRPCConn(ctx context.Context, addr string) (*grpc.ClientConn, error) {
-	// TODO refactoring xray
 	conn, err := grpc.DialContext(ctx, addr,
 		grpc.WithUnaryInterceptor(xray.UnaryClientInterceptor()), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
 	if err != nil {

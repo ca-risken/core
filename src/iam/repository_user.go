@@ -1,13 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/vikyd/zero"
 )
 
-func (i *iamDB) ListUser(activated bool, projectID uint32, name string, userID uint32) (*[]model.User, error) {
+func (i *iamDB) ListUser(ctx context.Context, activated bool, projectID uint32, name string, userID uint32) (*[]model.User, error) {
 	query := `
 select
   u.*
@@ -31,13 +32,13 @@ where
 		params = append(params, userID)
 	}
 	var data []model.User
-	if err := i.Slave.Raw(query, params...).Scan(&data).Error; err != nil {
+	if err := i.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
-func (i *iamDB) GetUser(userID uint32, sub string) (*model.User, error) {
+func (i *iamDB) GetUser(ctx context.Context, userID uint32, sub string) (*model.User, error) {
 	query := `select * from	user where activated = 'true'`
 	var params []interface{}
 	if !zero.IsZeroVal(userID) {
@@ -49,7 +50,7 @@ func (i *iamDB) GetUser(userID uint32, sub string) (*model.User, error) {
 		params = append(params, sub)
 	}
 	var data model.User
-	if err := i.Master.Raw(query, params...).First(&data).Error; err != nil {
+	if err := i.Master.WithContext(ctx).Raw(query, params...).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -57,9 +58,9 @@ func (i *iamDB) GetUser(userID uint32, sub string) (*model.User, error) {
 
 const selectGetUserBySub = `select * from user where sub = ?`
 
-func (i *iamDB) GetUserBySub(sub string) (*model.User, error) {
+func (i *iamDB) GetUserBySub(ctx context.Context, sub string) (*model.User, error) {
 	var data model.User
-	if err := i.Master.Raw(selectGetUserBySub, sub).First(&data).Error; err != nil {
+	if err := i.Master.WithContext(ctx).Raw(selectGetUserBySub, sub).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -75,9 +76,9 @@ ON DUPLICATE KEY UPDATE
   activated=VALUES(activated)
 `
 
-func (i *iamDB) PutUser(u *model.User) (*model.User, error) {
-	if err := i.Master.Exec(insertPutUser, u.UserID, u.Sub, u.Name, fmt.Sprintf("%t", u.Activated)).Error; err != nil {
+func (i *iamDB) PutUser(ctx context.Context, u *model.User) (*model.User, error) {
+	if err := i.Master.WithContext(ctx).Exec(insertPutUser, u.UserID, u.Sub, u.Name, fmt.Sprintf("%t", u.Activated)).Error; err != nil {
 		return nil, err
 	}
-	return i.GetUserBySub(u.Sub)
+	return i.GetUserBySub(ctx, u.Sub)
 }

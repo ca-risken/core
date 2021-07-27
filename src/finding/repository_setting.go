@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
+
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
 )
 
-func (f *findingDB) ListFindingSetting(req *finding.ListFindingSettingRequest) (*[]model.FindingSetting, error) {
+func (f *findingDB) ListFindingSetting(ctx context.Context, req *finding.ListFindingSettingRequest) (*[]model.FindingSetting, error) {
 	var param []interface{}
 	query := "select * from finding_setting where project_id=?"
 	param = append(param, req.ProjectId)
@@ -14,7 +16,7 @@ func (f *findingDB) ListFindingSetting(req *finding.ListFindingSettingRequest) (
 		param = append(param, getStatusString(req.Status))
 	}
 	var data []model.FindingSetting
-	if err := f.Slave.Raw(query, param...).Scan(&data).Error; err != nil {
+	if err := f.Slave.WithContext(ctx).Raw(query, param...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -22,9 +24,9 @@ func (f *findingDB) ListFindingSetting(req *finding.ListFindingSettingRequest) (
 
 const selectGetFindingSetting = `select * from finding_setting where project_id=? and finding_setting_id=?`
 
-func (f *findingDB) GetFindingSetting(projectID uint32, findingSettingID uint32) (*model.FindingSetting, error) {
+func (f *findingDB) GetFindingSetting(ctx context.Context, projectID uint32, findingSettingID uint32) (*model.FindingSetting, error) {
 	var data model.FindingSetting
-	if err := f.Slave.Raw(selectGetFindingSetting, projectID, findingSettingID).First(&data).Error; err != nil {
+	if err := f.Slave.WithContext(ctx).Raw(selectGetFindingSetting, projectID, findingSettingID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -32,9 +34,9 @@ func (f *findingDB) GetFindingSetting(projectID uint32, findingSettingID uint32)
 
 const selectGetFindingSettingByResource = `select * from finding_setting where project_id=? and resource_name=?`
 
-func (f *findingDB) GetFindingSettingByResource(projectID uint32, resourceName string) (*model.FindingSetting, error) {
+func (f *findingDB) GetFindingSettingByResource(ctx context.Context, projectID uint32, resourceName string) (*model.FindingSetting, error) {
 	var data model.FindingSetting
-	if err := f.Master.Raw(selectGetFindingSettingByResource, projectID, resourceName).First(&data).Error; err != nil {
+	if err := f.Master.WithContext(ctx).Raw(selectGetFindingSettingByResource, projectID, resourceName).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -50,9 +52,9 @@ ON DUPLICATE KEY UPDATE
   setting=VALUES(setting)
 `
 
-func (f *findingDB) UpsertFindingSetting(data *model.FindingSetting) (*model.FindingSetting, error) {
+func (f *findingDB) UpsertFindingSetting(ctx context.Context, data *model.FindingSetting) (*model.FindingSetting, error) {
 	var retData model.FindingSetting
-	if err := f.Master.Where("project_id=? AND resource_name=?", data.ProjectID, data.ResourceName).Assign(data).FirstOrCreate(&retData).Error; err != nil {
+	if err := f.Master.WithContext(ctx).Where("project_id=? AND resource_name=?", data.ProjectID, data.ResourceName).Assign(data).FirstOrCreate(&retData).Error; err != nil {
 		return nil, err
 	}
 	appLogger.Info(retData)
@@ -61,6 +63,6 @@ func (f *findingDB) UpsertFindingSetting(data *model.FindingSetting) (*model.Fin
 
 const deleteDeleteFindingSetting = `delete from finding_setting where project_id = ? and finding_setting_id = ?`
 
-func (f *findingDB) DeleteFindingSetting(projectID uint32, findingSettingID uint32) error {
-	return f.Master.Exec(deleteDeleteFindingSetting, projectID, findingSettingID).Error
+func (f *findingDB) DeleteFindingSetting(ctx context.Context, projectID uint32, findingSettingID uint32) error {
+	return f.Master.WithContext(ctx).Exec(deleteDeleteFindingSetting, projectID, findingSettingID).Error
 }

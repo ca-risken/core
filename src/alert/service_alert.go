@@ -23,7 +23,7 @@ func (a *alertService) ListAlert(ctx context.Context, req *alert.ListAlertReques
 	}
 
 	converted := convertListAlertRequest(req)
-	list, err := a.repository.ListAlert(converted.ProjectId, getStrings(converted.Status), converted.Severity, converted.Description, converted.FromAt, converted.ToAt)
+	list, err := a.repository.ListAlert(ctx, converted.ProjectId, getStrings(converted.Status), converted.Severity, converted.Description, converted.FromAt, converted.ToAt)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListAlertResponse{}, nil
@@ -56,7 +56,7 @@ func (a *alertService) GetAlert(ctx context.Context, req *alert.GetAlertRequest)
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	data, err := a.repository.GetAlert(req.ProjectId, req.AlertId)
+	data, err := a.repository.GetAlert(ctx, req.ProjectId, req.AlertId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetAlertResponse{}, nil
@@ -75,7 +75,7 @@ func (a *alertService) PutAlert(ctx context.Context, req *alert.PutAlertRequest)
 	// AlertIdのパラメータがリクエストに存在する場合、レコードの存在チェック
 	// 存在しなければエラー終了
 	if !zero.IsZeroVal(req.Alert.AlertId) {
-		savedData, err := a.repository.GetAlert(req.Alert.ProjectId, req.Alert.AlertId)
+		savedData, err := a.repository.GetAlert(ctx, req.Alert.ProjectId, req.Alert.AlertId)
 		if err != nil {
 			return nil, err
 		}
@@ -93,14 +93,14 @@ func (a *alertService) PutAlert(ctx context.Context, req *alert.PutAlertRequest)
 	}
 
 	// Fiding upsert
-	registeredData, err := a.repository.UpsertAlert(data)
+	registeredData, err := a.repository.UpsertAlert(ctx, data)
 	if err != nil {
 		return nil, err
 	}
 
 	now := time.Now().Unix()
 	// list RelAlertFinding
-	relAlertFindings, err := a.repository.ListRelAlertFinding(registeredData.ProjectID, registeredData.AlertID, 0, 0, now)
+	relAlertFindings, err := a.repository.ListRelAlertFinding(ctx, registeredData.ProjectID, registeredData.AlertID, 0, 0, now)
 	if err != nil {
 		appLogger.Errorf("Failed listRelAlertFinding when PutAlert. err: %v", err)
 		return &alert.PutAlertResponse{Alert: convertAlert(registeredData)}, err
@@ -124,7 +124,7 @@ func (a *alertService) PutAlert(ctx context.Context, req *alert.PutAlertRequest)
 	}
 
 	// Fiding upsert
-	_, err = a.repository.UpsertAlertHistory(dataHistory)
+	_, err = a.repository.UpsertAlertHistory(ctx, dataHistory)
 	if err != nil {
 		appLogger.Errorf("Failed PutAlertHistory when PutAlert. err: %v", err)
 		return &alert.PutAlertResponse{Alert: convertAlert(registeredData)}, err
@@ -137,7 +137,7 @@ func (a *alertService) DeleteAlert(ctx context.Context, req *alert.DeleteAlertRe
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	err := a.repository.DeleteAlert(req.ProjectId, req.AlertId)
+	err := a.repository.DeleteAlert(ctx, req.ProjectId, req.AlertId)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func (a *alertService) DeleteAlert(ctx context.Context, req *alert.DeleteAlertRe
 
 func (a *alertService) ListAlertHistory(ctx context.Context, req *alert.ListAlertHistoryRequest) (*alert.ListAlertHistoryResponse, error) {
 	converted := convertListAlertHistoryRequest(req)
-	list, err := a.repository.ListAlertHistory(converted.ProjectId, converted.AlertId, converted.HistoryType, converted.Severity, converted.FromAt, converted.ToAt)
+	list, err := a.repository.ListAlertHistory(ctx, converted.ProjectId, converted.AlertId, converted.HistoryType, converted.Severity, converted.FromAt, converted.ToAt)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListAlertHistoryResponse{}, nil
@@ -184,7 +184,7 @@ func (a *alertService) GetAlertHistory(ctx context.Context, req *alert.GetAlertH
 		return nil, err
 	}
 
-	data, err := a.repository.GetAlertHistory(req.ProjectId, req.AlertHistoryId)
+	data, err := a.repository.GetAlertHistory(ctx, req.ProjectId, req.AlertHistoryId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetAlertHistoryResponse{}, nil
@@ -209,7 +209,7 @@ func (a *alertService) PutAlertHistory(ctx context.Context, req *alert.PutAlertH
 	}
 
 	// Fiding upsert
-	registeredData, err := a.repository.UpsertAlertHistory(data)
+	registeredData, err := a.repository.UpsertAlertHistory(ctx, data)
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +221,7 @@ func (a *alertService) DeleteAlertHistory(ctx context.Context, req *alert.Delete
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	err := a.repository.DeleteAlertHistory(req.ProjectId, req.AlertHistoryId)
+	err := a.repository.DeleteAlertHistory(ctx, req.ProjectId, req.AlertHistoryId)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +234,7 @@ func (a *alertService) DeleteAlertHistory(ctx context.Context, req *alert.Delete
 
 func (a *alertService) ListRelAlertFinding(ctx context.Context, req *alert.ListRelAlertFindingRequest) (*alert.ListRelAlertFindingResponse, error) {
 	converted := convertListRelAlertFindingRequest(req)
-	list, err := a.repository.ListRelAlertFinding(converted.ProjectId, converted.AlertId, converted.FindingId, converted.FromAt, converted.ToAt)
+	list, err := a.repository.ListRelAlertFinding(ctx, converted.ProjectId, converted.AlertId, converted.FindingId, converted.FromAt, converted.ToAt)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.ListRelAlertFindingResponse{}, nil
@@ -267,7 +267,7 @@ func (a *alertService) GetRelAlertFinding(ctx context.Context, req *alert.GetRel
 		return nil, err
 	}
 
-	data, err := a.repository.GetRelAlertFinding(req.ProjectId, req.AlertId, req.FindingId)
+	data, err := a.repository.GetRelAlertFinding(ctx, req.ProjectId, req.AlertId, req.FindingId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &alert.GetRelAlertFindingResponse{}, nil
@@ -288,7 +288,7 @@ func (a *alertService) PutRelAlertFinding(ctx context.Context, req *alert.PutRel
 	}
 
 	// Fiding upsert
-	registeredData, err := a.repository.UpsertRelAlertFinding(data)
+	registeredData, err := a.repository.UpsertRelAlertFinding(ctx, data)
 	if err != nil {
 		return nil, err
 	}
@@ -300,7 +300,7 @@ func (a *alertService) DeleteRelAlertFinding(ctx context.Context, req *alert.Del
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	err := a.repository.DeleteRelAlertFinding(req.ProjectId, req.AlertId, req.FindingId)
+	err := a.repository.DeleteRelAlertFinding(ctx, req.ProjectId, req.AlertId, req.FindingId)
 	if err != nil {
 		return nil, err
 	}

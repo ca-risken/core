@@ -25,7 +25,7 @@ func (i *iamService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequ
 		return nil, err
 	}
 
-	policies, err := i.repository.GetUserPolicy(req.UserId)
+	policies, err := i.repository.GetUserPolicy(ctx, req.UserId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &iam.IsAuthorizedResponse{Ok: false}, nil
@@ -59,7 +59,7 @@ func (i *iamService) IsAdmin(ctx context.Context, req *iam.IsAdminRequest) (*iam
 		return nil, err
 	}
 
-	policy, err := i.repository.GetAdminPolicy(req.UserId)
+	policy, err := i.repository.GetAdminPolicy(ctx, req.UserId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &iam.IsAdminResponse{Ok: false}, nil

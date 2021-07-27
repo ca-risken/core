@@ -39,7 +39,7 @@ func (p *projectService) ListProject(ctx context.Context, req *project.ListProje
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := p.repository.ListProject(req.UserId, req.ProjectId, req.Name)
+	list, err := p.repository.ListProject(ctx, req.UserId, req.ProjectId, req.Name)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &project.ListProjectResponse{}, nil
@@ -66,7 +66,7 @@ func (p *projectService) CreateProject(ctx context.Context, req *project.CreateP
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	pr, err := p.repository.CreateProject(req.Name)
+	pr, err := p.repository.CreateProject(ctx, req.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (p *projectService) UpdateProject(ctx context.Context, req *project.UpdateP
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	pr, err := p.repository.UpdateProject(req.ProjectId, req.Name)
+	pr, err := p.repository.UpdateProject(ctx, req.ProjectId, req.Name)
 	if err != nil {
 		return nil, err
 	}

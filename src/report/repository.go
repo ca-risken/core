@@ -1,21 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
+	mimosasql "github.com/CyberAgent/mimosa-common/pkg/database/sql"
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/kelseyhightower/envconfig"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-	"gorm.io/gorm/schema"
 )
 
 type reportRepository interface {
 	// Report
-	GetReportFinding(uint32, []string, string, string, float32) (*[]model.ReportFinding, error)
-	GetReportFindingAll([]string, string, string, float32) (*[]model.ReportFinding, error)
-	CollectReportFinding() error
+	GetReportFinding(context.Context, uint32, []string, string, string, float32) (*[]model.ReportFinding, error)
+	GetReportFindingAll(context.Context, []string, string, string, float32) (*[]model.ReportFinding, error)
+	CollectReportFinding(ctx context.Context) error
 }
 
 type reportDB struct {
@@ -62,13 +61,9 @@ func initDB(isMaster bool) *gorm.DB {
 
 	dsn := fmt.Sprintf("%s:%s@tcp([%s]:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
 		user, pass, host, conf.Port, conf.Schema)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
+	db, err := mimosasql.Open(dsn, conf.LogMode)
 	if err != nil {
 		appLogger.Fatalf("Failed to open DB. isMaster: %t, err: %+v", isMaster, err)
-		return nil
-	}
-	if conf.LogMode {
-		db.Logger.LogMode(logger.Info)
 	}
 	appLogger.Infof("Connected to Database. isMaster: %t", isMaster)
 	return db

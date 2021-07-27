@@ -16,7 +16,7 @@ func (f *findingService) ListFindingSetting(ctx context.Context, req *finding.Li
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := f.repository.ListFindingSetting(req)
+	list, err := f.repository.ListFindingSetting(ctx, req)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &finding.ListFindingSettingResponse{}, nil
@@ -61,7 +61,7 @@ func (f *findingService) GetFindingSetting(ctx context.Context, req *finding.Get
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	data, err := f.repository.GetFindingSetting(req.ProjectId, req.FindingSettingId)
+	data, err := f.repository.GetFindingSetting(ctx, req.ProjectId, req.FindingSettingId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &finding.GetFindingSettingResponse{}, nil
@@ -75,7 +75,7 @@ func (f *findingService) PutFindingSetting(ctx context.Context, req *finding.Put
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	registerd, err := f.repository.UpsertFindingSetting(&model.FindingSetting{
+	registerd, err := f.repository.UpsertFindingSetting(ctx, &model.FindingSetting{
 		ProjectID:    req.FindingSetting.ProjectId,
 		ResourceName: req.FindingSetting.ResourceName,
 		Status:       getStatusString(req.FindingSetting.Status),
@@ -102,7 +102,7 @@ func (f *findingService) DeleteFindingSetting(ctx context.Context, req *finding.
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if err := f.repository.DeleteFindingSetting(req.ProjectId, req.FindingSettingId); err != nil {
+	if err := f.repository.DeleteFindingSetting(ctx, req.ProjectId, req.FindingSettingId); err != nil {
 		return nil, err
 	}
 	return &empty.Empty{}, nil
@@ -113,8 +113,8 @@ type findingSetting struct {
 	// Tag              []string `json:"tag,omitempty"`
 }
 
-func (f *findingService) getFindingSettingByResource(projectID uint32, resourceName string) (*findingSetting, error) {
-	fs, err := f.repository.GetFindingSettingByResource(projectID, resourceName)
+func (f *findingService) getFindingSettingByResource(ctx context.Context, projectID uint32, resourceName string) (*findingSetting, error) {
+	fs, err := f.repository.GetFindingSettingByResource(ctx, projectID, resourceName)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return &findingSetting{}, nil
 	} else if err != nil {
