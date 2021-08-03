@@ -58,18 +58,21 @@ func TestPutPendFinding(t *testing.T) {
 	mockDB := mockFindingRepository{}
 	svc := findingService{repository: &mockDB}
 	cases := []struct {
-		name     string
-		input    *finding.PutPendFindingRequest
-		want     *finding.PutPendFindingResponse
-		wantErr  bool
-		mockResp *model.PendFinding
-		mockErr  error
+		name         string
+		input        *finding.PutPendFindingRequest
+		want         *finding.PutPendFindingResponse
+		wantErr      bool
+		mockGetResp  *model.Finding
+		mockGetErr   error
+		mockPendResp *model.PendFinding
+		mockPendErr  error
 	}{
 		{
-			name:     "OK",
-			input:    &finding.PutPendFindingRequest{ProjectId: 1, PendFinding: &finding.PendFindingForUpsert{FindingId: 1, ProjectId: 1}},
-			want:     &finding.PutPendFindingResponse{PendFinding: &finding.PendFinding{FindingId: 1, ProjectId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockResp: &model.PendFinding{FindingID: 1, ProjectID: 1, CreatedAt: now, UpdatedAt: now},
+			name:         "OK",
+			input:        &finding.PutPendFindingRequest{ProjectId: 1, PendFinding: &finding.PendFindingForUpsert{FindingId: 1, ProjectId: 1}},
+			want:         &finding.PutPendFindingResponse{PendFinding: &finding.PendFinding{FindingId: 1, ProjectId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp:  &model.Finding{FindingID: 1, ProjectID: 1, CreatedAt: now, UpdatedAt: now},
+			mockPendResp: &model.PendFinding{FindingID: 1, ProjectID: 1, CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:    "NG Invalid request",
@@ -77,16 +80,32 @@ func TestPutPendFinding(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "Invalid DB error",
-			input:   &finding.PutPendFindingRequest{ProjectId: 1, PendFinding: &finding.PendFindingForUpsert{FindingId: 1, ProjectId: 1}},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidDB,
+			name:       "Record not found",
+			input:      &finding.PutPendFindingRequest{ProjectId: 1, PendFinding: &finding.PendFindingForUpsert{FindingId: 1, ProjectId: 1}},
+			wantErr:    true,
+			mockGetErr: gorm.ErrRecordNotFound,
+		},
+		{
+			name:       "Invalid DB error(Get)",
+			input:      &finding.PutPendFindingRequest{ProjectId: 1, PendFinding: &finding.PendFindingForUpsert{FindingId: 1, ProjectId: 1}},
+			wantErr:    true,
+			mockGetErr: gorm.ErrInvalidDB,
+		},
+		{
+			name:        "Invalid DB error(Pend)",
+			input:       &finding.PutPendFindingRequest{ProjectId: 1, PendFinding: &finding.PendFindingForUpsert{FindingId: 1, ProjectId: 1}},
+			wantErr:     true,
+			mockGetResp: &model.Finding{FindingID: 1, ProjectID: 1, CreatedAt: now, UpdatedAt: now},
+			mockPendErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			if c.mockResp != nil || c.mockErr != nil {
-				mockDB.On("UpsertPendFinding").Return(c.mockResp, c.mockErr).Once()
+			if c.mockGetResp != nil || c.mockGetErr != nil {
+				mockDB.On("GetFinding").Return(c.mockGetResp, c.mockGetErr).Once()
+			}
+			if c.mockPendResp != nil || c.mockPendErr != nil {
+				mockDB.On("UpsertPendFinding").Return(c.mockPendResp, c.mockPendErr).Once()
 			}
 			got, err := svc.PutPendFinding(ctx, c.input)
 			if err != nil && !c.wantErr {
