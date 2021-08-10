@@ -76,3 +76,35 @@ message RolePolicy {
   int64 created_at = 4;
   int64 updated_at = 5;
 }
+
+// AccessToken
+message AccessToken {
+  uint32 access_token_id = 1;
+  // string token_hash = 2; // Must not show this value.
+  string name = 2;
+  string description = 3;
+  uint32 project_id = 4;
+  int64 expired_at = 5;
+  uint32 last_updated_uesr_id = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
+}
+
+// AccessTokenForUpsert
+message AccessTokenForUpsert {
+  uint32 access_token_id = 1;
+  string plain_text_token = 2;
+  string name = 3;
+  string description = 4;
+  uint32 project_id = 5;
+  int64 expired_at = 6;
+  uint32 last_updated_uesr_id = 7;
+}
+
+message AccessTokenRole {
+  uint32 access_token_id = 1;
+  uint32 role_id = 2;
+  uint32 project_id = 3;
+  int64 created_at = 4;
+  int64 updated_at = 5;
+}

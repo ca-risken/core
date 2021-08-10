@@ -7,6 +7,7 @@ import "google/protobuf/empty.proto";
 import "iam/user.proto";
 import "iam/role.proto";
 import "iam/policy.proto";
+import "iam/access_token.proto";
 
 service IAMService {
   // User
@@ -30,24 +31,51 @@ service IAMService {
   rpc AttachPolicy(AttachPolicyRequest) returns (AttachPolicyResponse);
   rpc DetachPolicy(DetachPolicyRequest) returns (google.protobuf.Empty);
 
-  // 認可（ユーザがリクエストしたアクションや、リソースに対しての認可を行います）
+  // AccessToken
+  rpc ListAccessToken(ListAccessTokenRequest) returns (ListAccessTokenResponse);
+  rpc GetAccessToken(GetAccessTokenRequest) returns (GetAccessTokenResponse);
+  rpc PutAccessToken(PutAccessTokenRequest) returns (PutAccessTokenResponse);
+  rpc DeleteAccessToken(DeleteAccessTokenRequest)
+      returns (google.protobuf.Empty);
+  rpc AttachAccessTokenRole(AttachAccessTokenRoleRequest)
+      returns (AttachAccessTokenRoleResponse);
+  rpc DetachAccessTokenRole(DetachAccessTokenRoleRequest)
+      returns (google.protobuf.Empty);
+
+  // ユーザに対しての認可を行います
   rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
+  // アクセストークンに対しての認可を行います
+  rpc IsAuthorizedToken(IsAuthorizedTokenRequest)
+      returns (IsAuthorizedTokenResponse);
   // 特定プロジェクトに依存しない管理者権限を持っているかどうかを返します
   rpc IsAdmin(IsAdminRequest) returns (IsAdminResponse);
 }
 
 // IsAuthorizedRequest
-// ユーザからのリクエストに対して、アクションやリソースへの認可を行います
+// ユーザからのリクエストに対してアクションやリソースへの認可を行います
 message IsAuthorizedRequest {
   uint32 user_id = 1;    // UserID,(e.g.)111
   uint32 project_id = 2; // ProjectID,(e.g.)1001
   string action_name =
-      3; // Service&API_name(<service_name>/<API>format),(e.g.)`finding/GetFinding`
+      3; // Service&API_name(<service_name>/<API>format),(e.g.)`finding/get-finding`
   string resource_name =
-      4; // System_resource_name(<prefix>/<resouorce_name>format),(e.g.)`aws:accessAnalyzer/samplebucket`
+      4; // System_resource_name(<prefix>/<resouorce_name>format)
 }
 
 message IsAuthorizedResponse { bool ok = 1; }
+
+// IsAuthorizedTokenRequest
+// アクセストークンに対してアクションやリソースへの認可を行います
+message IsAuthorizedTokenRequest {
+  uint32 access_token_id = 1; // AccessTokenID,(e.g.)111
+  uint32 project_id = 2;      // ProjectID,(e.g.)1001
+  string action_name =
+      3; // Service&API_name(<service_name>/<API>format),(e.g.)`finding/get-finding`
+  string resource_name =
+      4; // System_resource_name(<prefix>/<resouorce_name>format)
+}
+
+message IsAuthorizedTokenResponse { bool ok = 1; }
 
 // IsAdminRequest
 // 特定プロジェクトに依存しない管理者権限を持っているかどうかを返します

@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package core.iam;
+option go_package = "github.com/CyberAgent/mimosa-core/proto/iam";
+
+import "iam/entity.proto";
+
+message ListAccessTokenRequest {
+  uint32 project_id = 1;
+  string name = 2;
+  uint32 access_token_id = 3;
+}
+
+message ListAccessTokenResponse { repeated AccessToken access_token = 1; }
+
+message GetAccessTokenRequest {
+  uint32 project_id = 1;
+  string plain_text_token = 2;
+}
+
+message GetAccessTokenResponse { AccessToken access_token = 1; }
+
+message PutAccessTokenRequest {
+  uint32 project_id = 1;
+  AccessTokenForUpsert access_token = 2;
+}
+
+message PutAccessTokenResponse { AccessToken access_token = 1; }
+
+message DeleteAccessTokenRequest {
+  uint32 project_id = 1;
+  uint32 access_token_id = 2;
+}
+
+message AttachAccessTokenRoleRequest {
+  uint32 project_id = 1;
+  uint32 access_token_id = 2;
+  uint32 role_id = 3;
+}
+
+message AttachAccessTokenRoleResponse { AccessTokenRole access_token_role = 1; }
+
+message DetachAccessTokenRoleRequest {
+  uint32 project_id = 1;
+  uint32 access_token_id = 2;
+  uint32 role_id = 3;
+}
