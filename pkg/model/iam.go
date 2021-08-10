@@ -49,3 +49,24 @@ type Policy struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
+
+// AccessToken entity model
+type AccessToken struct {
+	AccessTokenID     uint32
+	TokenHash         string
+	Name              string
+	Description       string
+	ProjectID         uint32
+	ExpiredAt         time.Time
+	LastUpdatedUserID uint32
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+
+// AccessTokenRole entity model
+type AccessTokenRole struct {
+	AccessTokenID uint32
+	RoleID        uint32
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
