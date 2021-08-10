@@ -168,10 +168,88 @@ func (d *DetachPolicyRequest) Validate() error {
 	)
 }
 
+// Validate ListAccessTokenRequest
+func (l *ListAccessTokenRequest) Validate() error {
+	return validation.ValidateStruct(l,
+		validation.Field(&l.ProjectId, validation.Required),
+		validation.Field(&l.Name, validation.Length(0, 64)),
+	)
+}
+
+// Validate GetAccessTokenRequest
+func (g *GetAccessTokenRequest) Validate() error {
+	return validation.ValidateStruct(g,
+		validation.Field(&g.ProjectId, validation.Required),
+		validation.Field(&g.PlainTextToken, validation.Required),
+	)
+}
+
+// Validate PutAccessTokenRequest
+func (p *PutAccessTokenRequest) Validate() error {
+	if validation.IsEmpty(p.AccessToken) {
+		return errors.New("Required access_token parameter")
+	}
+	if err := validation.ValidateStruct(p,
+		validation.Field(&p.ProjectId, validation.In(p.AccessToken.ProjectId)),
+	); err != nil {
+		return err
+	}
+	return p.AccessToken.Validate()
+}
+
+// Validate AccessTokenForUpsert
+func (a *AccessTokenForUpsert) Validate() error {
+	return validation.ValidateStruct(a,
+		validation.Field(&a.ProjectId, validation.Required),
+		validation.Field(&a.Name, validation.Required, validation.Length(0, 64)),
+		validation.Field(&a.Description, validation.Length(0, 255)),
+		validation.Field(&a.ExpiredAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&a.LastUpdatedUesrId, validation.Required),
+	)
+}
+
+// Validate DeleteAccessTokenRequest
+func (d *DeleteAccessTokenRequest) Validate() error {
+	return validation.ValidateStruct(d,
+		validation.Field(&d.ProjectId, validation.Required),
+		validation.Field(&d.AccessTokenId, validation.Required),
+	)
+}
+
+// Validate AttachAccessTokenRoleRequest
+func (a *AttachAccessTokenRoleRequest) Validate() error {
+	return validation.ValidateStruct(a,
+		validation.Field(&a.ProjectId, validation.Required),
+		validation.Field(&a.RoleId, validation.Required),
+		validation.Field(&a.AccessTokenId, validation.Required),
+	)
+}
+
+// Validate DetachAccessTokenRoleRequest
+func (d *DetachAccessTokenRoleRequest) Validate() error {
+	return validation.ValidateStruct(d,
+		validation.Field(&d.ProjectId, validation.Required),
+		validation.Field(&d.RoleId, validation.Required),
+		validation.Field(&d.AccessTokenId, validation.Required),
+	)
+}
+
 // Validate IsAuthorizedRequest
 func (i *IsAuthorizedRequest) Validate() error {
 	return validation.ValidateStruct(i,
 		validation.Field(&i.UserId, validation.Required),
+		validation.Field(&i.ProjectId, validation.Required),
+		// must format: "<service-name>/<action-name>"
+		validation.Field(&i.ActionName, validation.Required, validation.Match(regexp.MustCompile(`^(\w|-)+/(\w|-)+$`))),
+		// must format: "<prefix>/<prefix>/.../<resource-name>"
+		validation.Field(&i.ResourceName, validation.Required, validation.Match(regexp.MustCompile(`^(\w|-|:|/)+/.+$`))),
+	)
+}
+
+// Validate IsAuthorizedTokenRequest
+func (i *IsAuthorizedTokenRequest) Validate() error {
+	return validation.ValidateStruct(i,
+		validation.Field(&i.AccessTokenId, validation.Required),
 		validation.Field(&i.ProjectId, validation.Required),
 		// must format: "<service-name>/<action-name>"
 		validation.Field(&i.ActionName, validation.Required, validation.Match(regexp.MustCompile(`^(\w|-)+/(\w|-)+$`))),
