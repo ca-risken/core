@@ -4,6 +4,12 @@ import (
 	"testing"
 )
 
+const (
+	length65string  = "12345678901234567890123456789012345678901234567890123456789012345"
+	length129string = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789"
+	length256string = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456"
+)
+
 func TestValidate_ListUserRequest(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -671,6 +677,284 @@ func TestValidate_DetachPolicyRequest(t *testing.T) {
 	}
 }
 
+func TestValidate_ListAccessTokenRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *ListAccessTokenRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &ListAccessTokenRequest{ProjectId: 1, Name: "nm"},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &ListAccessTokenRequest{Name: "nm"},
+			wantErr: true,
+		},
+		{
+			name:    "NG length(name)",
+			input:   &ListAccessTokenRequest{ProjectId: 123, Name: "12345678901234567890123456789012345678901234567890123456789012345"},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_GetAccessTokenRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *GetAccessTokenRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &GetAccessTokenRequest{ProjectId: 1, AccessTokenId: 1, PlainTextToken: "token"},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &GetAccessTokenRequest{AccessTokenId: 1, PlainTextToken: "token"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(access_token_id)",
+			input:   &GetAccessTokenRequest{ProjectId: 1, PlainTextToken: "token"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(plain_text_token)",
+			input:   &GetAccessTokenRequest{ProjectId: 1, AccessTokenId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_PutAccessTokenRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *PutAccessTokenRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &PutAccessTokenRequest{ProjectId: 1, AccessToken: &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUesrId: 1}},
+			wantErr: false,
+		},
+		{
+			name:    "NG Empty(access_token)",
+			input:   &PutAccessTokenRequest{ProjectId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG NotMatch(project_id)",
+			input:   &PutAccessTokenRequest{ProjectId: 999, AccessToken: &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUesrId: 1}},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_AccessTokenForUpsert(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *AccessTokenForUpsert
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUesrId: 1},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ExpiredAt: 0, LastUpdatedUesrId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(name)",
+			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUesrId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Length(name)",
+			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: length65string, Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUesrId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Length(description)",
+			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: length256string, ProjectId: 1, ExpiredAt: 0, LastUpdatedUesrId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Min(expired_at)",
+			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: -1, LastUpdatedUesrId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Max(expired_at)",
+			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: 253402268400, LastUpdatedUesrId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(last_updated_user_id)",
+			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: 0},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_DeleteAccessTokenRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *DeleteAccessTokenRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &DeleteAccessTokenRequest{ProjectId: 1, AccessTokenId: 1},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &DeleteAccessTokenRequest{AccessTokenId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(access_token_id)",
+			input:   &DeleteAccessTokenRequest{ProjectId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_AttachAccessTokenRoleRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *AttachAccessTokenRoleRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &AttachAccessTokenRoleRequest{ProjectId: 1, RoleId: 1, AccessTokenId: 1},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &AttachAccessTokenRoleRequest{RoleId: 1, AccessTokenId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(role_id)",
+			input:   &AttachAccessTokenRoleRequest{ProjectId: 1, AccessTokenId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(access_token_id)",
+			input:   &AttachAccessTokenRoleRequest{ProjectId: 1, RoleId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_DetachAccessTokenRoleRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *DetachAccessTokenRoleRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &DetachAccessTokenRoleRequest{ProjectId: 1, RoleId: 1, AccessTokenId: 1},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &DetachAccessTokenRoleRequest{RoleId: 1, AccessTokenId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(role_id)",
+			input:   &DetachAccessTokenRoleRequest{ProjectId: 1, AccessTokenId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(access_token_id)",
+			input:   &DetachAccessTokenRoleRequest{ProjectId: 1, RoleId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
 func TestValidate_IsAuthorizedRequest(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -715,6 +999,65 @@ func TestValidate_IsAuthorizedRequest(t *testing.T) {
 		{
 			name:    "NG Invalid format(ResourceName)",
 			input:   &IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "/hoge-bucket"},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_IsAuthorizedTokenRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *IsAuthorizedTokenRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &IsAuthorizedTokenRequest{AccessTokenId: 1, ProjectId: 1, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/hoge-bucket"},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(access_token_id)",
+			input:   &IsAuthorizedTokenRequest{ProjectId: 1, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/hoge-bucket"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(projectID)",
+			input:   &IsAuthorizedTokenRequest{AccessTokenId: 1, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/hoge-bucket"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(ActionName)",
+			input:   &IsAuthorizedTokenRequest{AccessTokenId: 1, ProjectId: 1, ResourceName: "aws:guardduty/hoge-bucket"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid format 1(ActionName)",
+			input:   &IsAuthorizedTokenRequest{AccessTokenId: 1, ProjectId: 1, ActionName: "findingPutFinding", ResourceName: "aws:guardduty/hoge-bucket"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid format 2(ActionName)",
+			input:   &IsAuthorizedTokenRequest{AccessTokenId: 1, ProjectId: 1, ActionName: "finding/", ResourceName: "aws:guardduty/hoge-bucket"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(ResourceName)",
+			input:   &IsAuthorizedTokenRequest{AccessTokenId: 1, ProjectId: 1, ActionName: "finding/PutFinding"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid format(ResourceName)",
+			input:   &IsAuthorizedTokenRequest{AccessTokenId: 1, ProjectId: 1, ActionName: "finding/PutFinding", ResourceName: "/hoge-bucket"},
 			wantErr: true,
 		},
 	}

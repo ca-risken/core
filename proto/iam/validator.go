@@ -180,6 +180,7 @@ func (l *ListAccessTokenRequest) Validate() error {
 func (g *GetAccessTokenRequest) Validate() error {
 	return validation.ValidateStruct(g,
 		validation.Field(&g.ProjectId, validation.Required),
+		validation.Field(&g.AccessTokenId, validation.Required),
 		validation.Field(&g.PlainTextToken, validation.Required),
 	)
 }
