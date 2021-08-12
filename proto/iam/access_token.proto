@@ -13,13 +13,13 @@ message ListAccessTokenRequest {
 
 message ListAccessTokenResponse { repeated AccessToken access_token = 1; }
 
-message GetAccessTokenRequest {
+message AuthenticateAccessTokenRequest {
   uint32 project_id = 1;
   uint32 access_token_id = 2;
   string plain_text_token = 3;
 }
 
-message GetAccessTokenResponse { AccessToken access_token = 1; }
+message AuthenticateAccessTokenResponse { AccessToken access_token = 1; }
 
 message PutAccessTokenRequest {
   uint32 project_id = 1;

@@ -33,7 +33,8 @@ service IAMService {
 
   // AccessToken
   rpc ListAccessToken(ListAccessTokenRequest) returns (ListAccessTokenResponse);
-  rpc GetAccessToken(GetAccessTokenRequest) returns (GetAccessTokenResponse);
+  rpc AuthenticateAccessToken(AuthenticateAccessTokenRequest)
+      returns (AuthenticateAccessTokenResponse);
   rpc PutAccessToken(PutAccessTokenRequest) returns (PutAccessTokenResponse);
   rpc DeleteAccessToken(DeleteAccessTokenRequest)
       returns (google.protobuf.Empty);

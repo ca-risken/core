@@ -176,12 +176,12 @@ func (l *ListAccessTokenRequest) Validate() error {
 	)
 }
 
-// Validate GetAccessTokenRequest
-func (g *GetAccessTokenRequest) Validate() error {
-	return validation.ValidateStruct(g,
-		validation.Field(&g.ProjectId, validation.Required),
-		validation.Field(&g.AccessTokenId, validation.Required),
-		validation.Field(&g.PlainTextToken, validation.Required),
+// Validate AuthenticateAccessTokenRequest
+func (a *AuthenticateAccessTokenRequest) Validate() error {
+	return validation.ValidateStruct(a,
+		validation.Field(&a.ProjectId, validation.Required),
+		validation.Field(&a.AccessTokenId, validation.Required),
+		validation.Field(&a.PlainTextToken, validation.Required),
 	)
 }
 

@@ -711,30 +711,30 @@ func TestValidate_ListAccessTokenRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_GetAccessTokenRequest(t *testing.T) {
+func TestValidate_AuthenticateAccessTokenRequest(t *testing.T) {
 	cases := []struct {
 		name    string
-		input   *GetAccessTokenRequest
+		input   *AuthenticateAccessTokenRequest
 		wantErr bool
 	}{
 		{
 			name:    "OK",
-			input:   &GetAccessTokenRequest{ProjectId: 1, AccessTokenId: 1, PlainTextToken: "token"},
+			input:   &AuthenticateAccessTokenRequest{ProjectId: 1, AccessTokenId: 1, PlainTextToken: "token"},
 			wantErr: false,
 		},
 		{
 			name:    "NG Required(project_id)",
-			input:   &GetAccessTokenRequest{AccessTokenId: 1, PlainTextToken: "token"},
+			input:   &AuthenticateAccessTokenRequest{AccessTokenId: 1, PlainTextToken: "token"},
 			wantErr: true,
 		},
 		{
 			name:    "NG Required(access_token_id)",
-			input:   &GetAccessTokenRequest{ProjectId: 1, PlainTextToken: "token"},
+			input:   &AuthenticateAccessTokenRequest{ProjectId: 1, PlainTextToken: "token"},
 			wantErr: true,
 		},
 		{
 			name:    "NG Required(plain_text_token)",
-			input:   &GetAccessTokenRequest{ProjectId: 1, AccessTokenId: 1},
+			input:   &AuthenticateAccessTokenRequest{ProjectId: 1, AccessTokenId: 1},
 			wantErr: true,
 		},
 	}
