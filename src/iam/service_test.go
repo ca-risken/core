@@ -33,33 +33,6 @@ func TestIsAuthorized(t *testing.T) {
 			},
 		},
 		{
-			name:  "OK Unauthorized (Not allow project)",
-			input: &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 9999, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
-			want:  &iam.IsAuthorizedResponse{Ok: false},
-			mockResponce: &[]model.Policy{
-				{PolicyID: 101, Name: "viewer", ProjectID: 1001, ActionPtn: "finding/(Get|List|Describe)", ResourcePtn: ".*"},
-				{PolicyID: 102, Name: "put for aws", ProjectID: 1001, ActionPtn: "finding/Put.*", ResourcePtn: "aws:.*"},
-			},
-		},
-		{
-			name:  "OK Unauthorized (Not allow action)",
-			input: &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/DeleteFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
-			want:  &iam.IsAuthorizedResponse{Ok: false},
-			mockResponce: &[]model.Policy{
-				{PolicyID: 101, Name: "viewer", ProjectID: 1001, ActionPtn: "finding/(Get|List|Describe)", ResourcePtn: ".*"},
-				{PolicyID: 102, Name: "put for aws", ProjectID: 1001, ActionPtn: "finding/Put.*", ResourcePtn: "aws:.*"},
-			},
-		},
-		{
-			name:  "OK Unauthorized (Not allow resource)",
-			input: &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
-			want:  &iam.IsAuthorizedResponse{Ok: false},
-			mockResponce: &[]model.Policy{
-				{PolicyID: 101, Name: "viewer", ProjectID: 1001, ActionPtn: "finding/(Get|List|Describe)", ResourcePtn: ".*"},
-				{PolicyID: 102, Name: "put for aws", ProjectID: 1001, ActionPtn: "finding/Put.*", ResourcePtn: "aws:.*"},
-			},
-		},
-		{
 			name:      "OK Record not found",
 			input:     &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
 			want:      &iam.IsAuthorizedResponse{Ok: false},
@@ -71,7 +44,7 @@ func TestIsAuthorized(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "Invalid DB error",
+			name:      "NG Invalid DB error",
 			input:     &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
 			wantErr:   true,
 			mockError: gorm.ErrInvalidDB,
@@ -83,6 +56,151 @@ func TestIsAuthorized(t *testing.T) {
 				mock.On("GetUserPolicy").Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.IsAuthorized(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestIsAuthorizedToken(t *testing.T) {
+	var ctx context.Context
+	mock := mockIAMRepository{}
+	svc := iamService{repository: &mock}
+	cases := []struct {
+		name         string
+		input        *iam.IsAuthorizedTokenRequest
+		want         *iam.IsAuthorizedTokenResponse
+		wantErr      bool
+		mockResponce *[]model.Policy
+		mockError    error
+	}{
+		{
+			name:  "OK Authorized",
+			input: &iam.IsAuthorizedTokenRequest{AccessTokenId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
+			want:  &iam.IsAuthorizedTokenResponse{Ok: true},
+			mockResponce: &[]model.Policy{
+				{PolicyID: 101, Name: "viewer", ProjectID: 1001, ActionPtn: "finding/(Get|List|Describe)", ResourcePtn: ".*"},
+				{PolicyID: 102, Name: "put for aws", ProjectID: 1001, ActionPtn: "finding/Put.*", ResourcePtn: "aws:.*"},
+			},
+		},
+		{
+			name:      "OK Record not found",
+			input:     &iam.IsAuthorizedTokenRequest{AccessTokenId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			want:      &iam.IsAuthorizedTokenResponse{Ok: false},
+			mockError: gorm.ErrRecordNotFound,
+		},
+		{
+			name:    "NG Invalid parameter (invalid actionName format)",
+			input:   &iam.IsAuthorizedTokenRequest{AccessTokenId: 111, ProjectId: 1001, ActionName: "finding----PutFinding", ResourceName: "github:code-scan/repository-name"},
+			wantErr: true,
+		},
+		{
+			name:      "NG Invalid DB error",
+			input:     &iam.IsAuthorizedTokenRequest{AccessTokenId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			wantErr:   true,
+			mockError: gorm.ErrInvalidDB,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if c.mockResponce != nil || c.mockError != nil {
+				mock.On("GetTokenPolicy").Return(c.mockResponce, c.mockError).Once()
+			}
+			got, err := svc.IsAuthorizedToken(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestIsAuthorizedByPolicy(t *testing.T) {
+	// test data
+	validPolicies := &[]model.Policy{
+		{PolicyID: 1, Name: "viewer", ProjectID: 1, ActionPtn: "finding/(Get|List|Describe)", ResourcePtn: ".*"},
+		{PolicyID: 2, Name: "put", ProjectID: 1, ActionPtn: "finding/Put.*", ResourcePtn: "aws:.*"},
+	}
+	invalidPolicies := &[]model.Policy{
+		{PolicyID: 1, Name: "viewer", ProjectID: 1, ActionPtn: "(", ResourcePtn: ")"},
+	}
+	// test cases
+	cases := []struct {
+		name      string
+		projectID uint32
+		action    string
+		resource  string
+		policy    *[]model.Policy
+		want      bool
+		wantErr   bool
+	}{
+		{
+			name:      "OK Authorized 1",
+			projectID: 1,
+			action:    "finding/PutFinding",
+			resource:  "aws:guardduty/ec2-instance-id",
+			policy:    validPolicies,
+			want:      true,
+		},
+		{
+			name:      "Authorized 2",
+			projectID: 1,
+			action:    "finding/ListFinding",
+			resource:  "aws:guardduty/ec2-instance-id",
+			policy:    validPolicies,
+			want:      true,
+		},
+		{
+			name:      "Authorized 3",
+			projectID: 1,
+			action:    "finding/DescribeFinding",
+			resource:  "aws:guardduty/ec2-instance-id",
+			policy:    validPolicies,
+			want:      true,
+		},
+		{
+			name:      "Unauthorized (Not allow project)",
+			projectID: 999,
+			action:    "finding/PutFinding",
+			resource:  "aws:guardduty/ec2-instance-id",
+			policy:    validPolicies,
+			want:      false,
+		},
+		{
+			name:      "Unauthorized (Not allow action)",
+			projectID: 1,
+			action:    "finding/DeleteFinding",
+			resource:  "aws:guardduty/ec2-instance-id",
+			policy:    validPolicies,
+			want:      false,
+		},
+		{
+			name:      "Unauthorized (Not allow resource)",
+			projectID: 1,
+			action:    "finding/PutFinding",
+			resource:  "github:code-scan/repository-name",
+			policy:    validPolicies,
+			want:      false,
+		},
+		{
+			name:      "Error",
+			projectID: 1,
+			action:    "finding/PutFinding",
+			resource:  "aws:guardduty/ec2-instance-id",
+			policy:    invalidPolicies,
+			want:      false,
+			wantErr:   true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got, err := isAuthorizedByPolicy(c.projectID, c.action, c.resource, c.policy)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -168,11 +286,15 @@ func (m *mockIAMRepository) GetUserPolicy(context.Context, uint32) (*[]model.Pol
 	args := m.Called()
 	return args.Get(0).(*[]model.Policy), args.Error(1)
 }
+func (m *mockIAMRepository) GetTokenPolicy(context.Context, uint32) (*[]model.Policy, error) {
+	args := m.Called()
+	return args.Get(0).(*[]model.Policy), args.Error(1)
+}
 func (m *mockIAMRepository) PutUser(context.Context, *model.User) (*model.User, error) {
 	args := m.Called()
 	return args.Get(0).(*model.User), args.Error(1)
 }
-func (m *mockIAMRepository) ListRole(context.Context, uint32, string, uint32) (*[]model.Role, error) {
+func (m *mockIAMRepository) ListRole(ctx context.Context, projectID uint32, name string, userID uint32, accessTokenID uint32) (*[]model.Role, error) {
 	args := m.Called()
 	return args.Get(0).(*[]model.Role), args.Error(1)
 }
@@ -228,8 +350,43 @@ func (m *mockIAMRepository) DetachPolicy(context.Context, uint32, uint32, uint32
 	args := m.Called()
 	return args.Error(0)
 }
-
 func (m *mockIAMRepository) GetAdminPolicy(context.Context, uint32) (*model.Policy, error) {
 	args := m.Called()
 	return args.Get(0).(*model.Policy), args.Error(1)
+}
+func (m *mockIAMRepository) ListAccessToken(ctx context.Context, projectID uint32, name string, accessTokenID uint32) (*[]model.AccessToken, error) {
+	args := m.Called()
+	return args.Get(0).(*[]model.AccessToken), args.Error(1)
+}
+func (m *mockIAMRepository) GetActiveAccessTokenByID(ctx context.Context, projectID, accessTokenID uint32) (*model.AccessToken, error) {
+	args := m.Called()
+	return args.Get(0).(*model.AccessToken), args.Error(1)
+}
+func (m *mockIAMRepository) GetAccessTokenByUniqueKey(ctx context.Context, projectID uint32, name string) (*model.AccessToken, error) {
+	args := m.Called()
+	return args.Get(0).(*model.AccessToken), args.Error(1)
+}
+func (m *mockIAMRepository) GetActiveAccessTokenHash(ctx context.Context, projectID, accessTokenID uint32, tokenHash string) (*model.AccessToken, error) {
+	args := m.Called()
+	return args.Get(0).(*model.AccessToken), args.Error(1)
+}
+func (m *mockIAMRepository) PutAccessToken(ctx context.Context, r *model.AccessToken) (*model.AccessToken, error) {
+	args := m.Called()
+	return args.Get(0).(*model.AccessToken), args.Error(1)
+}
+func (m *mockIAMRepository) DeleteAccessToken(ctx context.Context, projectID, accessTokenID uint32) error {
+	args := m.Called()
+	return args.Error(0)
+}
+func (m *mockIAMRepository) AttachAccessTokenRole(ctx context.Context, projectID, roleID, accessTokenID uint32) (*model.AccessTokenRole, error) {
+	args := m.Called()
+	return args.Get(0).(*model.AccessTokenRole), args.Error(1)
+}
+func (m *mockIAMRepository) GetAccessTokenRole(ctx context.Context, accessTokenID, roleID uint32) (*model.AccessTokenRole, error) {
+	args := m.Called()
+	return args.Get(0).(*model.AccessTokenRole), args.Error(1)
+}
+func (m *mockIAMRepository) DetachAccessTokenRole(ctx context.Context, projectID, roleID, accessTokenID uint32) error {
+	args := m.Called()
+	return args.Error(0)
 }

@@ -29,6 +29,27 @@ func (i *iamDB) GetUserPolicy(ctx context.Context, userID uint32) (*[]model.Poli
 	return &data, nil
 }
 
+const selectGetTokenPolicy = `
+select
+  p.* 
+from
+  access_token at
+  inner join access_token_role ur using(access_token_id)
+  inner join role_policy rp using(role_id)
+  inner join policy p using(policy_id) 
+where
+  at.expired_at >= NOW()
+  and at.access_token_id = ?
+`
+
+func (i *iamDB) GetTokenPolicy(ctx context.Context, accessTokenID uint32) (*[]model.Policy, error) {
+	var data []model.Policy
+	if err := i.Slave.WithContext(ctx).Raw(selectGetTokenPolicy, accessTokenID).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
 const selectGetAdminPolicy = `
 select
   p.* 
