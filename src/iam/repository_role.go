@@ -8,7 +8,7 @@ import (
 	"github.com/vikyd/zero"
 )
 
-func (i *iamDB) ListRole(ctx context.Context, projectID uint32, name string, userID uint32) (*[]model.Role, error) {
+func (i *iamDB) ListRole(ctx context.Context, projectID uint32, name string, userID uint32, accessTokenID uint32) (*[]model.Role, error) {
 	query := `select * from role r where project_id = ?`
 	var params []interface{}
 	params = append(params, projectID)
@@ -19,6 +19,10 @@ func (i *iamDB) ListRole(ctx context.Context, projectID uint32, name string, use
 	if !zero.IsZeroVal(userID) {
 		query += " and exists (select * from user_role ur where ur.role_id = r.role_id and ur.user_id = ? )"
 		params = append(params, userID)
+	}
+	if !zero.IsZeroVal(accessTokenID) {
+		query += " and exists (select * from access_token_role atr where atr.role_id = r.role_id and atr.expired_at >= NOW() and atr.access_token_id = ? )"
+		params = append(params, accessTokenID)
 	}
 	var data []model.Role
 	if err := i.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {

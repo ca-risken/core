@@ -8,35 +8,48 @@ import (
 	mimosasql "github.com/CyberAgent/mimosa-common/pkg/database/sql"
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/vikyd/zero"
 	"gorm.io/gorm"
 )
 
 type iamRepository interface {
 	// User
 	ListUser(ctx context.Context, activated bool, projectID uint32, name string, userID uint32) (*[]model.User, error)
-	GetUser(context.Context, uint32, string) (*model.User, error)
-	GetUserBySub(context.Context, string) (*model.User, error)
-	PutUser(context.Context, *model.User) (*model.User, error)
+	GetUser(ctx context.Context, userID uint32, sub string) (*model.User, error)
+	GetUserBySub(ctx context.Context, sub string) (*model.User, error)
+	PutUser(ctx context.Context, u *model.User) (*model.User, error)
 
 	// Role
-	ListRole(context.Context, uint32, string, uint32) (*[]model.Role, error)
-	GetRole(context.Context, uint32, uint32) (*model.Role, error)
-	GetRoleByName(context.Context, uint32, string) (*model.Role, error)
+	ListRole(ctx context.Context, projectID uint32, name string, userID uint32, accessTokenID uint32) (*[]model.Role, error)
+	GetRole(ctx context.Context, projectID, roleID uint32) (*model.Role, error)
+	GetRoleByName(ctx context.Context, projectID uint32, name string) (*model.Role, error)
 	PutRole(ctx context.Context, r *model.Role) (*model.Role, error)
-	DeleteRole(context.Context, uint32, uint32) error
-	AttachRole(context.Context, uint32, uint32, uint32) (*model.UserRole, error)
-	DetachRole(context.Context, uint32, uint32, uint32) error
+	DeleteRole(ctx context.Context, projectID, roleID uint32) error
+	AttachRole(ctx context.Context, projectID, roleID, userID uint32) (*model.UserRole, error)
+	DetachRole(ctx context.Context, projectID, roleID, userID uint32) error
 
 	// Policy
-	GetUserPolicy(context.Context, uint32) (*[]model.Policy, error)
-	GetAdminPolicy(context.Context, uint32) (*model.Policy, error)
-	ListPolicy(context.Context, uint32, string, uint32) (*[]model.Policy, error)
-	GetPolicy(context.Context, uint32, uint32) (*model.Policy, error)
-	GetPolicyByName(context.Context, uint32, string) (*model.Policy, error)
-	PutPolicy(context.Context, *model.Policy) (*model.Policy, error)
-	DeletePolicy(context.Context, uint32, uint32) error
-	AttachPolicy(context.Context, uint32, uint32, uint32) (*model.RolePolicy, error)
-	DetachPolicy(context.Context, uint32, uint32, uint32) error
+	GetUserPolicy(ctx context.Context, userID uint32) (*[]model.Policy, error)
+	GetTokenPolicy(ctx context.Context, accessTokenID uint32) (*[]model.Policy, error)
+	GetAdminPolicy(ctx context.Context, userID uint32) (*model.Policy, error)
+	ListPolicy(ctx context.Context, projectID uint32, name string, roleID uint32) (*[]model.Policy, error)
+	GetPolicy(ctx context.Context, projectID, policyID uint32) (*model.Policy, error)
+	GetPolicyByName(ctx context.Context, projectID uint32, name string) (*model.Policy, error)
+	PutPolicy(ctx context.Context, p *model.Policy) (*model.Policy, error)
+	DeletePolicy(ctx context.Context, projectID, policyID uint32) error
+	AttachPolicy(ctx context.Context, projectID, roleID, policyID uint32) (*model.RolePolicy, error)
+	DetachPolicy(ctx context.Context, projectID, roleID, policyID uint32) error
+
+	// AccessToken
+	ListAccessToken(ctx context.Context, projectID uint32, name string, accessTokenID uint32) (*[]model.AccessToken, error)
+	GetActiveAccessTokenByID(ctx context.Context, projectID, accessTokenID uint32) (*model.AccessToken, error)
+	GetAccessTokenByUniqueKey(ctx context.Context, projectID uint32, name string) (*model.AccessToken, error)
+	GetActiveAccessTokenHash(ctx context.Context, projectID, accessTokenID uint32, tokenHash string) (*model.AccessToken, error)
+	PutAccessToken(ctx context.Context, r *model.AccessToken) (*model.AccessToken, error)
+	DeleteAccessToken(ctx context.Context, projectID, accessTokenID uint32) error
+	AttachAccessTokenRole(ctx context.Context, projectID, roleID, accessTokenID uint32) (*model.AccessTokenRole, error)
+	GetAccessTokenRole(ctx context.Context, accessTokenID, roleID uint32) (*model.AccessTokenRole, error)
+	DetachAccessTokenRole(ctx context.Context, projectID, roleID, accessTokenID uint32) error
 }
 
 type iamDB struct {
@@ -120,4 +133,21 @@ func (i *iamDB) policyExists(ctx context.Context, projectID, policyID uint32) bo
 		return false
 	}
 	return true
+}
+
+func (i *iamDB) accessTokenExists(ctx context.Context, projectID, accessTokenID uint32) bool {
+	if _, err := i.GetActiveAccessTokenByID(ctx, projectID, accessTokenID); errors.Is(err, gorm.ErrRecordNotFound) {
+		return false
+	} else if err != nil {
+		appLogger.Errorf("[accessTokenExists]DB error: project_id=%d, access_token_id=%d", projectID, accessTokenID)
+		return false
+	}
+	return true
+}
+
+func convertZeroValueToNull(input interface{}) interface{} {
+	if input == nil || zero.IsZeroVal(input) {
+		return gorm.Expr("NULL")
+	}
+	return input
 }
