@@ -205,7 +205,7 @@ func (a *AccessTokenForUpsert) Validate() error {
 		validation.Field(&a.Name, validation.Required, validation.Length(0, 64)),
 		validation.Field(&a.Description, validation.Length(0, 255)),
 		validation.Field(&a.ExpiredAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
-		validation.Field(&a.LastUpdatedUesrId, validation.Required),
+		validation.Field(&a.LastUpdatedUserId, validation.Required),
 	)
 }
 

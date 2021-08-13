@@ -758,7 +758,7 @@ func TestValidate_PutAccessTokenRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &PutAccessTokenRequest{ProjectId: 1, AccessToken: &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUesrId: 1}},
+			input:   &PutAccessTokenRequest{ProjectId: 1, AccessToken: &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUserId: 1}},
 			wantErr: false,
 		},
 		{
@@ -768,7 +768,7 @@ func TestValidate_PutAccessTokenRequest(t *testing.T) {
 		},
 		{
 			name:    "NG NotMatch(project_id)",
-			input:   &PutAccessTokenRequest{ProjectId: 999, AccessToken: &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUesrId: 1}},
+			input:   &PutAccessTokenRequest{ProjectId: 999, AccessToken: &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUseƒrId: 1}},
 			wantErr: true,
 		},
 	}
@@ -792,37 +792,37 @@ func TestValidate_AccessTokenForUpsert(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUesrId: 1},
+			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUserId: 1},
 			wantErr: false,
 		},
 		{
 			name:    "NG Required(project_id)",
-			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ExpiredAt: 0, LastUpdatedUesrId: 1},
+			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ExpiredAt: 0, LastUpdatedUserId: 1},
 			wantErr: true,
 		},
 		{
 			name:    "NG Required(name)",
-			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUesrId: 1},
+			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUserId: 1},
 			wantErr: true,
 		},
 		{
 			name:    "NG Length(name)",
-			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: length65string, Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUesrId: 1},
+			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: length65string, Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUserId: 1},
 			wantErr: true,
 		},
 		{
 			name:    "NG Length(description)",
-			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: length256string, ProjectId: 1, ExpiredAt: 0, LastUpdatedUesrId: 1},
+			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: length256string, ProjectId: 1, ExpiredAt: 0, LastUpdatedUserId: 1},
 			wantErr: true,
 		},
 		{
 			name:    "NG Min(expired_at)",
-			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: -1, LastUpdatedUesrId: 1},
+			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: -1, LastUpdatedUserId: 1},
 			wantErr: true,
 		},
 		{
 			name:    "NG Max(expired_at)",
-			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: 253402268400, LastUpdatedUesrId: 1},
+			input:   &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: 253402268400, LastUpdatedUserId: 1},
 			wantErr: true,
 		},
 		{
