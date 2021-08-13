@@ -5,16 +5,16 @@ go 1.16
 require (
 	github.com/CyberAgent/mimosa-common/pkg/database v0.0.0-20210811114519-3370ca0f108e
 	github.com/CyberAgent/mimosa-common/pkg/xray v0.0.0-20210811114519-3370ca0f108e
-	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210812033720-63a233697501
-	github.com/CyberAgent/mimosa-core/proto/iam v0.0.0-20210812033720-63a233697501
+	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210813080420-cfd90fae406e
+	github.com/CyberAgent/mimosa-core/proto/iam v0.0.0-20210813080420-cfd90fae406e
 	github.com/andybalholm/brotli v1.0.3 // indirect
-	github.com/aws/aws-sdk-go v1.40.20 // indirect
+	github.com/aws/aws-sdk-go v1.40.21 // indirect
 	github.com/aws/aws-xray-sdk-go v1.6.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/klauspost/compress v1.13.3 // indirect
+	github.com/klauspost/compress v1.13.4 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	github.com/valyala/fasthttp v1.28.0 // indirect
@@ -24,6 +24,6 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/genproto v0.0.0-20210811021853-ddbe55d93216 // indirect
 	google.golang.org/grpc v1.40.0
-	gorm.io/driver/mysql v1.1.2
+	gorm.io/driver/mysql v1.1.2 // indirect
 	gorm.io/gorm v1.21.13
 )

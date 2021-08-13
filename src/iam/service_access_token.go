@@ -39,7 +39,7 @@ func convertAccessToken(a *model.AccessToken) *iam.AccessToken {
 		Description:       a.Description,
 		ProjectId:         a.ProjectID,
 		ExpiredAt:         a.ExpiredAt.Unix(),
-		LastUpdatedUesrId: a.LastUpdatedUserID,
+		LastUpdatedUserId: a.LastUpdatedUserID,
 		CreatedAt:         a.CreatedAt.Unix(),
 		UpdatedAt:         a.UpdatedAt.Unix(),
 	}
@@ -99,7 +99,7 @@ func (i *iamService) PutAccessToken(ctx context.Context, req *iam.PutAccessToken
 		Description:       req.AccessToken.Description,
 		ProjectID:         req.AccessToken.ProjectId,
 		ExpiredAt:         expiredAt,
-		LastUpdatedUserID: req.AccessToken.LastUpdatedUesrId,
+		LastUpdatedUserID: req.AccessToken.LastUpdatedUserId,
 	}
 
 	// upsert
