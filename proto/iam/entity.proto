@@ -98,7 +98,7 @@ message AccessTokenForUpsert {
   string description = 4;
   uint32 project_id = 5;
   int64 expired_at = 6;
-  uint32 last_updated_uesr_id = 7;
+  uint32 last_updated_user_id = 7;
 }
 
 message AccessTokenRole {
