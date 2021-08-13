@@ -768,7 +768,7 @@ func TestValidate_PutAccessTokenRequest(t *testing.T) {
 		},
 		{
 			name:    "NG NotMatch(project_id)",
-			input:   &PutAccessTokenRequest{ProjectId: 999, AccessToken: &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUseƒrId: 1}},
+			input:   &PutAccessTokenRequest{ProjectId: 999, AccessToken: &AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "token", Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: 0, LastUpdatedUserId: 1}},
 			wantErr: true,
 		},
 	}
