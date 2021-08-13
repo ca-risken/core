@@ -85,7 +85,7 @@ message AccessToken {
   string description = 3;
   uint32 project_id = 4;
   int64 expired_at = 5;
-  uint32 last_updated_uesr_id = 6;
+  uint32 last_updated_user_id = 6;
   int64 created_at = 7;
   int64 updated_at = 8;
 }
