@@ -28,7 +28,7 @@ func TestListAccessToken(t *testing.T) {
 			name:  "OK",
 			input: &iam.ListAccessTokenRequest{ProjectId: 1, Name: "nm", AccessTokenId: 1},
 			want: &iam.ListAccessTokenResponse{AccessToken: []*iam.AccessToken{
-				{AccessTokenId: 1, Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: now.Unix(), LastUpdatedUesrId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+				{AccessTokenId: 1, Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: now.Unix(), LastUpdatedUserId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 			}},
 			mockResponce: &[]model.AccessToken{
 				{AccessTokenID: 1, TokenHash: "xxx", Name: "nm", Description: "desc", ProjectID: 1, ExpiredAt: now, LastUpdatedUserID: 1, CreatedAt: now, UpdatedAt: now},
@@ -84,7 +84,7 @@ func TestAuthenticateAccessToken(t *testing.T) {
 		{
 			name:         "OK",
 			input:        &iam.AuthenticateAccessTokenRequest{ProjectId: 1, AccessTokenId: 1, PlainTextToken: "xxx"},
-			want:         &iam.AuthenticateAccessTokenResponse{AccessToken: &iam.AccessToken{AccessTokenId: 1, Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: now.Unix(), LastUpdatedUesrId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			want:         &iam.AuthenticateAccessTokenResponse{AccessToken: &iam.AccessToken{AccessTokenId: 1, Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: now.Unix(), LastUpdatedUserId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockResponce: &model.AccessToken{AccessTokenID: 1, Name: "nm", Description: "desc", ProjectID: 1, ExpiredAt: now, LastUpdatedUserID: 1, CreatedAt: now, UpdatedAt: now},
 		},
 		{
@@ -138,32 +138,32 @@ func TestPutAccessToken(t *testing.T) {
 	}{
 		{
 			name:        "OK Insert",
-			input:       &iam.PutAccessTokenRequest{ProjectId: 1, AccessToken: &iam.AccessTokenForUpsert{PlainTextToken: "xxx", Name: "nm", Description: "desc", ProjectId: 1, LastUpdatedUesrId: 1}},
-			want:        &iam.PutAccessTokenResponse{AccessToken: &iam.AccessToken{AccessTokenId: 1, Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: now.Unix(), LastUpdatedUesrId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			input:       &iam.PutAccessTokenRequest{ProjectId: 1, AccessToken: &iam.AccessTokenForUpsert{PlainTextToken: "xxx", Name: "nm", Description: "desc", ProjectId: 1, LastUpdatedUserId: 1}},
+			want:        &iam.PutAccessTokenResponse{AccessToken: &iam.AccessToken{AccessTokenId: 1, Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: now.Unix(), LastUpdatedUserId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetErr:  gorm.ErrRecordNotFound,
 			mockUpdResp: &model.AccessToken{AccessTokenID: 1, TokenHash: "xxx", Name: "nm", Description: "desc", ProjectID: 1, ExpiredAt: now, LastUpdatedUserID: 1, CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:        "OK Update",
-			input:       &iam.PutAccessTokenRequest{ProjectId: 1, AccessToken: &iam.AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "xxx", Name: "nm", Description: "desc", ProjectId: 1, LastUpdatedUesrId: 1}},
-			want:        &iam.PutAccessTokenResponse{AccessToken: &iam.AccessToken{AccessTokenId: 1, Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: now.Unix(), LastUpdatedUesrId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			input:       &iam.PutAccessTokenRequest{ProjectId: 1, AccessToken: &iam.AccessTokenForUpsert{AccessTokenId: 1, PlainTextToken: "xxx", Name: "nm", Description: "desc", ProjectId: 1, LastUpdatedUserId: 1}},
+			want:        &iam.PutAccessTokenResponse{AccessToken: &iam.AccessToken{AccessTokenId: 1, Name: "nm", Description: "desc", ProjectId: 1, ExpiredAt: now.Unix(), LastUpdatedUserId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetResp: &model.AccessToken{AccessTokenID: 1, TokenHash: "xxx", Name: "nm", Description: "desc", ProjectID: 1, ExpiredAt: now, LastUpdatedUserID: 1, CreatedAt: now, UpdatedAt: now},
 			mockUpdResp: &model.AccessToken{AccessTokenID: 1, TokenHash: "xxx", Name: "nm", Description: "desc", ProjectID: 1, ExpiredAt: now, LastUpdatedUserID: 1, CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:    "NG Invalid param",
-			input:   &iam.PutAccessTokenRequest{ProjectId: 999, AccessToken: &iam.AccessTokenForUpsert{PlainTextToken: "xxx", Name: "nm", Description: "desc", ProjectId: 1, LastUpdatedUesrId: 1}},
+			input:   &iam.PutAccessTokenRequest{ProjectId: 999, AccessToken: &iam.AccessTokenForUpsert{PlainTextToken: "xxx", Name: "nm", Description: "desc", ProjectId: 1, LastUpdatedUserId: 1}},
 			wantErr: true,
 		},
 		{
 			name:       "NG DB error(Get)",
-			input:      &iam.PutAccessTokenRequest{ProjectId: 1, AccessToken: &iam.AccessTokenForUpsert{PlainTextToken: "xxx", Name: "nm", Description: "desc", ProjectId: 1, LastUpdatedUesrId: 1}},
+			input:      &iam.PutAccessTokenRequest{ProjectId: 1, AccessToken: &iam.AccessTokenForUpsert{PlainTextToken: "xxx", Name: "nm", Description: "desc", ProjectId: 1, LastUpdatedUserId: 1}},
 			mockGetErr: gorm.ErrInvalidTransaction,
 			wantErr:    true,
 		},
 		{
 			name:       "NG DB error(Put)",
-			input:      &iam.PutAccessTokenRequest{ProjectId: 1, AccessToken: &iam.AccessTokenForUpsert{PlainTextToken: "xxx", Name: "nm", Description: "desc", ProjectId: 1, LastUpdatedUesrId: 1}},
+			input:      &iam.PutAccessTokenRequest{ProjectId: 1, AccessToken: &iam.AccessTokenForUpsert{PlainTextToken: "xxx", Name: "nm", Description: "desc", ProjectId: 1, LastUpdatedUserId: 1}},
 			mockGetErr: gorm.ErrRecordNotFound,
 			mockUpdErr: gorm.ErrInvalidTransaction,
 			wantErr:    true,
