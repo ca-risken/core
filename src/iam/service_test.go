@@ -71,27 +71,42 @@ func TestIsAuthorizedToken(t *testing.T) {
 	mock := mockIAMRepository{}
 	svc := iamService{repository: &mock}
 	cases := []struct {
-		name         string
-		input        *iam.IsAuthorizedTokenRequest
-		want         *iam.IsAuthorizedTokenResponse
-		wantErr      bool
-		mockResponce *[]model.Policy
-		mockError    error
+		name    string
+		input   *iam.IsAuthorizedTokenRequest
+		want    *iam.IsAuthorizedTokenResponse
+		wantErr bool
+
+		// Mock setting
+		callMockMaintainerCheck bool
+		mockMaintainerCheckResp bool
+		mockMaintainerCheckErr  error
+
+		callMockGetTokenPolicy  bool
+		mockGetTokenPolicyResp  *[]model.Policy
+		mockGetTokenPolicyError error
 	}{
 		{
 			name:  "OK Authorized",
 			input: &iam.IsAuthorizedTokenRequest{AccessTokenId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
 			want:  &iam.IsAuthorizedTokenResponse{Ok: true},
-			mockResponce: &[]model.Policy{
+
+			callMockMaintainerCheck: true,
+			mockMaintainerCheckResp: true,
+			callMockGetTokenPolicy:  true,
+			mockGetTokenPolicyResp: &[]model.Policy{
 				{PolicyID: 101, Name: "viewer", ProjectID: 1001, ActionPtn: "finding/(Get|List|Describe)", ResourcePtn: ".*"},
 				{PolicyID: 102, Name: "put for aws", ProjectID: 1001, ActionPtn: "finding/Put.*", ResourcePtn: "aws:.*"},
 			},
 		},
 		{
-			name:      "OK Record not found",
-			input:     &iam.IsAuthorizedTokenRequest{AccessTokenId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
-			want:      &iam.IsAuthorizedTokenResponse{Ok: false},
-			mockError: gorm.ErrRecordNotFound,
+			name:  "OK Record not found",
+			input: &iam.IsAuthorizedTokenRequest{AccessTokenId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			want:  &iam.IsAuthorizedTokenResponse{Ok: false},
+
+			callMockMaintainerCheck: true,
+			mockMaintainerCheckResp: true,
+			callMockGetTokenPolicy:  true,
+			mockGetTokenPolicyError: gorm.ErrRecordNotFound,
 		},
 		{
 			name:    "NG Invalid parameter (invalid actionName format)",
@@ -99,16 +114,40 @@ func TestIsAuthorizedToken(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG Invalid DB error",
-			input:     &iam.IsAuthorizedTokenRequest{AccessTokenId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
-			wantErr:   true,
-			mockError: gorm.ErrInvalidDB,
+			name:    "NG Invalid DB error",
+			input:   &iam.IsAuthorizedTokenRequest{AccessTokenId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			wantErr: true,
+
+			callMockMaintainerCheck: true,
+			mockMaintainerCheckResp: true,
+			callMockGetTokenPolicy:  true,
+			mockGetTokenPolicyError: gorm.ErrInvalidDB,
+		},
+		{
+			name:  "NG No maintainer token",
+			input: &iam.IsAuthorizedTokenRequest{AccessTokenId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			want:  &iam.IsAuthorizedTokenResponse{Ok: false},
+
+			callMockMaintainerCheck: true,
+			mockMaintainerCheckResp: false,
+		},
+		{
+			name:    "NG maintainer check error",
+			input:   &iam.IsAuthorizedTokenRequest{AccessTokenId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			wantErr: true,
+
+			callMockMaintainerCheck: true,
+			mockMaintainerCheckResp: false,
+			mockMaintainerCheckErr:  gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("GetTokenPolicy").Return(c.mockResponce, c.mockError).Once()
+			if c.callMockMaintainerCheck {
+				mock.On("ExistsAccessTokenMaintainer").Return(c.mockMaintainerCheckResp, c.mockMaintainerCheckErr).Once()
+			}
+			if c.callMockGetTokenPolicy {
+				mock.On("GetTokenPolicy").Return(c.mockGetTokenPolicyResp, c.mockGetTokenPolicyError).Once()
 			}
 			got, err := svc.IsAuthorizedToken(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -389,4 +428,8 @@ func (m *mockIAMRepository) GetAccessTokenRole(ctx context.Context, accessTokenI
 func (m *mockIAMRepository) DetachAccessTokenRole(ctx context.Context, projectID, roleID, accessTokenID uint32) error {
 	args := m.Called()
 	return args.Error(0)
+}
+func (m *mockIAMRepository) ExistsAccessTokenMaintainer(ctx context.Context, projectID, accessTokenID uint32) (bool, error) {
+	args := m.Called()
+	return args.Get(0).(bool), args.Error(1)
 }
