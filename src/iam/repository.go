@@ -50,6 +50,7 @@ type iamRepository interface {
 	AttachAccessTokenRole(ctx context.Context, projectID, roleID, accessTokenID uint32) (*model.AccessTokenRole, error)
 	GetAccessTokenRole(ctx context.Context, accessTokenID, roleID uint32) (*model.AccessTokenRole, error)
 	DetachAccessTokenRole(ctx context.Context, projectID, roleID, accessTokenID uint32) error
+	ExistsAccessTokenMaintainer(ctx context.Context, projectID, accessTokenID uint32) (bool, error)
 }
 
 type iamDB struct {

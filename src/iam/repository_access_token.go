@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/vikyd/zero"
+	"gorm.io/gorm"
 )
 
 func (i *iamDB) ListAccessToken(ctx context.Context, projectID uint32, name string, accessTokenID uint32) (*[]model.AccessToken, error) {
@@ -145,4 +147,28 @@ func (i *iamDB) DetachAccessTokenRole(ctx context.Context, projectID, roleID, ac
 			"Not found access_token or role: access_token_id=%d, role_id=%d, project_id=%d", accessTokenID, roleID, projectID)
 	}
 	return i.Master.WithContext(ctx).Exec(deleteDetachAccessTokenRole, accessTokenID, roleID).Error
+}
+
+const selectExistsAccessTokenMaintainer = `
+select
+  user_id 
+from
+  access_token at
+  inner join role r using(project_id)
+  inner join user_role ur using(role_id)
+  inner join user u using(user_id)
+where
+  at.project_id=? 
+  and at.access_token_id=?
+  and u.activated='true'
+`
+
+func (i *iamDB) ExistsAccessTokenMaintainer(ctx context.Context, projectID, accessTokenID uint32) (bool, error) {
+	var data model.AccessToken
+	if err := i.Slave.WithContext(ctx).Raw(selectExistsAccessTokenMaintainer, projectID, accessTokenID).First(&data).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+	return true, nil
 }
