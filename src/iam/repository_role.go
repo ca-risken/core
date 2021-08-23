@@ -21,7 +21,7 @@ func (i *iamDB) ListRole(ctx context.Context, projectID uint32, name string, use
 		params = append(params, userID)
 	}
 	if !zero.IsZeroVal(accessTokenID) {
-		query += " and exists (select * from access_token_role atr where atr.role_id = r.role_id and atr.expired_at >= NOW() and atr.access_token_id = ? )"
+		query += " and exists (select * from access_token_role atr inner join access_token at using(access_token_id) where atr.role_id = r.role_id and at.expired_at >= NOW() and atr.access_token_id = ? )"
 		params = append(params, accessTokenID)
 	}
 	var data []model.Role

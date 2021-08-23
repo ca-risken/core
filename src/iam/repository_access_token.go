@@ -30,11 +30,11 @@ func (i *iamDB) ListAccessToken(ctx context.Context, projectID uint32, name stri
 	return &data, nil
 }
 
-const selectGetActiveAccessTokenByID = `select * from access_token where project_id=? and access_token_id=? and expired_at >= NOW()`
+const selectGetAccessTokenByID = `select * from access_token where project_id=? and access_token_id=?`
 
-func (i *iamDB) GetActiveAccessTokenByID(ctx context.Context, projectID, accessTokenID uint32) (*model.AccessToken, error) {
+func (i *iamDB) GetAccessTokenByID(ctx context.Context, projectID, accessTokenID uint32) (*model.AccessToken, error) {
 	var data model.AccessToken
-	if err := i.Master.WithContext(ctx).Raw(selectGetActiveAccessTokenByID, projectID, accessTokenID).First(&data).Error; err != nil {
+	if err := i.Master.WithContext(ctx).Raw(selectGetAccessTokenByID, projectID, accessTokenID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -106,7 +106,7 @@ where
   and exists(
     select * 
     from access_token at 
-    where at.access_token_id=atr.access_token_id and at.expired_at >= NOW()
+    where at.access_token_id=atr.access_token_id
   )
 `
 
@@ -159,6 +159,7 @@ from
   inner join user u using(user_id)
 where
   at.project_id=? 
+  and at.expired_at >= NOW()
   and at.access_token_id=?
   and u.activated='true'
 `

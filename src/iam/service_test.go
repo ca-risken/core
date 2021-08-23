@@ -397,7 +397,7 @@ func (m *mockIAMRepository) ListAccessToken(ctx context.Context, projectID uint3
 	args := m.Called()
 	return args.Get(0).(*[]model.AccessToken), args.Error(1)
 }
-func (m *mockIAMRepository) GetActiveAccessTokenByID(ctx context.Context, projectID, accessTokenID uint32) (*model.AccessToken, error) {
+func (m *mockIAMRepository) GetAccessTokenByID(ctx context.Context, projectID, accessTokenID uint32) (*model.AccessToken, error) {
 	args := m.Called()
 	return args.Get(0).(*model.AccessToken), args.Error(1)
 }
