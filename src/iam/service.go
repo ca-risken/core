@@ -51,7 +51,7 @@ func (i *iamService) IsAuthorizedToken(ctx context.Context, req *iam.IsAuthorize
 		return nil, err
 	}
 	if !existsMaintainer {
-		appLogger.Warnf("Unautorized the token that has no maintainers in the project. project_id=%d, access_token_id=%d", req.ProjectId, req.AccessTokenId)
+		appLogger.Warnf("Unautorized the token that has no maintainers or expired in the project. project_id=%d, access_token_id=%d", req.ProjectId, req.AccessTokenId)
 		return &iam.IsAuthorizedTokenResponse{Ok: false}, nil
 	}
 	policies, err := i.repository.GetTokenPolicy(ctx, req.AccessTokenId)

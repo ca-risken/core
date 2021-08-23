@@ -42,7 +42,7 @@ type iamRepository interface {
 
 	// AccessToken
 	ListAccessToken(ctx context.Context, projectID uint32, name string, accessTokenID uint32) (*[]model.AccessToken, error)
-	GetActiveAccessTokenByID(ctx context.Context, projectID, accessTokenID uint32) (*model.AccessToken, error)
+	GetAccessTokenByID(ctx context.Context, projectID, accessTokenID uint32) (*model.AccessToken, error)
 	GetAccessTokenByUniqueKey(ctx context.Context, projectID uint32, name string) (*model.AccessToken, error)
 	GetActiveAccessTokenHash(ctx context.Context, projectID, accessTokenID uint32, tokenHash string) (*model.AccessToken, error)
 	PutAccessToken(ctx context.Context, r *model.AccessToken) (*model.AccessToken, error)
@@ -137,7 +137,7 @@ func (i *iamDB) policyExists(ctx context.Context, projectID, policyID uint32) bo
 }
 
 func (i *iamDB) accessTokenExists(ctx context.Context, projectID, accessTokenID uint32) bool {
-	if _, err := i.GetActiveAccessTokenByID(ctx, projectID, accessTokenID); errors.Is(err, gorm.ErrRecordNotFound) {
+	if _, err := i.GetAccessTokenByID(ctx, projectID, accessTokenID); errors.Is(err, gorm.ErrRecordNotFound) {
 		return false
 	} else if err != nil {
 		appLogger.Errorf("[accessTokenExists]DB error: project_id=%d, access_token_id=%d", projectID, accessTokenID)
