@@ -151,7 +151,7 @@ func (i *iamDB) DetachAccessTokenRole(ctx context.Context, projectID, roleID, ac
 
 const selectExistsAccessTokenMaintainer = `
 select
-  user_id 
+  u.user_id 
 from
   access_token at
   inner join role r using(project_id)
@@ -165,7 +165,7 @@ where
 `
 
 func (i *iamDB) ExistsAccessTokenMaintainer(ctx context.Context, projectID, accessTokenID uint32) (bool, error) {
-	var data model.AccessToken
+	var data model.User
 	if err := i.Slave.WithContext(ctx).Raw(selectExistsAccessTokenMaintainer, projectID, accessTokenID).First(&data).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		return false, nil
 	} else if err != nil {
