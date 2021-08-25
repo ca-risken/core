@@ -1,6 +1,20 @@
-.PHONY: all install clean network fmt build doc go-test go-mod-update go-mod-tidy run log stop
+TARGETS = alert finding iam project report
+BUILD_TARGETS = $(TARGETS:=.build)
+BUILD_CI_TARGETS = $(TARGETS:=.build-ci)
+IMAGE_PUSH_TARGETS = $(TARGETS:=.push-image)
+MANIFEST_CREATE_TARGETS = $(TARGETS:=.create-manifest)
+MANIFEST_PUSH_TARGETS = $(TARGETS:=.push-manifest)
+TEST_TARGETS = $(TARGETS:=.go-test)
+BUILD_OPT=""
+IMAGE_TAG=latest
+MANIFEST_TAG=latest
+IMAGE_PREFIX=core
+IMAGE_REGISTRY=local
+
+.PHONY: all
 all: run
 
+.PHONY: install
 install:
 	go get \
 		google.golang.org/grpc \
@@ -8,19 +22,16 @@ install:
 		github.com/envoyproxy/protoc-gen-validate \
 		github.com/grpc-ecosystem/go-grpc-middleware
 
+.PHONY: clean
 clean:
 	rm -f proto/*/*.pb.go
 	rm -f doc/*.md
-	docker-compose down --volumes --rmi all
-	docker network rm local-shared
 
-# @see https://github.com/CyberAgent/mimosa-common/tree/master/local
-network:
-	@if [ -z "`docker network ls | grep local-shared`" ]; then docker network create local-shared; fi
-
+.PHONY: fmt
 fmt: proto/**/*.proto
 	@clang-format -i proto/**/*.proto
 
+.PHONY: doc
 doc: fmt
 	protoc \
 		--proto_path=proto \
@@ -30,6 +41,7 @@ doc: fmt
 		proto/**/*.proto;
 
 # build without protoc-gen-validate
+.PHONY: proto-without-validation
 proto-without-validate: fmt
 	for svc in "alert" "finding" "iam"; do \
 		protoc \
@@ -40,6 +52,7 @@ proto-without-validate: fmt
 	done
 
 # build with protoc-gen-validate
+.PHONY: proto-validate
 proto-validate: fmt
 	for svc in "project" "report"; do \
 		protoc \
@@ -51,20 +64,46 @@ proto-validate: fmt
 			proto/$$svc/*.proto; \
 	done
 
+.PHONY: proto
 proto : proto-without-validate proto-validate
 
-go-test: proto
-	cd proto/finding && go test ./...
-	cd proto/iam     && go test ./...
-	cd proto/project && go test ./...
-	cd proto/alert   && go test ./...
-	cd proto/report  && go test ./...
-	cd src/finding   && go test ./...
-	cd src/iam       && go test ./...
-	cd src/project   && go test ./...
-	cd src/alert     && AWS_XRAY_SDK_DISABLED=TRUE go test ./...
-	cd src/report    && go test ./...
+PHONY: build $(BUILD_TARGETS)
+build: $(BUILD_TARGETS)
+%.build: %.go-test
+	. env.sh && TARGET=$(*) IMAGE_TAG=$(IMAGE_TAG) IMAGE_PREFIX=$(IMAGE_PREFIX) BUILD_OPT="$(BUILD_OPT)" . hack/docker-build.sh
 
+PHONY: build-ci $(BUILD_CI_TARGETS)
+build-ci: $(BUILD_CI_TARGETS)
+%.build-ci:
+	TARGET=$(*) IMAGE_TAG=$(IMAGE_TAG) IMAGE_PREFIX=$(IMAGE_PREFIX) BUILD_OPT="$(BUILD_OPT)" . hack/docker-build.sh
+	docker tag $(IMAGE_PREFIX)/$(*):$(IMAGE_TAG) $(IMAGE_REGISTRY)/$(IMAGE_PREFIX)/$(*):$(IMAGE_TAG)
+
+PHONY: push-image $(IMAGE_PUSH_TARGETS)
+push-image: $(IMAGE_PUSH_TARGETS)
+%.push-image:
+	docker push $(IMAGE_REGISTRY)/$(IMAGE_PREFIX)/$(*):$(IMAGE_TAG)
+
+PHONY: create-manifest $(MANIFEST_CREATE_TARGETS)
+create-manifest: $(MANIFEST_CREATE_TARGETS)
+%.create-manifest:
+	docker manifest create $(IMAGE_REGISTRY)/$(IMAGE_PREFIX)/$(*):$(MANIFEST_TAG) $(IMAGE_REGISTRY)/$(IMAGE_PREFIX)/$(*):$(IMAGE_TAG_BASE)_linux_amd64 $(IMAGE_REGISTRY)/$(IMAGE_PREFIX)/$(*):$(IMAGE_TAG_BASE)_linux_arm64
+	docker manifest annotate --arch amd64 $(IMAGE_REGISTRY)/$(IMAGE_PREFIX)/$(*):$(MANIFEST_TAG) $(IMAGE_REGISTRY)/$(IMAGE_PREFIX)/$(*):$(IMAGE_TAG_BASE)_linux_amd64
+	docker manifest annotate --arch arm64 $(IMAGE_REGISTRY)/$(IMAGE_PREFIX)/$(*):$(MANIFEST_TAG) $(IMAGE_REGISTRY)/$(IMAGE_PREFIX)/$(*):$(IMAGE_TAG_BASE)_linux_arm64
+
+PHONY: push-manifest $(MANIFEST_PUSH_TARGETS)
+push-manifest: $(MANIFEST_PUSH_TARGETS)
+%.push-manifest:
+	docker manifest push $(IMAGE_REGISTRY)/$(IMAGE_PREFIX)/$(*):$(MANIFEST_TAG)
+	docker manifest inspect $(IMAGE_REGISTRY)/$(IMAGE_PREFIX)/$(*):$(MANIFEST_TAG)
+
+PHONY: go-test $(TEST_TARGETS)
+go-test: $(TEST_TARGETS)
+%.go-test:
+	cd src/$(*) && AWS_XRAY_SDK_DISABLED=TRUE go test ./...
+	cd proto/$(*) && AWS_XRAY_SDK_DISABLED=TRUE go test ./...
+
+
+.PHONY: go-mod-tidy
 go-mod-tidy: proto
 	cd proto/finding && go mod tidy
 	cd proto/iam     && go mod tidy
@@ -77,6 +116,7 @@ go-mod-tidy: proto
 	cd src/alert     && go mod tidy
 	cd src/report    && go mod tidy
 
+.PHONY: go-mod-update
 go-mod-update:
 	cd src/finding \
 		&& go get -u \
@@ -94,38 +134,3 @@ go-mod-update:
 		&& go get -u \
 			github.com/CyberAgent/mimosa-core/...
 
-build: go-test
-	source env.sh && docker-compose build
-
-run: go-test network
-	. env.sh && docker-compose up -d --build 
-
-run-finding: go-test network
-	. env.sh && docker-compose up -d --build finding
-
-run-iam: go-test network
-	. env.sh && docker-compose up -d --build iam
-
-run-alert: go-test network
-	. env.sh && docker-compose up -d --build alert
-
-run-project: go-test network
-	. env.sh && docker-compose up -d --build project
-
-log:
-	. env.sh && docker-compose logs -f
-
-log-finding:
-	. env.sh && docker-compose logs -f finding
-
-log-project:
-	. env.sh && docker-compose logs -f project
-
-log-alert:
-	. env.sh && docker-compose logs -f alert
-
-log-report:
-	. env.sh && docker-compose logs -f report
-
-stop:
-	. env.sh && docker-compose down
