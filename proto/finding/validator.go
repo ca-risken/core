@@ -117,6 +117,14 @@ func (u *UntagFindingRequest) Validate() error {
 	)
 }
 
+// Validate ClearScoreRequest
+func (c *ClearScoreRequest) Validate() error {
+	return validation.ValidateStruct(c,
+		validation.Field(&c.DataSource, validation.Required, validation.Length(0, 64)),
+		validation.Field(&c.Tag, validation.Each(validation.Length(0, 64))),
+	)
+}
+
 // Validate ListResourceRequest
 func (l *ListResourceRequest) Validate() error {
 	return validation.ValidateStruct(l,

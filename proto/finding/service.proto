@@ -19,6 +19,7 @@ service FindingService {
       returns (ListFindingTagNameResponse);
   rpc TagFinding(TagFindingRequest) returns (TagFindingResponse);
   rpc UntagFinding(UntagFindingRequest) returns (google.protobuf.Empty);
+  rpc ClearScore(ClearScoreRequest) returns (google.protobuf.Empty);
 
   // resource
   rpc ListResource(ListResourceRequest) returns (ListResourceResponse);
@@ -150,6 +151,13 @@ message TagFindingResponse { FindingTag tag = 1; }
 message UntagFindingRequest {
   uint32 project_id = 1;
   uint64 finding_tag_id = 2;
+}
+
+message ClearScoreRequest {
+  string data_source = 1;
+  uint32 project_id = 2;
+  repeated string tag = 3;
+  uint64 finding_id = 4;
 }
 
 message ListResourceRequest {
