@@ -42,6 +42,8 @@ service IAMService {
       returns (AttachAccessTokenRoleResponse);
   rpc DetachAccessTokenRole(DetachAccessTokenRoleRequest)
       returns (google.protobuf.Empty);
+  rpc AnalyzeTokenExpiration(google.protobuf.Empty)
+      returns (google.protobuf.Empty); // For scheduled job
 
   // ユーザに対しての認可を行います
   rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
