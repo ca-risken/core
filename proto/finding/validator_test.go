@@ -513,6 +513,45 @@ func TestValidate_UntagFindingRequest(t *testing.T) {
 	}
 }
 
+func TestValidate_ClearScoreRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *ClearScoreRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &ClearScoreRequest{DataSource: "ds", ProjectId: 1, Tag: []string{"tag1", "tag2"}, FindingId: 1},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(data_source)",
+			input:   &ClearScoreRequest{ProjectId: 1, Tag: []string{"tag1", "tag2"}, FindingId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Length(finding_tag_id)",
+			input:   &ClearScoreRequest{DataSource: len65string},
+			wantErr: true,
+		},
+		{
+			name:    "NG Length(finding_tag_id)",
+			input:   &ClearScoreRequest{DataSource: "ds", Tag: []string{"tag1", len65string}},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
 func TestValidate_ListResourceRequest(t *testing.T) {
 	cases := []struct {
 		name    string
