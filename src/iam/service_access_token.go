@@ -4,10 +4,13 @@ import (
 	"context"
 	"crypto/sha512"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
+	"github.com/CyberAgent/mimosa-core/proto/finding"
 	"github.com/CyberAgent/mimosa-core/proto/iam"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
@@ -146,6 +149,65 @@ func (i *iamService) DetachAccessTokenRole(ctx context.Context, req *iam.DetachA
 	}
 	if err := i.repository.DetachAccessTokenRole(ctx, req.ProjectId, req.RoleId, req.AccessTokenId); err != nil {
 		return nil, err
+	}
+	return &empty.Empty{}, nil
+}
+
+const (
+	riskenDataSource = "RISKEN"
+	accessTokenTag   = "access-token"
+)
+
+func (i *iamService) AnalyzeTokenExpiration(ctx context.Context, _ *empty.Empty) (*empty.Empty, error) {
+	tokens, err := i.repository.ListExpiredAccessToken(ctx)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &empty.Empty{}, nil
+		}
+		return nil, err
+	}
+	// Clear score
+	if _, err := i.findingClient.ClearScore(ctx, &finding.ClearScoreRequest{
+		DataSource: riskenDataSource,
+		Tag:        []string{accessTokenTag},
+	}); err != nil {
+		return nil, err
+	}
+
+	// Put finding
+	for _, token := range *tokens {
+		token.TokenHash = "xxx" // mask credentials
+		buf, err := json.Marshal(token)
+		if err != nil {
+			appLogger.Errorf("Failed to encoding json, accessToken=%+v, err=%+v", token, err)
+			return nil, err
+		}
+		resp, err := i.findingClient.PutFinding(ctx, &finding.PutFindingRequest{
+			ProjectId: token.ProjectID,
+			Finding: &finding.FindingForUpsert{
+				Description:      "RISKEN AccessToken expired",
+				DataSource:       riskenDataSource,
+				DataSourceId:     fmt.Sprintf("risken-access-token-id-%d", token.AccessTokenID),
+				ResourceName:     token.Name,
+				ProjectId:        token.ProjectID,
+				OriginalScore:    0.8,
+				OriginalMaxScore: 1.0,
+				Data:             string(buf),
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+		if _, err = i.findingClient.TagFinding(ctx, &finding.TagFindingRequest{
+			ProjectId: token.ProjectID,
+			Tag: &finding.FindingTagForUpsert{
+				FindingId: resp.Finding.FindingId,
+				ProjectId: token.ProjectID,
+				Tag:       accessTokenTag, // tag
+			},
+		}); err != nil {
+			return nil, err
+		}
 	}
 	return &empty.Empty{}, nil
 }

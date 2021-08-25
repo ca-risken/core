@@ -182,3 +182,8 @@ detach-access-token-role:
 		-d '{"project_id":1001, "role_id":1002, "access_token_id": 1001}' \
 		iam.core.svc.cluster.local:8002 core.iam.IAMService.DetachAccessTokenRole
 
+.PHONY: analyze-access-token-expiration
+analyze-access-token-expiration:
+	grpcurl \
+		-plaintext \
+		iam.core.svc.cluster.local:8002 core.iam.IAMService.AnalyzeTokenExpiration

@@ -173,3 +173,13 @@ func (i *iamDB) ExistsAccessTokenMaintainer(ctx context.Context, projectID, acce
 	}
 	return true, nil
 }
+
+const selectListExpiredAccessToken = `select * from access_token where expired_at < NOW()`
+
+func (i *iamDB) ListExpiredAccessToken(ctx context.Context) (*[]model.AccessToken, error) {
+	var data []model.AccessToken
+	if err := i.Slave.WithContext(ctx).Raw(selectListExpiredAccessToken).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}

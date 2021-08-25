@@ -433,3 +433,7 @@ func (m *mockIAMRepository) ExistsAccessTokenMaintainer(ctx context.Context, pro
 	args := m.Called()
 	return args.Get(0).(bool), args.Error(1)
 }
+func (m *mockIAMRepository) ListExpiredAccessToken(ctx context.Context) (*[]model.AccessToken, error) {
+	args := m.Called()
+	return args.Get(0).(*[]model.AccessToken), args.Error(1)
+}
