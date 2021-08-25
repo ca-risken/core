@@ -143,6 +143,10 @@ func (m *mockFindingRepository) UntagFinding(context.Context, uint32, uint64) er
 	args := m.Called()
 	return args.Error(0)
 }
+func (m *mockFindingRepository) ClearScoreFinding(ctx context.Context, req *finding.ClearScoreRequest) error {
+	args := m.Called()
+	return args.Error(0)
+}
 
 // Resource
 

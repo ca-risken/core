@@ -35,6 +35,7 @@ type findingRepository interface {
 	GetFindingTagByID(context.Context, uint32, uint64) (*model.FindingTag, error)
 	TagFinding(context.Context, *model.FindingTag) (*model.FindingTag, error)
 	UntagFinding(context.Context, uint32, uint64) error
+	ClearScoreFinding(ctx context.Context, req *finding.ClearScoreRequest) error
 
 	// Resource
 	ListResource(context.Context, *finding.ListResourceRequest) (*[]model.Resource, error)

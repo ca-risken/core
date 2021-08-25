@@ -234,6 +234,10 @@ func (m *mockFindingClient) UntagFinding(context.Context, *finding.UntagFindingR
 	args := m.Called()
 	return args.Get(0).(*empty.Empty), args.Error(1)
 }
+func (m *mockFindingClient) ClearScore(context.Context, *finding.ClearScoreRequest, ...grpc.CallOption) (*empty.Empty, error) {
+	args := m.Called()
+	return args.Get(0).(*empty.Empty), args.Error(1)
+}
 func (m *mockFindingClient) ListResource(context.Context, *finding.ListResourceRequest, ...grpc.CallOption) (*finding.ListResourceResponse, error) {
 	args := m.Called()
 	return args.Get(0).(*finding.ListResourceResponse), args.Error(1)

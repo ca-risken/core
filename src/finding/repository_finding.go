@@ -266,3 +266,23 @@ const deleteUntagFinding = `delete from finding_tag where project_id = ? and fin
 func (f *findingDB) UntagFinding(ctx context.Context, projectID uint32, findingTagID uint64) error {
 	return f.Master.WithContext(ctx).Exec(deleteUntagFinding, projectID, findingTagID).Error
 }
+
+func (f *findingDB) ClearScoreFinding(ctx context.Context, req *finding.ClearScoreRequest) error {
+	var params []interface{}
+	sql := `update finding f left outer join finding_tag ft using(finding_id) set f.score=0.0 where f.data_source = ?`
+
+	params = append(params, req.DataSource)
+	if !zero.IsZeroVal(req.ProjectId) {
+		sql += " and f.project_id = ?"
+		params = append(params, req.ProjectId)
+	}
+	if len(req.Tag) > 0 {
+		sql += " and ft.tag in (?)"
+		params = append(params, req.Tag)
+	}
+	if !zero.IsZeroVal(req.FindingId) {
+		sql += " and f.finding_id = ?"
+		params = append(params, req.FindingId)
+	}
+	return f.Master.WithContext(ctx).Exec(sql, params...).Error
+}
