@@ -297,6 +297,18 @@ func (f *findingService) UntagFinding(ctx context.Context, req *finding.UntagFin
 	return &empty.Empty{}, nil
 }
 
+func (f *findingService) ClearScore(ctx context.Context, req *finding.ClearScoreRequest) (*empty.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	err := f.repository.ClearScoreFinding(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	appLogger.Infof("Finding score cleared, param=%+v", req)
+	return &empty.Empty{}, nil
+}
+
 func convertFinding(f *model.Finding) *finding.Finding {
 	if f == nil {
 		return &finding.Finding{}

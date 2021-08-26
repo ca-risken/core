@@ -456,3 +456,48 @@ func TestTagFinding(t *testing.T) {
 		})
 	}
 }
+
+func TestClearSocre(t *testing.T) {
+	var ctx context.Context
+	mockDB := mockFindingRepository{}
+	svc := findingService{repository: &mockDB}
+	cases := []struct {
+		name     string
+		input    *finding.ClearScoreRequest
+		wantErr  bool
+		execMock bool
+		mockResp error
+	}{
+		{
+			name:     "OK",
+			input:    &finding.ClearScoreRequest{DataSource: "ds", ProjectId: 1, Tag: []string{"tag1", "tag2"}, FindingId: 1},
+			execMock: true,
+			wantErr:  false,
+			mockResp: nil,
+		},
+		{
+			name:     "NG Invalid request",
+			input:    &finding.ClearScoreRequest{}, // Required param error
+			execMock: false,
+			wantErr:  true,
+		},
+		{
+			name:     "NG DB error",
+			input:    &finding.ClearScoreRequest{DataSource: "ds", ProjectId: 1, Tag: []string{"tag1", "tag2"}, FindingId: 1},
+			execMock: true,
+			wantErr:  true,
+			mockResp: gorm.ErrInvalidDB,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if c.execMock {
+				mockDB.On("ClearScoreFinding").Return(c.mockResp).Once()
+			}
+			_, err := svc.ClearScore(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
+}

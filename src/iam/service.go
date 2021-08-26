@@ -6,18 +6,21 @@ import (
 	"regexp"
 
 	"github.com/CyberAgent/mimosa-core/pkg/model"
+	"github.com/CyberAgent/mimosa-core/proto/finding"
 	"github.com/CyberAgent/mimosa-core/proto/iam"
 	"github.com/vikyd/zero"
 	"gorm.io/gorm"
 )
 
 type iamService struct {
-	repository iamRepository
+	repository    iamRepository
+	findingClient finding.FindingServiceClient
 }
 
 func newIAMService() iam.IAMServiceServer {
 	return &iamService{
-		repository: newIAMRepository(),
+		repository:    newIAMRepository(),
+		findingClient: newFindingClient(),
 	}
 }
 
