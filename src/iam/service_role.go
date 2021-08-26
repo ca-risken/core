@@ -14,7 +14,6 @@ func (i *iamService) ListRole(ctx context.Context, req *iam.ListRoleRequest) (*i
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	// TODO access_token
 	list, err := i.repository.ListRole(ctx, req.ProjectId, req.Name, req.UserId, req.AccessTokenId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
