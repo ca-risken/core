@@ -269,7 +269,7 @@ func (f *findingDB) UntagFinding(ctx context.Context, projectID uint32, findingT
 
 func (f *findingDB) ClearScoreFinding(ctx context.Context, req *finding.ClearScoreRequest) error {
 	var params []interface{}
-	sql := `update finding f left outer join finding_tag ft using(finding_id) set f.score=0.0 where f.data_source = ?`
+	sql := `update finding f left outer join finding_tag ft using(finding_id) set f.score=0.0 where f.score > 0.0 and f.data_source = ?`
 
 	params = append(params, req.DataSource)
 	if !zero.IsZeroVal(req.ProjectId) {
