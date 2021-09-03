@@ -475,6 +475,7 @@ func sendSlackNotification(notifySetting string, alert *model.Alert, project *mo
 	// TODO http tracing
 	resp, err := http.PostForm(setting.WebhookURL, url.Values{"payload": {string(payload)}})
 	if err != nil {
+		appLogger.Errorf("Failed to send slack, resp=%+v, err=%+v", resp, err)
 		return err
 	}
 	defer resp.Body.Close()
@@ -506,6 +507,7 @@ func sendSlackTestNotification(notifySetting string) error {
 	// TODO http tracing
 	resp, err := http.PostForm(setting.WebhookURL, url.Values{"payload": {string(payload)}})
 	if err != nil {
+		appLogger.Errorf("Failed to send slack, resp=%+v, err=%+v", resp, err)
 		return err
 	}
 	defer resp.Body.Close()
