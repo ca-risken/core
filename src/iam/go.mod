@@ -3,14 +3,14 @@ module github.com/CyberAgent/mimosa-core/src/iam
 go 1.16
 
 require (
-	github.com/CyberAgent/mimosa-common/pkg/database v0.0.0-20210811114519-3370ca0f108e
-	github.com/CyberAgent/mimosa-common/pkg/xray v0.0.0-20210811114519-3370ca0f108e
 	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210825122421-f25e20c813e1
 	github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20210825122421-f25e20c813e1
 	github.com/CyberAgent/mimosa-core/proto/iam v0.0.0-20210825122421-f25e20c813e1
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/aws/aws-sdk-go v1.40.29 // indirect
 	github.com/aws/aws-xray-sdk-go v1.6.0
+	github.com/ca-risken/common/pkg/database v0.0.0-20210906084924-5c6039fc609d
+	github.com/ca-risken/common/pkg/xray v0.0.0-20210906084924-5c6039fc609d
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
