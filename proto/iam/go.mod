@@ -1,4 +1,4 @@
-module github.com/CyberAgent/mimosa-core/proto/iam
+module github.com/ca-risken/core/proto/iam
 
 go 1.16
 

@@ -1,4 +1,4 @@
-module github.com/CyberAgent/mimosa-core/proto/finding
+module github.com/ca-risken/core/proto/finding
 
 go 1.16
 

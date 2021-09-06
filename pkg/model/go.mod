@@ -1,3 +1,3 @@
-module github.com/CyberAgent/mimosa-core/pkg/model
+module github.com/ca-risken/core/pkg/model
 
-go 1.15
+go 1.16

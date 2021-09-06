@@ -1,4 +1,4 @@
-module github.com/CyberAgent/mimosa-core/proto/alert
+module github.com/ca-risken/core/proto/alert
 
 go 1.16
 

@@ -1,3 +1,3 @@
-# mimosa-core
+# core
 
 ![Build Status](https://codebuild.ap-northeast-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoicUorMEd6RFhSZ28yb0czN0ZqQkV4eFdraU9VUE4rZUpsU2tndVQxeXNuUGE3K3UvTEJTN3FtWDdQTkp0SWMxVDRLWFQwRXlCWlQ4RnYvVS85dEdzd1pRPSIsIml2UGFyYW1ldGVyU3BlYyI6IlZnZkIwc3BnS0szd2lVazgiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
