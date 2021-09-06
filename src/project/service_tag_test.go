@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/CyberAgent/mimosa-core/pkg/model"
-	"github.com/CyberAgent/mimosa-core/proto/project"
+	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/proto/project"
 	"gorm.io/gorm"
 )
 

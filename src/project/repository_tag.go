@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/CyberAgent/mimosa-core/pkg/model"
+	"github.com/ca-risken/core/pkg/model"
 )
 
 const selectListProjectTag string = `select * from project_tag where project_id=? order by tag`

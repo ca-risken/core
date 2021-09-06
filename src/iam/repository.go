@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/CyberAgent/mimosa-core/pkg/model"
 	mimosasql "github.com/ca-risken/common/pkg/database/sql"
+	"github.com/ca-risken/core/pkg/model"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/vikyd/zero"
 	"gorm.io/gorm"

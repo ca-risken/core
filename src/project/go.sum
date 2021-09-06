@@ -3,12 +3,6 @@ cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210825122421-f25e20c813e1 h1:IX4ER+3P33Sf683j1/AjvN4STAaYiX6AqCCMxoXBgXA=
-github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210825122421-f25e20c813e1/go.mod h1:80ykoMm2T4VZhcHLOTLPxzL2ay6m7TFisWQ4k5CPWgc=
-github.com/CyberAgent/mimosa-core/proto/iam v0.0.0-20210825122421-f25e20c813e1 h1:xLoJ0d6CpXqVrMkIAXbc6ihtmPKxKgeMFLvUySc2Y9w=
-github.com/CyberAgent/mimosa-core/proto/iam v0.0.0-20210825122421-f25e20c813e1/go.mod h1:9Xxkbp+bTj8/VYBuZXCnRgPRyY6J9fIeEB7Kou1Mf4c=
-github.com/CyberAgent/mimosa-core/proto/project v0.0.0-20210825122421-f25e20c813e1 h1:X7lGl7WgbgSMlJre4uRP5L9ePjpmYaFNQrFB/aG0tkQ=
-github.com/CyberAgent/mimosa-core/proto/project v0.0.0-20210825122421-f25e20c813e1/go.mod h1:06p9ZIWFnUgb0qhEiVTL5UtbfPl8Re4G0ycUBjT43jI=
 github.com/DATA-DOG/go-sqlmock v1.4.1 h1:ThlnYciV1iM/V0OSF/dtkqWb6xo5qITT1TJBG1MRDJM=
 github.com/DATA-DOG/go-sqlmock v1.4.1/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
@@ -30,6 +24,12 @@ github.com/ca-risken/common/pkg/database v0.0.0-20210906084924-5c6039fc609d h1:8
 github.com/ca-risken/common/pkg/database v0.0.0-20210906084924-5c6039fc609d/go.mod h1:9JacDXQAdUUqCyV3Z0iVBcS2SCh/ZMDnIzBzgbFRRbc=
 github.com/ca-risken/common/pkg/xray v0.0.0-20210906084924-5c6039fc609d h1:1ziGRnf7ng9MOY0kWpmtLr/y/Z5ZxTBnk3dvDcZA3FQ=
 github.com/ca-risken/common/pkg/xray v0.0.0-20210906084924-5c6039fc609d/go.mod h1:n654ONolaDXo0FYBd5sPDdaj/P5FL/G3PhhJVYT9WpY=
+github.com/ca-risken/core/pkg/model v0.0.0-20210906100342-c1bbb08cc3e4 h1:oObI0EoGbEsawHpdYkXesxs5JTMo6IsBC1d81y0ylQc=
+github.com/ca-risken/core/pkg/model v0.0.0-20210906100342-c1bbb08cc3e4/go.mod h1:2W0bLECvl7zVZqut9FHW5FYU9vgmwK48mtv2A+Ei9zc=
+github.com/ca-risken/core/proto/iam v0.0.0-20210906100342-c1bbb08cc3e4 h1:WQVeJjjEbHnABdHr9rsC409UwGgjlY3qyDVYKZMQ9uA=
+github.com/ca-risken/core/proto/iam v0.0.0-20210906100342-c1bbb08cc3e4/go.mod h1:QO1Q63adg6vJAjPC5A/u8VvpyY1ncCMfAuqgdb7O1pE=
+github.com/ca-risken/core/proto/project v0.0.0-20210906100342-c1bbb08cc3e4 h1:R0g7r29X2/SYb904Zfi/MTyzGqFr6rfHau+PKjeWlGs=
+github.com/ca-risken/core/proto/project v0.0.0-20210906100342-c1bbb08cc3e4/go.mod h1:riaWq/KLwjRpx2Sn2O3zrwGgmLHMv1hTR6wPadMgfQw=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=

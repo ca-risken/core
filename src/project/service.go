@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/CyberAgent/mimosa-core/proto/project"
+	"github.com/ca-risken/core/proto/project"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
 )

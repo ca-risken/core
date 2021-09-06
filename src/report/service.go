@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/CyberAgent/mimosa-core/proto/report"
+	"github.com/ca-risken/core/proto/report"
 )
 
 type reportService struct {
