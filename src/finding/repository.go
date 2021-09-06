@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	mimosasql "github.com/CyberAgent/mimosa-common/pkg/database/sql"
 	"github.com/CyberAgent/mimosa-core/pkg/model"
 	"github.com/CyberAgent/mimosa-core/proto/finding"
+	mimosasql "github.com/ca-risken/common/pkg/database/sql"
 	"github.com/kelseyhightower/envconfig"
 	"gorm.io/gorm"
 )

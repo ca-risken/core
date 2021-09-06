@@ -3,10 +3,6 @@ cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/CyberAgent/mimosa-common/pkg/database v0.0.0-20210811114519-3370ca0f108e h1:fpNVRZU0kx9BppZDKH+yhti4fjAMPj2sPjPIIiVacTc=
-github.com/CyberAgent/mimosa-common/pkg/database v0.0.0-20210811114519-3370ca0f108e/go.mod h1:6qBgvUU682xnwELGQFmMwjP4qGyf3TAimeokQFty3xU=
-github.com/CyberAgent/mimosa-common/pkg/xray v0.0.0-20210811114519-3370ca0f108e h1:VBLseqtJH7nTBJXt5qm5D9VF5o8fPQ7uXbmFuEtEYEA=
-github.com/CyberAgent/mimosa-common/pkg/xray v0.0.0-20210811114519-3370ca0f108e/go.mod h1:5oT6h4M/jXOoae5d3i7STExxv/eV68F6yuc0Isbvli0=
 github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210825122421-f25e20c813e1 h1:IX4ER+3P33Sf683j1/AjvN4STAaYiX6AqCCMxoXBgXA=
 github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210825122421-f25e20c813e1/go.mod h1:80ykoMm2T4VZhcHLOTLPxzL2ay6m7TFisWQ4k5CPWgc=
 github.com/CyberAgent/mimosa-core/proto/finding v0.0.0-20210825122421-f25e20c813e1 h1:g1nGzDzeyCGYnJIufBNKhSlaOC0tDbBAiER26gQtAGU=
@@ -33,6 +29,10 @@ github.com/aws/aws-sdk-go-v2/service/route53 v1.6.2/go.mod h1:ZnAMilx42P7DgIrdjl
 github.com/aws/aws-xray-sdk-go v1.6.0 h1:w4dPTvHZtbQg3dQFTRTu4TIunlfJCRGKdmGYZkcEJwI=
 github.com/aws/aws-xray-sdk-go v1.6.0/go.mod h1:k+NuTgdU+z07L3l8lnGHK+/luqe8TKmZJNpQAoVfLeY=
 github.com/aws/smithy-go v1.4.0/go.mod h1:SObp3lf9smib00L/v3U2eAKG8FyQ7iLrJnQiAmR5n+E=
+github.com/ca-risken/common/pkg/database v0.0.0-20210906084924-5c6039fc609d h1:8LhFAObzdOIHLR+dTFTjJB4Dly3tulcOfk9hfgo68q0=
+github.com/ca-risken/common/pkg/database v0.0.0-20210906084924-5c6039fc609d/go.mod h1:9JacDXQAdUUqCyV3Z0iVBcS2SCh/ZMDnIzBzgbFRRbc=
+github.com/ca-risken/common/pkg/xray v0.0.0-20210906084924-5c6039fc609d h1:1ziGRnf7ng9MOY0kWpmtLr/y/Z5ZxTBnk3dvDcZA3FQ=
+github.com/ca-risken/common/pkg/xray v0.0.0-20210906084924-5c6039fc609d/go.mod h1:n654ONolaDXo0FYBd5sPDdaj/P5FL/G3PhhJVYT9WpY=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=

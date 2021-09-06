@@ -3,12 +3,12 @@ module github.com/CyberAgent/src/project
 go 1.16
 
 require (
-	github.com/CyberAgent/mimosa-common/pkg/database v0.0.0-20210721063343-44cefe7f590e
-	github.com/CyberAgent/mimosa-common/pkg/xray v0.0.0-20210721063343-44cefe7f590e
 	github.com/CyberAgent/mimosa-core/pkg/model v0.0.0-20210825122421-f25e20c813e1
 	github.com/CyberAgent/mimosa-core/proto/iam v0.0.0-20210825122421-f25e20c813e1
 	github.com/CyberAgent/mimosa-core/proto/project v0.0.0-20210825122421-f25e20c813e1
 	github.com/aws/aws-xray-sdk-go v1.6.0
+	github.com/ca-risken/common/pkg/database v0.0.0-20210906084924-5c6039fc609d
+	github.com/ca-risken/common/pkg/xray v0.0.0-20210906084924-5c6039fc609d
 	github.com/envoyproxy/protoc-gen-validate v0.6.1 // indirect
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
 	github.com/golang/protobuf v1.5.2
