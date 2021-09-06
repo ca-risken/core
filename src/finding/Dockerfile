@@ -1,7 +1,7 @@
 FROM golang:1.16 as builder
-WORKDIR /go/src/github.com/CyberAgent/mimosa-core/src/finding/
+WORKDIR /go/src/github.com/ca-risken/core/src/finding/
 ADD *.go go.* ./
-ENV CGO_ENABLED=0 GOPRIVATE="github.com/CyberAgent/*"
+ENV CGO_ENABLED=0 GOPRIVATE="github.com/CyberAgent/*,github.com/ca-risken/*"
 ARG ENV_INJECTOR_VERSION=v0.0.6
 ARG GITHUB_USER
 ARG GITHUB_TOKEN
@@ -12,9 +12,9 @@ RUN go build && cp finding /go/bin/
 
 WORKDIR /go/src/github.com/gassara-kys
 RUN git clone https://github.com/gassara-kys/env-injector.git -b ${ENV_INJECTOR_VERSION} \
-    && cd env-injector \
-    && go build \
-    && cp env-injector /go/bin/
+  && cd env-injector \
+  && go build \
+  && cp env-injector /go/bin/
 
 FROM alpine
 RUN apk add --no-cache ca-certificates tzdata

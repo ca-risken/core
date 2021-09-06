@@ -1,7 +1,7 @@
 FROM golang:1.16 as builder
-WORKDIR /go/src/github.com/CyberAgent/mimosa-core/src/report/
+WORKDIR /go/src/github.com/ca-risken/core/src/report/
 ADD *.go go.* ./
-ENV CGO_ENABLED=0 GOPRIVATE="github.com/CyberAgent/*"
+ENV CGO_ENABLED=0 GOPRIVATE="github.com/CyberAgent/*,github.com/ca-risken/*"
 ARG ENV_INJECTOR_VERSION=v0.0.6
 ARG GITHUB_USER
 ARG GITHUB_TOKEN
