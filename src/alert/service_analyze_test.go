@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/CyberAgent/mimosa-core/pkg/model"
-	"github.com/CyberAgent/mimosa-core/proto/alert"
-	"github.com/CyberAgent/mimosa-core/proto/finding"
+	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/proto/alert"
+	"github.com/ca-risken/core/proto/finding"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jarcoal/httpmock"
 	"gorm.io/gorm"

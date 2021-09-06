@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/CyberAgent/mimosa-core/proto/iam"
 	"github.com/aws/aws-xray-sdk-go/xray"
+	"github.com/ca-risken/core/proto/iam"
 	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
 )

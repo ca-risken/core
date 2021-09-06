@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/CyberAgent/mimosa-core/proto/alert"
-	"github.com/CyberAgent/mimosa-core/proto/finding"
-	"github.com/CyberAgent/mimosa-core/proto/project"
+	"github.com/ca-risken/core/proto/alert"
+	"github.com/ca-risken/core/proto/finding"
+	"github.com/ca-risken/core/proto/project"
 )
 
 type alertService struct {

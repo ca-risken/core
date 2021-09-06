@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/CyberAgent/mimosa-core/pkg/model"
+	"github.com/ca-risken/core/pkg/model"
 	"github.com/stretchr/testify/mock"
 )
 

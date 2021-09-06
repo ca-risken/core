@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/CyberAgent/mimosa-core/proto/finding"
-	"github.com/CyberAgent/mimosa-core/proto/project"
 	"github.com/aws/aws-xray-sdk-go/xray"
+	"github.com/ca-risken/core/proto/finding"
+	"github.com/ca-risken/core/proto/project"
 	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
 )

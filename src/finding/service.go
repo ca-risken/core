@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/CyberAgent/mimosa-core/proto/finding"
+	"github.com/ca-risken/core/proto/finding"
 )
 
 const (

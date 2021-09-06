@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/CyberAgent/mimosa-core/pkg/model"
+	"github.com/ca-risken/core/pkg/model"
 )
 
 func (f *reportDB) GetReportFinding(ctx context.Context, projectID uint32, dataSource []string, fromDate, toDate string, score float32) (*[]model.ReportFinding, error) {

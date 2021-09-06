@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/CyberAgent/mimosa-core/pkg/model"
+	"github.com/ca-risken/core/pkg/model"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/vikyd/zero"
 )

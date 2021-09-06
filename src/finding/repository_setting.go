@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 
-	"github.com/CyberAgent/mimosa-core/pkg/model"
-	"github.com/CyberAgent/mimosa-core/proto/finding"
+	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/proto/finding"
 )
 
 func (f *findingDB) ListFindingSetting(ctx context.Context, req *finding.ListFindingSettingRequest) (*[]model.FindingSetting, error) {
