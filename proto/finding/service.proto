@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package core.finding;
-option go_package = "github.com/CyberAgent/mimosa-core/proto/finding";
+option go_package = "github.com/ca-risken/core/proto/finding";
 
 import "google/protobuf/empty.proto";
 import "finding/entity.proto";

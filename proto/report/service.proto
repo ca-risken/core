@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package core.report;
-option go_package = "github.com/CyberAgent/mimosa-core/proto/report";
+option go_package = "github.com/ca-risken/core/proto/report";
 
 import "google/protobuf/empty.proto";
 import "report/entity.proto";
