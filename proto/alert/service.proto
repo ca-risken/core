@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package core.alert;
-option go_package = "github.com/CyberAgent/mimosa-core/proto/alert";
+option go_package = "github.com/ca-risken/core/proto/alert";
 
 import "google/protobuf/empty.proto";
 import "alert/entity.proto";
