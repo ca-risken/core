@@ -18,6 +18,7 @@ type iamRepository interface {
 	GetUser(ctx context.Context, userID uint32, sub string) (*model.User, error)
 	GetUserBySub(ctx context.Context, sub string) (*model.User, error)
 	PutUser(ctx context.Context, u *model.User) (*model.User, error)
+	GetActiveUserCount(ctx context.Context) (*int, error)
 
 	// Role
 	ListRole(ctx context.Context, projectID uint32, name string, userID uint32, accessTokenID uint32) (*[]model.Role, error)
@@ -26,6 +27,7 @@ type iamRepository interface {
 	PutRole(ctx context.Context, r *model.Role) (*model.Role, error)
 	DeleteRole(ctx context.Context, projectID, roleID uint32) error
 	AttachRole(ctx context.Context, projectID, roleID, userID uint32) (*model.UserRole, error)
+	AttachAdminRole(ctx context.Context, userID uint32) error
 	DetachRole(ctx context.Context, projectID, roleID, userID uint32) error
 
 	// Policy

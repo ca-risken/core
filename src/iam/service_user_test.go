@@ -168,6 +168,9 @@ func TestPutUser(t *testing.T) {
 			wantErr:    true,
 		},
 	}
+	testUsers := 3
+	mock.On("GetActiveUserCount").Return(&testUsers, nil)
+	mock.On("AttachAdminRole").Return(nil)
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			if c.mockGetResp != nil || c.mockGetErr != nil {

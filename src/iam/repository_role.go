@@ -104,6 +104,26 @@ func (i *iamDB) AttachRole(ctx context.Context, projectID, roleID, userID uint32
 	return i.GetUserRole(ctx, projectID, userID, roleID)
 }
 
+const insertAttachAdminRole = `
+INSERT INTO user_role
+  (user_id, role_id, project_id)
+SELECT
+  ?, role_id, null
+FROM 
+  role
+WHERE
+  project_id is null
+ON DUPLICATE KEY UPDATE
+  role_id=VALUES(role_id)
+`
+
+func (i *iamDB) AttachAdminRole(ctx context.Context, userID uint32) error {
+	if !i.userExists(ctx, userID) {
+		return fmt.Errorf("Not found user: user_id=%d", userID)
+	}
+	return i.Master.WithContext(ctx).Exec(insertAttachAdminRole, userID).Error
+}
+
 const deleteDetachRole = `delete from user_role where user_id = ? and role_id = ? and project_id = ?`
 
 func (i *iamDB) DetachRole(ctx context.Context, projectID, roleID, userID uint32) error {

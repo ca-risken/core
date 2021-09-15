@@ -21,6 +21,7 @@ RUN apk add --no-cache ca-certificates tzdata
 COPY --from=builder /go/bin/env-injector /usr/local/bin/
 COPY --from=builder /go/bin/iam /usr/local/iam/bin/
 ENV PORT= \
+  DEBUG= \
   DB_MASTER_HOST= \
   DB_MASTER_USER= \
   DB_MASTER_PASSWORD= \
