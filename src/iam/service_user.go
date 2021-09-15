@@ -51,6 +51,16 @@ func (i *iamService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 	if err != nil && !noRecord {
 		return nil, err
 	}
+	// check first user
+	isFisrstUser := false
+	if noRecord {
+		users, err := i.repository.GetActiveUserCount(ctx)
+		if err != nil {
+			return nil, err
+		}
+		isFisrstUser = users == nil || *users == 0
+	}
+	appLogger.Debugf("isFisrstUser: %t", isFisrstUser)
 
 	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
 	var userID uint32
@@ -68,6 +78,14 @@ func (i *iamService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 	registerdData, err := i.repository.PutUser(ctx, u)
 	if err != nil {
 		return nil, err
+	}
+
+	if isFisrstUser {
+		// attach admin roles
+		if err := i.repository.AttachAdminRole(ctx, registerdData.UserID); err != nil {
+			return nil, err
+		}
+		appLogger.Infof("Attach admin role for first user, user_id=%d", registerdData.UserID)
 	}
 	return &iam.PutUserResponse{User: convertUser(registerdData)}, nil
 }

@@ -9,11 +9,13 @@ import (
 	"github.com/ca-risken/core/proto/iam"
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 type iamConf struct {
+	Debug   string `default:"false"`
 	Port    string `default:"8002"`
 	EnvName string `default:"default" split_words:"true"`
 }
@@ -24,6 +26,10 @@ func main() {
 	if err != nil {
 		appLogger.Fatal(err.Error())
 	}
+	if conf.Debug == "true" {
+		appLogger.SetLevel(logrus.DebugLevel)
+	}
+	appLogger.Infof("Load IAM config: %+v", conf)
 	mimosaxray.InitXRay(xray.Config{})
 
 	l, err := net.Listen("tcp", fmt.Sprintf(":%s", conf.Port))

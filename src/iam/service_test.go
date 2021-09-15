@@ -333,6 +333,10 @@ func (m *mockIAMRepository) PutUser(context.Context, *model.User) (*model.User, 
 	args := m.Called()
 	return args.Get(0).(*model.User), args.Error(1)
 }
+func (m *mockIAMRepository) GetActiveUserCount(ctx context.Context) (*int, error) {
+	args := m.Called()
+	return args.Get(0).(*int), args.Error(1)
+}
 func (m *mockIAMRepository) ListRole(ctx context.Context, projectID uint32, name string, userID uint32, accessTokenID uint32) (*[]model.Role, error) {
 	args := m.Called()
 	return args.Get(0).(*[]model.Role), args.Error(1)
@@ -356,6 +360,10 @@ func (m *mockIAMRepository) DeleteRole(context.Context, uint32, uint32) error {
 func (m *mockIAMRepository) AttachRole(context.Context, uint32, uint32, uint32) (*model.UserRole, error) {
 	args := m.Called()
 	return args.Get(0).(*model.UserRole), args.Error(1)
+}
+func (m *mockIAMRepository) AttachAdminRole(context.Context, uint32) error {
+	args := m.Called()
+	return args.Error(0)
 }
 func (m *mockIAMRepository) DetachRole(context.Context, uint32, uint32, uint32) error {
 	args := m.Called()

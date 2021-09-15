@@ -48,10 +48,24 @@ func (l *ListRoleRequest) Validate() error {
 	)
 }
 
+// ValidateForAdmin ListRoleRequest
+func (l *ListRoleRequest) ValidateForAdmin() error {
+	return validation.ValidateStruct(l,
+		validation.Field(&l.Name, validation.Length(0, 64)),
+	)
+}
+
 // Validate GetRoleRequest
 func (g *GetRoleRequest) Validate() error {
 	return validation.ValidateStruct(g,
 		validation.Field(&g.ProjectId, validation.Required),
+		validation.Field(&g.RoleId, validation.Required),
+	)
+}
+
+// ValidateForAdmin GetRoleRequest
+func (g *GetRoleRequest) ValidateForAdmin() error {
+	return validation.ValidateStruct(g,
 		validation.Field(&g.RoleId, validation.Required),
 	)
 }
@@ -94,10 +108,26 @@ func (a *AttachRoleRequest) Validate() error {
 	)
 }
 
+// ValidateForAdmin AttachRoleRequest
+func (a *AttachRoleRequest) ValidateForAdmin() error {
+	return validation.ValidateStruct(a,
+		validation.Field(&a.UserId, validation.Required),
+		validation.Field(&a.RoleId, validation.Required),
+	)
+}
+
 // Validate DetachRoleRequest
 func (d *DetachRoleRequest) Validate() error {
 	return validation.ValidateStruct(d,
 		validation.Field(&d.ProjectId, validation.Required),
+		validation.Field(&d.UserId, validation.Required),
+		validation.Field(&d.RoleId, validation.Required),
+	)
+}
+
+// ValidateForAdmin DetachRoleRequest
+func (d *DetachRoleRequest) ValidateForAdmin() error {
+	return validation.ValidateStruct(d,
 		validation.Field(&d.UserId, validation.Required),
 		validation.Field(&d.RoleId, validation.Required),
 	)

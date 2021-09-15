@@ -39,7 +39,7 @@ where
 }
 
 func (i *iamDB) GetUser(ctx context.Context, userID uint32, sub string) (*model.User, error) {
-	query := `select * from	user where activated = 'true'`
+	query := `select * from user where activated = 'true'`
 	var params []interface{}
 	if !zero.IsZeroVal(userID) {
 		query += " and user_id = ?"
@@ -81,4 +81,14 @@ func (i *iamDB) PutUser(ctx context.Context, u *model.User) (*model.User, error)
 		return nil, err
 	}
 	return i.GetUserBySub(ctx, u.Sub)
+}
+
+const selectGetActiveUserCount = `select count(*) from user where activated = 'true'`
+
+func (i *iamDB) GetActiveUserCount(ctx context.Context) (*int, error) {
+	var cnt int
+	if err := i.Slave.WithContext(ctx).Raw(selectGetActiveUserCount).Scan(&cnt).Error; err != nil {
+		return nil, err
+	}
+	return &cnt, nil
 }
