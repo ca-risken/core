@@ -190,6 +190,35 @@ func TestValidate_ListRoleRequest(t *testing.T) {
 	}
 }
 
+func TestValidateForAdmin_ListRoleRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *ListRoleRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &ListRoleRequest{},
+			wantErr: false,
+		},
+		{
+			name:    "NG Length(name)",
+			input:   &ListRoleRequest{Name: "12345678901234567890123456789012345678901234567890123456789012345"},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.ValidateForAdmin()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
 func TestValidate_GetRoleRequest(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -215,6 +244,35 @@ func TestValidate_GetRoleRequest(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidateForAdmin_GetRoleRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *GetRoleRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &GetRoleRequest{RoleId: 123},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(role_id)",
+			input:   &GetRoleRequest{},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.ValidateForAdmin()
 			if c.wantErr && err == nil {
 				t.Fatal("Unexpected no error")
 			} else if !c.wantErr && err != nil {
@@ -365,6 +423,40 @@ func TestValidate_AttachRoleRequest(t *testing.T) {
 	}
 }
 
+func TestValidateForAdmin_AttachRoleRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *AttachRoleRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &AttachRoleRequest{UserId: 1, RoleId: 1},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(user_id)",
+			input:   &AttachRoleRequest{RoleId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(role_id)",
+			input:   &AttachRoleRequest{UserId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.ValidateForAdmin()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
 func TestValidate_DetachRoleRequest(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -395,6 +487,40 @@ func TestValidate_DetachRoleRequest(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidateForAdmin_DetachRoleRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *DetachRoleRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &DetachRoleRequest{UserId: 1, RoleId: 1},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(user_id)",
+			input:   &DetachRoleRequest{RoleId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(role_id)",
+			input:   &DetachRoleRequest{UserId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.ValidateForAdmin()
 			if c.wantErr && err == nil {
 				t.Fatal("Unexpected no error")
 			} else if !c.wantErr && err != nil {
