@@ -105,32 +105,31 @@ go-test: $(TEST_TARGETS)
 
 .PHONY: go-mod-tidy
 go-mod-tidy: proto
-	cd proto/finding && go mod tidy
-	cd proto/iam     && go mod tidy
-	cd proto/project && go mod tidy
-	cd proto/alert   && go mod tidy
-	cd proto/report  && go mod tidy
-	cd src/finding   && go mod tidy
-	cd src/iam       && go mod tidy
-	cd src/project   && go mod tidy
-	cd src/alert     && go mod tidy
-	cd src/report    && go mod tidy
+	source env.sh && cd proto/finding && go mod tidy
+	source env.sh && cd proto/iam     && go mod tidy
+	source env.sh && cd proto/project && go mod tidy
+	source env.sh && cd proto/alert   && go mod tidy
+	source env.sh && cd proto/report  && go mod tidy
+	source env.sh && cd src/finding   && go mod tidy
+	source env.sh && cd src/iam       && go mod tidy
+	source env.sh && cd src/project   && go mod tidy
+	source env.sh && cd src/alert     && go mod tidy
+	source env.sh && cd src/report    && go mod tidy
 
 .PHONY: go-mod-update
 go-mod-update:
-	cd src/finding \
-		&& go get -u \
-			github.com/ca-risken/core/...
-	cd src/iam \
-		&& go get -u \
-			github.com/ca-risken/core/...
-	cd src/project \
-		&& go get -u \
-			github.com/ca-risken/core/...
-	cd src/alert \
-		&& go get -u \
-			github.com/ca-risken/core/...
-	cd src/report \
-		&& go get -u \
-			github.com/ca-risken/core/...
-
+	source env.sh \
+		&& cd src/finding \
+		&& go get -u github.com/ca-risken/core/...
+	source env.sh \
+		cd src/iam \
+		&& go get -u github.com/ca-risken/core/...
+	source env.sh \
+		cd src/project \
+		&& go get -u github.com/ca-risken/core/...
+	source env.sh \
+		cd src/alert \
+		&& go get -u github.com/ca-risken/core/...
+	source env.sh \
+		cd src/report \
+		&& go get -u github.com/ca-risken/core/...

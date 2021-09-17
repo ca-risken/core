@@ -66,9 +66,9 @@ where
   and u.user_id = ?
 `
 
-func (i *iamDB) GetAdminPolicy(ctx context.Context, userID uint32) (*model.Policy, error) {
-	var data model.Policy
-	if err := i.Slave.WithContext(ctx).Raw(selectGetAdminPolicy, userID).First(&data).Error; err != nil {
+func (i *iamDB) GetAdminPolicy(ctx context.Context, userID uint32) (*[]model.Policy, error) {
+	var data []model.Policy
+	if err := i.Slave.WithContext(ctx).Raw(selectGetAdminPolicy, userID).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

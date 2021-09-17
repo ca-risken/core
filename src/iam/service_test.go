@@ -66,6 +66,61 @@ func TestIsAuthorized(t *testing.T) {
 	}
 }
 
+func TestIsAuthorizedAdmin(t *testing.T) {
+	var ctx context.Context
+	mock := mockIAMRepository{}
+	svc := iamService{repository: &mock}
+	cases := []struct {
+		name         string
+		input        *iam.IsAuthorizedAdminRequest
+		want         *iam.IsAuthorizedAdminResponse
+		wantErr      bool
+		mockResponce *[]model.Policy
+		mockError    error
+	}{
+		{
+			name:  "OK Authorized",
+			input: &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
+			want:  &iam.IsAuthorizedAdminResponse{Ok: true},
+			mockResponce: &[]model.Policy{
+				{PolicyID: 1, Name: "viewer", ActionPtn: "finding/(Get|List|Describe)", ResourcePtn: ".*"},
+				{PolicyID: 2, Name: "put for aws", ActionPtn: "finding/Put.*", ResourcePtn: "aws:.*"},
+			},
+		},
+		{
+			name:      "OK Record not found",
+			input:     &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			want:      &iam.IsAuthorizedAdminResponse{Ok: false},
+			mockError: gorm.ErrRecordNotFound,
+		},
+		{
+			name:    "NG Invalid parameter (invalid actionName format)",
+			input:   &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding----PutFinding", ResourceName: "github:code-scan/repository-name"},
+			wantErr: true,
+		},
+		{
+			name:      "NG Invalid DB error",
+			input:     &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			wantErr:   true,
+			mockError: gorm.ErrInvalidDB,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if c.mockResponce != nil || c.mockError != nil {
+				mock.On("GetAdminPolicy").Return(c.mockResponce, c.mockError).Once()
+			}
+			got, err := svc.IsAuthorizedAdmin(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
 func TestIsAuthorizedToken(t *testing.T) {
 	var ctx context.Context
 	mock := mockIAMRepository{}
@@ -259,14 +314,16 @@ func TestIsAdmin(t *testing.T) {
 		input        *iam.IsAdminRequest
 		want         *iam.IsAdminResponse
 		wantErr      bool
-		mockResponce *model.Policy
+		mockResponce *[]model.Policy
 		mockError    error
 	}{
 		{
-			name:         "OK Admin",
-			input:        &iam.IsAdminRequest{UserId: 1},
-			want:         &iam.IsAdminResponse{Ok: true},
-			mockResponce: &model.Policy{PolicyID: 1, Name: "no-project-policy", ProjectID: 0, ActionPtn: ".*", ResourcePtn: ".*"},
+			name:  "OK Admin",
+			input: &iam.IsAdminRequest{UserId: 1},
+			want:  &iam.IsAdminResponse{Ok: true},
+			mockResponce: &[]model.Policy{
+				{PolicyID: 1, Name: "no-project-policy", ProjectID: 0, ActionPtn: ".*", ResourcePtn: ".*"},
+			},
 		},
 		{
 			name:      "OK Not Admin",
@@ -309,7 +366,7 @@ type mockIAMRepository struct {
 	mock.Mock
 }
 
-func (m *mockIAMRepository) ListUser(ctx context.Context, activated bool, projectID uint32, name string, userID uint32) (*[]model.User, error) {
+func (m *mockIAMRepository) ListUser(ctx context.Context, activated bool, projectID uint32, name string, userID uint32, admin bool) (*[]model.User, error) {
 	args := m.Called()
 	return args.Get(0).(*[]model.User), args.Error(1)
 }
@@ -361,7 +418,7 @@ func (m *mockIAMRepository) AttachRole(context.Context, uint32, uint32, uint32) 
 	args := m.Called()
 	return args.Get(0).(*model.UserRole), args.Error(1)
 }
-func (m *mockIAMRepository) AttachAdminRole(context.Context, uint32) error {
+func (m *mockIAMRepository) AttachAllAdminRole(context.Context, uint32) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -397,9 +454,9 @@ func (m *mockIAMRepository) DetachPolicy(context.Context, uint32, uint32, uint32
 	args := m.Called()
 	return args.Error(0)
 }
-func (m *mockIAMRepository) GetAdminPolicy(context.Context, uint32) (*model.Policy, error) {
+func (m *mockIAMRepository) GetAdminPolicy(context.Context, uint32) (*[]model.Policy, error) {
 	args := m.Called()
-	return args.Get(0).(*model.Policy), args.Error(1)
+	return args.Get(0).(*[]model.Policy), args.Error(1)
 }
 func (m *mockIAMRepository) ListAccessToken(ctx context.Context, projectID uint32, name string, accessTokenID uint32) (*[]model.AccessToken, error) {
 	args := m.Called()
