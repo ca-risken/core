@@ -11,6 +11,10 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	length65string = "12345678901234567890123456789012345678901234567890123456789012345"
+)
+
 func TestListRole(t *testing.T) {
 	var ctx context.Context
 	mock := mockIAMRepository{}
@@ -41,7 +45,7 @@ func TestListRole(t *testing.T) {
 		},
 		{
 			name:    "NG Invalid param",
-			input:   &iam.ListRoleRequest{Name: "nm"},
+			input:   &iam.ListRoleRequest{Name: length65string},
 			wantErr: true,
 		},
 		{

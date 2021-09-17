@@ -8,7 +8,7 @@ import (
 	"github.com/vikyd/zero"
 )
 
-func (i *iamDB) ListUser(ctx context.Context, activated bool, projectID uint32, name string, userID uint32) (*[]model.User, error) {
+func (i *iamDB) ListUser(ctx context.Context, activated bool, projectID uint32, name string, userID uint32, admin bool) (*[]model.User, error) {
 	query := `
 select
   u.*
@@ -30,6 +30,9 @@ where
 	if !zero.IsZeroVal(userID) {
 		query += " and u.user_id = ?"
 		params = append(params, userID)
+	}
+	if admin {
+		query += " and exists (select * from user_role ur where ur.user_id = u.user_id and ur.project_id is null)"
 	}
 	var data []model.User
 	if err := i.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {

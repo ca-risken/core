@@ -13,7 +13,7 @@ func (i *iamService) ListUser(ctx context.Context, req *iam.ListUserRequest) (*i
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := i.repository.ListUser(ctx, req.Activated, req.ProjectId, req.Name, req.UserId)
+	list, err := i.repository.ListUser(ctx, req.Activated, req.ProjectId, req.Name, req.UserId, req.Admin)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &iam.ListUserResponse{}, nil
@@ -82,7 +82,7 @@ func (i *iamService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 
 	if isFisrstUser {
 		// attach admin roles
-		if err := i.repository.AttachAdminRole(ctx, registerdData.UserID); err != nil {
+		if err := i.repository.AttachAllAdminRole(ctx, registerdData.UserID); err != nil {
 			return nil, err
 		}
 		appLogger.Infof("Attach admin role for first user, user_id=%d", registerdData.UserID)

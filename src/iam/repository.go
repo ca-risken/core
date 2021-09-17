@@ -14,7 +14,7 @@ import (
 
 type iamRepository interface {
 	// User
-	ListUser(ctx context.Context, activated bool, projectID uint32, name string, userID uint32) (*[]model.User, error)
+	ListUser(ctx context.Context, activated bool, projectID uint32, name string, userID uint32, admin bool) (*[]model.User, error)
 	GetUser(ctx context.Context, userID uint32, sub string) (*model.User, error)
 	GetUserBySub(ctx context.Context, sub string) (*model.User, error)
 	PutUser(ctx context.Context, u *model.User) (*model.User, error)
@@ -27,13 +27,13 @@ type iamRepository interface {
 	PutRole(ctx context.Context, r *model.Role) (*model.Role, error)
 	DeleteRole(ctx context.Context, projectID, roleID uint32) error
 	AttachRole(ctx context.Context, projectID, roleID, userID uint32) (*model.UserRole, error)
-	AttachAdminRole(ctx context.Context, userID uint32) error
+	AttachAllAdminRole(ctx context.Context, userID uint32) error
 	DetachRole(ctx context.Context, projectID, roleID, userID uint32) error
 
 	// Policy
 	GetUserPolicy(ctx context.Context, userID uint32) (*[]model.Policy, error)
 	GetTokenPolicy(ctx context.Context, accessTokenID uint32) (*[]model.Policy, error)
-	GetAdminPolicy(ctx context.Context, userID uint32) (*model.Policy, error)
+	GetAdminPolicy(ctx context.Context, userID uint32) (*[]model.Policy, error)
 	ListPolicy(ctx context.Context, projectID uint32, name string, roleID uint32) (*[]model.Policy, error)
 	GetPolicy(ctx context.Context, projectID, policyID uint32) (*model.Policy, error)
 	GetPolicyByName(ctx context.Context, projectID uint32, name string) (*model.Policy, error)
