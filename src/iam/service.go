@@ -128,6 +128,9 @@ func (i *iamService) IsAdmin(ctx context.Context, req *iam.IsAdminRequest) (*iam
 		}
 		return nil, err
 	}
+	if policy == nil || len(*policy) < 1 {
+		return &iam.IsAdminResponse{Ok: false}, nil
+	}
 	appLogger.Debugf("user(%d) is admin, policies: %d", req.UserId, len(*policy))
 	return &iam.IsAdminResponse{Ok: true}, nil
 }
