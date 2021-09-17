@@ -10,6 +10,7 @@ message ListUserRequest {
   string name = 2;
   bool activated = 3;
   uint32 user_id = 4;
+  bool admin = 5;
 }
 
 message ListUserResponse { repeated uint32 user_id = 1; }
