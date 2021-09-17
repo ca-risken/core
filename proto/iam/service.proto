@@ -47,6 +47,9 @@ service IAMService {
 
   // ユーザに対しての認可を行います
   rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
+  // 管理者ユーザに対しての認可を行います
+  rpc IsAuthorizedAdmin(IsAuthorizedAdminRequest)
+      returns (IsAuthorizedAdminResponse);
   // アクセストークンに対しての認可を行います
   rpc IsAuthorizedToken(IsAuthorizedTokenRequest)
       returns (IsAuthorizedTokenResponse);
@@ -66,6 +69,18 @@ message IsAuthorizedRequest {
 }
 
 message IsAuthorizedResponse { bool ok = 1; }
+
+// IsAuthorizedAdminRequest
+// 管理者ユーザからのリクエストに対してアクションやリソースへの認可を行います
+message IsAuthorizedAdminRequest {
+  uint32 user_id = 1; // UserID,(e.g.)111
+  string action_name =
+      2; // Service&API_name(<service_name>/<API>format),(e.g.)`finding/get-finding`
+  string resource_name =
+      3; // System_resource_name(<prefix>/<resouorce_name>format)
+}
+
+message IsAuthorizedAdminResponse { bool ok = 1; }
 
 // IsAuthorizedTokenRequest
 // アクセストークンに対してアクションやリソースへの認可を行います
