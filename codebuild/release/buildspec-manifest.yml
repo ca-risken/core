@@ -1,0 +1,40 @@
+version: 0.2
+
+env:
+  variables:
+    REGISTRY: "public.ecr.aws/w4a9j2y8"
+    IMAGE_PREFIX: "core"
+
+  parameter-store:
+    GITHUB_USER: "/build/GITHUB_USER"
+    GITHUB_TOKEN: "/build/GITHUB_TOKEN"
+
+phases:
+  install:
+    commands:
+      - echo "machine github.com" > ~/.netrc
+      - echo "login ${GITHUB_USER}" >> ~/.netrc
+      - echo "password ${GITHUB_TOKEN}" >> ~/.netrc
+  pre_build:
+    commands:
+      - echo Setting environment variables
+      - MANIFEST_TAG=${CODEBUILD_SOURCE_VERSION}
+      - IMAGE_TAG_BASE=$(git rev-parse --short $CODEBUILD_WEBHOOK_PREV_COMMIT)
+      - export DOCKER_CLI_EXPERIMENTAL=enabled
+
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REGISTRY}
+  build:
+    commands:
+      - echo Create manifests...
+      - make create-manifest -j IMAGE_REGISTRY=${REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} IMAGE_TAG_BASE=${IMAGE_TAG_BASE} MANIFEST_TAG=${MANIFEST_TAG}
+      - make create-manifest -j IMAGE_REGISTRY=${REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} IMAGE_TAG_BASE=${IMAGE_TAG_BASE} MANIFEST_TAG=latest
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker manifest...
+      - make push-manifest -j IMAGE_REGISTRY=${REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} MANIFEST_TAG=${MANIFEST_TAG}
+      - make push-manifest -j IMAGE_REGISTRY=${REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} MANIFEST_TAG=latest
+
