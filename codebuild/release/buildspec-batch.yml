@@ -1,5 +1,3 @@
-version: 0.2
-
 batch:
   build-graph:
     - identifier: build_amd64
