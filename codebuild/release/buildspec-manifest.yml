@@ -19,7 +19,7 @@ phases:
     commands:
       - echo Setting environment variables
       - MANIFEST_TAG=${CODEBUILD_SOURCE_VERSION}
-      - IMAGE_TAG_BASE=$(git rev-parse --short $CODEBUILD_WEBHOOK_PREV_COMMIT)
+      - IMAGE_TAG_BASE=$(git rev-parse --short ${CODEBUILD_WEBHOOK_PREV_COMMIT})
       - export DOCKER_CLI_EXPERIMENTAL=enabled
 
       - echo Logging in to Amazon ECR...
