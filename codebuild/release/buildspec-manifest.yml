@@ -24,7 +24,7 @@ phases:
 
       - echo Logging in to Amazon ECR...
       - aws --version
-      - aws ecr-public get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REGISTRY}
+      - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${REGISTRY}
   build:
     commands:
       - echo Create manifests...
