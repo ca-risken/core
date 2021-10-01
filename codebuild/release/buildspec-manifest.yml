@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    REGISTRY: "public.ecr.aws/w4a9j2y8"
+    REGISTRY: "public.ecr.aws/risken"
     IMAGE_PREFIX: "core"
 
   parameter-store:
@@ -24,7 +24,7 @@ phases:
 
       - echo Logging in to Amazon ECR...
       - aws --version
-      - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REGISTRY}
+      - aws ecr-public get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REGISTRY}
   build:
     commands:
       - echo Create manifests...
@@ -37,4 +37,3 @@ phases:
       - echo Pushing the Docker manifest...
       - make push-manifest -j IMAGE_REGISTRY=${REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} MANIFEST_TAG=${MANIFEST_TAG}
       - make push-manifest -j IMAGE_REGISTRY=${REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} MANIFEST_TAG=latest
-
