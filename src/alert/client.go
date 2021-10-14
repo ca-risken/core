@@ -7,12 +7,12 @@ import (
 	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/project"
-	"github.com/kelseyhightower/envconfig"
+	"github.com/gassara-kys/envconfig"
 	"google.golang.org/grpc"
 )
 
 type findingConfig struct {
-	FindingSvcAddr string `required:"true" split_words:"true"`
+	FindingSvcAddr string `required:"true" split_words:"true" default:"finding.core.svc.cluster.local:8001"`
 }
 
 func newFindingClient() finding.FindingServiceClient {

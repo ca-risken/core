@@ -7,8 +7,8 @@ import (
 	"github.com/aws/aws-xray-sdk-go/xray"
 	mimosaxray "github.com/ca-risken/common/pkg/xray"
 	"github.com/ca-risken/core/proto/iam"
+	"github.com/gassara-kys/envconfig"
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -17,7 +17,7 @@ import (
 type iamConf struct {
 	Debug   string `default:"false"`
 	Port    string `default:"8002"`
-	EnvName string `default:"default" split_words:"true"`
+	EnvName string `default:"local" split_words:"true"`
 }
 
 func main() {

@@ -10,10 +10,10 @@ require (
 	github.com/ca-risken/core/proto/iam v0.0.0-20210906100342-c1bbb08cc3e4
 	github.com/ca-risken/core/proto/project v0.0.0-20210906100342-c1bbb08cc3e4
 	github.com/envoyproxy/protoc-gen-validate v0.6.1 // indirect
+	github.com/gassara-kys/envconfig v1.4.4
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
-	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.7.0
 	github.com/vikyd/zero v0.0.0-20190921142904-0f738d0bc858
