@@ -7,15 +7,15 @@ import (
 	"github.com/aws/aws-xray-sdk-go/xray"
 	mimosaxray "github.com/ca-risken/common/pkg/xray"
 	"github.com/ca-risken/core/proto/report"
+	"github.com/gassara-kys/envconfig"
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 type reportConf struct {
 	Port    string `default:"8005"`
-	EnvName string `default:"default" split_words:"true"`
+	EnvName string `default:"local" split_words:"true"`
 }
 
 func main() {

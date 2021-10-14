@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/ca-risken/core/proto/project"
-	"github.com/kelseyhightower/envconfig"
+	"github.com/gassara-kys/envconfig"
 	"github.com/sirupsen/logrus"
 )
 

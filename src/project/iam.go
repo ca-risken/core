@@ -7,12 +7,12 @@ import (
 
 	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/ca-risken/core/proto/iam"
-	"github.com/kelseyhightower/envconfig"
+	"github.com/gassara-kys/envconfig"
 	"google.golang.org/grpc"
 )
 
 type iamConfig struct {
-	IAMSvcAddr string `required:"true" split_words:"true"`
+	IAMSvcAddr string `required:"true" split_words:"true" default:"iam.core.svc.cluster.local:8002"`
 }
 
 func newIAMService() iamService {

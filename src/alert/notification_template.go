@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
-	"github.com/kelseyhightower/envconfig"
+	"github.com/gassara-kys/envconfig"
 	"github.com/vikyd/zero"
 )
 
 type slackWebhookConfig struct {
-	NotificationAlertURL string `split_words:"true"`
+	NotificationAlertURL string `split_words:"true" default:"http://localhost"`
 }
 
 func newslackWebhookConfig() (*slackWebhookConfig, error) {
