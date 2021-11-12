@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/aws/aws-xray-sdk-go/xray"
+	mimosarpc "github.com/ca-risken/common/pkg/rpc"
 	mimosaxray "github.com/ca-risken/common/pkg/xray"
 	"github.com/ca-risken/core/proto/iam"
 	"github.com/gassara-kys/envconfig"
@@ -40,6 +41,7 @@ func main() {
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(
 			grpcmiddleware.ChainUnaryServer(
+				mimosarpc.LoggingUnaryServerInterceptor(appLogger),
 				xray.UnaryServerInterceptor(),
 				mimosaxray.AnnotateEnvTracingUnaryServerInterceptor(conf.EnvName))))
 	iamServer := newIAMService()

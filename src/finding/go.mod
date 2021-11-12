@@ -8,6 +8,7 @@ require (
 	github.com/aws/aws-sdk-go v1.40.44 // indirect
 	github.com/aws/aws-xray-sdk-go v1.6.0
 	github.com/ca-risken/common/pkg/database v0.0.0-20210917100731-b5b493e6eacd
+	github.com/ca-risken/common/pkg/rpc v0.0.0-20211112102518-e808bff9e30e
 	github.com/ca-risken/common/pkg/xray v0.0.0-20210917100731-b5b493e6eacd
 	github.com/ca-risken/core/pkg/model v0.0.0-20210917123127-86fbc1daa83f
 	github.com/ca-risken/core/proto/finding v0.0.0-20210917123127-86fbc1daa83f
@@ -25,7 +26,7 @@ require (
 	golang.org/x/sys v0.0.0-20210915083310-ed5796bab164 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/genproto v0.0.0-20210916144049-3192f974c780 // indirect
-	google.golang.org/grpc v1.40.0
+	google.golang.org/grpc v1.42.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	gorm.io/driver/mysql v1.1.2 // indirect
 	gorm.io/gorm v1.21.15
