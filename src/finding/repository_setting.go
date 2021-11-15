@@ -42,16 +42,6 @@ func (f *findingDB) GetFindingSettingByResource(ctx context.Context, projectID u
 	return &data, nil
 }
 
-const insertUpsertFindingSetting = `
-INSERT INTO finding_setting
-  (project_id, resource_name, status, setting)
-VALUES
-  (?, ?, ?, ?)
-ON DUPLICATE KEY UPDATE
-  status=VALUES(status),
-  setting=VALUES(setting)
-`
-
 func (f *findingDB) UpsertFindingSetting(ctx context.Context, data *model.FindingSetting) (*model.FindingSetting, error) {
 	var retData model.FindingSetting
 	if err := f.Master.WithContext(ctx).Where("project_id=? AND resource_name=?", data.ProjectID, data.ResourceName).Assign(data).FirstOrCreate(&retData).Error; err != nil {

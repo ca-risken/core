@@ -354,7 +354,6 @@ func (a *alertService) NotificationAlert(ctx context.Context, alertCondition *mo
 			}
 		default:
 			appLogger.Warn("This notification_type is unimprement.", notification.Type)
-			break
 		}
 		// 通知時刻を更新する
 		dataAlertCondNotification := &model.AlertCondNotification{

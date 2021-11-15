@@ -353,10 +353,8 @@ func (a *alertService) PutNotification(ctx context.Context, req *alert.PutNotifi
 				return nil, err
 			}
 			data.NotifySetting = string(newNotifySetting)
-			break
 		default:
 			appLogger.Warnf("This notification_type is unimprement. type: %v", existData.Type)
-			break
 		}
 	}
 
@@ -421,10 +419,8 @@ func (a *alertService) TestNotification(ctx context.Context, req *alert.TestNoti
 			appLogger.Errorf("Error occured when sending test slack notification. err: %v", err)
 			return nil, err
 		}
-		break
 	default:
 		appLogger.Warnf("This notification_type is unimprement. type: %v", notification.Type)
-		break
 	}
 	return &empty.Empty{}, nil
 }

@@ -29,8 +29,9 @@ func newIAMService() iamService {
 }
 
 func getGRPCConn(ctx context.Context, addr string) *grpc.ClientConn {
-	conn, err := grpc.DialContext(ctx, addr,
-		grpc.WithUnaryInterceptor(xray.UnaryClientInterceptor()), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
+	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+	conn, err := grpc.DialContext(ctx, addr, grpc.WithUnaryInterceptor(xray.UnaryClientInterceptor()), grpc.WithInsecure())
 	if err != nil {
 		appLogger.Fatalf("Failed to connect backend gRPC server, addr=%s, err=%+v", addr, err)
 	}
@@ -66,6 +67,9 @@ func (i *iamServiceImpl) CreateDefaultRole(ctx context.Context, ownerUserID, pro
 			ProjectId: projectID,
 		},
 	})
+	if err != nil {
+		return fmt.Errorf("Could not put project-admin-role, err=%+v", err)
+	}
 	if _, err := i.client.AttachPolicy(ctx, &iam.AttachPolicyRequest{
 		ProjectId: projectID,
 		RoleId:    role.Role.RoleId,
