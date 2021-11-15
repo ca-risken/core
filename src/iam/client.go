@@ -30,8 +30,9 @@ func newFindingClient() finding.FindingServiceClient {
 }
 
 func getGRPCConn(ctx context.Context, addr string) (*grpc.ClientConn, error) {
-	conn, err := grpc.DialContext(ctx, addr,
-		grpc.WithUnaryInterceptor(xray.UnaryClientInterceptor()), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
+	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+	conn, err := grpc.DialContext(ctx, addr, grpc.WithUnaryInterceptor(xray.UnaryClientInterceptor()), grpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
