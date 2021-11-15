@@ -14,13 +14,24 @@ import (
 type projectWithTag struct {
 	ProjectID uint32
 	Name      string
-	Tag       *[]model.ProjectTag `gorm:"-"`
+	Tag       *[]model.ProjectTag
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+type projectTagDenormarize struct {
+	ProjectID uint32
+	Name      string
+	Tag       string
+	Color     string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
 func (p *projectDB) ListProject(ctx context.Context, userID, projectID uint32, name string) (*[]projectWithTag, error) {
-	query := `select p.* from project p where 1 = 1` // プログラム構造をシンプルに保つために必ずtrueとなるwhere条件を入れとく（and条件のみなので一旦これで）
+	query := `
+select p.project_id, p.name, pt.tag, pt.color, p.created_at, p.updated_at 
+from project p left outer join project_tag pt using(project_id) 
+where 1 = 1 `
 	var params []interface{}
 	if !zero.IsZeroVal(userID) {
 		query += " and exists (select * from user_role ur inner join role r using(project_id, role_id) where ur.project_id = p.project_id and user_id = ?)"
@@ -34,18 +45,40 @@ func (p *projectDB) ListProject(ctx context.Context, userID, projectID uint32, n
 		query += " and name = ?"
 		params = append(params, name)
 	}
-	data := []projectWithTag{}
-	if err := p.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
+	query += " order by p.project_id, pt.tag"
+	denormarize := []projectTagDenormarize{}
+	if err := p.Slave.WithContext(ctx).Raw(query, params...).Scan(&denormarize).Error; err != nil {
 		return nil, err
 	}
-	for idx, pj := range data {
-		tag, err := p.ListProjectTag(ctx, pj.ProjectID)
-		if err != nil {
-			return nil, err
+	normarize := []projectWithTag{}
+	pjMap := make(map[uint32]int) // key: project_id, value: index number
+	for _, pj := range denormarize {
+		if idx, ok := pjMap[pj.ProjectID]; ok {
+			tags := *normarize[idx].Tag
+			tags = append(tags, model.ProjectTag{
+				ProjectID: pj.ProjectID,
+				Tag:       pj.Tag,
+				Color:     pj.Color,
+			})
+			normarize[idx].Tag = &tags
+			continue
 		}
-		data[idx].Tag = tag
+		// new project data
+		data := projectWithTag{
+			ProjectID: pj.ProjectID,
+			Name:      pj.Name,
+			CreatedAt: pj.CreatedAt,
+			UpdatedAt: pj.UpdatedAt,
+		}
+		if pj.Tag != "" {
+			data.Tag = &[]model.ProjectTag{
+				model.ProjectTag{ProjectID: pj.ProjectID, Tag: pj.Tag, Color: pj.Color},
+			}
+		}
+		normarize = append(normarize, data)
+		pjMap[pj.ProjectID] = len(normarize) - 1
 	}
-	return &data, nil
+	return &normarize, nil
 }
 
 const selectGetProjectByName = `select * from project where name = ?`
