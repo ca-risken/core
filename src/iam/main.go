@@ -31,7 +31,10 @@ func main() {
 		appLogger.SetLevel(logrus.DebugLevel)
 	}
 	appLogger.Infof("Load IAM config: %+v", conf)
-	mimosaxray.InitXRay(xray.Config{})
+	err = mimosaxray.InitXRay(xray.Config{})
+	if err != nil {
+		appLogger.Fatal(err.Error())
+	}
 
 	l, err := net.Listen("tcp", fmt.Sprintf(":%s", conf.Port))
 	if err != nil {
