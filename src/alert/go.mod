@@ -5,11 +5,10 @@ go 1.16
 require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
-	github.com/aws/aws-sdk-go v1.40.29 // indirect
 	github.com/aws/aws-xray-sdk-go v1.6.0
-	github.com/ca-risken/common/pkg/database v0.0.0-20210906084924-5c6039fc609d
-	github.com/ca-risken/common/pkg/rpc v0.0.0-20211112102518-e808bff9e30e
-	github.com/ca-risken/common/pkg/xray v0.0.0-20210906084924-5c6039fc609d
+	github.com/ca-risken/common/pkg/database v0.0.0-20211118071101-9855266b50a1
+	github.com/ca-risken/common/pkg/rpc v0.0.0-20211118071101-9855266b50a1
+	github.com/ca-risken/common/pkg/xray v0.0.0-20211118071101-9855266b50a1
 	github.com/ca-risken/core/pkg/model v0.0.0-20210906100342-c1bbb08cc3e4
 	github.com/ca-risken/core/proto/alert v0.0.0-20210906100342-c1bbb08cc3e4
 	github.com/ca-risken/core/proto/finding v0.0.0-20210906100342-c1bbb08cc3e4
