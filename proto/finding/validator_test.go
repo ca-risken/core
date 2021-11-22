@@ -1190,6 +1190,92 @@ func TestValidate_DeleteFindingSettingRequest(t *testing.T) {
 	}
 }
 
+func TestValidate_GetRecommendRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *GetRecommendRequest
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &GetRecommendRequest{ProjectId: 1, FindingId: 1},
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &GetRecommendRequest{FindingId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG required(finding_id)",
+			input:   &GetRecommendRequest{ProjectId: 1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_PutRecommendRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *PutRecommendRequest
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &PutRecommendRequest{ProjectId: 1, FindingId: 1, DataSource: "ds", Type: "type", Risk: "risk", Recommendation: "recommend"},
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &PutRecommendRequest{FindingId: 1, DataSource: "ds", Type: "type", Risk: "risk", Recommendation: "recommend"},
+			wantErr: true,
+		},
+		{
+			name:    "NG required(finding_id)",
+			input:   &PutRecommendRequest{ProjectId: 1, DataSource: "ds", Type: "type", Risk: "risk", Recommendation: "recommend"},
+			wantErr: true,
+		},
+		{
+			name:    "NG required(data_source)",
+			input:   &PutRecommendRequest{ProjectId: 1, FindingId: 1, Type: "type", Risk: "risk", Recommendation: "recommend"},
+			wantErr: true,
+		},
+		{
+			name:    "NG length(data_source)",
+			input:   &PutRecommendRequest{ProjectId: 1, FindingId: 1, DataSource: len65string, Type: "type", Risk: "risk", Recommendation: "recommend"},
+			wantErr: true,
+		},
+		{
+			name:    "NG required(type)",
+			input:   &PutRecommendRequest{ProjectId: 1, FindingId: 1, DataSource: "ds", Risk: "risk", Recommendation: "recommend"},
+			wantErr: true,
+		},
+		{
+			name:    "NG length(type)",
+			input:   &PutRecommendRequest{ProjectId: 1, FindingId: 1, DataSource: "ds", Type: len129string, Risk: "risk", Recommendation: "recommend"},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
 func TestValidate_FindingForUpsert(t *testing.T) {
 	cases := []struct {
 		name    string

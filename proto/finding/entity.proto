@@ -136,3 +136,15 @@ enum FindingSettingStatus {
   SETTING_ACTIVE = 1;
   SETTING_DEACTIVE = 2;
 }
+
+// Recommend
+message Recommend {
+  uint64 finding_id = 1;
+  uint32 recommend_id = 2;
+  string data_source = 3;
+  string type = 4;
+  string risk = 5;
+  string recommendation = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
+}

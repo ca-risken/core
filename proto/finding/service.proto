@@ -47,6 +47,10 @@ service FindingService {
       returns (PutFindingSettingResponse);
   rpc DeleteFindingSetting(DeleteFindingSettingRequest)
       returns (google.protobuf.Empty);
+
+  // recommend
+  rpc GetRecommend(GetRecommendRequest) returns (GetRecommendResponse);
+  rpc PutRecommend(PutRecommendRequest) returns (PutRecommendResponse);
 }
 
 message ListFindingRequest {
@@ -290,3 +294,21 @@ message DeleteFindingSettingRequest {
   uint32 project_id = 1;
   uint32 finding_setting_id = 2;
 }
+
+message GetRecommendRequest {
+  uint32 project_id = 1;
+  uint64 finding_id = 2;
+}
+
+message GetRecommendResponse { Recommend recommend = 1; }
+
+message PutRecommendRequest {
+  uint32 project_id = 1;
+  uint64 finding_id = 2;
+  string data_source = 3;
+  string type = 4;
+  string risk = 5;
+  string recommendation = 6;
+}
+
+message PutRecommendResponse { Recommend recommend = 1; }
