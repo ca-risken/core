@@ -285,6 +285,24 @@ func (d *DeleteFindingSettingRequest) Validate() error {
 	)
 }
 
+// Validate for GetRecommendRequest
+func (g *GetRecommendRequest) Validate() error {
+	return validation.ValidateStruct(g,
+		validation.Field(&g.ProjectId, validation.Required),
+		validation.Field(&g.FindingId, validation.Required),
+	)
+}
+
+// Validate for PutRecommendRequest
+func (p *PutRecommendRequest) Validate() error {
+	return validation.ValidateStruct(p,
+		validation.Field(&p.ProjectId, validation.Required),
+		validation.Field(&p.FindingId, validation.Required),
+		validation.Field(&p.DataSource, validation.Required, validation.Length(0, 64)),
+		validation.Field(&p.Type, validation.Required, validation.Length(0, 128)),
+	)
+}
+
 /*
  * entities
 **/
