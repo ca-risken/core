@@ -65,3 +65,22 @@ type FindingSetting struct {
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 }
+
+// Recommend entity model
+type Recommend struct {
+	RecommendID    uint32 `gorm:"primary_key"`
+	DataSource     string
+	Type           string
+	Risk           string
+	Recommendation string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+// RecommendFinding entity model
+type RecommendFinding struct {
+	FindingID   uint64 `gorm:"primary_key"`
+	RecommendID uint32
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
