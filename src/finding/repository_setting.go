@@ -47,7 +47,6 @@ func (f *findingDB) UpsertFindingSetting(ctx context.Context, data *model.Findin
 	if err := f.Master.WithContext(ctx).Where("project_id=? AND resource_name=?", data.ProjectID, data.ResourceName).Assign(data).FirstOrCreate(&retData).Error; err != nil {
 		return nil, err
 	}
-	appLogger.Info(retData)
 	return &retData, nil
 }
 

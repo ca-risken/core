@@ -181,3 +181,17 @@ delete-finding-setting:
 		-plaintext \
 		-d '{"project_id":1001, "finding_setting_id":1001}' \
 		finding.core.svc.cluster.local:8001 core.finding.FindingService.DeleteFindingSetting
+
+.PHONY: get-recommend
+get-recommend:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1, "finding_id":1}' \
+		finding.core.svc.cluster.local:8001 core.finding.FindingService.GetRecommend
+
+.PHONY: put-recommend
+put-recommend:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1,"finding_id":1, "data_source":"ds", "type":"c", "risk":"critical", "recommendation":"..."}' \
+		finding.core.svc.cluster.local:8001 core.finding.FindingService.PutRecommend
