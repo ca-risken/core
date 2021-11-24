@@ -244,3 +244,18 @@ func (m *mockFindingRepository) DeleteFindingSetting(ctx context.Context, projec
 	args := m.Called()
 	return args.Error(0)
 }
+
+// Recommend
+
+func (m *mockFindingRepository) GetRecommend(ctx context.Context, projectID uint32, findingID uint64) (*model.Recommend, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Recommend), args.Error(1)
+}
+func (m *mockFindingRepository) UpsertRecommend(ctx context.Context, data *model.Recommend) (*model.Recommend, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Recommend), args.Error(1)
+}
+func (m *mockFindingRepository) UpsertRecommendFinding(ctx context.Context, data *model.RecommendFinding) (*model.RecommendFinding, error) {
+	args := m.Called()
+	return args.Get(0).(*model.RecommendFinding), args.Error(1)
+}

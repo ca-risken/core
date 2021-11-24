@@ -64,6 +64,11 @@ type findingRepository interface {
 	GetFindingSettingByResource(ctx context.Context, projectID uint32, resourceName string) (*model.FindingSetting, error)
 	UpsertFindingSetting(ctx context.Context, data *model.FindingSetting) (*model.FindingSetting, error)
 	DeleteFindingSetting(ctx context.Context, projectID uint32, findingSettingID uint32) error
+
+	// Recommend
+	GetRecommend(ctx context.Context, projectID uint32, findingID uint64) (*model.Recommend, error)
+	UpsertRecommend(ctx context.Context, data *model.Recommend) (*model.Recommend, error)
+	UpsertRecommendFinding(ctx context.Context, data *model.RecommendFinding) (*model.RecommendFinding, error)
 }
 
 type findingDB struct {

@@ -13,7 +13,7 @@ env:
 phases:
   install:
     runtime-versions:
-      golang: 1.14
+      golang: 1.x
     commands:
       - echo "machine github.com" > ~/.netrc
       - echo "login ${GITHUB_USER}" >> ~/.netrc
