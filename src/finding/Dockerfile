@@ -30,6 +30,7 @@ ENV PORT= \
   DB_SCHEMA=mimosa \
   DB_PORT=3306 \
   DB_LOG_MODE=false \
+  DB_MAX_CONNECTION= \
   AWS_XRAY_CONTEXT_MISSING= \
   TZ=Asia/Tokyo
 WORKDIR /usr/local/finding
