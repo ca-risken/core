@@ -49,7 +49,7 @@ func (f *findingService) PutRecommend(ctx context.Context, req *finding.PutRecom
 		appLogger.Warnf("Failed to get finding, project_id=%d, finding_id=%d, err=%+v", req.ProjectId, req.FindingId, err)
 		return nil, err
 	}
-	registerd, err := f.repository.UpsertRecommend(ctx, &model.Recommend{
+	registered, err := f.repository.UpsertRecommend(ctx, &model.Recommend{
 		DataSource:     req.DataSource,
 		Type:           req.Type,
 		Risk:           req.Risk,
@@ -60,9 +60,9 @@ func (f *findingService) PutRecommend(ctx context.Context, req *finding.PutRecom
 	}
 	if _, err := f.repository.UpsertRecommendFinding(ctx, &model.RecommendFinding{
 		FindingID:   req.FindingId,
-		RecommendID: registerd.RecommendID,
+		RecommendID: registered.RecommendID,
 	}); err != nil {
 		return nil, err
 	}
-	return &finding.PutRecommendResponse{Recommend: convertRecommend(req.FindingId, registerd)}, nil
+	return &finding.PutRecommendResponse{Recommend: convertRecommend(req.FindingId, registered)}, nil
 }
