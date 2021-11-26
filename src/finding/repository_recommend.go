@@ -11,7 +11,7 @@ select r.*
 from recommend r 
   inner join recommend_finding rf using(recommend_id) 
   inner join finding f using(finding_id) 
-where f.project_id=? and rf.finding_id=?
+where f.project_id=? and f.finding_id=?
 `
 
 func (f *findingDB) GetRecommend(ctx context.Context, projectID uint32, findingID uint64) (*model.Recommend, error) {
