@@ -81,6 +81,7 @@ type Recommend struct {
 type RecommendFinding struct {
 	FindingID   uint64 `gorm:"primary_key"`
 	RecommendID uint32
+	ProjectID   uint32
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
