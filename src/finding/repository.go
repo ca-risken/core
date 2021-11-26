@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
 
 	mimosasql "github.com/ca-risken/common/pkg/database/sql"
 	"github.com/ca-risken/core/pkg/model"
@@ -91,9 +92,10 @@ type dbConfig struct {
 	SlaveUser      string `split_words:"true" default:"hoge"`
 	SlavePassword  string `split_words:"true" default:"moge"`
 
-	Schema  string `required:"true"    default:"mimosa"`
-	Port    int    `required:"true"    default:"3306"`
-	LogMode bool   `split_words:"true" default:"false"`
+	Schema        string `required:"true"    default:"mimosa"`
+	Port          int    `required:"true"    default:"3306"`
+	LogMode       bool   `split_words:"true" default:"false"`
+	MaxConnection int    `split_words:"true" default:"10"`
 }
 
 func initDB(isMaster bool) *gorm.DB {
@@ -119,6 +121,12 @@ func initDB(isMaster bool) *gorm.DB {
 	if err != nil {
 		appLogger.Fatalf("Failed to open DB. isMaster: %t, err: %+v", isMaster, err)
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		appLogger.Fatalf("Failed to get generic database object(sql.DB). isMaster: %t, err: %+v", isMaster, err)
+	}
+	sqlDB.SetMaxOpenConns(conf.MaxConnection)
+	sqlDB.SetConnMaxLifetime(time.Duration(conf.MaxConnection) * time.Second)
 	appLogger.Infof("Connected to Database. isMaster: %t", isMaster)
 	return db
 }
