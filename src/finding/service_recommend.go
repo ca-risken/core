@@ -61,6 +61,7 @@ func (f *findingService) PutRecommend(ctx context.Context, req *finding.PutRecom
 	if _, err := f.repository.UpsertRecommendFinding(ctx, &model.RecommendFinding{
 		FindingID:   req.FindingId,
 		RecommendID: registered.RecommendID,
+		ProjectID:   req.ProjectId,
 	}); err != nil {
 		return nil, err
 	}
