@@ -44,24 +44,6 @@ func (a *alertDB) GetAlertByAlertConditionIDStatus(ctx context.Context, projectI
 	return &data, nil
 }
 
-const selectListFinding string = `
-select
-  * 
-from
-  finding f 
-where
-  f.project_id = ?
-  and not exists(select * from pend_finding pf where pf.finding_id=f.finding_id)
-`
-
-func (a *alertDB) ListFinding(ctx context.Context, projectID uint32) (*[]model.Finding, error) {
-	var data []model.Finding
-	if err := a.Slave.WithContext(ctx).Raw(selectListFinding, projectID).Find(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
 func (a *alertDB) ListFindingTag(ctx context.Context, projectID uint32, findingID uint64) (*[]model.FindingTag, error) {
 	var data []model.FindingTag
 	if err := a.Slave.WithContext(ctx).Where("project_id = ? AND finding_id = ?", projectID, findingID).Find(&data).Error; err != nil {
