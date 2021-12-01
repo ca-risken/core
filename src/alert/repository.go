@@ -51,7 +51,6 @@ type alertRepository interface {
 	ListNotificationByAlertConditionID(context.Context, uint32, uint32) (*[]model.Notification, error)
 	DeactivateAlert(context.Context, *model.Alert) error
 	GetAlertByAlertConditionIDStatus(context.Context, uint32, uint32, []string) (*model.Alert, error)
-	ListFinding(context.Context, uint32) (*[]model.Finding, error)
 	ListFindingTag(context.Context, uint32, uint64) (*[]model.FindingTag, error)
 	ListEnabledAlertCondition(context.Context, uint32, []uint32) (*[]model.AlertCondition, error)
 	ListDisabledAlertCondition(context.Context, uint32, []uint32) (*[]model.AlertCondition, error)
