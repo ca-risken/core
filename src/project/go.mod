@@ -7,7 +7,6 @@ require (
 	github.com/ca-risken/common/pkg/database v0.0.0-20211118071101-9855266b50a1
 	github.com/ca-risken/common/pkg/rpc v0.0.0-20211118071101-9855266b50a1
 	github.com/ca-risken/common/pkg/xray v0.0.0-20211118071101-9855266b50a1
-	github.com/ca-risken/core/pkg/model v0.0.0-20210906100342-c1bbb08cc3e4
 	github.com/ca-risken/core/proto/iam v0.0.0-20210906100342-c1bbb08cc3e4
 	github.com/ca-risken/core/proto/project v0.0.0-20210906100342-c1bbb08cc3e4
 	github.com/envoyproxy/protoc-gen-validate v0.6.1 // indirect
