@@ -251,16 +251,6 @@ func (f *findingDB) GetFindingTagByKey(ctx context.Context, projectID uint32, fi
 	return &data, nil
 }
 
-const selectGetFindingTagByID = `select * from finding_tag where project_id = ? and finding_tag_id = ?`
-
-func (f *findingDB) GetFindingTagByID(ctx context.Context, projectID uint32, findingTagID uint64) (*model.FindingTag, error) {
-	var data model.FindingTag
-	if err := f.Slave.WithContext(ctx).Raw(selectGetFindingTagByID, projectID, findingTagID).First(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
 const deleteUntagFinding = `delete from finding_tag where project_id = ? and finding_tag_id = ?`
 
 func (f *findingDB) UntagFinding(ctx context.Context, projectID uint32, findingTagID uint64) error {

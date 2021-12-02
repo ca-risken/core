@@ -33,7 +33,6 @@ type findingRepository interface {
 	ListFindingTagName(ctx context.Context, param *finding.ListFindingTagNameRequest) (*[]tagName, error)
 	ListFindingTagNameCount(ctx context.Context, param *finding.ListFindingTagNameRequest) (int64, error)
 	GetFindingTagByKey(context.Context, uint32, uint64, string) (*model.FindingTag, error)
-	GetFindingTagByID(context.Context, uint32, uint64) (*model.FindingTag, error)
 	TagFinding(context.Context, *model.FindingTag) (*model.FindingTag, error)
 	UntagFinding(context.Context, uint32, uint64) error
 	ClearScoreFinding(ctx context.Context, req *finding.ClearScoreRequest) error
@@ -50,7 +49,6 @@ type findingRepository interface {
 	ListResourceTagName(ctx context.Context, param *finding.ListResourceTagNameRequest) (*[]tagName, error)
 	ListResourceTagNameCount(ctx context.Context, param *finding.ListResourceTagNameRequest) (int64, error)
 	GetResourceTagByKey(context.Context, uint32, uint64, string) (*model.ResourceTag, error)
-	GetResourceTagByID(context.Context, uint32, uint64) (*model.ResourceTag, error)
 	TagResource(context.Context, *model.ResourceTag) (*model.ResourceTag, error)
 	UntagResource(context.Context, uint32, uint64) error
 
