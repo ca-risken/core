@@ -209,16 +209,6 @@ func (f *findingDB) GetResourceTagByKey(ctx context.Context, projectID uint32, r
 	return &data, nil
 }
 
-const selectGetResourceTagByID = `select * from resource_tag where project_id = ? and resource_tag_id = ?`
-
-func (f *findingDB) GetResourceTagByID(ctx context.Context, projectID uint32, resourceID uint64) (*model.ResourceTag, error) {
-	var data model.ResourceTag
-	if err := f.Slave.WithContext(ctx).Raw(selectGetResourceTagByID, projectID, resourceID).First(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
 const insertTagResource = `
 INSERT INTO resource_tag
   (resource_tag_id, resource_id, project_id, tag)

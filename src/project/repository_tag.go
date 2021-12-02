@@ -6,16 +6,6 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 )
 
-const selectListProjectTag string = `select * from project_tag where project_id=? order by tag`
-
-func (p *projectDB) ListProjectTag(ctx context.Context, projectID uint32) (*[]model.ProjectTag, error) {
-	var data []model.ProjectTag
-	if err := p.Slave.WithContext(ctx).Raw(selectListProjectTag, projectID).Scan(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
 const selectGetProjectTag string = `select * from project_tag where project_id=? and tag=?`
 
 func (p *projectDB) GetProjectTag(ctx context.Context, projectID uint32, tag string) (*model.ProjectTag, error) {

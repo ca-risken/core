@@ -39,14 +39,6 @@ func (a *alertDB) GetAlert(ctx context.Context, projectID uint32, alertID uint32
 	return &data, nil
 }
 
-func (a *alertDB) GetAlertByAlertConditionID(ctx context.Context, projectID uint32, alertConditionID uint32) (*model.Alert, error) {
-	var data model.Alert
-	if err := a.Slave.WithContext(ctx).Where("project_id = ? AND alert_condition_id = ?", projectID, alertConditionID).First(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
 func (a *alertDB) UpsertAlert(ctx context.Context, data *model.Alert) (*model.Alert, error) {
 	var retData model.Alert
 	appLogger.Info("upsertAlert:", data)

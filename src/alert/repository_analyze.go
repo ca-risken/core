@@ -18,17 +18,6 @@ func (a *alertDB) ListAlertRuleByAlertConditionID(ctx context.Context, projectID
 	return &data, nil
 }
 
-func (a *alertDB) ListNotificationByAlertConditionID(ctx context.Context, projectID, alertConditionID uint32) (*[]model.Notification, error) {
-	query := `select * from notification where notification_id = any (select notification_id from alert_cond_notification where project_id = ? and alert_condition_id = ?);`
-	var params []interface{}
-	params = append(params, projectID, alertConditionID)
-	var data []model.Notification
-	if err := a.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
 func (a *alertDB) DeactivateAlert(ctx context.Context, data *model.Alert) error {
 	if err := a.Master.WithContext(ctx).Model(&model.Alert{}).Where("project_id = ? AND alert_id = ?", data.ProjectID, data.AlertID).Update("status", "DEACTIVE").Error; err != nil {
 		return err
@@ -39,14 +28,6 @@ func (a *alertDB) DeactivateAlert(ctx context.Context, data *model.Alert) error 
 func (a *alertDB) GetAlertByAlertConditionIDStatus(ctx context.Context, projectID uint32, AlertConditionID uint32, status []string) (*model.Alert, error) {
 	var data model.Alert
 	if err := a.Slave.WithContext(ctx).Where("project_id = ? AND alert_condition_id = ? AND status in (?)", projectID, AlertConditionID, status).First(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
-func (a *alertDB) ListFindingTag(ctx context.Context, projectID uint32, findingID uint64) (*[]model.FindingTag, error) {
-	var data []model.FindingTag
-	if err := a.Slave.WithContext(ctx).Where("project_id = ? AND finding_id = ?", projectID, findingID).Find(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

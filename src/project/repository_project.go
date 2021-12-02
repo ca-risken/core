@@ -72,7 +72,7 @@ where 1 = 1 `
 		}
 		if pj.Tag != "" {
 			data.Tag = &[]model.ProjectTag{
-				model.ProjectTag{ProjectID: pj.ProjectID, Tag: pj.Tag, Color: pj.Color},
+				{ProjectID: pj.ProjectID, Tag: pj.Tag, Color: pj.Color},
 			}
 		}
 		normarize = append(normarize, data)

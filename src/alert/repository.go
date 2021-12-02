@@ -14,7 +14,6 @@ type alertRepository interface {
 	// Alert
 	ListAlert(context.Context, uint32, []string, []string, string, int64, int64) (*[]model.Alert, error)
 	GetAlert(context.Context, uint32, uint32) (*model.Alert, error)
-	GetAlertByAlertConditionID(context.Context, uint32, uint32) (*model.Alert, error)
 	UpsertAlert(context.Context, *model.Alert) (*model.Alert, error)
 	DeleteAlert(context.Context, uint32, uint32) error
 	ListAlertHistory(context.Context, uint32, uint32, []string, []string, int64, int64) (*[]model.AlertHistory, error)
@@ -48,10 +47,8 @@ type alertRepository interface {
 
 	// forAnalyze
 	ListAlertRuleByAlertConditionID(context.Context, uint32, uint32) (*[]model.AlertRule, error)
-	ListNotificationByAlertConditionID(context.Context, uint32, uint32) (*[]model.Notification, error)
 	DeactivateAlert(context.Context, *model.Alert) error
 	GetAlertByAlertConditionIDStatus(context.Context, uint32, uint32, []string) (*model.Alert, error)
-	ListFindingTag(context.Context, uint32, uint64) (*[]model.FindingTag, error)
 	ListEnabledAlertCondition(context.Context, uint32, []uint32) (*[]model.AlertCondition, error)
 	ListDisabledAlertCondition(context.Context, uint32, []uint32) (*[]model.AlertCondition, error)
 	GetProject(context.Context, uint32) (*model.Project, error)
