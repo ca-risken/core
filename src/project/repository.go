@@ -55,7 +55,6 @@ type projectRepository interface {
 	CreateProject(ctx context.Context, name string) (*model.Project, error)
 	UpdateProject(ctx context.Context, projectID uint32, name string) (*model.Project, error)
 
-	ListProjectTag(ctx context.Context, projectID uint32) (*[]model.ProjectTag, error)
 	TagProject(ctx context.Context, projectID uint32, tag, color string) (*model.ProjectTag, error)
 	UntagProject(ctx context.Context, projectID uint32, tag string) error
 }
