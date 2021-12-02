@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/iam"
+	"github.com/ca-risken/core/src/iam/model"
 	"github.com/golang/protobuf/ptypes/empty"
 	"gorm.io/gorm"
 )

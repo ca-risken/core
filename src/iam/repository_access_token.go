@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/src/iam/model"
 	"github.com/vikyd/zero"
 	"gorm.io/gorm"
 )

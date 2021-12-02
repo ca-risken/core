@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/iam"
+	"github.com/ca-risken/core/src/iam/model"
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 )

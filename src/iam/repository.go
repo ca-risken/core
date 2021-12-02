@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	mimosasql "github.com/ca-risken/common/pkg/database/sql"
-	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/src/iam/model"
 	"github.com/gassara-kys/envconfig"
 	"github.com/vikyd/zero"
 	"gorm.io/gorm"

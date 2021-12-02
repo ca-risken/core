@@ -5,7 +5,7 @@ import (
 	"errors"
 	"regexp"
 
-	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/src/iam/model"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/iam"
 	"github.com/vikyd/zero"

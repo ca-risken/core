@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/iam"
+	"github.com/ca-risken/core/src/iam/model"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
 	"gorm.io/gorm"
