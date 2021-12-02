@@ -34,8 +34,6 @@ github.com/ca-risken/common/pkg/sqs v0.0.0-20211122093906-df2c2b1a375a h1:Pxh9Ik
 github.com/ca-risken/common/pkg/sqs v0.0.0-20211122093906-df2c2b1a375a/go.mod h1:PnGxivikVgnsel3YoM1W8a6ZlrlXL7pXb7UdKDFW96Q=
 github.com/ca-risken/common/pkg/xray v0.0.0-20211122093906-df2c2b1a375a h1:/3FY+QKuhOOoC1CBh+IJTi1CY/ZSkRsKjnmVIE6f4QQ=
 github.com/ca-risken/common/pkg/xray v0.0.0-20211122093906-df2c2b1a375a/go.mod h1:1QELprYp9UidwqzB1253qA00l3umMen4njJMFRNq5Po=
-github.com/ca-risken/core/pkg/model v0.0.0-20211126100009-48eb381d5d58 h1:4xhQ6vqR45e0VR3ze8F27BEytLlbscRUXd01uZ2e+1k=
-github.com/ca-risken/core/pkg/model v0.0.0-20211126100009-48eb381d5d58/go.mod h1:2W0bLECvl7zVZqut9FHW5FYU9vgmwK48mtv2A+Ei9zc=
 github.com/ca-risken/core/proto/finding v0.0.0-20211126100009-48eb381d5d58 h1:jCRjJNwYyXGp2hZ2gdSj6nPoESnaZ0t8+ZKeCSIXhNo=
 github.com/ca-risken/core/proto/finding v0.0.0-20211126100009-48eb381d5d58/go.mod h1:TZ3SqTbxvOpl6GF4FEY4XEiIGkss4FCNyYp2M4j1j60=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=

@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 
-	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
+	"github.com/ca-risken/core/src/finding/model"
 )
 
 const selectGetPendFinding = `select * from pend_finding where project_id = ? and finding_id = ?`
