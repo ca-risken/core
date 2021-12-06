@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/src/alert/model"
 	"github.com/vikyd/zero"
 )
 

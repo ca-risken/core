@@ -136,8 +136,8 @@ go-mod-update:
 		cd src/report \
 		&& go get -u github.com/ca-risken/core/...
 
-.PHONY: lint proto-lint pkg-lint
-lint: $(LINT_TARGETS) proto-lint pkg-lint
+.PHONY: lint proto-lint
+lint: $(LINT_TARGETS) proto-lint
 %.lint: FAKE
 	sh hack/golinter.sh src/$(*)
 proto-lint:
@@ -146,8 +146,6 @@ proto-lint:
 	sh hack/golinter.sh proto/iam
 	sh hack/golinter.sh proto/project
 	sh hack/golinter.sh proto/report
-pkg-lint:
-	sh hack/golinter.sh pkg/model
 
 .PHONY: generate-mock
 generate-mock: proto-mock

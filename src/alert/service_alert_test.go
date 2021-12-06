@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
+	"github.com/ca-risken/core/src/alert/model"
 	"gorm.io/gorm"
 )
 

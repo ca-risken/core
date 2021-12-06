@@ -12,10 +12,10 @@ import (
 	"time"
 
 	"github.com/aws/aws-xray-sdk-go/xray"
-	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
-	"github.com/ca-risken/core/proto/project"
+	projectproto "github.com/ca-risken/core/proto/project"
+	"github.com/ca-risken/core/src/alert/model"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
 	"gorm.io/gorm"
@@ -29,6 +29,16 @@ func (a *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
+
+	projects, err := a.projectClient.ListProject(ctx, &projectproto.ListProjectRequest{ProjectId: req.ProjectId})
+	if err != nil {
+		return nil, err
+	}
+	if len(projects.Project) == 0 {
+		return nil, fmt.Errorf("not found project: ProjectID:=%v", req.ProjectId)
+	}
+	project := projects.Project[0]
+
 	requestID := getRequestID(req.ProjectId)
 	// 有効なalertConditionの取得
 	appLogger.Infof("start ListEnabledAlertCondition: RequestID=%s", requestID)
@@ -45,7 +55,7 @@ func (a *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	// マッチング
 	appLogger.Infof("start matching: RequestID=%s", requestID)
 	for _, alertCondition := range *alertConditions {
-		err := a.AnalyzeAlertByCondition(ctx, &alertCondition)
+		err := a.AnalyzeAlertByCondition(ctx, &alertCondition, project)
 		if err != nil {
 			appLogger.Error(err)
 			return nil, err
@@ -77,7 +87,7 @@ func (a *alertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	return &empty.Empty{}, nil
 }
 
-func (a *alertService) AnalyzeAlertByCondition(ctx context.Context, alertCondition *model.AlertCondition) error {
+func (a *alertService) AnalyzeAlertByCondition(ctx context.Context, alertCondition *model.AlertCondition, project *projectproto.Project) error {
 	// AlertRuleの取得
 	_, ss := xray.BeginSubsegment(ctx, "ListAlertRuleByAlertConditionID")
 	alertRules, err := a.repository.ListAlertRuleByAlertConditionID(ctx, alertCondition.ProjectID, alertCondition.AlertConditionID)
@@ -127,7 +137,7 @@ func (a *alertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 		}
 		// AlertがACTIVE、かつMatchしている場合はAlert通知を行う
 		if registAlert.Status == alert.Status_ACTIVE.String() {
-			err = a.NotificationAlert(ctx, alertCondition, registAlert, alertRules)
+			err = a.NotificationAlert(ctx, alertCondition, registAlert, alertRules, project)
 			if err != nil {
 				return err
 			}
@@ -319,7 +329,7 @@ func (a *alertService) deleteRelAlertFindingByAlertID(ctx context.Context, proje
 	return nil
 }
 
-func (a *alertService) NotificationAlert(ctx context.Context, alertCondition *model.AlertCondition, alert *model.Alert, rules *[]model.AlertRule) error {
+func (a *alertService) NotificationAlert(ctx context.Context, alertCondition *model.AlertCondition, alert *model.Alert, rules *[]model.AlertRule, project *projectproto.Project) error {
 	_, ss := xray.BeginSubsegment(ctx, "ListAlertCondNotification")
 	alertCondNotifications, err := a.repository.ListAlertCondNotification(ctx, alertCondition.ProjectID, alertCondition.AlertConditionID, 0, 0, time.Now().Unix())
 	ss.Close(err)
@@ -340,12 +350,6 @@ func (a *alertService) NotificationAlert(ctx context.Context, alertCondition *mo
 		}
 		switch notification.Type {
 		case "slack":
-			_, ss = xray.BeginSubsegment(ctx, "GetProject")
-			project, err := a.repository.GetProject(ctx, alert.ProjectID)
-			ss.Close(err)
-			if err != nil {
-				return err
-			}
 			_, ss = xray.BeginSubsegment(ctx, "sendSlackNotification")
 			err = sendSlackNotification(notification.NotifySetting, alert, project, rules)
 			ss.Close(err)
@@ -445,7 +449,7 @@ func getHistoryType(alertID uint32) string {
 	return "updated"
 }
 
-func sendSlackNotification(notifySetting string, alert *model.Alert, project *model.Project, rules *[]model.AlertRule) error {
+func sendSlackNotification(notifySetting string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
@@ -547,7 +551,7 @@ func getRequestID(projectID uint32) string {
 
 func (a *alertService) AnalyzeAlertAll(ctx context.Context, _ *empty.Empty) (*empty.Empty, error) {
 	appLogger.Info("start AnalyzeAlertAll")
-	list, err := a.projectClient.ListProject(ctx, &project.ListProjectRequest{})
+	list, err := a.projectClient.ListProject(ctx, &projectproto.ListProjectRequest{})
 	if err != nil {
 		appLogger.Errorf("Failed to list project API, err=%+v", err)
 		return nil, err
@@ -561,7 +565,7 @@ func (a *alertService) AnalyzeAlertAll(ctx context.Context, _ *empty.Empty) (*em
 	wg.Add(projectNum)
 	for i := range list.Project {
 		// launch goroutine
-		go func(p *project.Project) {
+		go func(p *projectproto.Project) {
 			defer wg.Done()
 			if _, err := a.AnalyzeAlert(ctx, &alert.AnalyzeAlertRequest{ProjectId: p.ProjectId}); err != nil {
 				appLogger.Warnf("Failed to AnalyzeAlert, project_id=%d, err=%+v", p.ProjectId, err)

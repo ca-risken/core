@@ -7,9 +7,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
+	findingmock "github.com/ca-risken/core/proto/finding/mocks"
+	"github.com/ca-risken/core/proto/project"
+	projectmock "github.com/ca-risken/core/proto/project/mocks"
+	"github.com/ca-risken/core/src/alert/model"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jarcoal/httpmock"
 	"gorm.io/gorm"
@@ -22,12 +25,15 @@ import (
 func TestAnalyzeAlert(t *testing.T) {
 	now := time.Now()
 	mockDB := mockAlertRepository{}
-	svc := alertService{repository: &mockDB}
+	mockProject := projectmock.ProjectServiceClient{}
+	svc := alertService{repository: &mockDB, projectClient: &mockProject}
 	cases := []struct {
 		name                              string
 		input                             *alert.AnalyzeAlertRequest
 		want                              *empty.Empty
 		wantErr                           bool
+		mockListProject                   *project.ListProjectResponse
+		mockListProjectErr                error
 		mockListAlertCondition            *[]model.AlertCondition
 		mockListAlertConditionErr         error
 		mockListAlertRuleErr              error
@@ -35,28 +41,45 @@ func TestAnalyzeAlert(t *testing.T) {
 		mockListDisabledAlertConditionErr error
 	}{
 		{
-			name:                              "OK",
-			input:                             &alert.AnalyzeAlertRequest{ProjectId: 1001},
-			want:                              &empty.Empty{},
-			wantErr:                           false,
+			name:    "OK",
+			input:   &alert.AnalyzeAlertRequest{ProjectId: 1001},
+			want:    &empty.Empty{},
+			wantErr: false,
+			mockListProject: &project.ListProjectResponse{Project: []*project.Project{
+				{ProjectId: 1001, Name: "project1"},
+			}},
 			mockListAlertCondition:            &[]model.AlertCondition{},
 			mockListDisabledAlertCondition:    &[]model.AlertCondition{},
 			mockListDisabledAlertConditionErr: nil,
 		},
 		{
-			name:                      "NG ListAlertConditionErr",
-			input:                     &alert.AnalyzeAlertRequest{ProjectId: 1001},
-			want:                      nil,
-			wantErr:                   true,
+			name:               "NG ListProjectErr",
+			input:              &alert.AnalyzeAlertRequest{ProjectId: 1001},
+			want:               nil,
+			wantErr:            true,
+			mockListProject:    nil,
+			mockListProjectErr: errors.New("Something error occurred LListProject"),
+		},
+		{
+			name:    "NG ListAlertConditionErr",
+			input:   &alert.AnalyzeAlertRequest{ProjectId: 1001},
+			want:    nil,
+			wantErr: true,
+			mockListProject: &project.ListProjectResponse{Project: []*project.Project{
+				{ProjectId: 1001, Name: "project1"},
+			}},
 			mockListAlertCondition:    nil,
 			mockListAlertConditionErr: errors.New("Something error occured listAlertCondition"),
 			mockListAlertRuleErr:      nil,
 		},
 		{
-			name:                      "NG AlertAnalyzeError",
-			input:                     &alert.AnalyzeAlertRequest{ProjectId: 1001},
-			want:                      nil,
-			wantErr:                   true,
+			name:    "NG AlertAnalyzeError",
+			input:   &alert.AnalyzeAlertRequest{ProjectId: 1001},
+			want:    nil,
+			wantErr: true,
+			mockListProject: &project.ListProjectResponse{Project: []*project.Project{
+				{ProjectId: 1001, Name: "project1"},
+			}},
 			mockListAlertCondition:    &[]model.AlertCondition{{AlertConditionID: 1001, CreatedAt: now, UpdatedAt: now}},
 			mockListAlertConditionErr: nil,
 			mockListAlertRuleErr:      errors.New("Something error occured ListAlertRule"),
@@ -64,11 +87,15 @@ func TestAnalyzeAlert(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
 			mockDB = mockAlertRepository{}
 			mockDB.On("ListEnabledAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
 			mockDB.On("ListAlertRuleByAlertConditionID").Return(&[]model.AlertRule{}, c.mockListAlertRuleErr).Once()
 			mockDB.On("ListDisabledAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
-			got, err := svc.AnalyzeAlert(context.Background(), c.input)
+			mockProject = projectmock.ProjectServiceClient{}
+			mockProject.On("ListProject", ctx, &project.ListProjectRequest{ProjectId: c.input.ProjectId}).
+				Return(c.mockListProject, c.mockListProjectErr).Once()
+			got, err := svc.AnalyzeAlert(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -88,35 +115,35 @@ func TestSendSlackNotification(t *testing.T) {
 		name          string
 		notifySetting string
 		alert         *model.Alert
-		project       *model.Project
+		project       *project.Project
 		wantErr       bool
 	}{
 		{
 			name:          "OK",
 			notifySetting: `{"webhook_url":"http://hogehoge.com"}`,
 			alert:         &model.Alert{},
-			project:       &model.Project{},
+			project:       &project.Project{},
 			wantErr:       false,
 		},
 		{
 			name:          "NG Json.Marshal Error",
 			notifySetting: `{"webhook_url":http://hogehoge.com"}`,
 			alert:         &model.Alert{},
-			project:       &model.Project{},
+			project:       &project.Project{},
 			wantErr:       true,
 		},
 		{
 			name:          "Warn webhook_url not set",
 			notifySetting: `{}`,
 			alert:         &model.Alert{},
-			project:       &model.Project{},
+			project:       &project.Project{},
 			wantErr:       false,
 		},
 		{
 			name:          "HTTP Error",
 			notifySetting: `{"webhook_url":"http://fugafuga.com"}`,
 			alert:         &model.Alert{},
-			project:       &model.Project{},
+			project:       &project.Project{},
 			wantErr:       true,
 		},
 	}
@@ -148,7 +175,7 @@ func TestNotificationAlert(t *testing.T) {
 		mockListAlertCondNotificationErr   error
 		mockGetNotification                *model.Notification
 		mockGetNotificationErr             error
-		mockGetProject                     *model.Project
+		mockGetProject                     *project.Project
 		mockGetProjectErr                  error
 		mockUpsertAlertCondNotification    *model.AlertCondNotification
 		mockUpsertAlertCondNotificationErr error
@@ -170,7 +197,7 @@ func TestNotificationAlert(t *testing.T) {
 			mockListAlertCondNotificationErr:   nil,
 			mockGetNotification:                &model.Notification{Type: "slack", NotifySetting: `{"webhook_url":"http://hogehoge.com"}`},
 			mockGetNotificationErr:             nil,
-			mockGetProject:                     &model.Project{},
+			mockGetProject:                     &project.Project{},
 			mockGetProjectErr:                  nil,
 			mockUpsertAlertCondNotification:    &model.AlertCondNotification{},
 			mockUpsertAlertCondNotificationErr: nil,
@@ -224,7 +251,7 @@ func TestNotificationAlert(t *testing.T) {
 			mockListAlertCondNotificationErr:   nil,
 			mockGetNotification:                &model.Notification{Type: "slack", NotifySetting: `{"webhook_url":"http://hogehoge.com"}`},
 			mockGetNotificationErr:             nil,
-			mockGetProject:                     &model.Project{},
+			mockGetProject:                     &project.Project{},
 			mockGetProjectErr:                  nil,
 			mockUpsertAlertCondNotification:    nil,
 			mockUpsertAlertCondNotificationErr: errors.New("Somethinng error occured"),
@@ -237,7 +264,7 @@ func TestNotificationAlert(t *testing.T) {
 			mockDB.On("GetNotification").Return(c.mockGetNotification, c.mockGetNotificationErr).Once()
 			mockDB.On("UpsertAlertCondNotification").Return(c.mockUpsertAlertCondNotification, c.mockUpsertAlertCondNotificationErr).Once()
 			mockDB.On("GetProject").Return(c.mockGetProject, c.mockGetProjectErr).Once()
-			got := svc.NotificationAlert(context.Background(), c.alertCondition, c.alert, &[]model.AlertRule{})
+			got := svc.NotificationAlert(context.Background(), c.alertCondition, c.alert, &[]model.AlertRule{}, &project.Project{})
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
 			}
@@ -247,50 +274,56 @@ func TestNotificationAlert(t *testing.T) {
 
 func TestAnalyzeAlertByRule(t *testing.T) {
 	now := time.Now()
-	mockFinding := mockFindingClient{}
+	mockFinding := findingmock.FindingServiceClient{}
 	svc := alertService{findingClient: &mockFinding}
 	cases := []struct {
-		name               string
-		inputAlertRule     *model.AlertRule
-		wantBool           bool
-		wantIntArr         *[]uint64
-		wantErr            bool
-		mockListFinding    *finding.BatchListFindingResponse
-		mockListFindingErr error
+		name                   string
+		inputAlertRule         *model.AlertRule
+		wantBool               bool
+		wantIntArr             *[]uint64
+		wantErr                bool
+		mockListFindingRequest *finding.BatchListFindingRequest
+		mockListFinding        *finding.BatchListFindingResponse
+		mockListFindingErr     error
 	}{
 		{
-			name:               "OK Not Match 0 Findings",
-			inputAlertRule:     &model.AlertRule{Score: 1.0, CreatedAt: now, UpdatedAt: now, FindingCnt: 1},
-			wantBool:           false,
-			wantIntArr:         &[]uint64{},
-			wantErr:            false,
-			mockListFinding:    &finding.BatchListFindingResponse{FindingId: []uint64{}, Total: 0, Count: 0},
-			mockListFindingErr: nil,
+			name:                   "OK Not Match 0 Findings",
+			inputAlertRule:         &model.AlertRule{Score: 1.0, CreatedAt: now, UpdatedAt: now, FindingCnt: 1},
+			wantBool:               false,
+			wantIntArr:             &[]uint64{},
+			wantErr:                false,
+			mockListFindingRequest: &finding.BatchListFindingRequest{FromScore: 1.0, Status: finding.FindingStatus_FINDING_ACTIVE},
+			mockListFinding:        &finding.BatchListFindingResponse{FindingId: []uint64{}, Total: 0, Count: 0},
+			mockListFindingErr:     nil,
 		},
 		{
-			name:               "OK FindingCnt <= Match Findings",
-			inputAlertRule:     &model.AlertRule{Score: 0.1, CreatedAt: now, UpdatedAt: now, FindingCnt: 2},
-			wantBool:           true,
-			wantIntArr:         &[]uint64{1, 2},
-			wantErr:            false,
-			mockListFinding:    &finding.BatchListFindingResponse{FindingId: []uint64{1, 2}, Total: 2, Count: 2},
-			mockListFindingErr: nil,
+			name:                   "OK FindingCnt <= Match Findings",
+			inputAlertRule:         &model.AlertRule{Score: 0.1, CreatedAt: now, UpdatedAt: now, FindingCnt: 2},
+			wantBool:               true,
+			wantIntArr:             &[]uint64{1, 2},
+			wantErr:                false,
+			mockListFindingRequest: &finding.BatchListFindingRequest{FromScore: 0.1, Status: finding.FindingStatus_FINDING_ACTIVE},
+			mockListFinding:        &finding.BatchListFindingResponse{FindingId: []uint64{1, 2}, Total: 2, Count: 2},
+			mockListFindingErr:     nil,
 		},
 		{
-			name:               "OK FindingCnt > Match Findings",
-			inputAlertRule:     &model.AlertRule{Score: 0.1, CreatedAt: now, UpdatedAt: now, FindingCnt: 2},
-			wantBool:           false,
-			wantIntArr:         &[]uint64{1},
-			wantErr:            false,
-			mockListFinding:    &finding.BatchListFindingResponse{FindingId: []uint64{1}, Total: 1, Count: 1},
-			mockListFindingErr: nil,
+			name:                   "OK FindingCnt > Match Findings",
+			inputAlertRule:         &model.AlertRule{Score: 0.1, CreatedAt: now, UpdatedAt: now, FindingCnt: 2},
+			wantBool:               false,
+			wantIntArr:             &[]uint64{1},
+			wantErr:                false,
+			mockListFindingRequest: &finding.BatchListFindingRequest{FromScore: 0.1, Status: finding.FindingStatus_FINDING_ACTIVE},
+			mockListFinding:        &finding.BatchListFindingResponse{FindingId: []uint64{1}, Total: 1, Count: 1},
+			mockListFindingErr:     nil,
 		},
 		{
-			name:               "NG DB Error",
-			inputAlertRule:     &model.AlertRule{Score: 0.1, ResourceName: "hoge", Tag: "fuga", CreatedAt: now, UpdatedAt: now, FindingCnt: 1},
-			wantBool:           false,
-			wantIntArr:         &[]uint64{},
-			wantErr:            true,
+			name:           "NG DB Error",
+			inputAlertRule: &model.AlertRule{Score: 0.1, ResourceName: "hoge", Tag: "fuga", CreatedAt: now, UpdatedAt: now, FindingCnt: 1},
+			wantBool:       false,
+			wantIntArr:     &[]uint64{},
+			wantErr:        true,
+			mockListFindingRequest: &finding.BatchListFindingRequest{FromScore: 0.1,
+				ResourceName: []string{"hoge"}, Tag: []string{"fuga"}, Status: finding.FindingStatus_FINDING_ACTIVE},
 			mockListFinding:    nil,
 			mockListFindingErr: errors.New("something error occured"),
 		},
@@ -298,8 +331,11 @@ func TestAnalyzeAlertByRule(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 
-			mockFinding.On("BatchListFinding").Return(c.mockListFinding, c.mockListFindingErr).Once()
-			gotBool, gotArr, err := svc.analyzeAlertByRule(context.Background(), c.inputAlertRule)
+			ctx := context.Background()
+
+			mockFinding.On("BatchListFinding", ctx, c.mockListFindingRequest).
+				Return(c.mockListFinding, c.mockListFindingErr).Once()
+			gotBool, gotArr, err := svc.analyzeAlertByRule(ctx, c.inputAlertRule)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}

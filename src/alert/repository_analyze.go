@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/src/alert/model"
 	"github.com/vikyd/zero"
 )
 
@@ -58,14 +58,6 @@ func (a *alertDB) ListDisabledAlertCondition(ctx context.Context, projectID uint
 	}
 	var data []model.AlertCondition
 	if err := a.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
-func (a *alertDB) GetProject(ctx context.Context, projectID uint32) (*model.Project, error) {
-	var data model.Project
-	if err := a.Slave.WithContext(ctx).Where("project_id = ?", projectID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

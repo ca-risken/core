@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	mimosasql "github.com/ca-risken/common/pkg/database/sql"
-	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/src/alert/model"
 	"github.com/gassara-kys/envconfig"
 	"gorm.io/gorm"
 )
@@ -51,7 +51,6 @@ type alertRepository interface {
 	GetAlertByAlertConditionIDStatus(context.Context, uint32, uint32, []string) (*model.Alert, error)
 	ListEnabledAlertCondition(context.Context, uint32, []uint32) (*[]model.AlertCondition, error)
 	ListDisabledAlertCondition(context.Context, uint32, []uint32) (*[]model.AlertCondition, error)
-	GetProject(context.Context, uint32) (*model.Project, error)
 }
 
 type alertDB struct {
