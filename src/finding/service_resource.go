@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
+	"github.com/ca-risken/core/src/finding/model"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
 	"gorm.io/gorm"

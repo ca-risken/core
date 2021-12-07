@@ -5,8 +5,8 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/report"
+	"github.com/ca-risken/core/src/report/model"
 	"github.com/golang/protobuf/ptypes/empty"
 	"gorm.io/gorm"
 )

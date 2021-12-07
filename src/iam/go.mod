@@ -9,7 +9,6 @@ require (
 	github.com/ca-risken/common/pkg/database v0.0.0-20211118071101-9855266b50a1
 	github.com/ca-risken/common/pkg/rpc v0.0.0-20211118071101-9855266b50a1
 	github.com/ca-risken/common/pkg/xray v0.0.0-20211118071101-9855266b50a1
-	github.com/ca-risken/core/pkg/model v0.0.0-20210917100930-a9033029f9e4
 	github.com/ca-risken/core/proto/finding v0.0.0-20210917100930-a9033029f9e4
 	github.com/ca-risken/core/proto/iam v0.0.0-20210917123127-86fbc1daa83f
 	github.com/gassara-kys/envconfig v1.4.4

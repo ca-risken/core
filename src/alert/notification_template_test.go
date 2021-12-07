@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/src/alert/model"
 )
 
 /*

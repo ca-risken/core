@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/proto/project"
+	"github.com/ca-risken/core/src/alert/model"
 	"github.com/gassara-kys/envconfig"
 	"github.com/vikyd/zero"
 )
@@ -22,7 +23,7 @@ func newslackWebhookConfig() (*slackWebhookConfig, error) {
 	return config, nil
 }
 
-func (s *slackWebhookConfig) GetPayload(channel, message string, alert *model.Alert, project *model.Project, rules *[]model.AlertRule) (string, error) {
+func (s *slackWebhookConfig) GetPayload(channel, message string, alert *model.Alert, project *project.Project, rules *[]model.AlertRule) (string, error) {
 	payload := map[string]interface{}{}
 	// text
 	text := fmt.Sprintf("%vアラートを検知しました。", getMention(alert.Severity))
@@ -59,7 +60,7 @@ func (s *slackWebhookConfig) GetPayload(channel, message string, alert *model.Al
 				},
 				map[string]string{
 					"title": "Link",
-					"value": fmt.Sprintf("<%s?project_id=%d|詳細はこちらから>", s.NotificationAlertURL, project.ProjectID),
+					"value": fmt.Sprintf("<%s?project_id=%d|詳細はこちらから>", s.NotificationAlertURL, project.ProjectId),
 					"short": "true",
 				},
 				map[string]string{

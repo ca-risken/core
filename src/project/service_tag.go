@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 
-	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/project"
+	"github.com/ca-risken/core/src/project/model"
 	"github.com/golang/protobuf/ptypes/empty"
 )
 

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
+	"github.com/ca-risken/core/src/finding/model"
 	"github.com/vikyd/zero"
 )
 

@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/src/project/model"
 )
 
 const selectGetProjectTag string = `select * from project_tag where project_id=? and tag=?`
