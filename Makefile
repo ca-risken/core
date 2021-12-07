@@ -6,6 +6,7 @@ MANIFEST_CREATE_TARGETS = $(TARGETS:=.create-manifest)
 MANIFEST_PUSH_TARGETS = $(TARGETS:=.push-manifest)
 TEST_TARGETS = $(TARGETS:=.go-test)
 LINT_TARGETS = $(TARGETS:=.lint)
+MOCK_TARGETS = $(TARGETS:=.mock)
 BUILD_OPT=""
 IMAGE_TAG=latest
 MANIFEST_TAG=latest
@@ -66,7 +67,7 @@ proto-validate: fmt
 	done
 
 .PHONY: proto
-proto : proto-without-validate proto-validate
+proto : proto-without-validate proto-validate proto-mock
 
 PHONY: build $(BUILD_TARGETS)
 build: $(BUILD_TARGETS)
@@ -147,5 +148,11 @@ proto-lint:
 	sh hack/golinter.sh proto/report
 pkg-lint:
 	sh hack/golinter.sh pkg/model
+
+.PHONY: generate-mock
+generate-mock: proto-mock
+proto-mock: $(MOCK_TARGETS)
+%.mock: FAKE
+	sh hack/generate-mock.sh proto/$(*)
 
 FAKE:
