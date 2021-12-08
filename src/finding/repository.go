@@ -124,7 +124,7 @@ func initDB(isMaster bool) *gorm.DB {
 		appLogger.Fatalf("Failed to get generic database object(sql.DB). isMaster: %t, err: %+v", isMaster, err)
 	}
 	sqlDB.SetMaxOpenConns(conf.MaxConnection)
-	sqlDB.SetConnMaxLifetime(time.Duration(conf.MaxConnection) * time.Second)
+	sqlDB.SetConnMaxLifetime(time.Duration(conf.MaxConnection/2) * time.Second)
 	appLogger.Infof("Connected to Database. isMaster: %t", isMaster)
 	return db
 }
