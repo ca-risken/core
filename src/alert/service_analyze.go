@@ -18,6 +18,7 @@ import (
 	"github.com/ca-risken/core/src/alert/model"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
+	"golang.org/x/sync/semaphore"
 	"gorm.io/gorm"
 )
 
@@ -561,9 +562,16 @@ func (a *alertService) AnalyzeAlertAll(ctx context.Context, _ *empty.Empty) (*em
 		appLogger.Warn("There are no project")
 		return &empty.Empty{}, nil
 	}
+	allResource := a.maxAnalyzeAPICall // max groutine resources
+	analyzeAlertResource := int64(1)
+	sem := semaphore.NewWeighted(allResource)
 	var wg sync.WaitGroup
 	wg.Add(projectNum)
 	for i := range list.Project {
+		if err := sem.Acquire(ctx, analyzeAlertResource); err != nil {
+			appLogger.Errorf("Failed to acquire resource, err=%+v", err)
+			return nil, err
+		}
 		// launch goroutine
 		go func(p *projectproto.Project) {
 			defer wg.Done()
@@ -571,6 +579,7 @@ func (a *alertService) AnalyzeAlertAll(ctx context.Context, _ *empty.Empty) (*em
 				appLogger.Warnf("Failed to AnalyzeAlert, project_id=%d, err=%+v", p.ProjectId, err)
 			}
 			time.Sleep(1 * time.Second)
+			sem.Release(analyzeAlertResource)
 		}(list.Project[i])
 	}
 	wg.Wait()
