@@ -31,7 +31,7 @@ func newFindingClient() finding.FindingServiceClient {
 }
 
 type projectConfig struct {
-	ProjectSvcAddr string `required:"true" split_words:"true"`
+	ProjectSvcAddr string `required:"true" split_words:"true" default:"project.core.svc.cluster.local:8003"`
 }
 
 func newProjectClient() project.ProjectServiceClient {
