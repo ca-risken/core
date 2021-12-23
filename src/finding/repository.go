@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"time"
 
 	mimosasql "github.com/ca-risken/common/pkg/database/sql"
 	"github.com/ca-risken/core/proto/finding"
@@ -115,16 +114,10 @@ func initDB(isMaster bool) *gorm.DB {
 
 	dsn := fmt.Sprintf("%s:%s@tcp([%s]:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
 		user, pass, host, conf.Port, conf.Schema)
-	db, err := mimosasql.Open(dsn, conf.LogMode)
+	db, err := mimosasql.Open(dsn, conf.LogMode, conf.MaxConnection)
 	if err != nil {
 		appLogger.Fatalf("Failed to open DB. isMaster: %t, err: %+v", isMaster, err)
 	}
-	sqlDB, err := db.DB()
-	if err != nil {
-		appLogger.Fatalf("Failed to get generic database object(sql.DB). isMaster: %t, err: %+v", isMaster, err)
-	}
-	sqlDB.SetMaxOpenConns(conf.MaxConnection)
-	sqlDB.SetConnMaxLifetime(time.Duration(conf.MaxConnection/2) * time.Second)
 	appLogger.Infof("Connected to Database. isMaster: %t", isMaster)
 	return db
 }

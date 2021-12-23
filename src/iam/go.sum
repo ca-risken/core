@@ -25,6 +25,8 @@ github.com/aws/aws-xray-sdk-go v1.6.0/go.mod h1:k+NuTgdU+z07L3l8lnGHK+/luqe8TKmZ
 github.com/aws/smithy-go v1.4.0/go.mod h1:SObp3lf9smib00L/v3U2eAKG8FyQ7iLrJnQiAmR5n+E=
 github.com/ca-risken/common/pkg/database v0.0.0-20211118071101-9855266b50a1 h1:MVJHHJgSk0k0/s+cCU7hMySV0SWXnMiLM87c/tt6KYg=
 github.com/ca-risken/common/pkg/database v0.0.0-20211118071101-9855266b50a1/go.mod h1:9JacDXQAdUUqCyV3Z0iVBcS2SCh/ZMDnIzBzgbFRRbc=
+github.com/ca-risken/common/pkg/database v0.0.0-20211223025030-6bfdc45e906c h1:tPkAujN6Eqlkc0HAR/7vTL/1m6V3dfDoQomqfgAiim4=
+github.com/ca-risken/common/pkg/database v0.0.0-20211223025030-6bfdc45e906c/go.mod h1:9JacDXQAdUUqCyV3Z0iVBcS2SCh/ZMDnIzBzgbFRRbc=
 github.com/ca-risken/common/pkg/rpc v0.0.0-20211118071101-9855266b50a1 h1:9DqrM6hVgz+m9GCxDPcJsfH+NG8z8dn+/zlCyPerjuw=
 github.com/ca-risken/common/pkg/rpc v0.0.0-20211118071101-9855266b50a1/go.mod h1:UW3fVHuNc8QaC9eLJ8HOxLpKpmyX26tqVntvadxxDGo=
 github.com/ca-risken/common/pkg/sqs v0.0.0-20210924080827-df6e4ac73f01 h1:HTH++QqX5zyHUOsxBMIUpRpQL0Xt6JGxMBVK3gKIr9Y=

@@ -18,9 +18,10 @@ type dbConfig struct {
 	SlaveUser      string `split_words:"true" default:"hoge"`
 	SlavePassword  string `split_words:"true" default:"moge"`
 
-	Schema  string `required:"true"    default:"mimosa"`
-	Port    int    `required:"true"    default:"3306"`
-	LogMode bool   `split_words:"true" default:"false"`
+	Schema        string `required:"true"    default:"mimosa"`
+	Port          int    `required:"true"    default:"3306"`
+	LogMode       bool   `split_words:"true" default:"false"`
+	MaxConnection int    `split_words:"true" default:"10"`
 }
 
 func initDB(isMaster bool) *gorm.DB {
@@ -42,7 +43,7 @@ func initDB(isMaster bool) *gorm.DB {
 
 	dsn := fmt.Sprintf("%s:%s@tcp([%s]:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
 		user, pass, host, conf.Port, conf.Schema)
-	db, err := mimosasql.Open(dsn, conf.LogMode)
+	db, err := mimosasql.Open(dsn, conf.LogMode, conf.MaxConnection)
 	if err != nil {
 		appLogger.Fatalf("Failed to open DB. isMaster: %t, err: %+v", isMaster, err)
 	}

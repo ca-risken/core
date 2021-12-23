@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/aws/aws-xray-sdk-go v1.6.0
-	github.com/ca-risken/common/pkg/database v0.0.0-20211118071101-9855266b50a1
+	github.com/ca-risken/common/pkg/database v0.0.0-20211223025030-6bfdc45e906c
 	github.com/ca-risken/common/pkg/rpc v0.0.0-20211118071101-9855266b50a1
 	github.com/ca-risken/common/pkg/xray v0.0.0-20211118071101-9855266b50a1
 	github.com/ca-risken/core/proto/iam v0.0.0-20210906100342-c1bbb08cc3e4
