@@ -32,8 +32,10 @@ where
 		params = append(params, strings.Join(req.ResourceName, "|"))
 	}
 	if len(req.Tag) > 0 {
-		query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag in (?) )"
-		params = append(params, req.Tag)
+		for _, tag := range req.Tag {
+			query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag = ?)"
+			params = append(params, tag)
+		}
 	}
 	if req.FromSumScore > 0 {
 		query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
@@ -69,8 +71,10 @@ select count(*) from (
 		params = append(params, strings.Join(req.ResourceName, "|"))
 	}
 	if len(req.Tag) > 0 {
-		query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag in (?) )"
-		params = append(params, req.Tag)
+		for _, tag := range req.Tag {
+			query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag = ?)"
+			params = append(params, tag)
+		}
 	}
 	if req.FromSumScore > 0 {
 		query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
