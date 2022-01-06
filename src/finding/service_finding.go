@@ -278,13 +278,12 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 		findingTagID = savedData.FindingTagID
 	}
 
-	tag := &model.FindingTag{
+	registerd, err := f.repository.TagFinding(ctx, &model.FindingTag{
 		FindingTagID: findingTagID,
 		FindingID:    req.Tag.FindingId,
 		ProjectID:    req.ProjectId,
 		Tag:          req.Tag.Tag,
-	}
-	registerd, err := f.repository.TagFinding(ctx, tag)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -293,13 +292,10 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 	if err != nil {
 		return nil, err
 	}
-	_, err = f.TagResource(ctx, &finding.TagResourceRequest{
-		ProjectId: req.ProjectId,
-		Tag: &finding.ResourceTagForUpsert{
-			ResourceId: r.ResourceID,
-			ProjectId:  req.ProjectId,
-			Tag:        req.Tag.Tag,
-		},
+	_, err = f.repository.TagResource(ctx, &model.ResourceTag{
+		ResourceID: r.ResourceID,
+		ProjectID:  r.ProjectID,
+		Tag:        req.Tag.Tag,
 	})
 	if err != nil {
 		return nil, err

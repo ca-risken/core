@@ -137,13 +137,15 @@ func (f *findingDB) ListResourceTagCount(ctx context.Context, param *finding.Lis
 
 const selectListResourceTagName = `
 select
-  distinct tag
+  tag
 from
   resource_tag
 where
   project_id = ?
   and updated_at between ? and ?
-order by %s %s limit %d, %d
+group by project_id, tag
+order by %s %s
+limit %d, %d
 `
 
 func (f *findingDB) ListResourceTagName(ctx context.Context, param *finding.ListResourceTagNameRequest) (*[]tagName, error) {
@@ -158,10 +160,10 @@ func (f *findingDB) ListResourceTagName(ctx context.Context, param *finding.List
 
 const selectListResourceTagNameCount = `
 select count(*) from (
-	select tag
-	from resource_tag
-	where project_id = ? and updated_at between ? and ?
-	group by project_id, tag
+  select tag
+  from resource_tag
+  where project_id = ? and updated_at between ? and ?
+  group by project_id, tag
 ) tag
 `
 
