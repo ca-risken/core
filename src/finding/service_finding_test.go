@@ -394,30 +394,56 @@ func TestTagFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
 	mockDB := mockFindingRepository{}
+	mockDB.On("GetResourceTagByKey").Return(&model.ResourceTag{}, gorm.ErrRecordNotFound) // fixed
+	mockDB.On("TagResource").Return(&model.ResourceTag{}, nil)                            // fixed
 	svc := findingService{repository: &mockDB}
 	cases := []struct {
-		name        string
-		input       *finding.TagFindingRequest
-		want        *finding.TagFindingResponse
-		wantErr     bool
-		mockGetResp *model.FindingTag
-		mockGetErr  error
-		mockUpResp  *model.FindingTag
-		mockUpErr   error
+		name    string
+		input   *finding.TagFindingRequest
+		want    *finding.TagFindingResponse
+		wantErr bool
+
+		// mock
+		callGetFinding             bool
+		mockGetFindingResp         *model.Finding
+		mockGetFindingErr          error
+		callGetResourceByName      bool
+		mockGetResourceByNameResp  *model.Resource
+		mockGetResourceByNameErr   error
+		callGetFindingTagByKey     bool
+		mockGetFindingTagByKeyResp *model.FindingTag
+		mockGetFindingTagByKeyErr  error
+		callTagFinding             bool
+		mockTagFindingResp         *model.FindingTag
+		mockTagFindingErr          error
 	}{
 		{
-			name:       "OK Insert",
-			input:      &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, ProjectId: 1, Tag: "tag"}},
-			want:       &finding.TagFindingResponse{Tag: &finding.FindingTag{FindingTagId: 10011, ProjectId: 1, FindingId: 1001, Tag: "tag", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockGetErr: gorm.ErrRecordNotFound,
-			mockUpResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, ProjectID: 1, Tag: "tag", CreatedAt: now, UpdatedAt: now},
+			name:  "OK Insert",
+			input: &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, ProjectId: 1, Tag: "tag"}},
+			want:  &finding.TagFindingResponse{Tag: &finding.FindingTag{FindingTagId: 10011, ProjectId: 1, FindingId: 1001, Tag: "tag", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+
+			callGetFinding:            true,
+			mockGetFindingResp:        &model.Finding{FindingID: 1001, ProjectID: 1, ResourceName: "rn"},
+			callGetResourceByName:     true,
+			mockGetResourceByNameResp: &model.Resource{ResourceID: 1001, ProjectID: 1, ResourceName: "rn"},
+			callGetFindingTagByKey:    true,
+			mockGetFindingTagByKeyErr: gorm.ErrRecordNotFound,
+			callTagFinding:            true,
+			mockTagFindingResp:        &model.FindingTag{FindingTagID: 10011, FindingID: 1001, ProjectID: 1, Tag: "tag", CreatedAt: now, UpdatedAt: now},
 		},
 		{
-			name:        "OK Update",
-			input:       &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, ProjectId: 1, Tag: "tag"}},
-			want:        &finding.TagFindingResponse{Tag: &finding.FindingTag{FindingTagId: 10011, ProjectId: 1, FindingId: 1001, Tag: "tag", CreatedAt: now.Add(-1 * 24 * time.Hour).Unix(), UpdatedAt: now.Unix()}},
-			mockGetResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, ProjectID: 1, Tag: "tag", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now.Add(-1 * 24 * time.Hour)},
-			mockUpResp:  &model.FindingTag{FindingTagID: 10011, FindingID: 1001, ProjectID: 1, Tag: "tag", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now},
+			name:  "OK Update",
+			input: &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, ProjectId: 1, Tag: "tag"}},
+			want:  &finding.TagFindingResponse{Tag: &finding.FindingTag{FindingTagId: 10011, ProjectId: 1, FindingId: 1001, Tag: "tag", CreatedAt: now.Add(-1 * 24 * time.Hour).Unix(), UpdatedAt: now.Unix()}},
+
+			callGetFinding:             true,
+			mockGetFindingResp:         &model.Finding{FindingID: 1001, ProjectID: 1, ResourceName: "rn"},
+			callGetResourceByName:      true,
+			mockGetResourceByNameResp:  &model.Resource{ResourceID: 1001, ProjectID: 1, ResourceName: "rn"},
+			callGetFindingTagByKey:     true,
+			mockGetFindingTagByKeyResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, ProjectID: 1, Tag: "tag", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now.Add(-1 * 24 * time.Hour)},
+			callTagFinding:             true,
+			mockTagFindingResp:         &model.FindingTag{FindingTagID: 10011, FindingID: 1001, ProjectID: 1, Tag: "tag", CreatedAt: now.Add(-1 * 24 * time.Hour), UpdatedAt: now},
 		},
 		{
 			name:    "NG Invalid request",
@@ -425,26 +451,63 @@ func TestTagFinding(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:       "NG GetFindingTagByKey error",
-			input:      &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, Tag: "tag"}},
-			wantErr:    true,
-			mockGetErr: gorm.ErrInvalidDB,
+			name:    "NG GetFinding error",
+			input:   &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, Tag: "tag"}},
+			wantErr: true,
+
+			callGetFinding:    true,
+			mockGetFindingErr: gorm.ErrInvalidDB,
 		},
 		{
-			name:        "NG TagFinding error",
-			input:       &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, Tag: "tag"}},
-			wantErr:     true,
-			mockGetResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, Tag: "tag", CreatedAt: now, UpdatedAt: now},
-			mockUpErr:   gorm.ErrInvalidDB,
+			name:    "NG GetResourceByName error",
+			input:   &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, Tag: "tag"}},
+			wantErr: true,
+
+			callGetFinding:           true,
+			mockGetFindingResp:       &model.Finding{FindingID: 1001, ProjectID: 1, ResourceName: "rn"},
+			callGetResourceByName:    true,
+			mockGetResourceByNameErr: gorm.ErrInvalidDB,
+		},
+		{
+			name:    "NG GetFindingTagByKey error",
+			input:   &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, Tag: "tag"}},
+			wantErr: true,
+
+			callGetFinding:            true,
+			mockGetFindingResp:        &model.Finding{FindingID: 1001, ProjectID: 1, ResourceName: "rn"},
+			callGetResourceByName:     true,
+			mockGetResourceByNameResp: &model.Resource{ResourceID: 1001, ProjectID: 1, ResourceName: "rn"},
+			callGetFindingTagByKey:    true,
+			mockGetFindingTagByKeyErr: gorm.ErrInvalidDB,
+		},
+		{
+			name:    "NG TagFinding error",
+			input:   &finding.TagFindingRequest{ProjectId: 1, Tag: &finding.FindingTagForUpsert{FindingId: 1001, Tag: "tag"}},
+			wantErr: true,
+
+			callGetFinding:             true,
+			mockGetFindingResp:         &model.Finding{FindingID: 1001, ProjectID: 1, ResourceName: "rn"},
+			callGetResourceByName:      true,
+			mockGetResourceByNameResp:  &model.Resource{ResourceID: 1001, ProjectID: 1, ResourceName: "rn"},
+			callGetFindingTagByKey:     true,
+			mockGetFindingTagByKeyResp: &model.FindingTag{FindingTagID: 10011, FindingID: 1001, Tag: "tag", CreatedAt: now, UpdatedAt: now},
+			callTagFinding:             true,
+			mockTagFindingErr:          gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			if c.mockGetResp != nil || c.mockGetErr != nil {
-				mockDB.On("GetFindingTagByKey").Return(c.mockGetResp, c.mockGetErr).Once()
+			if c.callGetFinding {
+				mockDB.On("GetFinding").Return(c.mockGetFindingResp, c.mockGetFindingErr).Once()
 			}
-			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mockDB.On("TagFinding").Return(c.mockUpResp, c.mockUpErr).Once()
+			if c.callGetResourceByName {
+				mockDB.On("GetResourceByName").Return(c.mockGetResourceByNameResp, c.mockGetResourceByNameErr).Once()
+			}
+			if c.callGetFindingTagByKey {
+				mockDB.On("GetFindingTagByKey").Return(c.mockGetFindingTagByKeyResp, c.mockGetFindingTagByKeyErr).Once()
+			}
+			if c.callTagFinding {
+				mockDB.On("TagFinding").Return(c.mockTagFindingResp, c.mockTagFindingErr).Once()
 			}
 			got, err := svc.TagFinding(ctx, c.input)
 			if err != nil && !c.wantErr {

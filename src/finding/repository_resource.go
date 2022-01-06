@@ -32,8 +32,10 @@ where
 		params = append(params, strings.Join(req.ResourceName, "|"))
 	}
 	if len(req.Tag) > 0 {
-		query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag in (?) )"
-		params = append(params, req.Tag)
+		for _, tag := range req.Tag {
+			query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag = ?)"
+			params = append(params, tag)
+		}
 	}
 	if req.FromSumScore > 0 {
 		query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
@@ -69,8 +71,10 @@ select count(*) from (
 		params = append(params, strings.Join(req.ResourceName, "|"))
 	}
 	if len(req.Tag) > 0 {
-		query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag in (?) )"
-		params = append(params, req.Tag)
+		for _, tag := range req.Tag {
+			query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag = ?)"
+			params = append(params, tag)
+		}
 	}
 	if req.FromSumScore > 0 {
 		query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
@@ -133,13 +137,15 @@ func (f *findingDB) ListResourceTagCount(ctx context.Context, param *finding.Lis
 
 const selectListResourceTagName = `
 select
-  distinct tag
+  tag
 from
   resource_tag
 where
   project_id = ?
   and updated_at between ? and ?
-order by %s %s limit %d, %d
+group by project_id, tag
+order by %s %s
+limit %d, %d
 `
 
 func (f *findingDB) ListResourceTagName(ctx context.Context, param *finding.ListResourceTagNameRequest) (*[]tagName, error) {
@@ -154,10 +160,10 @@ func (f *findingDB) ListResourceTagName(ctx context.Context, param *finding.List
 
 const selectListResourceTagNameCount = `
 select count(*) from (
-	select tag
-	from resource_tag
-	where project_id = ? and updated_at between ? and ?
-	group by project_id, tag
+  select tag
+  from resource_tag
+  where project_id = ? and updated_at between ? and ?
+  group by project_id, tag
 ) tag
 `
 

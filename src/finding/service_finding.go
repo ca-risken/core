@@ -261,6 +261,11 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
+	fData, err := f.repository.GetFinding(ctx, req.ProjectId, req.Tag.FindingId)
+	if err != nil {
+		return nil, err // include `NotFound Finding` error
+	}
+
 	savedData, err := f.repository.GetFindingTagByKey(ctx, req.ProjectId, req.Tag.FindingId, req.Tag.Tag)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
@@ -273,16 +278,29 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 		findingTagID = savedData.FindingTagID
 	}
 
-	tag := &model.FindingTag{
+	registerd, err := f.repository.TagFinding(ctx, &model.FindingTag{
 		FindingTagID: findingTagID,
 		FindingID:    req.Tag.FindingId,
-		ProjectID:    req.Tag.ProjectId,
+		ProjectID:    req.ProjectId,
 		Tag:          req.Tag.Tag,
-	}
-	registerd, err := f.repository.TagFinding(ctx, tag)
+	})
 	if err != nil {
 		return nil, err
 	}
+	// Put resource tag
+	r, err := f.repository.GetResourceByName(ctx, req.ProjectId, fData.ResourceName)
+	if err != nil {
+		return nil, err
+	}
+	_, err = f.repository.TagResource(ctx, &model.ResourceTag{
+		ResourceID: r.ResourceID,
+		ProjectID:  r.ProjectID,
+		Tag:        req.Tag.Tag,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return &finding.TagFindingResponse{Tag: convertFindingTag(registerd)}, nil
 }
 
