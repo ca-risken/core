@@ -86,12 +86,21 @@ func (i *iamDB) DeleteRole(ctx context.Context, projectID, roleID uint32) error 
 	return i.Master.WithContext(ctx).Exec(deleteDeleteRole, projectID, roleID).Error
 }
 
-const selectGetUserRole = `select * from user_role where project_id = ? and user_id =? and role_id = ?`
+const (
+	selectGetAdminUserRole   = `select * from user_role where project_id is null and user_id = ? and role_id = ?`
+	selectGetProjectUserRole = `select * from user_role where project_id = ?     and user_id = ? and role_id = ?`
+)
 
 func (i *iamDB) GetUserRole(ctx context.Context, projectID, userID, roleID uint32) (*model.UserRole, error) {
 	var data model.UserRole
-	if err := i.Master.WithContext(ctx).Raw(selectGetUserRole, projectID, userID, roleID).First(&data).Error; err != nil {
-		return nil, err
+	if zero.IsZeroVal(projectID) {
+		if err := i.Master.WithContext(ctx).Raw(selectGetAdminUserRole, userID, roleID).First(&data).Error; err != nil {
+			return nil, err
+		}
+	} else {
+		if err := i.Master.WithContext(ctx).Raw(selectGetProjectUserRole, projectID, userID, roleID).First(&data).Error; err != nil {
+			return nil, err
+		}
 	}
 	return &data, nil
 }
