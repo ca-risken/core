@@ -187,12 +187,13 @@ func (f *findingDB) ListFindingTagCount(ctx context.Context, param *finding.List
 
 const selectListFindingTagName = `
 select
-  distinct tag
+  tag
 from
   finding_tag
 where
   project_id = ?
   and updated_at between ? and ?
+group by project_id, tag
 order by %s %s limit %d, %d
 `
 
@@ -211,7 +212,7 @@ select count(*) from (
   select tag
   from finding_tag
   where project_id = ? and updated_at between ? and ?
-	group by project_id, tag
+  group by project_id, tag
 ) tag
 `
 
