@@ -23,7 +23,7 @@ type findingRepository interface {
 		findingID uint64,
 		dataSources, resourceNames, tags []string,
 		status finding.FindingStatus) (int64, error)
-	GetFinding(context.Context, uint32, uint64) (*model.Finding, error)
+	GetFinding(context.Context, uint32, uint64, bool) (*model.Finding, error)
 	GetFindingByDataSource(context.Context, uint32, string, string) (*model.Finding, error)
 	UpsertFinding(context.Context, *model.Finding) (*model.Finding, error)
 	DeleteFinding(context.Context, uint32, uint64) error
