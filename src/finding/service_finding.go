@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 	"time"
 
@@ -108,7 +109,7 @@ func (f *findingService) GetFinding(ctx context.Context, req *finding.GetFinding
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	data, err := f.repository.GetFinding(ctx, req.ProjectId, req.FindingId)
+	data, err := f.repository.GetFinding(ctx, req.ProjectId, req.FindingId, false)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &finding.GetFindingResponse{}, nil
@@ -261,15 +262,15 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	fData, err := f.repository.GetFinding(ctx, req.ProjectId, req.Tag.FindingId)
+	fData, err := f.repository.GetFinding(ctx, req.ProjectId, req.Tag.FindingId, true)
 	if err != nil {
-		return nil, err // include `NotFound Finding` error
+		return nil, fmt.Errorf("Failed to GetFinding, finding_id=%d, err=%+v", req.Tag.FindingId, err)
 	}
 
 	savedData, err := f.repository.GetFindingTagByKey(ctx, req.ProjectId, req.Tag.FindingId, req.Tag.Tag)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
-		return nil, err
+		return nil, fmt.Errorf("Failed to GetFindingTagByKey, finding_id=%d, tag=%s, err=%+v", req.Tag.FindingId, req.Tag.Tag, err)
 	}
 
 	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
@@ -290,7 +291,7 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 	// Put resource tag
 	r, err := f.repository.GetResourceByName(ctx, req.ProjectId, fData.ResourceName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to GetResourceByName, resource_name=%s, err=%+v", fData.ResourceName, err)
 	}
 	_, err = f.repository.TagResource(ctx, &model.ResourceTag{
 		ResourceID: r.ResourceID,
@@ -298,7 +299,7 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 		Tag:        req.Tag.Tag,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to TagResource, resource_id=%d, err=%+v", r.ResourceID, err)
 	}
 
 	return &finding.TagFindingResponse{Tag: convertFindingTag(registerd)}, nil

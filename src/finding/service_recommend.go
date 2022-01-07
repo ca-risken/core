@@ -45,7 +45,7 @@ func (f *findingService) PutRecommend(ctx context.Context, req *finding.PutRecom
 		return nil, err
 	}
 	// exists finding in the req project
-	if f, err := f.repository.GetFinding(ctx, req.ProjectId, req.FindingId); err != nil || zero.IsZeroVal(f.FindingID) {
+	if f, err := f.repository.GetFinding(ctx, req.ProjectId, req.FindingId, false); err != nil || zero.IsZeroVal(f.FindingID) {
 		appLogger.Warnf("Failed to get finding, project_id=%d, finding_id=%d, err=%+v", req.ProjectId, req.FindingId, err)
 		return nil, err
 	}

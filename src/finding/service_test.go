@@ -95,7 +95,7 @@ func (m *mockFindingRepository) ListFindingCount(
 	args := m.Called()
 	return args.Get(0).(int64), args.Error(1)
 }
-func (m *mockFindingRepository) GetFinding(context.Context, uint32, uint64) (*model.Finding, error) {
+func (m *mockFindingRepository) GetFinding(context.Context, uint32, uint64, bool) (*model.Finding, error) {
 	args := m.Called()
 	return args.Get(0).(*model.Finding), args.Error(1)
 }

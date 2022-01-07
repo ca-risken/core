@@ -105,9 +105,15 @@ where
 
 const selectGetFinding = `select * from finding where project_id = ? and finding_id = ?`
 
-func (f *findingDB) GetFinding(ctx context.Context, projectID uint32, findingID uint64) (*model.Finding, error) {
+func (f *findingDB) GetFinding(ctx context.Context, projectID uint32, findingID uint64, immediately bool) (*model.Finding, error) {
 	var data model.Finding
-	if err := f.Slave.WithContext(ctx).Raw(selectGetFinding, projectID, findingID).First(&data).Error; err != nil {
+	var err error
+	if immediately {
+		err = f.Master.WithContext(ctx).Raw(selectGetFinding, projectID, findingID).First(&data).Error
+	} else {
+		err = f.Slave.WithContext(ctx).Raw(selectGetFinding, projectID, findingID).First(&data).Error
+	}
+	if err != nil {
 		return nil, err
 	}
 	return &data, nil
