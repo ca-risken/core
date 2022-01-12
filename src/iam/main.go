@@ -5,12 +5,12 @@ import (
 	"net"
 
 	"github.com/aws/aws-xray-sdk-go/xray"
+	"github.com/ca-risken/common/pkg/logging"
 	mimosarpc "github.com/ca-risken/common/pkg/rpc"
 	mimosaxray "github.com/ca-risken/common/pkg/xray"
 	"github.com/ca-risken/core/proto/iam"
 	"github.com/gassara-kys/envconfig"
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -28,7 +28,7 @@ func main() {
 		appLogger.Fatal(err.Error())
 	}
 	if conf.Debug == "true" {
-		appLogger.SetLevel(logrus.DebugLevel)
+		appLogger.SetLevel(logging.DebugLevel)
 	}
 	appLogger.Infof("Load IAM config: %+v", conf)
 	err = mimosaxray.InitXRay(xray.Config{})

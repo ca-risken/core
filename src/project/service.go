@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/gassara-kys/envconfig"
-	"github.com/sirupsen/logrus"
 )
 
 type projectService struct {
@@ -23,7 +23,7 @@ func newProjectService() project.ProjectServiceServer {
 		appLogger.Fatalf("project config load error: err=%+v", err)
 	}
 	if conf.Debug {
-		appLogger.SetLevel(logrus.DebugLevel)
+		appLogger.SetLevel(logging.DebugLevel)
 	}
 	return &projectService{
 		repository: newProjectRepository(),
