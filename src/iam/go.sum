@@ -27,8 +27,13 @@ github.com/ca-risken/common/pkg/database v0.0.0-20211118071101-9855266b50a1 h1:M
 github.com/ca-risken/common/pkg/database v0.0.0-20211118071101-9855266b50a1/go.mod h1:9JacDXQAdUUqCyV3Z0iVBcS2SCh/ZMDnIzBzgbFRRbc=
 github.com/ca-risken/common/pkg/database v0.0.0-20211223025030-6bfdc45e906c h1:tPkAujN6Eqlkc0HAR/7vTL/1m6V3dfDoQomqfgAiim4=
 github.com/ca-risken/common/pkg/database v0.0.0-20211223025030-6bfdc45e906c/go.mod h1:9JacDXQAdUUqCyV3Z0iVBcS2SCh/ZMDnIzBzgbFRRbc=
+github.com/ca-risken/common/pkg/logging v0.0.0-20220112075040-5a11f5fc5031/go.mod h1:dmZZ5/wkGbsmAMbhuC7YK6uJOMAlS4OndoM0DQyPhi8=
+github.com/ca-risken/common/pkg/logging v0.0.0-20220112083229-da961170dec3 h1:RFahm7AkSyZPEUK/SaMhI3EYiC5a3a9dYXfl6nZRF78=
+github.com/ca-risken/common/pkg/logging v0.0.0-20220112083229-da961170dec3/go.mod h1:dmZZ5/wkGbsmAMbhuC7YK6uJOMAlS4OndoM0DQyPhi8=
 github.com/ca-risken/common/pkg/rpc v0.0.0-20211118071101-9855266b50a1 h1:9DqrM6hVgz+m9GCxDPcJsfH+NG8z8dn+/zlCyPerjuw=
 github.com/ca-risken/common/pkg/rpc v0.0.0-20211118071101-9855266b50a1/go.mod h1:UW3fVHuNc8QaC9eLJ8HOxLpKpmyX26tqVntvadxxDGo=
+github.com/ca-risken/common/pkg/rpc v0.0.0-20220112083229-da961170dec3 h1:Uy++ac+K4gLtmISZ6rG1xf1dPyT+bfkHeLp/rIve4TA=
+github.com/ca-risken/common/pkg/rpc v0.0.0-20220112083229-da961170dec3/go.mod h1:1aXGnirrmTOPx8J5EydVy5O9wT8vaGnTfThQ6HUbkK0=
 github.com/ca-risken/common/pkg/sqs v0.0.0-20210924080827-df6e4ac73f01 h1:HTH++QqX5zyHUOsxBMIUpRpQL0Xt6JGxMBVK3gKIr9Y=
 github.com/ca-risken/common/pkg/sqs v0.0.0-20210924080827-df6e4ac73f01/go.mod h1:IxYbziqfohwo7y7Zn15W2emT4ubB5duUzdvj5fYhHJ4=
 github.com/ca-risken/common/pkg/xray v0.0.0-20211118071101-9855266b50a1 h1:SjbAAb2H9yZu4Ecs9aL2tNdgifTzYTSxY4qjXFubnYI=
@@ -100,6 +105,10 @@ github.com/google/go-cmp v0.5.4/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/google/go-cmp v0.5.5 h1:Khx7svrCpmxxtHBq5j2mp/xVjsi8hQMfNLvJFAlrGgU=
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/uuid v1.1.2/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/google/uuid v1.2.0 h1:qJYtXnJRWmpe7m/3XlyhrsLrEURqHRM2kxzoxXqyUDs=
+github.com/google/uuid v1.2.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
+github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/grpc-ecosystem/go-grpc-middleware v1.2.2/go.mod h1:EaizFBKfUKtMIF5iaDEhniwNedqGo9FuLFzppDr3uwI=
 github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 h1:+9834+KizmvFV7pXQGSXQTsaWhq2GjuNUt0aUU0YBYw=
 github.com/grpc-ecosystem/go-grpc-middleware v1.3.0/go.mod h1:z0ButlSOZa5vEBq9m2m2hlwIgKw+rp3sdCBRoJY+30Y=
@@ -225,6 +234,8 @@ golang.org/x/sys v0.0.0-20210510120138-977fb7262007/go.mod h1:oPkhp1MJrh7nUepCBc
 golang.org/x/sys v0.0.0-20210514084401-e8d321eab015/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20210915083310-ed5796bab164 h1:7ZDGnxgHAMw7thfC5bEos0RDAccZKxioiWBhfIe+tvw=
 golang.org/x/sys v0.0.0-20210915083310-ed5796bab164/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220111092808-5a964db01320 h1:0jf+tOCoZ3LyutmCOWpVni1chK4VfFLhRsDK7MhqGRY=
+golang.org/x/sys v0.0.0-20220111092808-5a964db01320/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201117132131-f5c789dd3221/go.mod h1:Nr5EML6q2oocZ2LXRh80K7BxOlk5/8JxuGnuhpl+muw=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=

@@ -1,15 +1,5 @@
 package main
 
-import (
-	"github.com/sirupsen/logrus"
-)
+import "github.com/ca-risken/common/pkg/logging"
 
-var (
-	appLogger = newAppLogger()
-)
-
-func newAppLogger() *logrus.Logger {
-	logger := logrus.New()
-	logger.Formatter = &logrus.JSONFormatter{}
-	return logger
-}
+var appLogger = logging.NewLogger()
