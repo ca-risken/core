@@ -28,7 +28,7 @@ func main() {
 		appLogger.Fatal(err.Error())
 	}
 	if conf.Debug == "true" {
-		appLogger.SetLevel(logging.DebugLevel)
+		appLogger.Level(logging.DebugLevel)
 	}
 	appLogger.Infof("Load IAM config: %+v", conf)
 	err = mimosaxray.InitXRay(xray.Config{})

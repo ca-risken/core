@@ -7,8 +7,9 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/aws/aws-xray-sdk-go v1.6.0
 	github.com/ca-risken/common/pkg/database v0.0.0-20211223025030-6bfdc45e906c
-	github.com/ca-risken/common/pkg/logging v0.0.0-20220112083229-da961170dec3 // indirect
-	github.com/ca-risken/common/pkg/rpc v0.0.0-20220112083229-da961170dec3
+	github.com/ca-risken/common/pkg/logging v0.0.0-20220113015330-0e8462d52b5b
+	github.com/ca-risken/common/pkg/rpc v0.0.0-20220113015330-0e8462d52b5b
+	github.com/ca-risken/common/pkg/sqs v0.0.0-20220113015330-0e8462d52b5b // indirect
 	github.com/ca-risken/common/pkg/xray v0.0.0-20211118071101-9855266b50a1
 	github.com/ca-risken/core/proto/finding v0.0.0-20210917100930-a9033029f9e4
 	github.com/ca-risken/core/proto/iam v0.0.0-20210917123127-86fbc1daa83f
@@ -17,7 +18,6 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/klauspost/compress v1.13.6 // indirect
-	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	github.com/valyala/fasthttp v1.30.0 // indirect
 	github.com/vikyd/zero v0.0.0-20190921142904-0f738d0bc858

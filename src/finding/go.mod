@@ -8,9 +8,9 @@ require (
 	github.com/aws/aws-sdk-go v1.42.11 // indirect
 	github.com/aws/aws-xray-sdk-go v1.6.0
 	github.com/ca-risken/common/pkg/database v0.0.0-20211223025030-6bfdc45e906c
-	github.com/ca-risken/common/pkg/logging v0.0.0-20220112083229-da961170dec3 // indirect
-	github.com/ca-risken/common/pkg/rpc v0.0.0-20220112083229-da961170dec3
-	github.com/ca-risken/common/pkg/sqs v0.0.0-20211122093906-df2c2b1a375a // indirect
+	github.com/ca-risken/common/pkg/logging v0.0.0-20220113015330-0e8462d52b5b
+	github.com/ca-risken/common/pkg/rpc v0.0.0-20220113015330-0e8462d52b5b
+	github.com/ca-risken/common/pkg/sqs v0.0.0-20220113015330-0e8462d52b5b // indirect
 	github.com/ca-risken/common/pkg/xray v0.0.0-20211122093906-df2c2b1a375a
 	github.com/ca-risken/core/proto/finding v0.0.0-20211126100009-48eb381d5d58
 	github.com/gassara-kys/envconfig v1.4.4
@@ -19,7 +19,6 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jinzhu/now v1.1.3 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
-	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/valyala/fasthttp v1.31.0 // indirect

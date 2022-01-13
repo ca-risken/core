@@ -23,7 +23,7 @@ func newProjectService() project.ProjectServiceServer {
 		appLogger.Fatalf("project config load error: err=%+v", err)
 	}
 	if conf.Debug {
-		appLogger.SetLevel(logging.DebugLevel)
+		appLogger.Level(logging.DebugLevel)
 	}
 	return &projectService{
 		repository: newProjectRepository(),
