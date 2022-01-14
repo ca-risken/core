@@ -25,6 +25,7 @@ phases:
       - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
       - REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
       - AWS_XRAY_SDK_DISABLED=TRUE
+      - which go
       - goenv install 1.17.1
       - goenv global 1.17.1
       - go version
