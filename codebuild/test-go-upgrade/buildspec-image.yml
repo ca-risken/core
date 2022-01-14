@@ -17,9 +17,6 @@ phases:
       - echo "machine github.com" > ~/.netrc
       - echo "login ${GITHUB_USER}" >> ~/.netrc
       - echo "password ${GITHUB_TOKEN}" >> ~/.netrc
-      - goenv install 1.17.1
-      - goenv global 1.17.1
-      - go version
   pre_build:
     commands:
       - echo Setting environment variables
@@ -28,6 +25,9 @@ phases:
       - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
       - REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
       - AWS_XRAY_SDK_DISABLED=TRUE
+      - goenv install 1.17.1
+      - goenv global 1.17.1
+      - go version
 
       - echo Logging in to Amazon ECR...
       - aws --version
