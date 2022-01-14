@@ -1,5 +1,15 @@
 batch:
   build-graph:
+    - identifier: build_amd64
+      buildspec: codebuild/test-go-upgrade/buildspec-image.yml
+      env:
+        compute-type: BUILD_GENERAL1_LARGE
+        image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+        privileged-mode: true
+        type: LINUX_CONTAINER
+        variables:
+          OS: linux
+          ARCH: amd64
     - identifier: build_arm64
       buildspec: codebuild/test-go-upgrade/buildspec-image.yml
       env:
