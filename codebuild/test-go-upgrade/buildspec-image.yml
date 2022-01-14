@@ -1,0 +1,53 @@
+version: 0.2
+
+env:
+  variables:
+    IMAGE_PREFIX: "risken-core"
+  parameter-store:
+    GITHUB_USER: "/build/GITHUB_USER"
+    GITHUB_TOKEN: "/build/GITHUB_TOKEN"
+    DOCKER_USER: "/build/DOCKER_USER"
+    DOCKER_TOKEN: "/build/DOCKER_TOKEN"
+
+phases:
+  install:
+    #runtime-versions:
+    #  golang: 1.14
+    commands:
+      - echo "machine github.com" > ~/.netrc
+      - echo "login ${GITHUB_USER}" >> ~/.netrc
+      - echo "password ${GITHUB_TOKEN}" >> ~/.netrc
+      - goenv install 1.17.1
+      - goenv global 1.17.1
+      - go version
+  pre_build:
+    commands:
+      - echo Setting environment variables
+      - BUILD_OPT="--no-cache --pull"
+      - TAG=$(git rev-parse --short HEAD)_${OS}_${ARCH}
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
+      - REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+      - AWS_XRAY_SDK_DISABLED=TRUE
+
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REGISTRY}
+
+      - |
+        #!/bin/bash
+        if [[ -n "${DOCKER_USER}" ]] && [[ -n "${DOCKER_TOKEN}" ]]; then
+          echo 'Logging in to Docker Hub...'
+          echo "$DOCKER_TOKEN" | docker login -u $DOCKER_USER --password-stdin
+        fi
+
+      - make go-test -j
+  build:
+    commands:
+      - echo Build gateway started on `date`
+      - echo Pushing the Docker images...
+      - make build-ci -j BUILD_OPT="${BUILD_OPT}" IMAGE_PREFIX=${IMAGE_PREFIX} IMAGE_TAG=${TAG} IMAGE_REGISTRY=${REGISTRY}
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
