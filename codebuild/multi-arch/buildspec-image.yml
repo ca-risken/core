@@ -11,8 +11,6 @@ env:
 
 phases:
   install:
-    runtime-versions:
-      golang: 1.14
     commands:
       - echo "machine github.com" > ~/.netrc
       - echo "login ${GITHUB_USER}" >> ~/.netrc
@@ -25,6 +23,8 @@ phases:
       - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
       - REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
       - AWS_XRAY_SDK_DISABLED=TRUE
+      - sh codebuild/multi-arch/install-go.sh
+      - go version
 
       - echo Logging in to Amazon ECR...
       - aws --version
