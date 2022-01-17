@@ -26,15 +26,7 @@ phases:
       - REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
       - AWS_XRAY_SDK_DISABLED=TRUE
       - which go
-      - |
-        #!/bin/sh
-        if [[ "${ARCH}" = "arm64" ]]; then
-          curl -OL https://go.dev/dl/go1.17.1.linux-arm64.tar.gz
-          rm -rf /usr/local/go && tar -C /usr/local -xzf go1.17.1.linux-arm64.tar.gz
-        else
-          goenv install 1.17.1
-          goenv global 1.17.1
-        fi
+      - sh codebuild/test-go-upgrade/install-go.sh
       - go version
 
       - echo Logging in to Amazon ECR...
