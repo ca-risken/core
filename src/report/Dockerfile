@@ -1,4 +1,4 @@
-FROM golang:1.16 as builder
+FROM golang:1.17 as builder
 WORKDIR /go/src/github.com/ca-risken/core/src/report/
 ADD *.go go.* ./
 ADD model/ ./model
