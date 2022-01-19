@@ -98,3 +98,14 @@ func (p *projectService) DeleteProject(ctx context.Context, req *project.DeleteP
 	appLogger.Infof("Project deleted: project=%+v", req.ProjectId)
 	return &empty.Empty{}, nil
 }
+
+func (p *projectService) IsActive(ctx context.Context, req *project.IsActiveRequest) (*project.IsActiveResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	active, err := p.iamClient.IsActiveProject(ctx, req.ProjectId)
+	if err != nil {
+		return nil, err
+	}
+	return &project.IsActiveResponse{Active: active}, nil
+}

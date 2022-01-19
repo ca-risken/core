@@ -228,3 +228,49 @@ func TestDeleteProject(t *testing.T) {
 		})
 	}
 }
+
+func TestIsActive(t *testing.T) {
+	var ctx context.Context
+	mockIAM := mockClient{}
+	svc := projectService{
+		iamClient: &mockIAM,
+	}
+	cases := []struct {
+		name         string
+		input        *project.IsActiveRequest
+		want         *project.IsActiveResponse
+		wantErr      bool
+		mockResponce bool
+		mockError    error
+	}{
+		{
+			name:         "OK",
+			input:        &project.IsActiveRequest{ProjectId: 1},
+			want:         &project.IsActiveResponse{Active: true},
+			mockResponce: true,
+		},
+		{
+			name:    "NG Invalid params",
+			input:   &project.IsActiveRequest{},
+			wantErr: true,
+		},
+		{
+			name:      "NG IAM service error",
+			input:     &project.IsActiveRequest{},
+			mockError: errors.New("Something error occured"),
+			wantErr:   true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mockIAM.On("IsActiveProject").Return(c.mockResponce, c.mockError).Once()
+			got, err := svc.IsActive(ctx, c.input)
+			if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}

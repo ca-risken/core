@@ -39,8 +39,9 @@ func getGRPCConn(ctx context.Context, addr string) *grpc.ClientConn {
 }
 
 type iamService interface {
-	CreateDefaultRole(context.Context, uint32, uint32) error
-	DeleteAllProjectRole(context.Context, uint32) error
+	CreateDefaultRole(ctx context.Context, ownerUserID, projectID uint32) error
+	DeleteAllProjectRole(ctx context.Context, projectID uint32) error
+	IsActiveProject(ctx context.Context, projectID uint32) (bool, error)
 }
 
 type iamServiceImpl struct {
@@ -101,4 +102,18 @@ func (i *iamServiceImpl) DeleteAllProjectRole(ctx context.Context, projectID uin
 		}
 	}
 	return nil
+}
+
+func (i *iamServiceImpl) IsActiveProject(ctx context.Context, projectID uint32) (bool, error) {
+	resp, err := i.client.ListUser(ctx, &iam.ListUserRequest{
+		ProjectId: projectID,
+		Activated: true,
+	})
+	if err != nil {
+		return false, err
+	}
+	if resp == nil {
+		return false, nil
+	}
+	return len(resp.UserId) > 0, nil
 }

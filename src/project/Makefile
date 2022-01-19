@@ -12,53 +12,60 @@ help:
 
 .PHONY: list-service
 list-service:
-	grpcurl -plaintext localhost:8001 list core.project.ProjectService
+	grpcurl -plaintext project.core.svc.cluster.local:8001 list core.project.ProjectService
 
 .PHONY: list-project
 list-project:
 	grpcurl \
 		-plaintext \
 		-d '{"user_id":1002, "project_id":1001, "name":"project-a"}' \
-		localhost:8003 core.project.ProjectService.ListProject
+		project.core.svc.cluster.local:8003 core.project.ProjectService.ListProject
 
 .PHONY: create-project
 create-project:
 	grpcurl \
 		-plaintext \
 		-d '{"user_id":1001, "name":"project-x"}' \
-		localhost:8003 core.project.ProjectService.CreateProject
+		project.core.svc.cluster.local:8003 core.project.ProjectService.CreateProject
 
 .PHONY: update-project
 update-project:
 	grpcurl \
 		-plaintext \
 		-d '{"project_id":1004, "name":"project-xxx"}' \
-		localhost:8003 core.project.ProjectService.UpdateProject
+		project.core.svc.cluster.local:8003 core.project.ProjectService.UpdateProject
 
 .PHONY: delete-project
 delete-project:
 	grpcurl \
 		-plaintext \
 		-d '{"project_id":1005}' \
-		localhost:8003 core.project.ProjectService.DeleteProject
+		project.core.svc.cluster.local:8003 core.project.ProjectService.DeleteProject
 
 .PHONY: tag-project
 tag-project:
 	grpcurl \
 		-plaintext \
 		-d '{"project_id":1001, "tag":"key:value", "color":"blue"}' \
-		localhost:8003 core.project.ProjectService.TagProject
+		project.core.svc.cluster.local:8003 core.project.ProjectService.TagProject
 
 .PHONY: tag-project2
 tag-project2:
 	grpcurl \
 		-plaintext \
 		-d '{"project_id":1001, "tag":"key:value2", "color":"green"}' \
-		localhost:8003 core.project.ProjectService.TagProject
+		project.core.svc.cluster.local:8003 core.project.ProjectService.TagProject
 
 .PHONY: untag-project
 untag-project:
 	grpcurl \
 		-plaintext \
 		-d '{"project_id":1001, "tag":"key:value"}' \
-		localhost:8003 core.project.ProjectService.UntagProject
+		project.core.svc.cluster.local:8003 core.project.ProjectService.UntagProject
+
+.PHONY: is-active
+is-active:
+	grpcurl \
+		-plaintext \
+		-d '{"project_id":1}' \
+		project.core.svc.cluster.local:8003 core.project.ProjectService.IsActive

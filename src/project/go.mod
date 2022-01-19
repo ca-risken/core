@@ -9,7 +9,7 @@ require (
 	github.com/ca-risken/common/pkg/rpc v0.0.0-20220113015330-0e8462d52b5b
 	github.com/ca-risken/common/pkg/xray v0.0.0-20211118071101-9855266b50a1
 	github.com/ca-risken/core/proto/iam v0.0.0-20210906100342-c1bbb08cc3e4
-	github.com/ca-risken/core/proto/project v0.0.0-20210906100342-c1bbb08cc3e4
+	github.com/ca-risken/core/proto/project v0.0.0-20220119081239-e324609d7c71
 	github.com/gassara-kys/envconfig v1.4.4
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
