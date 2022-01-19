@@ -62,6 +62,29 @@ func (_m *ProjectServiceServer) DeleteProject(_a0 context.Context, _a1 *project.
 	return r0, r1
 }
 
+// IsActive provides a mock function with given fields: _a0, _a1
+func (_m *ProjectServiceServer) IsActive(_a0 context.Context, _a1 *project.IsActiveRequest) (*project.IsActiveResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *project.IsActiveResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *project.IsActiveRequest) *project.IsActiveResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*project.IsActiveResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *project.IsActiveRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListProject provides a mock function with given fields: _a0, _a1
 func (_m *ProjectServiceServer) ListProject(_a0 context.Context, _a1 *project.ListProjectRequest) (*project.ListProjectResponse, error) {
 	ret := _m.Called(_a0, _a1)
