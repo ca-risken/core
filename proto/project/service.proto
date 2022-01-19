@@ -17,6 +17,8 @@ service ProjectService {
   // project_tag
   rpc TagProject(TagProjectRequest) returns (TagProjectResponse);
   rpc UntagProject(UntagProjectRequest) returns (google.protobuf.Empty);
+
+  rpc IsActive(IsActiveRequest) returns (IsActiveResponse);
 }
 
 message ListProjectRequest {
@@ -57,3 +59,9 @@ message UntagProjectRequest {
   uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ];
   string tag = 2 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
 }
+
+message IsActiveRequest {
+  uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ];
+}
+
+message IsActiveResponse { bool active = 1; }

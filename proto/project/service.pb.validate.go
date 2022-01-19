@@ -828,3 +828,142 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = UntagProjectRequestValidationError{}
+
+// Validate checks the field values on IsActiveRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *IsActiveRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if m.GetProjectId() <= 0 {
+		return IsActiveRequestValidationError{
+			field:  "ProjectId",
+			reason: "value must be greater than 0",
+		}
+	}
+
+	return nil
+}
+
+// IsActiveRequestValidationError is the validation error returned by
+// IsActiveRequest.Validate if the designated constraints aren't met.
+type IsActiveRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e IsActiveRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e IsActiveRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e IsActiveRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e IsActiveRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e IsActiveRequestValidationError) ErrorName() string { return "IsActiveRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e IsActiveRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sIsActiveRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = IsActiveRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = IsActiveRequestValidationError{}
+
+// Validate checks the field values on IsActiveResponse with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *IsActiveResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Active
+
+	return nil
+}
+
+// IsActiveResponseValidationError is the validation error returned by
+// IsActiveResponse.Validate if the designated constraints aren't met.
+type IsActiveResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e IsActiveResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e IsActiveResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e IsActiveResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e IsActiveResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e IsActiveResponseValidationError) ErrorName() string { return "IsActiveResponseValidationError" }
+
+// Error satisfies the builtin error interface
+func (e IsActiveResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sIsActiveResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = IsActiveResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = IsActiveResponseValidationError{}
