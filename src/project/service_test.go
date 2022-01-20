@@ -54,3 +54,7 @@ func (m *mockClient) DeleteAllProjectRole(context.Context, uint32) error {
 	args := m.Called()
 	return args.Error(0)
 }
+func (m *mockClient) IsActiveProject(ctx context.Context, projectID uint32) (bool, error) {
+	args := m.Called()
+	return args.Get(0).(bool), args.Error(1)
+}

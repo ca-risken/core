@@ -575,8 +575,14 @@ func (a *alertService) AnalyzeAlertAll(ctx context.Context, _ *empty.Empty) (*em
 		// launch goroutine
 		go func(p *projectproto.Project) {
 			defer wg.Done()
-			if _, err := a.AnalyzeAlert(ctx, &alert.AnalyzeAlertRequest{ProjectId: p.ProjectId}); err != nil {
-				appLogger.Warnf("Failed to AnalyzeAlert, project_id=%d, err=%+v", p.ProjectId, err)
+			active, err := a.projectClient.IsActive(ctx, &projectproto.IsActiveRequest{ProjectId: p.ProjectId})
+			if err != nil {
+				appLogger.Warnf("Failed to call API (project.IsActive), err=%+v", err)
+			}
+			if active != nil && active.Active {
+				if _, err := a.AnalyzeAlert(ctx, &alert.AnalyzeAlertRequest{ProjectId: p.ProjectId}); err != nil {
+					appLogger.Warnf("Failed to AnalyzeAlert, project_id=%d, err=%+v", p.ProjectId, err)
+				}
 			}
 			time.Sleep(1 * time.Second)
 			sem.Release(analyzeAlertResource)
