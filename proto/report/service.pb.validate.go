@@ -11,6 +11,7 @@ import (
 	"net/mail"
 	"net/url"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -31,46 +32,98 @@ var (
 	_ = (*url.URL)(nil)
 	_ = (*mail.Address)(nil)
 	_ = anypb.Any{}
+	_ = sort.Sort
 )
 
 // Validate checks the field values on GetReportFindingRequest with the rules
 // defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
+// violated, the first error encountered is returned, or nil if there are no violations.
 func (m *GetReportFindingRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetReportFindingRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetReportFindingRequestMultiError, or nil if none found.
+func (m *GetReportFindingRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetReportFindingRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
+	var errors []error
+
 	if m.GetProjectId() < 1 {
-		return GetReportFindingRequestValidationError{
+		err := GetReportFindingRequestValidationError{
 			field:  "ProjectId",
 			reason: "value must be greater than or equal to 1",
 		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
 	}
 
 	if !_GetReportFindingRequest_FromDate_Pattern.MatchString(m.GetFromDate()) {
-		return GetReportFindingRequestValidationError{
+		err := GetReportFindingRequestValidationError{
 			field:  "FromDate",
 			reason: "value does not match regex pattern \"^(|[0-9]{4}-[0-9]{2}-[0-9]{2})$\"",
 		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
 	}
 
 	if !_GetReportFindingRequest_ToDate_Pattern.MatchString(m.GetToDate()) {
-		return GetReportFindingRequestValidationError{
+		err := GetReportFindingRequestValidationError{
 			field:  "ToDate",
 			reason: "value does not match regex pattern \"^(|[0-9]{4}-[0-9]{2}-[0-9]{2})$\"",
 		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
 	}
 
 	if val := m.GetScore(); val < 0 || val > 1 {
-		return GetReportFindingRequestValidationError{
+		err := GetReportFindingRequestValidationError{
 			field:  "Score",
 			reason: "value must be inside range [0, 1]",
 		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return GetReportFindingRequestMultiError(errors)
 	}
 
 	return nil
 }
+
+// GetReportFindingRequestMultiError is an error wrapping multiple validation
+// errors returned by GetReportFindingRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GetReportFindingRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetReportFindingRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetReportFindingRequestMultiError) AllErrors() []error { return m }
 
 // GetReportFindingRequestValidationError is the validation error returned by
 // GetReportFindingRequest.Validate if the designated constraints aren't met.
@@ -134,16 +187,49 @@ var _GetReportFindingRequest_ToDate_Pattern = regexp.MustCompile("^(|[0-9]{4}-[0
 
 // Validate checks the field values on GetReportFindingResponse with the rules
 // defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
+// violated, the first error encountered is returned, or nil if there are no violations.
 func (m *GetReportFindingResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetReportFindingResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetReportFindingResponseMultiError, or nil if none found.
+func (m *GetReportFindingResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetReportFindingResponse) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
+	var errors []error
+
 	for idx, item := range m.GetReportFinding() {
 		_, _ = idx, item
 
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GetReportFindingResponseValidationError{
+						field:  fmt.Sprintf("ReportFinding[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GetReportFindingResponseValidationError{
+						field:  fmt.Sprintf("ReportFinding[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return GetReportFindingResponseValidationError{
 					field:  fmt.Sprintf("ReportFinding[%v]", idx),
@@ -155,8 +241,29 @@ func (m *GetReportFindingResponse) Validate() error {
 
 	}
 
+	if len(errors) > 0 {
+		return GetReportFindingResponseMultiError(errors)
+	}
+
 	return nil
 }
+
+// GetReportFindingResponseMultiError is an error wrapping multiple validation
+// errors returned by GetReportFindingResponse.ValidateAll() if the designated
+// constraints aren't met.
+type GetReportFindingResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetReportFindingResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetReportFindingResponseMultiError) AllErrors() []error { return m }
 
 // GetReportFindingResponseValidationError is the validation error returned by
 // GetReportFindingResponse.Validate if the designated constraints aren't met.
@@ -216,37 +323,84 @@ var _ interface {
 
 // Validate checks the field values on GetReportFindingAllRequest with the
 // rules defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
+// violated, the first error encountered is returned, or nil if there are no violations.
 func (m *GetReportFindingAllRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetReportFindingAllRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetReportFindingAllRequestMultiError, or nil if none found.
+func (m *GetReportFindingAllRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetReportFindingAllRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
+	var errors []error
+
 	// no validation rules for ProjectId
 
 	if !_GetReportFindingAllRequest_FromDate_Pattern.MatchString(m.GetFromDate()) {
-		return GetReportFindingAllRequestValidationError{
+		err := GetReportFindingAllRequestValidationError{
 			field:  "FromDate",
 			reason: "value does not match regex pattern \"^(|[0-9]{4}-[0-9]{2}-[0-9]{2})$\"",
 		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
 	}
 
 	if !_GetReportFindingAllRequest_ToDate_Pattern.MatchString(m.GetToDate()) {
-		return GetReportFindingAllRequestValidationError{
+		err := GetReportFindingAllRequestValidationError{
 			field:  "ToDate",
 			reason: "value does not match regex pattern \"^(|[0-9]{4}-[0-9]{2}-[0-9]{2})$\"",
 		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
 	}
 
 	if val := m.GetScore(); val < 0 || val > 1 {
-		return GetReportFindingAllRequestValidationError{
+		err := GetReportFindingAllRequestValidationError{
 			field:  "Score",
 			reason: "value must be inside range [0, 1]",
 		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return GetReportFindingAllRequestMultiError(errors)
 	}
 
 	return nil
 }
+
+// GetReportFindingAllRequestMultiError is an error wrapping multiple
+// validation errors returned by GetReportFindingAllRequest.ValidateAll() if
+// the designated constraints aren't met.
+type GetReportFindingAllRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetReportFindingAllRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetReportFindingAllRequestMultiError) AllErrors() []error { return m }
 
 // GetReportFindingAllRequestValidationError is the validation error returned
 // by GetReportFindingAllRequest.Validate if the designated constraints aren't met.
@@ -310,16 +464,49 @@ var _GetReportFindingAllRequest_ToDate_Pattern = regexp.MustCompile("^(|[0-9]{4}
 
 // Validate checks the field values on GetReportFindingAllResponse with the
 // rules defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
+// violated, the first error encountered is returned, or nil if there are no violations.
 func (m *GetReportFindingAllResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetReportFindingAllResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetReportFindingAllResponseMultiError, or nil if none found.
+func (m *GetReportFindingAllResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetReportFindingAllResponse) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
+	var errors []error
+
 	for idx, item := range m.GetReportFinding() {
 		_, _ = idx, item
 
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GetReportFindingAllResponseValidationError{
+						field:  fmt.Sprintf("ReportFinding[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GetReportFindingAllResponseValidationError{
+						field:  fmt.Sprintf("ReportFinding[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return GetReportFindingAllResponseValidationError{
 					field:  fmt.Sprintf("ReportFinding[%v]", idx),
@@ -331,8 +518,29 @@ func (m *GetReportFindingAllResponse) Validate() error {
 
 	}
 
+	if len(errors) > 0 {
+		return GetReportFindingAllResponseMultiError(errors)
+	}
+
 	return nil
 }
+
+// GetReportFindingAllResponseMultiError is an error wrapping multiple
+// validation errors returned by GetReportFindingAllResponse.ValidateAll() if
+// the designated constraints aren't met.
+type GetReportFindingAllResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetReportFindingAllResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetReportFindingAllResponseMultiError) AllErrors() []error { return m }
 
 // GetReportFindingAllResponseValidationError is the validation error returned
 // by GetReportFindingAllResponse.Validate if the designated constraints

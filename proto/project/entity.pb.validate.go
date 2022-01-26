@@ -11,6 +11,7 @@ import (
 	"net/mail"
 	"net/url"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -31,14 +32,29 @@ var (
 	_ = (*url.URL)(nil)
 	_ = (*mail.Address)(nil)
 	_ = anypb.Any{}
+	_ = sort.Sort
 )
 
 // Validate checks the field values on Project with the rules defined in the
-// proto definition for this message. If any rules are violated, an error is returned.
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
 func (m *Project) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Project with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in ProjectMultiError, or nil if none found.
+func (m *Project) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Project) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
+
+	var errors []error
 
 	// no validation rules for ProjectId
 
@@ -47,7 +63,26 @@ func (m *Project) Validate() error {
 	for idx, item := range m.GetTag() {
 		_, _ = idx, item
 
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ProjectValidationError{
+						field:  fmt.Sprintf("Tag[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ProjectValidationError{
+						field:  fmt.Sprintf("Tag[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return ProjectValidationError{
 					field:  fmt.Sprintf("Tag[%v]", idx),
@@ -63,8 +98,28 @@ func (m *Project) Validate() error {
 
 	// no validation rules for UpdatedAt
 
+	if len(errors) > 0 {
+		return ProjectMultiError(errors)
+	}
+
 	return nil
 }
+
+// ProjectMultiError is an error wrapping multiple validation errors returned
+// by Project.ValidateAll() if the designated constraints aren't met.
+type ProjectMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ProjectMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ProjectMultiError) AllErrors() []error { return m }
 
 // ProjectValidationError is the validation error returned by Project.Validate
 // if the designated constraints aren't met.
@@ -121,11 +176,26 @@ var _ interface {
 } = ProjectValidationError{}
 
 // Validate checks the field values on ProjectTag with the rules defined in the
-// proto definition for this message. If any rules are violated, an error is returned.
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
 func (m *ProjectTag) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ProjectTag with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in ProjectTagMultiError, or
+// nil if none found.
+func (m *ProjectTag) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ProjectTag) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
+
+	var errors []error
 
 	// no validation rules for ProjectId
 
@@ -137,8 +207,28 @@ func (m *ProjectTag) Validate() error {
 
 	// no validation rules for UpdatedAt
 
+	if len(errors) > 0 {
+		return ProjectTagMultiError(errors)
+	}
+
 	return nil
 }
+
+// ProjectTagMultiError is an error wrapping multiple validation errors
+// returned by ProjectTag.ValidateAll() if the designated constraints aren't met.
+type ProjectTagMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ProjectTagMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ProjectTagMultiError) AllErrors() []error { return m }
 
 // ProjectTagValidationError is the validation error returned by
 // ProjectTag.Validate if the designated constraints aren't met.
