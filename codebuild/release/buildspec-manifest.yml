@@ -2,12 +2,12 @@ version: 0.2
 
 env:
   variables:
-    REGISTRY: "public.ecr.aws/risken"
-    IMAGE_PREFIX: "core"
+    PUBLIC_REGISTRY: 'public.ecr.aws/risken'
+    IMAGE_PREFIX: 'core'
 
   parameter-store:
-    GITHUB_USER: "/build/GITHUB_USER"
-    GITHUB_TOKEN: "/build/GITHUB_TOKEN"
+    GITHUB_USER: '/build/GITHUB_USER'
+    GITHUB_TOKEN: '/build/GITHUB_TOKEN'
 
 phases:
   install:
@@ -23,7 +23,7 @@ phases:
 
       - echo Logging in to Amazon ECR...
       - aws --version
-      - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${REGISTRY}
+      - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${PUBLIC_REGISTRY}
   build:
     commands:
       - echo Create manifests...
@@ -34,5 +34,6 @@ phases:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker manifest...
-      - make push-manifest -j IMAGE_REGISTRY=${REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} MANIFEST_TAG=${TAG}
-      - make push-manifest -j IMAGE_REGISTRY=${REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} MANIFEST_TAG=latest
+      - make push-manifest -j IMAGE_REGISTRY=${PUBLIC_REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} MANIFEST_TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION}
+      - make push-manifest -j IMAGE_REGISTRY=${PUBLIC_REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} MANIFEST_TAG=${TAG}
+      - make push-manifest -j IMAGE_REGISTRY=${PUBLIC_REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} MANIFEST_TAG=latest
