@@ -2,18 +2,15 @@ version: 0.2
 
 env:
   variables:
-    REGISTRY: "public.ecr.aws/risken"
-    IMAGE_PREFIX: "core"
+    PRIVATE_IMAGE_PREFIX: 'risken-core'
+    PUBLIC_REGISTRY: 'public.ecr.aws/risken'
+    PUBLIC_IMAGE_PREFIX: 'core'
   parameter-store:
-    GITHUB_USER: "/build/GITHUB_USER"
-    GITHUB_TOKEN: "/build/GITHUB_TOKEN"
-    DOCKER_USER: "/build/DOCKER_USER"
-    DOCKER_TOKEN: "/build/DOCKER_TOKEN"
+    GITHUB_USER: '/build/GITHUB_USER'
+    GITHUB_TOKEN: '/build/GITHUB_TOKEN'
 
 phases:
   install:
-    runtime-versions:
-      golang: 1.14
     commands:
       - echo "machine github.com" > ~/.netrc
       - echo "login ${GITHUB_USER}" >> ~/.netrc
@@ -21,31 +18,30 @@ phases:
   pre_build:
     commands:
       - echo Setting environment variables
-      - BUILD_OPT="--no-cache --pull"
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
+      - PRIVATE_REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
       - TAG=${CODEBUILD_WEBHOOK_TRIGGER#tag/}
       - IMAGE_TAG=${TAG}_${OS}_${ARCH}
-      - AWS_XRAY_SDK_DISABLED=TRUE
 
-      - echo Logging in to Amazon ECR...
+      - echo Logging in to private Amazon ECR...
       - aws --version
-      - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin  ${REGISTRY}
-
-      - |
-        #!/bin/bash
-        if [[ -n "${DOCKER_USER}" ]] && [[ -n "${DOCKER_TOKEN}" ]]; then
-          echo 'Logging in to Docker Hub...'
-          echo "$DOCKER_TOKEN" | docker login -u $DOCKER_USER --password-stdin
-        fi
-
-      - make go-test -j
+      - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${PRIVATE_REGISTRY}
   build:
     commands:
       - echo Build gateway started on `date`
-      - echo Pushing the Docker images...
-      - make build-ci -j BUILD_OPT="${BUILD_OPT}" IMAGE_PREFIX=${IMAGE_PREFIX} IMAGE_TAG=${IMAGE_TAG} IMAGE_REGISTRY=${REGISTRY}
+      - echo pull images...
+      - make pull-image -j IMAGE_PREFIX=${PRIVATE_IMAGE_PREFIX} IMAGE_REGISTRY=${PRIVATE_REGISTRY} IMAGE_TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION}
+
+      - echo tag images...
+      - SOURCE_IMAGE_PREFIX=${PRIVATE_REGISTRY}/${PRIVATE_IMAGE_PREFIX}
+      - make tag-image -j SOURCE_IMAGE_PREFIX=${SOURCE_IMAGE_PREFIX} SOURCE_IMAGE_TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION} IMAGE_REGISTRY=${PUBLIC_REGISTRY} IMAGE_TAG=${IMAGE_TAG}
 
   post_build:
     commands:
+      - echo Logging in to public Amazon ECR ...
+      - aws --version
+      - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${PUBLIC_REGISTRY}
+
       - echo Build completed on `date`
       - echo Pushing the Docker image...
-      - make push-image -j IMAGE_PREFIX=${IMAGE_PREFIX} IMAGE_TAG=${IMAGE_TAG} IMAGE_REGISTRY=${REGISTRY}
+      - make push-image -j IMAGE_PREFIX=${PUBLIC_IMAGE_PREFIX} IMAGE_REGISTRY=${PUBLIC_REGISTRY} IMAGE_TAG=${IMAGE_TAG}

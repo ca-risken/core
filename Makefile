@@ -2,6 +2,8 @@ TARGETS = alert finding iam project report
 BUILD_TARGETS = $(TARGETS:=.build)
 BUILD_CI_TARGETS = $(TARGETS:=.build-ci)
 IMAGE_PUSH_TARGETS = $(TARGETS:=.push-image)
+IMAGE_PULL_TARGETS = $(TARGETS:=.pull-image)
+IMAGE_TAG_TARGETS = $(TARGETS:=.tag-image)
 MANIFEST_CREATE_TARGETS = $(TARGETS:=.create-manifest)
 MANIFEST_PUSH_TARGETS = $(TARGETS:=.push-manifest)
 TEST_TARGETS = $(TARGETS:=.go-test)
@@ -84,6 +86,16 @@ PHONY: push-image $(IMAGE_PUSH_TARGETS)
 push-image: $(IMAGE_PUSH_TARGETS)
 %.push-image:
 	docker push $(IMAGE_REGISTRY)/$(IMAGE_PREFIX)/$(*):$(IMAGE_TAG)
+
+PHONY: pull-image $(IMAGE_PULL_TARGETS)
+pull-image: $(IMAGE_PULL_TARGETS)
+%.pull-image:
+	docker pull $(IMAGE_REGISTRY)/$(IMAGE_PREFIX)/$(*):$(IMAGE_TAG)
+
+PHONY: tag-image $(IMAGE_TAG_TARGETS)
+tag-image: $(IMAGE_TAG_TARGETS)
+%.tag-image:
+	docker tag $(SOURCE_IMAGE_PREFIX)/$(*):$(SOURCE_IMAGE_TAG) $(IMAGE_REGISTRY)/$(IMAGE_PREFIX)/$(*):$(IMAGE_TAG)
 
 PHONY: create-manifest $(MANIFEST_CREATE_TARGETS)
 create-manifest: $(MANIFEST_CREATE_TARGETS)
