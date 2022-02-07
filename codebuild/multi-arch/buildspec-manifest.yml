@@ -2,10 +2,10 @@ version: 0.2
 
 env:
   variables:
-    IMAGE_PREFIX: "risken-core"
+    IMAGE_PREFIX: 'risken-core'
   parameter-store:
-    GITHUB_USER: "/build/GITHUB_USER"
-    GITHUB_TOKEN: "/build/GITHUB_TOKEN"
+    GITHUB_USER: '/build/GITHUB_USER'
+    GITHUB_TOKEN: '/build/GITHUB_TOKEN'
 
 phases:
   install:
@@ -29,6 +29,7 @@ phases:
     commands:
       - echo Create manifests...
       - make create-manifest -j IMAGE_REGISTRY=${REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} IMAGE_TAG_BASE=${IMAGE_TAG_BASE} MANIFEST_TAG=${MANIFEST_TAG}
+      - make create-manifest -j IMAGE_REGISTRY=${REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} IMAGE_TAG_BASE=${IMAGE_TAG_BASE} MANIFEST_TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION}
       - make create-manifest -j IMAGE_REGISTRY=${REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} IMAGE_TAG_BASE=${IMAGE_TAG_BASE} MANIFEST_TAG=latest
 
   post_build:
@@ -36,5 +37,5 @@ phases:
       - echo Build completed on `date`
       - echo Pushing the Docker manifest...
       - make push-manifest -j IMAGE_REGISTRY=${REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} MANIFEST_TAG=${MANIFEST_TAG}
+      - make push-manifest -j IMAGE_REGISTRY=${REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} MANIFEST_TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION}
       - make push-manifest -j IMAGE_REGISTRY=${REGISTRY} IMAGE_PREFIX=${IMAGE_PREFIX} MANIFEST_TAG=latest
-
