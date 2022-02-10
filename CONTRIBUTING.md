@@ -23,15 +23,23 @@ dependencies, and tools contained in this repository.
 
 * [Setting up your local environment](https://docs.security-hub.jp/admin/infra_local/)
   * Step 1(Fork): Fork the project on GitHub and clone your fork locally.
+    * For the repository you just cloned, make it follow the original repository with the name `upstream` .
+      ```bash
+      $ git remote add upstream {Repository URL}
+      $ git fetch upstream
+      ```
   * Step 2(Build): Build steps and dependencies differ slightly depending on your operating system. see the [README](README.md).
   * Step 3(Branch): To keep your development environment organized, create local branches to hold your work. These should be branched directly off of the `master` branch.
+    ```bash
+    $ git checkout -b my-branch -t upstream/master
+    ```
 * **Making Changes**
   * Step 4(Code): Please be sure to run `make lint` from time to time on any code changes to ensure that they follow the project's code style.
   * Step 5(Commit): It is recommended to keep your changes grouped logically within individual commits. Many contributors find it easier to review changes that are split across multiple commits. There is no limit to the number of commits in a pull request.
   * Step 6(Rebase): Once you have committed your changes, it is a good idea to use `git rebase` (not `git merge`) to synchronize your work with the main repository. 
     ```bash
     $ git fetch upstream
-    $ git rebase upstream/main
+    $ git rebase upstream/master
     ```
   * Step 7(Test): Please be sure to run `make go-test`, After fixing a bug or adding a feature, you should always make sure that the test passes.
   * Step 8(Push): Once your commits are ready to go -- with passing tests and linting -- begin the process of opening a pull request by pushing your working branch to your fork on GitHub.
