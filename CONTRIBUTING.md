@@ -28,7 +28,6 @@ dependencies, and tools contained in this repository.
 * **Making Changes**
   * Step 4(Code): Please be sure to run `make lint` from time to time on any code changes to ensure that they follow the project's code style.
   * Step 5(Commit): It is recommended to keep your changes grouped logically within individual commits. Many contributors find it easier to review changes that are split across multiple commits. There is no limit to the number of commits in a pull request.
-    * Commit message guidelines: A good commit message should describe what changed and why. The RISKEN project uses [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) to streamline the release process.
   * Step 6(Rebase): Once you have committed your changes, it is a good idea to use `git rebase` (not `git merge`) to synchronize your work with the main repository. 
     ```bash
     $ git fetch upstream
