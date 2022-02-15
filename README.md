@@ -50,10 +50,6 @@ Deploy the pre-built containers to the Kubernetes environment on your local mach
 | project | spec.template.spec.containers.image | `public.ecr.aws/risken/core/project:latest` | `core/project:latest`                    |
 | report  | spec.template.spec.containers.image | `public.ecr.aws/risken/core/report:latest`  | `core/report:latest`                     |
 
-## Contributing
-
-If you are interested in reporting/fixing issues and contributing directly to the code base, please see [CONTRIBUTING.md](CONTRIBUTING.md) for more information on what we're looking for and how to get started.
-
 ## Community
 
 Info on reporting bugs, getting help, finding roadmaps,
