@@ -149,7 +149,7 @@ func TestSendSlackNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := sendSlackNotification(c.notifySetting, c.alert, c.project, &[]model.AlertRule{})
+			got := sendSlackNotification("unused", c.notifySetting, c.alert, c.project, &[]model.AlertRule{})
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
 			}

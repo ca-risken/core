@@ -352,7 +352,7 @@ func (a *alertService) NotificationAlert(ctx context.Context, alertCondition *mo
 		switch notification.Type {
 		case "slack":
 			_, ss = xray.BeginSubsegment(ctx, "sendSlackNotification")
-			err = sendSlackNotification(notification.NotifySetting, alert, project, rules)
+			err = sendSlackNotification(a.notificationAlertURL, notification.NotifySetting, alert, project, rules)
 			ss.Close(err)
 			if err != nil {
 				return err
@@ -450,7 +450,7 @@ func getHistoryType(alertID uint32) string {
 	return "updated"
 }
 
-func sendSlackNotification(notifySetting string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule) error {
+func sendSlackNotification(notifyURL, notifySetting string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
@@ -467,11 +467,8 @@ func sendSlackNotification(notifySetting string, alert *model.Alert, project *pr
 	if !zero.IsZeroVal(setting.Data["message"]) {
 		message = setting.Data["message"]
 	}
-	slackConfig, err := newslackWebhookConfig()
-	if err != nil {
-		return err
-	}
 
+	slackConfig := &slackWebhookConfig{NotificationAlertURL: notifyURL}
 	payload, err := slackConfig.GetPayload(channel, message, alert, project, rules)
 	if err != nil {
 		return err
@@ -486,7 +483,7 @@ func sendSlackNotification(notifySetting string, alert *model.Alert, project *pr
 	return nil
 }
 
-func sendSlackTestNotification(notifySetting string) error {
+func sendSlackTestNotification(notifyURL, notifySetting string) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
@@ -499,11 +496,8 @@ func sendSlackTestNotification(notifySetting string) error {
 	if !zero.IsZeroVal(setting.Data["channel"]) {
 		channel = setting.Data["channel"]
 	}
-	slackConfig, err := newslackWebhookConfig()
-	if err != nil {
-		return err
-	}
 
+	slackConfig := slackWebhookConfig{NotificationAlertURL: notifyURL}
 	payload, err := slackConfig.GetTestPayload(channel)
 	if err != nil {
 		return err

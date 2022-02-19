@@ -7,20 +7,11 @@ import (
 
 	"github.com/ca-risken/core/proto/project"
 	"github.com/ca-risken/core/src/alert/model"
-	"github.com/gassara-kys/envconfig"
 	"github.com/vikyd/zero"
 )
 
 type slackWebhookConfig struct {
 	NotificationAlertURL string `split_words:"true" default:"http://localhost"`
-}
-
-func newslackWebhookConfig() (*slackWebhookConfig, error) {
-	config := &slackWebhookConfig{}
-	if err := envconfig.Process("", config); err != nil {
-		return nil, err
-	}
-	return config, nil
 }
 
 func (s *slackWebhookConfig) GetPayload(channel, message string, alert *model.Alert, project *project.Project, rules *[]model.AlertRule) (string, error) {
