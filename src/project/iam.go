@@ -7,24 +7,14 @@ import (
 
 	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/ca-risken/core/proto/iam"
-	"github.com/gassara-kys/envconfig"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type iamConfig struct {
-	IAMSvcAddr string `required:"true" split_words:"true" default:"iam.core.svc.cluster.local:8002"`
-}
-
-func newIAMService() iamService {
-	var conf iamConfig
-	err := envconfig.Process("", &conf)
-	if err != nil {
-		appLogger.Fatalf("project config load error: err=%+v", err)
-	}
+func newIAMService(svcAddr string) iamService {
 	ctx := context.Background()
 	return &iamServiceImpl{
-		client: iam.NewIAMServiceClient(getGRPCConn(ctx, conf.IAMSvcAddr)),
+		client: iam.NewIAMServiceClient(getGRPCConn(ctx, svcAddr)),
 	}
 
 }
