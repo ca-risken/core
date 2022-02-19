@@ -17,13 +17,6 @@ type iamService struct {
 	findingClient finding.FindingServiceClient
 }
 
-func newIAMService() iam.IAMServiceServer {
-	return &iamService{
-		repository:    newIAMRepository(),
-		findingClient: newFindingClient(),
-	}
-}
-
 func (i *iamService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequest) (*iam.IsAuthorizedResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err

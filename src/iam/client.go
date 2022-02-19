@@ -6,24 +6,13 @@ import (
 
 	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/ca-risken/core/proto/finding"
-	"github.com/gassara-kys/envconfig"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type findingConfig struct {
-	FindingSvcAddr string `required:"true" split_words:"true" default:"finding.core.svc.cluster.local:8001"`
-}
-
-func newFindingClient() finding.FindingServiceClient {
-	var conf findingConfig
-	err := envconfig.Process("", &conf)
-	if err != nil {
-		appLogger.Fatalf("Faild to load finding config error: err=%+v", err)
-	}
-
+func newFindingClient(svcAddr string) finding.FindingServiceClient {
 	ctx := context.Background()
-	conn, err := getGRPCConn(ctx, conf.FindingSvcAddr)
+	conn, err := getGRPCConn(ctx, svcAddr)
 	if err != nil {
 		appLogger.Fatalf("Faild to get GRPC connection: err=%+v", err)
 	}
