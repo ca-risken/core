@@ -9,6 +9,7 @@ import (
 	"github.com/ca-risken/core/proto/project"
 	"github.com/gassara-kys/envconfig"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type findingConfig struct {
@@ -52,7 +53,9 @@ func newProjectClient() project.ProjectServiceClient {
 func getGRPCConn(ctx context.Context, addr string) (*grpc.ClientConn, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
-	conn, err := grpc.DialContext(ctx, addr, grpc.WithUnaryInterceptor(xray.UnaryClientInterceptor()), grpc.WithInsecure())
+	conn, err := grpc.DialContext(ctx, addr,
+		grpc.WithUnaryInterceptor(xray.UnaryClientInterceptor()),
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
