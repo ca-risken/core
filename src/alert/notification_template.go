@@ -11,7 +11,7 @@ import (
 )
 
 type slackWebhookConfig struct {
-	NotificationAlertURL string `split_words:"true" default:"http://localhost"`
+	NotificationAlertURL string
 }
 
 func (s *slackWebhookConfig) GetPayload(channel, message string, alert *model.Alert, project *project.Project, rules *[]model.AlertRule) (string, error) {
