@@ -5,9 +5,9 @@ import (
 	"errors"
 	"regexp"
 
-	"github.com/ca-risken/core/src/iam/model"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/iam"
+	"github.com/ca-risken/core/src/iam/model"
 	"github.com/vikyd/zero"
 	"gorm.io/gorm"
 )
@@ -15,13 +15,6 @@ import (
 type iamService struct {
 	repository    iamRepository
 	findingClient finding.FindingServiceClient
-}
-
-func newIAMService() iam.IAMServiceServer {
-	return &iamService{
-		repository:    newIAMRepository(),
-		findingClient: newFindingClient(),
-	}
 }
 
 func (i *iamService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequest) (*iam.IsAuthorizedResponse, error) {

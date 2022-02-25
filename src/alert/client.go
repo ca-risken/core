@@ -7,42 +7,22 @@ import (
 	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/project"
-	"github.com/gassara-kys/envconfig"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
-type findingConfig struct {
-	FindingSvcAddr string `required:"true" split_words:"true" default:"finding.core.svc.cluster.local:8001"`
-}
-
-func newFindingClient() finding.FindingServiceClient {
-	var conf findingConfig
-	err := envconfig.Process("", &conf)
-	if err != nil {
-		appLogger.Fatalf("Faild to load finding config error: err=%+v", err)
-	}
-
+func newFindingClient(svcAddr string) finding.FindingServiceClient {
 	ctx := context.Background()
-	conn, err := getGRPCConn(ctx, conf.FindingSvcAddr)
+	conn, err := getGRPCConn(ctx, svcAddr)
 	if err != nil {
 		appLogger.Fatalf("Faild to get GRPC connection: err=%+v", err)
 	}
 	return finding.NewFindingServiceClient(conn)
 }
 
-type projectConfig struct {
-	ProjectSvcAddr string `required:"true" split_words:"true" default:"project.core.svc.cluster.local:8003"`
-}
-
-func newProjectClient() project.ProjectServiceClient {
-	var conf projectConfig
-	err := envconfig.Process("", &conf)
-	if err != nil {
-		appLogger.Fatalf("Faild to load project config error: err=%+v", err)
-	}
-
+func newProjectClient(svcAddr string) project.ProjectServiceClient {
 	ctx := context.Background()
-	conn, err := getGRPCConn(ctx, conf.ProjectSvcAddr)
+	conn, err := getGRPCConn(ctx, svcAddr)
 	if err != nil {
 		appLogger.Fatalf("Faild to get GRPC connection: err=%+v", err)
 	}
@@ -52,7 +32,9 @@ func newProjectClient() project.ProjectServiceClient {
 func getGRPCConn(ctx context.Context, addr string) (*grpc.ClientConn, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
-	conn, err := grpc.DialContext(ctx, addr, grpc.WithUnaryInterceptor(xray.UnaryClientInterceptor()), grpc.WithInsecure())
+	conn, err := grpc.DialContext(ctx, addr,
+		grpc.WithUnaryInterceptor(xray.UnaryClientInterceptor()),
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}

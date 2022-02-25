@@ -15,14 +15,30 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-type iamConf struct {
+type AppConf struct {
 	Debug   string `default:"false"`
 	Port    string `default:"8002"`
 	EnvName string `default:"local" split_words:"true"`
+
+	// db
+	DBMasterHost     string `split_words:"true" default:"db.middleware.svc.cluster.local"`
+	DBMasterUser     string `split_words:"true" default:"hoge"`
+	DBMasterPassword string `split_words:"true" default:"moge"`
+	DBSlaveHost      string `split_words:"true" default:"db.middleware.svc.cluster.local"`
+	DBSlaveUser      string `split_words:"true" default:"hoge"`
+	DBSlavePassword  string `split_words:"true" default:"moge"`
+
+	DBSchema        string `required:"true"    default:"mimosa"`
+	DBPort          int    `required:"true"    default:"3306"`
+	DBLogMode       bool   `split_words:"true" default:"false"`
+	DBMaxConnection int    `split_words:"true" default:"10"`
+
+	// grpc
+	FindingSvcAddr string `required:"true" split_words:"true" default:"finding.core.svc.cluster.local:8001"`
 }
 
 func main() {
-	var conf iamConf
+	var conf AppConf
 	err := envconfig.Process("", &conf)
 	if err != nil {
 		appLogger.Fatal(err.Error())
@@ -41,14 +57,29 @@ func main() {
 		appLogger.Fatal(err)
 	}
 
+	service := &iamService{}
+	dbConf := &DBConfig{
+		MasterHost:     conf.DBMasterHost,
+		MasterUser:     conf.DBMasterUser,
+		MasterPassword: conf.DBMasterPassword,
+		SlaveHost:      conf.DBSlaveHost,
+		SlaveUser:      conf.DBSlaveUser,
+		SlavePassword:  conf.DBSlavePassword,
+		Schema:         conf.DBSchema,
+		Port:           conf.DBPort,
+		LogMode:        conf.DBLogMode,
+		MaxConnection:  conf.DBMaxConnection,
+	}
+	service.repository = newIAMRepository(dbConf)
+	service.findingClient = newFindingClient(conf.FindingSvcAddr)
+
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(
 			grpcmiddleware.ChainUnaryServer(
 				mimosarpc.LoggingUnaryServerInterceptor(appLogger),
 				xray.UnaryServerInterceptor(),
 				mimosaxray.AnnotateEnvTracingUnaryServerInterceptor(conf.EnvName))))
-	iamServer := newIAMService()
-	iam.RegisterIAMServiceServer(server, iamServer)
+	iam.RegisterIAMServiceServer(server, service)
 
 	reflection.Register(server) // enable reflection API
 	appLogger.Infof("Starting gRPC server at :%s", conf.Port)

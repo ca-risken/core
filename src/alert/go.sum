@@ -41,8 +41,6 @@ github.com/ca-risken/core/proto/alert v0.0.0-20211207035656-c33310f08a4c h1:+NLG
 github.com/ca-risken/core/proto/alert v0.0.0-20211207035656-c33310f08a4c/go.mod h1:RqFbJiP1YNukFs1AX9KTf/aYZhIgNCCgIW4oTJuHbBw=
 github.com/ca-risken/core/proto/finding v0.0.0-20211207035656-c33310f08a4c h1:sfIeoNYtv42HmoOj91e6Hgr9ouu6GtOWZ0ql/5oVgYw=
 github.com/ca-risken/core/proto/finding v0.0.0-20211207035656-c33310f08a4c/go.mod h1:Zl2+Z3g878Tp33vh6nhiU1pqaz7ymtmiZ71+Wn+Rzts=
-github.com/ca-risken/core/proto/project v0.0.0-20211207035656-c33310f08a4c h1:fjKJyO/N8E5IzW9AvCnBGUCT0TE0jGWJS7oZLCji5YU=
-github.com/ca-risken/core/proto/project v0.0.0-20211207035656-c33310f08a4c/go.mod h1:sz1jLw6dJ9ffC7uXacNGrn3TfSqb4UUP1qxvj04/SmA=
 github.com/ca-risken/core/proto/project v0.0.0-20220119081239-e324609d7c71 h1:++eGS81WLcm/TEJfMaLEioyI8rdb08t281RiyT537n4=
 github.com/ca-risken/core/proto/project v0.0.0-20220119081239-e324609d7c71/go.mod h1:2wvmStoiOXmoWx8TbXMJPRc+rN6uGA1uPEbDAVT5gDo=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
