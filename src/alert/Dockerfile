@@ -13,6 +13,8 @@ RUN go build && cp alert /go/bin/
 FROM public.ecr.aws/risken/base/risken-base:v0.0.1
 COPY --from=builder /go/bin/alert /usr/local/alert/bin/
 ENV PORT= \
+  PROFILE_EXPORTER= \
+  PROFILE_TYPES= \
   FINDING_SVC_ADDR= \
   PROJECT_SVC_ADDR= \
   DB_MASTER_HOST= \
