@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-xray-sdk-go/xray"
 	"github.com/ca-risken/common/pkg/logging"
+	"github.com/ca-risken/common/pkg/profiler"
 	mimosarpc "github.com/ca-risken/common/pkg/rpc"
 	mimosaxray "github.com/ca-risken/common/pkg/xray"
 	"github.com/ca-risken/core/proto/iam"
@@ -15,10 +16,21 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+const (
+	nameSpace   = "core"
+	serviceName = "iam"
+)
+
+func getFullServiceName() string {
+	return fmt.Sprintf("%s.%s", nameSpace, serviceName)
+}
+
 type AppConf struct {
-	Debug   string `default:"false"`
-	Port    string `default:"8002"`
-	EnvName string `default:"local" split_words:"true"`
+	Debug           string   `default:"false"`
+	Port            string   `default:"8002"`
+	EnvName         string   `default:"local" split_words:"true"`
+	ProfileExporter string   `split_words:"true" default:"nop"`
+	ProfileTypes    []string `split_words:"true"`
 
 	// db
 	DBMasterHost     string `split_words:"true" default:"db.middleware.svc.cluster.local"`
@@ -51,6 +63,26 @@ func main() {
 	if err != nil {
 		appLogger.Fatal(err.Error())
 	}
+
+	pTypes, err := profiler.ConvertProfileTypeFrom(conf.ProfileTypes)
+	if err != nil {
+		appLogger.Fatal(err.Error())
+	}
+	pExporter, err := profiler.ConvertExporterTypeFrom(conf.ProfileExporter)
+	if err != nil {
+		appLogger.Fatal(err.Error())
+	}
+	pc := profiler.Config{
+		ServiceName:  getFullServiceName(),
+		EnvName:      conf.EnvName,
+		ProfileTypes: pTypes,
+		ExporterType: pExporter,
+	}
+	err = pc.Start()
+	if err != nil {
+		appLogger.Fatal(err.Error())
+	}
+	defer pc.Stop()
 
 	l, err := net.Listen("tcp", fmt.Sprintf(":%s", conf.Port))
 	if err != nil {
