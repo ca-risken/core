@@ -2,7 +2,7 @@ FROM golang:1.17 as builder
 WORKDIR /go/src/github.com/ca-risken/core/src/finding/
 ADD *.go go.* ./
 ADD model/ ./model
-ENV CGO_ENABLED=0 GOPRIVATE="github.com/ca-risken/*"
+ENV CGO_ENABLED=0
 ARG GITHUB_USER
 ARG GITHUB_TOKEN
 RUN echo "machine github.com" > ~/.netrc
