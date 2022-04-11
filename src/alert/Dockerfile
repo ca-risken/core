@@ -15,6 +15,7 @@ COPY --from=builder /go/bin/alert /usr/local/alert/bin/
 ENV PORT= \
   PROFILE_EXPORTER= \
   PROFILE_TYPES= \
+  TRACE_DEBUG= \
   FINDING_SVC_ADDR= \
   PROJECT_SVC_ADDR= \
   DB_MASTER_HOST= \
