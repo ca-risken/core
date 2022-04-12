@@ -36,6 +36,12 @@ message FindingForUpsert {
   string data = 8;
 }
 
+message FindingBatchForUpsert {
+  FindingForUpsert finding = 1;
+  RecommendForBatch recommend = 2;
+  repeated FindingTagForBatch tag = 3;
+}
+
 // FindingTag
 message FindingTag {
   uint64 finding_tag_id = 1;
@@ -148,3 +154,13 @@ message Recommend {
   int64 created_at = 7;
   int64 updated_at = 8;
 }
+
+// RecommendForBatch
+message RecommendForBatch {
+  string type = 1;
+  string risk = 2;
+  string recommendation = 3;
+}
+
+// FindingTagForBatch
+message FindingTagForBatch { string tag = 1; }
