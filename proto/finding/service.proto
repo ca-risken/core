@@ -13,6 +13,7 @@ service FindingService {
       returns (BatchListFindingResponse);
   rpc GetFinding(GetFindingRequest) returns (GetFindingResponse);
   rpc PutFinding(PutFindingRequest) returns (PutFindingResponse);
+  rpc PutFindingBatch(PutFindingBatchRequest) returns (google.protobuf.Empty);
   rpc DeleteFinding(DeleteFindingRequest) returns (google.protobuf.Empty);
   rpc ListFindingTag(ListFindingTagRequest) returns (ListFindingTagResponse);
   rpc ListFindingTagName(ListFindingTagNameRequest)
@@ -108,6 +109,11 @@ message PutFindingRequest {
 }
 
 message PutFindingResponse { Finding finding = 1; }
+
+message PutFindingBatchRequest {
+  uint32 project_id = 1;
+  repeated FindingBatchForUpsert finding = 2;
+}
 
 message DeleteFindingRequest {
   uint32 project_id = 1;

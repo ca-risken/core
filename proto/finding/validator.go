@@ -61,6 +61,37 @@ func (p *PutFindingRequest) Validate() error {
 	return p.Finding.Validate()
 }
 
+// Validate PutFindingBatchRequest
+func (p *PutFindingBatchRequest) Validate() error {
+	if validation.IsEmpty(p.Finding) {
+		return errors.New("Required finding parameter")
+	}
+	if err := validation.ValidateStruct(p,
+		validation.Field(&p.Finding, validation.Length(1, 50))); err != nil {
+		return err
+	}
+	for _, f := range p.Finding {
+		pfr := &PutFindingRequest{
+			ProjectId: p.ProjectId,
+			Finding:   f.Finding,
+		}
+		if err := pfr.Validate(); err != nil {
+			return err
+		}
+		if f.Recommend != nil {
+			if err := f.Recommend.Validate(); err != nil {
+				return err
+			}
+		}
+		for _, t := range f.Tag {
+			if err := t.Validate(); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 // Validate DeleteFindingRequest
 func (d *DeleteFindingRequest) Validate() error {
 	return validation.ValidateStruct(d,
@@ -358,5 +389,19 @@ func (f *FindingSettingForUpsert) Validate() error {
 		validation.Field(&f.ProjectId, validation.Required),
 		validation.Field(&f.ResourceName, validation.Required),
 		validation.Field(&f.Setting, validation.Required, is.JSON),
+	)
+}
+
+// Validate for RecommendForBatch
+func (r *RecommendForBatch) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.Type, validation.Required, validation.Length(0, 128)),
+	)
+}
+
+// Validate for FindingTagForBatch
+func (f *FindingTagForBatch) Validate() error {
+	return validation.ValidateStruct(f,
+		validation.Field(&f.Tag, validation.Required, validation.Length(0, 64)),
 	)
 }

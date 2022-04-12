@@ -453,6 +453,29 @@ func (_m *FindingServiceServer) PutFinding(_a0 context.Context, _a1 *finding.Put
 	return r0, r1
 }
 
+// PutFindingBatch provides a mock function with given fields: _a0, _a1
+func (_m *FindingServiceServer) PutFindingBatch(_a0 context.Context, _a1 *finding.PutFindingBatchRequest) (*emptypb.Empty, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *emptypb.Empty
+	if rf, ok := ret.Get(0).(func(context.Context, *finding.PutFindingBatchRequest) *emptypb.Empty); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*emptypb.Empty)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *finding.PutFindingBatchRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PutFindingSetting provides a mock function with given fields: _a0, _a1
 func (_m *FindingServiceServer) PutFindingSetting(_a0 context.Context, _a1 *finding.PutFindingSettingRequest) (*finding.PutFindingSettingResponse, error) {
 	ret := _m.Called(_a0, _a1)

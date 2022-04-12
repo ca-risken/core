@@ -1558,3 +1558,202 @@ func TestValidate_FindingSettingForUpsert(t *testing.T) {
 		})
 	}
 }
+
+func TestValidate_RecommendForBatch(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *RecommendForBatch
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &RecommendForBatch{Type: "type", Risk: "risk", Recommendation: "recommendation"},
+		},
+		{
+			name:    "NG required type",
+			input:   &RecommendForBatch{Risk: "risk", Recommendation: "recommendation"},
+			wantErr: true,
+		},
+		{
+			name:    "NG required type(blank)",
+			input:   &RecommendForBatch{Type: "", Risk: "risk", Recommendation: "recommendation"},
+			wantErr: true,
+		},
+		{
+			name:    "NG length type",
+			input:   &RecommendForBatch{Type: len129string, Risk: "risk", Recommendation: "recommendation"},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_FindingTagForBatch(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *FindingTagForBatch
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &FindingTagForBatch{Tag: "tag"},
+		},
+		{
+			name:    "NG required tag",
+			input:   &FindingTagForBatch{},
+			wantErr: true,
+		},
+		{
+			name:    "NG required tag(blank)",
+			input:   &FindingTagForBatch{Tag: ""},
+			wantErr: true,
+		},
+		{
+			name:    "NG length type",
+			input:   &FindingTagForBatch{Tag: len65string},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_PutFindingBatchRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *PutFindingBatchRequest
+		wantErr bool
+	}{
+		{
+			name: "OK",
+			input: &PutFindingBatchRequest{
+				ProjectId: 1,
+				Finding: []*FindingBatchForUpsert{
+					{
+						Finding:   &FindingForUpsert{DataSource: "ds", DataSourceId: "1", ResourceName: "name", ProjectId: 1, OriginalScore: 1.0, OriginalMaxScore: 1.0},
+						Recommend: &RecommendForBatch{Type: "type"},
+						Tag:       []*FindingTagForBatch{{Tag: "tag"}},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "OK only finding",
+			input: &PutFindingBatchRequest{
+				ProjectId: 1,
+				Finding: []*FindingBatchForUpsert{
+					{
+						Finding: &FindingForUpsert{DataSource: "ds", DataSourceId: "1", ResourceName: "name", ProjectId: 1, OriginalScore: 1.0, OriginalMaxScore: 1.0},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "NG required finding",
+			input: &PutFindingBatchRequest{
+				ProjectId: 1,
+				Finding: []*FindingBatchForUpsert{
+					{
+						Recommend: &RecommendForBatch{Type: "type"},
+						Tag:       []*FindingTagForBatch{{Tag: "tag"}},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG finding under min",
+			input: &PutFindingBatchRequest{
+				ProjectId: 1,
+				Finding:   []*FindingBatchForUpsert{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG finding over max",
+			input: &PutFindingBatchRequest{
+				ProjectId: 1,
+				Finding: []*FindingBatchForUpsert{
+					{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, // 10
+					{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, // 20
+					{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, // 30
+					{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, // 40
+					{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, // 50
+					{},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG finding error",
+			input: &PutFindingBatchRequest{
+				ProjectId: 1,
+				Finding: []*FindingBatchForUpsert{
+					{
+						Finding:   &FindingForUpsert{DataSourceId: "1", ResourceName: "name", ProjectId: 1, OriginalScore: 1.0, OriginalMaxScore: 1.0},
+						Recommend: &RecommendForBatch{Type: "type"},
+						Tag:       []*FindingTagForBatch{{Tag: "tag"}},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG recommend error",
+			input: &PutFindingBatchRequest{
+				ProjectId: 1,
+				Finding: []*FindingBatchForUpsert{
+					{
+						Finding:   &FindingForUpsert{DataSource: "ds", DataSourceId: "1", ResourceName: "name", ProjectId: 1, OriginalScore: 1.0, OriginalMaxScore: 1.0},
+						Recommend: &RecommendForBatch{},
+						Tag:       []*FindingTagForBatch{{Tag: "tag"}},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG tag error",
+			input: &PutFindingBatchRequest{
+				ProjectId: 1,
+				Finding: []*FindingBatchForUpsert{
+					{
+						Finding:   &FindingForUpsert{DataSource: "ds", DataSourceId: "1", ResourceName: "name", ProjectId: 1, OriginalScore: 1.0, OriginalMaxScore: 1.0},
+						Recommend: &RecommendForBatch{Type: "type"},
+						Tag:       []*FindingTagForBatch{{}},
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
