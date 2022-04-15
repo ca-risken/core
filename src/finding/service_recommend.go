@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/src/finding/model"
@@ -66,4 +67,16 @@ func (f *findingService) PutRecommend(ctx context.Context, req *finding.PutRecom
 		return nil, err
 	}
 	return &finding.PutRecommendResponse{Recommend: convertRecommend(req.FindingId, registered)}, nil
+}
+
+func (f *findingService) getStoredRecommendID(ctx context.Context, dataSource, recommendType string) (*uint32, error) {
+	storedData, err := f.repository.GetRecommendByDataSourceType(ctx, dataSource, recommendType)
+	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
+	if err != nil && !noRecord {
+		return nil, fmt.Errorf("Failed to GetRecommendByDataSourceType, data_source=%s, type=%s, err=%+v", dataSource, recommendType, err)
+	}
+	if !noRecord {
+		return &storedData.RecommendID, nil
+	}
+	return nil, nil
 }

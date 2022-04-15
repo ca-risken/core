@@ -147,6 +147,14 @@ func (m *mockFindingRepository) ClearScoreFinding(ctx context.Context, req *find
 	args := m.Called()
 	return args.Error(0)
 }
+func (m *mockFindingRepository) BulkUpsertFinding(ctx context.Context, data []*model.Finding) error {
+	args := m.Called()
+	return args.Error(0)
+}
+func (m *mockFindingRepository) BulkUpsertFindingTag(ctx context.Context, data []*model.FindingTag) error {
+	args := m.Called()
+	return args.Error(0)
+}
 
 // Resource
 
@@ -206,6 +214,14 @@ func (m *mockFindingRepository) UntagResource(context.Context, uint32, uint64) e
 	args := m.Called()
 	return args.Error(0)
 }
+func (m *mockFindingRepository) BulkUpsertResource(ctx context.Context, data []*model.Resource) error {
+	args := m.Called()
+	return args.Error(0)
+}
+func (m *mockFindingRepository) BulkUpsertResourceTag(ctx context.Context, data []*model.ResourceTag) error {
+	args := m.Called()
+	return args.Error(0)
+}
 
 // PendFinding
 
@@ -258,4 +274,16 @@ func (m *mockFindingRepository) UpsertRecommend(ctx context.Context, data *model
 func (m *mockFindingRepository) UpsertRecommendFinding(ctx context.Context, data *model.RecommendFinding) (*model.RecommendFinding, error) {
 	args := m.Called()
 	return args.Get(0).(*model.RecommendFinding), args.Error(1)
+}
+func (m *mockFindingRepository) GetRecommendByDataSourceType(ctx context.Context, dataSource, recommendType string) (*model.Recommend, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Recommend), args.Error(1)
+}
+func (m *mockFindingRepository) BulkUpsertRecommend(ctx context.Context, data []*model.Recommend) error {
+	args := m.Called()
+	return args.Error(0)
+}
+func (m *mockFindingRepository) BulkUpsertRecommendFinding(ctx context.Context, data []*model.RecommendFinding) error {
+	args := m.Called()
+	return args.Error(0)
 }

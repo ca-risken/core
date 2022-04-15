@@ -237,3 +237,57 @@ const deleteUntagResource = `delete from resource_tag where project_id = ? and r
 func (f *findingDB) UntagResource(ctx context.Context, projectID uint32, resourceTagID uint64) error {
 	return f.Master.WithContext(ctx).Exec(deleteUntagResource, projectID, resourceTagID).Error
 }
+
+func (f *findingDB) BulkUpsertResource(ctx context.Context, data []*model.Resource) error {
+	if len(data) == 0 {
+		return nil
+	}
+	sql, params := generateBulkUpsertResourceSQL(data)
+	return f.Master.WithContext(ctx).Exec(sql, params...).Error
+}
+
+func generateBulkUpsertResourceSQL(data []*model.Resource) (string, []interface{}) {
+	var params []interface{}
+	sql := `
+INSERT INTO resource
+  (resource_id, resource_name, project_id)
+VALUES`
+	for _, d := range data {
+		sql += `
+  (?, ?, ?),`
+		params = append(params, d.ResourceID, d.ResourceName, d.ProjectID)
+	}
+	sql = strings.TrimRight(sql, ",")
+	sql += `
+ON DUPLICATE KEY UPDATE
+  resource_name=VALUES(resource_name),
+  project_id=VALUES(project_id),
+  updated_at=NOW()`
+	return sql, params
+}
+
+func (f *findingDB) BulkUpsertResourceTag(ctx context.Context, data []*model.ResourceTag) error {
+	if len(data) == 0 {
+		return nil
+	}
+	sql, params := generateBulkUpsertResourceTagSQL(data)
+	return f.Master.WithContext(ctx).Exec(sql, params...).Error
+}
+
+func generateBulkUpsertResourceTagSQL(data []*model.ResourceTag) (string, []interface{}) {
+	var params []interface{}
+	sql := `
+INSERT INTO resource_tag
+  (resource_tag_id, resource_id, project_id, tag)
+VALUES`
+	for _, d := range data {
+		sql += `
+  (?, ?, ?, ?),`
+		params = append(params, d.ResourceTagID, d.ResourceID, d.ProjectID, d.Tag)
+	}
+	sql = strings.TrimRight(sql, ",")
+	sql += `
+ON DUPLICATE KEY UPDATE
+  tag=VALUES(tag)`
+	return sql, params
+}

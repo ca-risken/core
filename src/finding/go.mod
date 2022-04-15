@@ -9,7 +9,7 @@ require (
 	github.com/ca-risken/common/pkg/profiler v0.0.0-20220304031727-c94e2c463b27
 	github.com/ca-risken/common/pkg/rpc v0.0.0-20220113015330-0e8462d52b5b
 	github.com/ca-risken/common/pkg/xray v0.0.0-20211122093906-df2c2b1a375a
-	github.com/ca-risken/core/proto/finding v0.0.0-20211126100009-48eb381d5d58
+	github.com/ca-risken/core/proto/finding v0.0.0-20220412093922-1f5c2ba990ad
 	github.com/gassara-kys/envconfig v1.4.4
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0

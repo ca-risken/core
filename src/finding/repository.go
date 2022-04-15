@@ -34,6 +34,8 @@ type findingRepository interface {
 	TagFinding(context.Context, *model.FindingTag) (*model.FindingTag, error)
 	UntagFinding(context.Context, uint32, uint64) error
 	ClearScoreFinding(ctx context.Context, req *finding.ClearScoreRequest) error
+	BulkUpsertFinding(ctx context.Context, data []*model.Finding) error
+	BulkUpsertFindingTag(ctx context.Context, data []*model.FindingTag) error
 
 	// Resource
 	ListResource(context.Context, *finding.ListResourceRequest) (*[]model.Resource, error)
@@ -49,6 +51,8 @@ type findingRepository interface {
 	GetResourceTagByKey(context.Context, uint32, uint64, string) (*model.ResourceTag, error)
 	TagResource(context.Context, *model.ResourceTag) (*model.ResourceTag, error)
 	UntagResource(context.Context, uint32, uint64) error
+	BulkUpsertResource(ctx context.Context, data []*model.Resource) error
+	BulkUpsertResourceTag(ctx context.Context, data []*model.ResourceTag) error
 
 	// PendFinding
 	GetPendFinding(ctx context.Context, projectID uint32, findingID uint64) (*model.PendFinding, error)
@@ -66,6 +70,9 @@ type findingRepository interface {
 	GetRecommend(ctx context.Context, projectID uint32, findingID uint64) (*model.Recommend, error)
 	UpsertRecommend(ctx context.Context, data *model.Recommend) (*model.Recommend, error)
 	UpsertRecommendFinding(ctx context.Context, data *model.RecommendFinding) (*model.RecommendFinding, error)
+	GetRecommendByDataSourceType(ctx context.Context, dataSource, recommendType string) (*model.Recommend, error)
+	BulkUpsertRecommend(ctx context.Context, data []*model.Recommend) error
+	BulkUpsertRecommendFinding(ctx context.Context, data []*model.RecommendFinding) error
 }
 
 type findingDB struct {

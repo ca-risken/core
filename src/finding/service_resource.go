@@ -81,21 +81,9 @@ func (f *findingService) PutResource(ctx context.Context, req *finding.PutResour
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	savedData, err := f.repository.GetResourceByName(ctx, req.Resource.ProjectId, req.Resource.ResourceName)
-	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
-	if err != nil && !noRecord {
+	data, err := f.getResourceForUpsert(ctx, req.Resource.ProjectId, req.Resource.ResourceName)
+	if err != nil {
 		return nil, err
-	}
-
-	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
-	var resourceID uint64
-	if !noRecord {
-		resourceID = savedData.ResourceID
-	}
-	data := &model.Resource{
-		ResourceID:   resourceID,
-		ResourceName: req.Resource.ResourceName,
-		ProjectID:    req.Resource.ProjectId,
 	}
 	// upsert
 	registerdData, err := f.repository.UpsertResource(ctx, data)
@@ -200,22 +188,9 @@ func (f *findingService) TagResource(ctx context.Context, req *finding.TagResour
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	savedData, err := f.repository.GetResourceTagByKey(ctx, req.ProjectId, req.Tag.ResourceId, req.Tag.Tag)
-	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
-	if err != nil && !noRecord {
+	tag, err := f.getResourceTagForUpsert(ctx, req.ProjectId, req.Tag.ResourceId, req.Tag.Tag)
+	if err != nil {
 		return nil, err
-	}
-
-	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
-	var resourceTagID uint64
-	if !noRecord {
-		resourceTagID = savedData.ResourceTagID
-	}
-	tag := &model.ResourceTag{
-		ResourceTagID: resourceTagID,
-		ResourceID:    req.Tag.ResourceId,
-		ProjectID:     req.Tag.ProjectId,
-		Tag:           req.Tag.Tag,
 	}
 	registerd, err := f.repository.TagResource(ctx, tag)
 	if err != nil {
@@ -260,4 +235,47 @@ func convertResourceTag(r *model.ResourceTag) *finding.ResourceTag {
 		CreatedAt:     r.CreatedAt.Unix(),
 		UpdatedAt:     r.UpdatedAt.Unix(),
 	}
+}
+
+func (f *findingService) getResourceForUpsert(ctx context.Context, projectID uint32, resourceName string) (*model.Resource, error) {
+	storedData, err := f.repository.GetResourceByName(ctx, projectID, resourceName)
+	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
+	if err != nil && !noRecord {
+		return nil, err
+	}
+
+	// Specify the ID in PK as much as possible to avoid unnecessary AUTO_INCREMENT.
+	// https://dev.mysql.com/doc/refman/5.6/ja/insert-on-duplicate.html
+	var resourceID uint64
+	if !noRecord {
+		resourceID = storedData.ResourceID
+	}
+	return &model.Resource{
+		ResourceID:   resourceID,
+		ResourceName: resourceName,
+		ProjectID:    projectID,
+	}, nil
+
+}
+
+func (f *findingService) getResourceTagForUpsert(ctx context.Context, projectID uint32, resourceID uint64, tag string) (*model.ResourceTag, error) {
+	storedData, err := f.repository.GetResourceTagByKey(ctx, projectID, resourceID, tag)
+	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
+	if err != nil && !noRecord {
+		return nil, err
+	}
+
+	// Specify the ID in PK as much as possible to avoid unnecessary AUTO_INCREMENT.
+	// https://dev.mysql.com/doc/refman/5.6/ja/insert-on-duplicate.html
+	var resourceTagID uint64
+	if !noRecord {
+		resourceTagID = storedData.ResourceTagID
+	}
+	return &model.ResourceTag{
+		ResourceTagID: resourceTagID,
+		ResourceID:    resourceID,
+		ProjectID:     projectID,
+		Tag:           tag,
+	}, nil
+
 }

@@ -283,3 +283,65 @@ func (f *findingDB) ClearScoreFinding(ctx context.Context, req *finding.ClearSco
 	}
 	return f.Master.WithContext(ctx).Exec(sql, params...).Error
 }
+
+func (f *findingDB) BulkUpsertFinding(ctx context.Context, data []*model.Finding) error {
+	if len(data) == 0 {
+		return nil
+	}
+	sql, params := generateBulkUpsertFindingSQL(data)
+	return f.Master.WithContext(ctx).Exec(sql, params...).Error
+}
+
+func generateBulkUpsertFindingSQL(data []*model.Finding) (string, []interface{}) {
+	var params []interface{}
+	sql := `
+INSERT INTO finding
+  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+VALUES`
+	for _, d := range data {
+		sql += `
+  (?, ?, ?, ?, ?, ?, ?, ?, ?),`
+		params = append(params, d.FindingID, d.Description, d.DataSource, d.DataSourceID,
+			d.ResourceName, d.ProjectID, d.OriginalScore, d.Score, d.Data)
+	}
+	sql = strings.TrimRight(sql, ",")
+	sql += `
+ON DUPLICATE KEY UPDATE
+  description=VALUES(description),
+  resource_name=VALUES(resource_name),
+  project_id=VALUES(project_id),
+  original_score=VALUES(original_score),
+  score=VALUES(score),
+  data=VALUES(data),
+  updated_at=NOW()`
+	return sql, params
+}
+
+func (f *findingDB) BulkUpsertFindingTag(ctx context.Context, data []*model.FindingTag) error {
+	if len(data) == 0 {
+		return nil
+	}
+	sql, params := generateBulkUpsertFindingTagSQL(data)
+	return f.Master.WithContext(ctx).Exec(sql, params...).Error
+}
+
+func generateBulkUpsertFindingTagSQL(data []*model.FindingTag) (string, []interface{}) {
+	var params []interface{}
+	sql := `
+INSERT INTO finding_tag
+  (finding_tag_id, finding_id, project_id, tag)
+VALUES`
+	for _, d := range data {
+		sql += `
+  (?, ?, ?, ?),`
+		params = append(params, d.FindingTagID, d.FindingID, d.ProjectID, d.Tag)
+	}
+	sql = strings.TrimRight(sql, ",")
+	sql += `
+ON DUPLICATE KEY UPDATE
+  finding_id=VALUES(finding_id),
+  project_id=VALUES(project_id),
+  tag=VALUES(tag),
+  updated_at=NOW()`
+	return sql, params
+}
