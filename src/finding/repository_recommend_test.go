@@ -1,11 +1,135 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"reflect"
+	"regexp"
 	"testing"
+	"time"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/ca-risken/core/src/finding/model"
 )
+
+func TestGetRecommendByDataSourceType(t *testing.T) {
+	now := time.Now()
+	f, mock, err := newMockFindingDB()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+	type args struct {
+		dataSource    string
+		recommendType string
+	}
+	cases := []struct {
+		name       string
+		input      args
+		want       *model.Recommend
+		wantErr    bool
+		mockResult *sqlmock.Rows
+		mockErr    error
+	}{
+		{
+			name:  "OK",
+			input: args{dataSource: "ds", recommendType: "type"},
+			want: &model.Recommend{
+				RecommendID:    1,
+				DataSource:     "ds",
+				Type:           "type",
+				Risk:           "risk",
+				Recommendation: "recommendation",
+				CreatedAt:      now,
+				UpdatedAt:      now,
+			},
+			wantErr: false,
+			mockResult: sqlmock.NewRows([]string{
+				"recommend_id",
+				"data_source",
+				"type",
+				"risk",
+				"recommendation",
+				"created_at",
+				"updated_at",
+			}).AddRow(
+				1,
+				"ds",
+				"type",
+				"risk",
+				"recommendation",
+				now,
+				now,
+			),
+		},
+		{
+			name:    "NG DB error",
+			input:   args{dataSource: "ds", recommendType: "type"},
+			want:    nil,
+			wantErr: true,
+			mockErr: errors.New("DB error"),
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			if c.mockResult != nil {
+				mock.ExpectQuery(regexp.QuoteMeta(selectGetRecommendByDataSourceType)).WillReturnRows(c.mockResult)
+			} else if c.mockErr != nil {
+				mock.ExpectQuery(regexp.QuoteMeta(selectGetRecommendByDataSourceType)).WillReturnError(c.mockErr)
+			}
+			got, err := f.GetRecommendByDataSourceType(ctx, c.input.dataSource, c.input.recommendType)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestBulkUpsertRecommend(t *testing.T) {
+	f, mock, err := newMockFindingDB()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+	cases := []struct {
+		name    string
+		input   []*model.Recommend
+		mockSQL string
+		wantErr bool
+	}{
+		{
+			name: "OK",
+			input: []*model.Recommend{
+				{RecommendID: 1, DataSource: "ds", Type: "type1", Risk: "risk", Recommendation: "recommend"},
+			},
+			wantErr: false,
+			mockSQL: regexp.QuoteMeta(`
+INSERT INTO recommend
+  (recommend_id, data_source, type, risk, recommendation)
+VALUES`),
+		},
+		{
+			name:    "No data",
+			input:   []*model.Recommend{},
+			wantErr: false,
+			mockSQL: "",
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			if c.mockSQL != "" {
+				mock.ExpectExec(c.mockSQL).WillReturnResult(sqlmock.NewResult(int64(len(c.input)), int64(len(c.input))))
+			}
+			err := f.BulkUpsertRecommend(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
+}
 
 func TestGenerateBulkUpsertRecommendSQL(t *testing.T) {
 	cases := []struct {
@@ -69,6 +193,49 @@ ON DUPLICATE KEY UPDATE
 			}
 			if !reflect.DeepEqual(param, c.wantParam) {
 				t.Fatalf("Unexpected param response: want=%+v, got=%+v", c.wantParam, param)
+			}
+		})
+	}
+}
+
+func TestBulkUpsertRecommendFinding(t *testing.T) {
+	f, mock, err := newMockFindingDB()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+	cases := []struct {
+		name    string
+		input   []*model.RecommendFinding
+		mockSQL string
+		wantErr bool
+	}{
+		{
+			name: "OK",
+			input: []*model.RecommendFinding{
+				{FindingID: 1, RecommendID: 1, ProjectID: 1},
+			},
+			wantErr: false,
+			mockSQL: regexp.QuoteMeta(`
+INSERT INTO recommend_finding
+  (finding_id, recommend_id, project_id)
+VALUES`),
+		},
+		{
+			name:    "No data",
+			input:   []*model.RecommendFinding{},
+			wantErr: false,
+			mockSQL: "",
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			if c.mockSQL != "" {
+				mock.ExpectExec(c.mockSQL).WillReturnResult(sqlmock.NewResult(int64(len(c.input)), int64(len(c.input))))
+			}
+			err := f.BulkUpsertRecommendFinding(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
 			}
 		})
 	}

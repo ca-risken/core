@@ -1,11 +1,57 @@
 package main
 
 import (
+	"context"
 	"reflect"
+	"regexp"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/ca-risken/core/src/finding/model"
 )
+
+func TestBulkUpsertFinding(t *testing.T) {
+	f, mock, err := newMockFindingDB()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+	cases := []struct {
+		name    string
+		input   []*model.Finding
+		mockSQL string
+		wantErr bool
+	}{
+		{
+			name: "OK",
+			input: []*model.Finding{
+				{FindingID: 1, Description: "desc", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
+			},
+			wantErr: false,
+			mockSQL: regexp.QuoteMeta(`
+INSERT INTO finding
+  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+VALUES`),
+		},
+		{
+			name:    "No data",
+			input:   []*model.Finding{},
+			wantErr: false,
+			mockSQL: "",
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			if c.mockSQL != "" {
+				mock.ExpectExec(c.mockSQL).WillReturnResult(sqlmock.NewResult(int64(len(c.input)), int64(len(c.input))))
+			}
+			err := f.BulkUpsertFinding(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
+}
 
 func TestGenerateBulkUpsertFindingSQL(t *testing.T) {
 	cases := []struct {
@@ -73,6 +119,49 @@ ON DUPLICATE KEY UPDATE
 			}
 			if !reflect.DeepEqual(param, c.wantParam) {
 				t.Fatalf("Unexpected param response: want=%+v, got=%+v", c.wantParam, param)
+			}
+		})
+	}
+}
+
+func TestBulkUpsertFindingTag(t *testing.T) {
+	f, mock, err := newMockFindingDB()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+	cases := []struct {
+		name    string
+		input   []*model.FindingTag
+		mockSQL string
+		wantErr bool
+	}{
+		{
+			name: "OK",
+			input: []*model.FindingTag{
+				{FindingTagID: 1, FindingID: 1, ProjectID: 1, Tag: "t1"},
+			},
+			wantErr: false,
+			mockSQL: regexp.QuoteMeta(`
+INSERT INTO finding_tag
+  (finding_tag_id, finding_id, project_id, tag)
+VALUES`),
+		},
+		{
+			name:    "No data",
+			input:   []*model.FindingTag{},
+			wantErr: false,
+			mockSQL: "",
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			if c.mockSQL != "" {
+				mock.ExpectExec(c.mockSQL).WillReturnResult(sqlmock.NewResult(int64(len(c.input)), int64(len(c.input))))
+			}
+			err := f.BulkUpsertFindingTag(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
 			}
 		})
 	}

@@ -1,11 +1,57 @@
 package main
 
 import (
+	"context"
 	"reflect"
+	"regexp"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/ca-risken/core/src/finding/model"
 )
+
+func TestBulkUpsertResource(t *testing.T) {
+	f, mock, err := newMockFindingDB()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+	cases := []struct {
+		name    string
+		input   []*model.Resource
+		mockSQL string
+		wantErr bool
+	}{
+		{
+			name: "OK",
+			input: []*model.Resource{
+				{ResourceID: 1, ResourceName: "name1", ProjectID: 1},
+			},
+			wantErr: false,
+			mockSQL: regexp.QuoteMeta(`
+INSERT INTO resource
+  (resource_id, resource_name, project_id)
+VALUES`),
+		},
+		{
+			name:    "No data",
+			input:   []*model.Resource{},
+			wantErr: false,
+			mockSQL: "",
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			if c.mockSQL != "" {
+				mock.ExpectExec(c.mockSQL).WillReturnResult(sqlmock.NewResult(int64(len(c.input)), int64(len(c.input))))
+			}
+			err := f.BulkUpsertResource(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
+}
 
 func TestGenerateBulkUpsertResourceSQL(t *testing.T) {
 	cases := []struct {
@@ -62,6 +108,49 @@ ON DUPLICATE KEY UPDATE
 			}
 			if !reflect.DeepEqual(param, c.wantParam) {
 				t.Fatalf("Unexpected param response: want=%+v, got=%+v", c.wantParam, param)
+			}
+		})
+	}
+}
+
+func TestBulkUpsertResourceTag(t *testing.T) {
+	f, mock, err := newMockFindingDB()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+	cases := []struct {
+		name    string
+		input   []*model.ResourceTag
+		mockSQL string
+		wantErr bool
+	}{
+		{
+			name: "OK",
+			input: []*model.ResourceTag{
+				{ResourceTagID: 1, ResourceID: 1, ProjectID: 1, Tag: "tag1"},
+			},
+			wantErr: false,
+			mockSQL: regexp.QuoteMeta(`
+INSERT INTO resource_tag
+  (resource_tag_id, resource_id, project_id, tag)
+VALUES`),
+		},
+		{
+			name:    "No data",
+			input:   []*model.ResourceTag{},
+			wantErr: false,
+			mockSQL: "",
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			if c.mockSQL != "" {
+				mock.ExpectExec(c.mockSQL).WillReturnResult(sqlmock.NewResult(int64(len(c.input)), int64(len(c.input))))
+			}
+			err := f.BulkUpsertResourceTag(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
 			}
 		})
 	}
