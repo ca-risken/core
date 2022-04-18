@@ -47,22 +47,24 @@ func (f *findingService) PutFindingBatch(ctx context.Context, req *finding.PutFi
 		}
 		resources = append(resources, r)
 
-		storedRecommendID, err := f.getStoredRecommendID(ctx, d.Finding.DataSource, d.Recommend.Type)
-		if err != nil {
-			return nil, err
+		if d.Recommend != nil {
+			storedRecommendID, err := f.getStoredRecommendID(ctx, d.Finding.DataSource, d.Recommend.Type)
+			if err != nil {
+				return nil, err
+			}
+			var recommendID uint32
+			if storedRecommendID != nil {
+				recommendID = *storedRecommendID
+				recommendIDCache[fmt.Sprintf(recommendIDCacheKeyFmt, d.Finding.DataSource, d.Recommend.Type)] = *storedRecommendID
+			}
+			recommends = append(recommends, &model.Recommend{
+				RecommendID:    recommendID,
+				DataSource:     d.Finding.DataSource,
+				Type:           d.Recommend.Type,
+				Risk:           d.Recommend.Risk,
+				Recommendation: d.Recommend.Recommendation,
+			})
 		}
-		var recommendID uint32
-		if storedRecommendID != nil {
-			recommendID = *storedRecommendID
-			recommendIDCache[fmt.Sprintf(recommendIDCacheKeyFmt, d.Finding.DataSource, d.Recommend.Type)] = *storedRecommendID
-		}
-		recommends = append(recommends, &model.Recommend{
-			RecommendID:    recommendID,
-			DataSource:     d.Finding.DataSource,
-			Type:           d.Recommend.Type,
-			Risk:           d.Recommend.Risk,
-			Recommendation: d.Recommend.Recommendation,
-		})
 	}
 	if err := f.repository.BulkUpsertFinding(ctx, findings); err != nil {
 		return nil, fmt.Errorf("Failed to BulkUpsertFinding, err=%+w", err)
@@ -101,21 +103,23 @@ func (f *findingService) PutFindingBatch(ctx context.Context, req *finding.PutFi
 			storedResourceID = newResource.ResourceID
 		}
 
-		var storedRecommendID uint32
-		if id, ok := recommendIDCache[fmt.Sprintf(recommendIDCacheKeyFmt, d.Finding.DataSource, d.Recommend.Type)]; ok {
-			storedRecommendID = id
-		} else {
-			newRecommend, err := f.repository.GetRecommendByDataSourceType(ctx, d.Finding.DataSource, d.Recommend.Type)
-			if err != nil {
-				return nil, err
+		if d.Recommend != nil {
+			var storedRecommendID uint32
+			if id, ok := recommendIDCache[fmt.Sprintf(recommendIDCacheKeyFmt, d.Finding.DataSource, d.Recommend.Type)]; ok {
+				storedRecommendID = id
+			} else {
+				newRecommend, err := f.repository.GetRecommendByDataSourceType(ctx, d.Finding.DataSource, d.Recommend.Type)
+				if err != nil {
+					return nil, err
+				}
+				storedRecommendID = newRecommend.RecommendID
 			}
-			storedRecommendID = newRecommend.RecommendID
+			recommendFindings = append(recommendFindings, &model.RecommendFinding{
+				FindingID:   storedFindingID,
+				RecommendID: storedRecommendID,
+				ProjectID:   d.Finding.ProjectId,
+			})
 		}
-		recommendFindings = append(recommendFindings, &model.RecommendFinding{
-			FindingID:   storedFindingID,
-			RecommendID: storedRecommendID,
-			ProjectID:   d.Finding.ProjectId,
-		})
 		for _, t := range d.Tag {
 			storedFindingTag, err := f.getFindingTagForUpsert(ctx, d.Finding.ProjectId, storedFindingID, t.Tag)
 			if err != nil {
