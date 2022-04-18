@@ -39,13 +39,13 @@ func TestPutFindingBatch(t *testing.T) {
 		BulkUpsertRecommendCall bool
 		BulkUpsertRecommendErr  error
 
-		GetFindingTagByKeyCall bool
-		GetFindingTagByKeyResp *model.FindingTag
-		GetFindingTagByKeyErr  error
+		ListFindingTagByFindingIDCall bool
+		ListFindingTagByFindingIDResp *[]model.FindingTag
+		ListFindingTagByFindingIDErr  error
 
-		GetResourceTagByKeyCall bool
-		GetResourceTagByKeyResp *model.ResourceTag
-		GetResourceTagByKeyErr  error
+		ListResourceTagByResourceIDCall bool
+		ListResourceTagByResourceIDResp *[]model.ResourceTag
+		ListResourceTagByResourceIDErr  error
 
 		BulkUpsertFindingTagCall bool
 		BulkUpsertFindingTagErr  error
@@ -86,10 +86,10 @@ func TestPutFindingBatch(t *testing.T) {
 				BulkUpsertResourceCall:  true,
 				BulkUpsertRecommendCall: true,
 
-				GetFindingTagByKeyCall:  true,
-				GetFindingTagByKeyResp:  &model.FindingTag{FindingTagID: 1},
-				GetResourceTagByKeyCall: true,
-				GetResourceTagByKeyResp: &model.ResourceTag{ResourceTagID: 1},
+				ListFindingTagByFindingIDCall:   true,
+				ListFindingTagByFindingIDResp:   &[]model.FindingTag{{FindingTagID: 1, Tag: "tag1"}, {FindingTagID: 2, Tag: "tag2"}},
+				ListResourceTagByResourceIDCall: true,
+				ListResourceTagByResourceIDResp: &[]model.ResourceTag{{ResourceTagID: 1, Tag: "tag1"}, {ResourceTagID: 2, Tag: "tag2"}},
 
 				BulkUpsertRecommendFindingCall: true,
 				BulkUpsertFindingTagCall:       true,
@@ -167,11 +167,11 @@ func TestPutFindingBatch(t *testing.T) {
 			if c.mock.BulkUpsertRecommendCall {
 				mockDB.On("BulkUpsertRecommend").Return(c.mock.BulkUpsertRecommendErr).Once()
 			}
-			if c.mock.GetFindingTagByKeyCall {
-				mockDB.On("GetFindingTagByKey").Return(c.mock.GetFindingTagByKeyResp, c.mock.GetFindingTagByKeyErr)
+			if c.mock.ListFindingTagByFindingIDCall {
+				mockDB.On("ListFindingTagByFindingID").Return(c.mock.ListFindingTagByFindingIDResp, c.mock.ListFindingTagByFindingIDErr)
 			}
-			if c.mock.GetResourceTagByKeyCall {
-				mockDB.On("GetResourceTagByKey").Return(c.mock.GetResourceTagByKeyResp, c.mock.GetResourceTagByKeyErr)
+			if c.mock.ListResourceTagByResourceIDCall {
+				mockDB.On("ListResourceTagByResourceID").Return(c.mock.ListResourceTagByResourceIDResp, c.mock.ListResourceTagByResourceIDErr)
 			}
 			if c.mock.BulkUpsertFindingTagCall {
 				mockDB.On("BulkUpsertFindingTag").Return(c.mock.BulkUpsertFindingTagErr).Once()

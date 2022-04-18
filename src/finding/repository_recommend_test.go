@@ -44,22 +44,8 @@ func TestGetRecommendByDataSourceType(t *testing.T) {
 			},
 			wantErr: false,
 			mockResult: sqlmock.NewRows([]string{
-				"recommend_id",
-				"data_source",
-				"type",
-				"risk",
-				"recommendation",
-				"created_at",
-				"updated_at",
-			}).AddRow(
-				1,
-				"ds",
-				"type",
-				"risk",
-				"recommendation",
-				now,
-				now,
-			),
+				"recommend_id", "data_source", "type", "risk", "recommendation", "created_at", "updated_at"}).
+				AddRow(1, "ds", "type", "risk", "recommendation", now, now),
 		},
 		{
 			name:    "NG DB error",
@@ -97,14 +83,12 @@ func TestBulkUpsertRecommend(t *testing.T) {
 		name    string
 		input   []*model.Recommend
 		mockSQL string
-		wantErr bool
 	}{
 		{
 			name: "OK",
 			input: []*model.Recommend{
 				{RecommendID: 1, DataSource: "ds", Type: "type1", Risk: "risk", Recommendation: "recommend"},
 			},
-			wantErr: false,
 			mockSQL: regexp.QuoteMeta(`
 INSERT INTO recommend
   (recommend_id, data_source, type, risk, recommendation)
@@ -113,7 +97,6 @@ VALUES`),
 		{
 			name:    "No data",
 			input:   []*model.Recommend{},
-			wantErr: false,
 			mockSQL: "",
 		},
 	}
@@ -124,7 +107,7 @@ VALUES`),
 				mock.ExpectExec(c.mockSQL).WillReturnResult(sqlmock.NewResult(int64(len(c.input)), int64(len(c.input))))
 			}
 			err := f.BulkUpsertRecommend(ctx, c.input)
-			if err != nil && !c.wantErr {
+			if err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
 		})
@@ -207,14 +190,12 @@ func TestBulkUpsertRecommendFinding(t *testing.T) {
 		name    string
 		input   []*model.RecommendFinding
 		mockSQL string
-		wantErr bool
 	}{
 		{
 			name: "OK",
 			input: []*model.RecommendFinding{
 				{FindingID: 1, RecommendID: 1, ProjectID: 1},
 			},
-			wantErr: false,
 			mockSQL: regexp.QuoteMeta(`
 INSERT INTO recommend_finding
   (finding_id, recommend_id, project_id)
@@ -223,7 +204,6 @@ VALUES`),
 		{
 			name:    "No data",
 			input:   []*model.RecommendFinding{},
-			wantErr: false,
 			mockSQL: "",
 		},
 	}
@@ -234,7 +214,7 @@ VALUES`),
 				mock.ExpectExec(c.mockSQL).WillReturnResult(sqlmock.NewResult(int64(len(c.input)), int64(len(c.input))))
 			}
 			err := f.BulkUpsertRecommendFinding(ctx, c.input)
-			if err != nil && !c.wantErr {
+			if err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
 		})

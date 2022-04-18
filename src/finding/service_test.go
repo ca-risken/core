@@ -115,6 +115,10 @@ func (m *mockFindingRepository) ListFindingTag(ctx context.Context, param *findi
 	args := m.Called()
 	return args.Get(0).(*[]model.FindingTag), args.Error(1)
 }
+func (m *mockFindingRepository) ListFindingTagByFindingID(ctx context.Context, projectID uint32, findingID uint64) (*[]model.FindingTag, error) {
+	args := m.Called()
+	return args.Get(0).(*[]model.FindingTag), args.Error(1)
+}
 func (m *mockFindingRepository) ListFindingTagCount(ctx context.Context, param *finding.ListFindingTagRequest) (int64, error) {
 	args := m.Called()
 	return args.Get(0).(int64), args.Error(1)
@@ -183,6 +187,10 @@ func (m *mockFindingRepository) DeleteResource(context.Context, uint32, uint64) 
 	return args.Error(0)
 }
 func (m *mockFindingRepository) ListResourceTag(ctx context.Context, param *finding.ListResourceTagRequest) (*[]model.ResourceTag, error) {
+	args := m.Called()
+	return args.Get(0).(*[]model.ResourceTag), args.Error(1)
+}
+func (m *mockFindingRepository) ListResourceTagByResourceID(ctx context.Context, projectID uint32, resourceID uint64) (*[]model.ResourceTag, error) {
 	args := m.Called()
 	return args.Get(0).(*[]model.ResourceTag), args.Error(1)
 }

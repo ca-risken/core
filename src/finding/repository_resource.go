@@ -125,6 +125,16 @@ func (f *findingDB) ListResourceTag(ctx context.Context, param *finding.ListReso
 	return &data, nil
 }
 
+const selectListResourceTagByResourceID = `select * from resource_tag where project_id = ? and resource_id = ?`
+
+func (f *findingDB) ListResourceTagByResourceID(ctx context.Context, projectID uint32, resourceID uint64) (*[]model.ResourceTag, error) {
+	var data []model.ResourceTag
+	if err := f.Master.WithContext(ctx).Raw(selectListResourceTagByResourceID, projectID, resourceID).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
 const selectListResourceTagCount = `select count(*) from resource_tag where project_id = ? and resource_id = ?`
 
 func (f *findingDB) ListResourceTagCount(ctx context.Context, param *finding.ListResourceTagRequest) (int64, error) {

@@ -75,8 +75,8 @@ func (f *findingService) getStoredRecommendID(ctx context.Context, dataSource, r
 	if err != nil && !noRecord {
 		return nil, fmt.Errorf("Failed to GetRecommendByDataSourceType, data_source=%s, type=%s, err=%+v", dataSource, recommendType, err)
 	}
-	if !noRecord {
-		return &storedData.RecommendID, nil
+	if noRecord {
+		return nil, nil
 	}
-	return nil, nil
+	return &storedData.RecommendID, nil
 }

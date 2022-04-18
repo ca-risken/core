@@ -27,6 +27,7 @@ type findingRepository interface {
 	UpsertFinding(context.Context, *model.Finding) (*model.Finding, error)
 	DeleteFinding(context.Context, uint32, uint64) error
 	ListFindingTag(ctx context.Context, param *finding.ListFindingTagRequest) (*[]model.FindingTag, error)
+	ListFindingTagByFindingID(ctx context.Context, projectID uint32, findingID uint64) (*[]model.FindingTag, error)
 	ListFindingTagCount(ctx context.Context, param *finding.ListFindingTagRequest) (int64, error)
 	ListFindingTagName(ctx context.Context, param *finding.ListFindingTagNameRequest) (*[]tagName, error)
 	ListFindingTagNameCount(ctx context.Context, param *finding.ListFindingTagNameRequest) (int64, error)
@@ -45,6 +46,7 @@ type findingRepository interface {
 	UpsertResource(context.Context, *model.Resource) (*model.Resource, error)
 	DeleteResource(context.Context, uint32, uint64) error
 	ListResourceTag(ctx context.Context, param *finding.ListResourceTagRequest) (*[]model.ResourceTag, error)
+	ListResourceTagByResourceID(ctx context.Context, projectID uint32, resourceID uint64) (*[]model.ResourceTag, error)
 	ListResourceTagCount(ctx context.Context, param *finding.ListResourceTagRequest) (int64, error)
 	ListResourceTagName(ctx context.Context, param *finding.ListResourceTagNameRequest) (*[]tagName, error)
 	ListResourceTagNameCount(ctx context.Context, param *finding.ListResourceTagNameRequest) (int64, error)

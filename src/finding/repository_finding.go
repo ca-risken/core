@@ -181,6 +181,16 @@ func (f *findingDB) ListFindingTag(ctx context.Context, param *finding.ListFindi
 	return &data, nil
 }
 
+const selectListFindingTagByFindingID = `select * from finding_tag where project_id = ? and finding_id = ? `
+
+func (f *findingDB) ListFindingTagByFindingID(ctx context.Context, projectID uint32, findingID uint64) (*[]model.FindingTag, error) {
+	var data []model.FindingTag
+	if err := f.Master.WithContext(ctx).Raw(selectListFindingTagByFindingID, projectID, findingID).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
 const selectListFindingTagCount = `select count(*) from finding_tag where project_id = ? and finding_id = ?`
 
 func (f *findingDB) ListFindingTagCount(ctx context.Context, param *finding.ListFindingTagRequest) (int64, error) {

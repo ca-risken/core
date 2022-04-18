@@ -10,12 +10,6 @@ import (
 	"github.com/vikyd/zero"
 )
 
-const (
-	findingIDCacheKeyFmt   = "finding/%d/%s/%s"
-	resourceIDCacheKeyFmt  = "resource/%d/%s"
-	recommendIDCacheKeyFmt = "recommend/%s/%s"
-)
-
 func (f *findingService) PutFindingBatch(ctx context.Context, req *finding.PutFindingBatchRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
@@ -25,16 +19,16 @@ func (f *findingService) PutFindingBatch(ctx context.Context, req *finding.PutFi
 	var findings []*model.Finding
 	var resources []*model.Resource
 	var recommends []*model.Recommend
-	findingIDCache := map[string]uint64{}
-	resourceIDCache := map[string]uint64{}
-	recommendIDCache := map[string]uint32{}
-	for _, d := range req.Finding {
+	findingIDCache := map[int]uint64{}
+	resourceIDCache := map[int]uint64{}
+	recommendIDCache := map[int]uint32{}
+	for idx, d := range req.Finding {
 		fi, err := f.getFindingDataForUpsert(ctx, d.Finding)
 		if err != nil {
 			return nil, err
 		}
 		if !zero.IsZeroVal(fi.FindingID) {
-			findingIDCache[fmt.Sprintf(findingIDCacheKeyFmt, d.Finding.ProjectId, d.Finding.DataSource, d.Finding.DataSourceId)] = fi.FindingID
+			findingIDCache[idx] = fi.FindingID
 		}
 		findings = append(findings, fi)
 
@@ -43,7 +37,7 @@ func (f *findingService) PutFindingBatch(ctx context.Context, req *finding.PutFi
 			return nil, err
 		}
 		if !zero.IsZeroVal(r.ResourceID) {
-			resourceIDCache[fmt.Sprintf(resourceIDCacheKeyFmt, d.Finding.ProjectId, d.Finding.ResourceName)] = r.ResourceID
+			resourceIDCache[idx] = r.ResourceID
 		}
 		resources = append(resources, r)
 
@@ -55,7 +49,7 @@ func (f *findingService) PutFindingBatch(ctx context.Context, req *finding.PutFi
 			var recommendID uint32
 			if storedRecommendID != nil {
 				recommendID = *storedRecommendID
-				recommendIDCache[fmt.Sprintf(recommendIDCacheKeyFmt, d.Finding.DataSource, d.Recommend.Type)] = *storedRecommendID
+				recommendIDCache[idx] = *storedRecommendID
 			}
 			recommends = append(recommends, &model.Recommend{
 				RecommendID:    recommendID,
@@ -80,9 +74,9 @@ func (f *findingService) PutFindingBatch(ctx context.Context, req *finding.PutFi
 	var recommendFindings []*model.RecommendFinding
 	var findingTags []*model.FindingTag
 	var resourceTags []*model.ResourceTag
-	for _, d := range req.Finding {
+	for idx, d := range req.Finding {
 		var storedFindingID uint64
-		if id, ok := findingIDCache[fmt.Sprintf(findingIDCacheKeyFmt, d.Finding.ProjectId, d.Finding.DataSource, d.Finding.DataSourceId)]; ok {
+		if id, ok := findingIDCache[idx]; ok {
 			storedFindingID = id
 		} else {
 			newFinding, err := f.repository.GetFindingByDataSource(ctx, d.Finding.ProjectId, d.Finding.DataSource, d.Finding.DataSourceId)
@@ -93,7 +87,7 @@ func (f *findingService) PutFindingBatch(ctx context.Context, req *finding.PutFi
 		}
 
 		var storedResourceID uint64
-		if id, ok := resourceIDCache[fmt.Sprintf(resourceIDCacheKeyFmt, d.Finding.ProjectId, d.Finding.ResourceName)]; ok {
+		if id, ok := resourceIDCache[idx]; ok {
 			storedResourceID = id
 		} else {
 			newResource, err := f.repository.GetResourceByName(ctx, d.Finding.ProjectId, d.Finding.ResourceName)
@@ -105,7 +99,7 @@ func (f *findingService) PutFindingBatch(ctx context.Context, req *finding.PutFi
 
 		if d.Recommend != nil {
 			var storedRecommendID uint32
-			if id, ok := recommendIDCache[fmt.Sprintf(recommendIDCacheKeyFmt, d.Finding.DataSource, d.Recommend.Type)]; ok {
+			if id, ok := recommendIDCache[idx]; ok {
 				storedRecommendID = id
 			} else {
 				newRecommend, err := f.repository.GetRecommendByDataSourceType(ctx, d.Finding.DataSource, d.Recommend.Type)
@@ -120,27 +114,40 @@ func (f *findingService) PutFindingBatch(ctx context.Context, req *finding.PutFi
 				ProjectID:   d.Finding.ProjectId,
 			})
 		}
+		storedFindingTags, err := f.repository.ListFindingTagByFindingID(ctx, d.Finding.ProjectId, storedFindingID)
+		if err != nil {
+			return nil, err
+		}
+		storedResourceTags, err := f.repository.ListResourceTagByResourceID(ctx, d.Finding.ProjectId, storedResourceID)
+		if err != nil {
+			return nil, err
+		}
 		for _, t := range d.Tag {
-			storedFindingTag, err := f.getFindingTagForUpsert(ctx, d.Finding.ProjectId, storedFindingID, t.Tag)
-			if err != nil {
-				return nil, err
+			findingTag := &model.FindingTag{
+				FindingID: storedFindingID,
+				ProjectID: d.Finding.ProjectId,
+				Tag:       t.Tag,
 			}
-			findingTags = append(findingTags, &model.FindingTag{
-				FindingTagID: storedFindingTag.FindingTagID,
-				FindingID:    storedFindingID,
-				ProjectID:    d.Finding.ProjectId,
-				Tag:          t.Tag,
-			})
-			storedResourceTag, err := f.getResourceTagForUpsert(ctx, d.Finding.ProjectId, storedResourceID, t.Tag)
-			if err != nil {
-				return nil, err
+			for _, storedTag := range *storedFindingTags {
+				if t.Tag == storedTag.Tag {
+					findingTag.FindingTagID = storedTag.FindingTagID
+					break
+				}
 			}
-			resourceTags = append(resourceTags, &model.ResourceTag{
-				ResourceTagID: storedResourceTag.ResourceTagID,
-				ResourceID:    storedResourceID,
-				ProjectID:     d.Finding.ProjectId,
-				Tag:           t.Tag,
-			})
+			findingTags = append(findingTags, findingTag)
+
+			resourceTag := &model.ResourceTag{
+				ResourceID: storedResourceID,
+				ProjectID:  d.Finding.ProjectId,
+				Tag:        t.Tag,
+			}
+			for _, storedTag := range *storedResourceTags {
+				if t.Tag == storedTag.Tag {
+					resourceTag.ResourceTagID = storedTag.ResourceTagID
+					break
+				}
+			}
+			resourceTags = append(resourceTags, resourceTag)
 		}
 	}
 	if err := f.repository.BulkUpsertRecommendFinding(ctx, recommendFindings); err != nil {
