@@ -3,19 +3,21 @@ module github.com/ca-risken/core/src/finding
 go 1.17
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/aws/aws-xray-sdk-go v1.6.0
 	github.com/ca-risken/common/pkg/database v0.0.0-20211223025030-6bfdc45e906c
 	github.com/ca-risken/common/pkg/logging v0.0.0-20220113015330-0e8462d52b5b
 	github.com/ca-risken/common/pkg/profiler v0.0.0-20220304031727-c94e2c463b27
 	github.com/ca-risken/common/pkg/rpc v0.0.0-20220113015330-0e8462d52b5b
 	github.com/ca-risken/common/pkg/xray v0.0.0-20211122093906-df2c2b1a375a
-	github.com/ca-risken/core/proto/finding v0.0.0-20211126100009-48eb381d5d58
+	github.com/ca-risken/core/proto/finding v0.0.0-20220412093922-1f5c2ba990ad
 	github.com/gassara-kys/envconfig v1.4.4
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/stretchr/testify v1.7.0
 	github.com/vikyd/zero v0.0.0-20190921142904-0f738d0bc858
 	google.golang.org/grpc v1.42.0
+	gorm.io/driver/mysql v1.2.0
 	gorm.io/gorm v1.22.3
 )
 
@@ -50,5 +52,4 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/DataDog/dd-trace-go.v1 v1.36.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	gorm.io/driver/mysql v1.2.0 // indirect
 )

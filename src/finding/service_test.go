@@ -115,6 +115,10 @@ func (m *mockFindingRepository) ListFindingTag(ctx context.Context, param *findi
 	args := m.Called()
 	return args.Get(0).(*[]model.FindingTag), args.Error(1)
 }
+func (m *mockFindingRepository) ListFindingTagByFindingID(ctx context.Context, projectID uint32, findingID uint64) (*[]model.FindingTag, error) {
+	args := m.Called()
+	return args.Get(0).(*[]model.FindingTag), args.Error(1)
+}
 func (m *mockFindingRepository) ListFindingTagCount(ctx context.Context, param *finding.ListFindingTagRequest) (int64, error) {
 	args := m.Called()
 	return args.Get(0).(int64), args.Error(1)
@@ -144,6 +148,14 @@ func (m *mockFindingRepository) UntagFinding(context.Context, uint32, uint64) er
 	return args.Error(0)
 }
 func (m *mockFindingRepository) ClearScoreFinding(ctx context.Context, req *finding.ClearScoreRequest) error {
+	args := m.Called()
+	return args.Error(0)
+}
+func (m *mockFindingRepository) BulkUpsertFinding(ctx context.Context, data []*model.Finding) error {
+	args := m.Called()
+	return args.Error(0)
+}
+func (m *mockFindingRepository) BulkUpsertFindingTag(ctx context.Context, data []*model.FindingTag) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -178,6 +190,10 @@ func (m *mockFindingRepository) ListResourceTag(ctx context.Context, param *find
 	args := m.Called()
 	return args.Get(0).(*[]model.ResourceTag), args.Error(1)
 }
+func (m *mockFindingRepository) ListResourceTagByResourceID(ctx context.Context, projectID uint32, resourceID uint64) (*[]model.ResourceTag, error) {
+	args := m.Called()
+	return args.Get(0).(*[]model.ResourceTag), args.Error(1)
+}
 func (m *mockFindingRepository) ListResourceTagCount(ctx context.Context, param *finding.ListResourceTagRequest) (int64, error) {
 	args := m.Called()
 	return args.Get(0).(int64), args.Error(1)
@@ -203,6 +219,14 @@ func (m *mockFindingRepository) TagResource(context.Context, *model.ResourceTag)
 	return args.Get(0).(*model.ResourceTag), args.Error(1)
 }
 func (m *mockFindingRepository) UntagResource(context.Context, uint32, uint64) error {
+	args := m.Called()
+	return args.Error(0)
+}
+func (m *mockFindingRepository) BulkUpsertResource(ctx context.Context, data []*model.Resource) error {
+	args := m.Called()
+	return args.Error(0)
+}
+func (m *mockFindingRepository) BulkUpsertResourceTag(ctx context.Context, data []*model.ResourceTag) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -258,4 +282,16 @@ func (m *mockFindingRepository) UpsertRecommend(ctx context.Context, data *model
 func (m *mockFindingRepository) UpsertRecommendFinding(ctx context.Context, data *model.RecommendFinding) (*model.RecommendFinding, error) {
 	args := m.Called()
 	return args.Get(0).(*model.RecommendFinding), args.Error(1)
+}
+func (m *mockFindingRepository) GetRecommendByDataSourceType(ctx context.Context, dataSource, recommendType string) (*model.Recommend, error) {
+	args := m.Called()
+	return args.Get(0).(*model.Recommend), args.Error(1)
+}
+func (m *mockFindingRepository) BulkUpsertRecommend(ctx context.Context, data []*model.Recommend) error {
+	args := m.Called()
+	return args.Error(0)
+}
+func (m *mockFindingRepository) BulkUpsertRecommendFinding(ctx context.Context, data []*model.RecommendFinding) error {
+	args := m.Called()
+	return args.Error(0)
 }

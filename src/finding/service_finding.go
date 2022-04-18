@@ -123,32 +123,9 @@ func (f *findingService) PutFinding(ctx context.Context, req *finding.PutFinding
 	if err := req.Finding.Validate(); err != nil {
 		return nil, err
 	}
-	savedData, err := f.repository.GetFindingByDataSource(
-		ctx, req.Finding.ProjectId, req.Finding.DataSource, req.Finding.DataSourceId)
-	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
-	if err != nil && !noRecord {
-		return nil, err
-	}
-
-	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
-	var findingID uint64
-	if !noRecord {
-		findingID = savedData.FindingID
-	}
-	fs, err := f.getFindingSettingByResource(ctx, req.Finding.ProjectId, req.Finding.ResourceName)
+	data, err := f.getFindingDataForUpsert(ctx, req.Finding)
 	if err != nil {
 		return nil, err
-	}
-	data := &model.Finding{
-		FindingID:     findingID,
-		Description:   req.Finding.Description,
-		DataSource:    req.Finding.DataSource,
-		DataSourceID:  req.Finding.DataSourceId,
-		ResourceName:  req.Finding.ResourceName,
-		ProjectID:     req.Finding.ProjectId,
-		OriginalScore: req.Finding.OriginalScore,
-		Score:         calculateScore(req.Finding.OriginalScore, req.Finding.OriginalMaxScore, fs),
-		Data:          req.Finding.Data,
 	}
 
 	// Fiding upsert
@@ -267,24 +244,12 @@ func (f *findingService) TagFinding(ctx context.Context, req *finding.TagFinding
 		return nil, fmt.Errorf("Failed to GetFinding, finding_id=%d, err=%+v", req.Tag.FindingId, err)
 	}
 
-	savedData, err := f.repository.GetFindingTagByKey(ctx, req.ProjectId, req.Tag.FindingId, req.Tag.Tag)
-	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
-	if err != nil && !noRecord {
-		return nil, fmt.Errorf("Failed to GetFindingTagByKey, finding_id=%d, tag=%s, err=%+v", req.Tag.FindingId, req.Tag.Tag, err)
+	findingTag, err := f.getFindingTagForUpsert(ctx, req.ProjectId, req.Tag.FindingId, req.Tag.Tag)
+	if err != nil {
+		return nil, err
 	}
 
-	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
-	var findingTagID uint64
-	if !noRecord {
-		findingTagID = savedData.FindingTagID
-	}
-
-	registerd, err := f.repository.TagFinding(ctx, &model.FindingTag{
-		FindingTagID: findingTagID,
-		FindingID:    req.Tag.FindingId,
-		ProjectID:    req.ProjectId,
-		Tag:          req.Tag.Tag,
-	})
+	registerd, err := f.repository.TagFinding(ctx, findingTag)
 	if err != nil {
 		return nil, err
 	}
@@ -374,4 +339,56 @@ func calculateScore(score, maxScore float32, setting *findingSetting) float32 {
 		return 0.0
 	}
 	return calculated
+}
+
+func (f *findingService) getFindingDataForUpsert(ctx context.Context, req *finding.FindingForUpsert) (*model.Finding, error) {
+	storedData, err := f.repository.GetFindingByDataSource(
+		ctx, req.ProjectId, req.DataSource, req.DataSourceId)
+	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
+	if err != nil && !noRecord {
+		return nil, err
+	}
+
+	// Specify the ID in PK as much as possible to avoid unnecessary AUTO_INCREMENT.
+	// https://dev.mysql.com/doc/refman/5.6/ja/insert-on-duplicate.html
+	var findingID uint64
+	if !noRecord {
+		findingID = storedData.FindingID
+	}
+	fs, err := f.getFindingSettingByResource(ctx, req.ProjectId, req.ResourceName)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Finding{
+		FindingID:     findingID,
+		Description:   req.Description,
+		DataSource:    req.DataSource,
+		DataSourceID:  req.DataSourceId,
+		ResourceName:  req.ResourceName,
+		ProjectID:     req.ProjectId,
+		OriginalScore: req.OriginalScore,
+		Score:         calculateScore(req.OriginalScore, req.OriginalMaxScore, fs),
+		Data:          req.Data,
+	}, nil
+}
+
+func (f *findingService) getFindingTagForUpsert(ctx context.Context, projectID uint32, findingID uint64, tag string) (*model.FindingTag, error) {
+	storedData, err := f.repository.GetFindingTagByKey(ctx, projectID, findingID, tag)
+	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
+	if err != nil && !noRecord {
+		return nil, fmt.Errorf("Failed to GetFindingTagByKey, finding_id=%d, tag=%s, err=%+v", findingID, tag, err)
+	}
+
+	// Specify the ID in PK as much as possible to avoid unnecessary AUTO_INCREMENT.
+	// https://dev.mysql.com/doc/refman/5.6/ja/insert-on-duplicate.html
+	var findingTagID uint64
+	if !noRecord {
+		findingTagID = storedData.FindingTagID
+	}
+	return &model.FindingTag{
+		FindingTagID: findingTagID,
+		FindingID:    findingID,
+		ProjectID:    projectID,
+		Tag:          tag,
+	}, nil
 }
