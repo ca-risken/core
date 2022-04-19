@@ -1681,6 +1681,33 @@ func TestValidate_PutFindingBatchRequest(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "NG required project_id",
+			input: &PutFindingBatchRequest{
+				Finding: []*FindingBatchForUpsert{
+					{
+						Finding:   &FindingForUpsert{DataSource: "ds", DataSourceId: "1", ResourceName: "name", ProjectId: 1, OriginalScore: 1.0, OriginalMaxScore: 1.0},
+						Recommend: &RecommendForBatch{Type: "type"},
+						Tag:       []*FindingTagForBatch{{Tag: "tag"}},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG invalid project_id",
+			input: &PutFindingBatchRequest{
+				ProjectId: 999,
+				Finding: []*FindingBatchForUpsert{
+					{
+						Finding:   &FindingForUpsert{DataSource: "ds", DataSourceId: "1", ResourceName: "name", ProjectId: 1, OriginalScore: 1.0, OriginalMaxScore: 1.0},
+						Recommend: &RecommendForBatch{Type: "type"},
+						Tag:       []*FindingTagForBatch{{Tag: "tag"}},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
 			name: "NG finding under min",
 			input: &PutFindingBatchRequest{
 				ProjectId: 1,
@@ -1740,6 +1767,174 @@ func TestValidate_PutFindingBatchRequest(t *testing.T) {
 						Finding:   &FindingForUpsert{DataSource: "ds", DataSourceId: "1", ResourceName: "name", ProjectId: 1, OriginalScore: 1.0, OriginalMaxScore: 1.0},
 						Recommend: &RecommendForBatch{Type: "type"},
 						Tag:       []*FindingTagForBatch{{}},
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_ResourceTagForBatch(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *ResourceTagForBatch
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &ResourceTagForBatch{Tag: "tag"},
+		},
+		{
+			name:    "NG required tag",
+			input:   &ResourceTagForBatch{},
+			wantErr: true,
+		},
+		{
+			name:    "NG required tag(blank)",
+			input:   &ResourceTagForBatch{Tag: ""},
+			wantErr: true,
+		},
+		{
+			name:    "NG length type",
+			input:   &ResourceTagForBatch{Tag: len65string},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_PutResourceBatchRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *PutResourceBatchRequest
+		wantErr bool
+	}{
+		{
+			name: "OK",
+			input: &PutResourceBatchRequest{
+				ProjectId: 1,
+				Resource: []*ResourceBatchForUpsert{
+					{
+						Resource: &ResourceForUpsert{ResourceName: "name", ProjectId: 1},
+						Tag:      []*ResourceTagForBatch{{Tag: "tag"}},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "OK only resource",
+			input: &PutResourceBatchRequest{
+				ProjectId: 1,
+				Resource: []*ResourceBatchForUpsert{
+					{
+						Resource: &ResourceForUpsert{ResourceName: "name", ProjectId: 1},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "NG required resource",
+			input: &PutResourceBatchRequest{
+				ProjectId: 1,
+				Resource: []*ResourceBatchForUpsert{
+					{
+						Tag: []*ResourceTagForBatch{{Tag: "tag"}},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG required project_id",
+			input: &PutResourceBatchRequest{
+				Resource: []*ResourceBatchForUpsert{
+					{
+						Resource: &ResourceForUpsert{ResourceName: "name", ProjectId: 1},
+						Tag:      []*ResourceTagForBatch{{Tag: "tag"}},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG invalid project_id",
+			input: &PutResourceBatchRequest{
+				ProjectId: 999,
+				Resource: []*ResourceBatchForUpsert{
+					{
+						Resource: &ResourceForUpsert{ResourceName: "name", ProjectId: 1},
+						Tag:      []*ResourceTagForBatch{{Tag: "tag"}},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG resource under min",
+			input: &PutResourceBatchRequest{
+				ProjectId: 1,
+				Resource:  []*ResourceBatchForUpsert{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG resource over max",
+			input: &PutResourceBatchRequest{
+				ProjectId: 1,
+				Resource: []*ResourceBatchForUpsert{
+					{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, // 10
+					{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, // 20
+					{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, // 30
+					{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, // 40
+					{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, // 50
+					{},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG resource error",
+			input: &PutResourceBatchRequest{
+				ProjectId: 1,
+				Resource: []*ResourceBatchForUpsert{
+					{
+						Resource: &ResourceForUpsert{ProjectId: 1},
+						Tag:      []*ResourceTagForBatch{{Tag: "tag"}},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG tag error",
+			input: &PutResourceBatchRequest{
+				ProjectId: 1,
+				Resource: []*ResourceBatchForUpsert{
+					{
+						Resource: &ResourceForUpsert{ResourceName: "name", ProjectId: 1},
+						Tag:      []*ResourceTagForBatch{{}},
 					},
 				},
 			},
