@@ -118,21 +118,27 @@ func (f *findingService) PutFindingBatch(ctx context.Context, req *finding.PutFi
 		if err != nil {
 			return nil, err
 		}
+		findingTagMap := map[string]model.FindingTag{}
+		for _, t := range *storedFindingTags {
+			findingTagMap[t.Tag] = t
+		}
 		storedResourceTags, err := f.repository.ListResourceTagByResourceID(ctx, d.Finding.ProjectId, storedResourceID)
 		if err != nil {
 			return nil, err
 		}
+		resourceTagMap := map[string]model.ResourceTag{}
+		for _, t := range *storedResourceTags {
+			resourceTagMap[t.Tag] = t
+		}
+
 		for _, t := range d.Tag {
 			findingTag := &model.FindingTag{
 				FindingID: storedFindingID,
 				ProjectID: d.Finding.ProjectId,
 				Tag:       t.Tag,
 			}
-			for _, storedTag := range *storedFindingTags {
-				if t.Tag == storedTag.Tag {
-					findingTag.FindingTagID = storedTag.FindingTagID
-					break
-				}
+			if ft, ok := findingTagMap[findingTag.Tag]; ok {
+				findingTag.FindingTagID = ft.FindingTagID
 			}
 			findingTags = append(findingTags, findingTag)
 
@@ -141,11 +147,8 @@ func (f *findingService) PutFindingBatch(ctx context.Context, req *finding.PutFi
 				ProjectID:  d.Finding.ProjectId,
 				Tag:        t.Tag,
 			}
-			for _, storedTag := range *storedResourceTags {
-				if t.Tag == storedTag.Tag {
-					resourceTag.ResourceTagID = storedTag.ResourceTagID
-					break
-				}
+			if rt, ok := resourceTagMap[resourceTag.Tag]; ok {
+				resourceTag.ResourceTagID = rt.ResourceTagID
 			}
 			resourceTags = append(resourceTags, resourceTag)
 		}
@@ -166,6 +169,59 @@ func (f *findingService) PutFindingBatch(ctx context.Context, req *finding.PutFi
 func (f *findingService) PutResourceBatch(ctx context.Context, req *finding.PutResourceBatchRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
+	}
+	// Base entity
+	var resources []*model.Resource
+	resourceIDCache := map[int]uint64{}
+	for idx, d := range req.Resource {
+		r, err := f.getResourceForUpsert(ctx, d.Resource.ProjectId, d.Resource.ResourceName)
+		if err != nil {
+			return nil, err
+		}
+		if !zero.IsZeroVal(r.ResourceID) {
+			resourceIDCache[idx] = r.ResourceID
+		}
+		resources = append(resources, r)
+	}
+	if err := f.repository.BulkUpsertResource(ctx, resources); err != nil {
+		return nil, fmt.Errorf("Failed to BulkUpsertResource, err=%+w", err)
+	}
+
+	// Sub entity
+	var resourceTags []*model.ResourceTag
+	for idx, d := range req.Resource {
+		var storedResourceID uint64
+		if id, ok := resourceIDCache[idx]; ok {
+			storedResourceID = id
+		} else {
+			newResource, err := f.repository.GetResourceByName(ctx, d.Resource.ProjectId, d.Resource.ResourceName)
+			if err != nil {
+				return nil, err
+			}
+			storedResourceID = newResource.ResourceID
+		}
+		storedResourceTags, err := f.repository.ListResourceTagByResourceID(ctx, d.Resource.ProjectId, storedResourceID)
+		if err != nil {
+			return nil, err
+		}
+		resourceTagMap := map[string]model.ResourceTag{}
+		for _, t := range *storedResourceTags {
+			resourceTagMap[t.Tag] = t
+		}
+		for _, t := range d.Tag {
+			resourceTag := &model.ResourceTag{
+				ResourceID: storedResourceID,
+				ProjectID:  d.Resource.ProjectId,
+				Tag:        t.Tag,
+			}
+			if rt, ok := resourceTagMap[resourceTag.Tag]; ok {
+				resourceTag.ResourceTagID = rt.ResourceTagID
+			}
+			resourceTags = append(resourceTags, resourceTag)
+		}
+	}
+	if err := f.repository.BulkUpsertResourceTag(ctx, resourceTags); err != nil {
+		return nil, fmt.Errorf("Failed to BulkUpsertResourceTag, err=%+w", err)
 	}
 	appLogger.Infof("Succeded PutResourceBatch, project_id=%d, resources=%d", req.ProjectId, len(req.Resource))
 	return &empty.Empty{}, nil
