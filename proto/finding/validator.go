@@ -7,6 +7,13 @@ import (
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
+const (
+	// PutFindingBatchMaxLength is the max number of `finding` data per request.
+	PutFindingBatchMaxLength = 50
+	// PutResourceBatchMaxLength is the max number of `resource` data per request.
+	PutResourceBatchMaxLength = 50
+)
+
 // Validate ListFindingRequest
 func (l *ListFindingRequest) Validate() error {
 	return validation.ValidateStruct(l,
@@ -66,8 +73,11 @@ func (p *PutFindingBatchRequest) Validate() error {
 	if validation.IsEmpty(p.Finding) {
 		return errors.New("Required finding parameter")
 	}
+	if validation.IsEmpty(p.ProjectId) {
+		return errors.New("Required project_id parameter")
+	}
 	if err := validation.ValidateStruct(p,
-		validation.Field(&p.Finding, validation.Length(1, 50))); err != nil {
+		validation.Field(&p.Finding, validation.Length(1, PutFindingBatchMaxLength))); err != nil {
 		return err
 	}
 	for _, f := range p.Finding {
@@ -193,6 +203,35 @@ func (p *PutResourceRequest) Validate() error {
 		return err
 	}
 	return p.Resource.Validate()
+}
+
+// Validate PutResourceBatchRequest
+func (p *PutResourceBatchRequest) Validate() error {
+	if validation.IsEmpty(p.Resource) {
+		return errors.New("Required reosurce parameter")
+	}
+	if validation.IsEmpty(p.ProjectId) {
+		return errors.New("Required project_id parameter")
+	}
+	if err := validation.ValidateStruct(p,
+		validation.Field(&p.Resource, validation.Length(1, PutResourceBatchMaxLength))); err != nil {
+		return err
+	}
+	for _, r := range p.Resource {
+		prr := &PutResourceRequest{
+			ProjectId: p.ProjectId,
+			Resource:  r.Resource,
+		}
+		if err := prr.Validate(); err != nil {
+			return err
+		}
+		for _, t := range r.Tag {
+			if err := t.Validate(); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // Validate DeleteResourceRequest
@@ -403,5 +442,12 @@ func (r *RecommendForBatch) Validate() error {
 func (f *FindingTagForBatch) Validate() error {
 	return validation.ValidateStruct(f,
 		validation.Field(&f.Tag, validation.Required, validation.Length(0, 64)),
+	)
+}
+
+// Validate for ResourceTagForBatch
+func (r *ResourceTagForBatch) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.Tag, validation.Required, validation.Length(0, 64)),
 	)
 }

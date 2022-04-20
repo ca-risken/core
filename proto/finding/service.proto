@@ -26,6 +26,7 @@ service FindingService {
   rpc ListResource(ListResourceRequest) returns (ListResourceResponse);
   rpc GetResource(GetResourceRequest) returns (GetResourceResponse);
   rpc PutResource(PutResourceRequest) returns (PutResourceResponse);
+  rpc PutResourceBatch(PutResourceBatchRequest) returns (google.protobuf.Empty);
   rpc DeleteResource(DeleteResourceRequest) returns (google.protobuf.Empty);
   rpc ListResourceTag(ListResourceTagRequest) returns (ListResourceTagResponse);
   rpc ListResourceTagName(ListResourceTagNameRequest)
@@ -204,6 +205,11 @@ message PutResourceRequest {
 }
 
 message PutResourceResponse { Resource resource = 1; }
+
+message PutResourceBatchRequest {
+  uint32 project_id = 1;
+  repeated ResourceBatchForUpsert resource = 2;
+}
 
 message DeleteResourceRequest {
   uint32 project_id = 1;

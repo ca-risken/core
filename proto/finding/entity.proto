@@ -76,6 +76,12 @@ message ResourceForUpsert {
   uint32 project_id = 2;
 }
 
+// ResourceBatchForUpsert
+message ResourceBatchForUpsert {
+  ResourceForUpsert resource = 1;
+  repeated ResourceTagForBatch tag = 2;
+}
+
 // ResourceTag
 message ResourceTag {
   uint64 resource_tag_id = 1;
@@ -164,3 +170,6 @@ message RecommendForBatch {
 
 // FindingTagForBatch
 message FindingTagForBatch { string tag = 1; }
+
+// ResourceTagForBatch
+message ResourceTagForBatch { string tag = 1; }
