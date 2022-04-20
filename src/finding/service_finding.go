@@ -9,8 +9,8 @@ import (
 
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/src/finding/model"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
 )
 

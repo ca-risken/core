@@ -190,3 +190,110 @@ func TestPutFindingBatch(t *testing.T) {
 		})
 	}
 }
+
+func TestPutResourceBatch(t *testing.T) {
+	var ctx context.Context
+	mockDB := mockFindingRepository{}
+	svc := findingService{repository: &mockDB}
+	type mockResp struct {
+		GetResourceByNameCall bool
+		GetResourceByNameResp *model.Resource
+		GetResourceByNameErr  error
+
+		BulkUpsertResourceCall bool
+		BulkUpsertResourceErr  error
+
+		ListResourceTagByResourceIDCall bool
+		ListResourceTagByResourceIDResp *[]model.ResourceTag
+		ListResourceTagByResourceIDErr  error
+
+		BulkUpsertResourceTagCall bool
+		BulkUpsertResourceTagErr  error
+	}
+	cases := []struct {
+		name    string
+		input   *finding.PutResourceBatchRequest
+		wantErr bool
+		mock    *mockResp
+	}{
+		{
+			name: "OK",
+			input: &finding.PutResourceBatchRequest{ProjectId: 1, Resource: []*finding.ResourceBatchForUpsert{
+				{
+					Resource: &finding.ResourceForUpsert{ProjectId: 1, ResourceName: "r"},
+					Tag:      []*finding.ResourceTagForBatch{{Tag: "tag1"}, {Tag: "tag2"}},
+				},
+			}},
+			wantErr: false,
+			mock: &mockResp{
+				GetResourceByNameCall:  true,
+				GetResourceByNameResp:  &model.Resource{ResourceID: 1},
+				BulkUpsertResourceCall: true,
+
+				ListResourceTagByResourceIDCall: true,
+				ListResourceTagByResourceIDResp: &[]model.ResourceTag{{ResourceTagID: 1, Tag: "tag1"}, {ResourceTagID: 2, Tag: "tag2"}},
+				BulkUpsertResourceTagCall:       true,
+			},
+		},
+		{
+			name: "OK/No tags",
+			input: &finding.PutResourceBatchRequest{ProjectId: 1, Resource: []*finding.ResourceBatchForUpsert{
+				{
+					Resource: &finding.ResourceForUpsert{ProjectId: 1, ResourceName: "r"},
+				},
+			}},
+			wantErr: false,
+			mock: &mockResp{
+				GetResourceByNameCall: true,
+				GetResourceByNameResp: &model.Resource{ResourceID: 1},
+
+				BulkUpsertResourceCall:    true,
+				BulkUpsertResourceTagCall: true,
+			},
+		},
+		{
+			name: "NG/Invalid request",
+			input: &finding.PutResourceBatchRequest{ProjectId: 999, Resource: []*finding.ResourceBatchForUpsert{
+				{
+					Resource: &finding.ResourceForUpsert{ProjectId: 1, ResourceName: "r"},
+				},
+			}},
+			wantErr: true,
+			mock:    &mockResp{},
+		},
+		{
+			name: "NG/DB error",
+			input: &finding.PutResourceBatchRequest{ProjectId: 1, Resource: []*finding.ResourceBatchForUpsert{
+				{
+					Resource: &finding.ResourceForUpsert{ProjectId: 1, ResourceName: "r"},
+				},
+			}},
+			wantErr: true,
+			mock: &mockResp{
+				GetResourceByNameCall: true,
+				GetResourceByNameErr:  errors.New("DB error"),
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if c.mock.GetResourceByNameCall {
+				mockDB.On("GetResourceByName").Return(c.mock.GetResourceByNameResp, c.mock.GetResourceByNameErr).Once()
+			}
+			if c.mock.BulkUpsertResourceCall {
+				mockDB.On("BulkUpsertResource").Return(c.mock.BulkUpsertResourceErr).Once()
+			}
+			if c.mock.ListResourceTagByResourceIDCall {
+				mockDB.On("ListResourceTagByResourceID").Return(c.mock.ListResourceTagByResourceIDResp, c.mock.ListResourceTagByResourceIDErr)
+			}
+			if c.mock.BulkUpsertResourceTagCall {
+				mockDB.On("BulkUpsertResourceTag").Return(c.mock.BulkUpsertResourceTagErr).Once()
+			}
+
+			_, err := svc.PutResourceBatch(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
+}
