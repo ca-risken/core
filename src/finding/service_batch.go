@@ -6,8 +6,8 @@ import (
 
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/src/finding/model"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
 func (f *findingService) PutFindingBatch(ctx context.Context, req *finding.PutFindingBatchRequest) (*empty.Empty, error) {
@@ -160,5 +160,13 @@ func (f *findingService) PutFindingBatch(ctx context.Context, req *finding.PutFi
 		return nil, fmt.Errorf("Failed to BulkUpsertResourceTag, err=%+w", err)
 	}
 	appLogger.Infof("Succeded PutFindingBatch, project_id=%d, findings=%d", req.ProjectId, len(req.Finding))
+	return &empty.Empty{}, nil
+}
+
+func (f *findingService) PutResourceBatch(ctx context.Context, req *finding.PutResourceBatchRequest) (*empty.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	appLogger.Infof("Succeded PutResourceBatch, project_id=%d, resources=%d", req.ProjectId, len(req.Resource))
 	return &empty.Empty{}, nil
 }
