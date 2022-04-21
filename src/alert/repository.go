@@ -4,15 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	mimosasql "github.com/ca-risken/common/pkg/database/sql"
 	"github.com/ca-risken/core/src/alert/model"
-	mysqldriver "github.com/go-sql-driver/mysql"
-	sqltrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/database/sql"
-	gormtrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/gorm.io/gorm.v1"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-	"gorm.io/gorm/schema"
-	"time"
 )
 
 type alertRepository interface {
@@ -98,24 +92,10 @@ func initDB(conf *DBConfig, isMaster bool) *gorm.DB {
 
 	dsn := fmt.Sprintf("%s:%s@tcp([%s]:%d)/%s?charset=utf8mb4&interpolateParams=true&parseTime=true&loc=Local",
 		user, pass, host, conf.Port, conf.Schema)
-	sqltrace.Register("mysql", &mysqldriver.MySQLDriver{}, sqltrace.WithAnalytics(true))
-	dbConn, err := sqltrace.Open("mysql", dsn)
-	if err != nil {
-		appLogger.Fatalf("Failed to open DB connection. err: %+v", err)
-	}
-	dbConn.SetMaxOpenConns(conf.MaxConnection)
-	dbConn.SetConnMaxLifetime(time.Duration(conf.MaxConnection/2) * time.Second)
-
-	db, err := gormtrace.Open(mysql.New(mysql.Config{
-		Conn: dbConn,
-	}), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
+	db, err := mimosasql.Open(dsn, conf.LogMode, conf.MaxConnection)
 	if err != nil {
 		appLogger.Fatalf("Failed to open DB. isMaster: %t, err: %+v", isMaster, err)
 	}
-	if conf.LogMode {
-		db.Logger.LogMode(logger.Info)
-	}
-
 	appLogger.Infof("Connected to Database. isMaster: %t", isMaster)
 	return db
 }
