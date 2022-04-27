@@ -2,9 +2,9 @@ version: 0.2
 
 env:
   variables:
-    PRIVATE_IMAGE_PREFIX: 'risken-core'
+    PRIVATE_IMAGE_NAME: 'risken-core'
     PUBLIC_REGISTRY: 'public.ecr.aws/risken'
-    PUBLIC_IMAGE_PREFIX: 'core'
+    PUBLIC_IMAGE_NAME: 'core'
   parameter-store:
     GITHUB_USER: '/build/GITHUB_USER'
     GITHUB_TOKEN: '/build/GITHUB_TOKEN'
@@ -30,11 +30,11 @@ phases:
     commands:
       - echo Build gateway started on `date`
       - echo pull images...
-      - make pull-image -j IMAGE_PREFIX=${PRIVATE_IMAGE_PREFIX} IMAGE_REGISTRY=${PRIVATE_REGISTRY} IMAGE_TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION}
+      - make pull-image -j IMAGE_NAME=${PRIVATE_IMAGE_NAME} IMAGE_REGISTRY=${PRIVATE_REGISTRY} IMAGE_TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION}
 
       - echo tag images...
-      - SOURCE_IMAGE_PREFIX=${PRIVATE_REGISTRY}/${PRIVATE_IMAGE_PREFIX}
-      - make tag-image -j SOURCE_IMAGE_PREFIX=${SOURCE_IMAGE_PREFIX} SOURCE_IMAGE_TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION} IMAGE_REGISTRY=${PUBLIC_REGISTRY} IMAGE_TAG=${IMAGE_TAG}
+      - SOURCE_IMAGE_NAME=${PRIVATE_REGISTRY}/${PRIVATE_IMAGE_NAME}
+      - make tag-image -j SOURCE_IMAGE_NAME=${SOURCE_IMAGE_NAME} SOURCE_IMAGE_TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION} IMAGE_REGISTRY=${PUBLIC_REGISTRY} IMAGE_TAG=${IMAGE_TAG}
 
   post_build:
     commands:
@@ -44,4 +44,4 @@ phases:
 
       - echo Build completed on `date`
       - echo Pushing the Docker image...
-      - make push-image -j IMAGE_PREFIX=${PUBLIC_IMAGE_PREFIX} IMAGE_REGISTRY=${PUBLIC_REGISTRY} IMAGE_TAG=${IMAGE_TAG}
+      - make push-image -j IMAGE_NAME=${PUBLIC_IMAGE_NAME} IMAGE_REGISTRY=${PUBLIC_REGISTRY} IMAGE_TAG=${IMAGE_TAG}

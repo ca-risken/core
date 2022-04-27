@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    IMAGE_PREFIX: "risken-core"
+    IMAGE_NAME: "risken-core"
   parameter-store:
     GITHUB_USER: "/build/GITHUB_USER"
     GITHUB_TOKEN: "/build/GITHUB_TOKEN"
@@ -36,15 +36,15 @@ phases:
           echo "$DOCKER_TOKEN" | docker login -u $DOCKER_USER --password-stdin
         fi
 
-      - make go-test -j
+      - make test -j
   build:
     commands:
       - echo Build gateway started on `date`
       - echo Pushing the Docker images...
-      - make build-ci -j BUILD_OPT="${BUILD_OPT}" IMAGE_PREFIX=${IMAGE_PREFIX} IMAGE_TAG=${TAG} IMAGE_REGISTRY=${REGISTRY}
+      - make build-ci -j BUILD_OPT="${BUILD_OPT}" IMAGE_NAME=${IMAGE_NAME} IMAGE_TAG=${TAG} IMAGE_REGISTRY=${REGISTRY}
 
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
-      - make push-image -j IMAGE_PREFIX=${IMAGE_PREFIX} IMAGE_TAG=${TAG} IMAGE_REGISTRY=${REGISTRY}
+      - make push-image -j IMAGE_NAME=${IMAGE_NAME} IMAGE_TAG=${TAG} IMAGE_REGISTRY=${REGISTRY}
