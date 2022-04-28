@@ -22,7 +22,6 @@ phases:
       - TAG=$(git rev-parse --short HEAD)_${OS}_${ARCH}
       - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
       - REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
-      - AWS_XRAY_SDK_DISABLED=TRUE
       - sh codebuild/multi-arch/install-go.sh
       - go version
 
