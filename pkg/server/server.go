@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/ca-risken/common/pkg/logging"
@@ -56,7 +59,7 @@ func NewConfig(maxAnalyzeAPICall int64, notificationAlertURL string) Config {
 	}
 }
 
-func (s *Server) Run(ctx context.Context) error {
+func (s *Server) Run() error {
 	clientAddr := fmt.Sprintf("localhost:%s", s.port)
 	fc := s.newFindingClient(clientAddr)
 	isvc := iamserver.NewIAMService(s.db, fc)
@@ -96,6 +99,9 @@ func (s *Server) Run(ctx context.Context) error {
 			errChan <- fmt.Errorf("failed to serve: %w", err)
 		}
 	}()
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	select {
 	case err := <-errChan:
