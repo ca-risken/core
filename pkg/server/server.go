@@ -56,7 +56,7 @@ func NewConfig(maxAnalyzeAPICall int64, notificationAlertURL string) Config {
 	}
 }
 
-func (s *Server) Run() error {
+func (s *Server) Run(ctx context.Context) error {
 	clientAddr := fmt.Sprintf("localhost:%s", s.port)
 	fc := s.newFindingClient(clientAddr)
 	isvc := iamserver.NewIAMService(s.db, fc)
@@ -90,8 +90,19 @@ func (s *Server) Run() error {
 		return fmt.Errorf("failed to listen: %w", err)
 	}
 
-	if err := server.Serve(l); err != nil {
-		return fmt.Errorf("failed to serve: %w", err)
+	errChan := make(chan error)
+	go func() {
+		if err := server.Serve(l); err != nil && err != grpc.ErrServerStopped {
+			errChan <- fmt.Errorf("failed to serve: %w", err)
+		}
+	}()
+
+	select {
+	case err := <-errChan:
+		return err
+	case <-ctx.Done():
+		s.logger.Info("Shutdown gRPC server...")
+		server.GracefulStop()
 	}
 
 	return nil

@@ -1,7 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/common/pkg/profiler"
@@ -93,7 +97,10 @@ func main() {
 	c := server.NewConfig(conf.MaxAnalyzeAPICall, conf.NotificationAlertURL)
 	server := server.NewServer("0.0.0.0", conf.Port, db, logger, c)
 
-	err = server.Run()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	err = server.Run(ctx)
 	if err != nil {
 		logger.Fatalf("failed to run server: %w", err)
 	}
