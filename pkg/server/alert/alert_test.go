@@ -898,6 +898,10 @@ func TestDeleteAlertCondition(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB.On("ListAlertCondRule").Return(&[]model.AlertCondRule{{AlertConditionID: 1}}, nil)
+			mockDB.On("DeleteAlertCondRule").Return(c.mockErr).Once()
+			mockDB.On("ListAlertCondNotification").Return(&[]model.AlertCondNotification{{AlertConditionID: 1}}, nil)
+			mockDB.On("DeleteAlertCondNotification").Return(c.mockErr).Once()
 			mockDB.On("DeleteAlertCondition").Return(c.mockErr).Once()
 			_, err := svc.DeleteAlertCondition(ctx, c.input)
 			if err != nil && !c.wantErr {

@@ -87,7 +87,25 @@ func (a *AlertService) DeleteAlertCondition(ctx context.Context, req *alert.Dele
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	err := a.repository.DeleteAlertCondition(ctx, req.ProjectId, req.AlertConditionId)
+	alertCondRules, err := a.repository.ListAlertCondRule(ctx, req.ProjectId, req.AlertConditionId, 0, 0, time.Now().Unix())
+	if err != nil {
+		return nil, err
+	}
+	for _, acr := range *alertCondRules {
+		if err = a.repository.DeleteAlertCondRule(ctx, acr.ProjectID, acr.AlertConditionID, acr.AlertRuleID); err != nil {
+			return nil, err
+		}
+	}
+	alertCondNotifications, err := a.repository.ListAlertCondNotification(ctx, req.ProjectId, req.AlertConditionId, 0, 0, time.Now().Unix())
+	if err != nil {
+		return nil, err
+	}
+	for _, acn := range *alertCondNotifications {
+		if err = a.repository.DeleteAlertCondNotification(ctx, acn.ProjectID, acn.AlertConditionID, acn.NotificationID); err != nil {
+			return nil, err
+		}
+	}
+	err = a.repository.DeleteAlertCondition(ctx, req.ProjectId, req.AlertConditionId)
 	if err != nil {
 		return nil, err
 	}
