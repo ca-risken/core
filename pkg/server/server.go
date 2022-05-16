@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/ca-risken/common/pkg/logging"
@@ -90,8 +93,22 @@ func (s *Server) Run() error {
 		return fmt.Errorf("failed to listen: %w", err)
 	}
 
-	if err := server.Serve(l); err != nil {
-		return fmt.Errorf("failed to serve: %w", err)
+	errChan := make(chan error)
+	go func() {
+		if err := server.Serve(l); err != nil && err != grpc.ErrServerStopped {
+			errChan <- fmt.Errorf("failed to serve: %w", err)
+		}
+	}()
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	select {
+	case err := <-errChan:
+		return err
+	case <-ctx.Done():
+		s.logger.Info("Shutdown gRPC server...")
+		server.GracefulStop()
 	}
 
 	return nil
