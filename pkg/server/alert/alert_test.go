@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/ca-risken/core/pkg/db/mocks"
-	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/proto/alert"
 	"gorm.io/gorm"
 )
 
@@ -898,6 +898,10 @@ func TestDeleteAlertCondition(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB.On("ListAlertCondRule").Return(&[]model.AlertCondRule{{AlertConditionID: 1}}, nil)
+			mockDB.On("DeleteAlertCondRule").Return(c.mockErr).Once()
+			mockDB.On("ListAlertCondNotification").Return(&[]model.AlertCondNotification{{AlertConditionID: 1}}, nil)
+			mockDB.On("DeleteAlertCondNotification").Return(c.mockErr).Once()
 			mockDB.On("DeleteAlertCondition").Return(c.mockErr).Once()
 			_, err := svc.DeleteAlertCondition(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -1118,6 +1122,8 @@ func TestDeleteAlertRule(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB.On("ListAlertCondRule").Return(&[]model.AlertCondRule{{AlertConditionID: 1}}, nil)
+			mockDB.On("DeleteAlertCondRule").Return(nil)
 			mockDB.On("DeleteAlertRule").Return(c.mockErr).Once()
 			_, err := svc.DeleteAlertRule(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -1618,6 +1624,8 @@ func TestDeleteNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB.On("ListAlertCondNotification").Return(&[]model.AlertCondNotification{{ProjectID: 1, AlertConditionID: 1, NotificationID: 1}}, nil)
+			mockDB.On("DeleteAlertCondNotification").Return(nil)
 			mockDB.On("DeleteNotification").Return(c.mockErr).Once()
 			_, err := svc.DeleteNotification(ctx, c.input)
 			if err != nil && !c.wantErr {
