@@ -5,10 +5,10 @@ import (
 	"reflect"
 	"testing"
 	"time"
- 
+
 	"github.com/ca-risken/core/pkg/db/mocks"
-	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/proto/finding"
 	"gorm.io/gorm"
 )
 

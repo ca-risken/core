@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/ca-risken/common/pkg/database v0.0.0-20220426050416-a654045b9fa5
-	github.com/ca-risken/common/pkg/logging v0.0.0-20220113015330-0e8462d52b5b
+	github.com/ca-risken/common/pkg/logging v0.0.0-20220517105456-de734080357a
 	github.com/ca-risken/common/pkg/profiler v0.0.0-20220426050416-a654045b9fa5
 	github.com/ca-risken/common/pkg/rpc v0.0.0-20220426050416-a654045b9fa5
 	github.com/ca-risken/common/pkg/tracer v0.0.0-20220426050416-a654045b9fa5

@@ -9,12 +9,12 @@ import (
 
 	"github.com/ca-risken/core/pkg/db/mocks"
 
+	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
 	findingmock "github.com/ca-risken/core/proto/finding/mocks"
 	"github.com/ca-risken/core/proto/project"
 	projectmock "github.com/ca-risken/core/proto/project/mocks"
-	"github.com/ca-risken/core/pkg/model"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jarcoal/httpmock"
 	"gorm.io/gorm"
@@ -151,7 +151,7 @@ func TestSendSlackNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := sendSlackNotification("unused", c.notifySetting, c.alert, c.project, &[]model.AlertRule{})
+			got := sendSlackNotification(context.Background(), "unused", c.notifySetting, c.alert, c.project, &[]model.AlertRule{})
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
 			}

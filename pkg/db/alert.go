@@ -86,11 +86,11 @@ func (c *Client) GetAlert(ctx context.Context, projectID uint32, alertID uint32)
 
 func (c *Client) UpsertAlert(ctx context.Context, data *model.Alert) (*model.Alert, error) {
 	var retData model.Alert
-	c.logger.Info("upsertAlert:", data)
+	c.logger.Info(ctx, "upsertAlert:", data)
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_id = ?", data.ProjectID, data.AlertID).Assign(data).FirstOrCreate(&retData).Error; err != nil {
 		return nil, err
 	}
-	c.logger.Info(retData)
+	c.logger.Info(ctx, retData)
 	return &retData, nil
 }
 

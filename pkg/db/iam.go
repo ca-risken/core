@@ -663,7 +663,7 @@ func (c *Client) userExists(ctx context.Context, userID uint32) bool {
 		return false
 
 	} else if err != nil {
-		c.logger.Errorf("[userExists]DB error: user_id=%d", userID)
+		c.logger.Errorf(ctx, "[userExists]DB error: user_id=%d", userID)
 		return false
 	}
 	return true
@@ -673,7 +673,7 @@ func (c *Client) roleExists(ctx context.Context, projectID, roleID uint32) bool 
 	if _, err := c.GetRole(ctx, projectID, roleID); errors.Is(err, gorm.ErrRecordNotFound) {
 		return false
 	} else if err != nil {
-		c.logger.Errorf("[roleExists]DB error: project_id=%d, role_id=%d", projectID, roleID)
+		c.logger.Errorf(ctx, "[roleExists]DB error: project_id=%d, role_id=%d", projectID, roleID)
 		return false
 	}
 	return true
@@ -683,7 +683,7 @@ func (c *Client) policyExists(ctx context.Context, projectID, policyID uint32) b
 	if _, err := c.GetPolicy(ctx, projectID, policyID); errors.Is(err, gorm.ErrRecordNotFound) {
 		return false
 	} else if err != nil {
-		c.logger.Errorf("[policyExists]DB error: project_id=%d, policy_id=%d", projectID, policyID)
+		c.logger.Errorf(ctx, "[policyExists]DB error: project_id=%d, policy_id=%d", projectID, policyID)
 		return false
 	}
 	return true
@@ -693,7 +693,7 @@ func (c *Client) accessTokenExists(ctx context.Context, projectID, accessTokenID
 	if _, err := c.GetAccessTokenByID(ctx, projectID, accessTokenID); errors.Is(err, gorm.ErrRecordNotFound) {
 		return false
 	} else if err != nil {
-		c.logger.Errorf("[accessTokenExists]DB error: project_id=%d, access_token_id=%d", projectID, accessTokenID)
+		c.logger.Errorf(ctx, "[accessTokenExists]DB error: project_id=%d, access_token_id=%d", projectID, accessTokenID)
 		return false
 	}
 	return true

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"fmt"
 
 	"gorm.io/driver/mysql"
@@ -18,17 +19,18 @@ type Client struct {
 }
 
 func NewClient(conf *Config, l logging.Logger) *Client {
+	ctx := context.Background()
 	m, err := connect(conf, true)
 	if err != nil {
-		l.Fatalf("failed to connect database: %w", err)
+		l.Fatalf(ctx, "failed to connect database: %w", err)
 	}
-	l.Infof("Connected to Database. isMaster: %t", true)
+	l.Infof(ctx, "Connected to Database. isMaster: %t", true)
 
 	s, err := connect(conf, false)
 	if err != nil {
-		l.Fatalf("failed to connect database: %w", err)
+		l.Fatalf(ctx, "failed to connect database: %w", err)
 	}
-	l.Infof("Connected to Database. isMaster: %t", false)
+	l.Infof(ctx, "Connected to Database. isMaster: %t", false)
 
 	return &Client{
 		Master: m,
