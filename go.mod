@@ -3,6 +3,7 @@ module github.com/ca-risken/core
 go 1.17
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/ca-risken/common/pkg/database v0.0.0-20220426050416-a654045b9fa5
 	github.com/ca-risken/common/pkg/logging v0.0.0-20220113015330-0e8462d52b5b
 	github.com/ca-risken/common/pkg/profiler v0.0.0-20220426050416-a654045b9fa5
@@ -20,6 +21,7 @@ require (
 	google.golang.org/grpc v1.46.0
 	google.golang.org/protobuf v1.28.0
 	gopkg.in/DataDog/dd-trace-go.v1 v1.38.0
+	gorm.io/driver/mysql v1.2.0
 	gorm.io/gorm v1.22.3
 )
 
@@ -57,5 +59,4 @@ require (
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/genproto v0.0.0-20220414192740-2d67ff6cf2b4 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	gorm.io/driver/mysql v1.2.0 // indirect
 )

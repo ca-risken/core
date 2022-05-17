@@ -3,8 +3,10 @@ package db
 import (
 	"fmt"
 
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	mimosasql "github.com/ca-risken/common/pkg/database/sql"
 	"github.com/ca-risken/common/pkg/logging"
 )
@@ -33,6 +35,27 @@ func NewClient(conf *Config, l logging.Logger) *Client {
 		Slave:  s,
 		logger: l,
 	}
+}
+
+func newMockClient() (*Client, sqlmock.Sqlmock, error) {
+	sqlDB, mock, err := sqlmock.New()
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to open mock sql db, error: %+w", err)
+	}
+	if sqlDB == nil {
+		return nil, nil, fmt.Errorf("failed to create mock db, db: %+v, mock: %+v", sqlDB, mock)
+	}
+	gormDB, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      sqlDB,
+		SkipInitializeWithVersion: true,
+	}), &gorm.Config{})
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to open gorm, error: %+w", err)
+	}
+	return &Client{
+		Master: gormDB,
+		Slave:  gormDB,
+	}, mock, nil
 }
 
 type Config struct {
