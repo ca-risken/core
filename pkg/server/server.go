@@ -102,7 +102,7 @@ func (s *Server) Run() error {
 	errChan := make(chan error)
 	go func() {
 		if err := server.Serve(l); err != nil && err != grpc.ErrServerStopped {
-			s.logger.Warnf("failed to serve grpc: %w", err)
+			s.logger.Errorf("failed to serve grpc: %w", err)
 			errChan <- err
 		}
 	}()
@@ -119,7 +119,7 @@ func (s *Server) Run() error {
 
 	go func() {
 		if err := http.ListenAndServe(fmt.Sprintf("%s:3000", s.host), mux); err != http.ErrServerClosed {
-			s.logger.Warnf("failed to start http server: %w", err)
+			s.logger.Errorf("failed to start http server: %w", err)
 			errChan <- err
 		}
 	}()
