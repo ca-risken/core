@@ -78,8 +78,8 @@ func (s *Server) Run() error {
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(
 			grpcmiddleware.ChainUnaryServer(
-				mimosarpc.LoggingUnaryServerInterceptor(s.logger),
-				grpctrace.UnaryServerInterceptor())))
+				grpctrace.UnaryServerInterceptor(),
+				mimosarpc.LoggingUnaryServerInterceptor(s.logger))))
 	iam.RegisterIAMServiceServer(server, isvc)
 	report.RegisterReportServiceServer(server, rsvc)
 	alert.RegisterAlertServiceServer(server, asvc)
