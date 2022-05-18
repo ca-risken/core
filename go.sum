@@ -99,13 +99,11 @@ github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869/go.mod h1:Ekp36dR
 github.com/bradfitz/gomemcache v0.0.0-20220106215444-fb4bf637b56d/go.mod h1:H0wQNHz2YrLsuXOZozoeDmnHXkNCRmMW0gwFWDfEZDA=
 github.com/ca-risken/common/pkg/database v0.0.0-20220426050416-a654045b9fa5 h1:57mAN6PY5nCUxtAt/2LgmRVPDMQkzNu1hH0Go9h697s=
 github.com/ca-risken/common/pkg/database v0.0.0-20220426050416-a654045b9fa5/go.mod h1:n1VKFIhMlKCmSzc7Izgz+aH24ihR3K6yPDaNrTEFEGo=
-github.com/ca-risken/common/pkg/logging v0.0.0-20220113014249-f285e209578f/go.mod h1:dmZZ5/wkGbsmAMbhuC7YK6uJOMAlS4OndoM0DQyPhi8=
+github.com/ca-risken/common/pkg/logging v0.0.0-20220517105456-de734080357a/go.mod h1:iqLbvDuf708TWjF8RO5qw6Nx1e3R0/UEHZ8tE/VEPjA=
 github.com/ca-risken/common/pkg/logging v0.0.0-20220518032134-ad443b601efd h1:YXyIsRQNxpjNT3QaqYSU/RW7nA8HWh66EIE69yc0w/I=
 github.com/ca-risken/common/pkg/logging v0.0.0-20220518032134-ad443b601efd/go.mod h1:iqLbvDuf708TWjF8RO5qw6Nx1e3R0/UEHZ8tE/VEPjA=
 github.com/ca-risken/common/pkg/profiler v0.0.0-20220426050416-a654045b9fa5 h1:jwSdPbyf9jA7zky+DjJfYeCARcZ8BhXOvUPdgjyHX7c=
 github.com/ca-risken/common/pkg/profiler v0.0.0-20220426050416-a654045b9fa5/go.mod h1:xldq3VZ7qomkI5vfpw8Y9qCVEFl8BrSvDr+sxbz32H4=
-github.com/ca-risken/common/pkg/rpc v0.0.0-20220426050416-a654045b9fa5 h1:UeHkTA6kTP5zDGjRUdCqUk1ohm3PAp/fSiwao3Nq/uU=
-github.com/ca-risken/common/pkg/rpc v0.0.0-20220426050416-a654045b9fa5/go.mod h1:A5WmKMV58G2v1s/oNXIzFsd9SiS8YxkkEWT3U6+yPd0=
 github.com/ca-risken/common/pkg/rpc v0.0.0-20220518032134-ad443b601efd h1:rrkuvylG4Etubw0miHpNnWje4VR5ZPUGR8FPmJWNwck=
 github.com/ca-risken/common/pkg/rpc v0.0.0-20220518032134-ad443b601efd/go.mod h1:fnvFF8ESVirs5LV36leyFKf3FbuqjLDhJnipGJgDZtA=
 github.com/ca-risken/common/pkg/tracer v0.0.0-20220426050416-a654045b9fa5 h1:uWLkCDh/N4eXKBMaVfd3bbxA3R3oi6RKe4ZYuuJ5WcI=
@@ -342,7 +340,6 @@ github.com/google/pprof v0.0.0-20210423192551-a2663126120b/go.mod h1:kpwsk12EmLe
 github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm40UhjYkI=
 github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/google/uuid v1.1.2/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/google/uuid v1.2.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+vpHVxEJEs9eg=
@@ -984,7 +981,6 @@ golang.org/x/sys v0.0.0-20210816183151-1e6c022a8912/go.mod h1:oPkhp1MJrh7nUepCBc
 golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20211103235746-7861aae1554b/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.0.0-20220111092808-5a964db01320/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220412211240-33da011f77ad h1:ntjMns5wyP/fN65tdBD4g8J5w8n015+iIIs9rtjXkY0=
 golang.org/x/sys v0.0.0-20220412211240-33da011f77ad/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=

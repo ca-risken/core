@@ -62,8 +62,7 @@ func NewConfig(maxAnalyzeAPICall int64, notificationAlertURL string) Config {
 	}
 }
 
-func (s *Server) Run() error {
-	ctx := context.Background()
+func (s *Server) Run(ctx context.Context) error {
 	clientAddr := fmt.Sprintf("localhost:%s", s.port)
 	fc := s.newFindingClient(clientAddr)
 	isvc := iamserver.NewIAMService(s.db, fc)
@@ -102,16 +101,16 @@ func (s *Server) Run() error {
 	errChan := make(chan error)
 	go func() {
 		if err := server.Serve(l); err != nil && err != grpc.ErrServerStopped {
-			s.logger.Errorf("failed to serve grpc: %w", err)
+			s.logger.Errorf(ctx, "failed to serve grpc: %w", err)
 			errChan <- err
 		}
 	}()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		if err := healthCheck(context.Background(), clientAddr); err != nil {
+		if err := healthCheck(ctx, clientAddr); err != nil {
 			w.WriteHeader(http.StatusServiceUnavailable)
-			s.logger.Errorf("health check is failed: %w", err)
+			s.logger.Errorf(ctx, "health check is failed: %w", err)
 		} else {
 			fmt.Fprintln(w, "ok")
 		}
@@ -119,7 +118,7 @@ func (s *Server) Run() error {
 
 	go func() {
 		if err := http.ListenAndServe(fmt.Sprintf("%s:3000", s.host), mux); err != http.ErrServerClosed {
-			s.logger.Errorf("failed to start http server: %w", err)
+			s.logger.Errorf(ctx, "failed to start http server: %w", err)
 			errChan <- err
 		}
 	}()

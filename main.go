@@ -95,7 +95,7 @@ func main() {
 	c := server.NewConfig(conf.MaxAnalyzeAPICall, conf.NotificationAlertURL)
 	server := server.NewServer("0.0.0.0", conf.Port, db, logger, c)
 
-	err = server.Run()
+	err = server.Run(ctx)
 	if err != nil {
 		logger.Fatalf(ctx, "failed to run server: %w", err)
 	}
