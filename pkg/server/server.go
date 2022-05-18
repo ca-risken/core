@@ -60,6 +60,7 @@ func NewConfig(maxAnalyzeAPICall int64, notificationAlertURL string) Config {
 }
 
 func (s *Server) Run() error {
+	ctx := context.Background()
 	clientAddr := fmt.Sprintf("localhost:%s", s.port)
 	fc := s.newFindingClient(clientAddr)
 	isvc := iamserver.NewIAMService(s.db, fc)
@@ -77,8 +78,8 @@ func (s *Server) Run() error {
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(
 			grpcmiddleware.ChainUnaryServer(
-				mimosarpc.LoggingUnaryServerInterceptor(s.logger),
-				grpctrace.UnaryServerInterceptor())))
+				grpctrace.UnaryServerInterceptor(),
+				mimosarpc.LoggingUnaryServerInterceptor(s.logger))))
 	iam.RegisterIAMServiceServer(server, isvc)
 	report.RegisterReportServiceServer(server, rsvc)
 	alert.RegisterAlertServiceServer(server, asvc)
@@ -87,7 +88,7 @@ func (s *Server) Run() error {
 
 	reflection.Register(server) // enable reflection API
 
-	s.logger.Infof("Starting gRPC server at :%s", s.port)
+	s.logger.Infof(ctx, "Starting gRPC server at :%s", s.port)
 	l, err := net.Listen("tcp", fmt.Sprintf("%s:%s", s.host, s.port))
 	if err != nil {
 		return fmt.Errorf("failed to listen: %w", err)
@@ -100,14 +101,14 @@ func (s *Server) Run() error {
 		}
 	}()
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	select {
 	case err := <-errChan:
 		return err
 	case <-ctx.Done():
-		s.logger.Info("Shutdown gRPC server...")
+		s.logger.Info(ctx, "Shutdown gRPC server...")
 		server.GracefulStop()
 	}
 
@@ -118,7 +119,7 @@ func (s *Server) newFindingClient(svcAddr string) finding.FindingServiceClient {
 	ctx := context.Background()
 	conn, err := getGRPCConn(ctx, svcAddr)
 	if err != nil {
-		s.logger.Fatalf("failed to get grpc connection: err=%+v", err)
+		s.logger.Fatalf(ctx, "failed to get grpc connection: err=%+v", err)
 	}
 	return finding.NewFindingServiceClient(conn)
 }
@@ -127,7 +128,7 @@ func (s *Server) newIAMClient(svcAddr string) iam.IAMServiceClient {
 	ctx := context.Background()
 	conn, err := getGRPCConn(ctx, svcAddr)
 	if err != nil {
-		s.logger.Fatalf("failed to get grpc connection: err=%+v", err)
+		s.logger.Fatalf(ctx, "failed to get grpc connection: err=%+v", err)
 	}
 	return iam.NewIAMServiceClient(conn)
 }
@@ -136,7 +137,7 @@ func (s *Server) newProjectClient(svcAddr string) project.ProjectServiceClient {
 	ctx := context.Background()
 	conn, err := getGRPCConn(ctx, svcAddr)
 	if err != nil {
-		s.logger.Fatalf("failed to get grpc connection: err=%+v", err)
+		s.logger.Fatalf(ctx, "failed to get grpc connection: err=%+v", err)
 	}
 	return project.NewProjectServiceClient(conn)
 }

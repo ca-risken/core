@@ -35,47 +35,47 @@ func (a *AlertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 	}
 	project := projects.Project[0]
 
-	requestID := getRequestID(req.ProjectId)
+	requestID := getRequestID(ctx, req.ProjectId)
 	// 有効なalertConditionの取得
-	appLogger.Infof("start ListEnabledAlertCondition: RequestID=%s", requestID)
+	appLogger.Infof(ctx, "start ListEnabledAlertCondition: RequestID=%s", requestID)
 	alertConditions, err := a.repository.ListEnabledAlertCondition(ctx, req.ProjectId, req.AlertConditionId)
-	appLogger.Infof("finish ListEnabledAlertCondition: RequestID=%s", requestID)
+	appLogger.Infof(ctx, "finish ListEnabledAlertCondition: RequestID=%s", requestID)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
-		appLogger.Error(err)
+		appLogger.Error(ctx, err)
 		return nil, err
 	}
 
 	// マッチング
-	appLogger.Infof("start matching: RequestID=%s", requestID)
+	appLogger.Infof(ctx, "start matching: RequestID=%s", requestID)
 	for _, alertCondition := range *alertConditions {
 		err := a.AnalyzeAlertByCondition(ctx, &alertCondition, project)
 		if err != nil {
-			appLogger.Error(err)
+			appLogger.Error(ctx, err)
 			return nil, err
 		}
 	}
-	appLogger.Infof("finish matching: RequestID=%s", requestID)
+	appLogger.Infof(ctx, "finish matching: RequestID=%s", requestID)
 
 	// 無効のalertConditionの取得
-	appLogger.Infof("start ListDisabledAlertCondition: RequestID=%s", requestID)
+	appLogger.Infof(ctx, "start ListDisabledAlertCondition: RequestID=%s", requestID)
 	disabledAlertConditions, err := a.repository.ListDisabledAlertCondition(ctx, req.ProjectId, req.AlertConditionId)
-	appLogger.Infof("finish ListDisabledAlertCondition: RequestID=%s", requestID)
+	appLogger.Infof(ctx, "finish ListDisabledAlertCondition: RequestID=%s", requestID)
 	noRecord = errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
-		appLogger.Error(err)
+		appLogger.Error(ctx, err)
 		return nil, err
 	}
 	// 無効なalertConditionに紐づくAlertを削除
-	appLogger.Infof("start DeleteAlertByAnalyze: RequestID=%s", requestID)
+	appLogger.Infof(ctx, "start DeleteAlertByAnalyze: RequestID=%s", requestID)
 	for _, alertCondition := range *disabledAlertConditions {
 		err := a.DeleteAlertByAnalyze(ctx, &alertCondition)
 		if err != nil {
-			appLogger.Error(err)
+			appLogger.Error(ctx, err)
 			return nil, err
 		}
 	}
-	appLogger.Infof("finish DeleteAlertByAnalyze: RequestID=%s", requestID)
+	appLogger.Infof(ctx, "finish DeleteAlertByAnalyze: RequestID=%s", requestID)
 	return &empty.Empty{}, nil
 }
 
@@ -83,12 +83,12 @@ func (a *AlertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 	// AlertRuleの取得
 	alertRules, err := a.repository.ListAlertRuleByAlertConditionID(ctx, alertCondition.ProjectID, alertCondition.AlertConditionID)
 	if err != nil {
-		appLogger.Errorf("Failed list AlertRule by AlertConditionID. alertConditionID: %v, err: %v", alertCondition.AlertConditionID, err)
+		appLogger.Errorf(ctx, "Failed list AlertRule by AlertConditionID. alertConditionID: %v, err: %v", alertCondition.AlertConditionID, err)
 		return err
 	}
 	var matchFindingIDs []uint64
 	isFirst := true
-	appLogger.Info("start matching per rule")
+	appLogger.Info(ctx, "start matching per rule")
 	for _, alertRule := range *alertRules {
 		isMatchRule, matchFindingIDsByAlert, err := a.analyzeAlertByRule(ctx, &alertRule)
 		if err != nil {
@@ -119,7 +119,7 @@ func (a *AlertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 		}
 		matchFindingIDs = andMatchFindingIDs
 	}
-	appLogger.Info("finish matching per rule")
+	appLogger.Info(ctx, "finish matching per rule")
 	if len(matchFindingIDs) > 0 {
 		registAlert, err := a.RegistAlertByAnalyze(ctx, alertCondition, matchFindingIDs)
 		if err != nil {
@@ -178,7 +178,7 @@ func (a *AlertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 	// upsert Alert
 	registerdData, err := a.repository.UpsertAlert(ctx, data)
 	if err != nil {
-		appLogger.Errorf("Error occured when upsert alert. alertConditionID: %v, err: %v", alertCondition.AlertConditionID, err)
+		appLogger.Errorf(ctx, "Error occured when upsert alert. alertConditionID: %v, err: %v", alertCondition.AlertConditionID, err)
 		return nil, err
 	}
 
@@ -188,7 +188,7 @@ func (a *AlertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 	}
 
 	// AlertHistoryに登録するための現在のRelAlertFindingを整形
-	findingHistory, err := makeFindingIDs(findingIDs)
+	findingHistory, err := makeFindingIDs(ctx, findingIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func (a *AlertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 	}
 	_, err = a.repository.UpsertAlertHistory(ctx, dataAlertHistory)
 	if err != nil {
-		appLogger.Errorf("Error occured when upsert AlertHistory. err: %v", err)
+		appLogger.Errorf(ctx, "Error occured when upsert AlertHistory. err: %v", err)
 		return nil, err
 	}
 
@@ -234,7 +234,7 @@ func (a *AlertService) DeleteAlertByAnalyze(ctx context.Context, alertCondition 
 	savedData, err := a.repository.GetAlertByAlertConditionIDStatus(ctx, alertCondition.ProjectID, alertCondition.AlertConditionID, []string{"ACTIVE", "PENDING"})
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
-		appLogger.Errorf("Failed get alert by alertConditionIDStatus, err: %v", err)
+		appLogger.Errorf(ctx, "Failed get alert by alertConditionIDStatus, err: %v", err)
 		return err
 	}
 	// レコードが存在しない場合何もしない
@@ -257,7 +257,7 @@ func (a *AlertService) DeleteAlertByAnalyze(ctx context.Context, alertCondition 
 	}
 
 	// AlertHistoryに登録するための現在のRelAlertFindingを整形
-	findingHistory, err := makeFindingIDs([]uint64{})
+	findingHistory, err := makeFindingIDs(ctx, []uint64{})
 	if err != nil {
 		return err
 	}
@@ -316,12 +316,12 @@ func (a *AlertService) NotificationAlert(ctx context.Context, alertCondition *mo
 		}
 		switch notification.Type {
 		case "slack":
-			err = sendSlackNotification(a.notificationAlertURL, notification.NotifySetting, alert, project, rules)
+			err = sendSlackNotification(ctx, a.notificationAlertURL, notification.NotifySetting, alert, project, rules)
 			if err != nil {
 				return err
 			}
 		default:
-			appLogger.Warn("This notification_type is unimprement.", notification.Type)
+			appLogger.Warn(ctx, "This notification_type is unimprement.", notification.Type)
 		}
 		// 通知時刻を更新する
 		dataAlertCondNotification := &model.AlertCondNotification{
@@ -353,10 +353,10 @@ func (a *AlertService) analyzeAlertByRule(ctx context.Context, alertRule *model.
 	}
 	resp, err := a.findingClient.BatchListFinding(ctx, param)
 	if err != nil {
-		appLogger.Errorf("Failed to BatchListFinding, request=%+v, err=%+v", param, err)
+		appLogger.Errorf(ctx, "Failed to BatchListFinding, request=%+v, err=%+v", param, err)
 		return false, &[]uint64{}, err
 	}
-	appLogger.Infof("Got BatchListFinding, request=%+v, count=%d", param, resp.Count) // Debug
+	appLogger.Infof(ctx, "Got BatchListFinding, request=%+v, count=%d", param, resp.Count) // Debug
 	return resp.Count >= alertRule.FindingCnt, &resp.FindingId, nil
 }
 
@@ -383,11 +383,11 @@ func (a *AlertService) isMatchExistingAlert(ctx context.Context, savedAlert *mod
 	return true, nil
 }
 
-func makeFindingIDs(findingIDs []uint64) (string, error) {
+func makeFindingIDs(ctx context.Context, findingIDs []uint64) (string, error) {
 	mapFindingIDs := map[string][]uint64{"finding_id": findingIDs}
 	bytes, err := json.Marshal(mapFindingIDs)
 	if err != nil {
-		appLogger.Error("JSON marshal error when making FindingIDs ", err)
+		appLogger.Error(ctx, "JSON marshal error when making FindingIDs ", err)
 		return "", err
 	}
 	return string(bytes), nil
@@ -409,13 +409,13 @@ func getHistoryType(alertID uint32) string {
 	return "updated"
 }
 
-func sendSlackNotification(notifyURL, notifySetting string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule) error {
+func sendSlackNotification(ctx context.Context, notifyURL, notifySetting string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
 	}
 	if zero.IsZeroVal(setting.WebhookURL) {
-		appLogger.Warn("Unset webhook_url")
+		appLogger.Warn(ctx, "Unset webhook_url")
 		return nil
 	}
 	channel := ""
@@ -428,27 +428,27 @@ func sendSlackNotification(notifyURL, notifySetting string, alert *model.Alert, 
 	}
 
 	slackConfig := &slackWebhookConfig{NotificationAlertURL: notifyURL}
-	payload, err := slackConfig.GetPayload(channel, message, alert, project, rules)
+	payload, err := slackConfig.GetPayload(ctx, channel, message, alert, project, rules)
 	if err != nil {
 		return err
 	}
 	// TODO http tracing
 	resp, err := http.PostForm(setting.WebhookURL, url.Values{"payload": {string(payload)}})
 	if err != nil {
-		appLogger.Errorf("Failed to send slack, resp=%+v, err=%+v", resp, err)
+		appLogger.Errorf(ctx, "Failed to send slack, resp=%+v, err=%+v", resp, err)
 		return err
 	}
 	defer resp.Body.Close()
 	return nil
 }
 
-func sendSlackTestNotification(notifyURL, notifySetting string) error {
+func sendSlackTestNotification(ctx context.Context, notifyURL, notifySetting string) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
 	}
 	if zero.IsZeroVal(setting.WebhookURL) {
-		appLogger.Warn("Unset webhook_url")
+		appLogger.Warn(ctx, "Unset webhook_url")
 		return nil
 	}
 	channel := ""
@@ -464,7 +464,7 @@ func sendSlackTestNotification(notifyURL, notifySetting string) error {
 	// TODO http tracing
 	resp, err := http.PostForm(setting.WebhookURL, url.Values{"payload": {string(payload)}})
 	if err != nil {
-		appLogger.Errorf("Failed to send slack, resp=%+v, err=%+v", resp, err)
+		appLogger.Errorf(ctx, "Failed to send slack, resp=%+v, err=%+v", resp, err)
 		return err
 	}
 	defer resp.Body.Close()
@@ -495,24 +495,24 @@ func makeRandomStr(digit uint32) (string, error) {
 	return result, nil
 }
 
-func getRequestID(projectID uint32) string {
+func getRequestID(ctx context.Context, projectID uint32) string {
 	rand, err := makeRandomStr(10)
 	if err != nil {
-		appLogger.Warnf("Failed to make random string, err=%+v", err)
+		appLogger.Warnf(ctx, "Failed to make random string, err=%+v", err)
 	}
 	return fmt.Sprintf("%d-%s", projectID, rand)
 }
 
 func (a *AlertService) AnalyzeAlertAll(ctx context.Context, _ *empty.Empty) (*empty.Empty, error) {
-	appLogger.Info("start AnalyzeAlertAll")
+	appLogger.Info(ctx, "start AnalyzeAlertAll")
 	list, err := a.projectClient.ListProject(ctx, &projectproto.ListProjectRequest{})
 	if err != nil {
-		appLogger.Errorf("Failed to list project API, err=%+v", err)
+		appLogger.Errorf(ctx, "Failed to list project API, err=%+v", err)
 		return nil, err
 	}
 	projectNum := len(list.Project)
 	if projectNum < 1 {
-		appLogger.Warn("There are no project")
+		appLogger.Warn(ctx, "There are no project")
 		return &empty.Empty{}, nil
 	}
 	allResource := a.maxAnalyzeAPICall // max groutine resources
@@ -522,7 +522,7 @@ func (a *AlertService) AnalyzeAlertAll(ctx context.Context, _ *empty.Empty) (*em
 	wg.Add(projectNum)
 	for i := range list.Project {
 		if err := sem.Acquire(ctx, analyzeAlertResource); err != nil {
-			appLogger.Errorf("Failed to acquire resource, err=%+v", err)
+			appLogger.Errorf(ctx, "Failed to acquire resource, err=%+v", err)
 			return nil, err
 		}
 		// launch goroutine
@@ -530,11 +530,11 @@ func (a *AlertService) AnalyzeAlertAll(ctx context.Context, _ *empty.Empty) (*em
 			defer wg.Done()
 			active, err := a.projectClient.IsActive(ctx, &projectproto.IsActiveRequest{ProjectId: p.ProjectId})
 			if err != nil {
-				appLogger.Warnf("Failed to call API (project.IsActive), err=%+v", err)
+				appLogger.Warnf(ctx, "Failed to call API (project.IsActive), err=%+v", err)
 			}
 			if active != nil && active.Active {
 				if _, err := a.AnalyzeAlert(ctx, &alert.AnalyzeAlertRequest{ProjectId: p.ProjectId}); err != nil {
-					appLogger.Warnf("Failed to AnalyzeAlert, project_id=%d, err=%+v", p.ProjectId, err)
+					appLogger.Warnf(ctx, "Failed to AnalyzeAlert, project_id=%d, err=%+v", p.ProjectId, err)
 				}
 			}
 			time.Sleep(1 * time.Second)
@@ -542,7 +542,7 @@ func (a *AlertService) AnalyzeAlertAll(ctx context.Context, _ *empty.Empty) (*em
 		}(list.Project[i])
 	}
 	wg.Wait()
-	appLogger.Info("end AnalyzeAlertAll")
+	appLogger.Info(ctx, "end AnalyzeAlertAll")
 	return &empty.Empty{}, nil
 }
 
@@ -550,7 +550,7 @@ type slackWebhookConfig struct {
 	NotificationAlertURL string
 }
 
-func (s *slackWebhookConfig) GetPayload(channel, message string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule) (string, error) {
+func (s *slackWebhookConfig) GetPayload(ctx context.Context, channel, message string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule) (string, error) {
 	payload := map[string]interface{}{}
 	// text
 	text := fmt.Sprintf("%vアラートを検知しました。", getMention(alert.Severity))
@@ -604,7 +604,7 @@ func (s *slackWebhookConfig) GetPayload(channel, message string, alert *model.Al
 	if err != nil {
 		return "", err
 	}
-	appLogger.Debugf("Slack Webhook contents: %s", string(buf))
+	appLogger.Debugf(ctx, "Slack Webhook contents: %s", string(buf))
 	return string(buf), err
 }
 

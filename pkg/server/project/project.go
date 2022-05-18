@@ -76,7 +76,7 @@ func (p *ProjectService) CreateProject(ctx context.Context, req *project.CreateP
 	if err := p.createDefaultRole(ctx, req.UserId, pr.ProjectID); err != nil {
 		return nil, err
 	}
-	appLogger.Infof("Project created: owner=%d, project=%+v", req.UserId, pr)
+	appLogger.Infof(ctx, "Project created: owner=%d, project=%+v", req.UserId, pr)
 	return &project.CreateProjectResponse{Project: convertProject(pr)}, nil
 }
 
@@ -98,7 +98,7 @@ func (p *ProjectService) DeleteProject(ctx context.Context, req *project.DeleteP
 	if err := p.deleteAllProjectRole(ctx, req.ProjectId); err != nil {
 		return nil, err
 	}
-	appLogger.Infof("Project deleted: project=%+v", req.ProjectId)
+	appLogger.Infof(ctx, "Project deleted: project=%+v", req.ProjectId)
 	return &empty.Empty{}, nil
 }
 

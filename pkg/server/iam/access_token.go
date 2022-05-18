@@ -179,7 +179,7 @@ func (i *IAMService) AnalyzeTokenExpiration(ctx context.Context, _ *empty.Empty)
 		token.TokenHash = "xxx" // mask credentials
 		buf, err := json.Marshal(token)
 		if err != nil {
-			appLogger.Errorf("Failed to encoding json, accessToken=%+v, err=%+v", token, err)
+			appLogger.Errorf(ctx, "Failed to encoding json, accessToken=%+v, err=%+v", token, err)
 			return nil, err
 		}
 		resp, err := i.findingClient.PutFinding(ctx, &finding.PutFindingRequest{

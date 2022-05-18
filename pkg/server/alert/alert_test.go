@@ -1583,7 +1583,7 @@ func TestReplaceSlackNotifySetting(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := replaceSlackNotifySetting(c.inputExist, c.inputUpdate)
+			got, err := replaceSlackNotifySetting(context.Background(), c.inputExist, c.inputUpdate)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -1655,7 +1655,7 @@ func TestConvertNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := convertNotification(c.input)
+			got := convertNotification(context.Background(), c.input)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
 			}

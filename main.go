@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/ca-risken/common/pkg/logging"
@@ -42,20 +43,21 @@ type AppConf struct {
 }
 
 func main() {
+	ctx := context.Background()
 	var logger = logging.NewLogger()
 	var conf AppConf
 	err := envconfig.Process("", &conf)
 	if err != nil {
-		logger.Fatal(err.Error())
+		logger.Fatal(ctx, err.Error())
 	}
 
 	pTypes, err := profiler.ConvertProfileTypeFrom(conf.ProfileTypes)
 	if err != nil {
-		logger.Fatal(err.Error())
+		logger.Fatal(ctx, err.Error())
 	}
 	pExporter, err := profiler.ConvertExporterTypeFrom(conf.ProfileExporter)
 	if err != nil {
-		logger.Fatal(err.Error())
+		logger.Fatal(ctx, err.Error())
 	}
 	pc := profiler.Config{
 		ServiceName:  getFullServiceName(),
@@ -65,7 +67,7 @@ func main() {
 	}
 	err = pc.Start()
 	if err != nil {
-		logger.Fatal(err.Error())
+		logger.Fatal(ctx, err.Error())
 	}
 	defer pc.Stop()
 
@@ -95,7 +97,7 @@ func main() {
 
 	err = server.Run()
 	if err != nil {
-		logger.Fatalf("failed to run server: %w", err)
+		logger.Fatalf(ctx, "failed to run server: %w", err)
 	}
 }
 

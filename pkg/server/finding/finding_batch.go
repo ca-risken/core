@@ -162,7 +162,7 @@ func (f *FindingService) PutFindingBatch(ctx context.Context, req *finding.PutFi
 	if err := f.repository.BulkUpsertResourceTag(ctx, resourceTags); err != nil {
 		return nil, fmt.Errorf("Failed to BulkUpsertResourceTag, err=%+w", err)
 	}
-	appLogger.Infof("Succeded PutFindingBatch, project_id=%d, findings=%d", req.ProjectId, len(req.Finding))
+	appLogger.Infof(ctx, "Succeded PutFindingBatch, project_id=%d, findings=%d", req.ProjectId, len(req.Finding))
 	return &empty.Empty{}, nil
 }
 
@@ -223,6 +223,6 @@ func (f *FindingService) PutResourceBatch(ctx context.Context, req *finding.PutR
 	if err := f.repository.BulkUpsertResourceTag(ctx, resourceTags); err != nil {
 		return nil, fmt.Errorf("Failed to BulkUpsertResourceTag, err=%+w", err)
 	}
-	appLogger.Infof("Succeded PutResourceBatch, project_id=%d, resources=%d", req.ProjectId, len(req.Resource))
+	appLogger.Infof(ctx, "Succeded PutResourceBatch, project_id=%d, resources=%d", req.ProjectId, len(req.Resource))
 	return &empty.Empty{}, nil
 }
