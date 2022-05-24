@@ -96,11 +96,11 @@ push-manifest:
 
 PHONY: test
 test:
-	go test ./...
+	GO111MODULE=on go test ./...
 
 .PHONY: lint
 lint: FAKE
-	golangci-lint run --timeout 5m
+	GO111MODULE=on golangci-lint run --timeout 5m
 
 .PHONY: generate-mock
 generate-mock: proto-mock
