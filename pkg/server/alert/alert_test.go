@@ -1638,9 +1638,10 @@ func TestDeleteNotification(t *testing.T) {
 func TestConvertNotification(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
-		name  string
-		input *model.Notification
-		want  *alert.Notification
+		name    string
+		input   *model.Notification
+		want    *alert.Notification
+		wantErr bool
 	}{
 		{
 			name:  "OK convert unix time",
@@ -1652,12 +1653,21 @@ func TestConvertNotification(t *testing.T) {
 			input: nil,
 			want:  &alert.Notification{},
 		},
+		{
+			name:    "NG json marshal error",
+			input:   &model.Notification{NotificationID: 1001, CreatedAt: now, UpdatedAt: now, Type: "slack", NotifySetting: "{\"data\": {\"aaa\"}, \"webhook_url\": \"http://hogehoge.com\"}"},
+			want:    &alert.Notification{},
+			wantErr: true,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := convertNotification(context.Background(), c.input)
+			got, err := convertNotification(context.Background(), c.input)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
 			}
 		})
 	}
