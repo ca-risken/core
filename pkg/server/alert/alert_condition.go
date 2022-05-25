@@ -622,7 +622,7 @@ func convertNotification(ctx context.Context, n *model.Notification) (*alert.Not
 		NotifySetting:  maskingSetting,
 		CreatedAt:      n.CreatedAt.Unix(),
 		UpdatedAt:      n.UpdatedAt.Unix(),
-	}, err
+	}, nil
 }
 
 func convertAlertCondNotification(a *model.AlertCondNotification) *alert.AlertCondNotification {
