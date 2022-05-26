@@ -308,7 +308,12 @@ func (a *AlertService) ListNotification(ctx context.Context, req *alert.ListNoti
 	}
 	data := alert.ListNotificationResponse{}
 	for _, d := range *list {
-		data.Notification = append(data.Notification, convertNotification(ctx, &d))
+		convertedNotification, err := convertNotification(ctx, &d)
+		if err != nil {
+			appLogger.Errorf(ctx, "Failed to convert Notification. error: %v", err)
+			return nil, err
+		}
+		data.Notification = append(data.Notification, convertedNotification)
 	}
 	return &data, nil
 }
@@ -337,7 +342,12 @@ func (a *AlertService) GetNotification(ctx context.Context, req *alert.GetNotifi
 		}
 		return nil, err
 	}
-	return &alert.GetNotificationResponse{Notification: convertNotification(ctx, data)}, nil
+	convertedNotification, err := convertNotification(ctx, data)
+	if err != nil {
+		appLogger.Errorf(ctx, "Failed to convert Notification. error: %v", err)
+		return nil, err
+	}
+	return &alert.GetNotificationResponse{Notification: convertedNotification}, nil
 }
 
 func (a *AlertService) PutNotification(ctx context.Context, req *alert.PutNotificationRequest) (*alert.PutNotificationResponse, error) {
@@ -387,8 +397,12 @@ func (a *AlertService) PutNotification(ctx context.Context, req *alert.PutNotifi
 	if err != nil {
 		return nil, err
 	}
-
-	return &alert.PutNotificationResponse{Notification: convertNotification(ctx, registerdData)}, nil
+	convertedNotification, err := convertNotification(ctx, registerdData)
+	if err != nil {
+		appLogger.Errorf(ctx, "Failed to convert Notification. error: %v", err)
+		return nil, err
+	}
+	return &alert.PutNotificationResponse{Notification: convertedNotification}, nil
 }
 
 func replaceSlackNotifySetting(ctx context.Context, jsonNotifySettingExist, jsonNotifySettingUpdate string) (slackNotifySetting, error) {
@@ -591,14 +605,14 @@ func convertAlertCondRule(a *model.AlertCondRule) *alert.AlertCondRule {
 	}
 }
 
-func convertNotification(ctx context.Context, n *model.Notification) *alert.Notification {
+func convertNotification(ctx context.Context, n *model.Notification) (*alert.Notification, error) {
 	if n == nil {
-		return &alert.Notification{}
+		return &alert.Notification{}, nil
 	}
 	maskingSetting, err := maskingNotifySetting(n.Type, n.NotifySetting)
 	if err != nil {
 		appLogger.Errorf(ctx, "Failed to masking notify setting. %v", err)
-		maskingSetting = n.NotifySetting
+		return &alert.Notification{}, err
 	}
 	return &alert.Notification{
 		NotificationId: n.NotificationID,
@@ -608,7 +622,7 @@ func convertNotification(ctx context.Context, n *model.Notification) *alert.Noti
 		NotifySetting:  maskingSetting,
 		CreatedAt:      n.CreatedAt.Unix(),
 		UpdatedAt:      n.UpdatedAt.Unix(),
-	}
+	}, nil
 }
 
 func convertAlertCondNotification(a *model.AlertCondNotification) *alert.AlertCondNotification {
