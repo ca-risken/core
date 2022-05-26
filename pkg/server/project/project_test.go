@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
+	"github.com/ca-risken/common/pkg/logging"
 
 	iammock "github.com/ca-risken/core/proto/iam/mocks"
 )
@@ -96,6 +97,7 @@ func TestCreateProject(t *testing.T) {
 	svc := ProjectService{
 		repository: &mockDB,
 		iamClient:  &mockIAM,
+		logger:     logging.NewLogger(),
 	}
 	cases := []struct {
 		name                  string
@@ -222,6 +224,7 @@ func TestDeleteProject(t *testing.T) {
 	mockIAM := iammock.IAMServiceClient{}
 	svc := ProjectService{
 		iamClient: &mockIAM,
+		logger:     logging.NewLogger(),
 	}
 	cases := []struct {
 		name             string

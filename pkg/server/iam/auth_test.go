@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/iam"
@@ -14,7 +15,7 @@ import (
 func TestIsAuthorized(t *testing.T) {
 	var ctx context.Context
 	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
+	svc := IAMService{repository: &mock, logger: logging.NewLogger()}
 	cases := []struct {
 		name         string
 		input        *iam.IsAuthorizedRequest
@@ -69,7 +70,7 @@ func TestIsAuthorized(t *testing.T) {
 func TestIsAuthorizedAdmin(t *testing.T) {
 	var ctx context.Context
 	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
+	svc := IAMService{repository: &mock, logger: logging.NewLogger()}
 	cases := []struct {
 		name         string
 		input        *iam.IsAuthorizedAdminRequest
@@ -124,7 +125,7 @@ func TestIsAuthorizedAdmin(t *testing.T) {
 func TestIsAuthorizedToken(t *testing.T) {
 	var ctx context.Context
 	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
+	svc := IAMService{repository: &mock, logger: logging.NewLogger()}
 	cases := []struct {
 		name    string
 		input   *iam.IsAuthorizedTokenRequest
@@ -308,7 +309,7 @@ func TestIsAuthorizedByPolicy(t *testing.T) {
 func TestIsAdmin(t *testing.T) {
 	var ctx context.Context
 	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
+	svc := IAMService{repository: &mock, logger: logging.NewLogger()}
 	cases := []struct {
 		name         string
 		input        *iam.IsAdminRequest

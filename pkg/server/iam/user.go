@@ -34,7 +34,7 @@ func (i *IAMService) GetUser(ctx context.Context, req *iam.GetUserRequest) (*iam
 	user, err := i.repository.GetUser(ctx, req.UserId, req.Sub)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			appLogger.Infof(ctx, "[GetUser]User not found: GetUserRequest=%+v", req)
+			i.logger.Infof(ctx, "[GetUser]User not found: GetUserRequest=%+v", req)
 			return &iam.GetUserResponse{}, nil
 		}
 		return nil, err
@@ -60,7 +60,7 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 		}
 		isFisrstUser = users == nil || *users == 0
 	}
-	appLogger.Debugf(ctx, "isFisrstUser: %t", isFisrstUser)
+	i.logger.Debugf(ctx, "isFisrstUser: %t", isFisrstUser)
 
 	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
 	var userID uint32
@@ -85,7 +85,7 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 		if err := i.repository.AttachAllAdminRole(ctx, registerdData.UserID); err != nil {
 			return nil, err
 		}
-		appLogger.Infof(ctx, "Attach admin role for first user, user_id=%d", registerdData.UserID)
+		i.logger.Infof(ctx, "Attach admin role for first user, user_id=%d", registerdData.UserID)
 	}
 	return &iam.PutUserResponse{User: convertUser(registerdData)}, nil
 }

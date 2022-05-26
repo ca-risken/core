@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/iam"
@@ -72,7 +73,7 @@ func TestGetUser(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
 	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
+	svc := IAMService{repository: &mock, logger: logging.NewLogger()}
 	cases := []struct {
 		name         string
 		input        *iam.GetUserRequest
@@ -125,7 +126,7 @@ func TestPutUser(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
 	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
+	svc := IAMService{repository: &mock, logger: logging.NewLogger()}
 	cases := []struct {
 		name        string
 		input       *iam.PutUserRequest
