@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
@@ -69,7 +70,7 @@ func TestPutRecommend(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
 	mockDB := mocks.MockFindingRepository{}
-	svc := FindingService{repository: &mockDB}
+	svc := FindingService{repository: &mockDB, logger: logging.NewLogger()}
 	cases := []struct {
 		name    string
 		input   *finding.PutRecommendRequest

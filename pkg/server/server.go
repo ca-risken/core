@@ -65,7 +65,7 @@ func NewConfig(maxAnalyzeAPICall int64, notificationAlertURL string) Config {
 func (s *Server) Run(ctx context.Context) error {
 	clientAddr := fmt.Sprintf("localhost:%s", s.port)
 	fc := s.newFindingClient(clientAddr)
-	isvc := iamserver.NewIAMService(s.db, fc)
+	isvc := iamserver.NewIAMService(s.db, fc, s.logger)
 	asvc := alertserver.NewAlertService(
 		s.config.MaxAnalyzeAPICall,
 		s.config.NotificationAlertURL,
@@ -73,9 +73,9 @@ func (s *Server) Run(ctx context.Context) error {
 		s.newProjectClient(clientAddr),
 		s.db,
 	)
-	fsvc := findingserver.NewFindingService(s.db)
-	psvc := projectserver.NewProjectService(s.db, s.newIAMClient(clientAddr))
-	rsvc := reportserver.NewReportService(s.db)
+	fsvc := findingserver.NewFindingService(s.db, s.logger)
+	psvc := projectserver.NewProjectService(s.db, s.newIAMClient(clientAddr), s.logger)
+	rsvc := reportserver.NewReportService(s.db, s.logger)
 	hsvc := health.NewServer()
 
 	server := grpc.NewServer(

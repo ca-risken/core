@@ -1,6 +1,9 @@
 package finding
 
-import "github.com/ca-risken/core/pkg/db"
+import (
+	"github.com/ca-risken/common/pkg/logging"
+	"github.com/ca-risken/core/pkg/db"
+)
 
 const (
 	defaultSortDirection string = "asc"
@@ -9,11 +12,13 @@ const (
 
 type FindingService struct {
 	repository db.FindingRepository
+	logger     logging.Logger
 }
 
-func NewFindingService(repository db.FindingRepository) *FindingService {
+func NewFindingService(repository db.FindingRepository, logger logging.Logger) *FindingService {
 	return &FindingService{
 		repository: repository,
+		logger:     logger,
 	}
 }
 

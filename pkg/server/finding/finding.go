@@ -289,7 +289,8 @@ func (f *FindingService) ClearScore(ctx context.Context, req *finding.ClearScore
 	if err != nil {
 		return nil, err
 	}
-	appLogger.Infof(ctx, "Finding score cleared, param=%+v", req)
+	f.logger.Infof(ctx, "Finding score cleared, param=%+v", req)
+
 	return &empty.Empty{}, nil
 }
 

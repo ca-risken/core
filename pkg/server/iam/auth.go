@@ -27,7 +27,7 @@ func (i *IAMService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequ
 		return &iam.IsAuthorizedResponse{Ok: false}, err
 	}
 	if isAuthorized {
-		appLogger.Infof(ctx, "Authorized user action, request=%+v", req)
+		i.logger.Infof(ctx, "Authorized user action, request=%+v", req)
 	}
 	return &iam.IsAuthorizedResponse{Ok: isAuthorized}, nil
 }
@@ -48,7 +48,7 @@ func (i *IAMService) IsAuthorizedAdmin(ctx context.Context, req *iam.IsAuthorize
 		return &iam.IsAuthorizedAdminResponse{Ok: false}, err
 	}
 	if isAuthorized {
-		appLogger.Infof(ctx, "Authorized user action, request=%+v", req)
+		i.logger.Infof(ctx, "Authorized user action, request=%+v", req)
 	}
 	return &iam.IsAuthorizedAdminResponse{Ok: isAuthorized}, nil
 }
@@ -62,7 +62,7 @@ func (i *IAMService) IsAuthorizedToken(ctx context.Context, req *iam.IsAuthorize
 		return nil, err
 	}
 	if !existsMaintainer {
-		appLogger.Warnf(ctx, "Unautorized the token that has no maintainers or expired in the project. project_id=%d, access_token_id=%d", req.ProjectId, req.AccessTokenId)
+		i.logger.Warnf(ctx, "Unautorized the token that has no maintainers or expired in the project. project_id=%d, access_token_id=%d", req.ProjectId, req.AccessTokenId)
 		return &iam.IsAuthorizedTokenResponse{Ok: false}, nil
 	}
 	policies, err := i.repository.GetTokenPolicy(ctx, req.AccessTokenId)
@@ -77,7 +77,7 @@ func (i *IAMService) IsAuthorizedToken(ctx context.Context, req *iam.IsAuthorize
 		return &iam.IsAuthorizedTokenResponse{Ok: false}, err
 	}
 	if isAuthorized {
-		appLogger.Infof(ctx, "Authorized access_token action, request=%+v", req)
+		i.logger.Infof(ctx, "Authorized access_token action, request=%+v", req)
 	}
 	return &iam.IsAuthorizedTokenResponse{Ok: isAuthorized}, nil
 }
@@ -118,6 +118,7 @@ func (i *IAMService) IsAdmin(ctx context.Context, req *iam.IsAdminRequest) (*iam
 	if policy == nil || len(*policy) < 1 {
 		return &iam.IsAdminResponse{Ok: false}, nil
 	}
-	appLogger.Debugf(ctx, "user(%d) is admin, policies: %d", req.UserId, len(*policy))
+	i.logger.Debugf(ctx, "user(%d) is admin, policies: %d", req.UserId, len(*policy))
+
 	return &iam.IsAdminResponse{Ok: true}, nil
 }

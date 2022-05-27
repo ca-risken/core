@@ -54,7 +54,6 @@ func (f *ReportService) GetReportFindingAll(ctx context.Context, req *report.Get
 func (f *ReportService) CollectReportFinding(ctx context.Context, req *empty.Empty) (*empty.Empty, error) {
 	err := f.repository.CollectReportFinding(ctx)
 	if err != nil {
-		appLogger.Errorf(ctx, "Failed collectReportFinding. %v", err)
 		return nil, err
 	}
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
@@ -13,7 +14,7 @@ import (
 func TestPutFindingBatch(t *testing.T) {
 	var ctx context.Context
 	mockDB := mocks.MockFindingRepository{}
-	svc := FindingService{repository: &mockDB}
+	svc := FindingService{repository: &mockDB, logger: logging.NewLogger()}
 	type mockResp struct {
 		GetFindingByDataSourceCall bool
 		GetFindingByDataSourceResp *model.Finding
@@ -195,7 +196,7 @@ func TestPutFindingBatch(t *testing.T) {
 func TestPutResourceBatch(t *testing.T) {
 	var ctx context.Context
 	mockDB := mocks.MockFindingRepository{}
-	svc := FindingService{repository: &mockDB}
+	svc := FindingService{repository: &mockDB, logger: logging.NewLogger()}
 	type mockResp struct {
 		GetResourceByNameCall bool
 		GetResourceByNameResp *model.Resource

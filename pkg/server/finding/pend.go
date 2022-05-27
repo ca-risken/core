@@ -31,7 +31,7 @@ func (f *FindingService) PutPendFinding(ctx context.Context, req *finding.PutPen
 	_, err := f.repository.GetFinding(ctx, req.ProjectId, req.PendFinding.FindingId, false)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			appLogger.Warnf(ctx, "RecordNotFound for PutPendFinding API, project_id=%d, finding=%d", req.ProjectId, req.PendFinding.FindingId)
+			f.logger.Warnf(ctx, "RecordNotFound for PutPendFinding API, project_id=%d, finding=%d", req.ProjectId, req.PendFinding.FindingId)
 		}
 		return nil, err // DB error or RecordNotFound error
 	}

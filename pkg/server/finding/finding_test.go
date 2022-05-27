@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
@@ -525,7 +526,7 @@ func TestTagFinding(t *testing.T) {
 func TestClearSocre(t *testing.T) {
 	var ctx context.Context
 	mockDB := mocks.MockFindingRepository{}
-	svc := FindingService{repository: &mockDB}
+	svc := FindingService{repository: &mockDB, logger: logging.NewLogger()}
 	cases := []struct {
 		name     string
 		input    *finding.ClearScoreRequest
