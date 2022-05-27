@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
@@ -530,11 +531,13 @@ func (a *AlertService) AnalyzeAlertAll(ctx context.Context, _ *empty.Empty) (*em
 			defer wg.Done()
 			active, err := a.projectClient.IsActive(ctx, &projectproto.IsActiveRequest{ProjectId: p.ProjectId})
 			if err != nil {
-				appLogger.Warnf(ctx, "Failed to call API (project.IsActive), err=%+v", err)
+				// TODO AnalyzeAlertの呼び出しを非同期化したら、通常のログ出力に変更してAnalyzeAlertAllがerrorを返すよう修正
+				appLogger.Notifyf(ctx, logging.ErrorLevel, "Failed to call API (project.IsActive), err=%+v", err)
 			}
 			if active != nil && active.Active {
 				if _, err := a.AnalyzeAlert(ctx, &alert.AnalyzeAlertRequest{ProjectId: p.ProjectId}); err != nil {
-					appLogger.Warnf(ctx, "Failed to AnalyzeAlert, project_id=%d, err=%+v", p.ProjectId, err)
+					// TODO AnalyzeAlertの呼び出しを非同期化したら、通常のログ出力に変更してAnalyzeAlertAllがerrorを返すよう修正
+					appLogger.Notifyf(ctx, logging.ErrorLevel, "Failed to AnalyzeAlert, project_id=%d, err=%+v", p.ProjectId, err)
 				}
 			}
 			time.Sleep(1 * time.Second)
