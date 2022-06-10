@@ -162,7 +162,7 @@ func (u *UntagFindingRequest) Validate() error {
 func (c *ClearScoreRequest) Validate() error {
 	return validation.ValidateStruct(c,
 		validation.Field(&c.DataSource, validation.Required, validation.Length(0, 64)),
-		validation.Field(&c.Tag, validation.Each(validation.Length(0, 64))),
+		validation.Field(&c.Tag, validation.Each(validation.Length(0, 255))),
 	)
 }
 

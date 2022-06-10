@@ -536,7 +536,7 @@ func TestValidate_ClearScoreRequest(t *testing.T) {
 		},
 		{
 			name:    "NG Length(finding_tag_id)",
-			input:   &ClearScoreRequest{DataSource: "ds", Tag: []string{"tag1", len65string}},
+			input:   &ClearScoreRequest{DataSource: "ds", Tag: []string{"tag1", len256string}},
 			wantErr: true,
 		},
 	}
