@@ -4,7 +4,7 @@ env:
   variables:
     PRIVATE_IMAGE_NAME: 'risken-core'
     PUBLIC_REGISTRY: 'public.ecr.aws/risken'
-    PUBLIC_IMAGE_NAME: risken-core'
+    PUBLIC_IMAGE_NAME: 'risken-core'
   parameter-store:
     GITHUB_USER: '/build/GITHUB_USER'
     GITHUB_TOKEN: '/build/GITHUB_TOKEN'
