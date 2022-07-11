@@ -3,7 +3,7 @@ version: 0.2
 env:
   variables:
     PUBLIC_REGISTRY: 'public.ecr.aws/risken'
-    IMAGE_NAME: 'core'
+    IMAGE_NAME: 'risken-core'
 
   parameter-store:
     GITHUB_USER: '/build/GITHUB_USER'
