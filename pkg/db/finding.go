@@ -150,13 +150,17 @@ where
 	}
 	if len(dataSources) > 0 {
 		sql, sqlParams := generatePrefixMatchSQLStatement("finding.data_source", dataSources)
-		query += fmt.Sprintf(" and (%s)", sql)
-		params = append(params, sqlParams...)
+		if sql != "" {
+			query += fmt.Sprintf(" and (%s)", sql)
+			params = append(params, sqlParams...)
+		}
 	}
 	if len(resourceNames) > 0 {
 		sql, sqlParams := generatePrefixMatchSQLStatement("finding.resource_name", resourceNames)
-		query += fmt.Sprintf(" and (%s)", sql)
-		params = append(params, sqlParams...)
+		if sql != "" {
+			query += fmt.Sprintf(" and (%s)", sql)
+			params = append(params, sqlParams...)
+		}
 	}
 	// EXISTS and NOT EXISTS subquery cause performance slow so used join clause instead
 	if len(tags) > 0 {
@@ -519,8 +523,10 @@ where
 	}
 	if len(req.ResourceName) > 0 {
 		sql, sqlParams := generatePrefixMatchSQLStatement("r.resource_name", req.ResourceName)
-		query += fmt.Sprintf(" and (%s)", sql)
-		params = append(params, sqlParams...)
+		if sql != "" {
+			query += fmt.Sprintf(" and (%s)", sql)
+			params = append(params, sqlParams...)
+		}
 	}
 	if len(req.Tag) > 0 {
 		for _, tag := range req.Tag {
@@ -559,8 +565,10 @@ select count(*) from (
 	}
 	if len(req.ResourceName) > 0 {
 		sql, sqlParams := generatePrefixMatchSQLStatement("r.resource_name", req.ResourceName)
-		query += fmt.Sprintf(" and (%s)", sql)
-		params = append(params, sqlParams...)
+		if sql != "" {
+			query += fmt.Sprintf(" and (%s)", sql)
+			params = append(params, sqlParams...)
+		}
 	}
 	if len(req.Tag) > 0 {
 		for _, tag := range req.Tag {
