@@ -18,25 +18,25 @@ type Client struct {
 	logger logging.Logger
 }
 
-func NewClient(conf *Config, l logging.Logger) *Client {
+func NewClient(conf *Config, l logging.Logger) (*Client, error) {
 	ctx := context.Background()
 	m, err := connect(conf, true)
 	if err != nil {
-		l.Fatalf(ctx, "failed to connect database: %w", err)
+		return nil, fmt.Errorf("failed to connect database of master: %w", err)
 	}
-	l.Infof(ctx, "Connected to Database. isMaster: %t", true)
+	l.Info(ctx, "Connected to Database of master.")
 
 	s, err := connect(conf, false)
 	if err != nil {
-		l.Fatalf(ctx, "failed to connect database: %w", err)
+		return nil, fmt.Errorf("failed to connect database of slave: %w", err)
 	}
-	l.Infof(ctx, "Connected to Database. isMaster: %t", false)
+	l.Info(ctx, "Connected to Database of slave.")
 
 	return &Client{
 		Master: m,
 		Slave:  s,
 		logger: l,
-	}
+	}, nil
 }
 
 func newMockClient() (*Client, sqlmock.Sqlmock, error) {
