@@ -807,3 +807,64 @@ ON DUPLICATE KEY UPDATE
 		})
 	}
 }
+
+func TestGeneratePrefixMatchSQLStatement(t *testing.T) {
+	type args struct {
+		column string
+		params []string
+	}
+	cases := []struct {
+		name      string
+		input     args
+		wantSQL   string
+		wantParam []interface{}
+	}{
+		{
+			name: "Single param",
+			input: args{
+				column: "name",
+				params: []string{"aaa"},
+			},
+			wantSQL:   "name like ?",
+			wantParam: []interface{}{"aaa%"},
+		},
+		{
+			name: "Multi params",
+			input: args{
+				column: "name",
+				params: []string{"aaa", "bbb"},
+			},
+			wantSQL:   "name like ? or name like ?",
+			wantParam: []interface{}{"aaa%", "bbb%"},
+		},
+		{
+			name: "Blank param",
+			input: args{
+				column: "name",
+				params: []string{"aaa", "bbb", ""},
+			},
+			wantSQL:   "name like ? or name like ?",
+			wantParam: []interface{}{"aaa%", "bbb%"},
+		},
+		{
+			name: "All blank param",
+			input: args{
+				column: "name",
+				params: []string{"", "", ""},
+			},
+			wantSQL:   "",
+			wantParam: nil,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			sql, param := generatePrefixMatchSQLStatement(c.input.column, c.input.params)
+			if !reflect.DeepEqual(sql, c.wantSQL) {
+				t.Fatalf("Unexpected SQL response: want=%s, got=%s", c.wantSQL, sql)
+			}
+			if !reflect.DeepEqual(param, c.wantParam) {
+				t.Fatalf("Unexpected param response: want=%+v, got=%+v", c.wantParam, param)
+			}
+		})
+	}
+}

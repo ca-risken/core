@@ -149,12 +149,18 @@ where
 		params = append(params, findingID)
 	}
 	if len(dataSources) > 0 {
-		query += " and finding.data_source regexp ?"
-		params = append(params, strings.Join(dataSources, "|"))
+		sql, sqlParams := generatePrefixMatchSQLStatement("finding.data_source", dataSources)
+		if sql != "" {
+			query += fmt.Sprintf(" and (%s)", sql)
+			params = append(params, sqlParams...)
+		}
 	}
 	if len(resourceNames) > 0 {
-		query += " and finding.resource_name regexp ?"
-		params = append(params, strings.Join(resourceNames, "|"))
+		sql, sqlParams := generatePrefixMatchSQLStatement("finding.resource_name", resourceNames)
+		if sql != "" {
+			query += fmt.Sprintf(" and (%s)", sql)
+			params = append(params, sqlParams...)
+		}
 	}
 	// EXISTS and NOT EXISTS subquery cause performance slow so used join clause instead
 	if len(tags) > 0 {
@@ -170,6 +176,20 @@ where
 		join += " inner join pend_finding using(finding_id)"
 	}
 	return join + query, params
+}
+
+func generatePrefixMatchSQLStatement(column string, params []string) (sql string, sqlParams []interface{}) {
+	for _, p := range params {
+		if p == "" {
+			continue
+		}
+		if sql != "" {
+			sql += " or "
+		}
+		sql += fmt.Sprintf("%s like ?", column)
+		sqlParams = append(sqlParams, p+"%") // prefix match
+	}
+	return sql, sqlParams
 }
 
 const selectGetFinding = `select * from finding where project_id = ? and finding_id = ?`
@@ -502,8 +522,11 @@ where
 		params = append(params, req.ResourceId)
 	}
 	if len(req.ResourceName) > 0 {
-		query += " and r.resource_name regexp ?"
-		params = append(params, strings.Join(req.ResourceName, "|"))
+		sql, sqlParams := generatePrefixMatchSQLStatement("r.resource_name", req.ResourceName)
+		if sql != "" {
+			query += fmt.Sprintf(" and (%s)", sql)
+			params = append(params, sqlParams...)
+		}
 	}
 	if len(req.Tag) > 0 {
 		for _, tag := range req.Tag {
@@ -541,8 +564,11 @@ select count(*) from (
 		params = append(params, req.ResourceId)
 	}
 	if len(req.ResourceName) > 0 {
-		query += " and r.resource_name regexp ?"
-		params = append(params, strings.Join(req.ResourceName, "|"))
+		sql, sqlParams := generatePrefixMatchSQLStatement("r.resource_name", req.ResourceName)
+		if sql != "" {
+			query += fmt.Sprintf(" and (%s)", sql)
+			params = append(params, sqlParams...)
+		}
 	}
 	if len(req.Tag) > 0 {
 		for _, tag := range req.Tag {
