@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/ca-risken/core/pkg/model"
@@ -125,8 +126,7 @@ func (f *FindingService) getFindingSettingByResource(ctx context.Context, projec
 	}
 	var setting findingSetting
 	if err := json.Unmarshal([]byte(fs.Setting), &setting); err != nil {
-		f.logger.Warnf(ctx, "Failed to unmarshal finding setting JSON, projectID=%d, resourceName=%s, err=%+v", projectID, resourceName, err)
-		return &findingSetting{}, nil
+		return nil, fmt.Errorf("failed to unmarshal finding setting JSON, projectID=%d, resourceName=%s, err=%w", projectID, resourceName, err)
 	}
 	return &setting, nil
 }
