@@ -64,17 +64,28 @@ func NewConfig(maxAnalyzeAPICall int64, notificationAlertURL string) Config {
 
 func (s *Server) Run(ctx context.Context) error {
 	clientAddr := fmt.Sprintf("localhost:%s", s.port)
-	fc := s.newFindingClient(clientAddr)
+	fc, err := s.newFindingClient(clientAddr)
+	if err != nil {
+		return err
+	}
+	pc, err := s.newProjectClient(clientAddr)
+	if err != nil {
+		return err
+	}
+	iamc, err := s.newIAMClient(clientAddr)
+	if err != nil {
+		return err
+	}
 	isvc := iamserver.NewIAMService(s.db, fc, s.logger)
 	asvc := alertserver.NewAlertService(
 		s.config.MaxAnalyzeAPICall,
 		s.config.NotificationAlertURL,
 		fc,
-		s.newProjectClient(clientAddr),
+		pc,
 		s.db,
 	)
 	fsvc := findingserver.NewFindingService(s.db, s.logger)
-	psvc := projectserver.NewProjectService(s.db, s.newIAMClient(clientAddr), s.logger)
+	psvc := projectserver.NewProjectService(s.db, iamc, s.logger)
 	rsvc := reportserver.NewReportService(s.db, s.logger)
 	hsvc := health.NewServer()
 
@@ -156,31 +167,31 @@ func healthCheck(ctx context.Context, addr string) error {
 	return nil
 }
 
-func (s *Server) newFindingClient(svcAddr string) finding.FindingServiceClient {
+func (s *Server) newFindingClient(svcAddr string) (finding.FindingServiceClient, error) {
 	ctx := context.Background()
 	conn, err := getGRPCConn(ctx, svcAddr)
 	if err != nil {
-		s.logger.Fatalf(ctx, "failed to get grpc connection: err=%+v", err)
+		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
 	}
-	return finding.NewFindingServiceClient(conn)
+	return finding.NewFindingServiceClient(conn), nil
 }
 
-func (s *Server) newIAMClient(svcAddr string) iam.IAMServiceClient {
+func (s *Server) newIAMClient(svcAddr string) (iam.IAMServiceClient, error) {
 	ctx := context.Background()
 	conn, err := getGRPCConn(ctx, svcAddr)
 	if err != nil {
-		s.logger.Fatalf(ctx, "failed to get grpc connection: err=%+v", err)
+		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
 	}
-	return iam.NewIAMServiceClient(conn)
+	return iam.NewIAMServiceClient(conn), nil
 }
 
-func (s *Server) newProjectClient(svcAddr string) project.ProjectServiceClient {
+func (s *Server) newProjectClient(svcAddr string) (project.ProjectServiceClient, error) {
 	ctx := context.Background()
 	conn, err := getGRPCConn(ctx, svcAddr)
 	if err != nil {
-		s.logger.Fatalf(ctx, "failed to get grpc connection: err=%+v", err)
+		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
 	}
-	return project.NewProjectServiceClient(conn)
+	return project.NewProjectServiceClient(conn), nil
 }
 
 func getGRPCConn(ctx context.Context, addr string) (*grpc.ClientConn, error) {

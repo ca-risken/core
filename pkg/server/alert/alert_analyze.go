@@ -484,7 +484,7 @@ func makeRandomStr(digit uint32) (string, error) {
 	// 乱数を生成
 	b := make([]byte, digit)
 	if _, err := rand.Read(b); err != nil {
-		return "", errors.New("unexpected error...")
+		return "", fmt.Errorf("failed to read random, err=%w", err)
 	}
 
 	// letters からランダムに取り出して文字列を生成
