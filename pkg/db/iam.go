@@ -261,9 +261,17 @@ ON DUPLICATE KEY UPDATE
 )
 
 func (c *Client) AttachRole(ctx context.Context, projectID, roleID, userID uint32) (*model.UserRole, error) {
-	if !c.userExists(ctx, userID) || !c.roleExists(ctx, projectID, roleID) {
+	userExists, err := c.userExists(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	roleExists, err := c.roleExists(ctx, projectID, roleID)
+	if err != nil {
+		return nil, err
+	}
+	if !userExists || !roleExists {
 		return nil, fmt.Errorf(
-			"Not found user or role: user_id=%d, role_id=%d, project_id=%d", userID, roleID, projectID)
+			"not found user or role: user_id=%d, role_id=%d, project_id=%d", userID, roleID, projectID)
 	}
 	if zero.IsZeroVal(projectID) {
 		if err := c.Master.WithContext(ctx).Exec(insertAttachAdminRole, userID, roleID).Error; err != nil {
@@ -291,8 +299,12 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (c *Client) AttachAllAdminRole(ctx context.Context, userID uint32) error {
-	if !c.userExists(ctx, userID) {
-		return fmt.Errorf("Not found user: user_id=%d", userID)
+	exists, err := c.userExists(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return fmt.Errorf("not found user: user_id=%d", userID)
 	}
 	return c.Master.WithContext(ctx).Exec(insertAttachAllAdminRole, userID).Error
 }
@@ -303,9 +315,17 @@ const (
 )
 
 func (c *Client) DetachRole(ctx context.Context, projectID, roleID, userID uint32) error {
-	if !c.userExists(ctx, userID) || !c.roleExists(ctx, projectID, roleID) {
+	userExists, err := c.userExists(ctx, userID)
+	if err != nil {
+		return err
+	}
+	roleExists, err := c.roleExists(ctx, projectID, roleID)
+	if err != nil {
+		return err
+	}
+	if !userExists || !roleExists {
 		return fmt.Errorf(
-			"Not found user or role: user_id=%d, role_id=%d, project_id=%d", userID, roleID, projectID)
+			"not found user or role: user_id=%d, role_id=%d, project_id=%d", userID, roleID, projectID)
 	}
 	if zero.IsZeroVal(projectID) {
 		return c.Master.WithContext(ctx).Exec(deleteDetachAdminRole, userID, roleID, projectID).Error
@@ -464,9 +484,17 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (c *Client) AttachPolicy(ctx context.Context, projectID, roleID, policyID uint32) (*model.RolePolicy, error) {
-	if !c.roleExists(ctx, projectID, roleID) || !c.policyExists(ctx, projectID, policyID) {
+	roleExists, err := c.roleExists(ctx, projectID, roleID)
+	if err != nil {
+		return nil, err
+	}
+	policyExists, err := c.policyExists(ctx, projectID, policyID)
+	if err != nil {
+		return nil, err
+	}
+	if !roleExists || !policyExists {
 		return nil, fmt.Errorf(
-			"Not found role or policy: role_id=%d, policy_id=%d, project_id=%d", roleID, policyID, projectID)
+			"not found role or policy: role_id=%d, policy_id=%d, project_id=%d", roleID, policyID, projectID)
 	}
 	if err := c.Master.WithContext(ctx).Exec(insertAttachPolicy, roleID, policyID, projectID).Error; err != nil {
 		return nil, err
@@ -477,9 +505,17 @@ func (c *Client) AttachPolicy(ctx context.Context, projectID, roleID, policyID u
 const deleteDetachPolicy = `delete from role_policy where role_id = ? and policy_id = ? and project_id = ?`
 
 func (c *Client) DetachPolicy(ctx context.Context, projectID, roleID, policyID uint32) error {
-	if !c.roleExists(ctx, projectID, roleID) || !c.policyExists(ctx, projectID, policyID) {
+	roleExists, err := c.roleExists(ctx, projectID, roleID)
+	if err != nil {
+		return err
+	}
+	policyExists, err := c.policyExists(ctx, projectID, policyID)
+	if err != nil {
+		return err
+	}
+	if !roleExists || !policyExists {
 		return fmt.Errorf(
-			"Not found role or policy: role_id=%d, policy_id=%d, project_id=%d", roleID, policyID, projectID)
+			"not found role or policy: role_id=%d, policy_id=%d, project_id=%d", roleID, policyID, projectID)
 	}
 	return c.Master.WithContext(ctx).Exec(deleteDetachPolicy, roleID, policyID, projectID).Error
 }
@@ -603,9 +639,17 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (c *Client) AttachAccessTokenRole(ctx context.Context, projectID, roleID, accessTokenID uint32) (*model.AccessTokenRole, error) {
-	if !c.accessTokenExists(ctx, projectID, accessTokenID) || !c.roleExists(ctx, projectID, roleID) {
+	accessTokenExists, err := c.accessTokenExists(ctx, projectID, accessTokenID)
+	if err != nil {
+		return nil, err
+	}
+	roleExists, err := c.roleExists(ctx, projectID, roleID)
+	if err != nil {
+		return nil, err
+	}
+	if !accessTokenExists || !roleExists {
 		return nil, fmt.Errorf(
-			"Not found access_token or role: access_token_id=%d, role_id=%d, project_id=%d", accessTokenID, roleID, projectID)
+			"not found access_token or role: access_token_id=%d, role_id=%d, project_id=%d", accessTokenID, roleID, projectID)
 	}
 	if err := c.Master.WithContext(ctx).Exec(insertAttachAccessTokenRole, accessTokenID, roleID).Error; err != nil {
 		return nil, err
@@ -616,9 +660,17 @@ func (c *Client) AttachAccessTokenRole(ctx context.Context, projectID, roleID, a
 const deleteDetachAccessTokenRole = `delete from access_token_role where access_token_id=? and role_id=?`
 
 func (c *Client) DetachAccessTokenRole(ctx context.Context, projectID, roleID, accessTokenID uint32) error {
-	if !c.accessTokenExists(ctx, projectID, accessTokenID) || !c.roleExists(ctx, projectID, roleID) {
+	accessTokenExists, err := c.accessTokenExists(ctx, projectID, accessTokenID)
+	if err != nil {
+		return err
+	}
+	roleExists, err := c.roleExists(ctx, projectID, roleID)
+	if err != nil {
+		return err
+	}
+	if !accessTokenExists || !roleExists {
 		return fmt.Errorf(
-			"Not found access_token or role: access_token_id=%d, role_id=%d, project_id=%d", accessTokenID, roleID, projectID)
+			"not found access_token or role: access_token_id=%d, role_id=%d, project_id=%d", accessTokenID, roleID, projectID)
 	}
 	return c.Master.WithContext(ctx).Exec(deleteDetachAccessTokenRole, accessTokenID, roleID).Error
 }
@@ -658,45 +710,40 @@ func (c *Client) ListExpiredAccessToken(ctx context.Context) (*[]model.AccessTok
 	return &data, nil
 }
 
-func (c *Client) userExists(ctx context.Context, userID uint32) bool {
+func (c *Client) userExists(ctx context.Context, userID uint32) (bool, error) {
 	if _, err := c.GetUser(ctx, userID, ""); errors.Is(err, gorm.ErrRecordNotFound) {
-		return false
-
+		return false, nil
 	} else if err != nil {
-		c.logger.Errorf(ctx, "[userExists]DB error: user_id=%d", userID)
-		return false
+		return false, fmt.Errorf("failed to get user. user_id=%d, error: %w", userID, err)
 	}
-	return true
+	return true, nil
 }
 
-func (c *Client) roleExists(ctx context.Context, projectID, roleID uint32) bool {
+func (c *Client) roleExists(ctx context.Context, projectID, roleID uint32) (bool, error) {
 	if _, err := c.GetRole(ctx, projectID, roleID); errors.Is(err, gorm.ErrRecordNotFound) {
-		return false
+		return false, nil
 	} else if err != nil {
-		c.logger.Errorf(ctx, "[roleExists]DB error: project_id=%d, role_id=%d", projectID, roleID)
-		return false
+		return false, fmt.Errorf("failed to get role. project_id=%d, role_id=%d, error: %w", projectID, roleID, err)
 	}
-	return true
+	return true, nil
 }
 
-func (c *Client) policyExists(ctx context.Context, projectID, policyID uint32) bool {
+func (c *Client) policyExists(ctx context.Context, projectID, policyID uint32) (bool, error) {
 	if _, err := c.GetPolicy(ctx, projectID, policyID); errors.Is(err, gorm.ErrRecordNotFound) {
-		return false
+		return false, nil
 	} else if err != nil {
-		c.logger.Errorf(ctx, "[policyExists]DB error: project_id=%d, policy_id=%d", projectID, policyID)
-		return false
+		return false, fmt.Errorf("failed to get policy. project_id=%d, policy_id=%d, error: %w", projectID, policyID, err)
 	}
-	return true
+	return true, nil
 }
 
-func (c *Client) accessTokenExists(ctx context.Context, projectID, accessTokenID uint32) bool {
+func (c *Client) accessTokenExists(ctx context.Context, projectID, accessTokenID uint32) (bool, error) {
 	if _, err := c.GetAccessTokenByID(ctx, projectID, accessTokenID); errors.Is(err, gorm.ErrRecordNotFound) {
-		return false
+		return false, nil
 	} else if err != nil {
-		c.logger.Errorf(ctx, "[accessTokenExists]DB error: project_id=%d, access_token_id=%d", projectID, accessTokenID)
-		return false
+		return false, fmt.Errorf("failed to get access token. project_id=%d, access_token_id=%d, error: %w", projectID, accessTokenID, err)
 	}
-	return true
+	return true, nil
 }
 
 func convertZeroValueToNull(input interface{}) interface{} {
