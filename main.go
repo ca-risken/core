@@ -91,7 +91,10 @@ func main() {
 		LogMode:        conf.DBLogMode,
 		MaxConnection:  conf.DBMaxConnection,
 	}
-	db := db.NewClient(dbConf, logger)
+	db, err := db.NewClient(dbConf, logger)
+	if err != nil {
+		logger.Fatalf(ctx, "failed to create database client: %w", err)
+	}
 	c := server.NewConfig(conf.MaxAnalyzeAPICall, conf.NotificationAlertURL)
 	server := server.NewServer("0.0.0.0", conf.Port, db, logger, c)
 
