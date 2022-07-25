@@ -11,6 +11,10 @@ import (
 	"github.com/vikyd/zero"
 )
 
+const (
+	escapeString = "*"
+)
+
 type FindingRepository interface {
 	// Finding
 	ListFinding(context.Context, *finding.ListFindingRequest) (*[]model.Finding, error)
@@ -178,6 +182,13 @@ where
 	return join + query, params
 }
 
+func escapeLikeParam(s string) string {
+	s = strings.ReplaceAll(s, "*", escapeString+"*")
+	s = strings.ReplaceAll(s, "_", escapeString+"_")
+	s = strings.ReplaceAll(s, "%", escapeString+"%")
+	return s
+}
+
 func generatePrefixMatchSQLStatement(column string, params []string) (sql string, sqlParams []interface{}) {
 	for _, p := range params {
 		if p == "" {
@@ -186,8 +197,8 @@ func generatePrefixMatchSQLStatement(column string, params []string) (sql string
 		if sql != "" {
 			sql += " or "
 		}
-		sql += fmt.Sprintf("%s like ?", column)
-		sqlParams = append(sqlParams, p+"%") // prefix match
+		sql += fmt.Sprintf("%s like ? escape '%s'", column, escapeString)
+		sqlParams = append(sqlParams, escapeLikeParam(p)+"%") // prefix match
 	}
 	return sql, sqlParams
 }
