@@ -855,6 +855,15 @@ func TestGeneratePrefixMatchSQLStatement(t *testing.T) {
 			wantSQL:   "",
 			wantParam: nil,
 		},
+		{
+			name: "Escaping param",
+			input: args{
+				column: "name",
+				params: []string{"%", "_"},
+			},
+			wantSQL:   "name like ? escape '*' or name like ? escape '*'",
+			wantParam: []interface{}{"*%%", "*_%"},
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
