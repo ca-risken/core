@@ -825,7 +825,7 @@ func TestGeneratePrefixMatchSQLStatement(t *testing.T) {
 				column: "name",
 				params: []string{"aaa"},
 			},
-			wantSQL:   "name like ?",
+			wantSQL:   "name like ? escape '*'",
 			wantParam: []interface{}{"aaa%"},
 		},
 		{
@@ -834,7 +834,7 @@ func TestGeneratePrefixMatchSQLStatement(t *testing.T) {
 				column: "name",
 				params: []string{"aaa", "bbb"},
 			},
-			wantSQL:   "name like ? or name like ?",
+			wantSQL:   "name like ? escape '*' or name like ? escape '*'",
 			wantParam: []interface{}{"aaa%", "bbb%"},
 		},
 		{
@@ -843,7 +843,7 @@ func TestGeneratePrefixMatchSQLStatement(t *testing.T) {
 				column: "name",
 				params: []string{"aaa", "bbb", ""},
 			},
-			wantSQL:   "name like ? or name like ?",
+			wantSQL:   "name like ? escape '*' or name like ? escape '*'",
 			wantParam: []interface{}{"aaa%", "bbb%"},
 		},
 		{
