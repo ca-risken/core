@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
@@ -15,7 +16,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
-	"github.com/ca-risken/common/pkg/logging"
 
 	iammock "github.com/ca-risken/core/proto/iam/mocks"
 )
@@ -224,7 +224,7 @@ func TestDeleteProject(t *testing.T) {
 	mockIAM := iammock.IAMServiceClient{}
 	svc := ProjectService{
 		iamClient: &mockIAM,
-		logger:     logging.NewLogger(),
+		logger:    logging.NewLogger(),
 	}
 	cases := []struct {
 		name             string

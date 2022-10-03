@@ -27,8 +27,8 @@ import (
 func TestAnalyzeAlert(t *testing.T) {
 	now := time.Now()
 	mockDB := mocks.MockAlertRepository{}
-	mockProject := projectmock.ProjectServiceClient{}
-	svc := AlertService{repository: &mockDB, projectClient: &mockProject}
+	mockProject := projectmock.NewProjectServiceClient(t)
+	svc := AlertService{repository: &mockDB, projectClient: mockProject}
 	cases := []struct {
 		name                              string
 		input                             *alert.AnalyzeAlertRequest
@@ -94,7 +94,7 @@ func TestAnalyzeAlert(t *testing.T) {
 			mockDB.On("ListEnabledAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
 			mockDB.On("ListAlertRuleByAlertConditionID").Return(&[]model.AlertRule{}, c.mockListAlertRuleErr).Once()
 			mockDB.On("ListDisabledAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
-			mockProject = projectmock.ProjectServiceClient{}
+
 			mockProject.On("ListProject", ctx, &project.ListProjectRequest{ProjectId: c.input.ProjectId}).
 				Return(c.mockListProject, c.mockListProjectErr).Once()
 			got, err := svc.AnalyzeAlert(ctx, c.input)
