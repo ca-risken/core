@@ -3,6 +3,7 @@ package alert
 import (
 	"context"
 	"errors"
+	"github.com/ca-risken/core/pkg/test"
 	"reflect"
 	"testing"
 	"time"
@@ -20,8 +21,8 @@ import (
 func TestListAlert(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListAlertRequest
@@ -45,7 +46,7 @@ func TestListAlert(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("ListAlert").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("ListAlert", test.RepeatMockAnything(7)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.ListAlert(ctx, c.input)
 			if err != nil {
@@ -84,8 +85,8 @@ func TestConvertListAlertRequest(t *testing.T) {
 func TestGetAlert(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetAlertRequest
@@ -109,7 +110,7 @@ func TestGetAlert(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("GetAlert").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("GetAlert", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.GetAlert(ctx, c.input)
 			if err != nil {
@@ -125,8 +126,6 @@ func TestGetAlert(t *testing.T) {
 func TestPutAlert(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 
 	cases := []struct {
 		name                        string
@@ -169,21 +168,21 @@ func TestPutAlert(t *testing.T) {
 			mockGetErr: gorm.ErrRecordNotFound,
 		},
 		{
-			name:                        "NG failed listRelAlertFinding",
-			input:                       &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
-			want:                        &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			wantErr:                     true,
-			mockGetErr:                  gorm.ErrRecordNotFound,
+			name:    "NG failed listRelAlertFinding",
+			input:   &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
+			want:    &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			wantErr: true,
+			//mockGetErr:                  gorm.ErrRecordNotFound,
 			mockUpResp:                  &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 			mockListRelAlertFindingResp: nil,
 			mockListRelAlertFindingErr:  errors.New("something error"),
 		},
 		{
-			name:                        "NG failed putAlertHistory",
-			input:                       &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
-			want:                        &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			wantErr:                     true,
-			mockGetErr:                  gorm.ErrRecordNotFound,
+			name:    "NG failed putAlertHistory",
+			input:   &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
+			want:    &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			wantErr: true,
+			//mockGetErr:                  gorm.ErrRecordNotFound,
 			mockUpResp:                  &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 			mockListRelAlertFindingResp: &[]model.RelAlertFinding{{FindingID: 1001, ProjectID: 1001}},
 			mockListRelAlertFindingErr:  nil,
@@ -193,17 +192,19 @@ func TestPutAlert(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockGetResp != nil || c.mockGetErr != nil {
-				mockDB.On("GetAlert").Return(c.mockGetResp, c.mockGetErr).Once()
+				mockDB.On("GetAlert", test.RepeatMockAnything(3)...).Return(c.mockGetResp, c.mockGetErr).Once()
 			}
 			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mockDB.On("UpsertAlert").Return(c.mockUpResp, c.mockUpErr).Once()
+				mockDB.On("UpsertAlert", test.RepeatMockAnything(2)...).Return(c.mockUpResp, c.mockUpErr).Once()
 			}
 			if c.mockListRelAlertFindingResp != nil || c.mockListRelAlertFindingErr != nil {
-				mockDB.On("ListRelAlertFinding").Return(c.mockListRelAlertFindingResp, c.mockListRelAlertFindingErr).Once()
+				mockDB.On("ListRelAlertFinding", test.RepeatMockAnything(6)...).Return(c.mockListRelAlertFindingResp, c.mockListRelAlertFindingErr).Once()
 			}
 			if c.mockUpHistoryResp != nil || c.mockUpHistoryErr != nil {
-				mockDB.On("UpsertAlertHistory").Return(c.mockUpHistoryResp, c.mockUpHistoryErr).Once()
+				mockDB.On("UpsertAlertHistory", test.RepeatMockAnything(2)...).Return(c.mockUpHistoryResp, c.mockUpHistoryErr).Once()
 			}
 			got, err := svc.PutAlert(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -218,8 +219,8 @@ func TestPutAlert(t *testing.T) {
 
 func TestDeleteAlert(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name    string
 		input   *alert.DeleteAlertRequest
@@ -290,8 +291,8 @@ func TestConvertAlert(t *testing.T) {
 func TestListAlertHistory(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListAlertHistoryRequest
@@ -354,8 +355,8 @@ func TestConvertListAlertHistoryRequest(t *testing.T) {
 func TestGetAlertHistory(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetAlertHistoryRequest
@@ -395,8 +396,8 @@ func TestGetAlertHistory(t *testing.T) {
 func TestPutAlertHistory(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 
 	cases := []struct {
 		name        string
@@ -440,8 +441,8 @@ func TestPutAlertHistory(t *testing.T) {
 
 func TestDeleteAlertHistory(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name    string
 		input   *alert.DeleteAlertHistoryRequest
@@ -512,8 +513,8 @@ func TestConvertAlertHistory(t *testing.T) {
 func TestListRelAlertFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListRelAlertFindingRequest
@@ -576,8 +577,8 @@ func TestConvertListRelAlertFindingRequest(t *testing.T) {
 func TestGetRelAlertFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetRelAlertFindingRequest
@@ -617,8 +618,8 @@ func TestGetRelAlertFinding(t *testing.T) {
 func TestPutRelAlertFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 
 	cases := []struct {
 		name        string
@@ -655,8 +656,8 @@ func TestPutRelAlertFinding(t *testing.T) {
 
 func TestDeleteRelAlertFinding(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name    string
 		input   *alert.DeleteRelAlertFindingRequest
@@ -727,8 +728,8 @@ func TestConvertRelAlertFinding(t *testing.T) {
 func TestListAlertCondition(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListAlertConditionRequest
@@ -791,8 +792,8 @@ func TestConvertListAlertConditionRequest(t *testing.T) {
 func TestGetAlertCondition(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetAlertConditionRequest
@@ -832,8 +833,8 @@ func TestGetAlertCondition(t *testing.T) {
 func TestPutAlertCondition(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 
 	cases := []struct {
 		name        string
@@ -870,8 +871,8 @@ func TestPutAlertCondition(t *testing.T) {
 
 func TestDeleteAlertCondition(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name    string
 		input   *alert.DeleteAlertConditionRequest
@@ -946,8 +947,8 @@ func TestConvertAlertCondition(t *testing.T) {
 func TestListAlertRule(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListAlertRuleRequest
@@ -1015,8 +1016,8 @@ func TestConvertListAlertRuleRequest(t *testing.T) {
 func TestGetAlertRule(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetAlertRuleRequest
@@ -1056,8 +1057,8 @@ func TestGetAlertRule(t *testing.T) {
 func TestPutAlertRule(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 
 	cases := []struct {
 		name        string
@@ -1094,8 +1095,8 @@ func TestPutAlertRule(t *testing.T) {
 
 func TestDeleteAlertRule(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name    string
 		input   *alert.DeleteAlertRuleRequest
@@ -1168,8 +1169,8 @@ func TestConvertAlertRule(t *testing.T) {
 func TestListAlertCondRule(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListAlertCondRuleRequest
@@ -1232,8 +1233,8 @@ func TestConvertListAlertCondRuleRequest(t *testing.T) {
 func TestGetAlertCondRule(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetAlertCondRuleRequest
@@ -1273,8 +1274,8 @@ func TestGetAlertCondRule(t *testing.T) {
 func TestPutAlertCondRule(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 
 	cases := []struct {
 		name        string
@@ -1311,8 +1312,8 @@ func TestPutAlertCondRule(t *testing.T) {
 
 func TestDeleteAlertCondRule(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name    string
 		input   *alert.DeleteAlertCondRuleRequest
@@ -1383,8 +1384,8 @@ func TestConvertAlertCondRule(t *testing.T) {
 func TestListNotification(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListNotificationRequest
@@ -1452,8 +1453,8 @@ func TestConvertListNotificationRequest(t *testing.T) {
 func TestGetNotification(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetNotificationRequest
@@ -1493,8 +1494,8 @@ func TestGetNotification(t *testing.T) {
 func TestPutNotification(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 
 	cases := []struct {
 		name        string
@@ -1596,8 +1597,8 @@ func TestReplaceSlackNotifySetting(t *testing.T) {
 
 func TestDeleteNotification(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name    string
 		input   *alert.DeleteNotificationRequest
@@ -1680,8 +1681,8 @@ func TestConvertNotification(t *testing.T) {
 func TestListAlertCondNotification(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListAlertCondNotificationRequest
@@ -1744,8 +1745,8 @@ func TestConvertListAlertCondNotificationRequest(t *testing.T) {
 func TestGetAlertCondNotification(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetAlertCondNotificationRequest
@@ -1785,8 +1786,8 @@ func TestGetAlertCondNotification(t *testing.T) {
 func TestPutAlertCondNotification(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 
 	cases := []struct {
 		name        string
@@ -1823,8 +1824,8 @@ func TestPutAlertCondNotification(t *testing.T) {
 
 func TestDeleteAlertCondNotification(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name    string
 		input   *alert.DeleteAlertCondNotificationRequest

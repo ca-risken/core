@@ -26,9 +26,9 @@ import (
 
 func TestAnalyzeAlert(t *testing.T) {
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
+	mockDB := mocks.NewAlertRepository(t)
 	mockProject := projectmock.NewProjectServiceClient(t)
-	svc := AlertService{repository: &mockDB, projectClient: mockProject}
+	svc := AlertService{repository: mockDB, projectClient: mockProject}
 	cases := []struct {
 		name                              string
 		input                             *alert.AnalyzeAlertRequest
@@ -90,7 +90,6 @@ func TestAnalyzeAlert(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			ctx := context.Background()
-			mockDB = mocks.MockAlertRepository{}
 			mockDB.On("ListEnabledAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
 			mockDB.On("ListAlertRuleByAlertConditionID").Return(&[]model.AlertRule{}, c.mockListAlertRuleErr).Once()
 			mockDB.On("ListDisabledAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
@@ -163,8 +162,8 @@ func TestNotificationAlert(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 
 	httpmock.RegisterResponder("POST", "http://hogehoge.com", httpmock.NewStringResponder(200, "mocked"))
 	httpmock.RegisterResponder("POST", "http://fugafuga.com", httpmock.NewErrorResponder(errors.New("Something Wrong")))
@@ -261,7 +260,6 @@ func TestNotificationAlert(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB = mocks.MockAlertRepository{}
 			mockDB.On("ListAlertCondNotification").Return(c.mockListAlertCondNotification, c.mockListAlertCondNotificationErr).Once()
 			mockDB.On("GetNotification").Return(c.mockGetNotification, c.mockGetNotificationErr).Once()
 			mockDB.On("UpsertAlertCondNotification").Return(c.mockUpsertAlertCondNotification, c.mockUpsertAlertCondNotificationErr).Once()
@@ -353,8 +351,8 @@ func TestAnalyzeAlertByRule(t *testing.T) {
 
 func TestDeleteAlertByAnalyze(t *testing.T) {
 	//	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name                                    string
 		alertCondition                          *model.AlertCondition
@@ -441,7 +439,6 @@ func TestDeleteAlertByAnalyze(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB = mocks.MockAlertRepository{}
 			mockDB.On("GetAlertByAlertConditionIDStatus").Return(c.mockGetAlertByAlertConditionIDStatus, c.mockGetAlertByAlertConditionIDStatusErr).Once()
 			mockDB.On("DeactivateAlert").Return(c.mockDeactivateAlertErr).Once()
 			mockDB.On("UpsertAlertHistory").Return(c.mockUpsertAlertHistory, c.mockUpsertAlertHistoryErr).Once()
@@ -457,8 +454,8 @@ func TestDeleteAlertByAnalyze(t *testing.T) {
 
 func TestRegistAlertByAnalyze(t *testing.T) {
 	//	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB}
 	cases := []struct {
 		name                                    string
 		alertCondition                          *model.AlertCondition
@@ -533,7 +530,6 @@ func TestRegistAlertByAnalyze(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB = mocks.MockAlertRepository{}
 			mockDB.On("GetAlertByAlertConditionIDStatus").Return(c.mockGetAlertByAlertConditionIDStatus, c.mockGetAlertByAlertConditionIDStatusErr).Once()
 			mockDB.On("UpsertAlert").Return(c.mockUpsertAlert, c.mockUpsertAlertErr).Once()
 			mockDB.On("UpsertAlertHistory").Return(c.mockUpsertAlertHistory, c.mockUpsertAlertHistoryErr).Once()
