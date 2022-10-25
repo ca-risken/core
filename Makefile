@@ -11,10 +11,13 @@ all: run
 
 .PHONY: install
 install:
-	go get \
-		google.golang.org/grpc \
-		github.com/golang/protobuf/protoc-gen-go \
-		github.com/envoyproxy/protoc-gen-validate@v0.6.7 \
+	go install \
+		google.golang.org/grpc
+	go install \
+		github.com/golang/protobuf/protoc-gen-go
+	go install \
+		github.com/envoyproxy/protoc-gen-validate@v0.6.7
+	go install \
 		github.com/grpc-ecosystem/go-grpc-middleware
 
 .PHONY: clean
