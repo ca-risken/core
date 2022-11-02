@@ -117,7 +117,7 @@ func (c *Client) ListAlertHistory(ctx context.Context, projectID, alertID uint32
 		query += " and severity in (?)"
 		params = append(params, severity)
 	}
-	query += " order by alert_history_id desc"
+	query += " order by alert_history_id desc limit 10"
 	var data []model.AlertHistory
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
