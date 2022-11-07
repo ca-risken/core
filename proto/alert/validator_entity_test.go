@@ -321,32 +321,32 @@ func TestValidateNotificationForUpsert(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &NotificationForUpsert{ProjectId: 1001, Name: "test_name", Type: "test_type", NotifySetting: `{"test_setting": "test_val"}`},
+			input:   &NotificationForUpsert{ProjectId: 1001, Name: "test_name", Type: "test_type", NotifySetting: `{"webhook_url": "https://example.com"}`},
 			wantErr: false,
 		},
 		{
 			name:    "NG required project_id",
-			input:   &NotificationForUpsert{Name: "test_name", Type: "test_type", NotifySetting: `{"test_setting": "test_val"}`},
+			input:   &NotificationForUpsert{Name: "test_name", Type: "test_type", NotifySetting: `{"webhook_url": "https://example.com"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG too long name",
-			input:   &NotificationForUpsert{ProjectId: 1001, Name: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901", Type: "test_type", NotifySetting: `{"test_setting": "test_val"}`},
+			input:   &NotificationForUpsert{ProjectId: 1001, Name: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901", Type: "test_type", NotifySetting: `{"webhook_url": "https://example.com"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG required name",
-			input:   &NotificationForUpsert{ProjectId: 1001, Type: "test_type", NotifySetting: `{"test_setting": "test_val"}`},
+			input:   &NotificationForUpsert{ProjectId: 1001, Type: "test_type", NotifySetting: `{"webhook_url": "https://example.com"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG too long type",
-			input:   &NotificationForUpsert{ProjectId: 1001, Name: "test_name", Type: "12345678901234567890123456789012345678901234567890123456789012345", NotifySetting: `{"test_setting": "test_val"}`},
+			input:   &NotificationForUpsert{ProjectId: 1001, Name: "test_name", Type: "12345678901234567890123456789012345678901234567890123456789012345", NotifySetting: `{"webhook_url": "https://example.com"}`},
 			wantErr: true,
 		},
 		{
 			name:    "NG required type",
-			input:   &NotificationForUpsert{ProjectId: 1001, Name: "test_name", NotifySetting: `{"test_setting": "test_val"}`},
+			input:   &NotificationForUpsert{ProjectId: 1001, Name: "test_name", NotifySetting: `{"webhook_url": "https://example.com"}`},
 			wantErr: true,
 		},
 		{
@@ -357,6 +357,16 @@ func TestValidateNotificationForUpsert(t *testing.T) {
 		{
 			name:    "NG required notify_setting",
 			input:   &NotificationForUpsert{ProjectId: 1001, Name: "test_name", Type: "test_type"},
+			wantErr: true,
+		},
+		{
+			name:    "NG required notify webhook url",
+			input:   &NotificationForUpsert{ProjectId: 1001, Name: "test_name", Type: "test_type", NotifySetting: `{"webhook_url": ""}`},
+			wantErr: true,
+		},
+		{
+			name:    "NG invalid notify webhook url",
+			input:   &NotificationForUpsert{ProjectId: 1001, Name: "test_name", Type: "test_type", NotifySetting: `{"webhook_url": "hoge"}`},
 			wantErr: true,
 		},
 	}

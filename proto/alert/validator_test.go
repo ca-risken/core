@@ -1055,7 +1055,7 @@ func TestValidatePutNotificationRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &PutNotificationRequest{ProjectId: 1001, Notification: &NotificationForUpsert{ProjectId: 1001, Name: "test_name", Type: "test_type", NotifySetting: `{"test_setting": "test_val"}`}},
+			input:   &PutNotificationRequest{ProjectId: 1001, Notification: &NotificationForUpsert{ProjectId: 1001, Name: "test_name", Type: "test_type", NotifySetting: `{"webhook_url": "https://example.com"}`}},
 			wantErr: false,
 		},
 		{
@@ -1065,7 +1065,7 @@ func TestValidatePutNotificationRequest(t *testing.T) {
 		},
 		{
 			name:    "NG Not Equal(project_id != tag.project_id)",
-			input:   &PutNotificationRequest{ProjectId: 1000, Notification: &NotificationForUpsert{ProjectId: 1001, Name: "test_name", Type: "test_type", NotifySetting: `{"test_setting": "test_val"}`}},
+			input:   &PutNotificationRequest{ProjectId: 1000, Notification: &NotificationForUpsert{ProjectId: 1001, Name: "test_name", Type: "test_type", NotifySetting: `{"webhook_url": "https://example.com"}`}},
 			wantErr: true,
 		},
 	}

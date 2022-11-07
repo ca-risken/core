@@ -1,7 +1,10 @@
 package alert
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	is "github.com/go-ozzo/ozzo-validation/v4/is"
@@ -413,7 +416,7 @@ func (e *NotificationForUpsert) Validate() error {
 		validation.Field(&e.ProjectId, validation.Required),
 		validation.Field(&e.Type, validation.Required, validation.Length(0, 64)),
 		validation.Field(&e.Name, validation.Required, validation.Length(0, 200)),
-		validation.Field(&e.NotifySetting, validation.Required, is.JSON),
+		validation.Field(&e.NotifySetting, validation.Required, validation.By(validateNotifySetting)),
 	)
 }
 
@@ -425,4 +428,24 @@ func (e *AlertCondNotificationForUpsert) Validate() error {
 		validation.Field(&e.AlertConditionId, validation.Required),
 		validation.Field(&e.NotifiedAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 	)
+}
+
+type slackNotifySetting struct {
+	WebhookURL string `json:"webhook_url"`
+}
+
+func validateNotifySetting(value interface{}) error {
+	s, _ := value.(string)
+	var setting slackNotifySetting
+	if err := json.Unmarshal([]byte(s), &setting); err != nil {
+		return fmt.Errorf("invalid json, %w", err)
+	}
+	if strings.TrimSpace(setting.WebhookURL) == "" {
+		return errors.New("required webhook url in json")
+	}
+	err := validation.Validate(strings.TrimSpace(setting.WebhookURL), validation.Required, is.URL)
+	if err != nil {
+		return err
+	}
+	return nil
 }
