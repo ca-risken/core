@@ -590,7 +590,7 @@ func (s *slackWebhookConfig) GetPayload(ctx context.Context, channel, message st
 				},
 				map[string]string{
 					"title": "Link",
-					"value": fmt.Sprintf("<%s?project_id=%d|詳細はこちらから>", s.NotificationAlertURL, project.ProjectId),
+					"value": fmt.Sprintf("<%s?project_id=%d&from=slack|詳細はこちらから>", s.NotificationAlertURL, project.ProjectId),
 					"short": "true",
 				},
 				map[string]string{
