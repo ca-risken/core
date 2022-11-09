@@ -10,29 +10,29 @@ import (
 
 	"github.com/ca-risken/core/pkg/model"
 	projectproto "github.com/ca-risken/core/proto/project"
-	"github.com/vikyd/zero"
 )
+
+type slackNotifySetting struct {
+	WebhookURL string            `json:"webhook_url"`
+	Data       slackNotifyOption `json:"data"`
+}
+
+type slackNotifyOption struct {
+	Channel string `json:"channel,omitempty"`
+	Message string `json:"message,omitempty"`
+}
 
 func sendSlackNotification(ctx context.Context, notifyURL, notifySetting string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
 	}
-	if zero.IsZeroVal(setting.WebhookURL) {
+	if setting.WebhookURL == "" {
 		appLogger.Warn(ctx, "Unset webhook_url")
 		return nil
 	}
-	channel := ""
-	if !zero.IsZeroVal(setting.Data["channel"]) {
-		channel = setting.Data["channel"]
-	}
-	message := ""
-	if !zero.IsZeroVal(setting.Data["message"]) {
-		message = setting.Data["message"]
-	}
 
-	slackConfig := &slackWebhookConfig{NotificationAlertURL: notifyURL}
-	payload, err := slackConfig.GetPayload(ctx, channel, message, alert, project, rules)
+	payload, err := getPayload(ctx, setting.Data.Channel, setting.Data.Message, notifyURL, alert, project, rules)
 	if err != nil {
 		return err
 	}
@@ -51,17 +51,12 @@ func sendSlackTestNotification(ctx context.Context, notifyURL, notifySetting str
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
 	}
-	if zero.IsZeroVal(setting.WebhookURL) {
+	if setting.WebhookURL == "" {
 		appLogger.Warn(ctx, "Unset webhook_url")
 		return nil
 	}
-	channel := ""
-	if !zero.IsZeroVal(setting.Data["channel"]) {
-		channel = setting.Data["channel"]
-	}
 
-	slackConfig := slackWebhookConfig{NotificationAlertURL: notifyURL}
-	payload, err := slackConfig.GetTestPayload(channel)
+	payload, err := getTestPayload(setting.Data.Channel)
 	if err != nil {
 		return err
 	}
@@ -75,26 +70,17 @@ func sendSlackTestNotification(ctx context.Context, notifyURL, notifySetting str
 	return nil
 }
 
-type slackNotifySetting struct {
-	WebhookURL string            `json:"webhook_url"`
-	Data       map[string]string `json:"data"`
-}
-
-type slackWebhookConfig struct {
-	NotificationAlertURL string
-}
-
-func (s *slackWebhookConfig) GetPayload(ctx context.Context, channel, message string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule) (string, error) {
+func getPayload(ctx context.Context, channel, message, notifyURL string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule) (string, error) {
 	payload := map[string]interface{}{}
 	// text
 	text := fmt.Sprintf("%vアラートを検知しました。", getMention(alert.Severity))
-	if !zero.IsZeroVal(message) {
+	if message != "" {
 		text = message // update message
 	}
 	payload["text"] = text
 
 	// channel
-	if !zero.IsZeroVal(channel) {
+	if channel != "" {
 		payload["channel"] = channel
 	}
 
@@ -121,7 +107,7 @@ func (s *slackWebhookConfig) GetPayload(ctx context.Context, channel, message st
 				},
 				map[string]string{
 					"title": "Link",
-					"value": fmt.Sprintf("<%s?project_id=%d&from=slack|詳細はこちらから>", s.NotificationAlertURL, project.ProjectId),
+					"value": fmt.Sprintf("<%s?project_id=%d&from=slack|詳細はこちらから>", notifyURL, project.ProjectId),
 					"short": "true",
 				},
 				map[string]string{
@@ -142,14 +128,14 @@ func (s *slackWebhookConfig) GetPayload(ctx context.Context, channel, message st
 	return string(buf), err
 }
 
-func (s *slackWebhookConfig) GetTestPayload(channel string) (string, error) {
+func getTestPayload(channel string) (string, error) {
 	payload := map[string]interface{}{}
 	// text
 	text := "RISKENからのテスト通知です"
 	payload["text"] = text
 
 	// channel
-	if !zero.IsZeroVal(channel) {
+	if channel != "" {
 		payload["channel"] = channel
 	}
 
