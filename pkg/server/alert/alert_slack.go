@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
 	projectproto "github.com/ca-risken/core/proto/project"
+	"github.com/slack-go/slack"
 )
 
 type slackNotifySetting struct {
@@ -32,17 +32,12 @@ func sendSlackNotification(ctx context.Context, notifyURL, notifySetting string,
 		return nil
 	}
 
-	payload, err := getPayload(ctx, setting.Data.Channel, setting.Data.Message, notifyURL, alert, project, rules)
-	if err != nil {
-		return err
-	}
+	payload := getPayload(ctx, setting.Data.Channel, setting.Data.Message, notifyURL, alert, project, rules)
 	// TODO http tracing
-	resp, err := http.PostForm(setting.WebhookURL, url.Values{"payload": {string(payload)}})
-	if err != nil {
-		appLogger.Errorf(ctx, "Failed to send slack, resp=%+v, err=%+v", resp, err)
+	if err := slack.PostWebhook(setting.WebhookURL, payload); err != nil {
+		appLogger.Errorf(ctx, "Failed to send slack, err=%+v", err)
 		return err
 	}
-	defer resp.Body.Close()
 	return nil
 }
 
@@ -56,91 +51,82 @@ func sendSlackTestNotification(ctx context.Context, notifyURL, notifySetting str
 		return nil
 	}
 
-	payload, err := getTestPayload(setting.Data.Channel)
-	if err != nil {
-		return err
-	}
+	payload := getTestPayload(setting.Data.Channel)
 	// TODO http tracing
-	resp, err := http.PostForm(setting.WebhookURL, url.Values{"payload": {string(payload)}})
-	if err != nil {
-		appLogger.Errorf(ctx, "Failed to send slack, resp=%+v, err=%+v", resp, err)
+	if err := slack.PostWebhook(setting.WebhookURL, payload); err != nil {
+		appLogger.Errorf(ctx, "Failed to send slack, err=%+v", err)
 		return err
 	}
-	defer resp.Body.Close()
 	return nil
 }
 
-func getPayload(ctx context.Context, channel, message, notifyURL string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule) (string, error) {
-	payload := map[string]interface{}{}
-	// text
-	text := fmt.Sprintf("%vアラートを検知しました。", getMention(alert.Severity))
-	if message != "" {
-		text = message // update message
-	}
-	payload["text"] = text
-
-	// channel
-	if channel != "" {
-		payload["channel"] = channel
-	}
+func getPayload(
+	ctx context.Context,
+	channel string,
+	message string,
+	notifyURL string,
+	alert *model.Alert,
+	project *projectproto.Project,
+	rules *[]model.AlertRule,
+) *slack.WebhookMessage {
 
 	// attachments
-	now := time.Now().Unix()
-	attachments := []interface{}{
-		map[string]interface{}{
-			"color": getColor(alert.Severity),
-			"fields": []interface{}{
-				map[string]string{
-					"title": "Project",
-					"value": project.Name,
-					"short": "true",
-				},
-				map[string]string{
-					"title": "Severity",
-					"value": alert.Severity,
-					"short": "true",
-				},
-				map[string]string{
-					"title": "Description",
-					"value": alert.Description,
-					"short": "true",
-				},
-				map[string]string{
-					"title": "Link",
-					"value": fmt.Sprintf("<%s?project_id=%d&from=slack|詳細はこちらから>", notifyURL, project.ProjectId),
-					"short": "true",
-				},
-				map[string]string{
-					"title": "Rules",
-					"value": generateRuleList(rules),
-				},
+	attachment := slack.Attachment{
+		Color: getColor(alert.Severity),
+		Fields: []slack.AttachmentField{
+			{
+				Title: "Project",
+				Value: project.Name,
+				Short: true,
 			},
-			"footer": "Send from RISKEN",
-			"ts":     now,
+			{
+				Title: "Severity",
+				Value: alert.Severity,
+				Short: true,
+			},
+			{
+				Title: "Description",
+				Value: alert.Description,
+				Short: true,
+			},
+			{
+				Title: "Link",
+				Value: fmt.Sprintf("<%s?project_id=%d&from=slack|詳細はこちらから>", notifyURL, project.ProjectId),
+				Short: true,
+			},
+			{
+				Title: "Rules",
+				Value: generateRuleList(rules),
+			},
 		},
+		Ts: json.Number(strconv.FormatInt(time.Now().Unix(), 10)),
 	}
-	payload["attachments"] = attachments
-	buf, err := json.Marshal(payload)
-	if err != nil {
-		return "", err
+	msg := slack.WebhookMessage{
+		Text:        fmt.Sprintf("%vアラートを検知しました。", getMention(alert.Severity)),
+		Attachments: []slack.Attachment{attachment},
 	}
-	appLogger.Debugf(ctx, "Slack Webhook contents: %s", string(buf))
-	return string(buf), err
+
+	// override message
+	if message != "" {
+		msg.Text = message // update text
+	}
+	if channel != "" {
+		msg.Channel = channel // add channel
+	}
+
+	appLogger.Debugf(ctx, "Slack Webhook contents: %+v", msg)
+	return &msg
 }
 
-func getTestPayload(channel string) (string, error) {
-	payload := map[string]interface{}{}
-	// text
-	text := "RISKENからのテスト通知です"
-	payload["text"] = text
-
-	// channel
-	if channel != "" {
-		payload["channel"] = channel
+func getTestPayload(channel string) *slack.WebhookMessage {
+	msg := slack.WebhookMessage{
+		Text: "RISKENからのテスト通知です",
 	}
-
-	buf, err := json.Marshal(payload)
-	return string(buf), err
+	// override message
+	if channel != "" {
+		msg.Channel = channel
+	}
+	return &msg
 }
 
 func getColor(severity string) string {
