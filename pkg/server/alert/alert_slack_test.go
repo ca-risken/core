@@ -91,7 +91,7 @@ func TestGenerateRuleList(t *testing.T) {
 			want:  "",
 		},
 		{
-			name: "Too many rules",
+			name: "Too many rules(max=3)",
 			input: &[]model.AlertRule{
 				{AlertRuleID: 1, Name: "aaa"},
 				{AlertRuleID: 2, Name: "bbb"},
@@ -104,7 +104,7 @@ func TestGenerateRuleList(t *testing.T) {
 				{AlertRuleID: 9, Name: "iii"},
 				{AlertRuleID: 10, Name: "jjj"},
 			},
-			want: "- aaa\n- bbb\n- ccc\n- ddd\n- eee\n- ...",
+			want: "- aaa\n- bbb\n- ccc\n- ...",
 		},
 	}
 	for _, c := range cases {

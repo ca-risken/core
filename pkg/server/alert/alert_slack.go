@@ -78,18 +78,15 @@ func getPayload(
 		Color: getColor(alert.Severity),
 		Fields: []slack.AttachmentField{
 			{
+				Value: fmt.Sprintf("<%s/#/alert/alert?project_id=%d&from=slack|%s>", url, project.ProjectId, alert.Description),
+			},
+			{
+				Title: "Rules",
+				Value: generateRuleList(rules),
+			},
+			{
 				Title: "Project",
 				Value: project.Name,
-				Short: true,
-			},
-			{
-				Title: "Severity",
-				Value: alert.Severity,
-				Short: true,
-			},
-			{
-				Title: "Description",
-				Value: alert.Description,
 				Short: true,
 			},
 			{
@@ -97,18 +94,7 @@ func getPayload(
 				Value: fmt.Sprint(findings.FindingCount),
 				Short: true,
 			},
-			{
-				Title: "Rules",
-				Value: generateRuleList(rules),
-				Short: true,
-			},
-			{
-				Title: "Link",
-				Value: fmt.Sprintf("<%s/#/alert/alert?project_id=%d&from=slack|詳細はこちらから>", url, project.ProjectId),
-				Short: true,
-			},
 		},
-		Ts: json.Number(strconv.FormatInt(time.Now().Unix(), 10)),
 	}
 	msg := slack.WebhookMessage{
 		Text:        fmt.Sprintf("%vアラートを検知しました。", getMention(alert.Severity)),
@@ -163,21 +149,24 @@ func getMention(severity string) string {
 	}
 }
 
+const (
+	MAX_NOTIFY_RULE_NUM = 3
+)
+
 func generateRuleList(rules *[]model.AlertRule) string {
 	if rules == nil {
 		return ""
 	}
 	list := ""
 	for idx, rule := range *rules {
-		if idx == 0 {
-			list = fmt.Sprintf("- %s", rule.Name)
-			continue
-		}
-		list = fmt.Sprintf("%s\n- %s", list, rule.Name)
-		if idx >= 4 {
+		if idx >= MAX_NOTIFY_RULE_NUM {
 			list = fmt.Sprintf("%s\n- %s", list, "...")
-			break
+			return list
 		}
+		if idx != 0 {
+			list += "\n"
+		}
+		list += fmt.Sprintf("- %s", rule.Name)
 	}
 	return list
 }
@@ -189,17 +178,16 @@ func getFindingAttachment(url string, projectID uint32, findings *findingDetail)
 			Color: getColorByScore(f.Score),
 			Fields: []slack.AttachmentField{
 				{
-					Title: "Finding description",
 					Value: fmt.Sprintf("<%s/#/finding/finding?project_id=%d&finding_id=%d&from_score=0&status=1&from=slack|%s>", url, projectID, f.FindingID, f.Description),
-				},
-				{
-					Title: "Score",
-					Value: fmt.Sprint(f.Score),
-					Short: true,
 				},
 				{
 					Title: "DataSource",
 					Value: f.DataSource,
+					Short: true,
+				},
+				{
+					Title: "ResourceName",
+					Value: f.ResourceName,
 					Short: true,
 				},
 				{
