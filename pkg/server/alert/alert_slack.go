@@ -28,15 +28,13 @@ func sendSlackNotification(ctx context.Context, notifyURL, notifySetting string,
 		return err
 	}
 	if setting.WebhookURL == "" {
-		appLogger.Warn(ctx, "Unset webhook_url")
 		return nil
 	}
 
 	payload := getPayload(ctx, setting.Data.Channel, setting.Data.Message, notifyURL, alert, project, rules)
 	// TODO http tracing
 	if err := slack.PostWebhook(setting.WebhookURL, payload); err != nil {
-		appLogger.Errorf(ctx, "Failed to send slack, err=%+v", err)
-		return err
+		return fmt.Errorf("failed to send slack: %w", err)
 	}
 	return nil
 }
@@ -47,15 +45,13 @@ func sendSlackTestNotification(ctx context.Context, notifyURL, notifySetting str
 		return err
 	}
 	if setting.WebhookURL == "" {
-		appLogger.Warn(ctx, "Unset webhook_url")
 		return nil
 	}
 
 	payload := getTestPayload(setting.Data.Channel)
 	// TODO http tracing
 	if err := slack.PostWebhook(setting.WebhookURL, payload); err != nil {
-		appLogger.Errorf(ctx, "Failed to send slack, err=%+v", err)
-		return err
+		return fmt.Errorf("failed to send slack: %w", err)
 	}
 	return nil
 }
@@ -113,8 +109,6 @@ func getPayload(
 	if channel != "" {
 		msg.Channel = channel // add channel
 	}
-
-	appLogger.Debugf(ctx, "Slack Webhook contents: %+v", msg)
 	return &msg
 }
 
