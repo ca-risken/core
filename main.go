@@ -25,8 +25,8 @@ type AppConf struct {
 	TraceDebug      bool     `split_words:"true" default:"false"`
 
 	// service
-	MaxAnalyzeAPICall    int64  `split_words:"true" default:"10"`
-	NotificationAlertURL string `split_words:"true" default:"http://localhost"`
+	MaxAnalyzeAPICall int64  `split_words:"true" default:"10"`
+	BaseURL           string `split_words:"true" default:"http://localhost"`
 
 	// db
 	DBMasterHost     string `split_words:"true" default:"db.middleware.svc.cluster.local"`
@@ -95,7 +95,7 @@ func main() {
 	if err != nil {
 		logger.Fatalf(ctx, "failed to create database client: %w", err)
 	}
-	c := server.NewConfig(conf.MaxAnalyzeAPICall, conf.NotificationAlertURL)
+	c := server.NewConfig(conf.MaxAnalyzeAPICall, conf.BaseURL)
 	server := server.NewServer("0.0.0.0", conf.Port, db, logger, c)
 
 	err = server.Run(ctx)

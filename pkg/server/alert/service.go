@@ -7,19 +7,19 @@ import (
 )
 
 type AlertService struct {
-	repository           db.AlertRepository
-	findingClient        finding.FindingServiceClient
-	projectClient        project.ProjectServiceClient
-	maxAnalyzeAPICall    int64
-	notificationAlertURL string
+	repository        db.AlertRepository
+	findingClient     finding.FindingServiceClient
+	projectClient     project.ProjectServiceClient
+	maxAnalyzeAPICall int64
+	baseURL           string
 }
 
-func NewAlertService(maxAnalyzeAPICall int64, notificationAlertURL string, findingClient finding.FindingServiceClient, projectClient project.ProjectServiceClient, repository db.AlertRepository) *AlertService {
+func NewAlertService(maxAnalyzeAPICall int64, baseURL string, findingClient finding.FindingServiceClient, projectClient project.ProjectServiceClient, repository db.AlertRepository) *AlertService {
 	return &AlertService{
-		repository:           repository,
-		findingClient:        findingClient,
-		projectClient:        projectClient,
-		maxAnalyzeAPICall:    maxAnalyzeAPICall,
-		notificationAlertURL: notificationAlertURL,
+		repository:        repository,
+		findingClient:     findingClient,
+		projectClient:     projectClient,
+		maxAnalyzeAPICall: maxAnalyzeAPICall,
+		baseURL:           baseURL,
 	}
 }

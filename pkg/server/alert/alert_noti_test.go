@@ -3,12 +3,16 @@ package alert
 import (
 	"context"
 	"errors"
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/ca-risken/core/pkg/db/mocks"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/proto/finding"
+	findingmock "github.com/ca-risken/core/proto/finding/mocks"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/jarcoal/httpmock"
 )
@@ -124,6 +128,154 @@ func TestNotificationAlert(t *testing.T) {
 			got := svc.NotificationAlert(context.Background(), c.alertCondition, c.alert, &[]model.AlertRule{}, &project.Project{}, &testFindingIDs)
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
+			}
+		})
+	}
+}
+
+func TestGetFindingDetailsForNotification(t *testing.T) {
+	type inputParam struct {
+		ProjectID  uint32
+		FindingIDs *[]uint64
+	}
+	type mockGetFinding struct {
+		Resp *finding.GetFindingResponse
+		Err  error
+	}
+	type mockListFindingTag struct {
+		Resp *finding.ListFindingTagResponse
+		Err  error
+	}
+	cases := []struct {
+		name           string
+		input          inputParam
+		getFinding     mockGetFinding
+		listFindingTag mockListFindingTag
+
+		want    *findingDetail
+		wantErr bool
+	}{
+		{
+			name:  "OK single data",
+			input: inputParam{ProjectID: 1, FindingIDs: &[]uint64{1}},
+			getFinding: mockGetFinding{
+				Resp: &finding.GetFindingResponse{
+					Finding: &finding.Finding{FindingId: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0},
+				},
+				Err: nil,
+			},
+			listFindingTag: mockListFindingTag{
+				Resp: &finding.ListFindingTagResponse{
+					Tag: []*finding.FindingTag{
+						{FindingTagId: 1, Tag: "tag1"},
+					},
+				},
+				Err: nil,
+			},
+			want: &findingDetail{
+				FindingCount: 1,
+				Exampls: []*findingExample{
+					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0, Tags: []string{"tag1"}},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:  "OK multi datas",
+			input: inputParam{ProjectID: 1, FindingIDs: &[]uint64{1, 1, 1}},
+			getFinding: mockGetFinding{
+				Resp: &finding.GetFindingResponse{
+					Finding: &finding.Finding{FindingId: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0},
+				},
+				Err: nil,
+			},
+			listFindingTag: mockListFindingTag{
+				Resp: &finding.ListFindingTagResponse{
+					Tag: []*finding.FindingTag{
+						{FindingTagId: 1, Tag: "tag1"},
+						{FindingTagId: 2, Tag: "tag2"},
+					},
+				},
+				Err: nil,
+			},
+			want: &findingDetail{
+				FindingCount: 3,
+				Exampls: []*findingExample{
+					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0, Tags: []string{"tag1", "tag2"}},
+					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0, Tags: []string{"tag1", "tag2"}},
+					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0, Tags: []string{"tag1", "tag2"}},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:  "OK over max findings(max=3)",
+			input: inputParam{ProjectID: 1, FindingIDs: &[]uint64{1, 1, 1, 1}},
+			getFinding: mockGetFinding{
+				Resp: &finding.GetFindingResponse{
+					Finding: &finding.Finding{FindingId: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0},
+				},
+				Err: nil,
+			},
+			listFindingTag: mockListFindingTag{
+				Resp: &finding.ListFindingTagResponse{
+					Tag: []*finding.FindingTag{
+						{FindingTagId: 1, Tag: "tag1"},
+						{FindingTagId: 2, Tag: "tag2"},
+					},
+				},
+				Err: nil,
+			},
+			want: &findingDetail{
+				FindingCount: 4,
+				Exampls: []*findingExample{
+					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0, Tags: []string{"tag1", "tag2"}},
+					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0, Tags: []string{"tag1", "tag2"}},
+					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0, Tags: []string{"tag1", "tag2"}},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:  "NG getFinding API error",
+			input: inputParam{ProjectID: 1, FindingIDs: &[]uint64{1, 1, 1}},
+			getFinding: mockGetFinding{
+				Resp: nil,
+				Err:  errors.New("api error"),
+			},
+			listFindingTag: mockListFindingTag{},
+			want:           nil,
+			wantErr:        true,
+		},
+		{
+			name:  "NG listFindingTag API error",
+			input: inputParam{ProjectID: 1, FindingIDs: &[]uint64{1, 1, 1}},
+			getFinding: mockGetFinding{
+				Resp: &finding.GetFindingResponse{
+					Finding: &finding.Finding{FindingId: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0},
+				},
+				Err: nil,
+			},
+			listFindingTag: mockListFindingTag{
+				Resp: nil,
+				Err:  errors.New("api error"),
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mockFinding := findingmock.FindingServiceClient{}
+			svc := AlertService{findingClient: &mockFinding}
+			mockFinding.On("GetFinding", mock.Anything, mock.Anything).Return(c.getFinding.Resp, c.getFinding.Err)
+			mockFinding.On("ListFindingTag", mock.Anything, mock.Anything).Return(c.listFindingTag.Resp, c.listFindingTag.Err)
+			got, err := svc.getFindingDetailsForNotification(context.TODO(), c.input.ProjectID, c.input.FindingIDs)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected response: got=%+v, want=%+v", got, c.want)
 			}
 		})
 	}

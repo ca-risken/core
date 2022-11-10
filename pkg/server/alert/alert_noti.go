@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
+	"github.com/ca-risken/core/proto/finding"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
 	"gorm.io/gorm"
@@ -186,7 +188,7 @@ func (a *AlertService) TestNotification(ctx context.Context, req *alert.TestNoti
 	}
 	switch notification.Type {
 	case "slack":
-		err = sendSlackTestNotification(ctx, a.notificationAlertURL, notification.NotifySetting)
+		err = sendSlackTestNotification(ctx, a.baseURL, notification.NotifySetting)
 		if err != nil {
 			appLogger.Errorf(ctx, "Error occured when sending test slack notification. err: %v", err)
 			return nil, err
@@ -245,4 +247,58 @@ func maskRight(s string, num int) string {
 		rs[i] = '*'
 	}
 	return string(rs)
+}
+
+const (
+	MAX_NOTIFY_FINDING_NUM = 3
+)
+
+type findingDetail struct {
+	FindingCount int
+	Exampls      []*findingExample
+}
+
+type findingExample struct {
+	FindingID    uint64
+	Description  string
+	ResourceName string
+	DataSource   string
+	Score        float32
+	Tags         []string
+}
+
+func (a *AlertService) getFindingDetailsForNotification(ctx context.Context, projectID uint32, findingIDs *[]uint64) (
+	*findingDetail, error,
+) {
+	findings := findingDetail{
+		FindingCount: len(*findingIDs),
+	}
+	for _, id := range *findingIDs {
+		if len(findings.Exampls) >= MAX_NOTIFY_FINDING_NUM {
+			break
+		}
+
+		ex := findingExample{}
+		// finding
+		resp, err := a.findingClient.GetFinding(ctx, &finding.GetFindingRequest{FindingId: id, ProjectId: projectID})
+		if err != nil {
+			return nil, fmt.Errorf("get finding error: err=%w", err)
+		}
+		ex.FindingID = resp.Finding.FindingId
+		ex.Description = resp.Finding.Description
+		ex.ResourceName = resp.Finding.ResourceName
+		ex.DataSource = resp.Finding.DataSource
+		ex.Score = resp.Finding.Score
+
+		// finding tag
+		tagResp, err := a.findingClient.ListFindingTag(ctx, &finding.ListFindingTagRequest{FindingId: id, ProjectId: projectID})
+		if err != nil {
+			return nil, fmt.Errorf("get finding tag error: err=%w", err)
+		}
+		for _, t := range tagResp.Tag {
+			ex.Tags = append(ex.Tags, t.Tag)
+		}
+		findings.Exampls = append(findings.Exampls, &ex)
+	}
+	return &findings, nil
 }

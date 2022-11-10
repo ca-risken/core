@@ -51,14 +51,14 @@ func NewServer(host string, port string, db *db.Client, logger logging.Logger, c
 }
 
 type Config struct {
-	MaxAnalyzeAPICall    int64
-	NotificationAlertURL string
+	MaxAnalyzeAPICall int64
+	BaseURL           string
 }
 
-func NewConfig(maxAnalyzeAPICall int64, notificationAlertURL string) Config {
+func NewConfig(maxAnalyzeAPICall int64, baseURL string) Config {
 	return Config{
-		MaxAnalyzeAPICall:    maxAnalyzeAPICall,
-		NotificationAlertURL: notificationAlertURL,
+		MaxAnalyzeAPICall: maxAnalyzeAPICall,
+		BaseURL:           baseURL,
 	}
 }
 
@@ -79,7 +79,7 @@ func (s *Server) Run(ctx context.Context) error {
 	isvc := iamserver.NewIAMService(s.db, fc, s.logger)
 	asvc := alertserver.NewAlertService(
 		s.config.MaxAnalyzeAPICall,
-		s.config.NotificationAlertURL,
+		s.config.BaseURL,
 		fc,
 		pc,
 		s.db,

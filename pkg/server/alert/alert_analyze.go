@@ -126,7 +126,7 @@ func (a *AlertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 		}
 		// AlertがACTIVE、かつMatchしている場合はAlert通知を行う
 		if registAlert.Status == alert.Status_ACTIVE.String() {
-			err = a.NotificationAlert(ctx, alertCondition, registAlert, alertRules, project)
+			err = a.NotificationAlert(ctx, alertCondition, registAlert, alertRules, project, &matchFindingIDs)
 			if err != nil {
 				return err
 			}
@@ -298,8 +298,19 @@ func (a *AlertService) deleteRelAlertFindingByAlertID(ctx context.Context, proje
 	return nil
 }
 
-func (a *AlertService) NotificationAlert(ctx context.Context, alertCondition *model.AlertCondition, alert *model.Alert, rules *[]model.AlertRule, project *projectproto.Project) error {
+func (a *AlertService) NotificationAlert(
+	ctx context.Context,
+	alertCondition *model.AlertCondition,
+	alert *model.Alert,
+	rules *[]model.AlertRule,
+	project *projectproto.Project,
+	findingIDs *[]uint64,
+) error {
 	alertCondNotifications, err := a.repository.ListAlertCondNotification(ctx, alertCondition.ProjectID, alertCondition.AlertConditionID, 0, 0, time.Now().Unix())
+	if err != nil {
+		return err
+	}
+	findings, err := a.getFindingDetailsForNotification(ctx, project.ProjectId, findingIDs)
 	if err != nil {
 		return err
 	}
@@ -315,7 +326,7 @@ func (a *AlertService) NotificationAlert(ctx context.Context, alertCondition *mo
 		}
 		switch notification.Type {
 		case "slack":
-			err = sendSlackNotification(ctx, a.notificationAlertURL, notification.NotifySetting, alert, project, rules)
+			err = sendSlackNotification(ctx, a.baseURL, notification.NotifySetting, alert, project, rules, findings)
 			if err != nil {
 				return err
 			}
