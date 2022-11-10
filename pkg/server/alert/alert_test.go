@@ -1558,11 +1558,11 @@ func TestReplaceSlackNotifySetting(t *testing.T) {
 	}{
 		{
 			name:        "OK no replacing",
-			inputExist:  "{\"webhook_url\":\"hoge1\", \"data\":{\"hoge\":\"fuga\"}}",
-			inputUpdate: "{\"data\":{\"hoge\":\"fuga\"}}",
+			inputExist:  "{\"webhook_url\":\"hoge1\", \"data\":{\"channel\":\"ch\"}}",
+			inputUpdate: "{\"data\":{\"channel\":\"ch\"}}",
 			want: slackNotifySetting{
 				WebhookURL: "hoge1",
-				Data:       map[string]string{"hoge": "fuga"},
+				Data:       slackNotifyOption{Channel: "ch"},
 			},
 			wantErr: false,
 		},
