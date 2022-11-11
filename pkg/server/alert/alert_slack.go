@@ -22,7 +22,13 @@ type slackNotifyOption struct {
 	Message string `json:"message,omitempty"`
 }
 
-func sendSlackNotification(ctx context.Context, notifyURL, notifySetting string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule) error {
+func sendSlackNotification(
+	ctx context.Context, url, notifySetting string,
+	alert *model.Alert,
+	project *projectproto.Project,
+	rules *[]model.AlertRule,
+	findings *findingDetail,
+) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
@@ -31,7 +37,7 @@ func sendSlackNotification(ctx context.Context, notifyURL, notifySetting string,
 		return nil
 	}
 
-	payload := getPayload(ctx, setting.Data.Channel, setting.Data.Message, notifyURL, alert, project, rules)
+	payload := getPayload(ctx, setting.Data.Channel, setting.Data.Message, url, alert, project, rules, findings)
 	// TODO http tracing
 	if err := slack.PostWebhook(setting.WebhookURL, payload); err != nil {
 		return fmt.Errorf("failed to send slack: %w", err)
@@ -39,7 +45,7 @@ func sendSlackNotification(ctx context.Context, notifyURL, notifySetting string,
 	return nil
 }
 
-func sendSlackTestNotification(ctx context.Context, notifyURL, notifySetting string) error {
+func sendSlackTestNotification(ctx context.Context, url, notifySetting string) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
@@ -60,10 +66,11 @@ func getPayload(
 	ctx context.Context,
 	channel string,
 	message string,
-	notifyURL string,
+	url string,
 	alert *model.Alert,
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
+	findings *findingDetail,
 ) *slack.WebhookMessage {
 
 	// attachments
@@ -71,36 +78,29 @@ func getPayload(
 		Color: getColor(alert.Severity),
 		Fields: []slack.AttachmentField{
 			{
-				Title: "Project",
-				Value: project.Name,
-				Short: true,
-			},
-			{
-				Title: "Severity",
-				Value: alert.Severity,
-				Short: true,
-			},
-			{
-				Title: "Description",
-				Value: alert.Description,
-				Short: true,
-			},
-			{
-				Title: "Link",
-				Value: fmt.Sprintf("<%s?project_id=%d&from=slack|詳細はこちらから>", notifyURL, project.ProjectId),
-				Short: true,
+				Value: fmt.Sprintf("<%s/#/alert/alert?project_id=%d&from=slack|%s>", url, project.ProjectId, alert.Description),
 			},
 			{
 				Title: "Rules",
 				Value: generateRuleList(rules),
 			},
+			{
+				Title: "Project",
+				Value: project.Name,
+				Short: true,
+			},
+			{
+				Title: "Findings",
+				Value: fmt.Sprint(findings.FindingCount),
+				Short: true,
+			},
 		},
-		Ts: json.Number(strconv.FormatInt(time.Now().Unix(), 10)),
 	}
 	msg := slack.WebhookMessage{
 		Text:        fmt.Sprintf("%vアラートを検知しました。", getMention(alert.Severity)),
 		Attachments: []slack.Attachment{attachment},
 	}
+	msg.Attachments = append(msg.Attachments, *getFindingAttachment(url, project.ProjectId, findings)...)
 
 	// override message
 	if message != "" {
@@ -149,21 +149,95 @@ func getMention(severity string) string {
 	}
 }
 
+const (
+	MAX_NOTIFY_RULE_NUM = 3
+)
+
 func generateRuleList(rules *[]model.AlertRule) string {
 	if rules == nil {
 		return ""
 	}
 	list := ""
 	for idx, rule := range *rules {
-		if idx == 0 {
-			list = fmt.Sprintf("- %s", rule.Name)
-			continue
-		}
-		list = fmt.Sprintf("%s\n- %s", list, rule.Name)
-		if idx >= 4 {
+		if idx >= MAX_NOTIFY_RULE_NUM {
 			list = fmt.Sprintf("%s\n- %s", list, "...")
-			break
+			return list
 		}
+		if idx != 0 {
+			list += "\n"
+		}
+		list += fmt.Sprintf("- %s", rule.Name)
 	}
 	return list
+}
+
+func getFindingAttachment(url string, projectID uint32, findings *findingDetail) *[]slack.Attachment {
+	attachments := []slack.Attachment{}
+	for _, f := range findings.Exampls {
+		a := slack.Attachment{
+			Color: getColorByScore(f.Score),
+			Fields: []slack.AttachmentField{
+				{
+					Value: fmt.Sprintf("<%s/#/finding/finding?project_id=%d&finding_id=%d&from_score=0&status=1&from=slack|%s>", url, projectID, f.FindingID, f.Description),
+				},
+				{
+					Title: "DataSource",
+					Value: f.DataSource,
+					Short: true,
+				},
+				{
+					Title: "ResourceName",
+					Value: f.ResourceName,
+					Short: true,
+				},
+				{
+					Title: "Tags",
+					Value: generateTagContentByFinding(f.Tags),
+				},
+			},
+		}
+		attachments = append(attachments, a)
+	}
+	if findings.FindingCount > len(findings.Exampls) {
+		attachments = append(attachments, slack.Attachment{
+			Color: "grey",
+			Fields: []slack.AttachmentField{
+				{
+					Value: fmt.Sprintf("その他、%d件すべてのFindingは <%s/#/alert/alert?project_id=%d&from=slack|アラート画面> からご確認ください。", findings.FindingCount, url, projectID),
+				},
+			},
+			Ts: json.Number(strconv.FormatInt(time.Now().Unix(), 10)),
+		})
+	}
+	return &attachments
+}
+
+func getColorByScore(score float32) string {
+	switch {
+	case score >= 0.8:
+		return "danger"
+	case score >= 0.6:
+		return "warning"
+	default:
+		return "good"
+	}
+}
+
+const (
+	MAX_NOTIFY_FINDING_TAG_NUM = 15
+)
+
+func generateTagContentByFinding(tags []string) string {
+	content := ""
+	for idx, t := range tags {
+		if content != "" {
+			content += " "
+		}
+		content += fmt.Sprintf("`%s`", t)
+		if idx+1 >= MAX_NOTIFY_FINDING_TAG_NUM {
+			content += " ..."
+			return content
+		}
+	}
+	return content
 }

@@ -16,6 +16,7 @@ func TestSendSlackNotification(t *testing.T) {
 	defer httpmock.DeactivateAndReset()
 	httpmock.RegisterResponder("POST", "http://hogehoge.com", httpmock.NewStringResponder(200, "mocked"))
 	httpmock.RegisterResponder("POST", "http://fugafuga.com", httpmock.NewErrorResponder(errors.New("Something Wrong")))
+	testFindings := &findingDetail{}
 	cases := []struct {
 		name          string
 		notifySetting string
@@ -54,7 +55,7 @@ func TestSendSlackNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := sendSlackNotification(context.Background(), "unused", c.notifySetting, c.alert, c.project, &[]model.AlertRule{})
+			got := sendSlackNotification(context.Background(), "unused", c.notifySetting, c.alert, c.project, &[]model.AlertRule{}, testFindings)
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
 			}
@@ -90,7 +91,7 @@ func TestGenerateRuleList(t *testing.T) {
 			want:  "",
 		},
 		{
-			name: "Too many rules",
+			name: "Too many rules(max=3)",
 			input: &[]model.AlertRule{
 				{AlertRuleID: 1, Name: "aaa"},
 				{AlertRuleID: 2, Name: "bbb"},
@@ -103,7 +104,7 @@ func TestGenerateRuleList(t *testing.T) {
 				{AlertRuleID: 9, Name: "iii"},
 				{AlertRuleID: 10, Name: "jjj"},
 			},
-			want: "- aaa\n- bbb\n- ccc\n- ddd\n- eee\n- ...",
+			want: "- aaa\n- bbb\n- ccc\n- ...",
 		},
 	}
 	for _, c := range cases {
