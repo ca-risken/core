@@ -21,12 +21,13 @@ type FindingRepository interface {
 	BatchListFinding(context.Context, *finding.BatchListFindingRequest) (*[]model.Finding, error)
 	ListFindingCount(
 		ctx context.Context,
-		projectID uint32,
+		projectID, alertID uint32,
 		fromScore, toScore float32,
 		fromAt, toAt int64,
 		findingID uint64,
 		dataSources, resourceNames, tags []string,
-		status finding.FindingStatus) (int64, error)
+		status finding.FindingStatus,
+	) (int64, error)
 	GetFinding(context.Context, uint32, uint64, bool) (*model.Finding, error)
 	GetFindingByDataSource(context.Context, uint32, string, string) (*model.Finding, error)
 	UpsertFinding(context.Context, *model.Finding) (*model.Finding, error)
@@ -86,7 +87,8 @@ var _ FindingRepository = (*Client)(nil)
 
 func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*[]model.Finding, error) {
 	query := "select finding.* from finding inner join finding f_alias using(finding_id) "
-	cond, params := generateListFindingCondition(req.ProjectId,
+	cond, params := generateListFindingCondition(
+		req.ProjectId, req.AlertId,
 		req.FromScore, req.ToScore, req.FromAt, req.ToAt,
 		req.FindingId, req.DataSource, req.ResourceName, req.Tag, req.Status)
 	query += cond
@@ -101,7 +103,8 @@ func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingReques
 
 func (c *Client) BatchListFinding(ctx context.Context, req *finding.BatchListFindingRequest) (*[]model.Finding, error) {
 	query := "select finding.* from finding "
-	cond, params := generateListFindingCondition(req.ProjectId,
+	cond, params := generateListFindingCondition(
+		req.ProjectId, req.AlertId,
 		req.FromScore, req.ToScore, req.FromAt, req.ToAt,
 		req.FindingId, req.DataSource, req.ResourceName, req.Tag, req.Status)
 	query += cond
@@ -114,14 +117,15 @@ func (c *Client) BatchListFinding(ctx context.Context, req *finding.BatchListFin
 
 func (c *Client) ListFindingCount(
 	ctx context.Context,
-	projectID uint32,
+	projectID, alertID uint32,
 	fromScore, toScore float32,
 	fromAt, toAt int64,
 	findingID uint64,
 	dataSources, resourceNames, tags []string,
 	status finding.FindingStatus) (int64, error) {
 	query := "select count(*) from finding "
-	cond, params := generateListFindingCondition(projectID,
+	cond, params := generateListFindingCondition(
+		projectID, alertID,
 		fromScore, toScore, fromAt, toAt,
 		findingID, dataSources, resourceNames, tags, status)
 	query += cond
@@ -133,7 +137,7 @@ func (c *Client) ListFindingCount(
 }
 
 func generateListFindingCondition(
-	projectID uint32,
+	projectID, alertID uint32,
 	fromScore, toScore float32,
 	fromAt, toAt int64,
 	findingID uint64,
@@ -148,9 +152,13 @@ where
 `
 	var params []interface{}
 	params = append(params, projectID, fromScore, toScore, time.Unix(fromAt, 0), time.Unix(toAt, 0))
-	if !zero.IsZeroVal(findingID) {
+	if findingID != 0 {
 		query += " and finding.finding_id = ?"
 		params = append(params, findingID)
+	}
+	if alertID != 0 {
+		query += " and exists(select * from rel_alert_finding raf where raf.finding_id=finding.finding_id and raf.alert_id = ?)"
+		params = append(params, alertID)
 	}
 	if len(dataSources) > 0 {
 		sql, sqlParams := generatePrefixMatchSQLStatement("finding.data_source", dataSources)

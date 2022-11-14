@@ -429,7 +429,7 @@ list-finding-service:
 list-finding:
 	$(GRPCURL) \
 		-plaintext \
-		-d '{"finding_id": "1040", "project_id":1001, "status":0, "sort": "finding_id", "direction": "desc", "offset":0, "limit":10}' \
+		-d '{"alert_id":2, "project_id":1, "status":0, "sort":"finding_id", "direction":"desc", "offset":0, "limit":10}' \
 		$(CORE_API_ADDR) core.finding.FindingService.ListFinding
 
 .PHONY: get-finding

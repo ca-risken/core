@@ -28,7 +28,7 @@ func (m *MockFindingRepository) BatchListFinding(context.Context, *finding.Batch
 }
 func (m *MockFindingRepository) ListFindingCount(
 	ctx context.Context,
-	projectID uint32,
+	projectID, alertID uint32,
 	fromScore, toScore float32,
 	fromAt, toAt int64,
 	findingID uint64,
