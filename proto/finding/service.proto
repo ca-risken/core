@@ -70,6 +70,7 @@ message ListFindingRequest {
   int32 limit = 12;
   FindingStatus status = 13;
   uint64 finding_id = 14;
+  uint32 alert_id = 15;
 }
 
 message ListFindingResponse {
@@ -89,6 +90,7 @@ message BatchListFindingRequest {
   repeated string tag = 8;
   FindingStatus status = 9;
   uint64 finding_id = 10;
+  uint32 alert_id = 11;
 }
 
 message BatchListFindingResponse {
