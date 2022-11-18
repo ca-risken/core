@@ -326,7 +326,7 @@ func (a *AlertService) NotificationAlert(
 		}
 		switch notification.Type {
 		case "slack":
-			err = sendSlackNotification(ctx, a.baseURL, notification.NotifySetting, alert, project, rules, findings)
+			err = sendSlackNotification(ctx, a.baseURL, notification, alert, project, rules, findings)
 			if err != nil {
 				return err
 			}
