@@ -18,44 +18,44 @@ func TestSendSlackNotification(t *testing.T) {
 	httpmock.RegisterResponder("POST", "http://fugafuga.com", httpmock.NewErrorResponder(errors.New("Something Wrong")))
 	testFindings := &findingDetail{}
 	cases := []struct {
-		name    string
-		noti    *model.Notification
-		alert   *model.Alert
-		project *project.Project
-		wantErr bool
+		name          string
+		notifySetting string
+		alert         *model.Alert
+		project       *project.Project
+		wantErr       bool
 	}{
 		{
-			name:    "OK",
-			noti:    &model.Notification{NotificationID: 1, NotifySetting: `{"webhook_url":"http://hogehoge.com"}`},
-			alert:   &model.Alert{},
-			project: &project.Project{},
-			wantErr: false,
+			name:          "OK",
+			notifySetting: `{"webhook_url":"http://hogehoge.com"}`,
+			alert:         &model.Alert{},
+			project:       &project.Project{},
+			wantErr:       false,
 		},
 		{
-			name:    "NG Json.Marshal Error",
-			noti:    &model.Notification{NotificationID: 1, NotifySetting: `{"webhook_url": "}`},
-			alert:   &model.Alert{},
-			project: &project.Project{},
-			wantErr: true,
+			name:          "NG Json.Marshal Error",
+			notifySetting: `{"webhook_url":http://hogehoge.com"}`,
+			alert:         &model.Alert{},
+			project:       &project.Project{},
+			wantErr:       true,
 		},
 		{
-			name:    "Warn webhook_url not set",
-			noti:    &model.Notification{NotificationID: 1, NotifySetting: `{}`},
-			alert:   &model.Alert{},
-			project: &project.Project{},
-			wantErr: false,
+			name:          "Warn webhook_url not set",
+			notifySetting: `{}`,
+			alert:         &model.Alert{},
+			project:       &project.Project{},
+			wantErr:       false,
 		},
 		{
-			name:    "HTTP Error",
-			noti:    &model.Notification{NotificationID: 1, NotifySetting: `{"webhook_url":"http://fugafuga.com"}`},
-			alert:   &model.Alert{},
-			project: &project.Project{},
-			wantErr: true,
+			name:          "HTTP Error",
+			notifySetting: `{"webhook_url":"http://fugafuga.com"}`,
+			alert:         &model.Alert{},
+			project:       &project.Project{},
+			wantErr:       true,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := sendSlackNotification(context.Background(), "unused", c.noti, c.alert, c.project, &[]model.AlertRule{}, testFindings)
+			got := sendSlackNotification(context.Background(), "unused", c.notifySetting, c.alert, c.project, &[]model.AlertRule{}, testFindings)
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
 			}

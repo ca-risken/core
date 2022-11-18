@@ -23,15 +23,14 @@ type slackNotifyOption struct {
 }
 
 func sendSlackNotification(
-	ctx context.Context, url string,
-	noti *model.Notification,
+	ctx context.Context, url, notifySetting string,
 	alert *model.Alert,
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
 	findings *findingDetail,
 ) error {
 	var setting slackNotifySetting
-	if err := json.Unmarshal([]byte(noti.NotifySetting), &setting); err != nil {
+	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
 	}
 	if setting.WebhookURL == "" {
@@ -41,14 +40,14 @@ func sendSlackNotification(
 	payload := getPayload(ctx, setting.Data.Channel, setting.Data.Message, url, alert, project, rules, findings)
 	// TODO http tracing
 	if err := slack.PostWebhook(setting.WebhookURL, payload); err != nil {
-		return fmt.Errorf("failed to send slack: notification_id=%d, err=%w", noti.NotificationID, err)
+		return fmt.Errorf("failed to send slack: %w", err)
 	}
 	return nil
 }
 
-func sendSlackTestNotification(ctx context.Context, url string, noti *model.Notification) error {
+func sendSlackTestNotification(ctx context.Context, url, notifySetting string) error {
 	var setting slackNotifySetting
-	if err := json.Unmarshal([]byte(noti.NotifySetting), &setting); err != nil {
+	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
 	}
 	if setting.WebhookURL == "" {
@@ -58,7 +57,7 @@ func sendSlackTestNotification(ctx context.Context, url string, noti *model.Noti
 	payload := getTestPayload(setting.Data.Channel)
 	// TODO http tracing
 	if err := slack.PostWebhook(setting.WebhookURL, payload); err != nil {
-		return fmt.Errorf("failed to send slack: notification_id=%d, err=%w", noti.NotificationID, err)
+		return fmt.Errorf("failed to send slack: %w", err)
 	}
 	return nil
 }

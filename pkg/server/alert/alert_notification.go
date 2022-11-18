@@ -188,7 +188,7 @@ func (a *AlertService) TestNotification(ctx context.Context, req *alert.TestNoti
 	}
 	switch notification.Type {
 	case "slack":
-		err = sendSlackTestNotification(ctx, a.baseURL, notification)
+		err = sendSlackTestNotification(ctx, a.baseURL, notification.NotifySetting)
 		if err != nil {
 			appLogger.Errorf(ctx, "Error occured when sending test slack notification. err: %v", err)
 			return nil, err
