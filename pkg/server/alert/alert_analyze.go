@@ -328,7 +328,7 @@ func (a *AlertService) NotificationAlert(
 		case "slack":
 			err = sendSlackNotification(ctx, a.baseURL, notification.NotifySetting, alert, project, rules, findings)
 			if err != nil {
-				return err
+				return fmt.Errorf("notify error: notification_id=%d, err=%w", notification.NotificationID, err)
 			}
 		default:
 			appLogger.Warn(ctx, "This notification_type is unimprement.", notification.Type)
