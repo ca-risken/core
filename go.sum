@@ -96,6 +96,8 @@ github.com/ca-risken/common/pkg/rpc v0.0.0-20220518032134-ad443b601efd h1:rrkuvy
 github.com/ca-risken/common/pkg/rpc v0.0.0-20220518032134-ad443b601efd/go.mod h1:fnvFF8ESVirs5LV36leyFKf3FbuqjLDhJnipGJgDZtA=
 github.com/ca-risken/common/pkg/tracer v0.0.0-20220426050416-a654045b9fa5 h1:uWLkCDh/N4eXKBMaVfd3bbxA3R3oi6RKe4ZYuuJ5WcI=
 github.com/ca-risken/common/pkg/tracer v0.0.0-20220426050416-a654045b9fa5/go.mod h1:PIXjETIPseBEB/OXp5Rxn8FFuRwfQjFZe1VN+0Skh2E=
+github.com/cenkalti/backoff/v4 v4.2.0 h1:HN5dHm3WBOgndBH6E8V0q2jIYIR3s9yglV8k/+MN3u4=
+github.com/cenkalti/backoff/v4 v4.2.0/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/cespare/xxhash/v2 v2.1.2 h1:YRXhKfTDauu4ajMg1TPgFO5jnlC2HCbmLXMcTG5cbYE=

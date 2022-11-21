@@ -10,12 +10,14 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	mimosasql "github.com/ca-risken/common/pkg/database/sql"
 	"github.com/ca-risken/common/pkg/logging"
+	"github.com/cenkalti/backoff/v4"
 )
 
 type Client struct {
-	Master *gorm.DB
-	Slave  *gorm.DB
-	logger logging.Logger
+	Master  *gorm.DB
+	Slave   *gorm.DB
+	logger  logging.Logger
+	retryer backoff.BackOff
 }
 
 func NewClient(conf *Config, l logging.Logger) (*Client, error) {
@@ -31,11 +33,11 @@ func NewClient(conf *Config, l logging.Logger) (*Client, error) {
 		return nil, fmt.Errorf("failed to connect database of slave: %w", err)
 	}
 	l.Info(ctx, "Connected to Database of slave.")
-
 	return &Client{
-		Master: m,
-		Slave:  s,
-		logger: l,
+		Master:  m,
+		Slave:   s,
+		logger:  l,
+		retryer: backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10),
 	}, nil
 }
 
@@ -55,8 +57,10 @@ func newMockClient() (*Client, sqlmock.Sqlmock, error) {
 		return nil, nil, fmt.Errorf("failed to open gorm, error: %+w", err)
 	}
 	return &Client{
-		Master: gormDB,
-		Slave:  gormDB,
+		Master:  gormDB,
+		Slave:   gormDB,
+		logger:  logging.NewLogger(),
+		retryer: backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 2),
 	}, mock, nil
 }
 

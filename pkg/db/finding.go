@@ -8,6 +8,7 @@ import (
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/vikyd/zero"
 )
 
@@ -383,6 +384,16 @@ func (c *Client) UntagFinding(ctx context.Context, projectID uint32, findingTagI
 }
 
 func (c *Client) ClearScoreFinding(ctx context.Context, req *finding.ClearScoreRequest) error {
+	operation := func() error {
+		return c.clearScoreFinding(ctx, req)
+	}
+	retryLogger := func(err error, t time.Duration) {
+		c.logger.Warnf(ctx, "[Retryer]ClearScoreFinding error: duration=%+v, err=%+v", t, err)
+	}
+	return backoff.RetryNotify(operation, c.retryer, retryLogger)
+}
+
+func (c *Client) clearScoreFinding(ctx context.Context, req *finding.ClearScoreRequest) error {
 	var params []interface{}
 	sql := `update finding f left outer join finding_tag ft using(finding_id) set f.score=0.0 where f.score > 0.0 and f.data_source = ?`
 
@@ -403,6 +414,16 @@ func (c *Client) ClearScoreFinding(ctx context.Context, req *finding.ClearScoreR
 }
 
 func (c *Client) BulkUpsertFinding(ctx context.Context, data []*model.Finding) error {
+	operation := func() error {
+		return c.bulkUpsertFinding(ctx, data)
+	}
+	retryLogger := func(err error, t time.Duration) {
+		c.logger.Warnf(ctx, "[Retryer]BulkUpsertFinding error: duration=%+v, err=%+v", t, err)
+	}
+	return backoff.RetryNotify(operation, c.retryer, retryLogger)
+}
+
+func (c *Client) bulkUpsertFinding(ctx context.Context, data []*model.Finding) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -436,6 +457,16 @@ ON DUPLICATE KEY UPDATE
 }
 
 func (c *Client) BulkUpsertFindingTag(ctx context.Context, data []*model.FindingTag) error {
+	operation := func() error {
+		return c.bulkUpsertFindingTag(ctx, data)
+	}
+	retryLogger := func(err error, t time.Duration) {
+		c.logger.Warnf(ctx, "[Retryer]BulkUpsertFindingTag error: duration=%+v, err=%+v", t, err)
+	}
+	return backoff.RetryNotify(operation, c.retryer, retryLogger)
+}
+
+func (c *Client) bulkUpsertFindingTag(ctx context.Context, data []*model.FindingTag) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -768,6 +799,16 @@ func (c *Client) UntagResource(ctx context.Context, projectID uint32, resourceTa
 }
 
 func (c *Client) BulkUpsertResource(ctx context.Context, data []*model.Resource) error {
+	operation := func() error {
+		return c.bulkUpsertResource(ctx, data)
+	}
+	retryLogger := func(err error, t time.Duration) {
+		c.logger.Warnf(ctx, "[Retryer]BulkUpsertResource error: duration=%+v, err=%+v", t, err)
+	}
+	return backoff.RetryNotify(operation, c.retryer, retryLogger)
+}
+
+func (c *Client) bulkUpsertResource(ctx context.Context, data []*model.Resource) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -796,6 +837,16 @@ ON DUPLICATE KEY UPDATE
 }
 
 func (c *Client) BulkUpsertResourceTag(ctx context.Context, data []*model.ResourceTag) error {
+	operation := func() error {
+		return c.bulkUpsertResourceTag(ctx, data)
+	}
+	retryLogger := func(err error, t time.Duration) {
+		c.logger.Warnf(ctx, "[Retryer]BulkUpsertResourceTag error: duration=%+v, err=%+v", t, err)
+	}
+	return backoff.RetryNotify(operation, c.retryer, retryLogger)
+}
+
+func (c *Client) bulkUpsertResourceTag(ctx context.Context, data []*model.ResourceTag) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -867,6 +918,16 @@ func (c *Client) GetRecommendByDataSourceType(ctx context.Context, dataSource, r
 }
 
 func (c *Client) BulkUpsertRecommend(ctx context.Context, data []*model.Recommend) error {
+	operation := func() error {
+		return c.bulkUpsertRecommend(ctx, data)
+	}
+	retryLogger := func(err error, t time.Duration) {
+		c.logger.Warnf(ctx, "[Retryer]BulkUpsertRecommend error: duration=%+v, err=%+v", t, err)
+	}
+	return backoff.RetryNotify(operation, c.retryer, retryLogger)
+}
+
+func (c *Client) bulkUpsertRecommend(ctx context.Context, data []*model.Recommend) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -897,6 +958,16 @@ ON DUPLICATE KEY UPDATE
 }
 
 func (c *Client) BulkUpsertRecommendFinding(ctx context.Context, data []*model.RecommendFinding) error {
+	operation := func() error {
+		return c.bulkUpsertRecommendFinding(ctx, data)
+	}
+	retryLogger := func(err error, t time.Duration) {
+		c.logger.Warnf(ctx, "[Retryer]BulkUpsertRecommendFinding error: duration=%+v, err=%+v", t, err)
+	}
+	return backoff.RetryNotify(operation, c.retryer, retryLogger)
+}
+
+func (c *Client) bulkUpsertRecommendFinding(ctx context.Context, data []*model.RecommendFinding) error {
 	if len(data) == 0 {
 		return nil
 	}

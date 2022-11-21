@@ -9,6 +9,7 @@ require (
 	github.com/ca-risken/common/pkg/profiler v0.0.0-20220426050416-a654045b9fa5
 	github.com/ca-risken/common/pkg/rpc v0.0.0-20220518032134-ad443b601efd
 	github.com/ca-risken/common/pkg/tracer v0.0.0-20220426050416-a654045b9fa5
+	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/envoyproxy/protoc-gen-validate v0.6.7
 	github.com/gassara-kys/envconfig v1.4.4
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
