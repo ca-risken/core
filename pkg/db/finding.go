@@ -247,10 +247,7 @@ func (c *Client) UpsertFinding(ctx context.Context, data *model.Finding) (*model
 	operation := func() (*model.Finding, error) {
 		return c.upsertFinding(ctx, data)
 	}
-	retryLogger := func(err error, t time.Duration) {
-		c.logger.Warnf(ctx, "[Retryer]UpsertFinding error: duration=%+v, err=%+v", t, err)
-	}
-	return backoff.RetryNotifyWithData(operation, c.retryer, retryLogger)
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertFinding"))
 }
 
 func (c *Client) upsertFinding(ctx context.Context, data *model.Finding) (*model.Finding, error) {
@@ -373,10 +370,7 @@ func (c *Client) TagFinding(ctx context.Context, tag *model.FindingTag) (*model.
 	operation := func() (*model.FindingTag, error) {
 		return c.tagFinding(ctx, tag)
 	}
-	retryLogger := func(err error, t time.Duration) {
-		c.logger.Warnf(ctx, "[Retryer]TagFinding error: duration=%+v, err=%+v", t, err)
-	}
-	return backoff.RetryNotifyWithData(operation, c.retryer, retryLogger)
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "TagFinding"))
 }
 
 func (c *Client) tagFinding(ctx context.Context, tag *model.FindingTag) (*model.FindingTag, error) {
@@ -407,10 +401,7 @@ func (c *Client) ClearScoreFinding(ctx context.Context, req *finding.ClearScoreR
 	operation := func() error {
 		return c.clearScoreFinding(ctx, req)
 	}
-	retryLogger := func(err error, t time.Duration) {
-		c.logger.Warnf(ctx, "[Retryer]ClearScoreFinding error: duration=%+v, err=%+v", t, err)
-	}
-	return backoff.RetryNotify(operation, c.retryer, retryLogger)
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "ClearScoreFinding"))
 }
 
 func (c *Client) clearScoreFinding(ctx context.Context, req *finding.ClearScoreRequest) error {
@@ -437,10 +428,7 @@ func (c *Client) BulkUpsertFinding(ctx context.Context, data []*model.Finding) e
 	operation := func() error {
 		return c.bulkUpsertFinding(ctx, data)
 	}
-	retryLogger := func(err error, t time.Duration) {
-		c.logger.Warnf(ctx, "[Retryer]BulkUpsertFinding error: duration=%+v, err=%+v", t, err)
-	}
-	return backoff.RetryNotify(operation, c.retryer, retryLogger)
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "BulkUpsertFinding"))
 }
 
 func (c *Client) bulkUpsertFinding(ctx context.Context, data []*model.Finding) error {
@@ -480,10 +468,7 @@ func (c *Client) BulkUpsertFindingTag(ctx context.Context, data []*model.Finding
 	operation := func() error {
 		return c.bulkUpsertFindingTag(ctx, data)
 	}
-	retryLogger := func(err error, t time.Duration) {
-		c.logger.Warnf(ctx, "[Retryer]BulkUpsertFindingTag error: duration=%+v, err=%+v", t, err)
-	}
-	return backoff.RetryNotify(operation, c.retryer, retryLogger)
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "BulkUpsertFindingTag"))
 }
 
 func (c *Client) bulkUpsertFindingTag(ctx context.Context, data []*model.FindingTag) error {
@@ -771,10 +756,7 @@ func (c *Client) UpsertResource(ctx context.Context, data *model.Resource) (*mod
 	operation := func() (*model.Resource, error) {
 		return c.upsertResource(ctx, data)
 	}
-	retryLogger := func(err error, t time.Duration) {
-		c.logger.Warnf(ctx, "[Retryer]UpsertResource error: duration=%+v, err=%+v", t, err)
-	}
-	return backoff.RetryNotifyWithData(operation, c.retryer, retryLogger)
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertResource"))
 }
 
 func (c *Client) upsertResource(ctx context.Context, data *model.Resource) (*model.Resource, error) {
@@ -818,10 +800,7 @@ func (c *Client) TagResource(ctx context.Context, tag *model.ResourceTag) (*mode
 	operation := func() (*model.ResourceTag, error) {
 		return c.tagResource(ctx, tag)
 	}
-	retryLogger := func(err error, t time.Duration) {
-		c.logger.Warnf(ctx, "[Retryer]TagResource error: duration=%+v, err=%+v", t, err)
-	}
-	return backoff.RetryNotifyWithData(operation, c.retryer, retryLogger)
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "TagResource"))
 }
 
 func (c *Client) tagResource(ctx context.Context, tag *model.ResourceTag) (*model.ResourceTag, error) {
@@ -842,10 +821,7 @@ func (c *Client) BulkUpsertResource(ctx context.Context, data []*model.Resource)
 	operation := func() error {
 		return c.bulkUpsertResource(ctx, data)
 	}
-	retryLogger := func(err error, t time.Duration) {
-		c.logger.Warnf(ctx, "[Retryer]BulkUpsertResource error: duration=%+v, err=%+v", t, err)
-	}
-	return backoff.RetryNotify(operation, c.retryer, retryLogger)
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "BulkUpsertResource"))
 }
 
 func (c *Client) bulkUpsertResource(ctx context.Context, data []*model.Resource) error {
@@ -880,10 +856,7 @@ func (c *Client) BulkUpsertResourceTag(ctx context.Context, data []*model.Resour
 	operation := func() error {
 		return c.bulkUpsertResourceTag(ctx, data)
 	}
-	retryLogger := func(err error, t time.Duration) {
-		c.logger.Warnf(ctx, "[Retryer]BulkUpsertResourceTag error: duration=%+v, err=%+v", t, err)
-	}
-	return backoff.RetryNotify(operation, c.retryer, retryLogger)
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "BulkUpsertResourceTag"))
 }
 
 func (c *Client) bulkUpsertResourceTag(ctx context.Context, data []*model.ResourceTag) error {
@@ -931,10 +904,7 @@ func (c *Client) UpsertRecommend(ctx context.Context, data *model.Recommend) (*m
 	operation := func() (*model.Recommend, error) {
 		return c.upsertRecommend(ctx, data)
 	}
-	retryLogger := func(err error, t time.Duration) {
-		c.logger.Warnf(ctx, "[Retryer]UpsertRecommend error: duration=%+v, err=%+v", t, err)
-	}
-	return backoff.RetryNotifyWithData(operation, c.retryer, retryLogger)
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertRecommend"))
 }
 
 func (c *Client) upsertRecommend(ctx context.Context, data *model.Recommend) (*model.Recommend, error) {
@@ -949,10 +919,7 @@ func (c *Client) UpsertRecommendFinding(ctx context.Context, data *model.Recomme
 	operation := func() (*model.RecommendFinding, error) {
 		return c.upsertRecommendFinding(ctx, data)
 	}
-	retryLogger := func(err error, t time.Duration) {
-		c.logger.Warnf(ctx, "[Retryer]UpsertRecommendFinding error: duration=%+v, err=%+v", t, err)
-	}
-	return backoff.RetryNotifyWithData(operation, c.retryer, retryLogger)
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertRecommendFinding"))
 }
 
 func (c *Client) upsertRecommendFinding(ctx context.Context, data *model.RecommendFinding) (*model.RecommendFinding, error) {
@@ -981,10 +948,7 @@ func (c *Client) BulkUpsertRecommend(ctx context.Context, data []*model.Recommen
 	operation := func() error {
 		return c.bulkUpsertRecommend(ctx, data)
 	}
-	retryLogger := func(err error, t time.Duration) {
-		c.logger.Warnf(ctx, "[Retryer]BulkUpsertRecommend error: duration=%+v, err=%+v", t, err)
-	}
-	return backoff.RetryNotify(operation, c.retryer, retryLogger)
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "BulkUpsertRecommend"))
 }
 
 func (c *Client) bulkUpsertRecommend(ctx context.Context, data []*model.Recommend) error {
@@ -1021,10 +985,7 @@ func (c *Client) BulkUpsertRecommendFinding(ctx context.Context, data []*model.R
 	operation := func() error {
 		return c.bulkUpsertRecommendFinding(ctx, data)
 	}
-	retryLogger := func(err error, t time.Duration) {
-		c.logger.Warnf(ctx, "[Retryer]BulkUpsertRecommendFinding error: duration=%+v, err=%+v", t, err)
-	}
-	return backoff.RetryNotify(operation, c.retryer, retryLogger)
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "BulkUpsertRecommendFinding"))
 }
 
 func (c *Client) bulkUpsertRecommendFinding(ctx context.Context, data []*model.RecommendFinding) error {

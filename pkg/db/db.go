@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -98,4 +99,10 @@ func connect(conf *Config, isMaster bool) (*gorm.DB, error) {
 	}
 
 	return db, nil
+}
+
+func (c *Client) newRetryLogger(ctx context.Context, funcName string) func(error, time.Duration) {
+	return func(err error, t time.Duration) {
+		c.logger.Warnf(ctx, "[RetryLogger] %s error: duration=%+v, err=%+v", funcName, t, err)
+	}
 }
