@@ -244,6 +244,16 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (c *Client) UpsertFinding(ctx context.Context, data *model.Finding) (*model.Finding, error) {
+	operation := func() (*model.Finding, error) {
+		return c.upsertFinding(ctx, data)
+	}
+	retryLogger := func(err error, t time.Duration) {
+		c.logger.Warnf(ctx, "[Retryer]UpsertFinding error: duration=%+v, err=%+v", t, err)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, retryLogger)
+}
+
+func (c *Client) upsertFinding(ctx context.Context, data *model.Finding) (*model.Finding, error) {
 	if err := c.Master.WithContext(ctx).Exec(insertUpsertFinding,
 		data.FindingID, data.Description, data.DataSource, data.DataSourceID, data.ResourceName,
 		data.ProjectID, data.OriginalScore, data.Score, data.Data).Error; err != nil {
@@ -360,6 +370,16 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (c *Client) TagFinding(ctx context.Context, tag *model.FindingTag) (*model.FindingTag, error) {
+	operation := func() (*model.FindingTag, error) {
+		return c.tagFinding(ctx, tag)
+	}
+	retryLogger := func(err error, t time.Duration) {
+		c.logger.Warnf(ctx, "[Retryer]TagFinding error: duration=%+v, err=%+v", t, err)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, retryLogger)
+}
+
+func (c *Client) tagFinding(ctx context.Context, tag *model.FindingTag) (*model.FindingTag, error) {
 	if err := c.Master.WithContext(ctx).Exec(insertTagFinding,
 		tag.FindingTagID, tag.FindingID, tag.ProjectID, tag.Tag).Error; err != nil {
 		return nil, err
@@ -748,6 +768,16 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (c *Client) UpsertResource(ctx context.Context, data *model.Resource) (*model.Resource, error) {
+	operation := func() (*model.Resource, error) {
+		return c.upsertResource(ctx, data)
+	}
+	retryLogger := func(err error, t time.Duration) {
+		c.logger.Warnf(ctx, "[Retryer]UpsertResource error: duration=%+v, err=%+v", t, err)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, retryLogger)
+}
+
+func (c *Client) upsertResource(ctx context.Context, data *model.Resource) (*model.Resource, error) {
 	if err := c.Master.WithContext(ctx).Exec(insertUpsertResource,
 		data.ResourceID, data.ResourceName, data.ProjectID).Error; err != nil {
 		return nil, err
@@ -785,6 +815,16 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (c *Client) TagResource(ctx context.Context, tag *model.ResourceTag) (*model.ResourceTag, error) {
+	operation := func() (*model.ResourceTag, error) {
+		return c.tagResource(ctx, tag)
+	}
+	retryLogger := func(err error, t time.Duration) {
+		c.logger.Warnf(ctx, "[Retryer]TagResource error: duration=%+v, err=%+v", t, err)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, retryLogger)
+}
+
+func (c *Client) tagResource(ctx context.Context, tag *model.ResourceTag) (*model.ResourceTag, error) {
 	if err := c.Master.WithContext(ctx).Exec(insertTagResource,
 		tag.ResourceTagID, tag.ResourceID, tag.ProjectID, tag.Tag).Error; err != nil {
 		return nil, err
@@ -888,6 +928,16 @@ func (c *Client) GetRecommend(ctx context.Context, projectID uint32, findingID u
 }
 
 func (c *Client) UpsertRecommend(ctx context.Context, data *model.Recommend) (*model.Recommend, error) {
+	operation := func() (*model.Recommend, error) {
+		return c.upsertRecommend(ctx, data)
+	}
+	retryLogger := func(err error, t time.Duration) {
+		c.logger.Warnf(ctx, "[Retryer]UpsertRecommend error: duration=%+v, err=%+v", t, err)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, retryLogger)
+}
+
+func (c *Client) upsertRecommend(ctx context.Context, data *model.Recommend) (*model.Recommend, error) {
 	var ret model.Recommend
 	if err := c.Master.WithContext(ctx).Where("data_source=? AND type=?", data.DataSource, data.Type).Assign(data).FirstOrCreate(&ret).Error; err != nil {
 		return nil, err
@@ -896,6 +946,16 @@ func (c *Client) UpsertRecommend(ctx context.Context, data *model.Recommend) (*m
 }
 
 func (c *Client) UpsertRecommendFinding(ctx context.Context, data *model.RecommendFinding) (*model.RecommendFinding, error) {
+	operation := func() (*model.RecommendFinding, error) {
+		return c.upsertRecommendFinding(ctx, data)
+	}
+	retryLogger := func(err error, t time.Duration) {
+		c.logger.Warnf(ctx, "[Retryer]UpsertRecommendFinding error: duration=%+v, err=%+v", t, err)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, retryLogger)
+}
+
+func (c *Client) upsertRecommendFinding(ctx context.Context, data *model.RecommendFinding) (*model.RecommendFinding, error) {
 	var ret model.RecommendFinding
 	if err := c.Master.WithContext(ctx).Where("finding_id=?", data.FindingID).Assign(data).FirstOrCreate(&ret).Error; err != nil {
 		return nil, err
