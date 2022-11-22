@@ -8,6 +8,7 @@ import (
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/vikyd/zero"
 )
 
@@ -243,6 +244,13 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (c *Client) UpsertFinding(ctx context.Context, data *model.Finding) (*model.Finding, error) {
+	operation := func() (*model.Finding, error) {
+		return c.upsertFinding(ctx, data)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertFinding"))
+}
+
+func (c *Client) upsertFinding(ctx context.Context, data *model.Finding) (*model.Finding, error) {
 	if err := c.Master.WithContext(ctx).Exec(insertUpsertFinding,
 		data.FindingID, data.Description, data.DataSource, data.DataSourceID, data.ResourceName,
 		data.ProjectID, data.OriginalScore, data.Score, data.Data).Error; err != nil {
@@ -359,6 +367,13 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (c *Client) TagFinding(ctx context.Context, tag *model.FindingTag) (*model.FindingTag, error) {
+	operation := func() (*model.FindingTag, error) {
+		return c.tagFinding(ctx, tag)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "TagFinding"))
+}
+
+func (c *Client) tagFinding(ctx context.Context, tag *model.FindingTag) (*model.FindingTag, error) {
 	if err := c.Master.WithContext(ctx).Exec(insertTagFinding,
 		tag.FindingTagID, tag.FindingID, tag.ProjectID, tag.Tag).Error; err != nil {
 		return nil, err
@@ -383,6 +398,13 @@ func (c *Client) UntagFinding(ctx context.Context, projectID uint32, findingTagI
 }
 
 func (c *Client) ClearScoreFinding(ctx context.Context, req *finding.ClearScoreRequest) error {
+	operation := func() error {
+		return c.clearScoreFinding(ctx, req)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "ClearScoreFinding"))
+}
+
+func (c *Client) clearScoreFinding(ctx context.Context, req *finding.ClearScoreRequest) error {
 	var params []interface{}
 	sql := `update finding f left outer join finding_tag ft using(finding_id) set f.score=0.0 where f.score > 0.0 and f.data_source = ?`
 
@@ -403,6 +425,13 @@ func (c *Client) ClearScoreFinding(ctx context.Context, req *finding.ClearScoreR
 }
 
 func (c *Client) BulkUpsertFinding(ctx context.Context, data []*model.Finding) error {
+	operation := func() error {
+		return c.bulkUpsertFinding(ctx, data)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "BulkUpsertFinding"))
+}
+
+func (c *Client) bulkUpsertFinding(ctx context.Context, data []*model.Finding) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -436,6 +465,13 @@ ON DUPLICATE KEY UPDATE
 }
 
 func (c *Client) BulkUpsertFindingTag(ctx context.Context, data []*model.FindingTag) error {
+	operation := func() error {
+		return c.bulkUpsertFindingTag(ctx, data)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "BulkUpsertFindingTag"))
+}
+
+func (c *Client) bulkUpsertFindingTag(ctx context.Context, data []*model.FindingTag) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -717,6 +753,13 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (c *Client) UpsertResource(ctx context.Context, data *model.Resource) (*model.Resource, error) {
+	operation := func() (*model.Resource, error) {
+		return c.upsertResource(ctx, data)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertResource"))
+}
+
+func (c *Client) upsertResource(ctx context.Context, data *model.Resource) (*model.Resource, error) {
 	if err := c.Master.WithContext(ctx).Exec(insertUpsertResource,
 		data.ResourceID, data.ResourceName, data.ProjectID).Error; err != nil {
 		return nil, err
@@ -754,6 +797,13 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (c *Client) TagResource(ctx context.Context, tag *model.ResourceTag) (*model.ResourceTag, error) {
+	operation := func() (*model.ResourceTag, error) {
+		return c.tagResource(ctx, tag)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "TagResource"))
+}
+
+func (c *Client) tagResource(ctx context.Context, tag *model.ResourceTag) (*model.ResourceTag, error) {
 	if err := c.Master.WithContext(ctx).Exec(insertTagResource,
 		tag.ResourceTagID, tag.ResourceID, tag.ProjectID, tag.Tag).Error; err != nil {
 		return nil, err
@@ -768,6 +818,13 @@ func (c *Client) UntagResource(ctx context.Context, projectID uint32, resourceTa
 }
 
 func (c *Client) BulkUpsertResource(ctx context.Context, data []*model.Resource) error {
+	operation := func() error {
+		return c.bulkUpsertResource(ctx, data)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "BulkUpsertResource"))
+}
+
+func (c *Client) bulkUpsertResource(ctx context.Context, data []*model.Resource) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -796,6 +853,13 @@ ON DUPLICATE KEY UPDATE
 }
 
 func (c *Client) BulkUpsertResourceTag(ctx context.Context, data []*model.ResourceTag) error {
+	operation := func() error {
+		return c.bulkUpsertResourceTag(ctx, data)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "BulkUpsertResourceTag"))
+}
+
+func (c *Client) bulkUpsertResourceTag(ctx context.Context, data []*model.ResourceTag) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -837,6 +901,13 @@ func (c *Client) GetRecommend(ctx context.Context, projectID uint32, findingID u
 }
 
 func (c *Client) UpsertRecommend(ctx context.Context, data *model.Recommend) (*model.Recommend, error) {
+	operation := func() (*model.Recommend, error) {
+		return c.upsertRecommend(ctx, data)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertRecommend"))
+}
+
+func (c *Client) upsertRecommend(ctx context.Context, data *model.Recommend) (*model.Recommend, error) {
 	var ret model.Recommend
 	if err := c.Master.WithContext(ctx).Where("data_source=? AND type=?", data.DataSource, data.Type).Assign(data).FirstOrCreate(&ret).Error; err != nil {
 		return nil, err
@@ -845,6 +916,13 @@ func (c *Client) UpsertRecommend(ctx context.Context, data *model.Recommend) (*m
 }
 
 func (c *Client) UpsertRecommendFinding(ctx context.Context, data *model.RecommendFinding) (*model.RecommendFinding, error) {
+	operation := func() (*model.RecommendFinding, error) {
+		return c.upsertRecommendFinding(ctx, data)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertRecommendFinding"))
+}
+
+func (c *Client) upsertRecommendFinding(ctx context.Context, data *model.RecommendFinding) (*model.RecommendFinding, error) {
 	var ret model.RecommendFinding
 	if err := c.Master.WithContext(ctx).Where("finding_id=?", data.FindingID).Assign(data).FirstOrCreate(&ret).Error; err != nil {
 		return nil, err
@@ -867,6 +945,13 @@ func (c *Client) GetRecommendByDataSourceType(ctx context.Context, dataSource, r
 }
 
 func (c *Client) BulkUpsertRecommend(ctx context.Context, data []*model.Recommend) error {
+	operation := func() error {
+		return c.bulkUpsertRecommend(ctx, data)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "BulkUpsertRecommend"))
+}
+
+func (c *Client) bulkUpsertRecommend(ctx context.Context, data []*model.Recommend) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -897,6 +982,13 @@ ON DUPLICATE KEY UPDATE
 }
 
 func (c *Client) BulkUpsertRecommendFinding(ctx context.Context, data []*model.RecommendFinding) error {
+	operation := func() error {
+		return c.bulkUpsertRecommendFinding(ctx, data)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "BulkUpsertRecommendFinding"))
+}
+
+func (c *Client) bulkUpsertRecommendFinding(ctx context.Context, data []*model.RecommendFinding) error {
 	if len(data) == 0 {
 		return nil
 	}
