@@ -139,17 +139,17 @@ func TestPutUser(t *testing.T) {
 	}{
 		{
 			name:        "OK Insert",
-			input:       &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", Name: "nm", Activated: true}},
-			want:        &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", Activated: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			input:       &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true}},
+			want:        &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetErr:  gorm.ErrRecordNotFound,
-			mockUpdResp: &model.User{UserID: 1, Sub: "sub", Name: "nm", Activated: true, CreatedAt: now, UpdatedAt: now},
+			mockUpdResp: &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:        "OK Update",
-			input:       &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", Name: "nm", Activated: true}},
-			want:        &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", Activated: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockGetResp: &model.User{UserID: 1, Sub: "sub", Name: "nm", Activated: true, CreatedAt: now, UpdatedAt: now},
-			mockUpdResp: &model.User{UserID: 1, Sub: "sub", Name: "nm", Activated: true, CreatedAt: now, UpdatedAt: now},
+			input:       &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true}},
+			want:        &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp: &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, CreatedAt: now, UpdatedAt: now},
+			mockUpdResp: &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:    "NG Invalid param",

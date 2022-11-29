@@ -119,16 +119,17 @@ func (c *Client) GetUserBySub(ctx context.Context, sub string) (*model.User, err
 
 const insertPutUser = `
 INSERT INTO user
-  (user_id, sub, name, activated)
+  (user_id, sub, name, user_idp_key, activated)
 VALUES
-  (?, ?, ?, ?)
+  (?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   name=VALUES(name),
+  user_idp_key=VALUES(user_idp_key),
   activated=VALUES(activated)
 `
 
 func (c *Client) PutUser(ctx context.Context, u *model.User) (*model.User, error) {
-	if err := c.Master.WithContext(ctx).Exec(insertPutUser, u.UserID, u.Sub, u.Name, fmt.Sprintf("%t", u.Activated)).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(insertPutUser, u.UserID, u.Sub, u.Name, u.UserIdpKey, fmt.Sprintf("%t", u.Activated)).Error; err != nil {
 		return nil, err
 	}
 	return c.GetUserBySub(ctx, u.Sub)

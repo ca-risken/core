@@ -18,6 +18,7 @@ message ListUserResponse { repeated uint32 user_id = 1; }
 message GetUserRequest {
   uint32 user_id = 1;
   string sub = 2;
+  string user_idp_key = 3;
 }
 
 message GetUserResponse { User user = 1; }

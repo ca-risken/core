@@ -4,12 +4,13 @@ import "time"
 
 // User entity model
 type User struct {
-	UserID    uint32 `gorm:"primary_key"`
-	Sub       string
-	Name      string
-	Activated bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	UserID     uint32 `gorm:"primary_key"`
+	Sub        string
+	Name       string
+	UserIdpKey string
+	Activated  bool
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 // UserRole entity model

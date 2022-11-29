@@ -68,10 +68,11 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 		userID = savedData.UserID
 	}
 	u := &model.User{
-		UserID:    userID,
-		Sub:       req.User.Sub,
-		Name:      req.User.Name,
-		Activated: req.User.Activated,
+		UserID:     userID,
+		Sub:        req.User.Sub,
+		Name:       req.User.Name,
+		UserIdpKey: req.User.UserIdpKey,
+		Activated:  req.User.Activated,
 	}
 
 	// upsert
@@ -92,11 +93,12 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 
 func convertUser(u *model.User) *iam.User {
 	return &iam.User{
-		UserId:    u.UserID,
-		Sub:       u.Sub,
-		Name:      u.Name,
-		Activated: u.Activated,
-		CreatedAt: u.CreatedAt.Unix(),
-		UpdatedAt: u.UpdatedAt.Unix(),
+		UserId:     u.UserID,
+		Sub:        u.Sub,
+		Name:       u.Name,
+		UserIdpKey: u.UserIdpKey,
+		Activated:  u.Activated,
+		CreatedAt:  u.CreatedAt.Unix(),
+		UpdatedAt:  u.UpdatedAt.Unix(),
 	}
 }
