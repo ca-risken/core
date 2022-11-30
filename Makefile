@@ -675,7 +675,7 @@ get-user:
 put-user:
 	$(GRPCURL) \
 		-plaintext \
-		-d '{"user": {"sub":"sub", "name":"hogeta", "user_idp_key":"user_idp_key"}}' \
+		-d '{"user": {"sub":"sub", "name":"name", "user_idp_key":"user_idp_key"}}' \
 		$(CORE_API_ADDR) core.iam.IAMService.PutUser
 
 .PHONY: list-role

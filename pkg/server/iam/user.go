@@ -74,11 +74,18 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 		UserIdpKey: req.User.UserIdpKey,
 		Activated:  req.User.Activated,
 	}
-
-	// upsert
-	registerdData, err := i.repository.PutUser(ctx, u)
-	if err != nil {
-		return nil, err
+	var registerdData *model.User
+	// 登録済みユーザーの場合、update
+	if userID != 0 {
+		registerdData, err = i.repository.PutUser(ctx, u)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		registerdData, err = i.repository.CreateUser(ctx, u)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if isFisrstUser {
