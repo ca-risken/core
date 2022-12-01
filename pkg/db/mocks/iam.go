@@ -34,6 +34,10 @@ func (m *MockIAMRepository) GetTokenPolicy(context.Context, uint32) (*[]model.Po
 	args := m.Called()
 	return args.Get(0).(*[]model.Policy), args.Error(1)
 }
+func (m *MockIAMRepository) CreateUser(context.Context, *model.User) (*model.User, error) {
+	args := m.Called()
+	return args.Get(0).(*model.User), args.Error(1)
+}
 func (m *MockIAMRepository) PutUser(context.Context, *model.User) (*model.User, error) {
 	args := m.Called()
 	return args.Get(0).(*model.User), args.Error(1)

@@ -15,6 +15,7 @@ type IAMRepository interface {
 	ListUser(ctx context.Context, activated bool, projectID uint32, name string, userID uint32, admin bool) (*[]model.User, error)
 	GetUser(ctx context.Context, userID uint32, sub string) (*model.User, error)
 	GetUserBySub(ctx context.Context, sub string) (*model.User, error)
+	CreateUser(ctx context.Context, u *model.User) (*model.User, error)
 	PutUser(ctx context.Context, u *model.User) (*model.User, error)
 	GetActiveUserCount(ctx context.Context) (*int, error)
 
@@ -117,18 +118,30 @@ func (c *Client) GetUserBySub(ctx context.Context, sub string) (*model.User, err
 	return &data, nil
 }
 
-const insertPutUser = `
+const insertUser = `
 INSERT INTO user
-  (user_id, sub, name, activated)
-VALUES
-  (?, ?, ?, ?)
-ON DUPLICATE KEY UPDATE
-  name=VALUES(name),
-  activated=VALUES(activated)
+  (user_id, sub, name, user_idp_key, activated)
+  VALUES (?, ?, ?, ?, ?)
+`
+
+func (c *Client) CreateUser(ctx context.Context, u *model.User) (*model.User, error) {
+	if err := c.Master.WithContext(ctx).Exec(insertUser, u.UserID, u.Sub, u.Name, u.UserIdpKey, fmt.Sprintf("%t", u.Activated)).Error; err != nil {
+		return nil, err
+	}
+	return c.GetUserBySub(ctx, u.Sub)
+}
+
+const updateUser = `
+UPDATE user
+  SET 
+    name = ?,
+    user_idp_key = ?,
+    activated = ?
+  WHERE user_id = ?
 `
 
 func (c *Client) PutUser(ctx context.Context, u *model.User) (*model.User, error) {
-	if err := c.Master.WithContext(ctx).Exec(insertPutUser, u.UserID, u.Sub, u.Name, fmt.Sprintf("%t", u.Activated)).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(updateUser, u.Name, u.UserIdpKey, fmt.Sprintf("%t", u.Activated), u.UserID).Error; err != nil {
 		return nil, err
 	}
 	return c.GetUserBySub(ctx, u.Sub)
