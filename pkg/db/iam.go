@@ -125,7 +125,8 @@ INSERT INTO user
 `
 
 func (c *Client) CreateUser(ctx context.Context, u *model.User) (*model.User, error) {
-	if err := c.Master.WithContext(ctx).Exec(insertUser, u.UserID, u.Sub, u.Name, u.UserIdpKey, fmt.Sprintf("%t", u.Activated)).Error; err != nil {
+
+	if err := c.Master.WithContext(ctx).Exec(insertUser, u.UserID, u.Sub, u.Name, convertZeroValueToNull(u.UserIdpKey), fmt.Sprintf("%t", u.Activated)).Error; err != nil {
 		return nil, err
 	}
 	return c.GetUserBySub(ctx, u.Sub)
@@ -141,7 +142,7 @@ UPDATE user
 `
 
 func (c *Client) PutUser(ctx context.Context, u *model.User) (*model.User, error) {
-	if err := c.Master.WithContext(ctx).Exec(updateUser, u.Name, u.UserIdpKey, fmt.Sprintf("%t", u.Activated), u.UserID).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(updateUser, u.Name, convertZeroValueToNull(u.UserIdpKey), fmt.Sprintf("%t", u.Activated), u.UserID).Error; err != nil {
 		return nil, err
 	}
 	return c.GetUserBySub(ctx, u.Sub)
