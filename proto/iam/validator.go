@@ -36,7 +36,7 @@ func (p *PutUserRequest) Validate() error {
 func (u *UserForUpsert) Validate() error {
 	return validation.ValidateStruct(u,
 		validation.Field(&u.Sub, validation.Required, validation.Length(0, 255)),
-		validation.Field(&u.Name, validation.Required, validation.Length(0, 64)),
+		validation.Field(&u.Name, validation.Length(0, 64)),
 	)
 }
 

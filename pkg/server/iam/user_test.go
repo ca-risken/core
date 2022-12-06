@@ -154,9 +154,30 @@ func TestPutUser(t *testing.T) {
 			mockUpdResp: &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, CreatedAt: now, UpdatedAt: now},
 		},
 		{
+			name:        "OK Update (Name in request is empty)",
+			input:       &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", UserIdpKey: "uik", Activated: true}},
+			want:        &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "saved_nm", UserIdpKey: "uik", Activated: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp: &model.User{UserID: 1, Sub: "sub", Name: "saved_nm", UserIdpKey: "uik", Activated: true, CreatedAt: now, UpdatedAt: now},
+			mockUpdResp: &model.User{UserID: 1, Sub: "sub", Name: "saved_nm", UserIdpKey: "uik", Activated: true, CreatedAt: now, UpdatedAt: now},
+		},
+		{
+			name:        "OK Update (UserIdpKey in request is empty)",
+			input:       &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", Name: "nm", Activated: true}},
+			want:        &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", UserIdpKey: "saved_uik", Activated: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp: &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "saved_uik", Activated: true, CreatedAt: now, UpdatedAt: now},
+			mockUpdResp: &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "saved_uik", Activated: true, CreatedAt: now, UpdatedAt: now},
+		},
+		{
 			name:    "NG Invalid param",
 			input:   &iam.PutUserRequest{User: &iam.UserForUpsert{Name: "nm", Activated: true}},
 			wantErr: true,
+		},
+		{
+			name:       "NG name is empty when Insert",
+			input:      &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", UserIdpKey: "uik", Activated: true}},
+			want:       nil,
+			mockGetErr: gorm.ErrRecordNotFound,
+			wantErr:    true,
 		},
 		{
 			name:       "NG DB error(GetUserBySub)",

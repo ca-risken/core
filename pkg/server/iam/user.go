@@ -77,11 +77,20 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 	var registerdData *model.User
 	// 登録済みユーザーの場合、update
 	if userID != 0 {
+		if req.User.Name == "" {
+			u.Name = savedData.Name
+		}
+		if req.User.UserIdpKey == "" {
+			u.UserIdpKey = savedData.UserIdpKey
+		}
 		registerdData, err = i.repository.PutUser(ctx, u)
 		if err != nil {
 			return nil, err
 		}
 	} else {
+		if req.User.Name == "" {
+			return nil, errors.New("name is required when creating a user")
+		}
 		registerdData, err = i.repository.CreateUser(ctx, u)
 		if err != nil {
 			return nil, err

@@ -128,11 +128,6 @@ func TestValidate_UserForUpsert(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG required(name)",
-			input:   &UserForUpsert{Sub: "sub", Activated: true},
-			wantErr: true,
-		},
-		{
 			name:    "NG length(sub)",
 			input:   &UserForUpsert{Sub: "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456", Name: "nm", Activated: true},
 			wantErr: true,
