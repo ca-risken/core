@@ -15,6 +15,7 @@ type ProjectRepository interface {
 	ListProject(ctx context.Context, userID, projectID uint32, name string) (*[]ProjectWithTag, error)
 	CreateProject(ctx context.Context, name string) (*model.Project, error)
 	UpdateProject(ctx context.Context, projectID uint32, name string) (*model.Project, error)
+	DeleteProject(ctx context.Context, projectID uint32) error
 
 	TagProject(ctx context.Context, projectID uint32, tag, color string) (*model.ProjectTag, error)
 	UntagProject(ctx context.Context, projectID uint32, tag string) error
@@ -157,6 +158,15 @@ const deleteUntagProject string = `delete from project_tag where project_id=? an
 
 func (c *Client) UntagProject(ctx context.Context, projectID uint32, tag string) error {
 	if err := c.Master.WithContext(ctx).Exec(deleteUntagProject, projectID, tag).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+const deleteProject = `delete from project where project_id=?`
+
+func (c *Client) DeleteProject(ctx context.Context, projectID uint32) error {
+	if err := c.Master.WithContext(ctx).Exec(deleteProject, projectID).Error; err != nil {
 		return err
 	}
 	return nil

@@ -14,7 +14,6 @@ import (
 	"github.com/ca-risken/core/proto/iam"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/stretchr/testify/mock"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
 
 	iammock "github.com/ca-risken/core/proto/iam/mocks"
@@ -221,22 +220,15 @@ func TestUpdateProject(t *testing.T) {
 
 func TestDeleteProject(t *testing.T) {
 	var ctx context.Context
-	mockIAM := iammock.IAMServiceClient{}
-	svc := ProjectService{
-		iamClient: &mockIAM,
-		logger:    logging.NewLogger(),
-	}
 	cases := []struct {
-		name             string
-		input            *project.DeleteProjectRequest
-		wantErr          bool
-		listRoleResponse *iam.ListRoleResponse
-		mockIAMError     error
+		name    string
+		input   *project.DeleteProjectRequest
+		wantErr bool
+		mockErr error
 	}{
 		{
-			name:             "OK",
-			input:            &project.DeleteProjectRequest{ProjectId: 1},
-			listRoleResponse: &iam.ListRoleResponse{RoleId: []uint32{1}},
+			name:  "OK",
+			input: &project.DeleteProjectRequest{ProjectId: 1},
 		},
 		{
 			name:    "NG Invalid params",
@@ -244,18 +236,20 @@ func TestDeleteProject(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:         "NG IAM service error",
-			input:        &project.DeleteProjectRequest{},
-			mockIAMError: errors.New("Something error occured"),
-			wantErr:      true,
+			name:    "NG DB error",
+			input:   &project.DeleteProjectRequest{},
+			wantErr: true,
+			mockErr: errors.New("DB error"),
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			if c.listRoleResponse != nil {
-				mockIAM.On("ListRole", mock.Anything, mock.Anything).Return(c.listRoleResponse, nil).Once()
+			mockDB := mocks.MockProjectRepository{}
+			svc := ProjectService{
+				repository: &mockDB,
+				logger:     logging.NewLogger(),
 			}
-			mockIAM.On("DeleteRole", mock.Anything, mock.Anything).Return(&emptypb.Empty{}, nil).Once()
+			mockDB.On("DeleteProject").Return(c.mockErr).Once()
 			_, err := svc.DeleteProject(ctx, c.input)
 			if !c.wantErr && err != nil {
 				t.Fatalf("Unexpected error: %+v", err)

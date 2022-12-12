@@ -94,10 +94,9 @@ func (p *ProjectService) DeleteProject(ctx context.Context, req *project.DeleteP
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if err := p.deleteAllProjectRole(ctx, req.ProjectId); err != nil {
+	if err := p.repository.DeleteProject(ctx, req.ProjectId); err != nil {
 		return nil, err
 	}
-
 	p.logger.Infof(ctx, "Project deleted: project=%+v", req.ProjectId)
 
 	return &empty.Empty{}, nil
@@ -150,22 +149,6 @@ func (p *ProjectService) createDefaultRole(ctx context.Context, ownerUserID, pro
 		RoleId:    role.Role.RoleId,
 	}); err != nil {
 		return fmt.Errorf("Could not attach default role, err=%+v", err)
-	}
-	return nil
-}
-
-func (p *ProjectService) deleteAllProjectRole(ctx context.Context, projectID uint32) error {
-	list, err := p.iamClient.ListRole(ctx, &iam.ListRoleRequest{ProjectId: projectID})
-	if err != nil {
-		return err
-	}
-	for _, roleID := range list.RoleId {
-		if _, err := p.iamClient.DeleteRole(ctx, &iam.DeleteRoleRequest{
-			ProjectId: projectID,
-			RoleId:    roleID,
-		}); err != nil {
-			return err
-		}
 	}
 	return nil
 }
