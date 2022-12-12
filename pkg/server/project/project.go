@@ -166,3 +166,10 @@ func (p *ProjectService) isActiveProject(ctx context.Context, projectID uint32) 
 	}
 	return len(resp.UserId) > 0, nil
 }
+
+func (p *ProjectService) CleanProject(ctx context.Context, _ *empty.Empty) (*empty.Empty, error) {
+	if err := p.repository.CleanWithNoProject(ctx); err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
+}

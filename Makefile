@@ -145,6 +145,13 @@ delete-project:
 		-d '{"project_id":1005}' \
 		$(CORE_API_ADDR) core.project.ProjectService.DeleteProject
 
+.PHONY: clean-project
+clean-project:
+	$(GRPCURL) \
+		-plaintext \
+		-d '' \
+		$(CORE_API_ADDR) core.project.ProjectService.CleanProject
+
 .PHONY: tag-project
 tag-project:
 	$(GRPCURL) \

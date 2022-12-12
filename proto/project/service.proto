@@ -19,6 +19,7 @@ service ProjectService {
   rpc UntagProject(UntagProjectRequest) returns (google.protobuf.Empty);
 
   rpc IsActive(IsActiveRequest) returns (IsActiveResponse);
+  rpc CleanProject() returns (google.protobuf.Empty);
 }
 
 message ListProjectRequest {

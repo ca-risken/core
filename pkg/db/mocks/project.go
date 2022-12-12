@@ -43,3 +43,7 @@ func (m *MockProjectRepository) DeleteProject(ctx context.Context, projectID uin
 	args := m.Called()
 	return args.Error(0)
 }
+func (m *MockProjectRepository) CleanWithNoProject(ctx context.Context) error {
+	args := m.Called()
+	return args.Error(0)
+}
