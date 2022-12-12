@@ -175,86 +175,85 @@ func (c *Client) DeleteProject(ctx context.Context, projectID uint32) error {
 }
 
 const (
-	cleanTableWithNoProjectTempate    = "delete tbl from %s tbl where not exists(select * from project p where p.project_id = tbl.project_id)"
-	cleanTableWithNoFindingTempate    = "delete tbl from %s tbl where not exists(select * from finding f where f.finding_id = tbl.finding_id)"
-	cleanTableWithNoAcceeTokenTempate = "delete tbl from %s tbl where not exists(select * from access_token at where at.access_token_id = tbl.access_token_id)"
+	cleanTableWithNoProjectTemplate    = "delete tbl from %s tbl where not exists(select * from project p where p.project_id = tbl.project_id)"
+	cleanTableWithNoAcceeTokenTemplate = "delete tbl from %s tbl where not exists(select * from access_token at where at.access_token_id = tbl.access_token_id)"
 )
 
 func (c *Client) CleanWithNoProject(ctx context.Context) error {
 	// alert
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "alert")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "alert")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "alert_history")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "alert_history")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "rel_alert_finding")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "rel_alert_finding")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "alert_condition")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "alert_condition")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "alert_cond_rule")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "alert_cond_rule")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "alert_rule")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "alert_rule")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "alert_cond_notification")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "alert_cond_notification")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "notification")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "notification")).Error; err != nil {
 		return err
 	}
 
 	// finding
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "finding")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "finding")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "finding_tag")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "finding_tag")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "resource")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "resource")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "resource_tag")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "resource_tag")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "pend_finding")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "pend_finding")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "finding_setting")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "finding_setting")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "report_finding")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "report_finding")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoFindingTempate, "recommend_finding")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "recommend_finding")).Error; err != nil {
 		return err
 	}
 
 	// iam
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "access_token")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "access_token")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoAcceeTokenTempate, "access_token_role")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoAcceeTokenTemplate, "access_token_role")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "role")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "role")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "user_role")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "user_role")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "policy")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "policy")).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "role_policy")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "role_policy")).Error; err != nil {
 		return err
 	}
 
 	// project
-	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTempate, "project_tag")).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "project_tag")).Error; err != nil {
 		return err
 	}
 	return nil

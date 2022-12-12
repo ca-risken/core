@@ -84,7 +84,7 @@ func TestCleanWithNoProject(t *testing.T) {
 				"delete tbl from pend_finding tbl where not exists(select * from project p where p.project_id = tbl.project_id)",
 				"delete tbl from finding_setting tbl where not exists(select * from project p where p.project_id = tbl.project_id)",
 				"delete tbl from report_finding tbl where not exists(select * from project p where p.project_id = tbl.project_id)",
-				"delete tbl from recommend_finding tbl where not exists(select * from finding f where f.finding_id = tbl.finding_id)",
+				"delete tbl from recommend_finding tbl where not exists(select * from project p where p.project_id = tbl.project_id)",
 				"delete tbl from access_token tbl where not exists(select * from project p where p.project_id = tbl.project_id)",
 				"delete tbl from access_token_role tbl where not exists(select * from access_token at where at.access_token_id = tbl.access_token_id)",
 				"delete tbl from role tbl where not exists(select * from project p where p.project_id = tbl.project_id)",
