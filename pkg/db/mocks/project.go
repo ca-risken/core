@@ -39,3 +39,7 @@ func (m *MockProjectRepository) UntagProject(ctx context.Context, projectID uint
 	args := m.Called()
 	return args.Error(0)
 }
+func (m *MockProjectRepository) DeleteProject(ctx context.Context, projectID uint32) error {
+	args := m.Called()
+	return args.Error(0)
+}
