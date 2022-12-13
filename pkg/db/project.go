@@ -175,7 +175,7 @@ func (c *Client) DeleteProject(ctx context.Context, projectID uint32) error {
 }
 
 const (
-	cleanTableWithNoProjectTemplate    = "delete tbl from %s tbl where not exists(select * from project p where p.project_id = tbl.project_id)"
+	cleanTableWithNoProjectTemplate    = "delete tbl from %s tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id)"
 	cleanTableWithNoAcceeTokenTemplate = "delete tbl from %s tbl where not exists(select * from access_token at where at.access_token_id = tbl.access_token_id)"
 )
 
