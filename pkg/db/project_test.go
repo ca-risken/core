@@ -63,11 +63,16 @@ func TestCleanWithNoProject(t *testing.T) {
 	cases := []struct {
 		name    string
 		mockSQL []string
+		target  *sqlmock.Rows
 		wantErr bool
 		mockErr error
 	}{
 		{
 			name: "OK",
+			target: sqlmock.NewRows(
+				[]string{"project_id"}).
+				AddRow(1).
+				AddRow(2),
 			mockSQL: []string{
 				"delete from alert where project_id in",
 				"delete from alert_history where project_id in",
@@ -86,7 +91,7 @@ func TestCleanWithNoProject(t *testing.T) {
 				"delete from report_finding where project_id in",
 				"delete from recommend_finding where project_id in",
 				"delete from access_token where project_id in",
-				cleanAcceeTokenRole,
+				cleanAccessTokenRole,
 				"delete from role where project_id in",
 				"delete from user_role where project_id in",
 				"delete from policy where project_id in",
@@ -96,7 +101,17 @@ func TestCleanWithNoProject(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "NG DB error",
+			name: "No target",
+			target: sqlmock.NewRows(
+				[]string{"project_id"}),
+			wantErr: false,
+		},
+		{
+			name: "NG DB error",
+			target: sqlmock.NewRows(
+				[]string{"project_id"}).
+				AddRow(1).
+				AddRow(2),
 			wantErr: true,
 			mockErr: errors.New("DB error"),
 		},
@@ -106,12 +121,7 @@ func TestCleanWithNoProject(t *testing.T) {
 			ctx := context.Background()
 
 			// target project
-			mock.ExpectQuery(regexp.QuoteMeta(selectListCleanProjectTarget)).WillReturnRows(
-				sqlmock.NewRows(
-					[]string{"project_id"}).
-					AddRow(1).
-					AddRow(2),
-			)
+			mock.ExpectQuery(regexp.QuoteMeta(selectListCleanProjectTarget)).WillReturnRows(c.target)
 			for _, sql := range c.mockSQL {
 				mock.ExpectExec(regexp.QuoteMeta(sql)).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
 			}

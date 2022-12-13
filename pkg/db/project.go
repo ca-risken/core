@@ -175,9 +175,9 @@ func (c *Client) DeleteProject(ctx context.Context, projectID uint32) error {
 }
 
 const (
-	selectListCleanProjectTarget    = "select * from role r where not exists(select * from project p where p.project_id = r.project_id)"
+	selectListCleanProjectTarget    = "select * from role r where r.project_id is not null and not exists(select * from project p where p.project_id = r.project_id)"
 	cleanTableWithNoProjectTemplate = "delete from %s where project_id in (?)"
-	cleanAcceeTokenRole             = "delete atr from access_token_role atr where not exists(select * from access_token at where at.access_token_id = atr.access_token_id)"
+	cleanAccessTokenRole            = "delete atr from access_token_role atr where not exists(select * from access_token at where at.access_token_id = atr.access_token_id)"
 )
 
 func (c *Client) CleanWithNoProject(ctx context.Context) error {
@@ -186,9 +186,18 @@ func (c *Client) CleanWithNoProject(ctx context.Context) error {
 	if err := c.Slave.WithContext(ctx).Raw(selectListCleanProjectTarget).Scan(&data).Error; err != nil {
 		return err
 	}
+	if len(data) < 1 {
+		return nil
+	}
+
 	projectIDs := []uint32{}
+	duplicateCheck := map[uint32]bool{}
 	for _, d := range data {
+		if _, ok := duplicateCheck[d.ProjectID]; ok {
+			continue
+		}
 		projectIDs = append(projectIDs, d.ProjectID)
+		duplicateCheck[d.ProjectID] = true
 	}
 
 	// alert
@@ -247,7 +256,7 @@ func (c *Client) CleanWithNoProject(ctx context.Context) error {
 	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "access_token"), projectIDs).Error; err != nil {
 		return err
 	}
-	if err := c.Master.WithContext(ctx).Exec(cleanAcceeTokenRole).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(cleanAccessTokenRole).Error; err != nil {
 		return err
 	}
 	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "role"), projectIDs).Error; err != nil {
