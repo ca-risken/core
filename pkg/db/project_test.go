@@ -69,29 +69,29 @@ func TestCleanWithNoProject(t *testing.T) {
 		{
 			name: "OK",
 			mockSQL: []string{
-				"delete tbl from alert tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from alert_history tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from rel_alert_finding tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from alert_condition tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from alert_cond_rule tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from alert_rule tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from alert_cond_notification tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from notification tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from finding tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from finding_tag tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from resource tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from resource_tag tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from pend_finding tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from finding_setting tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from report_finding tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from recommend_finding tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from access_token tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from access_token_role tbl where not exists(select * from access_token at where at.access_token_id = tbl.access_token_id)",
-				"delete tbl from role tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from user_role tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from policy tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from role_policy tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
-				"delete tbl from project_tag tbl where tbl.project_id is not null and not exists(select * from project p where p.project_id = tbl.project_id) ",
+				"delete from alert where project_id in",
+				"delete from alert_history where project_id in",
+				"delete from rel_alert_finding where project_id in",
+				"delete from alert_condition where project_id in",
+				"delete from alert_cond_rule where project_id in",
+				"delete from alert_rule where project_id in",
+				"delete from alert_cond_notification where project_id in",
+				"delete from notification where project_id in",
+				"delete from finding where project_id in",
+				"delete from finding_tag where project_id in",
+				"delete from resource where project_id in",
+				"delete from resource_tag where project_id in",
+				"delete from pend_finding where project_id in",
+				"delete from finding_setting where project_id in",
+				"delete from report_finding where project_id in",
+				"delete from recommend_finding where project_id in",
+				"delete from access_token where project_id in",
+				cleanAcceeTokenRole,
+				"delete from role where project_id in",
+				"delete from user_role where project_id in",
+				"delete from policy where project_id in",
+				"delete from role_policy where project_id in",
+				"delete from project_tag where project_id in",
 			},
 			wantErr: false,
 		},
@@ -104,11 +104,19 @@ func TestCleanWithNoProject(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			ctx := context.Background()
+
+			// target project
+			mock.ExpectQuery(regexp.QuoteMeta(selectListCleanProjectTarget)).WillReturnRows(
+				sqlmock.NewRows(
+					[]string{"project_id"}).
+					AddRow(1).
+					AddRow(2),
+			)
 			for _, sql := range c.mockSQL {
 				mock.ExpectExec(regexp.QuoteMeta(sql)).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
 			}
 			if c.mockErr != nil {
-				mock.ExpectExec(regexp.QuoteMeta(`delete tbl from`)).WillReturnError(c.mockErr)
+				mock.ExpectExec(regexp.QuoteMeta(`delete from`)).WillReturnError(c.mockErr)
 			}
 
 			err := client.CleanWithNoProject(ctx)
