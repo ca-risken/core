@@ -265,6 +265,38 @@ func (d *DetachAccessTokenRoleRequest) Validate() error {
 	)
 }
 
+// Validate ListUserReservedRequest
+func (r *ListUserReservedRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.ProjectId, validation.Required),
+		validation.Field(&r.UserIdpKey, validation.Length(0, 255)),
+	)
+}
+
+// Validate PutUserReservedRequest
+func (r *PutUserReservedRequest) Validate() error {
+	if validation.IsEmpty(r.UserReserved) {
+		return errors.New("Required UserReserved parameter")
+	}
+	return r.UserReserved.Validate()
+}
+
+// Validate DeleteUserReservedRequest
+func (r *DeleteUserReservedRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.ProjectId, validation.Required),
+		validation.Field(&r.ReservedId, validation.Required),
+	)
+}
+
+// Validate UserReservedForUpsert
+func (r *UserReservedForUpsert) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.UserIdpKey, validation.Required, validation.Length(0, 255)),
+		validation.Field(&r.RoleId, validation.Required),
+	)
+}
+
 // Validate IsAuthorizedRequest
 func (i *IsAuthorizedRequest) Validate() error {
 	return validation.ValidateStruct(i,

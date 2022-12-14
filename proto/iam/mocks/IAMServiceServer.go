@@ -200,6 +200,29 @@ func (_m *IAMServiceServer) DeleteRole(_a0 context.Context, _a1 *iam.DeleteRoleR
 	return r0, r1
 }
 
+// DeleteUserReserved provides a mock function with given fields: _a0, _a1
+func (_m *IAMServiceServer) DeleteUserReserved(_a0 context.Context, _a1 *iam.DeleteUserReservedRequest) (*emptypb.Empty, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *emptypb.Empty
+	if rf, ok := ret.Get(0).(func(context.Context, *iam.DeleteUserReservedRequest) *emptypb.Empty); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*emptypb.Empty)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *iam.DeleteUserReservedRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DetachAccessTokenRole provides a mock function with given fields: _a0, _a1
 func (_m *IAMServiceServer) DetachAccessTokenRole(_a0 context.Context, _a1 *iam.DetachAccessTokenRoleRequest) (*emptypb.Empty, error) {
 	ret := _m.Called(_a0, _a1)
@@ -522,6 +545,29 @@ func (_m *IAMServiceServer) ListUser(_a0 context.Context, _a1 *iam.ListUserReque
 	return r0, r1
 }
 
+// ListUserReserved provides a mock function with given fields: _a0, _a1
+func (_m *IAMServiceServer) ListUserReserved(_a0 context.Context, _a1 *iam.ListUserReservedRequest) (*iam.ListUserReservedResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *iam.ListUserReservedResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *iam.ListUserReservedRequest) *iam.ListUserReservedResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*iam.ListUserReservedResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *iam.ListUserReservedRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PutAccessToken provides a mock function with given fields: _a0, _a1
 func (_m *IAMServiceServer) PutAccessToken(_a0 context.Context, _a1 *iam.PutAccessTokenRequest) (*iam.PutAccessTokenResponse, error) {
 	ret := _m.Called(_a0, _a1)
@@ -606,6 +652,29 @@ func (_m *IAMServiceServer) PutUser(_a0 context.Context, _a1 *iam.PutUserRequest
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *iam.PutUserRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PutUserReserved provides a mock function with given fields: _a0, _a1
+func (_m *IAMServiceServer) PutUserReserved(_a0 context.Context, _a1 *iam.PutUserReservedRequest) (*iam.PutUserReservedResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *iam.PutUserReservedResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *iam.PutUserReservedRequest) *iam.PutUserReservedResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*iam.PutUserReservedResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *iam.PutUserReservedRequest) error); ok {
 		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)

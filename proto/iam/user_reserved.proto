@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package core.iam;
+option go_package = "github.com/ca-risken/core/proto/iam";
+
+import "iam/entity.proto";
+
+message ListUserReservedRequest {
+  uint32 project_id = 1;
+  string user_idp_key = 2;
+}
+
+message ListUserReservedResponse { repeated UserReserved user_reserved = 1; }
+
+message PutUserReservedRequest {
+  uint32 project_id = 1;
+  UserReservedForUpsert user_reserved = 2;
+}
+
+message PutUserReservedResponse { UserReserved user_reserved = 1; }
+
+message DeleteUserReservedRequest {
+  uint32 project_id = 1;
+  uint32 reserved_id = 2;
+}

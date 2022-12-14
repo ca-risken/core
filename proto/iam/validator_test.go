@@ -1280,3 +1280,139 @@ func TestValidate_IsAdminRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestValidate_ListUserReservedRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *ListUserReservedRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &ListUserReservedRequest{ProjectId: 123},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &ListUserReservedRequest{UserIdpKey: "user_idp_key"},
+			wantErr: true,
+		},
+		{
+			name:    "NG length(user_idp_key)",
+			input:   &ListUserReservedRequest{ProjectId: 123, UserIdpKey: length256string},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_PutUserReservedRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *PutUserReservedRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &PutUserReservedRequest{ProjectId: 123, UserReserved: &UserReservedForUpsert{RoleId: 123, UserIdpKey: "user_idp_key"}},
+			wantErr: false,
+		},
+		{
+			name:    "NG Empty(policy)",
+			input:   &PutUserReservedRequest{ProjectId: 123},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_UserReservedForUpsert(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *UserReservedForUpsert
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &UserReservedForUpsert{RoleId: 123, UserIdpKey: "user_idp_key"},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(role_id)",
+			input:   &UserReservedForUpsert{UserIdpKey: "user_idp_key"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(user_idp_key)",
+			input:   &UserReservedForUpsert{RoleId: 123},
+			wantErr: true,
+		},
+		{
+			name:    "NG Length(user_idp_key)",
+			input:   &UserReservedForUpsert{RoleId: 123, UserIdpKey: length256string},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_DeleteUserReservedRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *DeleteUserReservedRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &DeleteUserReservedRequest{ProjectId: 123, ReservedId: 1},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &DeleteUserReservedRequest{ReservedId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(policy_id)",
+			input:   &DeleteUserReservedRequest{ProjectId: 123},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}

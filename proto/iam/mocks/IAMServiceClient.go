@@ -258,6 +258,36 @@ func (_m *IAMServiceClient) DeleteRole(ctx context.Context, in *iam.DeleteRoleRe
 	return r0, r1
 }
 
+// DeleteUserReserved provides a mock function with given fields: ctx, in, opts
+func (_m *IAMServiceClient) DeleteUserReserved(ctx context.Context, in *iam.DeleteUserReservedRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *emptypb.Empty
+	if rf, ok := ret.Get(0).(func(context.Context, *iam.DeleteUserReservedRequest, ...grpc.CallOption) *emptypb.Empty); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*emptypb.Empty)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *iam.DeleteUserReservedRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DetachAccessTokenRole provides a mock function with given fields: ctx, in, opts
 func (_m *IAMServiceClient) DetachAccessTokenRole(ctx context.Context, in *iam.DetachAccessTokenRoleRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	_va := make([]interface{}, len(opts))
@@ -678,6 +708,36 @@ func (_m *IAMServiceClient) ListUser(ctx context.Context, in *iam.ListUserReques
 	return r0, r1
 }
 
+// ListUserReserved provides a mock function with given fields: ctx, in, opts
+func (_m *IAMServiceClient) ListUserReserved(ctx context.Context, in *iam.ListUserReservedRequest, opts ...grpc.CallOption) (*iam.ListUserReservedResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *iam.ListUserReservedResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *iam.ListUserReservedRequest, ...grpc.CallOption) *iam.ListUserReservedResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*iam.ListUserReservedResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *iam.ListUserReservedRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PutAccessToken provides a mock function with given fields: ctx, in, opts
 func (_m *IAMServiceClient) PutAccessToken(ctx context.Context, in *iam.PutAccessTokenRequest, opts ...grpc.CallOption) (*iam.PutAccessTokenResponse, error) {
 	_va := make([]interface{}, len(opts))
@@ -790,6 +850,36 @@ func (_m *IAMServiceClient) PutUser(ctx context.Context, in *iam.PutUserRequest,
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *iam.PutUserRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PutUserReserved provides a mock function with given fields: ctx, in, opts
+func (_m *IAMServiceClient) PutUserReserved(ctx context.Context, in *iam.PutUserReservedRequest, opts ...grpc.CallOption) (*iam.PutUserReservedResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *iam.PutUserReservedResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *iam.PutUserReservedRequest, ...grpc.CallOption) *iam.PutUserReservedResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*iam.PutUserReservedResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *iam.PutUserReservedRequest, ...grpc.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)

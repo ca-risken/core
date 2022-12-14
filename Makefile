@@ -817,4 +817,25 @@ analyze-access-token-expiration:
 		-plaintext \
 		$(CORE_API_ADDR) core.iam.IAMService.AnalyzeTokenExpiration
 
+.PHONY: list-user-reserved
+list-user-reserved:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001}' \
+		$(CORE_API_ADDR) core.iam.IAMService.ListUserReserved
+
+.PHONY: put-user-reserved
+put-user-reserved:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001, "user_reserved": {"role_id": 1001, "user_idp_key": "reserved_user"}}' \
+		$(CORE_API_ADDR) core.iam.IAMService.PutUserReserved
+
+.PHONY: delete-user-reserved
+delete-user-reserved:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001, "reserved_id": 1006}' \
+		$(CORE_API_ADDR) core.iam.IAMService.DeleteUserReserved
+
 FAKE:

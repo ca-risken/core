@@ -110,3 +110,19 @@ message AccessTokenRole {
   int64 created_at = 4;
   int64 updated_at = 5;
 }
+
+// UserReserved
+message UserReserved {
+  uint32 reserved_id = 1;
+  string user_idp_key = 2;
+  uint32 role_id = 3;
+  int64 created_at = 4;
+  int64 updated_at = 5;
+}
+
+// UserReservedForUpsert
+message UserReservedForUpsert {
+  uint32 reserved_id = 1;
+  string user_idp_key = 2;
+  uint32 role_id = 3;
+}

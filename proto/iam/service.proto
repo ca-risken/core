@@ -8,6 +8,7 @@ import "iam/user.proto";
 import "iam/role.proto";
 import "iam/policy.proto";
 import "iam/access_token.proto";
+import "iam/user_reserved.proto";
 
 service IAMService {
   // User
@@ -44,6 +45,13 @@ service IAMService {
       returns (google.protobuf.Empty);
   rpc AnalyzeTokenExpiration(google.protobuf.Empty)
       returns (google.protobuf.Empty); // For scheduled job
+
+  // UserReserved
+  rpc ListUserReserved(ListUserReservedRequest)
+      returns (ListUserReservedResponse);
+  rpc PutUserReserved(PutUserReservedRequest) returns (PutUserReservedResponse);
+  rpc DeleteUserReserved(DeleteUserReservedRequest)
+      returns (google.protobuf.Empty);
 
   // ユーザに対しての認可を行います
   rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
