@@ -175,7 +175,7 @@ func TestListUserReserved(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(listUserReserved + " and r.project_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(listUserReserved)).WillReturnRows(sqlmock.NewRows([]string{
 					"reserved_id", "role_id", "user_idp_key", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "uik1", now, now).
 					AddRow(uint32(2), uint32(1), "uik2", now, now))
@@ -189,7 +189,7 @@ func TestListUserReserved(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(listUserReserved + " and r.project_id = ? and ur.user_idp_key = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(listUserReserved + " and ur.user_idp_key = ?")).WillReturnRows(sqlmock.NewRows([]string{
 					"reserved_id", "role_id", "user_idp_key", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "uik1", now, now))
 			},

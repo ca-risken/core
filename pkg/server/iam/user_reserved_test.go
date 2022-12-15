@@ -74,62 +74,6 @@ func TestListUserReserved(t *testing.T) {
 	}
 }
 
-// func TestGetUserReserved(t *testing.T) {
-// 	var ctx context.Context
-// 	now := time.Now()
-// 	mock := mocks.MockIAMRepository{}
-// 	svc := IAMService{repository: &mock}
-// 	cases := []struct {
-// 		name         string
-// 		input        *iam.GetUserReservedRequest
-// 		want         *iam.GetUserReservedResponse
-// 		wantErr      bool
-// 		mockResponce *model.UserReserved
-// 		mockError    error
-// 	}{
-// 		{
-// 			name:         "OK",
-// 			input:        &iam.GetUserReservedRequest{ReservedId: 111, ProjectId: 123},
-// 			want:         &iam.GetUserReservedResponse{
-// 				UserReserved: &iam.UserReserved{
-// 					ReservedId: 1,					RoleId: 1,					UserIdpKey: "uik",					 CreatedAt: now.Unix(),					  UpdatedAt: now.Unix()}},
-// 			mockResponce: &model.UserReserved{
-// 				ReservedID: 1,RoleID: 1, UserIdpKey: "uik1",  CreatedAt: now, UpdatedAt: now},
-// 		},
-// 		{
-// 			name:      "OK Record Not Found",
-// 			input:     &iam.GetUserReservedRequest{ReservedId: 111, ProjectId: 123},
-// 			want:      &iam.GetUserReservedResponse{},
-// 			mockError: gorm.ErrRecordNotFound,
-// 		},
-// 		{
-// 			name:    "NG validation error",
-// 			input:   &iam.GetUserReservedRequest{},
-// 			wantErr: true,
-// 		},
-// 		{
-// 			name:      "invalid DB error",
-// 			input:     &iam.GetUserReservedRequest{ReservedId: 111, ProjectId: 123},
-// 			wantErr:   true,
-// 			mockError: gorm.ErrInvalidDB,
-// 		},
-// 	}
-// 	for _, c := range cases {
-// 		t.Run(c.name, func(t *testing.T) {
-// 			if c.mockResponce != nil || c.mockError != nil {
-// 				mock.On("GetUserReserved").Return(c.mockResponce, c.mockError).Once()
-// 			}
-// 			got, err := svc.GetUserReserved(ctx, c.input)
-// 			if err != nil && !c.wantErr {
-// 				t.Fatalf("Unexpected error: %+v", err)
-// 			}
-// 			if !reflect.DeepEqual(got, c.want) {
-// 				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
-// 			}
-// 		})
-// 	}
-// }
-
 func TestPutUserReserved(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()

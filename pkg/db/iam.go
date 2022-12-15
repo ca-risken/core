@@ -776,16 +776,15 @@ func (c *Client) accessTokenExists(ctx context.Context, projectID, accessTokenID
 }
 
 const listUserReserved = `
-select * 
-from user_reserved ur inner join role r
-where ur.role_id = r.role_id`
+select ur.* 
+from user_reserved ur inner join role r using(role_id)
+where r.project_id = ?
+`
 
 func (c *Client) ListUserReserved(ctx context.Context, projectID uint32, userIdpKey string) (*[]model.UserReserved, error) {
 	query := listUserReserved
-	var params []interface{}
-	if projectID != 0 {
-		query += " and r.project_id = ?"
-		params = append(params, projectID)
+	params := []interface{}{
+		projectID,
 	}
 	if userIdpKey != "" {
 		query += " and ur.user_idp_key = ?"
@@ -807,8 +806,8 @@ type UserReservedWithProjectID struct {
 
 const listUserReservedWithProjectID = `
 select ur.reserved_id,ur.role_id,r.project_id 
-from user_reserved ur inner join role r
-where ur.role_id = r.role_id and ur.user_idp_key = ?
+from user_reserved ur inner join role r using(role_id)
+where  ur.user_idp_key = ?
 `
 
 func (c *Client) ListUserReservedWithProjectID(ctx context.Context, userIdpKey string) (*[]UserReservedWithProjectID, error) {
