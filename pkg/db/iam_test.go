@@ -294,7 +294,6 @@ func TestPutUserReserved(t *testing.T) {
 	cases := []struct {
 		name        string
 		args        args
-		want        *model.UserReserved
 		wantErr     bool
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
@@ -303,7 +302,6 @@ func TestPutUserReserved(t *testing.T) {
 			args: args{
 				data: &model.UserReserved{ReservedID: 1, RoleID: 1, UserIdpKey: "uik1"},
 			},
-			want: &model.UserReserved{ReservedID: 1, RoleID: 1, UserIdpKey: "uik1", CreatedAt: now, UpdatedAt: now},
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_reserved` WHERE reserved_id = ? ORDER BY `user_reserved`.`reserved_id` LIMIT 1")).WillReturnRows(sqlmock.NewRows([]string{
 					"reserved_id", "role_id", "user_idp_key", "created_at", "updated_at"}).
@@ -318,10 +316,9 @@ func TestPutUserReserved(t *testing.T) {
 			args: args{
 				data: &model.UserReserved{ReservedID: 1, RoleID: 1, UserIdpKey: "uik1"},
 			},
-			want:    &model.UserReserved{ReservedID: 1, RoleID: 1, UserIdpKey: "uik1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_reserved` WHERE reserved_id = ? ORDER BY `user_reserved`.`reserved_id` LIMIT 1")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_reserved`")).WillReturnRows(sqlmock.NewRows([]string{
 					"reserved_id", "role_id", "user_idp_key", "created_at", "updated_at"}))
 				mock.ExpectBegin()
 				mock.ExpectExec("INSERT INTO `user_reserved`").WillReturnResult(sqlmock.NewResult(1, 1))
@@ -333,7 +330,6 @@ func TestPutUserReserved(t *testing.T) {
 			args: args{
 				data: &model.UserReserved{ReservedID: 1, RoleID: 1, UserIdpKey: "uik1"},
 			},
-			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_reserved` WHERE reserved_id = ? ORDER BY `user_reserved`.`reserved_id` LIMIT 1")).WillReturnError(errors.New("DB error"))
@@ -348,13 +344,9 @@ func TestPutUserReserved(t *testing.T) {
 				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
 			}
 			c.mockClosure(mock)
-			got, err := db.PutUserReserved(ctx, c.args.data)
+			_, err = db.PutUserReserved(ctx, c.args.data)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
-			}
-			// 自動生成されるタイムスタンプをwantで指定できないのでそれ以外の値を比較
-			if c.want != nil && !((got.ReservedID == c.want.ReservedID) && (got.RoleID == c.want.RoleID) && (got.UserIdpKey == c.want.UserIdpKey)) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
 			}
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
