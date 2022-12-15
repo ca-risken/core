@@ -18,6 +18,7 @@ type IAMRepository interface {
 	CreateUser(ctx context.Context, u *model.User) (*model.User, error)
 	PutUser(ctx context.Context, u *model.User) (*model.User, error)
 	GetActiveUserCount(ctx context.Context) (*int, error)
+	GetUserByUserIdpKey(ctx context.Context, userIdpKey string) (*model.User, error)
 
 	// Role
 	ListRole(ctx context.Context, projectID uint32, name string, userID uint32, accessTokenID uint32) (*[]model.Role, error)
@@ -53,6 +54,12 @@ type IAMRepository interface {
 	DetachAccessTokenRole(ctx context.Context, projectID, roleID, accessTokenID uint32) error
 	ExistsAccessTokenMaintainer(ctx context.Context, projectID, accessTokenID uint32) (bool, error)
 	ListExpiredAccessToken(ctx context.Context) (*[]model.AccessToken, error)
+
+	// UserReserved
+	ListUserReserved(ctx context.Context, projectID uint32, userIdpKey string) (*[]model.UserReserved, error)
+	ListUserReservedWithProjectID(ctx context.Context, userIdpKey string) (*[]UserReservedWithProjectID, error)
+	PutUserReserved(ctx context.Context, u *model.UserReserved) (*model.UserReserved, error)
+	DeleteUserReserved(ctx context.Context, projectID, reservedID uint32) error
 }
 
 var _ IAMRepository = (*Client)(nil)
@@ -113,6 +120,14 @@ const selectGetUserBySub = `select * from user where sub = ?`
 func (c *Client) GetUserBySub(ctx context.Context, sub string) (*model.User, error) {
 	var data model.User
 	if err := c.Master.WithContext(ctx).Raw(selectGetUserBySub, sub).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (c *Client) GetUserByUserIdpKey(ctx context.Context, userIdpKey string) (*model.User, error) {
+	var data model.User
+	if err := c.Slave.WithContext(ctx).Where("user_idp_key = ?", userIdpKey).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -758,6 +773,70 @@ func (c *Client) accessTokenExists(ctx context.Context, projectID, accessTokenID
 		return false, fmt.Errorf("failed to get access token. project_id=%d, access_token_id=%d, error: %w", projectID, accessTokenID, err)
 	}
 	return true, nil
+}
+
+const listUserReserved = `
+select ur.* 
+from user_reserved ur inner join role r using(role_id)
+where r.project_id = ?
+`
+
+func (c *Client) ListUserReserved(ctx context.Context, projectID uint32, userIdpKey string) (*[]model.UserReserved, error) {
+	query := listUserReserved
+	params := []interface{}{
+		projectID,
+	}
+	if userIdpKey != "" {
+		query += " and ur.user_idp_key = ?"
+		params = append(params, userIdpKey)
+	}
+	var data []model.UserReserved
+	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+// For ListUserReservedWithProjectID
+type UserReservedWithProjectID struct {
+	ProjectID  uint32
+	ReservedID uint32
+	RoleID     uint32
+}
+
+const listUserReservedWithProjectID = `
+select ur.reserved_id,ur.role_id,r.project_id 
+from user_reserved ur inner join role r using(role_id)
+where  ur.user_idp_key = ?
+`
+
+func (c *Client) ListUserReservedWithProjectID(ctx context.Context, userIdpKey string) (*[]UserReservedWithProjectID, error) {
+	var data []UserReservedWithProjectID
+	if err := c.Slave.WithContext(ctx).Raw(listUserReservedWithProjectID, userIdpKey).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (c *Client) PutUserReserved(ctx context.Context, data *model.UserReserved) (*model.UserReserved, error) {
+	var ret *model.UserReserved
+	if err := c.Master.WithContext(ctx).Where("reserved_id = ?", data.ReservedID).Assign(data).FirstOrCreate(&ret).Error; err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+const deleteUserReserved = `
+delete ur from user_reserved ur 
+where exists 
+  (select * from role r where ur.role_id = r.role_id and r.project_id = ?) and ur.reserved_id = ?
+`
+
+func (c *Client) DeleteUserReserved(ctx context.Context, projectID, reservedID uint32) error {
+	if err := c.Master.WithContext(ctx).Exec(deleteUserReserved, projectID, reservedID).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func convertZeroValueToNull(input interface{}) interface{} {

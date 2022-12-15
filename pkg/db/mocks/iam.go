@@ -3,6 +3,7 @@ package mocks
 import (
 	"context"
 
+	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/stretchr/testify/mock"
 )
@@ -45,6 +46,10 @@ func (m *MockIAMRepository) PutUser(context.Context, *model.User) (*model.User, 
 func (m *MockIAMRepository) GetActiveUserCount(ctx context.Context) (*int, error) {
 	args := m.Called()
 	return args.Get(0).(*int), args.Error(1)
+}
+func (m *MockIAMRepository) GetUserByUserIdpKey(context.Context, string) (*model.User, error) {
+	args := m.Called()
+	return args.Get(0).(*model.User), args.Error(1)
 }
 func (m *MockIAMRepository) ListRole(ctx context.Context, projectID uint32, name string, userID uint32, accessTokenID uint32) (*[]model.Role, error) {
 	args := m.Called()
@@ -153,4 +158,20 @@ func (m *MockIAMRepository) ExistsAccessTokenMaintainer(ctx context.Context, pro
 func (m *MockIAMRepository) ListExpiredAccessToken(ctx context.Context) (*[]model.AccessToken, error) {
 	args := m.Called()
 	return args.Get(0).(*[]model.AccessToken), args.Error(1)
+}
+func (m *MockIAMRepository) ListUserReserved(ctx context.Context, projectID uint32, userIdpKey string) (*[]model.UserReserved, error) {
+	args := m.Called()
+	return args.Get(0).(*[]model.UserReserved), args.Error(1)
+}
+func (m *MockIAMRepository) ListUserReservedWithProjectID(ctx context.Context, userIdpKey string) (*[]db.UserReservedWithProjectID, error) {
+	args := m.Called()
+	return args.Get(0).(*[]db.UserReservedWithProjectID), args.Error(1)
+}
+func (m *MockIAMRepository) PutUserReserved(ctx context.Context, UserReserved *model.UserReserved) (*model.UserReserved, error) {
+	args := m.Called()
+	return args.Get(0).(*model.UserReserved), args.Error(1)
+}
+func (m *MockIAMRepository) DeleteUserReserved(ctx context.Context, projectID, reservedID uint32) error {
+	args := m.Called()
+	return args.Error(0)
 }

@@ -71,3 +71,12 @@ type AccessTokenRole struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 }
+
+// UserReserved entity model
+type UserReserved struct {
+	ReservedID uint32 `gorm:"primary_key"`
+	UserIdpKey string
+	RoleID     uint32
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ca-risken/common/pkg/logging"
+	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/iam"
@@ -128,23 +129,26 @@ func TestPutUser(t *testing.T) {
 	mock := mocks.MockIAMRepository{}
 	svc := IAMService{repository: &mock, logger: logging.NewLogger()}
 	cases := []struct {
-		name           string
-		input          *iam.PutUserRequest
-		want           *iam.PutUserResponse
-		wantErr        bool
-		mockGetResp    *model.User
-		mockGetErr     error
-		mockInsertResp *model.User
-		mockInsertErr  error
-		mockUpdResp    *model.User
-		mockUpdErr     error
+		name                     string
+		input                    *iam.PutUserRequest
+		want                     *iam.PutUserResponse
+		wantErr                  bool
+		mockGetResp              *model.User
+		mockGetErr               error
+		mockInsertResp           *model.User
+		mockInsertErr            error
+		mockUpdResp              *model.User
+		mockUpdErr               error
+		mockListUserReservedResp *[]db.UserReservedWithProjectID
+		mockListUserReservedErr  error
 	}{
 		{
-			name:           "OK Insert",
-			input:          &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true}},
-			want:           &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockGetErr:     gorm.ErrRecordNotFound,
-			mockInsertResp: &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, CreatedAt: now, UpdatedAt: now},
+			name:                     "OK Insert",
+			input:                    &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true}},
+			want:                     &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetErr:               gorm.ErrRecordNotFound,
+			mockInsertResp:           &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, CreatedAt: now, UpdatedAt: now},
+			mockListUserReservedResp: &[]db.UserReservedWithProjectID{},
 		},
 		{
 			name:        "OK Update",
@@ -171,6 +175,14 @@ func TestPutUser(t *testing.T) {
 			mockInsertErr: gorm.ErrInvalidTransaction,
 			wantErr:       true,
 		},
+		{
+			name:                    "NG DB error(ListUserReserved)",
+			input:                   &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true}},
+			wantErr:                 true,
+			mockGetErr:              gorm.ErrRecordNotFound,
+			mockInsertResp:          &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, CreatedAt: now, UpdatedAt: now},
+			mockListUserReservedErr: gorm.ErrInvalidTransaction,
+		},
 	}
 	testUsers := 3
 	mock.On("GetActiveUserCount").Return(&testUsers, nil)
@@ -185,6 +197,9 @@ func TestPutUser(t *testing.T) {
 			}
 			if c.mockInsertResp != nil || c.mockInsertErr != nil {
 				mock.On("CreateUser").Return(c.mockInsertResp, c.mockInsertErr).Once()
+			}
+			if c.mockListUserReservedResp != nil || c.mockListUserReservedErr != nil {
+				mock.On("ListUserReservedWithProjectID").Return(c.mockListUserReservedResp, c.mockListUserReservedErr).Once()
 			}
 			got, err := svc.PutUser(ctx, c.input)
 			if err != nil && !c.wantErr {

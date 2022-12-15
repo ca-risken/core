@@ -7,6 +7,7 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	mimosasql "github.com/ca-risken/common/pkg/database/sql"
@@ -53,7 +54,7 @@ func newMockClient() (*Client, sqlmock.Sqlmock, error) {
 	gormDB, err := gorm.Open(mysql.New(mysql.Config{
 		Conn:                      sqlDB,
 		SkipInitializeWithVersion: true,
-	}), &gorm.Config{})
+	}), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to open gorm, error: %+w", err)
 	}
