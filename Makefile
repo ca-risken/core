@@ -492,7 +492,7 @@ untag-finding:
 clear-score:
 	$(GRPCURL) \
 		-plaintext \
-		-d '{"data_source":"aws:guard-duty", "project_id":1001, "tag":["test1", "test2"]}' \
+		-d '{"data_source":"aws:guard-duty", "project_id":1001, "tag":["aws", "guardduty"], "before_at":1675071350 }' \
 		$(CORE_API_ADDR) core.finding.FindingService.ClearScore
 
 .PHONY: list-resource

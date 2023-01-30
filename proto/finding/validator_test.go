@@ -539,6 +539,16 @@ func TestValidate_ClearScoreRequest(t *testing.T) {
 			input:   &ClearScoreRequest{DataSource: "ds", Tag: []string{"tag1", len65string}},
 			wantErr: true,
 		},
+		{
+			name:    "NG Min(before_at)",
+			input:   &ClearScoreRequest{DataSource: "ds", ProjectId: 1, Tag: []string{"tag1", "tag2"}, BeforeAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Max(before_at)",
+			input:   &ClearScoreRequest{DataSource: "ds", ProjectId: 1, Tag: []string{"tag1", "tag2"}, BeforeAt: 253402268400},
+			wantErr: true,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

@@ -171,6 +171,7 @@ message ClearScoreRequest {
   uint32 project_id = 2;
   repeated string tag = 3;
   uint64 finding_id = 4;
+  int64 before_at = 5;
 }
 
 message ListResourceRequest {

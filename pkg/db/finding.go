@@ -409,7 +409,7 @@ func (c *Client) clearScoreFinding(ctx context.Context, req *finding.ClearScoreR
 	sql := `update finding f left outer join finding_tag ft using(finding_id) set f.score=0.0 where f.score > 0.0 and f.data_source = ?`
 
 	params = append(params, req.DataSource)
-	if !zero.IsZeroVal(req.ProjectId) {
+	if req.ProjectId != 0 {
 		sql += " and f.project_id = ?"
 		params = append(params, req.ProjectId)
 	}
@@ -417,9 +417,13 @@ func (c *Client) clearScoreFinding(ctx context.Context, req *finding.ClearScoreR
 		sql += " and ft.tag in (?)"
 		params = append(params, req.Tag)
 	}
-	if !zero.IsZeroVal(req.FindingId) {
+	if req.FindingId != 0 {
 		sql += " and f.finding_id = ?"
 		params = append(params, req.FindingId)
+	}
+	if req.BeforeAt != 0 {
+		sql += " and f.updated_at < ?"
+		params = append(params, time.Unix(req.BeforeAt, 0))
 	}
 	return c.Master.WithContext(ctx).Exec(sql, params...).Error
 }

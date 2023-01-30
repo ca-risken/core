@@ -163,6 +163,7 @@ func (c *ClearScoreRequest) Validate() error {
 	return validation.ValidateStruct(c,
 		validation.Field(&c.DataSource, validation.Required, validation.Length(0, 64)),
 		validation.Field(&c.Tag, validation.Each(validation.Length(0, 64))),
+		validation.Field(&c.BeforeAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 	)
 }
 
