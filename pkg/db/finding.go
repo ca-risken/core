@@ -569,34 +569,12 @@ func (c *Client) ListResource(ctx context.Context, req *finding.ListResourceRequ
 select 
   r.*
 from
-  resource r
-where
-  r.project_id = ?
-  and r.updated_at between ? and ?
-`
-	var params []interface{}
-	params = append(params, req.ProjectId, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
-	if !zero.IsZeroVal(req.ResourceId) {
-		query += " and r.resource_id = ?"
-		params = append(params, req.ResourceId)
-	}
-	if len(req.ResourceName) > 0 {
-		sql, sqlParams := generatePrefixMatchSQLStatement("r.resource_name", req.ResourceName)
-		if sql != "" {
-			query += fmt.Sprintf(" and (%s)", sql)
-			params = append(params, sqlParams...)
-		}
-	}
-	if len(req.Tag) > 0 {
-		for _, tag := range req.Tag {
-			query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag = ?)"
-			params = append(params, tag)
-		}
-	}
-	if req.FromSumScore > 0 {
-		query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
-		params = append(params, req.FromSumScore, req.ToSumScore)
-	}
+  resource r `
+	where, params := generateListResourceCondition(
+		req.ProjectId, req.FromSumScore, req.ToSumScore,
+		req.FromAt, req.ToAt, req.ResourceId, req.ResourceName, req.Tag,
+	)
+	query += where
 	query += fmt.Sprintf(" order by %s %s", req.Sort, req.Direction)
 	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
 	var data []model.Resource
@@ -611,40 +589,54 @@ func (c *Client) ListResourceCount(ctx context.Context, req *finding.ListResourc
 select count(*) from (
   select r.*
   from
-    resource r
-  where
-    r.project_id = ?
-    and r.updated_at between ? and ?
-`
-	var params []interface{}
-	params = append(params, req.ProjectId, time.Unix(req.FromAt, 0), time.Unix(req.ToAt, 0))
-	if !zero.IsZeroVal(req.ResourceId) {
-		query += " and r.resource_id = ?"
-		params = append(params, req.ResourceId)
-	}
-	if len(req.ResourceName) > 0 {
-		sql, sqlParams := generatePrefixMatchSQLStatement("r.resource_name", req.ResourceName)
-		if sql != "" {
-			query += fmt.Sprintf(" and (%s)", sql)
-			params = append(params, sqlParams...)
-		}
-	}
-	if len(req.Tag) > 0 {
-		for _, tag := range req.Tag {
-			query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag = ?)"
-			params = append(params, tag)
-		}
-	}
-	if req.FromSumScore > 0 {
-		query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
-		params = append(params, req.FromSumScore, req.ToSumScore)
-	}
+    resource r `
+	where, params := generateListResourceCondition(
+		req.ProjectId, req.FromSumScore, req.ToSumScore,
+		req.FromAt, req.ToAt, req.ResourceId, req.ResourceName, req.Tag,
+	)
+	query += where
 	query += ") as resource"
 	var count int64
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Count(&count).Error; err != nil {
 		return count, err
 	}
 	return count, nil
+}
+
+func generateListResourceCondition(
+	projectID uint32,
+	fromScore, toScore float32,
+	fromAt, toAt int64,
+	resourceID uint64,
+	resourceNames, tags []string) (string, []interface{}) {
+	var params []interface{}
+	query := `
+where
+  r.project_id = ?
+  and r.updated_at between ? and ?`
+	params = append(params, projectID, time.Unix(fromAt, 0), time.Unix(toAt, 0))
+	if !zero.IsZeroVal(resourceID) {
+		query += " and r.resource_id = ?"
+		params = append(params, resourceID)
+	}
+	if len(resourceNames) > 0 {
+		sql, sqlParams := generatePrefixMatchSQLStatement("r.resource_name", resourceNames)
+		if sql != "" {
+			query += fmt.Sprintf(" and (%s)", sql)
+			params = append(params, sqlParams...)
+		}
+	}
+	if len(tags) > 0 {
+		for _, tag := range tags {
+			query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag = ?)"
+			params = append(params, tag)
+		}
+	}
+	if fromScore > 0 {
+		query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
+		params = append(params, fromScore, toScore)
+	}
+	return query, params
 }
 
 const selectGetResource = `select * from resource where project_id = ? and resource_id = ?`
