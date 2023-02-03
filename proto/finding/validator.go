@@ -182,6 +182,8 @@ func (l *ListResourceRequest) Validate() error {
 		validation.Field(&l.Direction, validation.In("asc", "desc")),
 		validation.Field(&l.Offset, validation.Min(0)),
 		validation.Field(&l.Limit, validation.Min(0), validation.Max(200)),
+		validation.Field(&l.Namespace, validation.Length(0, 64)),
+		validation.Field(&l.ResourceType, validation.Length(0, 64)),
 	)
 }
 

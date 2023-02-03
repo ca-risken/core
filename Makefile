@@ -499,7 +499,7 @@ clear-score:
 list-resource:
 	$(GRPCURL) \
 		-plaintext \
-		-d '{"resource_id":"1001", "project_id":1001, "from_sum_score":0.0, "to_sum_score":999.9, "from_at":1560000000, "to_at":253402268399, "tag": ["tag1", "tag:key"],"sort": "resource_id", "direction": "desc", "offset":0, "limit":10}' \
+		-d '{"project_id":1001, "from_sum_score":0.0, "to_sum_score":999.9, "from_at":1560000000, "to_at":253402268399, "sort": "resource_id", "direction": "desc", "offset":0, "limit":10, "namespace":"aws", "resource_type":"s3"}' \
 		$(CORE_API_ADDR) core.finding.FindingService.ListResource
 
 .PHONY: get-resource

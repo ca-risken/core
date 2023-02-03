@@ -187,6 +187,8 @@ message ListResourceRequest {
   int32 offset = 10;
   int32 limit = 11;
   uint64 resource_id = 12;
+  string namespace = 13;
+  string resource_type = 14;
 }
 
 message ListResourceResponse {

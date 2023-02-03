@@ -573,6 +573,7 @@ from
 	where, params := generateListResourceCondition(
 		req.ProjectId, req.FromSumScore, req.ToSumScore,
 		req.FromAt, req.ToAt, req.ResourceId, req.ResourceName, req.Tag,
+		req.Namespace, req.ResourceType,
 	)
 	query += where
 	query += fmt.Sprintf(" order by %s %s", req.Sort, req.Direction)
@@ -593,6 +594,7 @@ select count(*) from (
 	where, params := generateListResourceCondition(
 		req.ProjectId, req.FromSumScore, req.ToSumScore,
 		req.FromAt, req.ToAt, req.ResourceId, req.ResourceName, req.Tag,
+		req.Namespace, req.ResourceType,
 	)
 	query += where
 	query += ") as resource"
@@ -608,7 +610,9 @@ func generateListResourceCondition(
 	fromScore, toScore float32,
 	fromAt, toAt int64,
 	resourceID uint64,
-	resourceNames, tags []string) (string, []interface{}) {
+	resourceNames, tags []string,
+	namespace, resourceType string,
+) (string, []interface{}) {
 	var params []interface{}
 	query := `
 where
@@ -627,14 +631,27 @@ where
 		}
 	}
 	if len(tags) > 0 {
-		for _, tag := range tags {
-			query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag = ?)"
+		query += " and ("
+		for i, tag := range tags {
+			if i > 0 {
+				query += " or "
+			}
+			query += "exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag = ?)"
 			params = append(params, tag)
 		}
+		query += ")"
 	}
 	if fromScore > 0 {
 		query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
 		params = append(params, fromScore, toScore)
+	}
+	if namespace != "" {
+		query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag = ?)"
+		params = append(params, namespace)
+	}
+	if resourceType != "" {
+		query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag = ?)"
+		params = append(params, resourceType)
 	}
 	return query, params
 }

@@ -643,6 +643,16 @@ func TestValidate_ListResourceRequest(t *testing.T) {
 			input:   &ListResourceRequest{ProjectId: 1, Limit: maxLimit + 1},
 			wantErr: true,
 		},
+		{
+			name:    "NG Length(namespace)",
+			input:   &ListResourceRequest{ProjectId: 1, Namespace: len65string},
+			wantErr: true,
+		},
+		{
+			name:    "NG Length(resource_type)",
+			input:   &ListResourceRequest{ProjectId: 1, ResourceType: len65string},
+			wantErr: true,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
