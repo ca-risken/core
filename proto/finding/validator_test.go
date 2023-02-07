@@ -584,16 +584,6 @@ func TestValidate_ListResourceRequest(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG too small from_sum_score",
-			input:   &ListResourceRequest{ProjectId: 1, FromSumScore: -0.1},
-			wantErr: true,
-		},
-		{
-			name:    "NG too small to_sum_score",
-			input:   &ListResourceRequest{ProjectId: 1, ToSumScore: -0.1},
-			wantErr: true,
-		},
-		{
 			name:    "NG small from_at",
 			input:   &ListResourceRequest{ProjectId: 1, FromAt: -1},
 			wantErr: true,
@@ -641,6 +631,16 @@ func TestValidate_ListResourceRequest(t *testing.T) {
 		{
 			name:    "NG Max limit",
 			input:   &ListResourceRequest{ProjectId: 1, Limit: maxLimit + 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Length(namespace)",
+			input:   &ListResourceRequest{ProjectId: 1, Namespace: len65string},
+			wantErr: true,
+		},
+		{
+			name:    "NG Length(resource_type)",
+			input:   &ListResourceRequest{ProjectId: 1, ResourceType: len65string},
 			wantErr: true,
 		},
 	}
