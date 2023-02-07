@@ -632,19 +632,28 @@ where
 			params = append(params, sqlParams...)
 		}
 	}
-	if len(tags) > 0 || namespace != "" || resourceType != "" {
-		join += " inner join resource_tag rt using(resource_id)"
-		if len(tags) > 0 {
-			query += " and r.resource_id in (?)"
-			params = append(params, tags)
+	if namespace != "" {
+		join += "\n  inner join resource_tag ns on ns.resource_id = r.resource_id"
+		query += " and ns.tag = ?"
+		params = append(params, namespace)
+	}
+	if resourceType != "" {
+		join += "\n  inner join resource_tag rt on rt.resource_id = r.resource_id"
+		query += " and rt.tag = ?"
+		params = append(params, resourceType)
+	}
+	if len(tags) > 0 {
+		dedupTags := []string{}
+		for _, t := range tags {
+			if t == namespace || t == resourceType {
+				continue
+			}
+			dedupTags = append(dedupTags, t)
 		}
-		if namespace != "" {
-			query += " and rt.tag = ?"
-			params = append(params, namespace)
-		}
-		if resourceType != "" {
-			query += " and rt.tag = ?"
-			params = append(params, resourceType)
+		if len(dedupTags) > 0 {
+			join += "\n  inner join resource_tag t on t.resource_id = r.resource_id"
+			query += " and t.tag in (?)"
+			params = append(params, dedupTags)
 		}
 	}
 	return join + query, params

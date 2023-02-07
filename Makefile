@@ -499,7 +499,7 @@ clear-score:
 list-resource:
 	$(GRPCURL) \
 		-plaintext \
-		-d '{"project_id":1001, "from_at":1560000000, "to_at":253402268399, "sort": "resource_id", "direction": "desc", "offset":0, "limit":10, "namespace":"aws", "resource_type":"s3"}' \
+		-d '{"project_id":1001, "from_at":1560000000, "to_at":253402268399, "sort": "resource_id", "direction": "desc", "offset":0, "limit":30, "namespace":"aws", "resource_type":"s3", "tag":["aws", "access-analyzer"]}' \
 		$(CORE_API_ADDR) core.finding.FindingService.ListResource
 
 .PHONY: get-resource
