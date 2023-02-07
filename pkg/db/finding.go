@@ -571,8 +571,9 @@ select
 from
   resource r `
 	where, params := generateListResourceCondition(
-		req.ProjectId, req.FromSumScore, req.ToSumScore,
-		req.FromAt, req.ToAt, req.ResourceId, req.ResourceName, req.Tag,
+		req.ProjectId,
+		req.FromAt, req.ToAt,
+		req.ResourceId, req.ResourceName, req.Tag,
 		req.Namespace, req.ResourceType,
 	)
 	query += where
@@ -592,8 +593,9 @@ select count(*) from (
   from
     resource r `
 	where, params := generateListResourceCondition(
-		req.ProjectId, req.FromSumScore, req.ToSumScore,
-		req.FromAt, req.ToAt, req.ResourceId, req.ResourceName, req.Tag,
+		req.ProjectId,
+		req.FromAt, req.ToAt,
+		req.ResourceId, req.ResourceName, req.Tag,
 		req.Namespace, req.ResourceType,
 	)
 	query += where
@@ -607,7 +609,6 @@ select count(*) from (
 
 func generateListResourceCondition(
 	projectID uint32,
-	fromScore, toScore float32,
 	fromAt, toAt int64,
 	resourceID uint64,
 	resourceNames, tags []string,
@@ -645,10 +646,6 @@ where
 			query += " and rt.tag = ?"
 			params = append(params, resourceType)
 		}
-	}
-	if fromScore > 0 {
-		query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
-		params = append(params, fromScore, toScore)
 	}
 	return join + query, params
 }

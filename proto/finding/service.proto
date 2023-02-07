@@ -177,8 +177,6 @@ message ClearScoreRequest {
 message ListResourceRequest {
   uint32 project_id = 1;
   repeated string resource_name = 2;
-  float from_sum_score = 3;
-  float to_sum_score = 4;
   int64 from_at = 5;
   int64 to_at = 6;
   repeated string tag = 7;

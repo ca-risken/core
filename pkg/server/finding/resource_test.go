@@ -29,7 +29,7 @@ func TestListResource(t *testing.T) {
 	}{
 		{
 			name:       "OK",
-			input:      &finding.ListResourceRequest{ProjectId: 1, ResourceName: []string{"rn"}, FromSumScore: 0.0, ToSumScore: 100.0, FromAt: now.Unix(), ToAt: now.Unix()},
+			input:      &finding.ListResourceRequest{ProjectId: 1, ResourceName: []string{"rn"}, FromAt: now.Unix(), ToAt: now.Unix()},
 			want:       &finding.ListResourceResponse{ResourceId: []uint64{1001, 1002}, Count: 2, Total: 999},
 			mockResp:   &[]model.Resource{{ResourceID: 1001}, {ResourceID: 1002}},
 			totalCount: 999,
@@ -42,7 +42,7 @@ func TestListResource(t *testing.T) {
 		},
 		{
 			name:       "NG Invalid request",
-			input:      &finding.ListResourceRequest{ProjectId: 1, FromSumScore: -0.1},
+			input:      &finding.ListResourceRequest{},
 			wantErr:    true,
 			totalCount: 999,
 		},

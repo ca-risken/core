@@ -12,10 +12,6 @@ import (
 	"gorm.io/gorm"
 )
 
-const (
-	maxSumScore = 999999.9
-)
-
 /**
  * Resource
  */
@@ -45,9 +41,6 @@ func (f *FindingService) ListResource(ctx context.Context, req *finding.ListReso
 
 func convertListResourceRequest(req *finding.ListResourceRequest) *finding.ListResourceRequest {
 	converted := req
-	if converted.ToSumScore == 0 {
-		converted.ToSumScore = maxSumScore
-	}
 	if converted.ToAt == 0 {
 		converted.ToAt = time.Now().Unix()
 	}
