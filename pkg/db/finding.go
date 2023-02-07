@@ -614,6 +614,7 @@ func generateListResourceCondition(
 	namespace, resourceType string,
 ) (string, []interface{}) {
 	var params []interface{}
+	join := ""
 	query := `
 where
   r.project_id = ?
@@ -630,30 +631,26 @@ where
 			params = append(params, sqlParams...)
 		}
 	}
-	if len(tags) > 0 {
-		query += " and ("
-		for i, tag := range tags {
-			if i > 0 {
-				query += " or "
-			}
-			query += "exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag = ?)"
-			params = append(params, tag)
+	if len(tags) > 0 || namespace != "" || resourceType != "" {
+		join += " inner join resource_tag rt using(resource_id)"
+		if len(tags) > 0 {
+			query += " and r.resource_id in (?)"
+			params = append(params, tags)
 		}
-		query += ")"
+		if namespace != "" {
+			query += " and rt.tag = ?"
+			params = append(params, namespace)
+		}
+		if resourceType != "" {
+			query += " and rt.tag = ?"
+			params = append(params, resourceType)
+		}
 	}
 	if fromScore > 0 {
 		query += " and exists (select resource_name from finding where resource_name=r.resource_name group by resource_name having sum(COALESCE(score, 0)) between ? and ?)"
 		params = append(params, fromScore, toScore)
 	}
-	if namespace != "" {
-		query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag = ?)"
-		params = append(params, namespace)
-	}
-	if resourceType != "" {
-		query += " and exists (select * from resource_tag rt where rt.resource_id=r.resource_id and rt.tag = ?)"
-		params = append(params, resourceType)
-	}
-	return query, params
+	return join + query, params
 }
 
 const selectGetResource = `select * from resource where project_id = ? and resource_id = ?`
