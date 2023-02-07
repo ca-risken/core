@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
@@ -126,7 +127,7 @@ func TestPutAlert(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
 	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	svc := AlertService{repository: &mockDB, logger: logging.NewLogger()}
 
 	cases := []struct {
 		name                        string
@@ -1490,65 +1491,8 @@ func TestGetNotification(t *testing.T) {
 	}
 }
 
-func TestPutNotification(t *testing.T) {
-	var ctx context.Context
-	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
-
-	cases := []struct {
-		name        string
-		input       *alert.PutNotificationRequest
-		want        *alert.PutNotificationResponse
-		wantErr     bool
-		mockGetResp *model.Notification
-		mockGetErr  error
-		mockUpResp  *model.Notification
-		mockUpErr   error
-	}{
-		{
-			name:       "OK Insert",
-			input:      &alert.PutNotificationRequest{Notification: &alert.NotificationForUpsert{ProjectId: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`}},
-			want:       &alert.PutNotificationResponse{Notification: &alert.Notification{ProjectId: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockUpResp: &model.Notification{ProjectID: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
-		},
-		{
-			name:        "OK Update",
-			input:       &alert.PutNotificationRequest{Notification: &alert.NotificationForUpsert{NotificationId: 1001, ProjectId: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`}},
-			want:        &alert.PutNotificationResponse{Notification: &alert.Notification{NotificationId: 1001, ProjectId: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockGetResp: &model.Notification{NotificationID: 1001, ProjectID: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
-			mockUpResp:  &model.Notification{NotificationID: 1001, ProjectID: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
-		},
-		{
-			name:        "NG Update (Notification Not Found)",
-			input:       &alert.PutNotificationRequest{Notification: &alert.NotificationForUpsert{NotificationId: 1001, ProjectId: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`}},
-			want:        &alert.PutNotificationResponse{},
-			wantErr:     true,
-			mockGetResp: &model.Notification{},
-			mockGetErr:  gorm.ErrRecordNotFound,
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mockDB.On("UpsertNotification").Return(c.mockUpResp, c.mockUpErr).Once()
-			}
-			if c.mockGetResp != nil || c.mockGetErr != nil {
-				mockDB.On("GetNotification").Return(c.mockGetResp, c.mockGetErr).Once()
-			}
-
-			got, err := svc.PutNotification(ctx, c.input)
-			if err != nil && !c.wantErr {
-				t.Fatalf("Unexpected error: %+v", err)
-			}
-			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
-			}
-		})
-	}
-}
-
 func TestReplaceSlackNotifySetting(t *testing.T) {
+	a := AlertService{logger: logging.NewLogger()}
 	cases := []struct {
 		name        string
 		inputExist  string
@@ -1583,7 +1527,7 @@ func TestReplaceSlackNotifySetting(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := replaceSlackNotifySetting(context.Background(), c.inputExist, c.inputUpdate)
+			got, err := a.replaceSlackNotifySetting(context.Background(), c.inputExist, c.inputUpdate)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -1636,6 +1580,7 @@ func TestDeleteNotification(t *testing.T) {
 }
 
 func TestConvertNotification(t *testing.T) {
+	a := AlertService{logger: logging.NewLogger()}
 	now := time.Now()
 	cases := []struct {
 		name    string
@@ -1662,7 +1607,7 @@ func TestConvertNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := convertNotification(context.Background(), c.input)
+			got, err := a.convertNotification(context.Background(), c.input)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
 			}

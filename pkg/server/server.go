@@ -83,6 +83,7 @@ func (s *Server) Run(ctx context.Context) error {
 		fc,
 		pc,
 		s.db,
+		s.logger,
 	)
 	fsvc := findingserver.NewFindingService(s.db, s.logger)
 	psvc := projectserver.NewProjectService(s.db, iamc, s.logger)
