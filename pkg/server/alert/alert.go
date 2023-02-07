@@ -98,16 +98,16 @@ func (a *AlertService) PutAlert(ctx context.Context, req *alert.PutAlertRequest)
 	// list RelAlertFinding
 	relAlertFindings, err := a.repository.ListRelAlertFinding(ctx, registeredData.ProjectID, registeredData.AlertID, 0, 0, now)
 	if err != nil {
-		appLogger.Errorf(ctx, "Failed listRelAlertFinding when PutAlert. err: %v", err)
+		a.logger.Errorf(ctx, "Failed listRelAlertFinding when PutAlert. err: %v", err)
 		return &alert.PutAlertResponse{Alert: convertAlert(registeredData)}, err
 	}
 	findingIDs := []uint64{}
 	for _, relAlertFinding := range *relAlertFindings {
 		findingIDs = append(findingIDs, uint64(relAlertFinding.FindingID))
 	}
-	findingHistory, err := makeFindingIDs(ctx, findingIDs)
+	findingHistory, err := a.makeFindingIDs(ctx, findingIDs)
 	if err != nil {
-		appLogger.Errorf(ctx, "Failed makeFindingIDs when PutAlert. err: %v", err)
+		a.logger.Errorf(ctx, "Failed makeFindingIDs when PutAlert. err: %v", err)
 		return &alert.PutAlertResponse{Alert: convertAlert(registeredData)}, err
 	}
 	dataHistory := &model.AlertHistory{
@@ -122,7 +122,7 @@ func (a *AlertService) PutAlert(ctx context.Context, req *alert.PutAlertRequest)
 	// Fiding upsert
 	_, err = a.repository.UpsertAlertHistory(ctx, dataHistory)
 	if err != nil {
-		appLogger.Errorf(ctx, "Failed PutAlertHistory when PutAlert. err: %v", err)
+		a.logger.Errorf(ctx, "Failed PutAlertHistory when PutAlert. err: %v", err)
 		return &alert.PutAlertResponse{Alert: convertAlert(registeredData)}, err
 	}
 

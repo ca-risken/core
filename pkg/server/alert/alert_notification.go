@@ -33,9 +33,9 @@ func (a *AlertService) ListNotification(ctx context.Context, req *alert.ListNoti
 	}
 	data := alert.ListNotificationResponse{}
 	for _, d := range *list {
-		convertedNotification, err := convertNotification(ctx, &d)
+		convertedNotification, err := a.convertNotification(ctx, &d)
 		if err != nil {
-			appLogger.Errorf(ctx, "Failed to convert Notification. error: %v", err)
+			a.logger.Errorf(ctx, "Failed to convert Notification. error: %v", err)
 			return nil, err
 		}
 		data.Notification = append(data.Notification, convertedNotification)
@@ -67,9 +67,9 @@ func (a *AlertService) GetNotification(ctx context.Context, req *alert.GetNotifi
 		}
 		return nil, err
 	}
-	convertedNotification, err := convertNotification(ctx, data)
+	convertedNotification, err := a.convertNotification(ctx, data)
 	if err != nil {
-		appLogger.Errorf(ctx, "Failed to convert Notification. error: %v", err)
+		a.logger.Errorf(ctx, "Failed to convert Notification. error: %v", err)
 		return nil, err
 	}
 	return &alert.GetNotificationResponse{Notification: convertedNotification}, nil
@@ -102,18 +102,18 @@ func (a *AlertService) PutNotification(ctx context.Context, req *alert.PutNotifi
 	if !zero.IsZeroVal(existData) {
 		switch existData.Type {
 		case "slack":
-			convertedNotifySetting, err := replaceSlackNotifySetting(ctx, existData.NotifySetting, data.NotifySetting)
+			convertedNotifySetting, err := a.replaceSlackNotifySetting(ctx, existData.NotifySetting, data.NotifySetting)
 			if err != nil {
 				return nil, err
 			}
 			newNotifySetting, err := json.Marshal(convertedNotifySetting)
 			if err != nil {
-				appLogger.Errorf(ctx, "Error occured when marshal update.NotifySetting. err: %v", err)
+				a.logger.Errorf(ctx, "Error occured when marshal update.NotifySetting. err: %v", err)
 				return nil, err
 			}
 			data.NotifySetting = string(newNotifySetting)
 		default:
-			appLogger.Warnf(ctx, "This notification_type is unimprement. type: %v", existData.Type)
+			a.logger.Warnf(ctx, "This notification_type is unimprement. type: %v", existData.Type)
 		}
 	}
 
@@ -122,26 +122,26 @@ func (a *AlertService) PutNotification(ctx context.Context, req *alert.PutNotifi
 	if err != nil {
 		return nil, err
 	}
-	convertedNotification, err := convertNotification(ctx, registerdData)
+	convertedNotification, err := a.convertNotification(ctx, registerdData)
 	if err != nil {
-		appLogger.Errorf(ctx, "Failed to convert Notification. error: %v", err)
+		a.logger.Errorf(ctx, "Failed to convert Notification. error: %v", err)
 		return nil, err
 	}
 	return &alert.PutNotificationResponse{Notification: convertedNotification}, nil
 }
 
-func replaceSlackNotifySetting(ctx context.Context, jsonNotifySettingExist, jsonNotifySettingUpdate string) (slackNotifySetting, error) {
+func (a *AlertService) replaceSlackNotifySetting(ctx context.Context, jsonNotifySettingExist, jsonNotifySettingUpdate string) (slackNotifySetting, error) {
 	var notifySettingUpdate slackNotifySetting
 	if err := json.Unmarshal([]byte(jsonNotifySettingUpdate), &notifySettingUpdate); err != nil {
 		if err != nil {
-			appLogger.Errorf(ctx, "Error occured when unmarshal update.NotifySetting. err: %v", err)
+			a.logger.Errorf(ctx, "Error occured when unmarshal update.NotifySetting. err: %v", err)
 			return slackNotifySetting{}, err
 		}
 	}
 	var notifySettingExist slackNotifySetting
 	if err := json.Unmarshal([]byte(jsonNotifySettingExist), &notifySettingExist); err != nil {
 		if err != nil {
-			appLogger.Errorf(ctx, "Error occured when unmarshal exist.NotifySetting. err: %v", err)
+			a.logger.Errorf(ctx, "Error occured when unmarshal exist.NotifySetting. err: %v", err)
 			return slackNotifySetting{}, err
 		}
 	}
@@ -190,22 +190,22 @@ func (a *AlertService) TestNotification(ctx context.Context, req *alert.TestNoti
 	case "slack":
 		err = sendSlackTestNotification(ctx, a.baseURL, notification.NotifySetting)
 		if err != nil {
-			appLogger.Errorf(ctx, "Error occured when sending test slack notification. err: %v", err)
+			a.logger.Errorf(ctx, "Error occured when sending test slack notification. err: %v", err)
 			return nil, err
 		}
 	default:
-		appLogger.Warnf(ctx, "This notification_type is unimprement. type: %v", notification.Type)
+		a.logger.Warnf(ctx, "This notification_type is unimprement. type: %v", notification.Type)
 	}
 	return &empty.Empty{}, nil
 }
 
-func convertNotification(ctx context.Context, n *model.Notification) (*alert.Notification, error) {
+func (a *AlertService) convertNotification(ctx context.Context, n *model.Notification) (*alert.Notification, error) {
 	if n == nil {
 		return &alert.Notification{}, nil
 	}
 	maskingSetting, err := maskingNotifySetting(n.Type, n.NotifySetting)
 	if err != nil {
-		appLogger.Errorf(ctx, "Failed to masking notify setting. %v", err)
+		a.logger.Errorf(ctx, "Failed to masking notify setting. %v", err)
 		return &alert.Notification{}, err
 	}
 	return &alert.Notification{

@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 
 	"github.com/ca-risken/core/pkg/model"
@@ -27,7 +28,7 @@ func TestAnalyzeAlert(t *testing.T) {
 	now := time.Now()
 	mockDB := mocks.MockAlertRepository{}
 	mockProject := projectmock.NewProjectServiceClient(t)
-	svc := AlertService{repository: &mockDB, projectClient: mockProject}
+	svc := AlertService{repository: &mockDB, projectClient: mockProject, logger: logging.NewLogger()}
 	cases := []struct {
 		name                              string
 		input                             *alert.AnalyzeAlertRequest
@@ -110,7 +111,7 @@ func TestAnalyzeAlert(t *testing.T) {
 func TestAnalyzeAlertByRule(t *testing.T) {
 	now := time.Now()
 	mockFinding := findingmock.FindingServiceClient{}
-	svc := AlertService{findingClient: &mockFinding}
+	svc := AlertService{findingClient: &mockFinding, logger: logging.NewLogger()}
 	cases := []struct {
 		name                   string
 		inputAlertRule         *model.AlertRule
@@ -187,7 +188,7 @@ func TestAnalyzeAlertByRule(t *testing.T) {
 func TestDeleteAlertByAnalyze(t *testing.T) {
 	//	now := time.Now()
 	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	svc := AlertService{repository: &mockDB, logger: logging.NewLogger()}
 	cases := []struct {
 		name                                    string
 		alertCondition                          *model.AlertCondition
@@ -291,7 +292,7 @@ func TestDeleteAlertByAnalyze(t *testing.T) {
 func TestRegistAlertByAnalyze(t *testing.T) {
 	//	now := time.Now()
 	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
+	svc := AlertService{repository: &mockDB, logger: logging.NewLogger()}
 	cases := []struct {
 		name                                    string
 		alertCondition                          *model.AlertCondition
