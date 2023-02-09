@@ -31,15 +31,6 @@ clean:
 fmt: proto/**/*.proto
 	@clang-format -i proto/**/*.proto
 
-.PHONY: doc
-doc: fmt
-	protoc \
-		--proto_path=proto \
-		--error_format=gcc \
-		-I $(GOPATH)/src/github.com/envoyproxy/protoc-gen-validate \
-		--doc_out=markdown,README.md:doc \
-		proto/**/*.proto;
-
 # build without protoc-gen-validate
 .PHONY: proto-without-validation
 proto-without-validate: fmt
