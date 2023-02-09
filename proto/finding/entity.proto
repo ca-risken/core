@@ -114,6 +114,7 @@ message PendFindingForUpsert {
   uint64 finding_id = 1;
   uint32 project_id = 2;
   string note = 3;
+  int64 expired_at = 4;
 }
 
 // FindingStatus
