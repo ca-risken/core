@@ -28,8 +28,8 @@ func TestGetPendFinding(t *testing.T) {
 		{
 			name:         "OK",
 			input:        &finding.GetPendFindingRequest{ProjectId: 1, FindingId: 1},
-			want:         &finding.GetPendFindingResponse{PendFinding: &finding.PendFinding{FindingId: 1, ProjectId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockResponce: &model.PendFinding{FindingID: 1, ProjectID: 1, CreatedAt: now, UpdatedAt: now},
+			want:         &finding.GetPendFindingResponse{PendFinding: &finding.PendFinding{FindingId: 1, ProjectId: 1, ExpiredAt: now.Unix(), CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockResponce: &model.PendFinding{FindingID: 1, ProjectID: 1, ExpiredAt: now, CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:      "NG record not found",
@@ -72,9 +72,9 @@ func TestPutPendFinding(t *testing.T) {
 		{
 			name:         "OK",
 			input:        &finding.PutPendFindingRequest{ProjectId: 1, PendFinding: &finding.PendFindingForUpsert{FindingId: 1, ProjectId: 1}},
-			want:         &finding.PutPendFindingResponse{PendFinding: &finding.PendFinding{FindingId: 1, ProjectId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			want:         &finding.PutPendFindingResponse{PendFinding: &finding.PendFinding{FindingId: 1, ProjectId: 1, ExpiredAt: now.Unix(), CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetResp:  &model.Finding{FindingID: 1, ProjectID: 1, CreatedAt: now, UpdatedAt: now},
-			mockPendResp: &model.PendFinding{FindingID: 1, ProjectID: 1, CreatedAt: now, UpdatedAt: now},
+			mockPendResp: &model.PendFinding{FindingID: 1, ProjectID: 1, ExpiredAt: now, CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:    "NG Invalid request",

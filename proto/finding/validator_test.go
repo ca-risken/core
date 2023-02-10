@@ -1018,6 +1018,16 @@ func TestValidate_PutPendFindingRequest(t *testing.T) {
 			input:   &PutPendFindingRequest{ProjectId: 999, PendFinding: &PendFindingForUpsert{FindingId: 1, ProjectId: 1}},
 			wantErr: true,
 		},
+		{
+			name:    "NG Min(expired_at)",
+			input:   &PutPendFindingRequest{ProjectId: 1, PendFinding: &PendFindingForUpsert{FindingId: 1, ProjectId: 1, ExpiredAt: -1}},
+			wantErr: true,
+		},
+		{
+			name:    "NG Max(expired_at)",
+			input:   &PutPendFindingRequest{ProjectId: 1, PendFinding: &PendFindingForUpsert{FindingId: 1, ProjectId: 1, ExpiredAt: 253402268400}},
+			wantErr: true,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

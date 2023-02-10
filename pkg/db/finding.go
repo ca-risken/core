@@ -183,10 +183,11 @@ where
 	}
 	if status == finding.FindingStatus_FINDING_ACTIVE {
 		join += " left join pend_finding pf using(finding_id)"
-		query += " and pf.finding_id is null"
+		query += " and (pf.finding_id is NULL or (pf.expired_at is not NULL and pf.expired_at <= NOW()))"
 	}
 	if status == finding.FindingStatus_FINDING_PENDING {
-		join += " inner join pend_finding using(finding_id)"
+		join += " inner join pend_finding pf using(finding_id)"
+		query += " and (pf.expired_at is NULL or NOW() < pf.expired_at)"
 	}
 	return join + query, params
 }
@@ -1042,15 +1043,27 @@ func (c *Client) GetPendFinding(ctx context.Context, projectID uint32, findingID
 
 const insertPendFinding = `
 INSERT INTO pend_finding
-  (finding_id, project_id, note)
+  (finding_id, project_id, note, expired_at)
 VALUES
-  (?, ?, ?)
+  (?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
-  updated_at = CURRENT_TIMESTAMP()
+  note = VALUES(note),
+  expired_at = VALUES(expired_at)
 `
 
 func (c *Client) UpsertPendFinding(ctx context.Context, pend *finding.PendFindingForUpsert) (*model.PendFinding, error) {
-	if err := c.Master.WithContext(ctx).Exec(insertPendFinding, pend.FindingId, pend.ProjectId, pend.Note).Error; err != nil {
+	var expiredAt interface{}
+	if pend.ExpiredAt == 0 {
+		expiredAt = convertZeroValueToNull(pend.ExpiredAt) // if zero value, put NULL
+	} else {
+		expiredAt = time.Unix(pend.ExpiredAt, 0)
+	}
+	if err := c.Master.WithContext(ctx).Exec(insertPendFinding,
+		pend.FindingId,
+		pend.ProjectId,
+		pend.Note,
+		expiredAt,
+	).Error; err != nil {
 		return nil, err
 	}
 	return c.GetPendFinding(ctx, pend.ProjectId, pend.FindingId)

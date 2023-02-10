@@ -420,6 +420,7 @@ func (p *PendFindingForUpsert) Validate() error {
 		validation.Field(&p.FindingId, validation.Required),
 		validation.Field(&p.ProjectId, validation.Required),
 		validation.Field(&p.Note, validation.Length(0, 128)),
+		validation.Field(&p.ExpiredAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 	)
 }
 

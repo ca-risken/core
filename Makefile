@@ -31,15 +31,6 @@ clean:
 fmt: proto/**/*.proto
 	@clang-format -i proto/**/*.proto
 
-.PHONY: doc
-doc: fmt
-	protoc \
-		--proto_path=proto \
-		--error_format=gcc \
-		-I $(GOPATH)/src/github.com/envoyproxy/protoc-gen-validate \
-		--doc_out=markdown,README.md:doc \
-		proto/**/*.proto;
-
 # build without protoc-gen-validate
 .PHONY: proto-without-validation
 proto-without-validate: fmt
@@ -563,6 +554,20 @@ put-pend-finding:
 	$(GRPCURL) \
 		-plaintext \
 		-d '{"project_id":1001, "pend_finding":{"finding_id":1001, "project_id":1001, "note":"note"}}' \
+		$(CORE_API_ADDR) core.finding.FindingService.PutPendFinding
+
+.PHONY: put-pend-finding-expired
+put-pend-finding-expired:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001, "pend_finding":{"finding_id":1001, "project_id":1001, "note":"note", "expired_at":1675868400}}' \
+		$(CORE_API_ADDR) core.finding.FindingService.PutPendFinding
+
+.PHONY: put-pend-finding-active
+put-pend-finding-active:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001, "pend_finding":{"finding_id":1001, "project_id":1001, "note":"note", "expired_at":253402182000}}' \
 		$(CORE_API_ADDR) core.finding.FindingService.PutPendFinding
 
 .PHONY: delete-pend-finding
