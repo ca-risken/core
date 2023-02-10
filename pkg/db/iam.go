@@ -80,8 +80,9 @@ where
 		params = append(params, projectID)
 	}
 	if !zero.IsZeroVal(name) {
-		query += " and (u.name like ? or u.user_idp_key like ?)"
-		params = append(params, "%"+name+"%", "%"+name+"%")
+		escapedName := escapeLikeParam(name)
+		query += fmt.Sprintf("and (u.name like ? escape '%s' or u.user_idp_key like ? escape '%s' )", escapeString, escapeString)
+		params = append(params, "%"+escapedName+"%", "%"+escapedName+"%")
 	}
 	if !zero.IsZeroVal(userID) {
 		query += " and u.user_id = ?"
