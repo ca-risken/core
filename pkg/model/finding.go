@@ -51,6 +51,7 @@ type PendFinding struct {
 	FindingID uint64 `gorm:"primary_key"`
 	ProjectID uint32
 	Note      string
+	ExpiredAt time.Time
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
