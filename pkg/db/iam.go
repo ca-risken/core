@@ -80,8 +80,8 @@ where
 		params = append(params, projectID)
 	}
 	if !zero.IsZeroVal(name) {
-		query += " and u.name like ?"
-		params = append(params, "%"+name+"%")
+		query += " and (u.name like ? or u.user_idp_key like ?)"
+		params = append(params, "%"+name+"%", "%"+name+"%")
 	}
 	if !zero.IsZeroVal(userID) {
 		query += " and u.user_id = ?"
