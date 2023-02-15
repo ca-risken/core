@@ -788,8 +788,9 @@ func (c *Client) ListUserReserved(ctx context.Context, projectID uint32, userIdp
 		projectID,
 	}
 	if userIdpKey != "" {
-		query += " and ur.user_idp_key = ?"
-		params = append(params, userIdpKey)
+		escapedUserIdpKey := escapeLikeParam(userIdpKey)
+		query += fmt.Sprintf(" and ur.user_idp_key like ? escape '%s' ", escapeString)
+		params = append(params, "%"+escapedUserIdpKey+"%")
 	}
 	var data []model.UserReserved
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
