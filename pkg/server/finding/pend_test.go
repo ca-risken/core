@@ -9,6 +9,7 @@ import (
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/finding"
 	"gorm.io/gorm"
 )
@@ -16,8 +17,6 @@ import (
 func TestGetPendFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockFindingRepository{}
-	svc := FindingService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *finding.GetPendFindingRequest
@@ -40,8 +39,11 @@ func TestGetPendFinding(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewFindingRepository(t)
+			svc := FindingService{repository: mockDB}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("GetPendFinding").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("GetPendFinding", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.GetPendFinding(ctx, c.input)
 			if err != nil {
@@ -57,8 +59,6 @@ func TestGetPendFinding(t *testing.T) {
 func TestPutPendFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockFindingRepository{}
-	svc := FindingService{repository: &mockDB, logger: logging.NewLogger()}
 	cases := []struct {
 		name         string
 		input        *finding.PutPendFindingRequest
@@ -103,11 +103,14 @@ func TestPutPendFinding(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewFindingRepository(t)
+			svc := FindingService{repository: mockDB, logger: logging.NewLogger()}
+
 			if c.mockGetResp != nil || c.mockGetErr != nil {
-				mockDB.On("GetFinding").Return(c.mockGetResp, c.mockGetErr).Once()
+				mockDB.On("GetFinding", test.RepeatMockAnything(4)...).Return(c.mockGetResp, c.mockGetErr).Once()
 			}
 			if c.mockPendResp != nil || c.mockPendErr != nil {
-				mockDB.On("UpsertPendFinding").Return(c.mockPendResp, c.mockPendErr).Once()
+				mockDB.On("UpsertPendFinding", test.RepeatMockAnything(2)...).Return(c.mockPendResp, c.mockPendErr).Once()
 			}
 			got, err := svc.PutPendFinding(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -122,34 +125,41 @@ func TestPutPendFinding(t *testing.T) {
 
 func TestDeletePendFinding(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockFindingRepository{}
-	svc := FindingService{repository: &mockDB}
 	cases := []struct {
-		name    string
-		input   *finding.DeletePendFindingRequest
-		wantErr bool
-		mockErr error
+		name                  string
+		input                 *finding.DeletePendFindingRequest
+		wantErr               bool
+		mockErr               error
+		callDeletePendFinding bool
 	}{
 		{
-			name:    "OK",
-			input:   &finding.DeletePendFindingRequest{ProjectId: 1, FindingId: 1},
-			wantErr: false,
+			name:                  "OK",
+			input:                 &finding.DeletePendFindingRequest{ProjectId: 1, FindingId: 1},
+			wantErr:               false,
+			callDeletePendFinding: true,
 		},
 		{
-			name:    "NG validation error",
-			input:   &finding.DeletePendFindingRequest{ProjectId: 1},
-			wantErr: true,
+			name:                  "NG validation error",
+			input:                 &finding.DeletePendFindingRequest{ProjectId: 1},
+			wantErr:               true,
+			callDeletePendFinding: false,
 		},
 		{
-			name:    "Invalid DB error",
-			input:   &finding.DeletePendFindingRequest{ProjectId: 1, FindingId: 1},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidDB,
+			name:                  "Invalid DB error",
+			input:                 &finding.DeletePendFindingRequest{ProjectId: 1, FindingId: 1},
+			wantErr:               true,
+			mockErr:               gorm.ErrInvalidDB,
+			callDeletePendFinding: true,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB.On("DeletePendFinding").Return(c.mockErr).Once()
+			mockDB := mocks.NewFindingRepository(t)
+			svc := FindingService{repository: mockDB}
+
+			if c.callDeletePendFinding {
+				mockDB.On("DeletePendFinding", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DeletePendFinding(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)

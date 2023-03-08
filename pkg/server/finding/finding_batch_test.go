@@ -8,13 +8,12 @@ import (
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/finding"
 )
 
 func TestPutFindingBatch(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockFindingRepository{}
-	svc := FindingService{repository: &mockDB, logger: logging.NewLogger()}
 	type mockResp struct {
 		GetFindingByDataSourceCall bool
 		GetFindingByDataSourceResp *model.Finding
@@ -120,6 +119,11 @@ func TestPutFindingBatch(t *testing.T) {
 				BulkUpsertRecommendFindingCall: true,
 				BulkUpsertFindingTagCall:       true,
 				BulkUpsertResourceTagCall:      true,
+
+				ListFindingTagByFindingIDCall:   true,
+				ListFindingTagByFindingIDResp:   &[]model.FindingTag{{FindingTagID: 1, Tag: "tag1"}, {FindingTagID: 2, Tag: "tag2"}},
+				ListResourceTagByResourceIDCall: true,
+				ListResourceTagByResourceIDResp: &[]model.ResourceTag{{ResourceTagID: 1, Tag: "tag1"}, {ResourceTagID: 2, Tag: "tag2"}},
 			},
 		},
 		{
@@ -148,41 +152,44 @@ func TestPutFindingBatch(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewFindingRepository(t)
+			svc := FindingService{repository: mockDB, logger: logging.NewLogger()}
+
 			if c.mock.GetFindingByDataSourceCall {
-				mockDB.On("GetFindingByDataSource").Return(c.mock.GetFindingByDataSourceResp, c.mock.GetFindingByDataSourceErr).Once()
+				mockDB.On("GetFindingByDataSource", test.RepeatMockAnything(4)...).Return(c.mock.GetFindingByDataSourceResp, c.mock.GetFindingByDataSourceErr).Once()
 			}
 			if c.mock.GetFindingSettingByResourceCall {
-				mockDB.On("GetFindingSettingByResource").Return(c.mock.GetFindingSettingByResourceResp, c.mock.GetFindingSettingByResourceErr).Once()
+				mockDB.On("GetFindingSettingByResource", test.RepeatMockAnything(3)...).Return(c.mock.GetFindingSettingByResourceResp, c.mock.GetFindingSettingByResourceErr).Once()
 			}
 			if c.mock.GetResourceByNameCall {
-				mockDB.On("GetResourceByName").Return(c.mock.GetResourceByNameResp, c.mock.GetResourceByNameErr).Once()
+				mockDB.On("GetResourceByName", test.RepeatMockAnything(3)...).Return(c.mock.GetResourceByNameResp, c.mock.GetResourceByNameErr).Once()
 			}
 			if c.mock.GetRecommendByDataSourceTypeCall {
-				mockDB.On("GetRecommendByDataSourceType").Return(c.mock.GetRecommendByDataSourceTypeResp, c.mock.GetRecommendByDataSourceTypeErr).Once()
+				mockDB.On("GetRecommendByDataSourceType", test.RepeatMockAnything(3)...).Return(c.mock.GetRecommendByDataSourceTypeResp, c.mock.GetRecommendByDataSourceTypeErr).Once()
 			}
 			if c.mock.BulkUpsertFindingCall {
-				mockDB.On("BulkUpsertFinding").Return(c.mock.BulkUpsertFindingErr).Once()
+				mockDB.On("BulkUpsertFinding", test.RepeatMockAnything(2)...).Return(c.mock.BulkUpsertFindingErr).Once()
 			}
 			if c.mock.BulkUpsertResourceCall {
-				mockDB.On("BulkUpsertResource").Return(c.mock.BulkUpsertResourceErr).Once()
+				mockDB.On("BulkUpsertResource", test.RepeatMockAnything(2)...).Return(c.mock.BulkUpsertResourceErr).Once()
 			}
 			if c.mock.BulkUpsertRecommendCall {
-				mockDB.On("BulkUpsertRecommend").Return(c.mock.BulkUpsertRecommendErr).Once()
+				mockDB.On("BulkUpsertRecommend", test.RepeatMockAnything(2)...).Return(c.mock.BulkUpsertRecommendErr).Once()
 			}
 			if c.mock.ListFindingTagByFindingIDCall {
-				mockDB.On("ListFindingTagByFindingID").Return(c.mock.ListFindingTagByFindingIDResp, c.mock.ListFindingTagByFindingIDErr)
+				mockDB.On("ListFindingTagByFindingID", test.RepeatMockAnything(3)...).Return(c.mock.ListFindingTagByFindingIDResp, c.mock.ListFindingTagByFindingIDErr)
 			}
 			if c.mock.ListResourceTagByResourceIDCall {
-				mockDB.On("ListResourceTagByResourceID").Return(c.mock.ListResourceTagByResourceIDResp, c.mock.ListResourceTagByResourceIDErr)
+				mockDB.On("ListResourceTagByResourceID", test.RepeatMockAnything(3)...).Return(c.mock.ListResourceTagByResourceIDResp, c.mock.ListResourceTagByResourceIDErr)
 			}
 			if c.mock.BulkUpsertFindingTagCall {
-				mockDB.On("BulkUpsertFindingTag").Return(c.mock.BulkUpsertFindingTagErr).Once()
+				mockDB.On("BulkUpsertFindingTag", test.RepeatMockAnything(2)...).Return(c.mock.BulkUpsertFindingTagErr).Once()
 			}
 			if c.mock.BulkUpsertResourceTagCall {
-				mockDB.On("BulkUpsertResourceTag").Return(c.mock.BulkUpsertResourceTagErr).Once()
+				mockDB.On("BulkUpsertResourceTag", test.RepeatMockAnything(2)...).Return(c.mock.BulkUpsertResourceTagErr).Once()
 			}
 			if c.mock.BulkUpsertRecommendFindingCall {
-				mockDB.On("BulkUpsertRecommendFinding").Return(c.mock.BulkUpsertRecommendFindingErr).Once()
+				mockDB.On("BulkUpsertRecommendFinding", test.RepeatMockAnything(2)...).Return(c.mock.BulkUpsertRecommendFindingErr).Once()
 			}
 
 			_, err := svc.PutFindingBatch(ctx, c.input)
@@ -195,8 +202,6 @@ func TestPutFindingBatch(t *testing.T) {
 
 func TestPutResourceBatch(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockFindingRepository{}
-	svc := FindingService{repository: &mockDB, logger: logging.NewLogger()}
 	type mockResp struct {
 		GetResourceByNameCall bool
 		GetResourceByNameResp *model.Resource
@@ -251,6 +256,9 @@ func TestPutResourceBatch(t *testing.T) {
 
 				BulkUpsertResourceCall:    true,
 				BulkUpsertResourceTagCall: true,
+
+				ListResourceTagByResourceIDCall: true,
+				ListResourceTagByResourceIDResp: &[]model.ResourceTag{{ResourceTagID: 1, Tag: "tag1"}, {ResourceTagID: 2, Tag: "tag2"}},
 			},
 		},
 		{
@@ -279,17 +287,20 @@ func TestPutResourceBatch(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewFindingRepository(t)
+			svc := FindingService{repository: mockDB, logger: logging.NewLogger()}
+
 			if c.mock.GetResourceByNameCall {
-				mockDB.On("GetResourceByName").Return(c.mock.GetResourceByNameResp, c.mock.GetResourceByNameErr).Once()
+				mockDB.On("GetResourceByName", test.RepeatMockAnything(3)...).Return(c.mock.GetResourceByNameResp, c.mock.GetResourceByNameErr).Once()
 			}
 			if c.mock.BulkUpsertResourceCall {
-				mockDB.On("BulkUpsertResource").Return(c.mock.BulkUpsertResourceErr).Once()
+				mockDB.On("BulkUpsertResource", test.RepeatMockAnything(2)...).Return(c.mock.BulkUpsertResourceErr).Once()
 			}
 			if c.mock.ListResourceTagByResourceIDCall {
-				mockDB.On("ListResourceTagByResourceID").Return(c.mock.ListResourceTagByResourceIDResp, c.mock.ListResourceTagByResourceIDErr)
+				mockDB.On("ListResourceTagByResourceID", test.RepeatMockAnything(3)...).Return(c.mock.ListResourceTagByResourceIDResp, c.mock.ListResourceTagByResourceIDErr)
 			}
 			if c.mock.BulkUpsertResourceTagCall {
-				mockDB.On("BulkUpsertResourceTag").Return(c.mock.BulkUpsertResourceTagErr).Once()
+				mockDB.On("BulkUpsertResourceTag", test.RepeatMockAnything(2)...).Return(c.mock.BulkUpsertResourceTagErr).Once()
 			}
 
 			_, err := svc.PutResourceBatch(ctx, c.input)
