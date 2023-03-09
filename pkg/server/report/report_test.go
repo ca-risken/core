@@ -7,6 +7,7 @@ import (
 
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/report"
 	"gorm.io/gorm"
 )
@@ -16,9 +17,6 @@ import (
  */
 
 func TestGetReportFinding(t *testing.T) {
-	var ctx context.Context
-	mockDB := mocks.MockReportRepository{}
-	svc := ReportService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *report.GetReportFindingRequest
@@ -41,8 +39,12 @@ func TestGetReportFinding(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewReportRepository(t)
+			svc := ReportService{repository: mockDB}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("GetReportFinding").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("GetReportFinding", test.RepeatMockAnything(6)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.GetReportFinding(ctx, c.input)
 			if err != nil {
@@ -56,9 +58,6 @@ func TestGetReportFinding(t *testing.T) {
 }
 
 func TestGetReportFindingAll(t *testing.T) {
-	var ctx context.Context
-	mockDB := mocks.MockReportRepository{}
-	svc := ReportService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *report.GetReportFindingAllRequest
@@ -81,8 +80,12 @@ func TestGetReportFindingAll(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewReportRepository(t)
+			svc := ReportService{repository: mockDB}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("GetReportFindingAll").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("GetReportFindingAll", test.RepeatMockAnything(5)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.GetReportFindingAll(ctx, c.input)
 			if err != nil {

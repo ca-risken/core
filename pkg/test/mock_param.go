@@ -15,3 +15,7 @@ func RepeatMockAnything(n int) []interface{} {
 func Int64(n int64) *int64 {
 	return &n
 }
+
+func Int(n int) *int {
+	return &n
+}

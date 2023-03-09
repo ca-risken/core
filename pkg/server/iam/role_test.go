@@ -8,6 +8,7 @@ import (
 
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
 	"gorm.io/gorm"
 )
@@ -17,9 +18,6 @@ const (
 )
 
 func TestListRole(t *testing.T) {
-	var ctx context.Context
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
 		name         string
 		input        *iam.ListRoleRequest
@@ -58,8 +56,12 @@ func TestListRole(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("ListRole").Return(c.mockResponce, c.mockError).Once()
+				mock.On("ListRole", test.RepeatMockAnything(5)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.ListRole(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -73,10 +75,7 @@ func TestListRole(t *testing.T) {
 }
 
 func TestGetRole(t *testing.T) {
-	var ctx context.Context
 	now := time.Now()
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
 		name         string
 		input        *iam.GetRoleRequest
@@ -111,8 +110,12 @@ func TestGetRole(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("GetRole").Return(c.mockResponce, c.mockError).Once()
+				mock.On("GetRole", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.GetRole(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -126,10 +129,7 @@ func TestGetRole(t *testing.T) {
 }
 
 func TestPutRole(t *testing.T) {
-	var ctx context.Context
 	now := time.Now()
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
 		name        string
 		input       *iam.PutRoleRequest
@@ -175,11 +175,15 @@ func TestPutRole(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
 			if c.mockGetResp != nil || c.mockGetErr != nil {
-				mock.On("GetRoleByName").Return(c.mockGetResp, c.mockGetErr).Once()
+				mock.On("GetRoleByName", test.RepeatMockAnything(3)...).Return(c.mockGetResp, c.mockGetErr).Once()
 			}
 			if c.mockUpdResp != nil || c.mockUpdErr != nil {
-				mock.On("PutRole").Return(c.mockUpdResp, c.mockUpdErr).Once()
+				mock.On("PutRole", test.RepeatMockAnything(2)...).Return(c.mockUpdResp, c.mockUpdErr).Once()
 			}
 			got, err := svc.PutRole(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -193,35 +197,42 @@ func TestPutRole(t *testing.T) {
 }
 
 func TestDeleteRole(t *testing.T) {
-	var ctx context.Context
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
-		name    string
-		input   *iam.DeleteRoleRequest
-		wantErr bool
-		mockErr error
+		name     string
+		input    *iam.DeleteRoleRequest
+		wantErr  bool
+		mockCall bool
+		mockErr  error
 	}{
 		{
-			name:    "OK",
-			input:   &iam.DeleteRoleRequest{ProjectId: 1, RoleId: 1},
-			wantErr: false,
+			name:     "OK",
+			input:    &iam.DeleteRoleRequest{ProjectId: 1, RoleId: 1},
+			wantErr:  false,
+			mockCall: true,
 		},
 		{
-			name:    "NG Invalid parameters",
-			input:   &iam.DeleteRoleRequest{ProjectId: 1},
-			wantErr: true,
+			name:     "NG Invalid parameters",
+			input:    &iam.DeleteRoleRequest{ProjectId: 1},
+			wantErr:  true,
+			mockCall: false,
 		},
 		{
-			name:    "Invalid DB error",
-			input:   &iam.DeleteRoleRequest{ProjectId: 1, RoleId: 1},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidDB,
+			name:     "Invalid DB error",
+			input:    &iam.DeleteRoleRequest{ProjectId: 1, RoleId: 1},
+			wantErr:  true,
+			mockCall: true,
+			mockErr:  gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("DeleteRole").Return(c.mockErr).Once()
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
+			if c.mockCall {
+				mock.On("DeleteRole", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DeleteRole(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -231,10 +242,7 @@ func TestDeleteRole(t *testing.T) {
 }
 
 func TestAttachRole(t *testing.T) {
-	var ctx context.Context
 	now := time.Now()
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
 		name     string
 		input    *iam.AttachRoleRequest
@@ -263,8 +271,12 @@ func TestAttachRole(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
 			if c.mockResp != nil || c.mockErr != nil {
-				mock.On("AttachRole").Return(c.mockResp, c.mockErr).Once()
+				mock.On("AttachRole", test.RepeatMockAnything(4)...).Return(c.mockResp, c.mockErr).Once()
 			}
 			got, err := svc.AttachRole(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -278,34 +290,41 @@ func TestAttachRole(t *testing.T) {
 }
 
 func TestDetachRole(t *testing.T) {
-	var ctx context.Context
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
-		name    string
-		input   *iam.DetachRoleRequest
-		wantErr bool
-		mockErr error
+		name     string
+		input    *iam.DetachRoleRequest
+		wantErr  bool
+		mockCall bool
+		mockErr  error
 	}{
 		{
-			name:  "OK",
-			input: &iam.DetachRoleRequest{ProjectId: 123, UserId: 1, RoleId: 1},
+			name:     "OK",
+			input:    &iam.DetachRoleRequest{ProjectId: 123, UserId: 1, RoleId: 1},
+			mockCall: true,
 		},
 		{
-			name:    "NG Invalid parameter",
-			input:   &iam.DetachRoleRequest{UserId: 1},
-			wantErr: true,
+			name:     "NG Invalid parameter",
+			input:    &iam.DetachRoleRequest{UserId: 1},
+			wantErr:  true,
+			mockCall: false,
 		},
 		{
-			name:    "Invalid DB error",
-			input:   &iam.DetachRoleRequest{ProjectId: 123, UserId: 1, RoleId: 1},
-			mockErr: gorm.ErrInvalidDB,
-			wantErr: true,
+			name:     "Invalid DB error",
+			input:    &iam.DetachRoleRequest{ProjectId: 123, UserId: 1, RoleId: 1},
+			wantErr:  true,
+			mockCall: true,
+			mockErr:  gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("DetachRole").Return(c.mockErr).Once()
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
+			if c.mockCall {
+				mock.On("DetachRole", test.RepeatMockAnything(4)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DetachRole(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)

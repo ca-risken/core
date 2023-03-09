@@ -8,17 +8,13 @@ import (
 
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/project"
 	"gorm.io/gorm"
 )
 
 func TestTagProject(t *testing.T) {
 	now := time.Now()
-	var ctx context.Context
-	mockDB := mocks.MockProjectRepository{}
-	svc := ProjectService{
-		repository: &mockDB,
-	}
 	cases := []struct {
 		name         string
 		input        *project.TagProjectRequest
@@ -47,8 +43,12 @@ func TestTagProject(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewProjectRepository(t)
+			svc := ProjectService{repository: mockDB}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("TagProject").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("TagProject", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.TagProject(ctx, c.input)
 			if !c.wantErr && err != nil {
@@ -62,36 +62,41 @@ func TestTagProject(t *testing.T) {
 }
 
 func TestUntagProject(t *testing.T) {
-	var ctx context.Context
-	mockDB := mocks.MockProjectRepository{}
-	svc := ProjectService{
-		repository: &mockDB,
-	}
 	cases := []struct {
 		name      string
 		input     *project.UntagProjectRequest
 		wantErr   bool
 		mockError error
+		callMock  bool
 	}{
 		{
-			name:  "OK",
-			input: &project.UntagProjectRequest{ProjectId: 1, Tag: "tag"},
+			name:     "OK",
+			input:    &project.UntagProjectRequest{ProjectId: 1, Tag: "tag"},
+			callMock: true,
 		},
 		{
-			name:    "NG Invalid params",
-			input:   &project.UntagProjectRequest{ProjectId: 1},
-			wantErr: true,
+			name:     "NG Invalid params",
+			input:    &project.UntagProjectRequest{ProjectId: 1},
+			callMock: false,
+			wantErr:  true,
 		},
 		{
 			name:      "Invalid DB error",
-			input:     &project.UntagProjectRequest{},
+			input:     &project.UntagProjectRequest{ProjectId: 1, Tag: "tag"},
+			callMock:  true,
 			mockError: gorm.ErrInvalidDB,
 			wantErr:   true,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB.On("UntagProject").Return(c.mockError).Once()
+			var ctx context.Context
+			mockDB := mocks.NewProjectRepository(t)
+			svc := ProjectService{repository: mockDB}
+
+			if c.callMock {
+				mockDB.On("UntagProject", test.RepeatMockAnything(3)...).Return(c.mockError).Once()
+			}
 			_, err := svc.UntagProject(ctx, c.input)
 			if !c.wantErr && err != nil {
 				t.Fatalf("Unexpected error: %+v", err)

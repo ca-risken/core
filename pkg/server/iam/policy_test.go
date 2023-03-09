@@ -8,14 +8,12 @@ import (
 
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
 	"gorm.io/gorm"
 )
 
 func TestListPolicy(t *testing.T) {
-	var ctx context.Context
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
 		name         string
 		input        *iam.ListPolicyRequest
@@ -54,8 +52,12 @@ func TestListPolicy(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("ListPolicy").Return(c.mockResponce, c.mockError).Once()
+				mock.On("ListPolicy", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.ListPolicy(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -69,10 +71,7 @@ func TestListPolicy(t *testing.T) {
 }
 
 func TestGetPolicy(t *testing.T) {
-	var ctx context.Context
 	now := time.Now()
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
 		name         string
 		input        *iam.GetPolicyRequest
@@ -107,8 +106,12 @@ func TestGetPolicy(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("GetPolicy").Return(c.mockResponce, c.mockError).Once()
+				mock.On("GetPolicy", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.GetPolicy(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -122,10 +125,7 @@ func TestGetPolicy(t *testing.T) {
 }
 
 func TestPutPolicy(t *testing.T) {
-	var ctx context.Context
 	now := time.Now()
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
 		name        string
 		input       *iam.PutPolicyRequest
@@ -171,11 +171,15 @@ func TestPutPolicy(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
 			if c.mockGetResp != nil || c.mockGetErr != nil {
-				mock.On("GetPolicyByName").Return(c.mockGetResp, c.mockGetErr).Once()
+				mock.On("GetPolicyByName", test.RepeatMockAnything(3)...).Return(c.mockGetResp, c.mockGetErr).Once()
 			}
 			if c.mockUpdResp != nil || c.mockUpdErr != nil {
-				mock.On("PutPolicy").Return(c.mockUpdResp, c.mockUpdErr).Once()
+				mock.On("PutPolicy", test.RepeatMockAnything(2)...).Return(c.mockUpdResp, c.mockUpdErr).Once()
 			}
 			got, err := svc.PutPolicy(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -189,35 +193,42 @@ func TestPutPolicy(t *testing.T) {
 }
 
 func TestDeletePolicy(t *testing.T) {
-	var ctx context.Context
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
-		name    string
-		input   *iam.DeletePolicyRequest
-		wantErr bool
-		mockErr error
+		name     string
+		input    *iam.DeletePolicyRequest
+		wantErr  bool
+		callMock bool
+		mockErr  error
 	}{
 		{
-			name:    "OK",
-			input:   &iam.DeletePolicyRequest{ProjectId: 1, PolicyId: 1},
-			wantErr: false,
+			name:     "OK",
+			input:    &iam.DeletePolicyRequest{ProjectId: 1, PolicyId: 1},
+			wantErr:  false,
+			callMock: true,
 		},
 		{
-			name:    "NG Invalid parameters",
-			input:   &iam.DeletePolicyRequest{ProjectId: 1},
-			wantErr: true,
+			name:     "NG Invalid parameters",
+			input:    &iam.DeletePolicyRequest{ProjectId: 1},
+			wantErr:  true,
+			callMock: false,
 		},
 		{
-			name:    "Invalid DB error",
-			input:   &iam.DeletePolicyRequest{ProjectId: 1, PolicyId: 1},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidDB,
+			name:     "Invalid DB error",
+			input:    &iam.DeletePolicyRequest{ProjectId: 1, PolicyId: 1},
+			wantErr:  true,
+			callMock: true,
+			mockErr:  gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("DeletePolicy").Return(c.mockErr).Once()
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
+			if c.callMock {
+				mock.On("DeletePolicy", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DeletePolicy(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -227,10 +238,7 @@ func TestDeletePolicy(t *testing.T) {
 }
 
 func TestAttachPolicy(t *testing.T) {
-	var ctx context.Context
 	now := time.Now()
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
 		name     string
 		input    *iam.AttachPolicyRequest
@@ -259,8 +267,12 @@ func TestAttachPolicy(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
 			if c.mockResp != nil || c.mockErr != nil {
-				mock.On("AttachPolicy").Return(c.mockResp, c.mockErr).Once()
+				mock.On("AttachPolicy", test.RepeatMockAnything(4)...).Return(c.mockResp, c.mockErr).Once()
 			}
 			got, err := svc.AttachPolicy(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -274,34 +286,41 @@ func TestAttachPolicy(t *testing.T) {
 }
 
 func TestDetachPolicy(t *testing.T) {
-	var ctx context.Context
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
-		name    string
-		input   *iam.DetachPolicyRequest
-		wantErr bool
-		mockErr error
+		name     string
+		input    *iam.DetachPolicyRequest
+		wantErr  bool
+		mockCall bool
+		mockErr  error
 	}{
 		{
-			name:  "OK",
-			input: &iam.DetachPolicyRequest{ProjectId: 1, RoleId: 2, PolicyId: 3},
+			name:     "OK",
+			input:    &iam.DetachPolicyRequest{ProjectId: 1, RoleId: 2, PolicyId: 3},
+			mockCall: true,
 		},
 		{
-			name:    "NG Invalid parameter",
-			input:   &iam.DetachPolicyRequest{RoleId: 2, PolicyId: 3},
-			wantErr: true,
+			name:     "NG Invalid parameter",
+			input:    &iam.DetachPolicyRequest{RoleId: 2, PolicyId: 3},
+			wantErr:  true,
+			mockCall: false,
 		},
 		{
-			name:    "Invalid DB error",
-			input:   &iam.DetachPolicyRequest{ProjectId: 1, RoleId: 2, PolicyId: 3},
-			mockErr: gorm.ErrInvalidDB,
-			wantErr: true,
+			name:     "Invalid DB error",
+			input:    &iam.DetachPolicyRequest{ProjectId: 1, RoleId: 2, PolicyId: 3},
+			wantErr:  true,
+			mockCall: true,
+			mockErr:  gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("DetachPolicy").Return(c.mockErr).Once()
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
+			if c.mockCall {
+				mock.On("DetachPolicy", test.RepeatMockAnything(4)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DetachPolicy(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)

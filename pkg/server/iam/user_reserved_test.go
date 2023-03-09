@@ -10,15 +10,13 @@ import (
 	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
 	"gorm.io/gorm"
 )
 
 func TestListUserReserved(t *testing.T) {
-	var ctx context.Context
 	now := time.Now()
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
 		name         string
 		input        *iam.ListUserReservedRequest
@@ -60,8 +58,12 @@ func TestListUserReserved(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("ListUserReserved").Return(c.mockResponce, c.mockError).Once()
+				mock.On("ListUserReserved", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.ListUserReserved(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -75,10 +77,7 @@ func TestListUserReserved(t *testing.T) {
 }
 
 func TestPutUserReserved(t *testing.T) {
-	var ctx context.Context
 	now := time.Now()
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
 		name            string
 		input           *iam.PutUserReservedRequest
@@ -136,14 +135,18 @@ func TestPutUserReserved(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
 			if c.mockGetUserResp != nil || c.mockGetUserErr != nil {
-				mock.On("GetUserByUserIdpKey").Return(c.mockGetUserResp, c.mockGetUserErr).Once()
+				mock.On("GetUserByUserIdpKey", test.RepeatMockAnything(2)...).Return(c.mockGetUserResp, c.mockGetUserErr).Once()
 			}
 			if c.isCalledGetRole {
-				mock.On("GetRole").Return(&model.Role{}, c.mockGetRoleErr).Once()
+				mock.On("GetRole", test.RepeatMockAnything(3)...).Return(&model.Role{}, c.mockGetRoleErr).Once()
 			}
 			if c.mockUpdResp != nil || c.mockUpdErr != nil {
-				mock.On("PutUserReserved").Return(c.mockUpdResp, c.mockUpdErr).Once()
+				mock.On("PutUserReserved", test.RepeatMockAnything(2)...).Return(c.mockUpdResp, c.mockUpdErr).Once()
 			}
 			got, err := svc.PutUserReserved(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -157,35 +160,42 @@ func TestPutUserReserved(t *testing.T) {
 }
 
 func TestDeleteUserReserved(t *testing.T) {
-	var ctx context.Context
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
-		name    string
-		input   *iam.DeleteUserReservedRequest
-		wantErr bool
-		mockErr error
+		name     string
+		input    *iam.DeleteUserReservedRequest
+		wantErr  bool
+		mockCall bool
+		mockErr  error
 	}{
 		{
-			name:    "OK",
-			input:   &iam.DeleteUserReservedRequest{ReservedId: 1, ProjectId: 1},
-			wantErr: false,
+			name:     "OK",
+			input:    &iam.DeleteUserReservedRequest{ReservedId: 1, ProjectId: 1},
+			wantErr:  false,
+			mockCall: true,
 		},
 		{
-			name:    "NG Invalid parameters",
-			input:   &iam.DeleteUserReservedRequest{ReservedId: 1},
-			wantErr: true,
+			name:     "NG Invalid parameters",
+			input:    &iam.DeleteUserReservedRequest{ReservedId: 1},
+			wantErr:  true,
+			mockCall: false,
 		},
 		{
-			name:    "NG Invalid DB error",
-			input:   &iam.DeleteUserReservedRequest{ReservedId: 1, ProjectId: 1},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidDB,
+			name:     "NG Invalid DB error",
+			input:    &iam.DeleteUserReservedRequest{ReservedId: 1, ProjectId: 1},
+			wantErr:  true,
+			mockCall: true,
+			mockErr:  gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("DeleteUserReserved").Return(c.mockErr).Once()
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
+			if c.mockCall {
+				mock.On("DeleteUserReserved", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DeleteUserReserved(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -195,9 +205,6 @@ func TestDeleteUserReserved(t *testing.T) {
 }
 
 func TestAttachRoleByUserReserved(t *testing.T) {
-	var ctx context.Context
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	type args struct {
 		userID     uint32
 		userIdpKey string
@@ -245,11 +252,15 @@ func TestAttachRoleByUserReserved(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
 			if c.mockListResp != nil || c.mockListErr != nil {
-				mock.On("ListUserReservedWithProjectID").Return(c.mockListResp, c.mockListErr).Once()
+				mock.On("ListUserReservedWithProjectID", test.RepeatMockAnything(2)...).Return(c.mockListResp, c.mockListErr).Once()
 			}
 			if c.isCalledAttachRole {
-				mock.On("AttachRole").Return(&model.UserRole{}, c.mockAttachRoleErr).Once()
+				mock.On("AttachRole", test.RepeatMockAnything(4)...).Return(&model.UserRole{}, c.mockAttachRoleErr).Once()
 
 			}
 			err := svc.AttachRoleByUserReserved(ctx, c.args.userID, c.args.userIdpKey)

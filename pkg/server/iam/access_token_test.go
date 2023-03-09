@@ -8,15 +8,13 @@ import (
 
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
 	"gorm.io/gorm"
 )
 
 func TestListAccessToken(t *testing.T) {
-	var ctx context.Context
 	now := time.Now()
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
 		name         string
 		input        *iam.ListAccessTokenRequest
@@ -55,8 +53,12 @@ func TestListAccessToken(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("ListAccessToken").Return(c.mockResponce, c.mockError).Once()
+				mock.On("ListAccessToken", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.ListAccessToken(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -70,10 +72,7 @@ func TestListAccessToken(t *testing.T) {
 }
 
 func TestAuthenticateAccessToken(t *testing.T) {
-	var ctx context.Context
 	now := time.Now()
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
 		name         string
 		input        *iam.AuthenticateAccessTokenRequest
@@ -108,8 +107,12 @@ func TestAuthenticateAccessToken(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("GetActiveAccessTokenHash").Return(c.mockResponce, c.mockError).Once()
+				mock.On("GetActiveAccessTokenHash", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.AuthenticateAccessToken(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -123,10 +126,7 @@ func TestAuthenticateAccessToken(t *testing.T) {
 }
 
 func TestPutAccessToken(t *testing.T) {
-	var ctx context.Context
 	now := time.Now()
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
 		name        string
 		input       *iam.PutAccessTokenRequest
@@ -172,11 +172,15 @@ func TestPutAccessToken(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
 			if c.mockGetResp != nil || c.mockGetErr != nil {
-				mock.On("GetAccessTokenByUniqueKey").Return(c.mockGetResp, c.mockGetErr).Once()
+				mock.On("GetAccessTokenByUniqueKey", test.RepeatMockAnything(3)...).Return(c.mockGetResp, c.mockGetErr).Once()
 			}
 			if c.mockUpdResp != nil || c.mockUpdErr != nil {
-				mock.On("PutAccessToken").Return(c.mockUpdResp, c.mockUpdErr).Once()
+				mock.On("PutAccessToken", test.RepeatMockAnything(2)...).Return(c.mockUpdResp, c.mockUpdErr).Once()
 			}
 			got, err := svc.PutAccessToken(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -190,35 +194,42 @@ func TestPutAccessToken(t *testing.T) {
 }
 
 func TestDeleteAccessToken(t *testing.T) {
-	var ctx context.Context
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
-		name    string
-		input   *iam.DeleteAccessTokenRequest
-		wantErr bool
-		mockErr error
+		name     string
+		input    *iam.DeleteAccessTokenRequest
+		wantErr  bool
+		callMock bool
+		mockErr  error
 	}{
 		{
-			name:    "OK",
-			input:   &iam.DeleteAccessTokenRequest{ProjectId: 1, AccessTokenId: 1},
-			wantErr: false,
+			name:     "OK",
+			input:    &iam.DeleteAccessTokenRequest{ProjectId: 1, AccessTokenId: 1},
+			wantErr:  false,
+			callMock: true,
 		},
 		{
-			name:    "NG Invalid parameters",
-			input:   &iam.DeleteAccessTokenRequest{AccessTokenId: 1},
-			wantErr: true,
+			name:     "NG Invalid parameters",
+			input:    &iam.DeleteAccessTokenRequest{AccessTokenId: 1},
+			wantErr:  true,
+			callMock: false,
 		},
 		{
-			name:    "NG Invalid DB error",
-			input:   &iam.DeleteAccessTokenRequest{ProjectId: 1, AccessTokenId: 1},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidDB,
+			name:     "NG Invalid DB error",
+			input:    &iam.DeleteAccessTokenRequest{ProjectId: 1, AccessTokenId: 1},
+			wantErr:  true,
+			callMock: true,
+			mockErr:  gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("DeleteAccessToken").Return(c.mockErr).Once()
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
+			if c.callMock {
+				mock.On("DeleteAccessToken", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DeleteAccessToken(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -228,10 +239,7 @@ func TestDeleteAccessToken(t *testing.T) {
 }
 
 func TestAttachAccessTokenRole(t *testing.T) {
-	var ctx context.Context
 	now := time.Now()
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
 		name     string
 		input    *iam.AttachAccessTokenRoleRequest
@@ -260,8 +268,12 @@ func TestAttachAccessTokenRole(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
 			if c.mockResp != nil || c.mockErr != nil {
-				mock.On("AttachAccessTokenRole").Return(c.mockResp, c.mockErr).Once()
+				mock.On("AttachAccessTokenRole", test.RepeatMockAnything(4)...).Return(c.mockResp, c.mockErr).Once()
 			}
 			got, err := svc.AttachAccessTokenRole(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -275,34 +287,41 @@ func TestAttachAccessTokenRole(t *testing.T) {
 }
 
 func TestDetachAccessTokenRole(t *testing.T) {
-	var ctx context.Context
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock}
 	cases := []struct {
-		name    string
-		input   *iam.DetachAccessTokenRoleRequest
-		wantErr bool
-		mockErr error
+		name     string
+		input    *iam.DetachAccessTokenRoleRequest
+		wantErr  bool
+		mockCall bool
+		mockErr  error
 	}{
 		{
-			name:  "OK",
-			input: &iam.DetachAccessTokenRoleRequest{ProjectId: 1, RoleId: 2, AccessTokenId: 3},
+			name:     "OK",
+			input:    &iam.DetachAccessTokenRoleRequest{ProjectId: 1, RoleId: 2, AccessTokenId: 3},
+			mockCall: true,
 		},
 		{
-			name:    "NG Invalid parameter",
-			input:   &iam.DetachAccessTokenRoleRequest{RoleId: 2, AccessTokenId: 3},
-			wantErr: true,
+			name:     "NG Invalid parameter",
+			input:    &iam.DetachAccessTokenRoleRequest{RoleId: 2, AccessTokenId: 3},
+			mockCall: false,
+			wantErr:  true,
 		},
 		{
-			name:    "NG Invalid DB error",
-			input:   &iam.DetachAccessTokenRoleRequest{ProjectId: 1, RoleId: 2, AccessTokenId: 3},
-			mockErr: gorm.ErrInvalidDB,
-			wantErr: true,
+			name:     "NG Invalid DB error",
+			input:    &iam.DetachAccessTokenRoleRequest{ProjectId: 1, RoleId: 2, AccessTokenId: 3},
+			mockCall: true,
+			mockErr:  gorm.ErrInvalidDB,
+			wantErr:  true,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.On("DetachAccessTokenRole").Return(c.mockErr).Once()
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock}
+
+			if c.mockCall {
+				mock.On("DetachAccessTokenRole", test.RepeatMockAnything(4)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DetachAccessTokenRole(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
