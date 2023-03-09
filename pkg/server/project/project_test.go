@@ -11,9 +11,9 @@ import (
 	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
 	"github.com/ca-risken/core/proto/project"
-	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 
 	iammock "github.com/ca-risken/core/proto/iam/mocks"
@@ -21,11 +21,6 @@ import (
 
 func TestListProject(t *testing.T) {
 	now := time.Now()
-	var ctx context.Context
-	mockDB := mocks.MockProjectRepository{}
-	svc := ProjectService{
-		repository: &mockDB,
-	}
 	cases := []struct {
 		name         string
 		input        *project.ListProjectRequest
@@ -74,8 +69,11 @@ func TestListProject(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewProjectRepository(t)
+			svc := ProjectService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("ListProject").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("ListProject", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.ListProject(ctx, c.input)
 			if !c.wantErr && err != nil {
@@ -90,25 +88,17 @@ func TestListProject(t *testing.T) {
 
 func TestCreateProject(t *testing.T) {
 	now := time.Now()
-	var ctx context.Context
-	mockDB := mocks.MockProjectRepository{}
-	mockIAM := iammock.IAMServiceClient{}
-	svc := ProjectService{
-		repository: &mockDB,
-		iamClient:  &mockIAM,
-		logger:     logging.NewLogger(),
-	}
 	cases := []struct {
 		name                  string
 		input                 *project.CreateProjectRequest
 		want                  *project.CreateProjectResponse
 		wantErr               bool
 		createProjectResponse *model.Project
+		createProjectError    error
 		putPolicyResponse     *iam.PutPolicyResponse
 		putRoleResponce       *iam.PutRoleResponse
 		attachPolicyResponse  *iam.AttachPolicyResponse
 		attachRoleResponse    *iam.AttachRoleResponse
-		createProjectError    error
 		mockIAMError          error
 	}{
 		{
@@ -128,34 +118,43 @@ func TestCreateProject(t *testing.T) {
 		},
 		{
 			name:               "Invalid DB error",
-			input:              &project.CreateProjectRequest{UserId: 1},
+			input:              &project.CreateProjectRequest{UserId: 1, Name: "nm"},
 			createProjectError: gorm.ErrInvalidDB,
 			wantErr:            true,
 		},
 		{
 			name:                  "NG IAM service error",
-			input:                 &project.CreateProjectRequest{UserId: 1},
+			input:                 &project.CreateProjectRequest{UserId: 1, Name: "nm"},
 			createProjectResponse: &model.Project{ProjectID: 1, Name: "nm", CreatedAt: now, UpdatedAt: now},
+			putPolicyResponse:     &iam.PutPolicyResponse{Policy: &iam.Policy{PolicyId: 1, Name: "nm", ActionPtn: "ap", ResourcePtn: "rp", ProjectId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockIAMError:          errors.New("Something error occured"),
 			wantErr:               true,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewProjectRepository(t)
+			mockIAM := iammock.NewIAMServiceClient(t)
+			svc := ProjectService{
+				repository: mockDB,
+				iamClient:  mockIAM,
+				logger:     logging.NewLogger(),
+			}
 			if c.createProjectResponse != nil || c.createProjectError != nil {
-				mockDB.On("CreateProject").Return(c.createProjectResponse, c.createProjectError).Once()
+				mockDB.On("CreateProject", test.RepeatMockAnything(2)...).Return(c.createProjectResponse, c.createProjectError).Once()
 			}
 			if c.putRoleResponce != nil {
-				mockIAM.On("PutRole", mock.Anything, mock.Anything).Return(c.putRoleResponce, nil).Once()
+				mockIAM.On("PutRole", test.RepeatMockAnything(2)...).Return(c.putRoleResponce, c.mockIAMError).Once()
 			}
 			if c.attachRoleResponse != nil {
-				mockIAM.On("AttachRole", mock.Anything, mock.Anything).Return(c.attachRoleResponse, nil).Once()
+				mockIAM.On("AttachRole", test.RepeatMockAnything(2)...).Return(c.attachRoleResponse, c.mockIAMError).Once()
 			}
 			if c.putPolicyResponse != nil {
-				mockIAM.On("PutPolicy", mock.Anything, mock.Anything).Return(c.putPolicyResponse, nil).Once()
+				mockIAM.On("PutPolicy", test.RepeatMockAnything(2)...).Return(c.putPolicyResponse, c.mockIAMError).Once()
 			}
 			if c.attachPolicyResponse != nil {
-				mockIAM.On("AttachPolicy", mock.Anything, mock.Anything).Return(c.attachPolicyResponse, nil).Once()
+				mockIAM.On("AttachPolicy", test.RepeatMockAnything(2)...).Return(c.attachPolicyResponse, c.mockIAMError).Once()
 			}
 
 			result, err := svc.CreateProject(ctx, c.input)
@@ -171,11 +170,6 @@ func TestCreateProject(t *testing.T) {
 
 func TestUpdateProject(t *testing.T) {
 	now := time.Now()
-	var ctx context.Context
-	mockDB := mocks.MockProjectRepository{}
-	svc := ProjectService{
-		repository: &mockDB,
-	}
 	cases := []struct {
 		name         string
 		input        *project.UpdateProjectRequest
@@ -204,8 +198,11 @@ func TestUpdateProject(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewProjectRepository(t)
+			svc := ProjectService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("UpdateProject").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("UpdateProject", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.UpdateProject(ctx, c.input)
 			if !c.wantErr && err != nil {
@@ -221,35 +218,41 @@ func TestUpdateProject(t *testing.T) {
 func TestDeleteProject(t *testing.T) {
 	var ctx context.Context
 	cases := []struct {
-		name    string
-		input   *project.DeleteProjectRequest
-		wantErr bool
-		mockErr error
+		name              string
+		input             *project.DeleteProjectRequest
+		wantErr           bool
+		mockErr           error
+		callDeleteProject bool
 	}{
 		{
-			name:  "OK",
-			input: &project.DeleteProjectRequest{ProjectId: 1},
+			name:              "OK",
+			input:             &project.DeleteProjectRequest{ProjectId: 1},
+			callDeleteProject: true,
 		},
 		{
-			name:    "NG Invalid params",
-			input:   &project.DeleteProjectRequest{},
-			wantErr: true,
+			name:              "NG Invalid params",
+			input:             &project.DeleteProjectRequest{},
+			wantErr:           true,
+			callDeleteProject: false,
 		},
 		{
-			name:    "NG DB error",
-			input:   &project.DeleteProjectRequest{},
-			wantErr: true,
-			mockErr: errors.New("DB error"),
+			name:              "NG DB error",
+			input:             &project.DeleteProjectRequest{ProjectId: 1},
+			wantErr:           true,
+			mockErr:           errors.New("DB error"),
+			callDeleteProject: true,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB := mocks.MockProjectRepository{}
+			mockDB := mocks.NewProjectRepository(t)
 			svc := ProjectService{
-				repository: &mockDB,
+				repository: mockDB,
 				logger:     logging.NewLogger(),
 			}
-			mockDB.On("DeleteProject").Return(c.mockErr).Once()
+			if c.callDeleteProject {
+				mockDB.On("DeleteProject", test.RepeatMockAnything(2)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DeleteProject(ctx, c.input)
 			if !c.wantErr && err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -259,11 +262,6 @@ func TestDeleteProject(t *testing.T) {
 }
 
 func TestIsActive(t *testing.T) {
-	var ctx context.Context
-	mockIAM := iammock.IAMServiceClient{}
-	svc := ProjectService{
-		iamClient: &mockIAM,
-	}
 	cases := []struct {
 		name             string
 		input            *project.IsActiveRequest
@@ -292,8 +290,13 @@ func TestIsActive(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockIAM := iammock.NewIAMServiceClient(t)
+			svc := ProjectService{
+				iamClient: mockIAM,
+			}
 			if c.listUserResponse != nil {
-				mockIAM.On("ListUser", mock.Anything, mock.Anything).Return(c.listUserResponse, nil).Once()
+				mockIAM.On("ListUser", test.RepeatMockAnything(2)...).Return(c.listUserResponse, nil).Once()
 			}
 			got, err := svc.IsActive(ctx, c.input)
 			if !c.wantErr && err != nil {
