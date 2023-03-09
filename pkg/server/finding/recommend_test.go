@@ -9,6 +9,7 @@ import (
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/finding"
 	"gorm.io/gorm"
 )
@@ -16,8 +17,6 @@ import (
 func TestGetRecommend(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockFindingRepository{}
-	svc := FindingService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *finding.GetRecommendRequest
@@ -52,8 +51,11 @@ func TestGetRecommend(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewFindingRepository(t)
+			svc := FindingService{repository: mockDB}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("GetRecommend").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("GetRecommend", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.GetRecommend(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -69,8 +71,6 @@ func TestGetRecommend(t *testing.T) {
 func TestPutRecommend(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockFindingRepository{}
-	svc := FindingService{repository: &mockDB, logger: logging.NewLogger()}
 	cases := []struct {
 		name    string
 		input   *finding.PutRecommendRequest
@@ -122,14 +122,17 @@ func TestPutRecommend(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewFindingRepository(t)
+			svc := FindingService{repository: mockDB, logger: logging.NewLogger()}
+
 			if c.mockGetFindingResp != nil || c.mockGetFindingErr != nil {
-				mockDB.On("GetFinding").Return(c.mockGetFindingResp, c.mockGetFindingErr).Once()
+				mockDB.On("GetFinding", test.RepeatMockAnything(4)...).Return(c.mockGetFindingResp, c.mockGetFindingErr).Once()
 			}
 			if c.mockUpsertRecommendResp != nil || c.mockUpsertRecommendErr != nil {
-				mockDB.On("UpsertRecommend").Return(c.mockUpsertRecommendResp, c.mockUpsertRecommendErr).Once()
+				mockDB.On("UpsertRecommend", test.RepeatMockAnything(2)...).Return(c.mockUpsertRecommendResp, c.mockUpsertRecommendErr).Once()
 			}
 			if c.mockUpsertRecommendFindingResp != nil || c.mockUpsertRecommendFindingErr != nil {
-				mockDB.On("UpsertRecommendFinding").Return(c.mockUpsertRecommendFindingResp, c.mockUpsertRecommendFindingErr).Once()
+				mockDB.On("UpsertRecommendFinding", test.RepeatMockAnything(2)...).Return(c.mockUpsertRecommendFindingResp, c.mockUpsertRecommendFindingErr).Once()
 			}
 			got, err := svc.PutRecommend(ctx, c.input)
 			if err != nil && !c.wantErr {

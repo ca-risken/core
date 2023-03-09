@@ -8,6 +8,7 @@ import (
 
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/finding"
 	"gorm.io/gorm"
 )
@@ -15,8 +16,6 @@ import (
 func TestListFindingSetting(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockFindingRepository{}
-	svc := FindingService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *finding.ListFindingSettingRequest
@@ -57,8 +56,11 @@ func TestListFindingSetting(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewFindingRepository(t)
+			svc := FindingService{repository: mockDB}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("ListFindingSetting").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("ListFindingSetting", test.RepeatMockAnything(2)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.ListFindingSetting(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -74,8 +76,6 @@ func TestListFindingSetting(t *testing.T) {
 func TestGetFindingSetting(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockFindingRepository{}
-	svc := FindingService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *finding.GetFindingSettingRequest
@@ -110,8 +110,11 @@ func TestGetFindingSetting(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewFindingRepository(t)
+			svc := FindingService{repository: mockDB}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("GetFindingSetting").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("GetFindingSetting", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.GetFindingSetting(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -127,8 +130,6 @@ func TestGetFindingSetting(t *testing.T) {
 func TestPutFindingSetting(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockFindingRepository{}
-	svc := FindingService{repository: &mockDB}
 	cases := []struct {
 		name     string
 		input    *finding.PutFindingSettingRequest
@@ -157,8 +158,11 @@ func TestPutFindingSetting(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewFindingRepository(t)
+			svc := FindingService{repository: mockDB}
+
 			if c.mockResp != nil || c.mockErr != nil {
-				mockDB.On("UpsertFindingSetting").Return(c.mockResp, c.mockErr).Once()
+				mockDB.On("UpsertFindingSetting", test.RepeatMockAnything(2)...).Return(c.mockResp, c.mockErr).Once()
 			}
 			got, err := svc.PutFindingSetting(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -173,34 +177,41 @@ func TestPutFindingSetting(t *testing.T) {
 
 func TestDeleteFindingSetting(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockFindingRepository{}
-	svc := FindingService{repository: &mockDB}
 	cases := []struct {
-		name    string
-		input   *finding.DeleteFindingSettingRequest
-		wantErr bool
-		mockErr error
+		name     string
+		input    *finding.DeleteFindingSettingRequest
+		wantErr  bool
+		mockCall bool
+		mockErr  error
 	}{
 		{
-			name:    "OK",
-			input:   &finding.DeleteFindingSettingRequest{ProjectId: 1, FindingSettingId: 1},
-			wantErr: false,
+			name:     "OK",
+			input:    &finding.DeleteFindingSettingRequest{ProjectId: 1, FindingSettingId: 1},
+			mockCall: true,
+			wantErr:  false,
 		},
 		{
-			name:    "NG validation error",
-			input:   &finding.DeleteFindingSettingRequest{ProjectId: 1},
-			wantErr: true,
+			name:     "NG validation error",
+			input:    &finding.DeleteFindingSettingRequest{ProjectId: 1},
+			mockCall: false,
+			wantErr:  true,
 		},
 		{
-			name:    "Invalid DB error",
-			input:   &finding.DeleteFindingSettingRequest{ProjectId: 1, FindingSettingId: 1},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidDB,
+			name:     "Invalid DB error",
+			input:    &finding.DeleteFindingSettingRequest{ProjectId: 1, FindingSettingId: 1},
+			mockCall: true,
+			wantErr:  true,
+			mockErr:  gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB.On("DeleteFindingSetting").Return(c.mockErr).Once()
+			mockDB := mocks.NewFindingRepository(t)
+			svc := FindingService{repository: mockDB}
+
+			if c.mockCall {
+				mockDB.On("DeleteFindingSetting", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DeleteFindingSetting(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)

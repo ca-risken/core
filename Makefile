@@ -104,6 +104,10 @@ proto-mock: $(MOCK_TARGETS)
 %.mock: FAKE
 	sh hack/generate-mock.sh proto/$(*)
 
+.PHONY: repository-mock
+repository-mock: FAKE
+	sh hack/generate-mock.sh pkg/db
+
 .PHONY: list-project-service
 list-project-service:
 	$(GRPCURL) -plaintext $(CORE_API_ADDR) list core.project.ProjectService
