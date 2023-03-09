@@ -8,14 +8,12 @@ import (
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
 	"gorm.io/gorm"
 )
 
 func TestIsAuthorized(t *testing.T) {
-	var ctx context.Context
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock, logger: logging.NewLogger()}
 	cases := []struct {
 		name         string
 		input        *iam.IsAuthorizedRequest
@@ -53,8 +51,12 @@ func TestIsAuthorized(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock, logger: logging.NewLogger()}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("GetUserPolicy").Return(c.mockResponce, c.mockError).Once()
+				mock.On("GetUserPolicy", test.RepeatMockAnything(2)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.IsAuthorized(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -68,9 +70,6 @@ func TestIsAuthorized(t *testing.T) {
 }
 
 func TestIsAuthorizedAdmin(t *testing.T) {
-	var ctx context.Context
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock, logger: logging.NewLogger()}
 	cases := []struct {
 		name         string
 		input        *iam.IsAuthorizedAdminRequest
@@ -108,8 +107,12 @@ func TestIsAuthorizedAdmin(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock, logger: logging.NewLogger()}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("GetAdminPolicy").Return(c.mockResponce, c.mockError).Once()
+				mock.On("GetAdminPolicy", test.RepeatMockAnything(2)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.IsAuthorizedAdmin(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -123,9 +126,6 @@ func TestIsAuthorizedAdmin(t *testing.T) {
 }
 
 func TestIsAuthorizedToken(t *testing.T) {
-	var ctx context.Context
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock, logger: logging.NewLogger()}
 	cases := []struct {
 		name    string
 		input   *iam.IsAuthorizedTokenRequest
@@ -199,11 +199,15 @@ func TestIsAuthorizedToken(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock, logger: logging.NewLogger()}
+
 			if c.callMockMaintainerCheck {
-				mock.On("ExistsAccessTokenMaintainer").Return(c.mockMaintainerCheckResp, c.mockMaintainerCheckErr).Once()
+				mock.On("ExistsAccessTokenMaintainer", test.RepeatMockAnything(3)...).Return(c.mockMaintainerCheckResp, c.mockMaintainerCheckErr).Once()
 			}
 			if c.callMockGetTokenPolicy {
-				mock.On("GetTokenPolicy").Return(c.mockGetTokenPolicyResp, c.mockGetTokenPolicyError).Once()
+				mock.On("GetTokenPolicy", test.RepeatMockAnything(2)...).Return(c.mockGetTokenPolicyResp, c.mockGetTokenPolicyError).Once()
 			}
 			got, err := svc.IsAuthorizedToken(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -307,9 +311,6 @@ func TestIsAuthorizedByPolicy(t *testing.T) {
 }
 
 func TestIsAdmin(t *testing.T) {
-	var ctx context.Context
-	mock := mocks.MockIAMRepository{}
-	svc := IAMService{repository: &mock, logger: logging.NewLogger()}
 	cases := []struct {
 		name         string
 		input        *iam.IsAdminRequest
@@ -346,8 +347,12 @@ func TestIsAdmin(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock, logger: logging.NewLogger()}
+
 			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("GetAdminPolicy").Return(c.mockResponce, c.mockError).Once()
+				mock.On("GetAdminPolicy", test.RepeatMockAnything(2)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.IsAdmin(ctx, c.input)
 			if err != nil && !c.wantErr {
