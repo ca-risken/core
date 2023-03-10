@@ -2,7 +2,6 @@ package finding
 
 import (
 	"testing"
-	"time"
 )
 
 const (
@@ -14,7 +13,6 @@ const (
 )
 
 func TestValidate_ListFindingRequest(t *testing.T) {
-	now := time.Now()
 	cases := []struct {
 		name    string
 		input   *ListFindingRequest
@@ -22,11 +20,11 @@ func TestValidate_ListFindingRequest(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: &ListFindingRequest{ProjectId: 1, DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix(), Sort: "finding_id", Direction: "asc", Offset: 0, Limit: maxLimit},
+			input: &ListFindingRequest{ProjectId: 1, DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0, Sort: "finding_id", Direction: "asc", Offset: 0, Limit: maxLimit},
 		},
 		{
 			name:    "NG Required(project_id)",
-			input:   &ListFindingRequest{DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix()},
+			input:   &ListFindingRequest{DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0},
 			wantErr: true,
 		},
 		{
@@ -57,26 +55,6 @@ func TestValidate_ListFindingRequest(t *testing.T) {
 		{
 			name:    "NG big to_score",
 			input:   &ListFindingRequest{ProjectId: 1, ToScore: 1.1},
-			wantErr: true,
-		},
-		{
-			name:    "NG small from_at",
-			input:   &ListFindingRequest{ProjectId: 1, FromAt: -1},
-			wantErr: true,
-		},
-		{
-			name:    "NG big from_at",
-			input:   &ListFindingRequest{ProjectId: 1, FromAt: 253402268400},
-			wantErr: true,
-		},
-		{
-			name:    "NG small to_at",
-			input:   &ListFindingRequest{ProjectId: 1, ToAt: -1},
-			wantErr: true,
-		},
-		{
-			name:    "NG big to_at",
-			input:   &ListFindingRequest{ProjectId: 1, ToAt: 253402268400},
 			wantErr: true,
 		},
 		{
@@ -123,7 +101,6 @@ func TestValidate_ListFindingRequest(t *testing.T) {
 }
 
 func TestValidate_BatchListFindingRequest(t *testing.T) {
-	now := time.Now()
 	cases := []struct {
 		name    string
 		input   *BatchListFindingRequest
@@ -131,11 +108,11 @@ func TestValidate_BatchListFindingRequest(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: &BatchListFindingRequest{ProjectId: 1, DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix()},
+			input: &BatchListFindingRequest{ProjectId: 1, DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0},
 		},
 		{
 			name:    "NG Required(project_id)",
-			input:   &BatchListFindingRequest{DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0, FromAt: now.Unix(), ToAt: now.Unix()},
+			input:   &BatchListFindingRequest{DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0},
 			wantErr: true,
 		},
 		{
@@ -166,26 +143,6 @@ func TestValidate_BatchListFindingRequest(t *testing.T) {
 		{
 			name:    "NG big to_score",
 			input:   &BatchListFindingRequest{ProjectId: 1, ToScore: 1.1},
-			wantErr: true,
-		},
-		{
-			name:    "NG small from_at",
-			input:   &BatchListFindingRequest{ProjectId: 1, FromAt: -1},
-			wantErr: true,
-		},
-		{
-			name:    "NG big from_at",
-			input:   &BatchListFindingRequest{ProjectId: 1, FromAt: 253402268400},
-			wantErr: true,
-		},
-		{
-			name:    "NG small to_at",
-			input:   &BatchListFindingRequest{ProjectId: 1, ToAt: -1},
-			wantErr: true,
-		},
-		{
-			name:    "NG big to_at",
-			input:   &BatchListFindingRequest{ProjectId: 1, ToAt: 253402268400},
 			wantErr: true,
 		},
 		{
@@ -375,31 +332,11 @@ func TestValidate_ListFindingTagNameRequest(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: &ListFindingTagNameRequest{ProjectId: 1, FromAt: 0, ToAt: 0, Sort: "finding_tag_id", Direction: "desc", Offset: 0, Limit: maxLimit},
+			input: &ListFindingTagNameRequest{ProjectId: 1, Sort: "finding_tag_id", Direction: "desc", Offset: 0, Limit: maxLimit},
 		},
 		{
 			name:    "NG Required(project_id)",
-			input:   &ListFindingTagNameRequest{FromAt: 0, ToAt: 0},
-			wantErr: true,
-		},
-		{
-			name:    "NG small from_at",
-			input:   &ListFindingTagNameRequest{ProjectId: 1, FromAt: -1},
-			wantErr: true,
-		},
-		{
-			name:    "NG big from_at",
-			input:   &ListFindingTagNameRequest{ProjectId: 1, FromAt: 253402268400},
-			wantErr: true,
-		},
-		{
-			name:    "NG small to_at",
-			input:   &ListFindingTagNameRequest{ProjectId: 1, ToAt: -1},
-			wantErr: true,
-		},
-		{
-			name:    "NG big to_at",
-			input:   &ListFindingTagNameRequest{ProjectId: 1, ToAt: 253402268400},
+			input:   &ListFindingTagNameRequest{},
 			wantErr: true,
 		},
 		{
@@ -581,26 +518,6 @@ func TestValidate_ListResourceRequest(t *testing.T) {
 		{
 			name:    "NG Length(resource_name)",
 			input:   &ListResourceRequest{ProjectId: 1, ResourceName: []string{len256string}},
-			wantErr: true,
-		},
-		{
-			name:    "NG small from_at",
-			input:   &ListResourceRequest{ProjectId: 1, FromAt: -1},
-			wantErr: true,
-		},
-		{
-			name:    "NG big from_at",
-			input:   &ListResourceRequest{ProjectId: 1, FromAt: 253402268400},
-			wantErr: true,
-		},
-		{
-			name:    "NG small to_at",
-			input:   &ListResourceRequest{ProjectId: 1, ToAt: -1},
-			wantErr: true,
-		},
-		{
-			name:    "NG big to_at",
-			input:   &ListResourceRequest{ProjectId: 1, ToAt: 253402268400},
 			wantErr: true,
 		},
 		{
@@ -825,31 +742,11 @@ func TestValidate_ListResourceTagNameRequest(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: &ListResourceTagNameRequest{ProjectId: 1, FromAt: 0, ToAt: 0, Sort: "resource_tag_id", Direction: "desc", Offset: 0, Limit: maxLimit},
+			input: &ListResourceTagNameRequest{ProjectId: 1, Sort: "resource_tag_id", Direction: "desc", Offset: 0, Limit: maxLimit},
 		},
 		{
 			name:    "NG Required(project_id)",
-			input:   &ListResourceTagNameRequest{FromAt: 0, ToAt: 0},
-			wantErr: true,
-		},
-		{
-			name:    "NG small from_at",
-			input:   &ListResourceTagNameRequest{ProjectId: 1, FromAt: -1},
-			wantErr: true,
-		},
-		{
-			name:    "NG big from_at",
-			input:   &ListResourceTagNameRequest{ProjectId: 1, FromAt: 253402268400},
-			wantErr: true,
-		},
-		{
-			name:    "NG small to_at",
-			input:   &ListResourceTagNameRequest{ProjectId: 1, ToAt: -1},
-			wantErr: true,
-		},
-		{
-			name:    "NG big to_at",
-			input:   &ListResourceTagNameRequest{ProjectId: 1, ToAt: 253402268400},
+			input:   &ListResourceTagNameRequest{},
 			wantErr: true,
 		},
 		{

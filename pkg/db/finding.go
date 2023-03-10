@@ -24,7 +24,6 @@ type FindingRepository interface {
 		ctx context.Context,
 		projectID, alertID uint32,
 		fromScore, toScore float32,
-		fromAt, toAt int64,
 		findingID uint64,
 		dataSources, resourceNames, tags []string,
 		status finding.FindingStatus,
@@ -90,7 +89,7 @@ func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingReques
 	query := "select finding.* from finding inner join finding f_alias using(finding_id) "
 	cond, params := generateListFindingCondition(
 		req.ProjectId, req.AlertId,
-		req.FromScore, req.ToScore, req.FromAt, req.ToAt,
+		req.FromScore, req.ToScore,
 		req.FindingId, req.DataSource, req.ResourceName, req.Tag, req.Status)
 	query += cond
 	query += fmt.Sprintf(" order by f_alias.%s %s", req.Sort, req.Direction)
@@ -106,7 +105,7 @@ func (c *Client) BatchListFinding(ctx context.Context, req *finding.BatchListFin
 	query := "select finding.* from finding "
 	cond, params := generateListFindingCondition(
 		req.ProjectId, req.AlertId,
-		req.FromScore, req.ToScore, req.FromAt, req.ToAt,
+		req.FromScore, req.ToScore,
 		req.FindingId, req.DataSource, req.ResourceName, req.Tag, req.Status)
 	query += cond
 	var data []model.Finding
@@ -120,14 +119,13 @@ func (c *Client) ListFindingCount(
 	ctx context.Context,
 	projectID, alertID uint32,
 	fromScore, toScore float32,
-	fromAt, toAt int64,
 	findingID uint64,
 	dataSources, resourceNames, tags []string,
 	status finding.FindingStatus) (int64, error) {
 	query := "select count(*) from finding "
 	cond, params := generateListFindingCondition(
 		projectID, alertID,
-		fromScore, toScore, fromAt, toAt,
+		fromScore, toScore,
 		findingID, dataSources, resourceNames, tags, status)
 	query += cond
 	var count int64
@@ -140,7 +138,6 @@ func (c *Client) ListFindingCount(
 func generateListFindingCondition(
 	projectID, alertID uint32,
 	fromScore, toScore float32,
-	fromAt, toAt int64,
 	findingID uint64,
 	dataSources, resourceNames, tags []string,
 	status finding.FindingStatus) (string, []interface{}) {
@@ -149,10 +146,9 @@ func generateListFindingCondition(
 where
   finding.project_id = ?
   and finding.score between ? and ?
-  and finding.updated_at between ? and ?
 `
 	var params []interface{}
-	params = append(params, projectID, fromScore, toScore, time.Unix(fromAt, 0), time.Unix(toAt, 0))
+	params = append(params, projectID, fromScore, toScore)
 	if findingID != 0 {
 		query += " and finding.finding_id = ?"
 		params = append(params, findingID)
@@ -325,7 +321,6 @@ from
   finding_tag
 where
   project_id = ?
-  and updated_at between ? and ?
 group by project_id, tag
 order by %s %s limit %d, %d
 `
@@ -334,7 +329,7 @@ func (c *Client) ListFindingTagName(ctx context.Context, param *finding.ListFind
 	var data []TagName
 	if err := c.Slave.WithContext(ctx).Raw(
 		fmt.Sprintf(selectListFindingTagName, param.Sort, param.Direction, param.Offset, param.Limit),
-		param.ProjectId, time.Unix(param.FromAt, 0), time.Unix(param.ToAt, 0)).Scan(&data).Error; err != nil {
+		param.ProjectId).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -344,7 +339,7 @@ const selectListFindingTagNameCount = `
 select count(*) from (
   select tag
   from finding_tag
-  where project_id = ? and updated_at between ? and ?
+  where project_id = ?
   group by project_id, tag
 ) tag
 `
@@ -352,7 +347,7 @@ select count(*) from (
 func (c *Client) ListFindingTagNameCount(ctx context.Context, param *finding.ListFindingTagNameRequest) (int64, error) {
 	var count int64
 	if err := c.Slave.WithContext(ctx).Raw(selectListFindingTagNameCount,
-		param.ProjectId, time.Unix(param.FromAt, 0), time.Unix(param.ToAt, 0)).Count(&count).Error; err != nil {
+		param.ProjectId).Count(&count).Error; err != nil {
 		return count, err
 	}
 	return count, nil
@@ -573,7 +568,6 @@ from
   resource r `
 	where, params := generateListResourceCondition(
 		req.ProjectId,
-		req.FromAt, req.ToAt,
 		req.ResourceId, req.ResourceName, req.Tag,
 		req.Namespace, req.ResourceType,
 	)
@@ -595,7 +589,6 @@ select count(*) from (
     resource r `
 	where, params := generateListResourceCondition(
 		req.ProjectId,
-		req.FromAt, req.ToAt,
 		req.ResourceId, req.ResourceName, req.Tag,
 		req.Namespace, req.ResourceType,
 	)
@@ -610,7 +603,6 @@ select count(*) from (
 
 func generateListResourceCondition(
 	projectID uint32,
-	fromAt, toAt int64,
 	resourceID uint64,
 	resourceNames, tags []string,
 	namespace, resourceType string,
@@ -619,9 +611,8 @@ func generateListResourceCondition(
 	join := ""
 	query := `
 where
-  r.project_id = ?
-  and r.updated_at between ? and ?`
-	params = append(params, projectID, time.Unix(fromAt, 0), time.Unix(toAt, 0))
+  r.project_id = ?`
+	params = append(params, projectID)
 	if !zero.IsZeroVal(resourceID) {
 		query += " and r.resource_id = ?"
 		params = append(params, resourceID)
@@ -724,7 +715,6 @@ from
   resource_tag
 where
   project_id = ?
-  and updated_at between ? and ?
 group by project_id, tag
 order by %s %s
 limit %d, %d
@@ -734,7 +724,7 @@ func (c *Client) ListResourceTagName(ctx context.Context, param *finding.ListRes
 	var data []TagName
 	if err := c.Slave.WithContext(ctx).Raw(
 		fmt.Sprintf(selectListResourceTagName, param.Sort, param.Direction, param.Offset, param.Limit),
-		param.ProjectId, time.Unix(param.FromAt, 0), time.Unix(param.ToAt, 0)).Scan(&data).Error; err != nil {
+		param.ProjectId).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -744,7 +734,7 @@ const selectListResourceTagNameCount = `
 select count(*) from (
   select tag
   from resource_tag
-  where project_id = ? and updated_at between ? and ?
+  where project_id = ?
   group by project_id, tag
 ) tag
 `
@@ -752,7 +742,7 @@ select count(*) from (
 func (c *Client) ListResourceTagNameCount(ctx context.Context, param *finding.ListResourceTagNameRequest) (int64, error) {
 	var count int64
 	if err := c.Slave.WithContext(ctx).Raw(selectListResourceTagNameCount,
-		param.ProjectId, time.Unix(param.FromAt, 0), time.Unix(param.ToAt, 0)).Count(&count).Error; err != nil {
+		param.ProjectId).Count(&count).Error; err != nil {
 		return count, err
 	}
 	return count, nil

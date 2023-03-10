@@ -471,20 +471,20 @@ func (_m *FindingRepository) ListFinding(_a0 context.Context, _a1 *finding.ListF
 	return r0, r1
 }
 
-// ListFindingCount provides a mock function with given fields: ctx, projectID, alertID, fromScore, toScore, fromAt, toAt, findingID, dataSources, resourceNames, tags, status
-func (_m *FindingRepository) ListFindingCount(ctx context.Context, projectID uint32, alertID uint32, fromScore float32, toScore float32, fromAt int64, toAt int64, findingID uint64, dataSources []string, resourceNames []string, tags []string, status finding.FindingStatus) (int64, error) {
-	ret := _m.Called(ctx, projectID, alertID, fromScore, toScore, fromAt, toAt, findingID, dataSources, resourceNames, tags, status)
+// ListFindingCount provides a mock function with given fields: ctx, projectID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status
+func (_m *FindingRepository) ListFindingCount(ctx context.Context, projectID uint32, alertID uint32, fromScore float32, toScore float32, findingID uint64, dataSources []string, resourceNames []string, tags []string, status finding.FindingStatus) (int64, error) {
+	ret := _m.Called(ctx, projectID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status)
 
 	var r0 int64
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, float32, float32, int64, int64, uint64, []string, []string, []string, finding.FindingStatus) int64); ok {
-		r0 = rf(ctx, projectID, alertID, fromScore, toScore, fromAt, toAt, findingID, dataSources, resourceNames, tags, status)
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus) int64); ok {
+		r0 = rf(ctx, projectID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status)
 	} else {
 		r0 = ret.Get(0).(int64)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, float32, float32, int64, int64, uint64, []string, []string, []string, finding.FindingStatus) error); ok {
-		r1 = rf(ctx, projectID, alertID, fromScore, toScore, fromAt, toAt, findingID, dataSources, resourceNames, tags, status)
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus) error); ok {
+		r1 = rf(ctx, projectID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"time"
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
@@ -23,7 +22,6 @@ func (f *FindingService) ListFinding(ctx context.Context, req *finding.ListFindi
 		ctx,
 		param.ProjectId, param.AlertId,
 		param.FromScore, param.ToScore,
-		param.FromAt, param.ToAt,
 		param.FindingId,
 		param.DataSource, param.ResourceName, param.Tag,
 		param.Status,
@@ -50,9 +48,6 @@ func convertListFindingRequest(req *finding.ListFindingRequest) *finding.ListFin
 	if zero.IsZeroVal(converted.ToScore) {
 		converted.ToScore = 1.0
 	}
-	if zero.IsZeroVal(converted.ToAt) {
-		converted.ToAt = time.Now().Unix()
-	}
 	if zero.IsZeroVal(converted.Sort) {
 		converted.Sort = "finding_id"
 	}
@@ -74,7 +69,6 @@ func (f *FindingService) BatchListFinding(ctx context.Context, req *finding.Batc
 		ctx,
 		param.ProjectId, param.AlertId,
 		param.FromScore, param.ToScore,
-		param.FromAt, param.ToAt,
 		param.FindingId,
 		param.DataSource, param.ResourceName, param.Tag,
 		param.Status)
@@ -99,9 +93,6 @@ func convertBatchListFindingRequest(req *finding.BatchListFindingRequest) *findi
 	converted := req
 	if zero.IsZeroVal(converted.ToScore) {
 		converted.ToScore = 1.0
-	}
-	if zero.IsZeroVal(converted.ToAt) {
-		converted.ToAt = time.Now().Unix()
 	}
 	return converted
 }
@@ -221,9 +212,6 @@ func (f *FindingService) ListFindingTagName(ctx context.Context, req *finding.Li
 
 func convertListFindingTagNameRequest(req *finding.ListFindingTagNameRequest) *finding.ListFindingTagNameRequest {
 	converted := req
-	if converted.ToAt == 0 {
-		converted.ToAt = time.Now().Unix()
-	}
 	if zero.IsZeroVal(converted.Sort) {
 		converted.Sort = "tag"
 	}
