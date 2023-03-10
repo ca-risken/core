@@ -440,13 +440,13 @@ func (_m *AlertRepository) ListAlertCondition(_a0 context.Context, _a1 uint32, _
 	return r0, r1
 }
 
-// ListAlertHistory provides a mock function with given fields: _a0, _a1, _a2, _a3, _a4, _a5, _a6
-func (_m *AlertRepository) ListAlertHistory(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 []string, _a4 []string, _a5 int64, _a6 int64) (*[]model.AlertHistory, error) {
-	ret := _m.Called(_a0, _a1, _a2, _a3, _a4, _a5, _a6)
+// ListAlertHistory provides a mock function with given fields: _a0, _a1, _a2, _a3, _a4, _a5, _a6, _a7
+func (_m *AlertRepository) ListAlertHistory(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 []string, _a4 []string, _a5 int64, _a6 int64, _a7 uint32) (*[]model.AlertHistory, error) {
+	ret := _m.Called(_a0, _a1, _a2, _a3, _a4, _a5, _a6, _a7)
 
 	var r0 *[]model.AlertHistory
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, []string, []string, int64, int64) *[]model.AlertHistory); ok {
-		r0 = rf(_a0, _a1, _a2, _a3, _a4, _a5, _a6)
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, []string, []string, int64, int64, uint32) *[]model.AlertHistory); ok {
+		r0 = rf(_a0, _a1, _a2, _a3, _a4, _a5, _a6, _a7)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*[]model.AlertHistory)
@@ -454,8 +454,8 @@ func (_m *AlertRepository) ListAlertHistory(_a0 context.Context, _a1 uint32, _a2
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, []string, []string, int64, int64) error); ok {
-		r1 = rf(_a0, _a1, _a2, _a3, _a4, _a5, _a6)
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, []string, []string, int64, int64, uint32) error); ok {
+		r1 = rf(_a0, _a1, _a2, _a3, _a4, _a5, _a6, _a7)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -14,7 +14,7 @@ type AlertRepository interface {
 	GetAlert(context.Context, uint32, uint32) (*model.Alert, error)
 	UpsertAlert(context.Context, *model.Alert) (*model.Alert, error)
 	DeleteAlert(context.Context, uint32, uint32) error
-	ListAlertHistory(context.Context, uint32, uint32, []string, []string, int64, int64) (*[]model.AlertHistory, error)
+	ListAlertHistory(context.Context, uint32, uint32, []string, []string, int64, int64, uint32) (*[]model.AlertHistory, error)
 	GetAlertHistory(context.Context, uint32, uint32) (*model.AlertHistory, error)
 	UpsertAlertHistory(context.Context, *model.AlertHistory) (*model.AlertHistory, error)
 	DeleteAlertHistory(context.Context, uint32, uint32) error
@@ -101,7 +101,7 @@ func (c *Client) DeleteAlert(ctx context.Context, projectID uint32, alertID uint
 	return nil
 }
 
-func (c *Client) ListAlertHistory(ctx context.Context, projectID, alertID uint32, HistoryType, severity []string, fromAt, toAt int64) (*[]model.AlertHistory, error) {
+func (c *Client) ListAlertHistory(ctx context.Context, projectID, alertID uint32, HistoryType, severity []string, fromAt, toAt int64, limit uint32) (*[]model.AlertHistory, error) {
 	query := `select * from alert_history where project_id = ? and updated_at between ? and ?`
 	var params []interface{}
 	params = append(params, projectID, time.Unix(fromAt, 0), time.Unix(toAt, 0))
@@ -117,7 +117,8 @@ func (c *Client) ListAlertHistory(ctx context.Context, projectID, alertID uint32
 		query += " and severity in (?)"
 		params = append(params, severity)
 	}
-	query += " order by alert_history_id desc limit 10"
+	query += " order by alert_history_id desc limit ?"
+	params = append(params, limit)
 	var data []model.AlertHistory
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err

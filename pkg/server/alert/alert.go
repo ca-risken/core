@@ -2,6 +2,7 @@ package alert
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"strings"
 	"time"
@@ -145,19 +146,60 @@ func (a *AlertService) DeleteAlert(ctx context.Context, req *alert.DeleteAlertRe
  */
 
 func (a *AlertService) ListAlertHistory(ctx context.Context, req *alert.ListAlertHistoryRequest) (*alert.ListAlertHistoryResponse, error) {
-	converted := convertListAlertHistoryRequest(req)
-	list, err := a.repository.ListAlertHistory(ctx, converted.ProjectId, converted.AlertId, converted.HistoryType, converted.Severity, converted.FromAt, converted.ToAt)
+	convertedReq := convertListAlertHistoryRequest(req)
+	// req.HistoryTypeにcreatedが含まれない場合、最新の10件を取得する
+	// 含まれている場合には、最新の9件 + createdの1件を取得
+	requiredCreated := isRequiredCreated(convertedReq.HistoryType)
+	listLimit := uint32(9)
+	if !requiredCreated {
+		listLimit += 1
+	}
+	list, err := a.repository.ListAlertHistory(ctx, convertedReq.ProjectId, convertedReq.AlertId, convertedReq.HistoryType, convertedReq.Severity, convertedReq.FromAt, convertedReq.ToAt, listLimit)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &alert.ListAlertHistoryResponse{}, nil
-		}
 		return nil, err
 	}
-	data := alert.ListAlertHistoryResponse{}
+	var histories []*alert.AlertHistory
+	createdContain := false
 	for _, d := range *list {
-		data.AlertHistory = append(data.AlertHistory, convertAlertHistory(&d))
+		if d.HistoryType == "created" {
+			createdContain = true
+		}
+		converted, err := convertAlertHistory(&d, true)
+		if err != nil {
+			a.logger.Errorf(ctx, "Error occured when convertAlertHistory. err: %v", err)
+			return nil, err
+		}
+		histories = append(histories, converted)
 	}
-	return &data, nil
+	if createdContain || !requiredCreated {
+		return &alert.ListAlertHistoryResponse{AlertHistory: histories}, nil
+	}
+	listCreated, err := a.repository.ListAlertHistory(ctx, convertedReq.ProjectId, convertedReq.AlertId, []string{"created"}, convertedReq.Severity, convertedReq.FromAt, convertedReq.ToAt, 1)
+	if err != nil {
+		return nil, err
+	}
+	for _, d := range *listCreated {
+		converted, err := convertAlertHistory(&d, true)
+		if err != nil {
+			a.logger.Errorf(ctx, "Error occured when convertAlertHistory. err: %v", err)
+			return nil, err
+		}
+		histories = append(histories, converted)
+	}
+	return &alert.ListAlertHistoryResponse{AlertHistory: histories}, nil
+}
+
+func isRequiredCreated(strs []string) bool {
+	// 長さ0ならば検索条件なしのため、true
+	if len(strs) == 0 {
+		return true
+	}
+	for _, s := range strs {
+		if s == "created" {
+			return true
+		}
+	}
+	return false
 }
 
 func convertListAlertHistoryRequest(req *alert.ListAlertHistoryRequest) *alert.ListAlertHistoryRequest {
@@ -187,7 +229,12 @@ func (a *AlertService) GetAlertHistory(ctx context.Context, req *alert.GetAlertH
 		}
 		return nil, err
 	}
-	return &alert.GetAlertHistoryResponse{AlertHistory: convertAlertHistory(data)}, nil
+	convertedAlertHistory, err := convertAlertHistory(data, false)
+	if err != nil {
+		a.logger.Errorf(ctx, "Error occured when convertAlertHistory. err: %v", err)
+		return nil, err
+	}
+	return &alert.GetAlertHistoryResponse{AlertHistory: convertedAlertHistory}, nil
 }
 
 func (a *AlertService) PutAlertHistory(ctx context.Context, req *alert.PutAlertHistoryRequest) (*alert.PutAlertHistoryResponse, error) {
@@ -209,8 +256,12 @@ func (a *AlertService) PutAlertHistory(ctx context.Context, req *alert.PutAlertH
 	if err != nil {
 		return nil, err
 	}
-
-	return &alert.PutAlertHistoryResponse{AlertHistory: convertAlertHistory(registeredData)}, nil
+	convertedAlertHistory, err := convertAlertHistory(registeredData, false)
+	if err != nil {
+		a.logger.Errorf(ctx, "Error occured when convertAlertHistory. err: %v", err)
+		return nil, err
+	}
+	return &alert.PutAlertHistoryResponse{AlertHistory: convertedAlertHistory}, nil
 }
 
 func (a *AlertService) DeleteAlertHistory(ctx context.Context, req *alert.DeleteAlertHistoryRequest) (*empty.Empty, error) {
@@ -323,9 +374,17 @@ func convertAlert(a *model.Alert) *alert.Alert {
 	}
 }
 
-func convertAlertHistory(a *model.AlertHistory) *alert.AlertHistory {
+func convertAlertHistory(a *model.AlertHistory, getCount bool) (*alert.AlertHistory, error) {
 	if a == nil {
-		return &alert.AlertHistory{}
+		return &alert.AlertHistory{}, nil
+	}
+	findingHistory := a.FindingHistory
+	var err error
+	if getCount {
+		findingHistory, err = convertIDsToCount(findingHistory)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &alert.AlertHistory{
 		AlertHistoryId: a.AlertHistoryID,
@@ -333,11 +392,30 @@ func convertAlertHistory(a *model.AlertHistory) *alert.AlertHistory {
 		HistoryType:    a.HistoryType,
 		Description:    a.Description,
 		Severity:       a.Severity,
-		FindingHistory: a.FindingHistory,
+		FindingHistory: findingHistory,
 		ProjectId:      a.ProjectID,
 		CreatedAt:      a.CreatedAt.Unix(),
 		UpdatedAt:      a.UpdatedAt.Unix(),
+	}, nil
+}
+
+type FindingHistory struct {
+	FindingIDs []uint32 `json:"finding_id"`
+}
+
+func convertIDsToCount(history string) (string, error) {
+	var findingHistory FindingHistory
+	err := json.Unmarshal([]byte(history), &findingHistory)
+	if err != nil {
+		return "", err
 	}
+	converted, err := json.Marshal(struct {
+		Count int `json:"count"`
+	}{Count: len(findingHistory.FindingIDs)})
+	if err != nil {
+		return "", err
+	}
+	return string(converted), nil
 }
 
 func convertRelAlertFinding(f *model.RelAlertFinding) *alert.RelAlertFinding {
