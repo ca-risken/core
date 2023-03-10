@@ -9,6 +9,7 @@ import (
 
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
+	"github.com/ca-risken/core/pkg/test"
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 
@@ -24,8 +25,6 @@ func TestNotificationAlert(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	testFindingIDs := []uint64{}
 
 	httpmock.RegisterResponder("POST", "http://hogehoge.com", httpmock.NewStringResponder(200, "mocked"))
@@ -61,8 +60,6 @@ func TestNotificationAlert(t *testing.T) {
 			mockListAlertCondNotificationErr:   nil,
 			mockGetNotification:                &model.Notification{Type: "slack", NotifySetting: `{"webhook_url":"http://hogehoge.com"}`},
 			mockGetNotificationErr:             nil,
-			mockGetProject:                     &project.Project{},
-			mockGetProjectErr:                  nil,
 			mockUpsertAlertCondNotification:    &model.AlertCondNotification{},
 			mockUpsertAlertCondNotificationErr: nil,
 		},
@@ -73,8 +70,6 @@ func TestNotificationAlert(t *testing.T) {
 			wantErr:                          false,
 			mockListAlertCondNotification:    &[]model.AlertCondNotification{{AlertConditionID: 1, NotificationID: 1, CacheSecond: 30, NotifiedAt: now}},
 			mockListAlertCondNotificationErr: nil,
-			mockGetNotification:              &model.Notification{Type: "slack", NotifySetting: `{"webhook_url":"http://fugafuga.com"}`},
-			mockGetNotificationErr:           nil,
 		},
 		{
 			name:                             "Error ListAlertCondNotification Failed",
@@ -95,18 +90,6 @@ func TestNotificationAlert(t *testing.T) {
 			mockGetNotificationErr:           errors.New("Somethinng error occured"),
 		},
 		{
-			name:                             "Error GetNotification Failed",
-			alertCondition:                   &model.AlertCondition{AlertConditionID: 1},
-			alert:                            &model.Alert{},
-			wantErr:                          true,
-			mockListAlertCondNotification:    &[]model.AlertCondNotification{{AlertConditionID: 1, NotificationID: 1}},
-			mockListAlertCondNotificationErr: nil,
-			mockGetNotification:              nil,
-			mockGetNotificationErr:           errors.New("Somethinng error occured"),
-			mockGetProject:                   nil,
-			mockGetProjectErr:                errors.New("Somethinng error occured"),
-		},
-		{
 			name:                               "Error UpsertAlertCondNotification Failed",
 			alertCondition:                     &model.AlertCondition{AlertConditionID: 1},
 			alert:                              &model.Alert{},
@@ -115,19 +98,23 @@ func TestNotificationAlert(t *testing.T) {
 			mockListAlertCondNotificationErr:   nil,
 			mockGetNotification:                &model.Notification{Type: "slack", NotifySetting: `{"webhook_url":"http://hogehoge.com"}`},
 			mockGetNotificationErr:             nil,
-			mockGetProject:                     &project.Project{},
-			mockGetProjectErr:                  nil,
 			mockUpsertAlertCondNotification:    nil,
 			mockUpsertAlertCondNotificationErr: errors.New("Somethinng error occured"),
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB = mocks.MockAlertRepository{}
-			mockDB.On("ListAlertCondNotification").Return(c.mockListAlertCondNotification, c.mockListAlertCondNotificationErr).Once()
-			mockDB.On("GetNotification").Return(c.mockGetNotification, c.mockGetNotificationErr).Once()
-			mockDB.On("UpsertAlertCondNotification").Return(c.mockUpsertAlertCondNotification, c.mockUpsertAlertCondNotificationErr).Once()
-			mockDB.On("GetProject").Return(c.mockGetProject, c.mockGetProjectErr).Once()
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB, logger: logging.NewLogger()}
+			if c.mockListAlertCondNotification != nil || c.mockListAlertCondNotificationErr != nil {
+				mockDB.On("ListAlertCondNotification", test.RepeatMockAnything(6)...).Return(c.mockListAlertCondNotification, c.mockListAlertCondNotificationErr).Once()
+			}
+			if c.mockGetNotification != nil || c.mockGetNotificationErr != nil {
+				mockDB.On("GetNotification", test.RepeatMockAnything(3)...).Return(c.mockGetNotification, c.mockGetNotificationErr).Once()
+			}
+			if c.mockUpsertAlertCondNotification != nil || c.mockUpsertAlertCondNotificationErr != nil {
+				mockDB.On("UpsertAlertCondNotification", test.RepeatMockAnything(2)...).Return(c.mockUpsertAlertCondNotification, c.mockUpsertAlertCondNotificationErr).Once()
+			}
 			got := svc.NotificationAlert(context.Background(), c.alertCondition, c.alert, &[]model.AlertRule{}, &project.Project{}, &testFindingIDs)
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
@@ -270,7 +257,7 @@ func TestGetFindingDetailsForNotification(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			mockFinding := findingmock.FindingServiceClient{}
-			svc := AlertService{findingClient: &mockFinding}
+			svc := AlertService{findingClient: &mockFinding, logger: logging.NewLogger()}
 			mockFinding.On("GetFinding", mock.Anything, mock.Anything).Return(c.getFinding.Resp, c.getFinding.Err)
 			mockFinding.On("ListFindingTag", mock.Anything, mock.Anything).Return(c.listFindingTag.Resp, c.listFindingTag.Err)
 			got, err := svc.getFindingDetailsForNotification(context.TODO(), c.input.ProjectID, c.input.FindingIDs)
@@ -287,9 +274,6 @@ func TestGetFindingDetailsForNotification(t *testing.T) {
 func TestPutNotification(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB, logger: logging.NewLogger()}
-
 	cases := []struct {
 		name        string
 		input       *alert.PutNotificationRequest
@@ -302,20 +286,20 @@ func TestPutNotification(t *testing.T) {
 	}{
 		{
 			name:       "OK Insert",
-			input:      &alert.PutNotificationRequest{Notification: &alert.NotificationForUpsert{ProjectId: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`}},
-			want:       &alert.PutNotificationResponse{Notification: &alert.Notification{ProjectId: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockUpResp: &model.Notification{ProjectID: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
+			input:      &alert.PutNotificationRequest{Notification: &alert.NotificationForUpsert{ProjectId: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url": "https://example.com"}`}},
+			want:       &alert.PutNotificationResponse{Notification: &alert.Notification{ProjectId: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url":"https://e**********","data":{}}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockUpResp: &model.Notification{ProjectID: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:        "OK Update",
-			input:       &alert.PutNotificationRequest{Notification: &alert.NotificationForUpsert{NotificationId: 1001, ProjectId: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`}},
-			want:        &alert.PutNotificationResponse{Notification: &alert.Notification{NotificationId: 1001, ProjectId: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockGetResp: &model.Notification{NotificationID: 1001, ProjectID: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
-			mockUpResp:  &model.Notification{NotificationID: 1001, ProjectID: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
+			input:       &alert.PutNotificationRequest{Notification: &alert.NotificationForUpsert{NotificationId: 1001, ProjectId: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url": "https://example.com"}`}},
+			want:        &alert.PutNotificationResponse{Notification: &alert.Notification{NotificationId: 1001, ProjectId: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url":"https://e**********","data":{}}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp: &model.Notification{NotificationID: 1001, ProjectID: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
+			mockUpResp:  &model.Notification{NotificationID: 1001, ProjectID: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:        "NG Update (Notification Not Found)",
-			input:       &alert.PutNotificationRequest{Notification: &alert.NotificationForUpsert{NotificationId: 1001, ProjectId: 1001, Name: "name", Type: "type", NotifySetting: `{"webhook_url": "https://example.com"}`}},
+			input:       &alert.PutNotificationRequest{Notification: &alert.NotificationForUpsert{NotificationId: 1001, ProjectId: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url": "https://example.com"}`}},
 			want:        &alert.PutNotificationResponse{},
 			wantErr:     true,
 			mockGetResp: &model.Notification{},
@@ -324,11 +308,13 @@ func TestPutNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mockDB.On("UpsertNotification").Return(c.mockUpResp, c.mockUpErr).Once()
-			}
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB, logger: logging.NewLogger()}
 			if c.mockGetResp != nil || c.mockGetErr != nil {
-				mockDB.On("GetNotification").Return(c.mockGetResp, c.mockGetErr).Once()
+				mockDB.On("GetNotification", test.RepeatMockAnything(3)...).Return(c.mockGetResp, c.mockGetErr).Once()
+			}
+			if c.mockUpResp != nil || c.mockUpErr != nil {
+				mockDB.On("UpsertNotification", test.RepeatMockAnything(2)...).Return(c.mockUpResp, c.mockUpErr).Once()
 			}
 
 			got, err := svc.PutNotification(ctx, c.input)

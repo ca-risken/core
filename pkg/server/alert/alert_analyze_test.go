@@ -9,6 +9,7 @@ import (
 
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
+	"github.com/ca-risken/core/pkg/test"
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
@@ -26,9 +27,6 @@ import (
 
 func TestAnalyzeAlert(t *testing.T) {
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	mockProject := projectmock.NewProjectServiceClient(t)
-	svc := AlertService{repository: &mockDB, projectClient: mockProject, logger: logging.NewLogger()}
 	cases := []struct {
 		name                              string
 		input                             *alert.AnalyzeAlertRequest
@@ -39,6 +37,7 @@ func TestAnalyzeAlert(t *testing.T) {
 		mockListAlertCondition            *[]model.AlertCondition
 		mockListAlertConditionErr         error
 		mockListAlertRuleErr              error
+		ListAlertRuleCall                 bool
 		mockListDisabledAlertCondition    *[]model.AlertCondition
 		mockListDisabledAlertConditionErr error
 	}{
@@ -85,16 +84,25 @@ func TestAnalyzeAlert(t *testing.T) {
 			mockListAlertCondition:    &[]model.AlertCondition{{AlertConditionID: 1001, CreatedAt: now, UpdatedAt: now}},
 			mockListAlertConditionErr: nil,
 			mockListAlertRuleErr:      errors.New("Something error occured ListAlertRule"),
+			ListAlertRuleCall:         true,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			mockProject := projectmock.NewProjectServiceClient(t)
+			svc := AlertService{repository: mockDB, projectClient: mockProject, logger: logging.NewLogger()}
 			ctx := context.Background()
-			mockDB = mocks.MockAlertRepository{}
-			mockDB.On("ListEnabledAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
-			mockDB.On("ListAlertRuleByAlertConditionID").Return(&[]model.AlertRule{}, c.mockListAlertRuleErr).Once()
-			mockDB.On("ListDisabledAlertCondition").Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
+			if c.mockListAlertCondition != nil || c.mockListAlertConditionErr != nil {
+				mockDB.On("ListEnabledAlertCondition", test.RepeatMockAnything(3)...).Return(c.mockListAlertCondition, c.mockListAlertConditionErr).Once()
+			}
+			if c.ListAlertRuleCall {
+				mockDB.On("ListAlertRuleByAlertConditionID", test.RepeatMockAnything(3)...).Return(&[]model.AlertRule{}, c.mockListAlertRuleErr).Once()
+			}
+			if c.mockListDisabledAlertCondition != nil || c.mockListDisabledAlertConditionErr != nil {
+				mockDB.On("ListDisabledAlertCondition", test.RepeatMockAnything(3)...).Return(c.mockListDisabledAlertCondition, c.mockListDisabledAlertConditionErr).Once()
 
+			}
 			mockProject.On("ListProject", ctx, &project.ListProjectRequest{ProjectId: c.input.ProjectId}).
 				Return(c.mockListProject, c.mockListProjectErr).Once()
 			got, err := svc.AnalyzeAlert(ctx, c.input)
@@ -110,8 +118,6 @@ func TestAnalyzeAlert(t *testing.T) {
 
 func TestAnalyzeAlertByRule(t *testing.T) {
 	now := time.Now()
-	mockFinding := findingmock.FindingServiceClient{}
-	svc := AlertService{findingClient: &mockFinding, logger: logging.NewLogger()}
 	cases := []struct {
 		name                   string
 		inputAlertRule         *model.AlertRule
@@ -166,8 +172,10 @@ func TestAnalyzeAlertByRule(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-
 			ctx := context.Background()
+			mockDB := mocks.NewAlertRepository(t)
+			mockFinding := findingmock.NewFindingServiceClient(t)
+			svc := AlertService{repository: mockDB, findingClient: mockFinding, logger: logging.NewLogger()}
 
 			mockFinding.On("BatchListFinding", ctx, c.mockListFindingRequest).
 				Return(c.mockListFinding, c.mockListFindingErr).Once()
@@ -186,21 +194,20 @@ func TestAnalyzeAlertByRule(t *testing.T) {
 }
 
 func TestDeleteAlertByAnalyze(t *testing.T) {
-	//	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB, logger: logging.NewLogger()}
 	cases := []struct {
 		name                                    string
 		alertCondition                          *model.AlertCondition
 		wantErr                                 bool
 		mockGetAlertByAlertConditionIDStatus    *model.Alert
 		mockGetAlertByAlertConditionIDStatusErr error
+		deactivateAlertCall                     bool
 		mockDeactivateAlertErr                  error
 		mockUpsertAlertHistory                  *model.AlertHistory
 		mockUpsertAlertHistoryErr               error
 		mockListRelAlertFinding                 *[]model.RelAlertFinding
 		mockListRelAlertFindingErr              error
-		mockListDeleteAlertFindingErr           error
+		deleteAlertFindingCall                  bool
+		mockDeleteAlertFindingErr               error
 	}{
 		{
 			name:                                    "OK 0 Alert",
@@ -215,12 +222,12 @@ func TestDeleteAlertByAnalyze(t *testing.T) {
 			wantErr:                                 false,
 			mockGetAlertByAlertConditionIDStatus:    &model.Alert{AlertID: 1},
 			mockGetAlertByAlertConditionIDStatusErr: nil,
+			deactivateAlertCall:                     true,
 			mockDeactivateAlertErr:                  nil,
 			mockUpsertAlertHistory:                  &model.AlertHistory{},
 			mockUpsertAlertHistoryErr:               nil,
 			mockListRelAlertFinding:                 &[]model.RelAlertFinding{},
 			mockListRelAlertFindingErr:              nil,
-			mockListDeleteAlertFindingErr:           nil,
 		},
 		{
 			name:                                    "Error GetAlertByAlertConditionIDStatus",
@@ -235,6 +242,7 @@ func TestDeleteAlertByAnalyze(t *testing.T) {
 			wantErr:                                 true,
 			mockGetAlertByAlertConditionIDStatus:    &model.Alert{AlertID: 1, Status: "ACTIVE"},
 			mockGetAlertByAlertConditionIDStatusErr: nil,
+			deactivateAlertCall:                     true,
 			mockDeactivateAlertErr:                  gorm.ErrInvalidDB,
 		},
 		{
@@ -243,6 +251,7 @@ func TestDeleteAlertByAnalyze(t *testing.T) {
 			wantErr:                                 true,
 			mockGetAlertByAlertConditionIDStatus:    &model.Alert{AlertID: 1, Status: "ACTIVE"},
 			mockGetAlertByAlertConditionIDStatusErr: nil,
+			deactivateAlertCall:                     true,
 			mockDeactivateAlertErr:                  nil,
 			mockUpsertAlertHistory:                  nil,
 			mockUpsertAlertHistoryErr:               errors.New("Something error occured"),
@@ -253,6 +262,7 @@ func TestDeleteAlertByAnalyze(t *testing.T) {
 			wantErr:                                 true,
 			mockGetAlertByAlertConditionIDStatus:    &model.Alert{AlertID: 1, Status: "ACTIVE"},
 			mockGetAlertByAlertConditionIDStatusErr: nil,
+			deactivateAlertCall:                     true,
 			mockDeactivateAlertErr:                  nil,
 			mockUpsertAlertHistory:                  &model.AlertHistory{},
 			mockUpsertAlertHistoryErr:               nil,
@@ -265,22 +275,35 @@ func TestDeleteAlertByAnalyze(t *testing.T) {
 			wantErr:                                 true,
 			mockGetAlertByAlertConditionIDStatus:    &model.Alert{AlertID: 1, Status: "ACTIVE"},
 			mockGetAlertByAlertConditionIDStatusErr: nil,
+			deactivateAlertCall:                     true,
 			mockDeactivateAlertErr:                  nil,
 			mockUpsertAlertHistory:                  &model.AlertHistory{},
 			mockUpsertAlertHistoryErr:               nil,
 			mockListRelAlertFinding:                 &[]model.RelAlertFinding{{AlertID: 1, FindingID: 1, ProjectID: 1}},
 			mockListRelAlertFindingErr:              nil,
-			mockListDeleteAlertFindingErr:           errors.New("Something error occured"),
+			deleteAlertFindingCall:                  true,
+			mockDeleteAlertFindingErr:               errors.New("Something error occured"),
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB = mocks.MockAlertRepository{}
-			mockDB.On("GetAlertByAlertConditionIDStatus").Return(c.mockGetAlertByAlertConditionIDStatus, c.mockGetAlertByAlertConditionIDStatusErr).Once()
-			mockDB.On("DeactivateAlert").Return(c.mockDeactivateAlertErr).Once()
-			mockDB.On("UpsertAlertHistory").Return(c.mockUpsertAlertHistory, c.mockUpsertAlertHistoryErr).Once()
-			mockDB.On("ListRelAlertFinding").Return(c.mockListRelAlertFinding, c.mockListRelAlertFindingErr).Once()
-			mockDB.On("DeleteRelAlertFinding").Return(c.mockListDeleteAlertFindingErr).Once()
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB, logger: logging.NewLogger()}
+			if c.mockGetAlertByAlertConditionIDStatus != nil || c.mockGetAlertByAlertConditionIDStatusErr != nil {
+				mockDB.On("GetAlertByAlertConditionIDStatus", test.RepeatMockAnything(4)...).Return(c.mockGetAlertByAlertConditionIDStatus, c.mockGetAlertByAlertConditionIDStatusErr).Once()
+			}
+			if c.deactivateAlertCall {
+				mockDB.On("DeactivateAlert", test.RepeatMockAnything(2)...).Return(c.mockDeactivateAlertErr).Once()
+			}
+			if c.mockUpsertAlertHistory != nil || c.mockUpsertAlertHistoryErr != nil {
+				mockDB.On("UpsertAlertHistory", test.RepeatMockAnything(2)...).Return(c.mockUpsertAlertHistory, c.mockUpsertAlertHistoryErr).Once()
+			}
+			if c.mockListRelAlertFinding != nil || c.mockListRelAlertFindingErr != nil {
+				mockDB.On("ListRelAlertFinding", test.RepeatMockAnything(6)...).Return(c.mockListRelAlertFinding, c.mockListRelAlertFindingErr).Once()
+			}
+			if c.deleteAlertFindingCall {
+				mockDB.On("DeleteRelAlertFinding", test.RepeatMockAnything(4)...).Return(c.mockDeleteAlertFindingErr).Once()
+			}
 			got := svc.DeleteAlertByAnalyze(context.Background(), c.alertCondition)
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
@@ -290,9 +313,6 @@ func TestDeleteAlertByAnalyze(t *testing.T) {
 }
 
 func TestRegistAlertByAnalyze(t *testing.T) {
-	//	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB, logger: logging.NewLogger()}
 	cases := []struct {
 		name                                    string
 		alertCondition                          *model.AlertCondition
@@ -367,12 +387,23 @@ func TestRegistAlertByAnalyze(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB = mocks.MockAlertRepository{}
-			mockDB.On("GetAlertByAlertConditionIDStatus").Return(c.mockGetAlertByAlertConditionIDStatus, c.mockGetAlertByAlertConditionIDStatusErr).Once()
-			mockDB.On("UpsertAlert").Return(c.mockUpsertAlert, c.mockUpsertAlertErr).Once()
-			mockDB.On("UpsertAlertHistory").Return(c.mockUpsertAlertHistory, c.mockUpsertAlertHistoryErr).Once()
-			mockDB.On("ListRelAlertFinding").Return(c.mockListRelAlertFinding, c.mockListRelAlertFindingErr).Once()
-			mockDB.On("UpsertRelAlertFinding").Return(c.mockUpsertRelAlertFinding, c.mockUpsertRelAlertFindingErr).Once()
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB, logger: logging.NewLogger()}
+			if c.mockGetAlertByAlertConditionIDStatus != nil || c.mockGetAlertByAlertConditionIDStatusErr != nil {
+				mockDB.On("GetAlertByAlertConditionIDStatus", test.RepeatMockAnything(4)...).Return(c.mockGetAlertByAlertConditionIDStatus, c.mockGetAlertByAlertConditionIDStatusErr).Once()
+			}
+			if c.mockUpsertAlert != nil || c.mockUpsertAlertErr != nil {
+				mockDB.On("UpsertAlert", test.RepeatMockAnything(2)...).Return(c.mockUpsertAlert, c.mockUpsertAlertErr).Once()
+			}
+			if c.mockUpsertAlertHistory != nil || c.mockUpsertAlertHistoryErr != nil {
+				mockDB.On("UpsertAlertHistory", test.RepeatMockAnything(2)...).Return(c.mockUpsertAlertHistory, c.mockUpsertAlertHistoryErr).Once()
+			}
+			if c.mockListRelAlertFinding != nil || c.mockListRelAlertFindingErr != nil {
+				mockDB.On("ListRelAlertFinding", test.RepeatMockAnything(6)...).Return(c.mockListRelAlertFinding, c.mockListRelAlertFindingErr).Once()
+			}
+			if c.mockUpsertRelAlertFinding != nil || c.mockUpsertRelAlertFindingErr != nil {
+				mockDB.On("UpsertRelAlertFinding", test.RepeatMockAnything(2)...).Return(c.mockUpsertRelAlertFinding, c.mockUpsertRelAlertFindingErr).Once()
+			}
 			got, err := svc.RegistAlertByAnalyze(context.Background(), c.alertCondition, c.findingIDs)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", got)

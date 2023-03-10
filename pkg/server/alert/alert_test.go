@@ -10,6 +10,7 @@ import (
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/alert"
 	"gorm.io/gorm"
 )
@@ -21,8 +22,6 @@ import (
 func TestListAlert(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListAlertRequest
@@ -45,8 +44,10 @@ func TestListAlert(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("ListAlert").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("ListAlert", test.RepeatMockAnything(7)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.ListAlert(ctx, c.input)
 			if err != nil {
@@ -85,8 +86,6 @@ func TestConvertListAlertRequest(t *testing.T) {
 func TestGetAlert(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetAlertRequest
@@ -109,8 +108,10 @@ func TestGetAlert(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("GetAlert").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("GetAlert", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.GetAlert(ctx, c.input)
 			if err != nil {
@@ -126,8 +127,6 @@ func TestGetAlert(t *testing.T) {
 func TestPutAlert(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB, logger: logging.NewLogger()}
 
 	cases := []struct {
 		name                        string
@@ -174,7 +173,6 @@ func TestPutAlert(t *testing.T) {
 			input:                       &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
 			want:                        &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			wantErr:                     true,
-			mockGetErr:                  gorm.ErrRecordNotFound,
 			mockUpResp:                  &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 			mockListRelAlertFindingResp: nil,
 			mockListRelAlertFindingErr:  errors.New("something error"),
@@ -184,7 +182,6 @@ func TestPutAlert(t *testing.T) {
 			input:                       &alert.PutAlertRequest{Alert: &alert.AlertForUpsert{ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE}},
 			want:                        &alert.PutAlertResponse{Alert: &alert.Alert{AlertId: 1001, ProjectId: 1001, AlertConditionId: 1001, Description: "desc", Severity: "high", Status: alert.Status_ACTIVE, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			wantErr:                     true,
-			mockGetErr:                  gorm.ErrRecordNotFound,
 			mockUpResp:                  &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 			mockListRelAlertFindingResp: &[]model.RelAlertFinding{{FindingID: 1001, ProjectID: 1001}},
 			mockListRelAlertFindingErr:  nil,
@@ -194,17 +191,19 @@ func TestPutAlert(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB, logger: logging.NewLogger()}
 			if c.mockGetResp != nil || c.mockGetErr != nil {
-				mockDB.On("GetAlert").Return(c.mockGetResp, c.mockGetErr).Once()
+				mockDB.On("GetAlert", test.RepeatMockAnything(3)...).Return(c.mockGetResp, c.mockGetErr).Once()
 			}
 			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mockDB.On("UpsertAlert").Return(c.mockUpResp, c.mockUpErr).Once()
+				mockDB.On("UpsertAlert", test.RepeatMockAnything(2)...).Return(c.mockUpResp, c.mockUpErr).Once()
 			}
 			if c.mockListRelAlertFindingResp != nil || c.mockListRelAlertFindingErr != nil {
-				mockDB.On("ListRelAlertFinding").Return(c.mockListRelAlertFindingResp, c.mockListRelAlertFindingErr).Once()
+				mockDB.On("ListRelAlertFinding", test.RepeatMockAnything(6)...).Return(c.mockListRelAlertFindingResp, c.mockListRelAlertFindingErr).Once()
 			}
 			if c.mockUpHistoryResp != nil || c.mockUpHistoryErr != nil {
-				mockDB.On("UpsertAlertHistory").Return(c.mockUpHistoryResp, c.mockUpHistoryErr).Once()
+				mockDB.On("UpsertAlertHistory", test.RepeatMockAnything(2)...).Return(c.mockUpHistoryResp, c.mockUpHistoryErr).Once()
 			}
 			got, err := svc.PutAlert(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -219,35 +218,41 @@ func TestPutAlert(t *testing.T) {
 
 func TestDeleteAlert(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
-		name    string
-		input   *alert.DeleteAlertRequest
-		wantErr bool
-		mockErr error
+		name            string
+		input           *alert.DeleteAlertRequest
+		wantErr         bool
+		deleteAlertCall bool
+		mockErr         error
 	}{
 		{
-			name:    "OK",
-			input:   &alert.DeleteAlertRequest{ProjectId: 1, AlertId: 1001},
-			wantErr: false,
-			mockErr: nil,
+			name:            "OK",
+			input:           &alert.DeleteAlertRequest{ProjectId: 1, AlertId: 1001},
+			wantErr:         false,
+			deleteAlertCall: true,
+			mockErr:         nil,
 		},
 		{
-			name:    "NG validation error",
-			input:   &alert.DeleteAlertRequest{ProjectId: 1},
-			wantErr: true,
+			name:            "NG validation error",
+			input:           &alert.DeleteAlertRequest{ProjectId: 1},
+			deleteAlertCall: false,
+			wantErr:         true,
 		},
 		{
-			name:    "Invalid DB error",
-			input:   &alert.DeleteAlertRequest{ProjectId: 1, AlertId: 1001},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidDB,
+			name:            "Invalid DB error",
+			input:           &alert.DeleteAlertRequest{ProjectId: 1, AlertId: 1001},
+			wantErr:         true,
+			deleteAlertCall: true,
+			mockErr:         gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB.On("DeleteAlert").Return(c.mockErr).Once()
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
+			if c.deleteAlertCall {
+				mockDB.On("DeleteAlert", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DeleteAlert(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -291,8 +296,6 @@ func TestConvertAlert(t *testing.T) {
 func TestListAlertHistory(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListAlertHistoryRequest
@@ -315,8 +318,10 @@ func TestListAlertHistory(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("ListAlertHistory").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("ListAlertHistory", test.RepeatMockAnything(7)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.ListAlertHistory(ctx, c.input)
 			if err != nil {
@@ -355,8 +360,6 @@ func TestConvertListAlertHistoryRequest(t *testing.T) {
 func TestGetAlertHistory(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetAlertHistoryRequest
@@ -379,8 +382,10 @@ func TestGetAlertHistory(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("GetAlertHistory").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("GetAlertHistory", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.GetAlertHistory(ctx, c.input)
 			if err != nil {
@@ -396,8 +401,6 @@ func TestGetAlertHistory(t *testing.T) {
 func TestPutAlertHistory(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 
 	cases := []struct {
 		name        string
@@ -425,8 +428,10 @@ func TestPutAlertHistory(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mockDB.On("UpsertAlertHistory").Return(c.mockUpResp, c.mockUpErr).Once()
+				mockDB.On("UpsertAlertHistory", test.RepeatMockAnything(2)...).Return(c.mockUpResp, c.mockUpErr).Once()
 			}
 			got, err := svc.PutAlertHistory(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -441,35 +446,41 @@ func TestPutAlertHistory(t *testing.T) {
 
 func TestDeleteAlertHistory(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
-		name    string
-		input   *alert.DeleteAlertHistoryRequest
-		wantErr bool
-		mockErr error
+		name                   string
+		input                  *alert.DeleteAlertHistoryRequest
+		wantErr                bool
+		deleteAlertHistoryCall bool
+		mockErr                error
 	}{
 		{
-			name:    "OK",
-			input:   &alert.DeleteAlertHistoryRequest{ProjectId: 1, AlertHistoryId: 1001},
-			wantErr: false,
-			mockErr: nil,
+			name:                   "OK",
+			input:                  &alert.DeleteAlertHistoryRequest{ProjectId: 1, AlertHistoryId: 1001},
+			wantErr:                false,
+			deleteAlertHistoryCall: true,
+			mockErr:                nil,
 		},
 		{
-			name:    "NG validation error",
-			input:   &alert.DeleteAlertHistoryRequest{ProjectId: 1},
-			wantErr: true,
+			name:                   "NG validation error",
+			input:                  &alert.DeleteAlertHistoryRequest{ProjectId: 1},
+			deleteAlertHistoryCall: false,
+			wantErr:                true,
 		},
 		{
-			name:    "Invalid DB error",
-			input:   &alert.DeleteAlertHistoryRequest{ProjectId: 1, AlertHistoryId: 1001},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidDB,
+			name:                   "Invalid DB error",
+			input:                  &alert.DeleteAlertHistoryRequest{ProjectId: 1, AlertHistoryId: 1001},
+			wantErr:                true,
+			deleteAlertHistoryCall: true,
+			mockErr:                gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
+		mockDB := mocks.NewAlertRepository(t)
+		svc := AlertService{repository: mockDB}
 		t.Run(c.name, func(t *testing.T) {
-			mockDB.On("DeleteAlertHistory").Return(c.mockErr).Once()
+			if c.deleteAlertHistoryCall {
+				mockDB.On("DeleteAlertHistory", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DeleteAlertHistory(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -513,8 +524,6 @@ func TestConvertAlertHistory(t *testing.T) {
 func TestListRelAlertFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListRelAlertFindingRequest
@@ -536,9 +545,11 @@ func TestListRelAlertFinding(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
+		mockDB := mocks.NewAlertRepository(t)
+		svc := AlertService{repository: mockDB}
 		t.Run(c.name, func(t *testing.T) {
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("ListRelAlertFinding").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("ListRelAlertFinding", test.RepeatMockAnything(6)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.ListRelAlertFinding(ctx, c.input)
 			if err != nil {
@@ -577,8 +588,6 @@ func TestConvertListRelAlertFindingRequest(t *testing.T) {
 func TestGetRelAlertFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetRelAlertFindingRequest
@@ -601,8 +610,10 @@ func TestGetRelAlertFinding(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("GetRelAlertFinding").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("GetRelAlertFinding", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.GetRelAlertFinding(ctx, c.input)
 			if err != nil {
@@ -618,8 +629,6 @@ func TestGetRelAlertFinding(t *testing.T) {
 func TestPutRelAlertFinding(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 
 	cases := []struct {
 		name        string
@@ -640,8 +649,10 @@ func TestPutRelAlertFinding(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mockDB.On("UpsertRelAlertFinding").Return(c.mockUpResp, c.mockUpErr).Once()
+				mockDB.On("UpsertRelAlertFinding", test.RepeatMockAnything(2)...).Return(c.mockUpResp, c.mockUpErr).Once()
 			}
 			got, err := svc.PutRelAlertFinding(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -656,35 +667,41 @@ func TestPutRelAlertFinding(t *testing.T) {
 
 func TestDeleteRelAlertFinding(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
-		name    string
-		input   *alert.DeleteRelAlertFindingRequest
-		wantErr bool
-		mockErr error
+		name                      string
+		input                     *alert.DeleteRelAlertFindingRequest
+		wantErr                   bool
+		deleteRelAlertFindingCall bool
+		mockErr                   error
 	}{
 		{
-			name:    "OK",
-			input:   &alert.DeleteRelAlertFindingRequest{ProjectId: 1, AlertId: 1001, FindingId: 1001},
-			wantErr: false,
-			mockErr: nil,
+			name:                      "OK",
+			input:                     &alert.DeleteRelAlertFindingRequest{ProjectId: 1, AlertId: 1001, FindingId: 1001},
+			wantErr:                   false,
+			deleteRelAlertFindingCall: true,
+			mockErr:                   nil,
 		},
 		{
-			name:    "NG validation error",
-			input:   &alert.DeleteRelAlertFindingRequest{ProjectId: 1},
-			wantErr: true,
+			name:                      "NG validation error",
+			input:                     &alert.DeleteRelAlertFindingRequest{ProjectId: 1},
+			deleteRelAlertFindingCall: false,
+			wantErr:                   true,
 		},
 		{
-			name:    "Invalid DB error",
-			input:   &alert.DeleteRelAlertFindingRequest{ProjectId: 1, AlertId: 1001, FindingId: 1001},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidDB,
+			name:                      "Invalid DB error",
+			input:                     &alert.DeleteRelAlertFindingRequest{ProjectId: 1, AlertId: 1001, FindingId: 1001},
+			wantErr:                   true,
+			deleteRelAlertFindingCall: true,
+			mockErr:                   gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB.On("DeleteRelAlertFinding").Return(c.mockErr).Once()
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
+			if c.deleteRelAlertFindingCall {
+				mockDB.On("DeleteRelAlertFinding", test.RepeatMockAnything(4)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DeleteRelAlertFinding(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -728,8 +745,6 @@ func TestConvertRelAlertFinding(t *testing.T) {
 func TestListAlertCondition(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListAlertConditionRequest
@@ -752,8 +767,10 @@ func TestListAlertCondition(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("ListAlertCondition").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("ListAlertCondition", test.RepeatMockAnything(6)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.ListAlertCondition(ctx, c.input)
 			if err != nil {
@@ -792,8 +809,6 @@ func TestConvertListAlertConditionRequest(t *testing.T) {
 func TestGetAlertCondition(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetAlertConditionRequest
@@ -816,8 +831,10 @@ func TestGetAlertCondition(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("GetAlertCondition").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("GetAlertCondition", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.GetAlertCondition(ctx, c.input)
 			if err != nil {
@@ -833,8 +850,6 @@ func TestGetAlertCondition(t *testing.T) {
 func TestPutAlertCondition(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 
 	cases := []struct {
 		name        string
@@ -855,8 +870,10 @@ func TestPutAlertCondition(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mockDB.On("UpsertAlertCondition").Return(c.mockUpResp, c.mockUpErr).Once()
+				mockDB.On("UpsertAlertCondition", test.RepeatMockAnything(2)...).Return(c.mockUpResp, c.mockUpErr).Once()
 			}
 			got, err := svc.PutAlertCondition(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -871,39 +888,66 @@ func TestPutAlertCondition(t *testing.T) {
 
 func TestDeleteAlertCondition(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
-		name    string
-		input   *alert.DeleteAlertConditionRequest
-		wantErr bool
-		mockErr error
+		name                            string
+		input                           *alert.DeleteAlertConditionRequest
+		wantErr                         bool
+		deleteAlertConditionCall        bool
+		listAlertCondRuleCall           bool
+		deleteAlertCondRuleCall         bool
+		listAlertCondNotificationCall   bool
+		deleteAlertCondNotificationCall bool
+		mockErr                         error
 	}{
 		{
-			name:    "OK",
-			input:   &alert.DeleteAlertConditionRequest{ProjectId: 1, AlertConditionId: 1001},
-			wantErr: false,
-			mockErr: nil,
+			name:                            "OK",
+			input:                           &alert.DeleteAlertConditionRequest{ProjectId: 1, AlertConditionId: 1001},
+			wantErr:                         false,
+			deleteAlertConditionCall:        true,
+			listAlertCondRuleCall:           true,
+			deleteAlertCondRuleCall:         true,
+			listAlertCondNotificationCall:   true,
+			deleteAlertCondNotificationCall: true,
+			mockErr:                         nil,
 		},
 		{
-			name:    "NG validation error",
-			input:   &alert.DeleteAlertConditionRequest{ProjectId: 1},
-			wantErr: true,
+			name:                     "NG validation error",
+			input:                    &alert.DeleteAlertConditionRequest{ProjectId: 1},
+			deleteAlertConditionCall: false,
+			wantErr:                  true,
 		},
 		{
-			name:    "Invalid DB error",
-			input:   &alert.DeleteAlertConditionRequest{ProjectId: 1, AlertConditionId: 1001},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidDB,
+			name:                            "Invalid DB error",
+			input:                           &alert.DeleteAlertConditionRequest{ProjectId: 1, AlertConditionId: 1001},
+			wantErr:                         true,
+			deleteAlertConditionCall:        false,
+			listAlertCondRuleCall:           true,
+			deleteAlertCondRuleCall:         true,
+			listAlertCondNotificationCall:   false,
+			deleteAlertCondNotificationCall: false,
+			mockErr:                         gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB.On("ListAlertCondRule").Return(&[]model.AlertCondRule{{AlertConditionID: 1}}, nil)
-			mockDB.On("DeleteAlertCondRule").Return(c.mockErr).Once()
-			mockDB.On("ListAlertCondNotification").Return(&[]model.AlertCondNotification{{AlertConditionID: 1}}, nil)
-			mockDB.On("DeleteAlertCondNotification").Return(c.mockErr).Once()
-			mockDB.On("DeleteAlertCondition").Return(c.mockErr).Once()
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
+			if c.listAlertCondRuleCall {
+				mockDB.On("ListAlertCondRule", test.RepeatMockAnything(7)...).Return(&[]model.AlertCondRule{{AlertConditionID: 1}}, nil)
+			}
+			if c.deleteAlertCondRuleCall {
+				mockDB.On("DeleteAlertCondRule", test.RepeatMockAnything(4)...).Return(c.mockErr).Once()
+			}
+			if c.listAlertCondNotificationCall {
+				mockDB.On("ListAlertCondNotification", test.RepeatMockAnything(6)...).Return(&[]model.AlertCondNotification{{AlertConditionID: 1}}, nil)
+			}
+			if c.deleteAlertCondNotificationCall {
+				mockDB.On("DeleteAlertCondNotification", test.RepeatMockAnything(4)...).Return(c.mockErr).Once()
+			}
+			if c.deleteAlertConditionCall {
+				mockDB.On("DeleteAlertCondition", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
+			}
+
 			_, err := svc.DeleteAlertCondition(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -947,8 +991,6 @@ func TestConvertAlertCondition(t *testing.T) {
 func TestListAlertRule(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListAlertRuleRequest
@@ -971,8 +1013,10 @@ func TestListAlertRule(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("ListAlertRule").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("ListAlertRule", test.RepeatMockAnything(6)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.ListAlertRule(ctx, c.input)
 			if err != nil {
@@ -1016,8 +1060,6 @@ func TestConvertListAlertRuleRequest(t *testing.T) {
 func TestGetAlertRule(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetAlertRuleRequest
@@ -1040,8 +1082,10 @@ func TestGetAlertRule(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("GetAlertRule").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("GetAlertRule", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.GetAlertRule(ctx, c.input)
 			if err != nil {
@@ -1057,8 +1101,6 @@ func TestGetAlertRule(t *testing.T) {
 func TestPutAlertRule(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 
 	cases := []struct {
 		name        string
@@ -1079,8 +1121,10 @@ func TestPutAlertRule(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mockDB.On("UpsertAlertRule").Return(c.mockUpResp, c.mockUpErr).Once()
+				mockDB.On("UpsertAlertRule", test.RepeatMockAnything(2)...).Return(c.mockUpResp, c.mockUpErr).Once()
 			}
 			got, err := svc.PutAlertRule(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -1095,37 +1139,43 @@ func TestPutAlertRule(t *testing.T) {
 
 func TestDeleteAlertRule(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
-		name    string
-		input   *alert.DeleteAlertRuleRequest
-		wantErr bool
-		mockErr error
+		name                string
+		input               *alert.DeleteAlertRuleRequest
+		wantErr             bool
+		deleteAlertRuleCall bool
+		mockErr             error
 	}{
 		{
-			name:    "OK",
-			input:   &alert.DeleteAlertRuleRequest{ProjectId: 1, AlertRuleId: 1001},
-			wantErr: false,
-			mockErr: nil,
+			name:                "OK",
+			input:               &alert.DeleteAlertRuleRequest{ProjectId: 1, AlertRuleId: 1001},
+			wantErr:             false,
+			deleteAlertRuleCall: true,
+			mockErr:             nil,
 		},
 		{
-			name:    "NG validation error",
-			input:   &alert.DeleteAlertRuleRequest{ProjectId: 1},
-			wantErr: true,
+			name:                "NG validation error",
+			input:               &alert.DeleteAlertRuleRequest{ProjectId: 1},
+			deleteAlertRuleCall: false,
+			wantErr:             true,
 		},
 		{
-			name:    "Invalid DB error",
-			input:   &alert.DeleteAlertRuleRequest{ProjectId: 1, AlertRuleId: 1001},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidDB,
+			name:                "Invalid DB error",
+			input:               &alert.DeleteAlertRuleRequest{ProjectId: 1, AlertRuleId: 1001},
+			wantErr:             true,
+			deleteAlertRuleCall: true,
+			mockErr:             gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB.On("ListAlertCondRule").Return(&[]model.AlertCondRule{{AlertConditionID: 1}}, nil)
-			mockDB.On("DeleteAlertCondRule").Return(nil)
-			mockDB.On("DeleteAlertRule").Return(c.mockErr).Once()
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
+			if c.deleteAlertRuleCall {
+				mockDB.On("ListAlertCondRule", test.RepeatMockAnything(6)...).Return(&[]model.AlertCondRule{{AlertConditionID: 1}}, nil)
+				mockDB.On("DeleteAlertCondRule", test.RepeatMockAnything(4)...).Return(nil)
+				mockDB.On("DeleteAlertRule", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DeleteAlertRule(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -1169,8 +1219,6 @@ func TestConvertAlertRule(t *testing.T) {
 func TestListAlertCondRule(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListAlertCondRuleRequest
@@ -1193,8 +1241,10 @@ func TestListAlertCondRule(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("ListAlertCondRule").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("ListAlertCondRule", test.RepeatMockAnything(6)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.ListAlertCondRule(ctx, c.input)
 			if err != nil {
@@ -1233,8 +1283,6 @@ func TestConvertListAlertCondRuleRequest(t *testing.T) {
 func TestGetAlertCondRule(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetAlertCondRuleRequest
@@ -1257,8 +1305,10 @@ func TestGetAlertCondRule(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("GetAlertCondRule").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("GetAlertCondRule", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.GetAlertCondRule(ctx, c.input)
 			if err != nil {
@@ -1274,8 +1324,6 @@ func TestGetAlertCondRule(t *testing.T) {
 func TestPutAlertCondRule(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 
 	cases := []struct {
 		name        string
@@ -1296,8 +1344,10 @@ func TestPutAlertCondRule(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mockDB.On("UpsertAlertCondRule").Return(c.mockUpResp, c.mockUpErr).Once()
+				mockDB.On("UpsertAlertCondRule", test.RepeatMockAnything(2)...).Return(c.mockUpResp, c.mockUpErr).Once()
 			}
 			got, err := svc.PutAlertCondRule(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -1312,35 +1362,41 @@ func TestPutAlertCondRule(t *testing.T) {
 
 func TestDeleteAlertCondRule(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
-		name    string
-		input   *alert.DeleteAlertCondRuleRequest
-		wantErr bool
-		mockErr error
+		name                    string
+		input                   *alert.DeleteAlertCondRuleRequest
+		wantErr                 bool
+		deleteAlertCondRuleCall bool
+		mockErr                 error
 	}{
 		{
-			name:    "OK",
-			input:   &alert.DeleteAlertCondRuleRequest{ProjectId: 1, AlertConditionId: 1001, AlertRuleId: 1001},
-			wantErr: false,
-			mockErr: nil,
+			name:                    "OK",
+			input:                   &alert.DeleteAlertCondRuleRequest{ProjectId: 1, AlertConditionId: 1001, AlertRuleId: 1001},
+			wantErr:                 false,
+			deleteAlertCondRuleCall: true,
+			mockErr:                 nil,
 		},
 		{
-			name:    "NG validation error",
-			input:   &alert.DeleteAlertCondRuleRequest{ProjectId: 1},
-			wantErr: true,
+			name:                    "NG validation error",
+			input:                   &alert.DeleteAlertCondRuleRequest{ProjectId: 1},
+			deleteAlertCondRuleCall: false,
+			wantErr:                 true,
 		},
 		{
-			name:    "Invalid DB error",
-			input:   &alert.DeleteAlertCondRuleRequest{ProjectId: 1, AlertConditionId: 1001, AlertRuleId: 1001},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidDB,
+			name:                    "Invalid DB error",
+			input:                   &alert.DeleteAlertCondRuleRequest{ProjectId: 1, AlertConditionId: 1001, AlertRuleId: 1001},
+			wantErr:                 true,
+			deleteAlertCondRuleCall: true,
+			mockErr:                 gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB.On("DeleteAlertCondRule").Return(c.mockErr).Once()
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
+			if c.deleteAlertCondRuleCall {
+				mockDB.On("DeleteAlertCondRule", test.RepeatMockAnything(4)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DeleteAlertCondRule(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -1384,8 +1440,6 @@ func TestConvertAlertCondRule(t *testing.T) {
 func TestListNotification(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListNotificationRequest
@@ -1408,8 +1462,10 @@ func TestListNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("ListNotification").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("ListNotification", test.RepeatMockAnything(5)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.ListNotification(ctx, c.input)
 			if err != nil {
@@ -1453,8 +1509,6 @@ func TestConvertListNotificationRequest(t *testing.T) {
 func TestGetNotification(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetNotificationRequest
@@ -1477,8 +1531,10 @@ func TestGetNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("GetNotification").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("GetNotification", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.GetNotification(ctx, c.input)
 			if err != nil {
@@ -1540,37 +1596,43 @@ func TestReplaceSlackNotifySetting(t *testing.T) {
 
 func TestDeleteNotification(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
-		name    string
-		input   *alert.DeleteNotificationRequest
-		wantErr bool
-		mockErr error
+		name                   string
+		input                  *alert.DeleteNotificationRequest
+		wantErr                bool
+		deleteNotificationCall bool
+		mockErr                error
 	}{
 		{
-			name:    "OK",
-			input:   &alert.DeleteNotificationRequest{ProjectId: 1, NotificationId: 1001},
-			wantErr: false,
-			mockErr: nil,
+			name:                   "OK",
+			input:                  &alert.DeleteNotificationRequest{ProjectId: 1, NotificationId: 1001},
+			wantErr:                false,
+			deleteNotificationCall: true,
+			mockErr:                nil,
 		},
 		{
-			name:    "NG validation error",
-			input:   &alert.DeleteNotificationRequest{ProjectId: 1},
-			wantErr: true,
+			name:                   "NG validation error",
+			input:                  &alert.DeleteNotificationRequest{ProjectId: 1},
+			deleteNotificationCall: false,
+			wantErr:                true,
 		},
 		{
-			name:    "Invalid DB error",
-			input:   &alert.DeleteNotificationRequest{ProjectId: 1, NotificationId: 1001},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidDB,
+			name:                   "Invalid DB error",
+			input:                  &alert.DeleteNotificationRequest{ProjectId: 1, NotificationId: 1001},
+			wantErr:                true,
+			deleteNotificationCall: true,
+			mockErr:                gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB.On("ListAlertCondNotification").Return(&[]model.AlertCondNotification{{ProjectID: 1, AlertConditionID: 1, NotificationID: 1}}, nil)
-			mockDB.On("DeleteAlertCondNotification").Return(nil)
-			mockDB.On("DeleteNotification").Return(c.mockErr).Once()
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
+			if c.deleteNotificationCall {
+				mockDB.On("ListAlertCondNotification", test.RepeatMockAnything(6)...).Return(&[]model.AlertCondNotification{{ProjectID: 1, AlertConditionID: 1, NotificationID: 1}}, nil)
+				mockDB.On("DeleteAlertCondNotification", test.RepeatMockAnything(4)...).Return(nil)
+				mockDB.On("DeleteNotification", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DeleteNotification(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -1625,8 +1687,6 @@ func TestConvertNotification(t *testing.T) {
 func TestListAlertCondNotification(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.ListAlertCondNotificationRequest
@@ -1649,8 +1709,10 @@ func TestListAlertCondNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB, logger: logging.NewLogger()}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("ListAlertCondNotification").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("ListAlertCondNotification", test.RepeatMockAnything(6)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.ListAlertCondNotification(ctx, c.input)
 			if err != nil {
@@ -1689,8 +1751,6 @@ func TestConvertListAlertCondNotificationRequest(t *testing.T) {
 func TestGetAlertCondNotification(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
 		name         string
 		input        *alert.GetAlertCondNotificationRequest
@@ -1713,8 +1773,10 @@ func TestGetAlertCondNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("GetAlertCondNotification").Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("GetAlertCondNotification", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.GetAlertCondNotification(ctx, c.input)
 			if err != nil {
@@ -1730,8 +1792,6 @@ func TestGetAlertCondNotification(t *testing.T) {
 func TestPutAlertCondNotification(t *testing.T) {
 	var ctx context.Context
 	now := time.Now()
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 
 	cases := []struct {
 		name        string
@@ -1752,8 +1812,10 @@ func TestPutAlertCondNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
 			if c.mockUpResp != nil || c.mockUpErr != nil {
-				mockDB.On("UpsertAlertCondNotification").Return(c.mockUpResp, c.mockUpErr).Once()
+				mockDB.On("UpsertAlertCondNotification", test.RepeatMockAnything(2)...).Return(c.mockUpResp, c.mockUpErr).Once()
 			}
 			got, err := svc.PutAlertCondNotification(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -1768,35 +1830,41 @@ func TestPutAlertCondNotification(t *testing.T) {
 
 func TestDeleteAlertCondNotification(t *testing.T) {
 	var ctx context.Context
-	mockDB := mocks.MockAlertRepository{}
-	svc := AlertService{repository: &mockDB}
 	cases := []struct {
-		name    string
-		input   *alert.DeleteAlertCondNotificationRequest
-		wantErr bool
-		mockErr error
+		name                            string
+		input                           *alert.DeleteAlertCondNotificationRequest
+		wantErr                         bool
+		deleteAlertCondNotificationCall bool
+		mockErr                         error
 	}{
 		{
-			name:    "OK",
-			input:   &alert.DeleteAlertCondNotificationRequest{ProjectId: 1, AlertConditionId: 1001, NotificationId: 1001},
-			wantErr: false,
-			mockErr: nil,
+			name:                            "OK",
+			input:                           &alert.DeleteAlertCondNotificationRequest{ProjectId: 1, AlertConditionId: 1001, NotificationId: 1001},
+			wantErr:                         false,
+			deleteAlertCondNotificationCall: true,
+			mockErr:                         nil,
 		},
 		{
-			name:    "NG validation error",
-			input:   &alert.DeleteAlertCondNotificationRequest{ProjectId: 1},
-			wantErr: true,
+			name:                            "NG validation error",
+			input:                           &alert.DeleteAlertCondNotificationRequest{ProjectId: 1},
+			deleteAlertCondNotificationCall: false,
+			wantErr:                         true,
 		},
 		{
-			name:    "Invalid DB error",
-			input:   &alert.DeleteAlertCondNotificationRequest{ProjectId: 1, AlertConditionId: 1001, NotificationId: 1001},
-			wantErr: true,
-			mockErr: gorm.ErrInvalidDB,
+			name:                            "Invalid DB error",
+			input:                           &alert.DeleteAlertCondNotificationRequest{ProjectId: 1, AlertConditionId: 1001, NotificationId: 1001},
+			wantErr:                         true,
+			deleteAlertCondNotificationCall: true,
+			mockErr:                         gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mockDB.On("DeleteAlertCondNotification").Return(c.mockErr).Once()
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB}
+			if c.deleteAlertCondNotificationCall {
+				mockDB.On("DeleteAlertCondNotification", test.RepeatMockAnything(4)...).Return(c.mockErr).Once()
+			}
 			_, err := svc.DeleteAlertCondNotification(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
