@@ -152,8 +152,6 @@ func (a *AlertService) DeleteAlert(ctx context.Context, req *alert.DeleteAlertRe
  */
 
 func (a *AlertService) ListAlertHistory(ctx context.Context, req *alert.ListAlertHistoryRequest) (*alert.ListAlertHistoryResponse, error) {
-	// req.HistoryTypeにcreatedが含まれない場合、最新の10件を取得する
-	// 含まれている場合には、最新の9件 + createdの1件を取得
 	listLimit := uint32(9)
 	list, err := a.repository.ListAlertHistory(ctx, req.ProjectId, req.AlertId, "", listLimit)
 	if err != nil {
