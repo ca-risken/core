@@ -308,7 +308,7 @@ func TestListAlertHistory(t *testing.T) {
 	}{
 		{
 			name:  "OK first list result contains created",
-			input: &alert.ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"created", "updated"}, Severity: []string{"high"}},
+			input: &alert.ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001},
 			want: &alert.ListAlertHistoryResponse{AlertHistory: []*alert.AlertHistory{
 				{AlertHistoryId: 1001, HistoryType: "created", FindingHistory: `{"count":3}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 				{AlertHistoryId: 1002, HistoryType: "updated", FindingHistory: `{"count":0}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
@@ -320,7 +320,7 @@ func TestListAlertHistory(t *testing.T) {
 		},
 		{
 			name:  "OK first list result doesn't contain created",
-			input: &alert.ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"created"}, Severity: []string{"high"}},
+			input: &alert.ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001},
 			want: &alert.ListAlertHistoryResponse{AlertHistory: []*alert.AlertHistory{
 				{AlertHistoryId: 1001, HistoryType: "updated", FindingHistory: `{"count":1}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 				{AlertHistoryId: 1002, HistoryType: "updated", FindingHistory: `{"count":0}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
@@ -335,27 +335,15 @@ func TestListAlertHistory(t *testing.T) {
 			},
 		},
 		{
-			name:  "OK not required created",
-			input: &alert.ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"updated"}, Severity: []string{"high"}},
-			want: &alert.ListAlertHistoryResponse{AlertHistory: []*alert.AlertHistory{
-				{AlertHistoryId: 1001, HistoryType: "updated", FindingHistory: `{"count":1}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-				{AlertHistoryId: 1002, HistoryType: "updated", FindingHistory: `{"count":0}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-			}},
-			mockListResponce: &[]model.AlertHistory{
-				{AlertHistoryID: 1001, HistoryType: "updated", FindingHistory: `{"finding_id":[1]}`, CreatedAt: now, UpdatedAt: now},
-				{AlertHistoryID: 1002, HistoryType: "updated", FindingHistory: `{}`, CreatedAt: now, UpdatedAt: now},
-			},
-		},
-		{
 			name:          "NG error listAlertHistory",
-			input:         &alert.ListAlertHistoryRequest{ProjectId: 1, AlertId: 1001, HistoryType: []string{"created"}, Severity: []string{"high"}},
+			input:         &alert.ListAlertHistoryRequest{ProjectId: 1, AlertId: 1001},
 			want:          nil,
 			wantErr:       true,
 			mockListError: errors.New("somethingError"),
 		},
 		{
 			name:    "NG error listAlertHistory only Created",
-			input:   &alert.ListAlertHistoryRequest{ProjectId: 1, AlertId: 1001, HistoryType: []string{"created"}, Severity: []string{"high"}},
+			input:   &alert.ListAlertHistoryRequest{ProjectId: 1, AlertId: 1001},
 			want:    nil,
 			wantErr: true,
 			mockListResponce: &[]model.AlertHistory{
@@ -381,29 +369,6 @@ func TestListAlertHistory(t *testing.T) {
 			}
 			if !reflect.DeepEqual(result, c.want) {
 				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
-			}
-		})
-	}
-}
-
-func TestConvertListAlertHistoryRequest(t *testing.T) {
-	now := time.Now()
-	cases := []struct {
-		name  string
-		input *alert.ListAlertHistoryRequest
-		want  *alert.ListAlertHistoryRequest
-	}{
-		{
-			name:  "OK full-set",
-			input: &alert.ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"created"}, Severity: []string{"high"}, FromAt: now.Unix(), ToAt: now.Unix()},
-			want:  &alert.ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"created"}, Severity: []string{"high"}, FromAt: now.Unix(), ToAt: now.Unix()},
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			got := convertListAlertHistoryRequest(c.input)
-			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected convert: got=%+v, want: %+v", got, c.want)
 			}
 		})
 	}

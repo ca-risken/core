@@ -54,10 +54,6 @@ func (r *DeleteAlertRequest) Validate() error {
 func (r *ListAlertHistoryRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ProjectId, validation.Required),
-		validation.Field(&r.HistoryType, validation.Each(validation.In("created", "updated", "deleted"))),
-		validation.Field(&r.Severity, validation.Each(validation.In("high", "medium", "low"))),
-		validation.Field(&r.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
-		validation.Field(&r.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 	)
 }
 

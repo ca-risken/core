@@ -14,7 +14,7 @@ type AlertRepository interface {
 	GetAlert(context.Context, uint32, uint32) (*model.Alert, error)
 	UpsertAlert(context.Context, *model.Alert) (*model.Alert, error)
 	DeleteAlert(context.Context, uint32, uint32) error
-	ListAlertHistory(context.Context, uint32, uint32, []string, []string, int64, int64, uint32) (*[]model.AlertHistory, error)
+	ListAlertHistory(context.Context, uint32, uint32, string, uint32) (*[]model.AlertHistory, error)
 	GetAlertHistory(context.Context, uint32, uint32) (*model.AlertHistory, error)
 	UpsertAlertHistory(context.Context, *model.AlertHistory) (*model.AlertHistory, error)
 	DeleteAlertHistory(context.Context, uint32, uint32) error
@@ -101,21 +101,17 @@ func (c *Client) DeleteAlert(ctx context.Context, projectID uint32, alertID uint
 	return nil
 }
 
-func (c *Client) ListAlertHistory(ctx context.Context, projectID, alertID uint32, HistoryType, severity []string, fromAt, toAt int64, limit uint32) (*[]model.AlertHistory, error) {
-	query := `select * from alert_history where project_id = ? and updated_at between ? and ?`
+func (c *Client) ListAlertHistory(ctx context.Context, projectID, alertID uint32, historyType string, limit uint32) (*[]model.AlertHistory, error) {
+	query := `select * from alert_history where project_id = ?`
 	var params []interface{}
-	params = append(params, projectID, time.Unix(fromAt, 0), time.Unix(toAt, 0))
+	params = append(params, projectID)
 	if !zero.IsZeroVal(alertID) {
 		query += " and alert_id = ?"
 		params = append(params, alertID)
 	}
-	if !zero.IsZeroVal(HistoryType) {
-		query += " and history_type in (?)"
-		params = append(params, HistoryType)
-	}
-	if !zero.IsZeroVal(severity) {
-		query += " and severity in (?)"
-		params = append(params, severity)
+	if !zero.IsZeroVal(historyType) {
+		query += " and history_type = ?"
+		params = append(params, historyType)
 	}
 	query += " order by alert_history_id desc limit ?"
 	params = append(params, limit)

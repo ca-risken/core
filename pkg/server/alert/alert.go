@@ -14,6 +14,12 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	alertHistoryTypeCreated = "created"
+	alertHistoryTypeUpdated = "updated"
+	alertHistoryTypeDeleted = "deleted"
+)
+
 func (a *AlertService) ListAlert(ctx context.Context, req *alert.ListAlertRequest) (*alert.ListAlertResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
@@ -68,7 +74,7 @@ func (a *AlertService) PutAlert(ctx context.Context, req *alert.PutAlertRequest)
 		return nil, err
 	}
 	var alertID uint32
-	alertHistoryStatus := "created"
+	alertHistoryStatus := alertHistoryTypeCreated
 	// AlertIdのパラメータがリクエストに存在する場合、レコードの存在チェック
 	// 存在しなければエラー終了
 	if !zero.IsZeroVal(req.Alert.AlertId) {
@@ -77,7 +83,7 @@ func (a *AlertService) PutAlert(ctx context.Context, req *alert.PutAlertRequest)
 			return nil, err
 		}
 		alertID = savedData.AlertID
-		alertHistoryStatus = "updated"
+		alertHistoryStatus = alertHistoryTypeUpdated
 	}
 
 	data := &model.Alert{
@@ -146,75 +152,43 @@ func (a *AlertService) DeleteAlert(ctx context.Context, req *alert.DeleteAlertRe
  */
 
 func (a *AlertService) ListAlertHistory(ctx context.Context, req *alert.ListAlertHistoryRequest) (*alert.ListAlertHistoryResponse, error) {
-	convertedReq := convertListAlertHistoryRequest(req)
 	// req.HistoryTypeにcreatedが含まれない場合、最新の10件を取得する
 	// 含まれている場合には、最新の9件 + createdの1件を取得
-	requiredCreated := isRequiredCreated(convertedReq.HistoryType)
 	listLimit := uint32(9)
-	if !requiredCreated {
-		listLimit += 1
-	}
-	list, err := a.repository.ListAlertHistory(ctx, convertedReq.ProjectId, convertedReq.AlertId, convertedReq.HistoryType, convertedReq.Severity, convertedReq.FromAt, convertedReq.ToAt, listLimit)
+	list, err := a.repository.ListAlertHistory(ctx, req.ProjectId, req.AlertId, "", listLimit)
 	if err != nil {
 		return nil, err
 	}
 	var histories []*alert.AlertHistory
 	createdContain := false
 	for _, d := range *list {
-		if d.HistoryType == "created" {
+		if d.HistoryType == alertHistoryTypeCreated {
 			createdContain = true
 		}
 		converted, err := convertAlertHistory(&d, true)
 		if err != nil {
-			a.logger.Errorf(ctx, "Error occured when convertAlertHistory. err: %v", err)
+			a.logger.Errorf(ctx, "Error occurred in convertAlertHistory. err: %v", err)
 			return nil, err
 		}
 		histories = append(histories, converted)
 	}
-	if createdContain || !requiredCreated {
+	if createdContain {
 		return &alert.ListAlertHistoryResponse{AlertHistory: histories}, nil
 	}
-	listCreated, err := a.repository.ListAlertHistory(ctx, convertedReq.ProjectId, convertedReq.AlertId, []string{"created"}, convertedReq.Severity, convertedReq.FromAt, convertedReq.ToAt, 1)
+	listCreated, err := a.repository.ListAlertHistory(ctx, req.ProjectId, req.AlertId, alertHistoryTypeCreated, 1)
 	if err != nil {
 		return nil, err
 	}
-	for _, d := range *listCreated {
-		converted, err := convertAlertHistory(&d, true)
+	if *listCreated != nil && len(*listCreated) > 0 {
+		converted, err := convertAlertHistory(&(*listCreated)[0], true)
 		if err != nil {
-			a.logger.Errorf(ctx, "Error occured when convertAlertHistory. err: %v", err)
+			a.logger.Errorf(ctx, "Error occurred in convertAlertHistory. err: %v", err)
 			return nil, err
 		}
 		histories = append(histories, converted)
+
 	}
 	return &alert.ListAlertHistoryResponse{AlertHistory: histories}, nil
-}
-
-func isRequiredCreated(strs []string) bool {
-	// 長さ0ならば検索条件なしのため、true
-	if len(strs) == 0 {
-		return true
-	}
-	for _, s := range strs {
-		if s == "created" {
-			return true
-		}
-	}
-	return false
-}
-
-func convertListAlertHistoryRequest(req *alert.ListAlertHistoryRequest) *alert.ListAlertHistoryRequest {
-	converted := alert.ListAlertHistoryRequest{
-		ProjectId:   req.ProjectId,
-		HistoryType: req.HistoryType,
-		AlertId:     req.AlertId,
-		Severity:    req.Severity,
-		FromAt:      req.FromAt,
-		ToAt:        req.ToAt,
-	}
-	if converted.ToAt == 0 {
-		converted.ToAt = time.Now().Unix()
-	}
-	return &converted
 }
 
 func (a *AlertService) GetAlertHistory(ctx context.Context, req *alert.GetAlertHistoryRequest) (*alert.GetAlertHistoryResponse, error) {
@@ -231,7 +205,7 @@ func (a *AlertService) GetAlertHistory(ctx context.Context, req *alert.GetAlertH
 	}
 	convertedAlertHistory, err := convertAlertHistory(data, false)
 	if err != nil {
-		a.logger.Errorf(ctx, "Error occured when convertAlertHistory. err: %v", err)
+		a.logger.Errorf(ctx, "Error occurred in convertAlertHistory. err: %v", err)
 		return nil, err
 	}
 	return &alert.GetAlertHistoryResponse{AlertHistory: convertedAlertHistory}, nil
@@ -258,7 +232,7 @@ func (a *AlertService) PutAlertHistory(ctx context.Context, req *alert.PutAlertH
 	}
 	convertedAlertHistory, err := convertAlertHistory(registeredData, false)
 	if err != nil {
-		a.logger.Errorf(ctx, "Error occured when convertAlertHistory. err: %v", err)
+		a.logger.Errorf(ctx, "Error occurred in convertAlertHistory. err: %v", err)
 		return nil, err
 	}
 	return &alert.PutAlertHistoryResponse{AlertHistory: convertedAlertHistory}, nil

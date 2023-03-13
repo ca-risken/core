@@ -115,10 +115,6 @@ message DeleteAlertRequest {
 message ListAlertHistoryRequest {
   uint32 project_id = 1;
   uint32 alert_id = 2;
-  repeated string history_type = 3;
-  repeated string severity = 4;
-  int64 from_at = 5;
-  int64 to_at = 6;
 }
 
 message ListAlertHistoryResponse { repeated AlertHistory alert_history = 1; }
