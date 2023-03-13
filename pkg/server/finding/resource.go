@@ -3,7 +3,6 @@ package finding
 import (
 	"context"
 	"errors"
-	"time"
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
@@ -41,9 +40,6 @@ func (f *FindingService) ListResource(ctx context.Context, req *finding.ListReso
 
 func convertListResourceRequest(req *finding.ListResourceRequest) *finding.ListResourceRequest {
 	converted := req
-	if converted.ToAt == 0 {
-		converted.ToAt = time.Now().Unix()
-	}
 	if zero.IsZeroVal(converted.Sort) {
 		converted.Sort = "resource_id"
 	}
@@ -163,9 +159,6 @@ func (f *FindingService) ListResourceTagName(ctx context.Context, req *finding.L
 
 func convertListResourceTagNameRequest(req *finding.ListResourceTagNameRequest) *finding.ListResourceTagNameRequest {
 	converted := req
-	if converted.ToAt == 0 {
-		converted.ToAt = time.Now().Unix()
-	}
 	if zero.IsZeroVal(converted.Sort) {
 		converted.Sort = "tag"
 	}

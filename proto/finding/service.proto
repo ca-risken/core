@@ -61,8 +61,6 @@ message ListFindingRequest {
   repeated string resource_name = 3;
   float from_score = 4;
   float to_score = 5;
-  int64 from_at = 6;
-  int64 to_at = 7;
   repeated string tag = 8;
   string sort = 9;
   string direction = 10;
@@ -85,8 +83,6 @@ message BatchListFindingRequest {
   repeated string resource_name = 3;
   float from_score = 4;
   float to_score = 5;
-  int64 from_at = 6;
-  int64 to_at = 7;
   repeated string tag = 8;
   FindingStatus status = 9;
   uint64 finding_id = 10;
@@ -140,8 +136,6 @@ message ListFindingTagResponse {
 
 message ListFindingTagNameRequest {
   uint32 project_id = 1;
-  int64 from_at = 2;
-  int64 to_at = 3;
   string sort = 4;
   string direction = 5;
   int32 offset = 6;
@@ -177,8 +171,6 @@ message ClearScoreRequest {
 message ListResourceRequest {
   uint32 project_id = 1;
   repeated string resource_name = 2;
-  int64 from_at = 5;
-  int64 to_at = 6;
   repeated string tag = 7;
   string sort = 8;
   string direction = 9;
@@ -236,8 +228,6 @@ message ListResourceTagResponse {
 
 message ListResourceTagNameRequest {
   uint32 project_id = 1;
-  int64 from_at = 2;
-  int64 to_at = 3;
   string sort = 4;
   string direction = 5;
   int32 offset = 6;
