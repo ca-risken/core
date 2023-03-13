@@ -16,7 +16,6 @@ import (
 
 func TestListResource(t *testing.T) {
 	var ctx context.Context
-	now := time.Now()
 	cases := []struct {
 		name       string
 		input      *finding.ListResourceRequest
@@ -28,7 +27,7 @@ func TestListResource(t *testing.T) {
 	}{
 		{
 			name:       "OK",
-			input:      &finding.ListResourceRequest{ProjectId: 1, ResourceName: []string{"rn"}, FromAt: now.Unix(), ToAt: now.Unix()},
+			input:      &finding.ListResourceRequest{ProjectId: 1, ResourceName: []string{"rn"}},
 			want:       &finding.ListResourceResponse{ResourceId: []uint64{1001, 1002}, Count: 2, Total: 999},
 			mockResp:   &[]model.Resource{{ResourceID: 1001}, {ResourceID: 1002}},
 			totalCount: test.Int64(999),
@@ -301,7 +300,6 @@ func TestListResourceTag(t *testing.T) {
 
 func TestListResourceTagName(t *testing.T) {
 	var ctx context.Context
-	now := time.Now()
 	cases := []struct {
 		name       string
 		input      *finding.ListResourceTagNameRequest
@@ -313,7 +311,7 @@ func TestListResourceTagName(t *testing.T) {
 	}{
 		{
 			name:       "OK",
-			input:      &finding.ListResourceTagNameRequest{ProjectId: 1, FromAt: 0, ToAt: now.Unix()},
+			input:      &finding.ListResourceTagNameRequest{ProjectId: 1},
 			want:       &finding.ListResourceTagNameResponse{Tag: []string{"tag1", "tag2"}, Count: 2, Total: 999},
 			mockResp:   &[]db.TagName{{Tag: "tag1"}, {Tag: "tag2"}},
 			totalCount: test.Int64(999),

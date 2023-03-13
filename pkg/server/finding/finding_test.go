@@ -375,7 +375,6 @@ func TestListFindingTag(t *testing.T) {
 
 func TestListFindingTagName(t *testing.T) {
 	var ctx context.Context
-	now := time.Now()
 	cases := []struct {
 		name       string
 		input      *finding.ListFindingTagNameRequest
@@ -386,10 +385,9 @@ func TestListFindingTagName(t *testing.T) {
 		totalCount *int64
 	}{
 		{
-			name:  "OK",
-			input: &finding.ListFindingTagNameRequest{ProjectId: 1, FromAt: 0, ToAt: now.Unix()},
-			want: &finding.ListFindingTagNameResponse{Count: 2, Total: 999,
-				Tag: []string{"tag1", "tag2"}},
+			name:       "OK",
+			input:      &finding.ListFindingTagNameRequest{ProjectId: 1},
+			want:       &finding.ListFindingTagNameResponse{Count: 2, Total: 999, Tag: []string{"tag1", "tag2"}},
 			mockResp:   &[]db.TagName{{Tag: "tag1"}, {Tag: "tag2"}},
 			totalCount: test.Int64(999),
 		},

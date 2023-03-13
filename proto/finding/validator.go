@@ -22,8 +22,6 @@ func (l *ListFindingRequest) Validate() error {
 		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 255))),
 		validation.Field(&l.FromScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.ToScore, validation.Min(0.0), validation.Max(1.0)),
-		validation.Field(&l.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
-		validation.Field(&l.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 		validation.Field(&l.Tag, validation.Each(validation.Length(0, 64))),
 		validation.Field(&l.Sort, validation.In(
 			"finding_id", "description", "data_source", "resource_name", "score", "updated_at")),
@@ -41,8 +39,6 @@ func (b *BatchListFindingRequest) Validate() error {
 		validation.Field(&b.ResourceName, validation.Each(validation.Length(0, 255))),
 		validation.Field(&b.FromScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&b.ToScore, validation.Min(0.0), validation.Max(1.0)),
-		validation.Field(&b.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
-		validation.Field(&b.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 		validation.Field(&b.Tag, validation.Each(validation.Length(0, 64))),
 	)
 }
@@ -127,8 +123,6 @@ func (l *ListFindingTagRequest) Validate() error {
 func (l *ListFindingTagNameRequest) Validate() error {
 	return validation.ValidateStruct(l,
 		validation.Field(&l.ProjectId, validation.Required),
-		validation.Field(&l.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
-		validation.Field(&l.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 		validation.Field(&l.Sort, validation.In(
 			"finding_tag_id", "tag", "updated_at")),
 		validation.Field(&l.Direction, validation.In("asc", "desc")),
@@ -172,8 +166,6 @@ func (l *ListResourceRequest) Validate() error {
 	return validation.ValidateStruct(l,
 		validation.Field(&l.ProjectId, validation.Required),
 		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 255))),
-		validation.Field(&l.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
-		validation.Field(&l.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 		validation.Field(&l.Tag, validation.Each(validation.Length(0, 64))),
 		validation.Field(&l.Sort, validation.In(
 			"resource_id", "resource_name", "updated_at")),
@@ -260,8 +252,6 @@ func (l *ListResourceTagRequest) Validate() error {
 func (l *ListResourceTagNameRequest) Validate() error {
 	return validation.ValidateStruct(l,
 		validation.Field(&l.ProjectId, validation.Required),
-		validation.Field(&l.FromAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
-		validation.Field(&l.ToAt, validation.Min(0), validation.Max(253402268399)),   //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
 		validation.Field(&l.Sort, validation.In(
 			"resource_tag_id", "tag", "updated_at")),
 		validation.Field(&l.Direction, validation.In("asc", "desc")),
