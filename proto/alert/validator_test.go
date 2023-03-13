@@ -169,7 +169,6 @@ func TestValidateDeleteAlertRequest(t *testing.T) {
 }
 
 func TestValidateListAlertHistoryRequest(t *testing.T) {
-	now := time.Now()
 	cases := []struct {
 		name    string
 		input   *ListAlertHistoryRequest
@@ -177,42 +176,12 @@ func TestValidateListAlertHistoryRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"created"}, Severity: []string{"high"}, FromAt: now.Unix(), ToAt: now.Unix()},
+			input:   &ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001},
 			wantErr: false,
 		},
 		{
 			name:    "NG Required(project_id)",
-			input:   &ListAlertHistoryRequest{AlertId: 1001, HistoryType: []string{"created"}, Severity: []string{"high"}, FromAt: now.Unix(), ToAt: now.Unix()},
-			wantErr: true,
-		},
-		{
-			name:    "NG wrong history_type",
-			input:   &ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"error"}, Severity: []string{"high"}, FromAt: now.Unix(), ToAt: now.Unix()},
-			wantErr: true,
-		},
-		{
-			name:    "NG wrong severity",
-			input:   &ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"updated"}, Severity: []string{"info"}, FromAt: now.Unix(), ToAt: now.Unix()},
-			wantErr: true,
-		},
-		{
-			name:    "NG too small from_at",
-			input:   &ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"created"}, Severity: []string{"high"}, FromAt: -1, ToAt: now.Unix()},
-			wantErr: true,
-		},
-		{
-			name:    "NG too large from_at",
-			input:   &ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"created"}, Severity: []string{"high"}, FromAt: 253402268400, ToAt: now.Unix()},
-			wantErr: true,
-		},
-		{
-			name:    "NG too small to_at",
-			input:   &ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"created"}, Severity: []string{"high"}, FromAt: now.Unix(), ToAt: -1},
-			wantErr: true,
-		},
-		{
-			name:    "NG too large to_at",
-			input:   &ListAlertHistoryRequest{ProjectId: 1001, AlertId: 1001, HistoryType: []string{"created"}, Severity: []string{"high"}, FromAt: now.Unix(), ToAt: 253402268400},
+			input:   &ListAlertHistoryRequest{AlertId: 1001},
 			wantErr: true,
 		},
 	}
