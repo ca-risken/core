@@ -53,12 +53,14 @@ func NewServer(host string, port string, db *db.Client, logger logging.Logger, c
 type Config struct {
 	MaxAnalyzeAPICall int64
 	BaseURL           string
+	OpenAIToken       string
 }
 
-func NewConfig(maxAnalyzeAPICall int64, baseURL string) Config {
+func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken string) Config {
 	return Config{
 		MaxAnalyzeAPICall: maxAnalyzeAPICall,
 		BaseURL:           baseURL,
+		OpenAIToken:       openaiToken,
 	}
 }
 
@@ -85,7 +87,7 @@ func (s *Server) Run(ctx context.Context) error {
 		s.db,
 		s.logger,
 	)
-	fsvc := findingserver.NewFindingService(s.db, s.logger)
+	fsvc := findingserver.NewFindingService(s.db, s.config.OpenAIToken, s.logger)
 	psvc := projectserver.NewProjectService(s.db, iamc, s.logger)
 	rsvc := reportserver.NewReportService(s.db, s.logger)
 	hsvc := health.NewServer()

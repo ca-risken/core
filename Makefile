@@ -99,7 +99,9 @@ lint: FAKE
 	GO111MODULE=on GOFLAGS=-buildvcs=false golangci-lint run --timeout 5m
 
 .PHONY: generate-mock
-generate-mock: proto-mock repository-mock
+generate-mock: proto-mock repository-mock ai-mock
+
+.PHONY: proto-mock
 proto-mock: $(MOCK_TARGETS)
 %.mock: FAKE
 	sh hack/generate-mock.sh proto/$(*)
@@ -107,6 +109,10 @@ proto-mock: $(MOCK_TARGETS)
 .PHONY: repository-mock
 repository-mock: FAKE
 	sh hack/generate-mock.sh pkg/db
+
+.PHONY: ai-mock
+ai-mock: FAKE
+	sh hack/generate-mock.sh pkg/ai
 
 .PHONY: list-project-service
 list-project-service:
@@ -622,6 +628,13 @@ put-recommend:
 		-plaintext \
 		-d '{"project_id":1,"finding_id":1, "data_source":"ds", "type":"c", "risk":"critical", "recommendation":"..."}' \
 		$(CORE_API_ADDR) core.finding.FindingService.PutRecommend
+
+.PHONY: ask-ai-summary
+ask-ai-summary:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001, "finding_id": 1001, "lang":"jp"}' \
+		$(CORE_API_ADDR) core.finding.FindingService.AskAISummary
 
 .PHONY: list-report-service
 list-report-service:
