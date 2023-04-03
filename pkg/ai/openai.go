@@ -76,7 +76,10 @@ func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding
 	if err != nil {
 		return "", fmt.Errorf("openai API error: err=%w", err)
 	}
-	a.logger.Infof(ctx, "OpenAI response: usage=%+v, resp=%+v", resp.Usage, resp)
+	fields := map[string]interface{}{
+		"openai_token": resp.Usage.TotalTokens,
+	}
+	a.logger.WithItemsf(ctx, logging.InfoLevel, fields, "OpenAI usage: %+v", resp.Usage)
 	return resp.Choices[0].Message.Content, nil
 }
 
