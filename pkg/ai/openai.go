@@ -2,14 +2,20 @@ package ai
 
 import (
 	"context"
+	"crypto/md5"
 	"fmt"
 
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/coocood/freecache"
 	"github.com/sashabaranov/go-openai"
 )
 
 const (
+	CACHE_SIZE       = 500 * 1024 * 1024 // 500MB
+	CACHE_EXPIRE_SEC = 3600
+	CACHE_KEY_FORMAT = "OpenAICache/%d/%s"
+
 	LANG_JP               = "jp"
 	PROMPT_SYSTEM_MSG_EN  = "You are a helpful security assistant."
 	PROMPT_SYSTEM_MSG_JP  = "あなたは役に立つセキュリティアシスタントです。"
@@ -30,6 +36,7 @@ type AIService interface {
 
 type AIClient struct {
 	openaiClient *openai.Client
+	cache        *freecache.Cache
 	logger       logging.Logger
 }
 
@@ -42,11 +49,17 @@ func NewAIClient(token string, logger logging.Logger) AIService {
 	client := AIClient{
 		openaiClient: openai.NewClient(token),
 		logger:       logger,
+		cache:        freecache.NewCache(CACHE_SIZE),
 	}
 	return &client
 }
 
 func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding, r *model.Recommend, lang string) (string, error) {
+	cacheKey := generateCacheKey(fmt.Sprintf(CACHE_KEY_FORMAT, f.FindingID, lang))
+	if got, err := a.cache.Get(cacheKey); err == nil {
+		a.logger.Infof(ctx, "Cache HIT: finding_id=%d, lang=%s", f.FindingID, lang)
+		return string(got), nil
+	}
 	promptSystem := PROMPT_SYSTEM_MSG_EN
 	promptSummary := PROMPT_SUMMARY_EN
 	if lang == LANG_JP {
@@ -80,7 +93,11 @@ func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding
 		"openai_token": resp.Usage.TotalTokens,
 	}
 	a.logger.WithItemsf(ctx, logging.InfoLevel, fields, "OpenAI usage: %+v", resp.Usage)
-	return resp.Choices[0].Message.Content, nil
+	answer := resp.Choices[0].Message.Content
+	if err := a.cache.Set(cacheKey, []byte(answer), CACHE_EXPIRE_SEC); err != nil {
+		return "", fmt.Errorf("cache set error: err=%w", err)
+	}
+	return answer, nil
 }
 
 func generateFindingDataForAI(f *model.Finding, r *model.Recommend) string {
@@ -89,4 +106,9 @@ func generateFindingDataForAI(f *model.Finding, r *model.Recommend) string {
 		text += fmt.Sprintf(RECOMMEND_FORMAT_FOR_AI, r.Risk, r.Recommendation)
 	}
 	return text
+}
+
+func generateCacheKey(content string) []byte {
+	hash := md5.Sum([]byte(content))
+	return []byte(hash[:])
 }
