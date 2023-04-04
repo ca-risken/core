@@ -444,8 +444,8 @@ func (r *ResourceTagForBatch) Validate() error {
 	)
 }
 
-// Validate for AskAISummaryRequest
-func (a *AskAISummaryRequest) Validate() error {
+// Validate for GetAISummaryRequest
+func (a *GetAISummaryRequest) Validate() error {
 	return validation.ValidateStruct(a,
 		validation.Field(&a.ProjectId, validation.Required),
 		validation.Field(&a.FindingId, validation.Required),

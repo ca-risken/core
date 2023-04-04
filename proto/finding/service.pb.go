@@ -3056,7 +3056,7 @@ func (x *PutRecommendResponse) GetRecommend() *Recommend {
 	return nil
 }
 
-type AskAISummaryRequest struct {
+type GetAISummaryRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -3066,8 +3066,8 @@ type AskAISummaryRequest struct {
 	Lang      string `protobuf:"bytes,3,opt,name=lang,proto3" json:"lang,omitempty"`
 }
 
-func (x *AskAISummaryRequest) Reset() {
-	*x = AskAISummaryRequest{}
+func (x *GetAISummaryRequest) Reset() {
+	*x = GetAISummaryRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_finding_service_proto_msgTypes[49]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3075,13 +3075,13 @@ func (x *AskAISummaryRequest) Reset() {
 	}
 }
 
-func (x *AskAISummaryRequest) String() string {
+func (x *GetAISummaryRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AskAISummaryRequest) ProtoMessage() {}
+func (*GetAISummaryRequest) ProtoMessage() {}
 
-func (x *AskAISummaryRequest) ProtoReflect() protoreflect.Message {
+func (x *GetAISummaryRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_finding_service_proto_msgTypes[49]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3093,33 +3093,33 @@ func (x *AskAISummaryRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AskAISummaryRequest.ProtoReflect.Descriptor instead.
-func (*AskAISummaryRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetAISummaryRequest.ProtoReflect.Descriptor instead.
+func (*GetAISummaryRequest) Descriptor() ([]byte, []int) {
 	return file_finding_service_proto_rawDescGZIP(), []int{49}
 }
 
-func (x *AskAISummaryRequest) GetProjectId() uint32 {
+func (x *GetAISummaryRequest) GetProjectId() uint32 {
 	if x != nil {
 		return x.ProjectId
 	}
 	return 0
 }
 
-func (x *AskAISummaryRequest) GetFindingId() uint64 {
+func (x *GetAISummaryRequest) GetFindingId() uint64 {
 	if x != nil {
 		return x.FindingId
 	}
 	return 0
 }
 
-func (x *AskAISummaryRequest) GetLang() string {
+func (x *GetAISummaryRequest) GetLang() string {
 	if x != nil {
 		return x.Lang
 	}
 	return ""
 }
 
-type AskAISummaryResponse struct {
+type GetAISummaryResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -3127,8 +3127,8 @@ type AskAISummaryResponse struct {
 	Answer string `protobuf:"bytes,1,opt,name=answer,proto3" json:"answer,omitempty"`
 }
 
-func (x *AskAISummaryResponse) Reset() {
-	*x = AskAISummaryResponse{}
+func (x *GetAISummaryResponse) Reset() {
+	*x = GetAISummaryResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_finding_service_proto_msgTypes[50]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3136,13 +3136,13 @@ func (x *AskAISummaryResponse) Reset() {
 	}
 }
 
-func (x *AskAISummaryResponse) String() string {
+func (x *GetAISummaryResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AskAISummaryResponse) ProtoMessage() {}
+func (*GetAISummaryResponse) ProtoMessage() {}
 
-func (x *AskAISummaryResponse) ProtoReflect() protoreflect.Message {
+func (x *GetAISummaryResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_finding_service_proto_msgTypes[50]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3154,12 +3154,12 @@ func (x *AskAISummaryResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AskAISummaryResponse.ProtoReflect.Descriptor instead.
-func (*AskAISummaryResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetAISummaryResponse.ProtoReflect.Descriptor instead.
+func (*GetAISummaryResponse) Descriptor() ([]byte, []int) {
 	return file_finding_service_proto_rawDescGZIP(), []int{50}
 }
 
-func (x *AskAISummaryResponse) GetAnswer() string {
+func (x *GetAISummaryResponse) GetAnswer() string {
 	if x != nil {
 		return x.Answer
 	}
@@ -3549,13 +3549,13 @@ var file_finding_service_proto_rawDesc = []byte{
 	0x6d, 0x65, 0x6e, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x63, 0x6f, 0x72,
 	0x65, 0x2e, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x52, 0x65, 0x63, 0x6f, 0x6d, 0x6d,
 	0x65, 0x6e, 0x64, 0x52, 0x09, 0x72, 0x65, 0x63, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x64, 0x22, 0x67,
-	0x0a, 0x13, 0x41, 0x73, 0x6b, 0x41, 0x49, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x52, 0x65,
+	0x0a, 0x13, 0x47, 0x65, 0x74, 0x41, 0x49, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x52, 0x65,
 	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74,
 	0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65,
 	0x63, 0x74, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x5f,
 	0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x09, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e,
 	0x67, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6c, 0x61, 0x6e, 0x67, 0x18, 0x03, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x04, 0x6c, 0x61, 0x6e, 0x67, 0x22, 0x2e, 0x0a, 0x14, 0x41, 0x73, 0x6b, 0x41, 0x49,
+	0x09, 0x52, 0x04, 0x6c, 0x61, 0x6e, 0x67, 0x22, 0x2e, 0x0a, 0x14, 0x47, 0x65, 0x74, 0x41, 0x49,
 	0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
 	0x16, 0x0a, 0x06, 0x61, 0x6e, 0x73, 0x77, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
 	0x06, 0x61, 0x6e, 0x73, 0x77, 0x65, 0x72, 0x32, 0xe2, 0x14, 0x0a, 0x0e, 0x46, 0x69, 0x6e, 0x64,
@@ -3719,11 +3719,11 @@ var file_finding_service_proto_rawDesc = []byte{
 	0x74, 0x52, 0x65, 0x63, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
 	0x74, 0x1a, 0x22, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67,
 	0x2e, 0x50, 0x75, 0x74, 0x52, 0x65, 0x63, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x55, 0x0a, 0x0c, 0x41, 0x73, 0x6b, 0x41, 0x49, 0x53, 0x75,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x55, 0x0a, 0x0c, 0x47, 0x65, 0x74, 0x41, 0x49, 0x53, 0x75,
 	0x6d, 0x6d, 0x61, 0x72, 0x79, 0x12, 0x21, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x66, 0x69, 0x6e,
-	0x64, 0x69, 0x6e, 0x67, 0x2e, 0x41, 0x73, 0x6b, 0x41, 0x49, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72,
+	0x64, 0x69, 0x6e, 0x67, 0x2e, 0x47, 0x65, 0x74, 0x41, 0x49, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72,
 	0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x22, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e,
-	0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x41, 0x73, 0x6b, 0x41, 0x49, 0x53, 0x75, 0x6d,
+	0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x47, 0x65, 0x74, 0x41, 0x49, 0x53, 0x75, 0x6d,
 	0x6d, 0x61, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x29, 0x5a, 0x27,
 	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69,
 	0x73, 0x6b, 0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f,
@@ -3793,8 +3793,8 @@ var file_finding_service_proto_goTypes = []interface{}{
 	(*GetRecommendResponse)(nil),        // 46: core.finding.GetRecommendResponse
 	(*PutRecommendRequest)(nil),         // 47: core.finding.PutRecommendRequest
 	(*PutRecommendResponse)(nil),        // 48: core.finding.PutRecommendResponse
-	(*AskAISummaryRequest)(nil),         // 49: core.finding.AskAISummaryRequest
-	(*AskAISummaryResponse)(nil),        // 50: core.finding.AskAISummaryResponse
+	(*GetAISummaryRequest)(nil),         // 49: core.finding.GetAISummaryRequest
+	(*GetAISummaryResponse)(nil),        // 50: core.finding.GetAISummaryResponse
 	(FindingStatus)(0),                  // 51: core.finding.FindingStatus
 	(*Finding)(nil),                     // 52: core.finding.Finding
 	(*FindingForUpsert)(nil),            // 53: core.finding.FindingForUpsert
@@ -3871,7 +3871,7 @@ var file_finding_service_proto_depIdxs = []int32{
 	44, // 53: core.finding.FindingService.DeleteFindingSetting:input_type -> core.finding.DeleteFindingSettingRequest
 	45, // 54: core.finding.FindingService.GetRecommend:input_type -> core.finding.GetRecommendRequest
 	47, // 55: core.finding.FindingService.PutRecommend:input_type -> core.finding.PutRecommendRequest
-	49, // 56: core.finding.FindingService.AskAISummary:input_type -> core.finding.AskAISummaryRequest
+	49, // 56: core.finding.FindingService.GetAISummary:input_type -> core.finding.GetAISummaryRequest
 	1,  // 57: core.finding.FindingService.ListFinding:output_type -> core.finding.ListFindingResponse
 	3,  // 58: core.finding.FindingService.BatchListFinding:output_type -> core.finding.BatchListFindingResponse
 	5,  // 59: core.finding.FindingService.GetFinding:output_type -> core.finding.GetFindingResponse
@@ -3901,7 +3901,7 @@ var file_finding_service_proto_depIdxs = []int32{
 	68, // 83: core.finding.FindingService.DeleteFindingSetting:output_type -> google.protobuf.Empty
 	46, // 84: core.finding.FindingService.GetRecommend:output_type -> core.finding.GetRecommendResponse
 	48, // 85: core.finding.FindingService.PutRecommend:output_type -> core.finding.PutRecommendResponse
-	50, // 86: core.finding.FindingService.AskAISummary:output_type -> core.finding.AskAISummaryResponse
+	50, // 86: core.finding.FindingService.GetAISummary:output_type -> core.finding.GetAISummaryResponse
 	57, // [57:87] is the sub-list for method output_type
 	27, // [27:57] is the sub-list for method input_type
 	27, // [27:27] is the sub-list for extension type_name
@@ -4505,7 +4505,7 @@ func file_finding_service_proto_init() {
 			}
 		}
 		file_finding_service_proto_msgTypes[49].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AskAISummaryRequest); i {
+			switch v := v.(*GetAISummaryRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4517,7 +4517,7 @@ func file_finding_service_proto_init() {
 			}
 		}
 		file_finding_service_proto_msgTypes[50].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AskAISummaryResponse); i {
+			switch v := v.(*GetAISummaryResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4596,7 +4596,7 @@ type FindingServiceClient interface {
 	GetRecommend(ctx context.Context, in *GetRecommendRequest, opts ...grpc.CallOption) (*GetRecommendResponse, error)
 	PutRecommend(ctx context.Context, in *PutRecommendRequest, opts ...grpc.CallOption) (*PutRecommendResponse, error)
 	// AI
-	AskAISummary(ctx context.Context, in *AskAISummaryRequest, opts ...grpc.CallOption) (*AskAISummaryResponse, error)
+	GetAISummary(ctx context.Context, in *GetAISummaryRequest, opts ...grpc.CallOption) (*GetAISummaryResponse, error)
 }
 
 type findingServiceClient struct {
@@ -4868,9 +4868,9 @@ func (c *findingServiceClient) PutRecommend(ctx context.Context, in *PutRecommen
 	return out, nil
 }
 
-func (c *findingServiceClient) AskAISummary(ctx context.Context, in *AskAISummaryRequest, opts ...grpc.CallOption) (*AskAISummaryResponse, error) {
-	out := new(AskAISummaryResponse)
-	err := c.cc.Invoke(ctx, "/core.finding.FindingService/AskAISummary", in, out, opts...)
+func (c *findingServiceClient) GetAISummary(ctx context.Context, in *GetAISummaryRequest, opts ...grpc.CallOption) (*GetAISummaryResponse, error) {
+	out := new(GetAISummaryResponse)
+	err := c.cc.Invoke(ctx, "/core.finding.FindingService/GetAISummary", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4914,7 +4914,7 @@ type FindingServiceServer interface {
 	GetRecommend(context.Context, *GetRecommendRequest) (*GetRecommendResponse, error)
 	PutRecommend(context.Context, *PutRecommendRequest) (*PutRecommendResponse, error)
 	// AI
-	AskAISummary(context.Context, *AskAISummaryRequest) (*AskAISummaryResponse, error)
+	GetAISummary(context.Context, *GetAISummaryRequest) (*GetAISummaryResponse, error)
 }
 
 // UnimplementedFindingServiceServer can be embedded to have forward compatible implementations.
@@ -5008,8 +5008,8 @@ func (*UnimplementedFindingServiceServer) GetRecommend(context.Context, *GetReco
 func (*UnimplementedFindingServiceServer) PutRecommend(context.Context, *PutRecommendRequest) (*PutRecommendResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PutRecommend not implemented")
 }
-func (*UnimplementedFindingServiceServer) AskAISummary(context.Context, *AskAISummaryRequest) (*AskAISummaryResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AskAISummary not implemented")
+func (*UnimplementedFindingServiceServer) GetAISummary(context.Context, *GetAISummaryRequest) (*GetAISummaryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAISummary not implemented")
 }
 
 func RegisterFindingServiceServer(s *grpc.Server, srv FindingServiceServer) {
@@ -5538,20 +5538,20 @@ func _FindingService_PutRecommend_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FindingService_AskAISummary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AskAISummaryRequest)
+func _FindingService_GetAISummary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAISummaryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FindingServiceServer).AskAISummary(ctx, in)
+		return srv.(FindingServiceServer).GetAISummary(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/core.finding.FindingService/AskAISummary",
+		FullMethod: "/core.finding.FindingService/GetAISummary",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FindingServiceServer).AskAISummary(ctx, req.(*AskAISummaryRequest))
+		return srv.(FindingServiceServer).GetAISummary(ctx, req.(*GetAISummaryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -5677,8 +5677,8 @@ var _FindingService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _FindingService_PutRecommend_Handler,
 		},
 		{
-			MethodName: "AskAISummary",
-			Handler:    _FindingService_AskAISummary_Handler,
+			MethodName: "GetAISummary",
+			Handler:    _FindingService_GetAISummary_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

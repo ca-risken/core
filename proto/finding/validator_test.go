@@ -1870,37 +1870,37 @@ func TestValidate_PutResourceBatchRequest(t *testing.T) {
 	}
 }
 
-func TestValidate_AskAISummaryRequest(t *testing.T) {
+func TestValidate_GetAISummaryRequest(t *testing.T) {
 	cases := []struct {
 		name    string
-		input   *AskAISummaryRequest
+		input   *GetAISummaryRequest
 		wantErr bool
 	}{
 		{
 			name:  "OK 1",
-			input: &AskAISummaryRequest{ProjectId: 1, FindingId: 1},
+			input: &GetAISummaryRequest{ProjectId: 1, FindingId: 1},
 		},
 		{
 			name:  "OK 2",
-			input: &AskAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "en"},
+			input: &GetAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "en"},
 		},
 		{
 			name:  "OK 3",
-			input: &AskAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "jp"},
+			input: &GetAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "jp"},
 		},
 		{
 			name:    "NG required project_id",
-			input:   &AskAISummaryRequest{FindingId: 1},
+			input:   &GetAISummaryRequest{FindingId: 1},
 			wantErr: true,
 		},
 		{
 			name:    "NG required finding_id",
-			input:   &AskAISummaryRequest{ProjectId: 1},
+			input:   &GetAISummaryRequest{ProjectId: 1},
 			wantErr: true,
 		},
 		{
 			name:    "NG unsuported lang",
-			input:   &AskAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "xxx"},
+			input:   &GetAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "xxx"},
 			wantErr: true,
 		},
 	}

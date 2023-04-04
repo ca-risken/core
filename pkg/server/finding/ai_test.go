@@ -28,8 +28,8 @@ func TestAskAISummary(t *testing.T) {
 	}
 	cases := []struct {
 		name             string
-		input            *finding.AskAISummaryRequest
-		want             *finding.AskAISummaryResponse
+		input            *finding.GetAISummaryRequest
+		want             *finding.GetAISummaryResponse
 		wantErr          bool
 		mockGetFinding   *MockGetFinding
 		mockGetRecommend *MockGetRecommend
@@ -37,8 +37,8 @@ func TestAskAISummary(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: &finding.AskAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "en"},
-			want:  &finding.AskAISummaryResponse{Answer: "answer"},
+			input: &finding.GetAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "en"},
+			want:  &finding.GetAISummaryResponse{Answer: "answer"},
 			mockGetFinding: &MockGetFinding{
 				Resp: &model.Finding{},
 			},
@@ -51,12 +51,12 @@ func TestAskAISummary(t *testing.T) {
 		},
 		{
 			name:    "NG Invalid param",
-			input:   &finding.AskAISummaryRequest{FindingId: 1, Lang: "en"},
+			input:   &finding.GetAISummaryRequest{FindingId: 1, Lang: "en"},
 			wantErr: true,
 		},
 		{
 			name:    "NG DB error(GetFinding)",
-			input:   &finding.AskAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "en"},
+			input:   &finding.GetAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "en"},
 			wantErr: true,
 			mockGetFinding: &MockGetFinding{
 				Err: errors.New("some error"),
@@ -64,7 +64,7 @@ func TestAskAISummary(t *testing.T) {
 		},
 		{
 			name:    "NG DB error(GetRecommend)",
-			input:   &finding.AskAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "en"},
+			input:   &finding.GetAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "en"},
 			wantErr: true,
 			mockGetFinding: &MockGetFinding{
 				Resp: &model.Finding{},
@@ -75,7 +75,7 @@ func TestAskAISummary(t *testing.T) {
 		},
 		{
 			name:    "NG OpenAI API error",
-			input:   &finding.AskAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "en"},
+			input:   &finding.GetAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "en"},
 			wantErr: true,
 			mockGetFinding: &MockGetFinding{
 				Resp: &model.Finding{},
@@ -112,7 +112,7 @@ func TestAskAISummary(t *testing.T) {
 					Return(c.mockAskAI.Resp, c.mockAskAI.Err).
 					Once()
 			}
-			got, err := svc.AskAISummary(context.TODO(), c.input)
+			got, err := svc.GetAISummary(context.TODO(), c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}

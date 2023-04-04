@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (f *FindingService) AskAISummary(ctx context.Context, req *finding.AskAISummaryRequest) (*finding.AskAISummaryResponse, error) {
+func (f *FindingService) GetAISummary(ctx context.Context, req *finding.GetAISummaryRequest) (*finding.GetAISummaryResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
@@ -31,5 +31,5 @@ func (f *FindingService) AskAISummary(ctx context.Context, req *finding.AskAISum
 	if err != nil {
 		return nil, fmt.Errorf("openai API error: err=%w", err)
 	}
-	return &finding.AskAISummaryResponse{Answer: answer}, nil
+	return &finding.GetAISummaryResponse{Answer: answer}, nil
 }

@@ -55,7 +55,7 @@ service FindingService {
   rpc PutRecommend(PutRecommendRequest) returns (PutRecommendResponse);
 
   // AI
-  rpc AskAISummary(AskAISummaryRequest) returns (AskAISummaryResponse);
+  rpc GetAISummary(GetAISummaryRequest) returns (GetAISummaryResponse);
 }
 
 message ListFindingRequest {
@@ -321,10 +321,10 @@ message PutRecommendRequest {
 
 message PutRecommendResponse { Recommend recommend = 1; }
 
-message AskAISummaryRequest {
+message GetAISummaryRequest {
   uint32 project_id = 1;
   uint64 finding_id = 2;
   string lang = 3;
 }
 
-message AskAISummaryResponse { string answer = 1; }
+message GetAISummaryResponse { string answer = 1; }
