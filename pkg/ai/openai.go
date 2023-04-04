@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	CACHE_SIZE       = 500 * 1024 * 1024 // 500MB
+	CACHE_SIZE       = 200 * 1024 * 1024 // 200MB
 	CACHE_EXPIRE_SEC = 3600
 	CACHE_KEY_FORMAT = "OpenAICache/%d/%s"
 
