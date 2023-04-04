@@ -16,7 +16,7 @@ const (
 	CACHE_EXPIRE_SEC = 3600
 	CACHE_KEY_FORMAT = "OpenAICache/%d/%s"
 
-	LANG_JP               = "jp"
+	LANG_JP               = "ja"
 	PROMPT_SYSTEM_MSG_EN  = "You are a helpful security assistant."
 	PROMPT_SYSTEM_MSG_JP  = "あなたは役に立つセキュリティアシスタントです。"
 	PROMPT_SUMMARY_EN     = "I have detected the following security issue in my cloud environment. Please summarize in 500 characters or less. Also, please include any ways to address the issue. By the way, I am not a security expert."

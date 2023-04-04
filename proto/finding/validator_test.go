@@ -1886,7 +1886,7 @@ func TestValidate_GetAISummaryRequest(t *testing.T) {
 		},
 		{
 			name:  "OK 3",
-			input: &GetAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "jp"},
+			input: &GetAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
 		},
 		{
 			name:    "NG required project_id",

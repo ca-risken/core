@@ -449,6 +449,6 @@ func (a *GetAISummaryRequest) Validate() error {
 	return validation.ValidateStruct(a,
 		validation.Field(&a.ProjectId, validation.Required),
 		validation.Field(&a.FindingId, validation.Required),
-		validation.Field(&a.Lang, validation.In("en", "jp")),
+		validation.Field(&a.Lang, validation.In("en", "ja")),
 	)
 }

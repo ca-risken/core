@@ -629,12 +629,12 @@ put-recommend:
 		-d '{"project_id":1,"finding_id":1, "data_source":"ds", "type":"c", "risk":"critical", "recommendation":"..."}' \
 		$(CORE_API_ADDR) core.finding.FindingService.PutRecommend
 
-.PHONY: ask-ai-summary
-ask-ai-summary:
+.PHONY: get-ai-summary
+get-ai-summary:
 	$(GRPCURL) \
 		-plaintext \
-		-d '{"project_id":1001, "finding_id": 1001, "lang":"jp"}' \
-		$(CORE_API_ADDR) core.finding.FindingService.AskAISummary
+		-d '{"project_id":1001, "finding_id": 1001, "lang":"ja"}' \
+		$(CORE_API_ADDR) core.finding.FindingService.GetAISummary
 
 .PHONY: list-report-service
 list-report-service:
