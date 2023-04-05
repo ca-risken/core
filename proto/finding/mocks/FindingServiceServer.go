@@ -154,6 +154,29 @@ func (_m *FindingServiceServer) DeleteResource(_a0 context.Context, _a1 *finding
 	return r0, r1
 }
 
+// GetAISummary provides a mock function with given fields: _a0, _a1
+func (_m *FindingServiceServer) GetAISummary(_a0 context.Context, _a1 *finding.GetAISummaryRequest) (*finding.GetAISummaryResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *finding.GetAISummaryResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *finding.GetAISummaryRequest) *finding.GetAISummaryResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*finding.GetAISummaryResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *finding.GetAISummaryRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetFinding provides a mock function with given fields: _a0, _a1
 func (_m *FindingServiceServer) GetFinding(_a0 context.Context, _a1 *finding.GetFindingRequest) (*finding.GetFindingResponse, error) {
 	ret := _m.Called(_a0, _a1)

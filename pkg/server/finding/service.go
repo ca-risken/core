@@ -2,7 +2,9 @@ package finding
 
 import (
 	"github.com/ca-risken/common/pkg/logging"
+	"github.com/ca-risken/core/pkg/ai"
 	"github.com/ca-risken/core/pkg/db"
+	"github.com/ca-risken/core/proto/finding"
 )
 
 const (
@@ -13,12 +15,16 @@ const (
 type FindingService struct {
 	repository db.FindingRepository
 	logger     logging.Logger
+	ai         ai.AIService
 }
 
-func NewFindingService(repository db.FindingRepository, logger logging.Logger) *FindingService {
+var _ finding.FindingServiceServer = (*FindingService)(nil)
+
+func NewFindingService(repository db.FindingRepository, openaiToken string, logger logging.Logger) *FindingService {
 	return &FindingService{
 		repository: repository,
 		logger:     logger,
+		ai:         ai.NewAIClient(openaiToken, logger),
 	}
 }
 

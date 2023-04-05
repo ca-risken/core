@@ -1869,3 +1869,49 @@ func TestValidate_PutResourceBatchRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestValidate_GetAISummaryRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *GetAISummaryRequest
+		wantErr bool
+	}{
+		{
+			name:  "OK 1",
+			input: &GetAISummaryRequest{ProjectId: 1, FindingId: 1},
+		},
+		{
+			name:  "OK 2",
+			input: &GetAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "en"},
+		},
+		{
+			name:  "OK 3",
+			input: &GetAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
+		},
+		{
+			name:    "NG required project_id",
+			input:   &GetAISummaryRequest{FindingId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG required finding_id",
+			input:   &GetAISummaryRequest{ProjectId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG unsupported lang",
+			input:   &GetAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "xxx"},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}

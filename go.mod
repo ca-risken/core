@@ -10,12 +10,14 @@ require (
 	github.com/ca-risken/common/pkg/rpc v0.0.0-20220518032134-ad443b601efd
 	github.com/ca-risken/common/pkg/tracer v0.0.0-20220426050416-a654045b9fa5
 	github.com/cenkalti/backoff/v4 v4.2.0
+	github.com/coocood/freecache v1.2.3
 	github.com/envoyproxy/protoc-gen-validate v0.6.7
 	github.com/gassara-kys/envconfig v1.4.4
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jarcoal/httpmock v1.1.0
+	github.com/sashabaranov/go-openai v1.5.8
 	github.com/slack-go/slack v0.11.4
 	github.com/stretchr/testify v1.7.1
 	github.com/vikyd/zero v0.0.0-20190921142904-0f738d0bc858
