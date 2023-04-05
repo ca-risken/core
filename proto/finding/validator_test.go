@@ -1899,7 +1899,7 @@ func TestValidate_GetAISummaryRequest(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG unsuported lang",
+			name:    "NG unsupported lang",
 			input:   &GetAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "xxx"},
 			wantErr: true,
 		},

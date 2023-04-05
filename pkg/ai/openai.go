@@ -87,7 +87,10 @@ func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding
 		},
 	)
 	if err != nil {
-		return "", fmt.Errorf("openai API error: err=%w", err)
+		return "", fmt.Errorf("openai API error: finding_id=%d, err=%w", f.FindingID, err)
+	}
+	if len(resp.Choices) == 0 {
+		return "", fmt.Errorf("openai API no response: finding_id=%d", f.FindingID)
 	}
 	fields := map[string]interface{}{
 		"openai_token": resp.Usage.TotalTokens,
