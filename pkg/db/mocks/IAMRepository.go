@@ -241,29 +241,6 @@ func (_m *IAMRepository) ExistsAccessTokenMaintainer(ctx context.Context, projec
 	return r0, r1
 }
 
-// GetAccessTokenByID provides a mock function with given fields: ctx, projectID, accessTokenID
-func (_m *IAMRepository) GetAccessTokenByID(ctx context.Context, projectID uint32, accessTokenID uint32) (*model.AccessToken, error) {
-	ret := _m.Called(ctx, projectID, accessTokenID)
-
-	var r0 *model.AccessToken
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) *model.AccessToken); ok {
-		r0 = rf(ctx, projectID, accessTokenID)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.AccessToken)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
-		r1 = rf(ctx, projectID, accessTokenID)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetAccessTokenByUniqueKey provides a mock function with given fields: ctx, projectID, name
 func (_m *IAMRepository) GetAccessTokenByUniqueKey(ctx context.Context, projectID uint32, name string) (*model.AccessToken, error) {
 	ret := _m.Called(ctx, projectID, name)
@@ -280,29 +257,6 @@ func (_m *IAMRepository) GetAccessTokenByUniqueKey(ctx context.Context, projectI
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, uint32, string) error); ok {
 		r1 = rf(ctx, projectID, name)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetAccessTokenRole provides a mock function with given fields: ctx, accessTokenID, roleID
-func (_m *IAMRepository) GetAccessTokenRole(ctx context.Context, accessTokenID uint32, roleID uint32) (*model.AccessTokenRole, error) {
-	ret := _m.Called(ctx, accessTokenID, roleID)
-
-	var r0 *model.AccessTokenRole
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) *model.AccessTokenRole); ok {
-		r0 = rf(ctx, accessTokenID, roleID)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.AccessTokenRole)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
-		r1 = rf(ctx, accessTokenID, roleID)
 	} else {
 		r1 = ret.Error(1)
 	}
