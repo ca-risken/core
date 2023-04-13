@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/vikyd/zero"
 )
 
@@ -85,6 +86,13 @@ func (c *Client) GetAlert(ctx context.Context, projectID uint32, alertID uint32)
 }
 
 func (c *Client) UpsertAlert(ctx context.Context, data *model.Alert) (*model.Alert, error) {
+	operation := func() (*model.Alert, error) {
+		return c.upsertAlert(ctx, data)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertAlert"))
+}
+
+func (c *Client) upsertAlert(ctx context.Context, data *model.Alert) (*model.Alert, error) {
 	var retData model.Alert
 	c.logger.Info(ctx, "upsertAlert:", data)
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_id = ?", data.ProjectID, data.AlertID).Assign(data).FirstOrCreate(&retData).Error; err != nil {
@@ -95,6 +103,13 @@ func (c *Client) UpsertAlert(ctx context.Context, data *model.Alert) (*model.Ale
 }
 
 func (c *Client) DeleteAlert(ctx context.Context, projectID uint32, alertID uint32) error {
+	operation := func() error {
+		return c.deleteAlert(ctx, projectID, alertID)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "DeleteAlert"))
+}
+
+func (c *Client) deleteAlert(ctx context.Context, projectID uint32, alertID uint32) error {
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_id = ?", projectID, alertID).Delete(model.Alert{}).Error; err != nil {
 		return err
 	}
@@ -131,6 +146,13 @@ func (c *Client) GetAlertHistory(ctx context.Context, projectID uint32, alertHis
 }
 
 func (c *Client) UpsertAlertHistory(ctx context.Context, data *model.AlertHistory) (*model.AlertHistory, error) {
+	operation := func() (*model.AlertHistory, error) {
+		return c.upsertAlertHistory(ctx, data)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertAlertHistory"))
+}
+
+func (c *Client) upsertAlertHistory(ctx context.Context, data *model.AlertHistory) (*model.AlertHistory, error) {
 	var retData model.AlertHistory
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_history_id = ?", data.ProjectID, data.AlertHistoryID).Assign(data).FirstOrCreate(&retData).Error; err != nil {
 		return nil, err
@@ -139,6 +161,13 @@ func (c *Client) UpsertAlertHistory(ctx context.Context, data *model.AlertHistor
 }
 
 func (c *Client) DeleteAlertHistory(ctx context.Context, projectID uint32, alertHistoryID uint32) error {
+	operation := func() error {
+		return c.deleteAlertHistory(ctx, projectID, alertHistoryID)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "DeleteAlertHistory"))
+}
+
+func (c *Client) deleteAlertHistory(ctx context.Context, projectID uint32, alertHistoryID uint32) error {
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_history_id = ?", projectID, alertHistoryID).Delete(model.AlertHistory{}).Error; err != nil {
 		return err
 	}
@@ -173,6 +202,13 @@ func (c *Client) GetRelAlertFinding(ctx context.Context, projectID, alertID, fin
 }
 
 func (c *Client) UpsertRelAlertFinding(ctx context.Context, data *model.RelAlertFinding) (*model.RelAlertFinding, error) {
+	operation := func() (*model.RelAlertFinding, error) {
+		return c.upsertRelAlertFinding(ctx, data)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertRelAlertFinding"))
+}
+
+func (c *Client) upsertRelAlertFinding(ctx context.Context, data *model.RelAlertFinding) (*model.RelAlertFinding, error) {
 	var retData model.RelAlertFinding
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_id = ? AND finding_id = ?", data.ProjectID, data.AlertID, data.FindingID).Assign(data).FirstOrCreate(&retData).Error; err != nil {
 		return nil, err
@@ -181,6 +217,13 @@ func (c *Client) UpsertRelAlertFinding(ctx context.Context, data *model.RelAlert
 }
 
 func (c *Client) DeleteRelAlertFinding(ctx context.Context, projectID, alertID, findingID uint32) error {
+	operation := func() error {
+		return c.deleteRelAlertFinding(ctx, projectID, alertID, findingID)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "DeleteRelAlertFinding"))
+}
+
+func (c *Client) deleteRelAlertFinding(ctx context.Context, projectID, alertID, findingID uint32) error {
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_id = ? AND finding_id = ?", projectID, alertID, findingID).Delete(model.RelAlertFinding{}).Error; err != nil {
 		return err
 	}
@@ -215,6 +258,13 @@ func (c *Client) GetAlertCondition(ctx context.Context, projectID uint32, alertC
 }
 
 func (c *Client) UpsertAlertCondition(ctx context.Context, data *model.AlertCondition) (*model.AlertCondition, error) {
+	operation := func() (*model.AlertCondition, error) {
+		return c.upsertAlertCondition(ctx, data)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertAlertCondition"))
+}
+
+func (c *Client) upsertAlertCondition(ctx context.Context, data *model.AlertCondition) (*model.AlertCondition, error) {
 	var retData model.AlertCondition
 	update := alertConditionToMap(data)
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_condition_id = ?", data.ProjectID, data.AlertConditionID).Assign(update).FirstOrCreate(&retData).Error; err != nil {
@@ -224,6 +274,13 @@ func (c *Client) UpsertAlertCondition(ctx context.Context, data *model.AlertCond
 }
 
 func (c *Client) DeleteAlertCondition(ctx context.Context, projectID uint32, alertConditionID uint32) error {
+	operation := func() error {
+		return c.deleteAlertCondition(ctx, projectID, alertConditionID)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "DeleteAlertCondition"))
+}
+
+func (c *Client) deleteAlertCondition(ctx context.Context, projectID uint32, alertConditionID uint32) error {
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_condition_id = ?", projectID, alertConditionID).Delete(model.AlertCondition{}).Error; err != nil {
 		return err
 	}
@@ -251,6 +308,13 @@ func (c *Client) GetAlertRule(ctx context.Context, projectID uint32, alertRuleID
 }
 
 func (c *Client) UpsertAlertRule(ctx context.Context, data *model.AlertRule) (*model.AlertRule, error) {
+	operation := func() (*model.AlertRule, error) {
+		return c.upsertAlertRule(ctx, data)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertAlertRule"))
+}
+
+func (c *Client) upsertAlertRule(ctx context.Context, data *model.AlertRule) (*model.AlertRule, error) {
 	var retData model.AlertRule
 	update := alertRuleToMap(data)
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_rule_id = ?", data.ProjectID, data.AlertRuleID).Assign(update).FirstOrCreate(&retData).Error; err != nil {
@@ -260,6 +324,13 @@ func (c *Client) UpsertAlertRule(ctx context.Context, data *model.AlertRule) (*m
 }
 
 func (c *Client) DeleteAlertRule(ctx context.Context, projectID uint32, alertRuleID uint32) error {
+	operation := func() error {
+		return c.deleteAlertRule(ctx, projectID, alertRuleID)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "DeleteAlertRule"))
+}
+
+func (c *Client) deleteAlertRule(ctx context.Context, projectID uint32, alertRuleID uint32) error {
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_rule_id = ?", projectID, alertRuleID).Delete(model.AlertRule{}).Error; err != nil {
 		return err
 	}
@@ -294,6 +365,13 @@ func (c *Client) GetAlertCondRule(ctx context.Context, projectID, alertCondition
 }
 
 func (c *Client) UpsertAlertCondRule(ctx context.Context, data *model.AlertCondRule) (*model.AlertCondRule, error) {
+	operation := func() (*model.AlertCondRule, error) {
+		return c.upsertAlertCondRule(ctx, data)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertAlertCondRule"))
+}
+
+func (c *Client) upsertAlertCondRule(ctx context.Context, data *model.AlertCondRule) (*model.AlertCondRule, error) {
 	var retData model.AlertCondRule
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_condition_id = ? AND alert_rule_id = ?", data.ProjectID, data.AlertConditionID, data.AlertRuleID).Assign(data).FirstOrCreate(&retData).Error; err != nil {
 		return nil, err
@@ -302,6 +380,13 @@ func (c *Client) UpsertAlertCondRule(ctx context.Context, data *model.AlertCondR
 }
 
 func (c *Client) DeleteAlertCondRule(ctx context.Context, projectID, alertConditionID, alertRuleID uint32) error {
+	operation := func() error {
+		return c.deleteAlertCondRule(ctx, projectID, alertConditionID, alertRuleID)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "DeleteAlertCondRule"))
+}
+
+func (c *Client) deleteAlertCondRule(ctx context.Context, projectID, alertConditionID, alertRuleID uint32) error {
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_condition_id = ? AND alert_rule_id = ?", projectID, alertConditionID, alertRuleID).Delete(model.AlertCondRule{}).Error; err != nil {
 		return err
 	}
@@ -332,6 +417,13 @@ func (c *Client) GetNotification(ctx context.Context, projectID uint32, Notifica
 }
 
 func (c *Client) UpsertNotification(ctx context.Context, data *model.Notification) (*model.Notification, error) {
+	operation := func() (*model.Notification, error) {
+		return c.upsertNotification(ctx, data)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertNotification"))
+}
+
+func (c *Client) upsertNotification(ctx context.Context, data *model.Notification) (*model.Notification, error) {
 	var retData model.Notification
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND notification_id = ?", data.ProjectID, data.NotificationID).Assign(data).FirstOrCreate(&retData).Error; err != nil {
 		return nil, err
@@ -340,6 +432,13 @@ func (c *Client) UpsertNotification(ctx context.Context, data *model.Notificatio
 }
 
 func (c *Client) DeleteNotification(ctx context.Context, projectID uint32, NotificationID uint32) error {
+	operation := func() error {
+		return c.deleteNotification(ctx, projectID, NotificationID)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "DeleteNotification"))
+}
+
+func (c *Client) deleteNotification(ctx context.Context, projectID uint32, NotificationID uint32) error {
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND notification_id = ?", projectID, NotificationID).Delete(model.Notification{}).Error; err != nil {
 		return err
 	}
@@ -374,6 +473,13 @@ func (c *Client) GetAlertCondNotification(ctx context.Context, projectID, alertC
 }
 
 func (c *Client) UpsertAlertCondNotification(ctx context.Context, data *model.AlertCondNotification) (*model.AlertCondNotification, error) {
+	operation := func() (*model.AlertCondNotification, error) {
+		return c.upsertAlertCondNotification(ctx, data)
+	}
+	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertAlertCondNotification"))
+}
+
+func (c *Client) upsertAlertCondNotification(ctx context.Context, data *model.AlertCondNotification) (*model.AlertCondNotification, error) {
 	var retData model.AlertCondNotification
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_condition_id = ? AND notification_id = ?", data.ProjectID, data.AlertConditionID, data.NotificationID).Assign(data).FirstOrCreate(&retData).Error; err != nil {
 		return nil, err
@@ -382,6 +488,13 @@ func (c *Client) UpsertAlertCondNotification(ctx context.Context, data *model.Al
 }
 
 func (c *Client) DeleteAlertCondNotification(ctx context.Context, projectID, alertConditionID, notificationID uint32) error {
+	operation := func() error {
+		return c.deleteAlertCondNotification(ctx, projectID, alertConditionID, notificationID)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "DeleteAlertCondNotification"))
+}
+
+func (c *Client) deleteAlertCondNotification(ctx context.Context, projectID, alertConditionID, notificationID uint32) error {
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_condition_id = ? AND notification_id = ?", projectID, alertConditionID, notificationID).Delete(model.AlertCondNotification{}).Error; err != nil {
 		return err
 	}
@@ -423,6 +536,13 @@ func (c *Client) ListAlertRuleByAlertConditionID(ctx context.Context, projectID,
 }
 
 func (c *Client) DeactivateAlert(ctx context.Context, data *model.Alert) error {
+	operation := func() error {
+		return c.deactivateAlert(ctx, data)
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "DeactivateAlert"))
+}
+
+func (c *Client) deactivateAlert(ctx context.Context, data *model.Alert) error {
 	if err := c.Master.WithContext(ctx).Model(&model.Alert{}).Where("project_id = ? AND alert_id = ?", data.ProjectID, data.AlertID).Update("status", "DEACTIVE").Error; err != nil {
 		return err
 	}
