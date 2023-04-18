@@ -75,6 +75,20 @@ func (_m *ReportRepository) GetReportFindingAll(_a0 context.Context, _a1 []strin
 	return r0, r1
 }
 
+// PurgeReportFinding provides a mock function with given fields: ctx
+func (_m *ReportRepository) PurgeReportFinding(ctx context.Context) error {
+	ret := _m.Called(ctx)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context) error); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 type mockConstructorTestingTNewReportRepository interface {
 	mock.TestingT
 	Cleanup(func())

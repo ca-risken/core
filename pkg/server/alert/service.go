@@ -3,9 +3,12 @@ package alert
 import (
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db"
+	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/project"
 )
+
+var _ alert.AlertServiceServer = (*AlertService)(nil)
 
 type AlertService struct {
 	repository        db.AlertRepository

@@ -2,6 +2,7 @@ package report
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"testing"
 
@@ -9,6 +10,8 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/report"
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 )
 
@@ -93,6 +96,41 @@ func TestGetReportFindingAll(t *testing.T) {
 			}
 			if !reflect.DeepEqual(result, c.want) {
 				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
+			}
+		})
+	}
+}
+
+func TestPurgeReportFinding(t *testing.T) {
+	cases := []struct {
+		name      string
+		wantErr   bool
+		mockError error
+	}{
+		{
+			name:      "OK",
+			wantErr:   false,
+			mockError: nil,
+		},
+		{
+			name:      "NG DB Error",
+			wantErr:   true,
+			mockError: errors.New("DB Error"),
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewReportRepository(t)
+			svc := ReportService{repository: mockDB}
+			mockDB.On("PurgeReportFinding", mock.Anything).Return(c.mockError).Once()
+
+			_, err := svc.PurgeReportFinding(ctx, &empty.Empty{})
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatal("No error")
 			}
 		})
 	}

@@ -661,6 +661,13 @@ collect-report:
 		-d '{}' \
 		$(CORE_API_ADDR) core.report.ReportService.CollectReportFinding
 
+.PHONY: purge-report
+purge-report:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{}' \
+		$(CORE_API_ADDR) core.report.ReportService.PurgeReportFinding
+
 .PHONY: list-iam-service
 list-iam-service:
 	$(GRPCURL) -plaintext $(CORE_API_ADDR) list core.iam.IAMService
