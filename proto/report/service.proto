@@ -15,6 +15,7 @@ service ReportService {
       returns (GetReportFindingAllResponse);
   rpc CollectReportFinding(google.protobuf.Empty)
       returns (google.protobuf.Empty);
+  rpc PurgeReportFinding(google.protobuf.Empty) returns (google.protobuf.Empty);
 }
 
 message GetReportFindingRequest {

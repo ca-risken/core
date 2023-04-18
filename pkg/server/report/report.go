@@ -60,6 +60,14 @@ func (f *ReportService) CollectReportFinding(ctx context.Context, req *empty.Emp
 	return &empty.Empty{}, nil
 }
 
+func (f *ReportService) PurgeReportFinding(ctx context.Context, req *empty.Empty) (*empty.Empty, error) {
+	err := f.repository.PurgeReportFinding(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
+}
+
 /**
  * Converter
  */

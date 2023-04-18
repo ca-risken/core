@@ -12,6 +12,7 @@ type ReportRepository interface {
 	GetReportFinding(context.Context, uint32, []string, string, string, float32) (*[]model.ReportFinding, error)
 	GetReportFindingAll(context.Context, []string, string, string, float32) (*[]model.ReportFinding, error)
 	CollectReportFinding(ctx context.Context) error
+	PurgeReportFinding(ctx context.Context) error
 }
 
 var _ ReportRepository = (*Client)(nil)
@@ -70,6 +71,15 @@ where not exists (select pend_finding.finding_id from pend_finding where f.findi
 group by f.project_id, data_source, score ON DUPLICATE KEY UPDATE count=values(count)`
 	var data []model.ReportFinding
 	if err := c.Master.WithContext(ctx).Raw(query).Scan(&data).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+const deleteReportFinding = "delete from report_finding where report_date < DATE_ADD(CURRENT_DATE, INTERVAL -365 DAY)"
+
+func (c *Client) PurgeReportFinding(ctx context.Context) error {
+	if err := c.Master.WithContext(ctx).Exec(deleteReportFinding).Error; err != nil {
 		return err
 	}
 	return nil

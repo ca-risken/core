@@ -12,6 +12,8 @@ const (
 	defaultLimit         int32  = 200
 )
 
+var _ finding.FindingServiceServer = (*FindingService)(nil)
+
 type FindingService struct {
 	repository db.FindingRepository
 	logger     logging.Logger
