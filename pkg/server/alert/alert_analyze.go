@@ -120,13 +120,13 @@ func (a *AlertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 	}
 	a.logger.Info(ctx, "finish matching per rule")
 	if len(matchFindingIDs) > 0 {
-		registAlert, err := a.RegistAlertByAnalyze(ctx, alertCondition, matchFindingIDs)
+		registAlert, alertUpdated, err := a.RegistAlertByAnalyze(ctx, alertCondition, matchFindingIDs)
 		if err != nil {
 			return err
 		}
 		// AlertがACTIVE、かつMatchしている場合はAlert通知を行う
 		if registAlert.Status == alert.Status_ACTIVE.String() {
-			err = a.NotificationAlert(ctx, alertCondition, registAlert, alertRules, project, &matchFindingIDs)
+			err = a.NotificationAlert(ctx, alertCondition, registAlert, alertRules, project, &matchFindingIDs, alertUpdated)
 			if err != nil {
 				return err
 			}
@@ -140,12 +140,18 @@ func (a *AlertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 	return nil
 }
 
-func (a *AlertService) RegistAlertByAnalyze(ctx context.Context, alertCondition *model.AlertCondition, findingIDs []uint64) (*model.Alert, error) {
+// RegistAlertByAnalyze
+// アラートを登録・更新します。既に登録済みのアラートがある場合は処理をスキップします。
+// Return:
+//  1. *model.Alert (登録したアラート)
+//  2. bool (アラートの更新があったかどうか)
+//  3. error (エラー)
+func (a *AlertService) RegistAlertByAnalyze(ctx context.Context, alertCondition *model.AlertCondition, findingIDs []uint64) (*model.Alert, bool, error) {
 	// AlertConditionに該当するAlertが既に存在しているか確認
 	savedData, err := a.repository.GetAlertByAlertConditionIDStatus(ctx, alertCondition.ProjectID, alertCondition.AlertConditionID, []string{"ACTIVE", "PENDING"})
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
-		return nil, err
+		return nil, false, err
 	}
 
 	// 既に登録済みの場合は登録済みのAlertと内容が一致しているか確認
@@ -157,7 +163,7 @@ func (a *AlertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 	if !noRecord {
 		isMatchExisting, err = a.isMatchExistingAlert(ctx, savedData, alertCondition, findingIDs)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
 		alertID = savedData.AlertID
@@ -178,18 +184,18 @@ func (a *AlertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 	registerdData, err := a.repository.UpsertAlert(ctx, data)
 	if err != nil {
 		a.logger.Errorf(ctx, "Error occured when upsert alert. alertConditionID: %v, err: %v", alertCondition.AlertConditionID, err)
-		return nil, err
+		return nil, false, err
 	}
 
 	// 過去のアラートと状態が同じなら以下の処理はスキップ
 	if isMatchExisting {
-		return registerdData, nil
+		return registerdData, false, nil
 	}
 
 	// AlertHistoryに登録するための現在のRelAlertFindingを整形
 	findingHistory, err := a.makeFindingIDs(ctx, findingIDs)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	historyType := getHistoryType(alertID)
@@ -205,13 +211,13 @@ func (a *AlertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 	_, err = a.repository.UpsertAlertHistory(ctx, dataAlertHistory)
 	if err != nil {
 		a.logger.Errorf(ctx, "Error occured when upsert AlertHistory. err: %v", err)
-		return nil, err
+		return nil, false, err
 	}
 
 	//RelAlertFindingの更新 (削除して再登録)
 	err = a.deleteRelAlertFindingByAlertID(ctx, registerdData.ProjectID, registerdData.AlertID)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	for _, findingID := range findingIDs {
 		data := &model.RelAlertFinding{
@@ -221,11 +227,11 @@ func (a *AlertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 		}
 		_, err := a.repository.UpsertRelAlertFinding(ctx, data)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 	}
 
-	return registerdData, nil
+	return registerdData, true, nil
 }
 
 func (a *AlertService) DeleteAlertByAnalyze(ctx context.Context, alertCondition *model.AlertCondition) error {
@@ -305,6 +311,7 @@ func (a *AlertService) NotificationAlert(
 	rules *[]model.AlertRule,
 	project *projectproto.Project,
 	findingIDs *[]uint64,
+	alertUpdated bool,
 ) error {
 	alertCondNotifications, err := a.repository.ListAlertCondNotification(ctx, alertCondition.ProjectID, alertCondition.AlertConditionID, 0, 0, time.Now().Unix())
 	if err != nil {
@@ -316,7 +323,7 @@ func (a *AlertService) NotificationAlert(
 	}
 	for _, alertCondNotification := range *alertCondNotifications {
 		// 連続通知を防ぐ
-		if time.Now().Unix() < alertCondNotification.NotifiedAt.Unix()+int64(alertCondNotification.CacheSecond) {
+		if !alertUpdated || time.Now().Unix() < alertCondNotification.NotifiedAt.Unix()+int64(alertCondNotification.CacheSecond) {
 			continue
 		}
 
