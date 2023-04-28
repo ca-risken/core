@@ -404,7 +404,7 @@ func TestRegistAlertByAnalyze(t *testing.T) {
 			if c.mockUpsertRelAlertFinding != nil || c.mockUpsertRelAlertFindingErr != nil {
 				mockDB.On("UpsertRelAlertFinding", test.RepeatMockAnything(2)...).Return(c.mockUpsertRelAlertFinding, c.mockUpsertRelAlertFindingErr).Once()
 			}
-			got, err := svc.RegistAlertByAnalyze(context.Background(), c.alertCondition, c.findingIDs)
+			got, _, err := svc.RegistAlertByAnalyze(context.Background(), c.alertCondition, c.findingIDs)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", got)
 			}
