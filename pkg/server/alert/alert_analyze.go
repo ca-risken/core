@@ -323,7 +323,7 @@ func (a *AlertService) NotificationAlert(
 	}
 	for _, alertCondNotification := range *alertCondNotifications {
 		// 連続通知を防ぐ
-		if !alertUpdated || time.Now().Unix() < alertCondNotification.NotifiedAt.Unix()+int64(alertCondNotification.CacheSecond) {
+		if !alertUpdated && time.Now().Unix() < alertCondNotification.NotifiedAt.Unix()+int64(alertCondNotification.CacheSecond) {
 			continue
 		}
 
