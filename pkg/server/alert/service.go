@@ -11,12 +11,13 @@ import (
 var _ alert.AlertServiceServer = (*AlertService)(nil)
 
 type AlertService struct {
-	repository        db.AlertRepository
-	findingClient     finding.FindingServiceClient
-	projectClient     project.ProjectServiceClient
-	maxAnalyzeAPICall int64
-	baseURL           string
-	logger            logging.Logger
+	repository         db.AlertRepository
+	findingClient      finding.FindingServiceClient
+	projectClient      project.ProjectServiceClient
+	maxAnalyzeAPICall  int64
+	baseURL            string
+	logger             logging.Logger
+	notificationLocale string
 }
 
 func NewAlertService(
@@ -26,13 +27,15 @@ func NewAlertService(
 	projectClient project.ProjectServiceClient,
 	repository db.AlertRepository,
 	logger logging.Logger,
+	notificationLocale string,
 ) *AlertService {
 	return &AlertService{
-		repository:        repository,
-		findingClient:     findingClient,
-		projectClient:     projectClient,
-		maxAnalyzeAPICall: maxAnalyzeAPICall,
-		baseURL:           baseURL,
-		logger:            logger,
+		repository:         repository,
+		findingClient:      findingClient,
+		projectClient:      projectClient,
+		maxAnalyzeAPICall:  maxAnalyzeAPICall,
+		baseURL:            baseURL,
+		logger:             logger,
+		notificationLocale: notificationLocale,
 	}
 }
