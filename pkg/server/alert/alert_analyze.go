@@ -333,7 +333,7 @@ func (a *AlertService) NotificationAlert(
 		}
 		switch notification.Type {
 		case "slack":
-			err = sendSlackNotification(ctx, a.baseURL, notification.NotifySetting, alert, project, rules, findings)
+			err = sendSlackNotification(ctx, a.baseURL, notification.NotifySetting, alert, project, rules, findings, a.defaultLocale)
 			if err != nil {
 				return fmt.Errorf("notify error: notification_id=%d, err=%w", notification.NotificationID, err)
 			}

@@ -54,13 +54,15 @@ type Config struct {
 	MaxAnalyzeAPICall int64
 	BaseURL           string
 	OpenAIToken       string
+	defaultLocale     string
 }
 
-func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken string) Config {
+func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, defaultLocale string) Config {
 	return Config{
 		MaxAnalyzeAPICall: maxAnalyzeAPICall,
 		BaseURL:           baseURL,
 		OpenAIToken:       openaiToken,
+		defaultLocale:     defaultLocale,
 	}
 }
 
@@ -86,6 +88,7 @@ func (s *Server) Run(ctx context.Context) error {
 		pc,
 		s.db,
 		s.logger,
+		s.config.defaultLocale,
 	)
 	fsvc := findingserver.NewFindingService(s.db, s.config.OpenAIToken, s.logger)
 	psvc := projectserver.NewProjectService(s.db, iamc, s.logger)

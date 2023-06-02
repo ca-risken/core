@@ -287,13 +287,13 @@ func TestPutNotification(t *testing.T) {
 		{
 			name:       "OK Insert",
 			input:      &alert.PutNotificationRequest{Notification: &alert.NotificationForUpsert{ProjectId: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url": "https://example.com"}`}},
-			want:       &alert.PutNotificationResponse{Notification: &alert.Notification{ProjectId: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url":"https://e**********","data":{}}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			want:       &alert.PutNotificationResponse{Notification: &alert.Notification{ProjectId: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url":"https://e**********","data":{},"locale":""}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockUpResp: &model.Notification{ProjectID: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:        "OK Update",
 			input:       &alert.PutNotificationRequest{Notification: &alert.NotificationForUpsert{NotificationId: 1001, ProjectId: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url": "https://example.com"}`}},
-			want:        &alert.PutNotificationResponse{Notification: &alert.Notification{NotificationId: 1001, ProjectId: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url":"https://e**********","data":{}}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			want:        &alert.PutNotificationResponse{Notification: &alert.Notification{NotificationId: 1001, ProjectId: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url":"https://e**********","data":{},"locale":""}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetResp: &model.Notification{NotificationID: 1001, ProjectID: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
 			mockUpResp:  &model.Notification{NotificationID: 1001, ProjectID: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
 		},

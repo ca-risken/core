@@ -17,6 +17,7 @@ type AlertService struct {
 	maxAnalyzeAPICall int64
 	baseURL           string
 	logger            logging.Logger
+	defaultLocale     string
 }
 
 func NewAlertService(
@@ -26,6 +27,7 @@ func NewAlertService(
 	projectClient project.ProjectServiceClient,
 	repository db.AlertRepository,
 	logger logging.Logger,
+	defaultLocale string,
 ) *AlertService {
 	return &AlertService{
 		repository:        repository,
@@ -34,5 +36,6 @@ func NewAlertService(
 		maxAnalyzeAPICall: maxAnalyzeAPICall,
 		baseURL:           baseURL,
 		logger:            logger,
+		defaultLocale:     defaultLocale,
 	}
 }

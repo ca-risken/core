@@ -28,6 +28,7 @@ type AppConf struct {
 	MaxAnalyzeAPICall int64  `split_words:"true" default:"10"`
 	BaseURL           string `split_words:"true" default:"http://localhost"`
 	OpenAIToken       string `split_words:"true"`
+	DefaultLocale     string `split_words:"true" default:"en"`
 
 	// db
 	DBMasterHost     string `split_words:"true" default:"db.middleware.svc.cluster.local"`
@@ -96,7 +97,7 @@ func main() {
 	if err != nil {
 		logger.Fatalf(ctx, "failed to create database client: %w", err)
 	}
-	c := server.NewConfig(conf.MaxAnalyzeAPICall, conf.BaseURL, conf.OpenAIToken)
+	c := server.NewConfig(conf.MaxAnalyzeAPICall, conf.BaseURL, conf.OpenAIToken, conf.DefaultLocale)
 	server := server.NewServer("0.0.0.0", conf.Port, db, logger, c)
 
 	err = server.Run(ctx)
