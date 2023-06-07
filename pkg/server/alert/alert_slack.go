@@ -24,10 +24,16 @@ type slackNotifyOption struct {
 }
 
 const (
-	LocaleJa                       = "ja"
-	LocaleEn                       = "en"
-	slackNotificationMessageJa     = "%vアラートを検知しました。"
-	slackNotificationMessageEn     = "%vDetected alerts."
+	LocaleJa                   = "ja"
+	LocaleEn                   = "en"
+	slackNotificationMessageJa = `%v問題を検知しました。内容を確認し以下のいずれかの対応を行ってください。
+	- 問題の根本原因を取り除く
+	- 意図的な設定・操作であり、リスクが小さい場合はアーカイブする
+	- 問題の性質上緊急性はなく、すぐに対応が難しい場合は目標期限を設定してPENDする`
+	slackNotificationMessageEn = `%vDetected alerts. Please review the contents and take one of the following actions
+	- Remove the root cause of the problem
+	- If it is an intentional setup/operation and the risk is small, archive it
+	- If the nature of the problem is not urgent and immediate action is difficult, set a target deadline and PEND.`
 	slackNotificationAttachmentJa  = "その他、%d件すべてのFindingは <%s/#/alert/alert?project_id=%d&from=slack|アラート画面> からご確認ください。"
 	slackNotificationAttachmentEn  = "Please check all %d Findings from <%s/#/alert/alert?project_id=%d&from=slack|Alert screen>."
 	slackNotificationTestMessageJa = "RISKENからのテスト通知です"
@@ -67,7 +73,7 @@ func sendSlackNotification(
 	return nil
 }
 
-func sendSlackTestNotification(ctx context.Context, url, notifySetting string) error {
+func sendSlackTestNotification(ctx context.Context, url, notifySetting, defaultLocale string) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
@@ -75,8 +81,16 @@ func sendSlackTestNotification(ctx context.Context, url, notifySetting string) e
 	if setting.WebhookURL == "" {
 		return nil
 	}
-
-	payload := getTestPayload(setting.Data.Channel)
+	var locale string
+	switch setting.Locale {
+	case LocaleJa:
+		locale = LocaleJa
+	case LocaleEn:
+		locale = LocaleEn
+	default:
+		locale = defaultLocale
+	}
+	payload := getTestPayload(setting.Data.Channel, locale)
 	// TODO http tracing
 	if err := slack.PostWebhook(setting.WebhookURL, payload); err != nil {
 		return fmt.Errorf("failed to send slack: %w", err)
@@ -143,9 +157,16 @@ func getPayload(
 	return &msg
 }
 
-func getTestPayload(channel string) *slack.WebhookMessage {
+func getTestPayload(channel, locale string) *slack.WebhookMessage {
+	var msgText string
+	switch locale {
+	case LocaleJa:
+		msgText = slackNotificationTestMessageJa
+	default:
+		msgText = slackNotificationTestMessageEn
+	}
 	msg := slack.WebhookMessage{
-		Text: "RISKENからのテスト通知です",
+		Text: msgText,
 	}
 	// override message
 	if channel != "" {
