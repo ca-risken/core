@@ -33,7 +33,7 @@ const (
 	slackNotificationMessageEn = `%vDetected alerts. Please review the contents and take one of the following actions
 	- Remove the root cause of the problem
 	- If it is an intentional setup/operation and the risk is small, archive it
-	- If the nature of the problem is not urgent and immediate action is difficult, set a target deadline and PEND.`
+	- If the nature of the problem is not urgent and immediate action is difficult, set a target deadline and PEND`
 	slackNotificationAttachmentJa  = "その他、%d件すべてのFindingは <%s/#/alert/alert?project_id=%d&from=slack|アラート画面> からご確認ください。"
 	slackNotificationAttachmentEn  = "Please check all %d Findings from <%s/#/alert/alert?project_id=%d&from=slack|Alert screen>."
 	slackNotificationTestMessageJa = "RISKENからのテスト通知です"
