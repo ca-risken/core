@@ -365,6 +365,11 @@ func TestValidateNotificationForUpsert(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "OK not required notify webhook url (existing notification)",
+			input:   &NotificationForUpsert{NotificationId: 1, ProjectId: 1001, Name: "test_name", Type: "test_type", NotifySetting: `{"webhook_url": ""}`},
+			wantErr: false,
+		},
+		{
 			name:    "NG invalid notify webhook url",
 			input:   &NotificationForUpsert{ProjectId: 1001, Name: "test_name", Type: "test_type", NotifySetting: `{"webhook_url": "hoge"}`},
 			wantErr: true,

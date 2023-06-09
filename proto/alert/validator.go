@@ -408,11 +408,15 @@ func (e *AlertCondRuleForUpsert) Validate() error {
 
 // Validate NotificationForUpsert
 func (e *NotificationForUpsert) Validate() error {
+	notifySettingValidation := validateNewNotifySetting
+	if e.NotificationId != 0 {
+		notifySettingValidation = validateExistingNotifySetting
+	}
 	return validation.ValidateStruct(e,
 		validation.Field(&e.ProjectId, validation.Required),
 		validation.Field(&e.Type, validation.Required, validation.Length(0, 64)),
 		validation.Field(&e.Name, validation.Required, validation.Length(0, 200)),
-		validation.Field(&e.NotifySetting, validation.Required, validation.By(validateNotifySetting)),
+		validation.Field(&e.NotifySetting, validation.Required, validation.By(notifySettingValidation)),
 	)
 }
 
@@ -430,7 +434,7 @@ type slackNotifySetting struct {
 	WebhookURL string `json:"webhook_url"`
 }
 
-func validateNotifySetting(value interface{}) error {
+func validateNewNotifySetting(value interface{}) error {
 	s, _ := value.(string)
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(s), &setting); err != nil {
@@ -442,6 +446,21 @@ func validateNotifySetting(value interface{}) error {
 	err := validation.Validate(strings.TrimSpace(setting.WebhookURL), validation.Required, is.URL)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func validateExistingNotifySetting(value interface{}) error {
+	s, _ := value.(string)
+	var setting slackNotifySetting
+	if err := json.Unmarshal([]byte(s), &setting); err != nil {
+		return fmt.Errorf("invalid json, %w", err)
+	}
+	if strings.TrimSpace(setting.WebhookURL) != "" {
+		err := validation.Validate(strings.TrimSpace(setting.WebhookURL), validation.Required, is.URL)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
