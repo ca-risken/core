@@ -435,7 +435,10 @@ type slackNotifySetting struct {
 }
 
 func validateNewNotifySetting(value interface{}) error {
-	s, _ := value.(string)
+	s, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("notify setting is not string, %v", value)
+	}
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(s), &setting); err != nil {
 		return fmt.Errorf("invalid json, %w", err)
@@ -451,7 +454,10 @@ func validateNewNotifySetting(value interface{}) error {
 }
 
 func validateExistingNotifySetting(value interface{}) error {
-	s, _ := value.(string)
+	s, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("notify setting is not string, %v", value)
+	}
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(s), &setting); err != nil {
 		return fmt.Errorf("invalid json, %w", err)

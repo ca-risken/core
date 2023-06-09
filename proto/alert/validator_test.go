@@ -1308,3 +1308,86 @@ func TestValidateAnalyzeAlertRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateNewNotifySetting(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   interface{}
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   "{\"data\": {},\"locale\": \"en\",\"webhook_url\": \"https://hogehoge\"}",
+			wantErr: false,
+		},
+		{
+			name:    "NG input is not string",
+			input:   123,
+			wantErr: true,
+		},
+		{
+			name:    "NG invalid json",
+			input:   "invalid json",
+			wantErr: true,
+		},
+		{
+			name:    "NG required webhook_url",
+			input:   "{\"data\": {},\"locale\": \"en\"}",
+			wantErr: true,
+		},
+		{
+			name:    "NG invalid webhook_url",
+			input:   "{\"data\": {},\"locale\": \"en\",\"webhook_url\": \"invalid url\"}",
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := validateNewNotifySetting(c.input)
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidateExistingNotifySetting(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   interface{}
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   "{\"data\": {},\"locale\": \"en\",\"webhook_url\": \"https://hogehoge\"}",
+			wantErr: false,
+		},
+		{
+			name:    "NG input is not string",
+			input:   123,
+			wantErr: true,
+		},
+		{
+			name:    "NG invalid json",
+			input:   "invalid json",
+			wantErr: true,
+		},
+		{
+			name:    "NG invalid webhook_url",
+			input:   "{\"data\": {},\"locale\": \"en\",\"webhook_url\": \"invalid url\"}",
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := validateExistingNotifySetting(c.input)
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
