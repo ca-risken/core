@@ -152,6 +152,62 @@ func TestPutUser(t *testing.T) {
 	}
 }
 
+func TestListUserRole(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name        string
+		projectID   uint32
+		want        *[]model.UserRole
+		wantErr     bool
+		mockClosure func(mock sqlmock.Sqlmock)
+	}{
+		{
+			name:      "OK",
+			projectID: 1,
+			want: &[]model.UserRole{
+				{RoleID: 1, UserID: 1, ProjectID: 1, CreatedAt: now, UpdatedAt: now},
+				{RoleID: 2, UserID: 2, ProjectID: 1, CreatedAt: now, UpdatedAt: now},
+			},
+			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectListUserRole)).WillReturnRows(sqlmock.NewRows([]string{
+					"user_id", "role_id", "project_id", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), uint32(1), now, now).
+					AddRow(uint32(2), uint32(2), uint32(1), now, now))
+			},
+		},
+		{
+			name:      "NG failed to list userrole",
+			projectID: 1,
+			want:      nil,
+			wantErr:   true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectListUserRole)).WillReturnError(errors.New("DB error"))
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			db, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+			}
+			c.mockClosure(mock)
+			got, err := db.ListUserRole(ctx, c.projectID)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
 func TestListUserReserved(t *testing.T) {
 	now := time.Now()
 	type args struct {

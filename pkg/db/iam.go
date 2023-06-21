@@ -251,9 +251,18 @@ func (c *Client) DeleteRole(ctx context.Context, projectID, roleID uint32) error
 }
 
 const (
+	selectListUserRole       = `select * from user_role where project_id = ?`
 	selectGetAdminUserRole   = `select * from user_role where project_id is null and user_id = ? and role_id = ?`
 	selectGetProjectUserRole = `select * from user_role where project_id = ?     and user_id = ? and role_id = ?`
 )
+
+func (c *Client) ListUserRole(ctx context.Context, projectID uint32) (*[]model.UserRole, error) {
+	var data []model.UserRole
+	if err := c.Slave.WithContext(ctx).Raw(selectListUserRole, projectID).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
 
 func (c *Client) GetUserRole(ctx context.Context, projectID, userID, roleID uint32) (*model.UserRole, error) {
 	var data model.UserRole
