@@ -552,6 +552,13 @@ untag-resource:
 		-d '{"project_id":1001, "resource_tag_id":1003}' \
 		$(CORE_API_ADDR) core.finding.FindingService.UntagResource
 
+.PHONY: untag-by-resource-name
+untag-by-resource-name:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001, "resource_name":"arn:aws:s3:::test-bucket", "tag":"aws"}' \
+		$(CORE_API_ADDR) core.finding.FindingService.UntagByResourceName
+
 .PHONY: get-pend-finding
 get-pend-finding:
 	$(GRPCURL) \
