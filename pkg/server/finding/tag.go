@@ -30,7 +30,7 @@ func (f *FindingService) untagFinding(ctx context.Context, projectID uint32, res
 		Tag:          []string{tag},
 	}
 	list, err := f.repository.ListFinding(ctx, convertListFindingRequest(req))
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
 		return err
 	}
 	if list == nil {
