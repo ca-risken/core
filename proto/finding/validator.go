@@ -281,6 +281,15 @@ func (u *UntagResourceRequest) Validate() error {
 	)
 }
 
+// Validate UntagResourceRequest
+func (u *UntagByResourceNameRequest) Validate() error {
+	return validation.ValidateStruct(u,
+		validation.Field(&u.ProjectId, validation.Required),
+		validation.Field(&u.ResourceName, validation.Required),
+		validation.Field(&u.Tag, validation.Required),
+	)
+}
+
 // Validate for GetPendFindingRequest
 func (g *GetPendFindingRequest) Validate() error {
 	return validation.ValidateStruct(g,

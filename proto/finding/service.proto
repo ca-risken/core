@@ -34,6 +34,10 @@ service FindingService {
   rpc TagResource(TagResourceRequest) returns (TagResourceResponse);
   rpc UntagResource(UntagResourceRequest) returns (google.protobuf.Empty);
 
+  // finding/resource common
+  rpc UntagByResourceName(UntagByResourceNameRequest)
+      returns (google.protobuf.Empty);
+
   // pend_finding
   rpc GetPendFinding(GetPendFindingRequest) returns (GetPendFindingResponse);
   rpc PutPendFinding(PutPendFindingRequest) returns (PutPendFindingResponse);
@@ -253,6 +257,12 @@ message TagResourceResponse { ResourceTag tag = 1; }
 message UntagResourceRequest {
   uint32 project_id = 1;
   uint64 resource_tag_id = 2;
+}
+
+message UntagByResourceNameRequest {
+  uint32 project_id = 1;
+  string resource_name = 2;
+  string tag = 3;
 }
 
 message GetPendFindingRequest {
