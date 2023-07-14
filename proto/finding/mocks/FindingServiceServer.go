@@ -42,6 +42,32 @@ func (_m *FindingServiceServer) BatchListFinding(_a0 context.Context, _a1 *findi
 	return r0, r1
 }
 
+// CleanOldResource provides a mock function with given fields: _a0, _a1
+func (_m *FindingServiceServer) CleanOldResource(_a0 context.Context, _a1 *emptypb.Empty) (*emptypb.Empty, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *emptypb.Empty
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *emptypb.Empty) (*emptypb.Empty, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *emptypb.Empty) *emptypb.Empty); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*emptypb.Empty)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *emptypb.Empty) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ClearScore provides a mock function with given fields: _a0, _a1
 func (_m *FindingServiceServer) ClearScore(_a0 context.Context, _a1 *finding.ClearScoreRequest) (*emptypb.Empty, error) {
 	ret := _m.Called(_a0, _a1)

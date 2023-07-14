@@ -643,6 +643,13 @@ get-ai-summary:
 		-d '{"project_id":1001, "finding_id": 1001, "lang":"ja"}' \
 		$(CORE_API_ADDR) core.finding.FindingService.GetAISummary
 
+.PHONY: clean-old-resource
+clean-old-resource:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{}' \
+		$(CORE_API_ADDR) core.finding.FindingService.CleanOldResource
+
 .PHONY: list-report-service
 list-report-service:
 	$(GRPCURL) -plaintext $(CORE_API_ADDR) list core.report.ReportService

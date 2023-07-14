@@ -170,6 +170,62 @@ func (_m *FindingRepository) DeleteFindingSetting(ctx context.Context, projectID
 	return r0
 }
 
+// DeleteNoFindingIdTag provides a mock function with given fields: ctx
+func (_m *FindingRepository) DeleteNoFindingIdTag(ctx context.Context) error {
+	ret := _m.Called(ctx)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context) error); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteNoResourceIdTag provides a mock function with given fields: ctx
+func (_m *FindingRepository) DeleteNoResourceIdTag(ctx context.Context) error {
+	ret := _m.Called(ctx)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context) error); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteOldFinding provides a mock function with given fields: ctx, excludeDataSource
+func (_m *FindingRepository) DeleteOldFinding(ctx context.Context, excludeDataSource []string) error {
+	ret := _m.Called(ctx, excludeDataSource)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, []string) error); ok {
+		r0 = rf(ctx, excludeDataSource)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteOldResource provides a mock function with given fields: ctx, excludeDataSource
+func (_m *FindingRepository) DeleteOldResource(ctx context.Context, excludeDataSource []string) error {
+	ret := _m.Called(ctx, excludeDataSource)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, []string) error); ok {
+		r0 = rf(ctx, excludeDataSource)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DeletePendFinding provides a mock function with given fields: ctx, projectID, findingID
 func (_m *FindingRepository) DeletePendFinding(ctx context.Context, projectID uint32, findingID uint64) error {
 	ret := _m.Called(ctx, projectID, findingID)
