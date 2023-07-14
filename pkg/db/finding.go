@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	escapeString = "*"
+	escapeString    = "*"
+	cleanBeforeDays = 30
 )
 
 type FindingRepository interface {
@@ -81,6 +82,12 @@ type FindingRepository interface {
 	GetRecommendByDataSourceType(ctx context.Context, dataSource, recommendType string) (*model.Recommend, error)
 	BulkUpsertRecommend(ctx context.Context, data []*model.Recommend) error
 	BulkUpsertRecommendFinding(ctx context.Context, data []*model.RecommendFinding) error
+
+	// Clean
+	DeleteOldResource(ctx context.Context, excludeDataSource []string) error
+	DeleteNoResourceIdTag(ctx context.Context) error
+	DeleteOldFinding(ctx context.Context, excludeDataSource []string) error
+	DeleteNoFindingIdTag(ctx context.Context) error
 }
 
 var _ FindingRepository = (*Client)(nil)
@@ -1067,4 +1074,66 @@ func (c *Client) DeletePendFinding(ctx context.Context, projectID uint32, findin
 
 type TagName struct {
 	Tag string
+}
+
+const deleteOldResource = `
+delete
+  resource
+from 
+  resource
+  left outer join (
+    select finding_id, resource_name, project_id from finding where data_source in (?)
+  ) exclude using(resource_name, project_id)
+where 
+  resource.updated_at < DATE_SUB(CURRENT_DATE, INTERVAL ? DAY)
+  and exclude.finding_id is null
+`
+
+func (c *Client) DeleteOldResource(ctx context.Context, excludeDataSource []string) error {
+	return c.Master.WithContext(ctx).Exec(deleteOldResource, excludeDataSource, cleanBeforeDays).Error
+}
+
+const deleteNoResourceIdTag = `
+delete
+  resource_tag
+from
+  resource_tag
+  left outer join resource using(resource_id, project_id)
+where 
+  resource.resource_id is null
+`
+
+func (c *Client) DeleteNoResourceIdTag(ctx context.Context) error {
+	return c.Master.WithContext(ctx).Exec(deleteNoResourceIdTag).Error
+}
+
+const deleteOldFinding = `
+delete 
+  finding
+from 
+  finding
+  left outer join (
+    select finding_id, resource_name, project_id from finding where data_source in (?)
+  ) exclude using(finding_id)
+where 
+  updated_at < DATE_SUB(CURRENT_DATE, INTERVAL ? DAY)
+  and exclude.finding_id is null
+`
+
+func (c *Client) DeleteOldFinding(ctx context.Context, excludeDataSource []string) error {
+	return c.Master.WithContext(ctx).Exec(deleteOldFinding, excludeDataSource, cleanBeforeDays).Error
+}
+
+const deleteNoFindingIdTag = `
+delete
+  finding_tag
+from 
+  finding_tag 
+  left outer join finding using(finding_id, project_id)
+where 
+  finding.finding_id is null
+`
+
+func (c *Client) DeleteNoFindingIdTag(ctx context.Context) error {
+	return c.Master.WithContext(ctx).Exec(deleteNoFindingIdTag).Error
 }

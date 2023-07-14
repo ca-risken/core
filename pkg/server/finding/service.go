@@ -15,18 +15,20 @@ const (
 var _ finding.FindingServiceServer = (*FindingService)(nil)
 
 type FindingService struct {
-	repository db.FindingRepository
-	logger     logging.Logger
-	ai         ai.AIService
+	repository              db.FindingRepository
+	logger                  logging.Logger
+	ai                      ai.AIService
+	excludeDeleteDataSource []string
 }
 
 var _ finding.FindingServiceServer = (*FindingService)(nil)
 
-func NewFindingService(repository db.FindingRepository, openaiToken string, logger logging.Logger) *FindingService {
+func NewFindingService(repository db.FindingRepository, openaiToken string, excludeDeleteDataSource []string, logger logging.Logger) *FindingService {
 	return &FindingService{
-		repository: repository,
-		logger:     logger,
-		ai:         ai.NewAIClient(openaiToken, logger),
+		repository:              repository,
+		logger:                  logger,
+		ai:                      ai.NewAIClient(openaiToken, logger),
+		excludeDeleteDataSource: excludeDeleteDataSource,
 	}
 }
 

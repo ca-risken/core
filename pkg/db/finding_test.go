@@ -877,3 +877,169 @@ func TestGeneratePrefixMatchSQLStatement(t *testing.T) {
 		})
 	}
 }
+
+func TestDeleteOldResource(t *testing.T) {
+	client, mock, err := newMockClient()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+	cases := []struct {
+		name    string
+		input   []string
+		wantErr bool
+		mockErr error
+	}{
+		{
+			name:    "OK",
+			input:   []string{"code:gitleaks"},
+			wantErr: false,
+		},
+		{
+			name:    "NG DB error",
+			input:   []string{"code:gitleaks"},
+			wantErr: true,
+			mockErr: errors.New("DB error"),
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			if c.mockErr != nil {
+				mock.ExpectExec(regexp.QuoteMeta(deleteOldResource)).WillReturnError(c.mockErr)
+			} else {
+				mock.ExpectExec(regexp.QuoteMeta(deleteOldResource)).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
+			}
+
+			err := client.DeleteOldResource(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatal("No error")
+			}
+		})
+	}
+}
+
+func TestDeleteNoResourceIdTag(t *testing.T) {
+	client, mock, err := newMockClient()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+	cases := []struct {
+		name    string
+		wantErr bool
+		mockErr error
+	}{
+		{
+			name:    "OK",
+			wantErr: false,
+		},
+		{
+			name:    "NG DB error",
+			wantErr: true,
+			mockErr: errors.New("DB error"),
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			if c.mockErr != nil {
+				mock.ExpectExec(regexp.QuoteMeta(deleteNoResourceIdTag)).WillReturnError(c.mockErr)
+			} else {
+				mock.ExpectExec(regexp.QuoteMeta(deleteNoResourceIdTag)).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
+			}
+
+			err := client.DeleteNoResourceIdTag(ctx)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatal("No error")
+			}
+		})
+	}
+}
+
+func TestDeleteOldFinding(t *testing.T) {
+	client, mock, err := newMockClient()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+	cases := []struct {
+		name    string
+		input   []string
+		wantErr bool
+		mockErr error
+	}{
+		{
+			name:    "OK",
+			input:   []string{"code:gitleaks"},
+			wantErr: false,
+		},
+		{
+			name:    "NG DB error",
+			input:   []string{"code:gitleaks"},
+			wantErr: true,
+			mockErr: errors.New("DB error"),
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			if c.mockErr != nil {
+				mock.ExpectExec(regexp.QuoteMeta(deleteOldFinding)).WillReturnError(c.mockErr)
+			} else {
+				mock.ExpectExec(regexp.QuoteMeta(deleteOldFinding)).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
+			}
+
+			err := client.DeleteOldFinding(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatal("No error")
+			}
+		})
+	}
+}
+
+func TestDeleteNoFindingIdTag(t *testing.T) {
+	client, mock, err := newMockClient()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+	cases := []struct {
+		name    string
+		wantErr bool
+		mockErr error
+	}{
+		{
+			name:    "OK",
+			wantErr: false,
+		},
+		{
+			name:    "NG DB error",
+			wantErr: true,
+			mockErr: errors.New("DB error"),
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			if c.mockErr != nil {
+				mock.ExpectExec(regexp.QuoteMeta(deleteNoFindingIdTag)).WillReturnError(c.mockErr)
+			} else {
+				mock.ExpectExec(regexp.QuoteMeta(deleteNoFindingIdTag)).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
+			}
+
+			err := client.DeleteNoFindingIdTag(ctx)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatal("No error")
+			}
+		})
+	}
+}

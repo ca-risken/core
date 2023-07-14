@@ -34,10 +34,6 @@ service FindingService {
   rpc TagResource(TagResourceRequest) returns (TagResourceResponse);
   rpc UntagResource(UntagResourceRequest) returns (google.protobuf.Empty);
 
-  // finding/resource common
-  rpc UntagByResourceName(UntagByResourceNameRequest)
-      returns (google.protobuf.Empty);
-
   // pend_finding
   rpc GetPendFinding(GetPendFindingRequest) returns (GetPendFindingResponse);
   rpc PutPendFinding(PutPendFindingRequest) returns (PutPendFindingResponse);
@@ -60,6 +56,11 @@ service FindingService {
 
   // AI
   rpc GetAISummary(GetAISummaryRequest) returns (GetAISummaryResponse);
+
+  // finding/resource common
+  rpc UntagByResourceName(UntagByResourceNameRequest)
+      returns (google.protobuf.Empty);
+  rpc CleanOldResource(google.protobuf.Empty) returns (google.protobuf.Empty);
 }
 
 message ListFindingRequest {
@@ -259,12 +260,6 @@ message UntagResourceRequest {
   uint64 resource_tag_id = 2;
 }
 
-message UntagByResourceNameRequest {
-  uint32 project_id = 1;
-  string resource_name = 2;
-  string tag = 3;
-}
-
 message GetPendFindingRequest {
   uint32 project_id = 1;
   uint64 finding_id = 2;
@@ -338,3 +333,9 @@ message GetAISummaryRequest {
 }
 
 message GetAISummaryResponse { string answer = 1; }
+
+message UntagByResourceNameRequest {
+  uint32 project_id = 1;
+  string resource_name = 2;
+  string tag = 3;
+}
