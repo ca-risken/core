@@ -19,10 +19,10 @@ type AlertRepository interface {
 	GetAlertHistory(context.Context, uint32, uint32) (*model.AlertHistory, error)
 	UpsertAlertHistory(context.Context, *model.AlertHistory) (*model.AlertHistory, error)
 	DeleteAlertHistory(context.Context, uint32, uint32) error
-	ListRelAlertFinding(context.Context, uint32, uint32, uint32, int64, int64) (*[]model.RelAlertFinding, error)
-	GetRelAlertFinding(context.Context, uint32, uint32, uint32) (*model.RelAlertFinding, error)
+	ListRelAlertFinding(context.Context, uint32, uint32, uint64, int64, int64) (*[]model.RelAlertFinding, error)
+	GetRelAlertFinding(context.Context, uint32, uint32, uint64) (*model.RelAlertFinding, error)
 	UpsertRelAlertFinding(context.Context, *model.RelAlertFinding) (*model.RelAlertFinding, error)
-	DeleteRelAlertFinding(context.Context, uint32, uint32, uint32) error
+	DeleteRelAlertFinding(context.Context, uint32, uint32, uint64) error
 	ListAlertCondition(context.Context, uint32, []string, bool, int64, int64) (*[]model.AlertCondition, error)
 	GetAlertCondition(context.Context, uint32, uint32) (*model.AlertCondition, error)
 	UpsertAlertCondition(context.Context, *model.AlertCondition) (*model.AlertCondition, error)
@@ -174,7 +174,7 @@ func (c *Client) deleteAlertHistory(ctx context.Context, projectID uint32, alert
 	return nil
 }
 
-func (c *Client) ListRelAlertFinding(ctx context.Context, projectID, alertID, findingID uint32, fromAt, toAt int64) (*[]model.RelAlertFinding, error) {
+func (c *Client) ListRelAlertFinding(ctx context.Context, projectID, alertID uint32, findingID uint64, fromAt, toAt int64) (*[]model.RelAlertFinding, error) {
 	query := `select * from rel_alert_finding where project_id = ? and updated_at between ? and ?`
 	var params []interface{}
 	params = append(params, projectID, time.Unix(fromAt, 0), time.Unix(toAt, 0))
@@ -193,7 +193,7 @@ func (c *Client) ListRelAlertFinding(ctx context.Context, projectID, alertID, fi
 	return &data, nil
 }
 
-func (c *Client) GetRelAlertFinding(ctx context.Context, projectID, alertID, findingID uint32) (*model.RelAlertFinding, error) {
+func (c *Client) GetRelAlertFinding(ctx context.Context, projectID, alertID uint32, findingID uint64) (*model.RelAlertFinding, error) {
 	var data model.RelAlertFinding
 	if err := c.Slave.WithContext(ctx).Where("project_id = ? AND alert_id = ? AND finding_id = ?", projectID, alertID, findingID).First(&data).Error; err != nil {
 		return nil, err
@@ -216,14 +216,14 @@ func (c *Client) upsertRelAlertFinding(ctx context.Context, data *model.RelAlert
 	return &retData, nil
 }
 
-func (c *Client) DeleteRelAlertFinding(ctx context.Context, projectID, alertID, findingID uint32) error {
+func (c *Client) DeleteRelAlertFinding(ctx context.Context, projectID, alertID uint32, findingID uint64) error {
 	operation := func() error {
 		return c.deleteRelAlertFinding(ctx, projectID, alertID, findingID)
 	}
 	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "DeleteRelAlertFinding"))
 }
 
-func (c *Client) deleteRelAlertFinding(ctx context.Context, projectID, alertID, findingID uint32) error {
+func (c *Client) deleteRelAlertFinding(ctx context.Context, projectID, alertID uint32, findingID uint64) error {
 	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_id = ? AND finding_id = ?", projectID, alertID, findingID).Delete(model.RelAlertFinding{}).Error; err != nil {
 		return err
 	}

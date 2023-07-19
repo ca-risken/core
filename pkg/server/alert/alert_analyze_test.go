@@ -414,3 +414,135 @@ func TestRegistAlertByAnalyze(t *testing.T) {
 		})
 	}
 }
+
+func TestCompareLatestAlertFinding(t *testing.T) {
+	type args struct {
+		alert      *model.Alert
+		condition  *model.AlertCondition
+		findingIDs []uint64
+	}
+	type mockListRelAlertFinding struct {
+		Resp *[]model.RelAlertFinding
+		Err  error
+	}
+	cases := []struct {
+		name    string
+		input   args
+		mock    mockListRelAlertFinding
+		want    *compareLatestAlertFindingResult
+		wantErr bool
+	}{
+		{
+			name: "Match the latest alert finding",
+			input: args{
+				alert:      &model.Alert{AlertID: 1, Description: "test", Severity: "HIGH"},
+				condition:  &model.AlertCondition{AlertConditionID: 1, Description: "test", Severity: "HIGH"},
+				findingIDs: []uint64{1},
+			},
+			mock: mockListRelAlertFinding{
+				Resp: &[]model.RelAlertFinding{
+					{AlertID: 1, FindingID: 1},
+				},
+				Err: nil,
+			},
+			want: &compareLatestAlertFindingResult{
+				isMatchAlertFindings: true,
+				existsNewFindings:    false,
+			},
+		},
+		{
+			name: "Exists new finding(s)",
+			input: args{
+				alert:      &model.Alert{AlertID: 1, Description: "test", Severity: "HIGH"},
+				condition:  &model.AlertCondition{AlertConditionID: 1, Description: "test", Severity: "HIGH"},
+				findingIDs: []uint64{1, 2},
+			},
+			mock: mockListRelAlertFinding{
+				Resp: &[]model.RelAlertFinding{
+					{AlertID: 1, FindingID: 1},
+				},
+				Err: nil,
+			},
+			want: &compareLatestAlertFindingResult{
+				isMatchAlertFindings: false,
+				existsNewFindings:    true,
+			},
+		},
+		{
+			name: "No new finding(s)",
+			input: args{
+				alert:      &model.Alert{AlertID: 1, Description: "test", Severity: "HIGH"},
+				condition:  &model.AlertCondition{AlertConditionID: 1, Description: "test", Severity: "HIGH"},
+				findingIDs: []uint64{1},
+			},
+			mock: mockListRelAlertFinding{
+				Resp: &[]model.RelAlertFinding{
+					{AlertID: 1, FindingID: 1},
+					{AlertID: 1, FindingID: 2},
+				},
+				Err: nil,
+			},
+			want: &compareLatestAlertFindingResult{
+				isMatchAlertFindings: false,
+				existsNewFindings:    false,
+			},
+		},
+		{
+			name: "Different alert description",
+			input: args{
+				alert:      &model.Alert{AlertID: 1, Description: "different desc", Severity: "HIGH"},
+				condition:  &model.AlertCondition{AlertConditionID: 1, Description: "test", Severity: "HIGH"},
+				findingIDs: []uint64{1},
+			},
+			want: &compareLatestAlertFindingResult{
+				isMatchAlertFindings: false,
+				existsNewFindings:    false,
+			},
+		},
+		{
+			name: "Different alert description",
+			input: args{
+				alert:      &model.Alert{AlertID: 1, Description: "test", Severity: "LOW"},
+				condition:  &model.AlertCondition{AlertConditionID: 1, Description: "test", Severity: "HIGH"},
+				findingIDs: []uint64{1},
+			},
+			want: &compareLatestAlertFindingResult{
+				isMatchAlertFindings: false,
+				existsNewFindings:    false,
+			},
+		},
+		{
+			name: "DB error",
+			input: args{
+				alert:      &model.Alert{AlertID: 1, Description: "test", Severity: "HIGH"},
+				condition:  &model.AlertCondition{AlertConditionID: 1, Description: "test", Severity: "HIGH"},
+				findingIDs: []uint64{1},
+			},
+			mock: mockListRelAlertFinding{
+				Resp: nil,
+				Err:  errors.New("DB error"),
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB, logger: logging.NewLogger()}
+			if c.mock.Resp != nil || c.mock.Err != nil {
+				mockDB.On("ListRelAlertFinding", test.RepeatMockAnything(6)...).Return(c.mock.Resp, c.mock.Err).Once()
+			}
+			got, err := svc.compareLatestAlertFinding(context.TODO(), c.input.alert, c.input.condition, c.input.findingIDs)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatalf("Expected error")
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
