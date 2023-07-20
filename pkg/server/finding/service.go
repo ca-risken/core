@@ -23,11 +23,11 @@ type FindingService struct {
 
 var _ finding.FindingServiceServer = (*FindingService)(nil)
 
-func NewFindingService(repository db.FindingRepository, openaiToken string, excludeDeleteDataSource []string, logger logging.Logger) *FindingService {
+func NewFindingService(repository db.FindingRepository, openaiToken, chatGPTModel string, excludeDeleteDataSource []string, logger logging.Logger) *FindingService {
 	return &FindingService{
 		repository:              repository,
 		logger:                  logger,
-		ai:                      ai.NewAIClient(openaiToken, logger),
+		ai:                      ai.NewAIClient(openaiToken, chatGPTModel, logger),
 		excludeDeleteDataSource: excludeDeleteDataSource,
 	}
 }

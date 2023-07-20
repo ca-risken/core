@@ -37,18 +37,23 @@ type AIService interface {
 type AIClient struct {
 	openaiClient *openai.Client
 	cache        *freecache.Cache
+	chatGPTModel string // https://platform.openai.com/docs/models/overview
 	logger       logging.Logger
 }
 
 var _ AIService = (*AIClient)(nil)
 
-func NewAIClient(token string, logger logging.Logger) AIService {
+func NewAIClient(token, model string, logger logging.Logger) AIService {
 	if token == "" {
+		return nil
+	}
+	if model == "" {
 		return nil
 	}
 	client := AIClient{
 		openaiClient: openai.NewClient(token),
 		logger:       logger,
+		chatGPTModel: model,
 		cache:        freecache.NewCache(CACHE_SIZE),
 	}
 	return &client
@@ -69,7 +74,7 @@ func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding
 	resp, err := a.openaiClient.CreateChatCompletion(
 		ctx,
 		openai.ChatCompletionRequest{
-			Model: openai.GPT3Dot5Turbo,
+			Model: a.chatGPTModel,
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleSystem,
