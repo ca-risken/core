@@ -120,13 +120,13 @@ func (a *AlertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 	}
 	a.logger.Info(ctx, "finish matching per rule")
 	if len(matchFindingIDs) > 0 {
-		registAlert, alertUpdated, err := a.RegistAlertByAnalyze(ctx, alertCondition, matchFindingIDs)
+		registAlert, existsNewFindings, err := a.RegistAlertByAnalyze(ctx, alertCondition, matchFindingIDs)
 		if err != nil {
 			return err
 		}
 		// AlertがACTIVE、かつMatchしている場合はAlert通知を行う
 		if registAlert.Status == alert.Status_ACTIVE.String() {
-			err = a.NotificationAlert(ctx, alertCondition, registAlert, alertRules, project, &matchFindingIDs, alertUpdated)
+			err = a.NotificationAlert(ctx, alertCondition, registAlert, alertRules, project, &matchFindingIDs, existsNewFindings)
 			if err != nil {
 				return err
 			}
@@ -144,7 +144,7 @@ func (a *AlertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 // アラートを登録・更新します。既に登録済みのアラートがある場合は処理をスキップします。
 // Return:
 //  1. *model.Alert (登録したアラート)
-//  2. bool (アラートの更新があったかどうか)
+//  2. bool (新規Findingがあったかどうか)
 //  3. error (エラー)
 func (a *AlertService) RegistAlertByAnalyze(ctx context.Context, alertCondition *model.AlertCondition, findingIDs []uint64) (*model.Alert, bool, error) {
 	// AlertConditionに該当するAlertが既に存在しているか確認
@@ -159,9 +159,9 @@ func (a *AlertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 	// 登録済みかつStatusがPENDINGの場合、PENDING
 	var status string
 	var alertID uint32
-	var isMatchExisting bool
+	compareLatestAlertFinding := &compareLatestAlertFindingResult{}
 	if !noRecord {
-		isMatchExisting, err = a.isMatchExistingAlert(ctx, savedData, alertCondition, findingIDs)
+		compareLatestAlertFinding, err = a.compareLatestAlertFinding(ctx, savedData, alertCondition, findingIDs)
 		if err != nil {
 			return nil, false, err
 		}
@@ -181,15 +181,15 @@ func (a *AlertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 		Status:           status,
 	}
 	// upsert Alert
-	registerdData, err := a.repository.UpsertAlert(ctx, data)
+	registeredData, err := a.repository.UpsertAlert(ctx, data)
 	if err != nil {
-		a.logger.Errorf(ctx, "Error occured when upsert alert. alertConditionID: %v, err: %v", alertCondition.AlertConditionID, err)
+		a.logger.Errorf(ctx, "Error occurred when upsert alert. alertConditionID: %v, err: %v", alertCondition.AlertConditionID, err)
 		return nil, false, err
 	}
 
 	// 過去のアラートと状態が同じなら以下の処理はスキップ
-	if isMatchExisting {
-		return registerdData, false, nil
+	if compareLatestAlertFinding.isMatchAlertFindings {
+		return registeredData, compareLatestAlertFinding.existsNewFindings, nil
 	}
 
 	// AlertHistoryに登録するための現在のRelAlertFindingを整形
@@ -202,28 +202,28 @@ func (a *AlertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 	// AlertHistoryの登録
 	dataAlertHistory := &model.AlertHistory{
 		HistoryType:    historyType,
-		AlertID:        registerdData.AlertID,
-		Description:    registerdData.Description,
+		AlertID:        registeredData.AlertID,
+		Description:    registeredData.Description,
 		FindingHistory: findingHistory,
-		Severity:       registerdData.Severity,
-		ProjectID:      registerdData.ProjectID,
+		Severity:       registeredData.Severity,
+		ProjectID:      registeredData.ProjectID,
 	}
 	_, err = a.repository.UpsertAlertHistory(ctx, dataAlertHistory)
 	if err != nil {
-		a.logger.Errorf(ctx, "Error occured when upsert AlertHistory. err: %v", err)
+		a.logger.Errorf(ctx, "Error occurred when upsert AlertHistory. err: %v", err)
 		return nil, false, err
 	}
 
 	//RelAlertFindingの更新 (削除して再登録)
-	err = a.deleteRelAlertFindingByAlertID(ctx, registerdData.ProjectID, registerdData.AlertID)
+	err = a.deleteRelAlertFindingByAlertID(ctx, registeredData.ProjectID, registeredData.AlertID)
 	if err != nil {
 		return nil, false, err
 	}
 	for _, findingID := range findingIDs {
 		data := &model.RelAlertFinding{
-			AlertID:   registerdData.AlertID,
-			FindingID: uint32(findingID),
-			ProjectID: registerdData.ProjectID,
+			AlertID:   registeredData.AlertID,
+			FindingID: findingID,
+			ProjectID: registeredData.ProjectID,
 		}
 		_, err := a.repository.UpsertRelAlertFinding(ctx, data)
 		if err != nil {
@@ -231,7 +231,7 @@ func (a *AlertService) RegistAlertByAnalyze(ctx context.Context, alertCondition 
 		}
 	}
 
-	return registerdData, true, nil
+	return registeredData, compareLatestAlertFinding.existsNewFindings, nil
 }
 
 func (a *AlertService) DeleteAlertByAnalyze(ctx context.Context, alertCondition *model.AlertCondition) error {
@@ -291,7 +291,7 @@ func (a *AlertService) DeleteAlertByAnalyze(ctx context.Context, alertCondition 
 }
 
 func (a *AlertService) deleteRelAlertFindingByAlertID(ctx context.Context, projectID, alertID uint32) error {
-	listRelAlertFinding, err := a.repository.ListRelAlertFinding(ctx, projectID, alertID, uint32(0), 0, time.Now().Unix())
+	listRelAlertFinding, err := a.repository.ListRelAlertFinding(ctx, projectID, alertID, uint64(0), 0, time.Now().Unix())
 	if err != nil {
 		return err
 	}
@@ -311,7 +311,7 @@ func (a *AlertService) NotificationAlert(
 	rules *[]model.AlertRule,
 	project *projectproto.Project,
 	findingIDs *[]uint64,
-	alertUpdated bool,
+	existsNewFindings bool,
 ) error {
 	alertCondNotifications, err := a.repository.ListAlertCondNotification(ctx, alertCondition.ProjectID, alertCondition.AlertConditionID, 0, 0, time.Now().Unix())
 	if err != nil {
@@ -323,7 +323,7 @@ func (a *AlertService) NotificationAlert(
 	}
 	for _, alertCondNotification := range *alertCondNotifications {
 		// 連続通知を防ぐ
-		if !alertUpdated && time.Now().Unix() < alertCondNotification.NotifiedAt.Unix()+int64(alertCondNotification.CacheSecond) {
+		if !existsNewFindings && time.Now().Unix() < alertCondNotification.NotifiedAt.Unix()+int64(alertCondNotification.CacheSecond) {
 			continue
 		}
 
@@ -377,27 +377,45 @@ func (a *AlertService) analyzeAlertByRule(ctx context.Context, alertRule *model.
 	return resp.Count >= alertRule.FindingCnt, &resp.FindingId, nil
 }
 
-func (a *AlertService) isMatchExistingAlert(ctx context.Context, savedAlert *model.Alert, alertCondition *model.AlertCondition, findingIDs []uint64) (bool, error) {
+type compareLatestAlertFindingResult struct {
+	isMatchAlertFindings bool
+	existsNewFindings    bool
+}
+
+func (a *AlertService) compareLatestAlertFinding(
+	ctx context.Context, savedAlert *model.Alert, alertCondition *model.AlertCondition, findingIDs []uint64,
+) (
+	*compareLatestAlertFindingResult, error,
+) {
+	result := compareLatestAlertFindingResult{
+		isMatchAlertFindings: false,
+		existsNewFindings:    false,
+	}
 	if savedAlert.Description != alertCondition.Description {
-		return false, nil
+		return &result, nil
 	}
 	if savedAlert.Severity != alertCondition.Severity {
-		return false, nil
+		return &result, nil
 	}
 	now := time.Now().Unix()
 	relAlertFindings, err := a.repository.ListRelAlertFinding(ctx, savedAlert.ProjectID, savedAlert.AlertID, 0, 0, now)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	if len(*relAlertFindings) != len(findingIDs) {
-		return false, nil
-	}
+	alertFindingMap := map[uint64]bool{}
 	for _, relAlertFinding := range *relAlertFindings {
-		if !isContainsFindings(uint64(relAlertFinding.FindingID), findingIDs) {
-			return false, nil
+		alertFindingMap[relAlertFinding.FindingID] = true
+	}
+	for _, findingID := range findingIDs {
+		if _, exists := alertFindingMap[findingID]; !exists {
+			result.existsNewFindings = true
+			break
 		}
 	}
-	return true, nil
+	if len(*relAlertFindings) == len(findingIDs) && !result.existsNewFindings {
+		result.isMatchAlertFindings = true
+	}
+	return &result, nil
 }
 
 func (a *AlertService) makeFindingIDs(ctx context.Context, findingIDs []uint64) (string, error) {

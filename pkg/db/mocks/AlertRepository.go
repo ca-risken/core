@@ -128,11 +128,11 @@ func (_m *AlertRepository) DeleteNotification(_a0 context.Context, _a1 uint32, _
 }
 
 // DeleteRelAlertFinding provides a mock function with given fields: _a0, _a1, _a2, _a3
-func (_m *AlertRepository) DeleteRelAlertFinding(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 uint32) error {
+func (_m *AlertRepository) DeleteRelAlertFinding(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 uint64) error {
 	ret := _m.Called(_a0, _a1, _a2, _a3)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint64) error); ok {
 		r0 = rf(_a0, _a1, _a2, _a3)
 	} else {
 		r0 = ret.Error(0)
@@ -350,15 +350,15 @@ func (_m *AlertRepository) GetNotification(_a0 context.Context, _a1 uint32, _a2 
 }
 
 // GetRelAlertFinding provides a mock function with given fields: _a0, _a1, _a2, _a3
-func (_m *AlertRepository) GetRelAlertFinding(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 uint32) (*model.RelAlertFinding, error) {
+func (_m *AlertRepository) GetRelAlertFinding(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 uint64) (*model.RelAlertFinding, error) {
 	ret := _m.Called(_a0, _a1, _a2, _a3)
 
 	var r0 *model.RelAlertFinding
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32) (*model.RelAlertFinding, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint64) (*model.RelAlertFinding, error)); ok {
 		return rf(_a0, _a1, _a2, _a3)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32) *model.RelAlertFinding); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint64) *model.RelAlertFinding); ok {
 		r0 = rf(_a0, _a1, _a2, _a3)
 	} else {
 		if ret.Get(0) != nil {
@@ -366,7 +366,7 @@ func (_m *AlertRepository) GetRelAlertFinding(_a0 context.Context, _a1 uint32, _
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint32) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint64) error); ok {
 		r1 = rf(_a0, _a1, _a2, _a3)
 	} else {
 		r1 = ret.Error(1)
@@ -636,15 +636,15 @@ func (_m *AlertRepository) ListNotification(_a0 context.Context, _a1 uint32, _a2
 }
 
 // ListRelAlertFinding provides a mock function with given fields: _a0, _a1, _a2, _a3, _a4, _a5
-func (_m *AlertRepository) ListRelAlertFinding(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 uint32, _a4 int64, _a5 int64) (*[]model.RelAlertFinding, error) {
+func (_m *AlertRepository) ListRelAlertFinding(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 uint64, _a4 int64, _a5 int64) (*[]model.RelAlertFinding, error) {
 	ret := _m.Called(_a0, _a1, _a2, _a3, _a4, _a5)
 
 	var r0 *[]model.RelAlertFinding
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, int64, int64) (*[]model.RelAlertFinding, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint64, int64, int64) (*[]model.RelAlertFinding, error)); ok {
 		return rf(_a0, _a1, _a2, _a3, _a4, _a5)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, int64, int64) *[]model.RelAlertFinding); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint64, int64, int64) *[]model.RelAlertFinding); ok {
 		r0 = rf(_a0, _a1, _a2, _a3, _a4, _a5)
 	} else {
 		if ret.Get(0) != nil {
@@ -652,7 +652,7 @@ func (_m *AlertRepository) ListRelAlertFinding(_a0 context.Context, _a1 uint32, 
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint32, int64, int64) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint64, int64, int64) error); ok {
 		r1 = rf(_a0, _a1, _a2, _a3, _a4, _a5)
 	} else {
 		r1 = ret.Error(1)

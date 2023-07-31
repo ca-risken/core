@@ -52,7 +52,7 @@ message AlertHistoryForUpsert {
 // RelAlertFinding
 message RelAlertFinding {
   uint32 alert_id = 1;
-  uint32 finding_id = 2;
+  uint64 finding_id = 2;
   uint32 project_id = 3;
   int64 created_at = 4;
   int64 updated_at = 5;
@@ -61,7 +61,7 @@ message RelAlertFinding {
 // RelAlertFindingForUpsert
 message RelAlertFindingForUpsert {
   uint32 alert_id = 1;
-  uint32 finding_id = 2;
+  uint64 finding_id = 2;
   uint32 project_id = 3;
 }
 
