@@ -254,6 +254,13 @@ func (r *ListNotificationRequest) Validate() error {
 	)
 }
 
+// Validate ListNotificationForInternalRequest
+func (r *ListNotificationForInternalRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.ProjectId, validation.Required),
+	)
+}
+
 // Validate GetNotificationRequest
 func (r *GetNotificationRequest) Validate() error {
 	return validation.ValidateStruct(r,

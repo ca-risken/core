@@ -1741,7 +1741,7 @@ func TestConvertNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := a.convertNotification(context.Background(), c.input)
+			got, err := a.convertNotification(context.Background(), c.input, true)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
 			}

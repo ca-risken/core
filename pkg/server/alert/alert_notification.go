@@ -23,6 +23,26 @@ func (a *AlertService) ListNotification(ctx context.Context, req *alert.ListNoti
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
+	return a.listNotification(ctx, req, true)
+}
+
+func (a *AlertService) ListNotificationForInternal(ctx context.Context, req *alert.ListNotificationForInternalRequest) (*alert.ListNotificationForInternalResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	resp, err := a.listNotification(ctx, &alert.ListNotificationRequest{
+		ProjectId: req.ProjectId,
+		Type:      req.Type,
+	}, false)
+	if err != nil {
+		return nil, err
+	}
+	return &alert.ListNotificationForInternalResponse{
+		Notification: resp.Notification,
+	}, nil
+}
+
+func (a *AlertService) listNotification(ctx context.Context, req *alert.ListNotificationRequest, mask bool) (*alert.ListNotificationResponse, error) {
 	converted := convertListNotificationRequest(req)
 	list, err := a.repository.ListNotification(ctx, converted.ProjectId, converted.Type, converted.FromAt, converted.ToAt)
 	if err != nil {
@@ -33,7 +53,7 @@ func (a *AlertService) ListNotification(ctx context.Context, req *alert.ListNoti
 	}
 	data := alert.ListNotificationResponse{}
 	for _, d := range *list {
-		convertedNotification, err := a.convertNotification(ctx, &d)
+		convertedNotification, err := a.convertNotification(ctx, &d, mask)
 		if err != nil {
 			a.logger.Errorf(ctx, "Failed to convert Notification. error: %v", err)
 			return nil, err
@@ -67,7 +87,7 @@ func (a *AlertService) GetNotification(ctx context.Context, req *alert.GetNotifi
 		}
 		return nil, err
 	}
-	convertedNotification, err := a.convertNotification(ctx, data)
+	convertedNotification, err := a.convertNotification(ctx, data, true)
 	if err != nil {
 		a.logger.Errorf(ctx, "Failed to convert Notification. error: %v", err)
 		return nil, err
@@ -122,7 +142,7 @@ func (a *AlertService) PutNotification(ctx context.Context, req *alert.PutNotifi
 	if err != nil {
 		return nil, err
 	}
-	convertedNotification, err := a.convertNotification(ctx, registerdData)
+	convertedNotification, err := a.convertNotification(ctx, registerdData, true)
 	if err != nil {
 		a.logger.Errorf(ctx, "Failed to convert Notification. error: %v", err)
 		return nil, err
@@ -199,21 +219,25 @@ func (a *AlertService) TestNotification(ctx context.Context, req *alert.TestNoti
 	return &empty.Empty{}, nil
 }
 
-func (a *AlertService) convertNotification(ctx context.Context, n *model.Notification) (*alert.Notification, error) {
+func (a *AlertService) convertNotification(ctx context.Context, n *model.Notification, mask bool) (*alert.Notification, error) {
 	if n == nil {
 		return &alert.Notification{}, nil
 	}
-	maskingSetting, err := maskingNotifySetting(n.Type, n.NotifySetting)
-	if err != nil {
-		a.logger.Errorf(ctx, "Failed to masking notify setting. %v", err)
-		return &alert.Notification{}, err
+	var err error
+	setting := n.NotifySetting
+	if mask {
+		setting, err = maskingNotifySetting(n.Type, setting)
+		if err != nil {
+			a.logger.Errorf(ctx, "Failed to masking notify setting. %v", err)
+			return &alert.Notification{}, err
+		}
 	}
 	return &alert.Notification{
 		NotificationId: n.NotificationID,
 		Name:           n.Name,
 		ProjectId:      n.ProjectID,
 		Type:           n.Type,
-		NotifySetting:  maskingSetting,
+		NotifySetting:  setting,
 		CreatedAt:      n.CreatedAt.Unix(),
 		UpdatedAt:      n.UpdatedAt.Unix(),
 	}, nil
