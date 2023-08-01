@@ -17,6 +17,10 @@ const (
 	serviceName = "core"
 )
 
+var (
+	samplingRate float64 = 0.3000
+)
+
 type AppConf struct {
 	Port            string   `default:"8080"`
 	EnvName         string   `default:"local" split_words:"true"`
@@ -76,9 +80,10 @@ func main() {
 	defer pc.Stop()
 
 	tc := &tracer.Config{
-		ServiceName: getFullServiceName(),
-		Environment: conf.EnvName,
-		Debug:       conf.TraceDebug,
+		ServiceName:  getFullServiceName(),
+		Environment:  conf.EnvName,
+		Debug:        conf.TraceDebug,
+		SamplingRate: &samplingRate,
 	}
 	tracer.Start(tc)
 	defer tracer.Stop()

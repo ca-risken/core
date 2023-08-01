@@ -30,7 +30,7 @@ type AlertHistory struct {
 // RelAlertFinding entity model
 type RelAlertFinding struct {
 	AlertID   uint32
-	FindingID uint32
+	FindingID uint64
 	ProjectID uint32
 	CreatedAt time.Time
 	UpdatedAt time.Time
