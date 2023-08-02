@@ -667,6 +667,32 @@ func (_m *AlertServiceServer) ListNotification(_a0 context.Context, _a1 *alert.L
 	return r0, r1
 }
 
+// ListNotificationForInternal provides a mock function with given fields: _a0, _a1
+func (_m *AlertServiceServer) ListNotificationForInternal(_a0 context.Context, _a1 *alert.ListNotificationForInternalRequest) (*alert.ListNotificationForInternalResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *alert.ListNotificationForInternalResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *alert.ListNotificationForInternalRequest) (*alert.ListNotificationForInternalResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *alert.ListNotificationForInternalRequest) *alert.ListNotificationForInternalResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*alert.ListNotificationForInternalResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *alert.ListNotificationForInternalRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListRelAlertFinding provides a mock function with given fields: _a0, _a1
 func (_m *AlertServiceServer) ListRelAlertFinding(_a0 context.Context, _a1 *alert.ListRelAlertFindingRequest) (*alert.ListRelAlertFindingResponse, error) {
 	ret := _m.Called(_a0, _a1)

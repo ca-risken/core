@@ -357,8 +357,15 @@ delete-alert_cond_rule:
 list-notification:
 	$(GRPCURL) \
 		-plaintext \
-		-d '{"project_id":1001, "type":"slack", "from_at":1560000000, "to_at":1660000000}' \
+		-d '{"project_id":1001, "type":"slack"}' \
 		$(CORE_API_ADDR) core.alert.AlertService.ListNotification
+
+.PHONY: list-notification-for-internal
+list-notification-for-internal:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001, "type":"slack"}' \
+		$(CORE_API_ADDR) core.alert.AlertService.ListNotificationForInternal
 
 .PHONY: get-notification
 get-notification:

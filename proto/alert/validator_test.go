@@ -982,6 +982,35 @@ func TestValidateListNotificationRequest(t *testing.T) {
 	}
 }
 
+func TestValidateListNotificationForInternalRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *ListNotificationForInternalRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &ListNotificationForInternalRequest{ProjectId: 1, Type: "slack"},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &ListNotificationForInternalRequest{Type: "slack"},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
 func TestValidateGetNotificationRequest(t *testing.T) {
 	cases := []struct {
 		name    string

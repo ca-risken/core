@@ -60,6 +60,8 @@ service AlertService {
   // notification
   rpc ListNotification(ListNotificationRequest)
       returns (ListNotificationResponse);
+  rpc ListNotificationForInternal(ListNotificationForInternalRequest)
+      returns (ListNotificationForInternalResponse);
   rpc GetNotification(GetNotificationRequest) returns (GetNotificationResponse);
   rpc PutNotification(PutNotificationRequest) returns (PutNotificationResponse);
   rpc DeleteNotification(DeleteNotificationRequest)
@@ -272,6 +274,15 @@ message ListNotificationRequest {
 }
 
 message ListNotificationResponse { repeated Notification notification = 1; }
+
+message ListNotificationForInternalRequest {
+  uint32 project_id = 1;
+  string type = 2;
+}
+
+message ListNotificationForInternalResponse {
+  repeated Notification notification = 1;
+}
 
 message GetNotificationRequest {
   uint32 project_id = 1;

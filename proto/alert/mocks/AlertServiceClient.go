@@ -844,6 +844,39 @@ func (_m *AlertServiceClient) ListNotification(ctx context.Context, in *alert.Li
 	return r0, r1
 }
 
+// ListNotificationForInternal provides a mock function with given fields: ctx, in, opts
+func (_m *AlertServiceClient) ListNotificationForInternal(ctx context.Context, in *alert.ListNotificationForInternalRequest, opts ...grpc.CallOption) (*alert.ListNotificationForInternalResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *alert.ListNotificationForInternalResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *alert.ListNotificationForInternalRequest, ...grpc.CallOption) (*alert.ListNotificationForInternalResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *alert.ListNotificationForInternalRequest, ...grpc.CallOption) *alert.ListNotificationForInternalResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*alert.ListNotificationForInternalResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *alert.ListNotificationForInternalRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListRelAlertFinding provides a mock function with given fields: ctx, in, opts
 func (_m *AlertServiceClient) ListRelAlertFinding(ctx context.Context, in *alert.ListRelAlertFindingRequest, opts ...grpc.CallOption) (*alert.ListRelAlertFindingResponse, error) {
 	_va := make([]interface{}, len(opts))
