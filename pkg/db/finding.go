@@ -1076,9 +1076,9 @@ type TagName struct {
 	Tag string
 }
 
-const deleteOldResource = `
-delete
-  resource
+const selectForDeleteOldResource = `
+select
+  resource_id
 from 
   resource
   left outer join (
@@ -1090,12 +1090,22 @@ where
 `
 
 func (c *Client) DeleteOldResource(ctx context.Context, excludeDataSource []string) error {
-	return c.Master.WithContext(ctx).Exec(deleteOldResource, excludeDataSource, cleanBeforeDays).Error
+	var ids []uint64
+	if err := c.Slave.WithContext(ctx).Raw(selectForDeleteOldResource, excludeDataSource, cleanBeforeDays).
+		Scan(&ids).Error; err != nil {
+		return err
+	}
+	for _, id := range ids {
+		if err := c.Master.WithContext(ctx).Delete(&model.Resource{ResourceID: id}).Error; err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-const deleteNoResourceIdTag = `
-delete
-  resource_tag
+const selectForDeleteNoResourceIdTag = `
+select
+  resource_tag_id
 from
   resource_tag
   left outer join resource using(resource_id, project_id)
@@ -1104,12 +1114,21 @@ where
 `
 
 func (c *Client) DeleteNoResourceIdTag(ctx context.Context) error {
-	return c.Master.WithContext(ctx).Exec(deleteNoResourceIdTag).Error
+	var ids []uint64
+	if err := c.Slave.WithContext(ctx).Raw(selectForDeleteNoResourceIdTag).Scan(&ids).Error; err != nil {
+		return err
+	}
+	for _, id := range ids {
+		if err := c.Master.WithContext(ctx).Delete(&model.ResourceTag{ResourceTagID: id}).Error; err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-const deleteOldFinding = `
-delete 
-  finding
+const selectForDeleteOldFinding = `
+select 
+  finding_id
 from 
   finding
   left outer join (
@@ -1121,12 +1140,22 @@ where
 `
 
 func (c *Client) DeleteOldFinding(ctx context.Context, excludeDataSource []string) error {
-	return c.Master.WithContext(ctx).Exec(deleteOldFinding, excludeDataSource, cleanBeforeDays).Error
+	var ids []uint64
+	if err := c.Slave.WithContext(ctx).Raw(selectForDeleteOldFinding, excludeDataSource, cleanBeforeDays).
+		Scan(&ids).Error; err != nil {
+		return err
+	}
+	for _, id := range ids {
+		if err := c.Master.WithContext(ctx).Delete(&model.Finding{FindingID: id}).Error; err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-const deleteNoFindingIdTag = `
-delete
-  finding_tag
+const selectForDeleteNoFindingIdTag = `
+select
+  finding_tag_id
 from 
   finding_tag 
   left outer join finding using(finding_id, project_id)
@@ -1135,5 +1164,14 @@ where
 `
 
 func (c *Client) DeleteNoFindingIdTag(ctx context.Context) error {
-	return c.Master.WithContext(ctx).Exec(deleteNoFindingIdTag).Error
+	var ids []uint64
+	if err := c.Slave.WithContext(ctx).Raw(selectForDeleteNoFindingIdTag).Scan(&ids).Error; err != nil {
+		return err
+	}
+	for _, id := range ids {
+		if err := c.Master.WithContext(ctx).Delete(&model.FindingTag{FindingTagID: id}).Error; err != nil {
+			return err
+		}
+	}
+	return nil
 }
