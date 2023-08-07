@@ -884,32 +884,37 @@ func TestDeleteOldResource(t *testing.T) {
 		t.Fatalf("Failed to open mock sql db, error: %+v", err)
 	}
 	cases := []struct {
-		name    string
-		input   []string
-		wantErr bool
-		mockErr error
+		name        string
+		input       []string
+		wantErr     bool
+		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name:    "OK",
-			input:   []string{"code:gitleaks"},
+			name:  "OK",
+			input: []string{"code:gitleaks"},
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectForDeleteOldResource)).
+					WillReturnRows(sqlmock.NewRows([]string{"resource_id"}).AddRow(uint64(1)))
+				mock.ExpectBegin()
+				mock.ExpectExec("DELETE FROM `resource`").WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectCommit()
+			},
 			wantErr: false,
 		},
 		{
 			name:    "NG DB error",
 			input:   []string{"code:gitleaks"},
 			wantErr: true,
-			mockErr: errors.New("DB error"),
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectForDeleteOldResource)).
+					WillReturnError(errors.New("DB error"))
+			},
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			ctx := context.Background()
-			if c.mockErr != nil {
-				mock.ExpectExec(regexp.QuoteMeta(deleteOldResource)).WillReturnError(c.mockErr)
-			} else {
-				mock.ExpectExec(regexp.QuoteMeta(deleteOldResource)).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
-			}
-
+			c.mockClosure(mock)
 			err := client.DeleteOldResource(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -927,29 +932,34 @@ func TestDeleteNoResourceIdTag(t *testing.T) {
 		t.Fatalf("Failed to open mock sql db, error: %+v", err)
 	}
 	cases := []struct {
-		name    string
-		wantErr bool
-		mockErr error
+		name        string
+		wantErr     bool
+		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
 			name:    "OK",
 			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectForDeleteNoResourceIdTag)).
+					WillReturnRows(sqlmock.NewRows([]string{"resource_tag_id"}).AddRow(uint64(1)))
+				mock.ExpectBegin()
+				mock.ExpectExec("DELETE FROM `resource_tag`").WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectCommit()
+			},
 		},
 		{
 			name:    "NG DB error",
 			wantErr: true,
-			mockErr: errors.New("DB error"),
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectForDeleteNoResourceIdTag)).
+					WillReturnError(errors.New("DB error"))
+			},
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			ctx := context.Background()
-			if c.mockErr != nil {
-				mock.ExpectExec(regexp.QuoteMeta(deleteNoResourceIdTag)).WillReturnError(c.mockErr)
-			} else {
-				mock.ExpectExec(regexp.QuoteMeta(deleteNoResourceIdTag)).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
-			}
-
+			c.mockClosure(mock)
 			err := client.DeleteNoResourceIdTag(ctx)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -967,32 +977,37 @@ func TestDeleteOldFinding(t *testing.T) {
 		t.Fatalf("Failed to open mock sql db, error: %+v", err)
 	}
 	cases := []struct {
-		name    string
-		input   []string
-		wantErr bool
-		mockErr error
+		name        string
+		input       []string
+		wantErr     bool
+		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
 			name:    "OK",
 			input:   []string{"code:gitleaks"},
 			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectForDeleteOldFinding)).
+					WillReturnRows(sqlmock.NewRows([]string{"finding_id"}).AddRow(uint64(1)))
+				mock.ExpectBegin()
+				mock.ExpectExec("DELETE FROM `finding`").WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectCommit()
+			},
 		},
 		{
 			name:    "NG DB error",
 			input:   []string{"code:gitleaks"},
 			wantErr: true,
-			mockErr: errors.New("DB error"),
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectForDeleteOldFinding)).
+					WillReturnError(errors.New("DB error"))
+			},
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			ctx := context.Background()
-			if c.mockErr != nil {
-				mock.ExpectExec(regexp.QuoteMeta(deleteOldFinding)).WillReturnError(c.mockErr)
-			} else {
-				mock.ExpectExec(regexp.QuoteMeta(deleteOldFinding)).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
-			}
-
+			c.mockClosure(mock)
 			err := client.DeleteOldFinding(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -1010,29 +1025,34 @@ func TestDeleteNoFindingIdTag(t *testing.T) {
 		t.Fatalf("Failed to open mock sql db, error: %+v", err)
 	}
 	cases := []struct {
-		name    string
-		wantErr bool
-		mockErr error
+		name        string
+		wantErr     bool
+		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
 			name:    "OK",
 			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectForDeleteNoFindingIdTag)).
+					WillReturnRows(sqlmock.NewRows([]string{"finding_tag_id"}).AddRow(uint64(1)))
+				mock.ExpectBegin()
+				mock.ExpectExec("DELETE FROM `finding_tag`").WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectCommit()
+			},
 		},
 		{
 			name:    "NG DB error",
 			wantErr: true,
-			mockErr: errors.New("DB error"),
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectForDeleteNoFindingIdTag)).
+					WillReturnError(errors.New("DB error"))
+			},
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			ctx := context.Background()
-			if c.mockErr != nil {
-				mock.ExpectExec(regexp.QuoteMeta(deleteNoFindingIdTag)).WillReturnError(c.mockErr)
-			} else {
-				mock.ExpectExec(regexp.QuoteMeta(deleteNoFindingIdTag)).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
-			}
-
+			c.mockClosure(mock)
 			err := client.DeleteNoFindingIdTag(ctx)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
