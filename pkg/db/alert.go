@@ -14,6 +14,7 @@ type AlertRepository interface {
 	ListAlert(context.Context, uint32, []string, []string, string, int64, int64) (*[]model.Alert, error)
 	GetAlert(context.Context, uint32, uint32) (*model.Alert, error)
 	UpsertAlert(context.Context, *model.Alert) (*model.Alert, error)
+	UpdateAlertFirstViewedAt(context.Context, uint32, uint32, int64) error
 	DeleteAlert(context.Context, uint32, uint32) error
 	ListAlertHistory(context.Context, uint32, uint32, string, uint32) (*[]model.AlertHistory, error)
 	GetAlertHistory(context.Context, uint32, uint32) (*model.AlertHistory, error)
@@ -90,6 +91,14 @@ func (c *Client) UpsertAlert(ctx context.Context, data *model.Alert) (*model.Ale
 		return c.upsertAlert(ctx, data)
 	}
 	return backoff.RetryNotifyWithData(operation, c.retryer, c.newRetryLogger(ctx, "UpsertAlert"))
+}
+
+func (c *Client) UpdateAlertFirstViewedAt(ctx context.Context, projectID, alertID uint32, viewedAt int64) error {
+
+	if err := c.Master.WithContext(ctx).Model(&model.Alert{}).Where("project_id = ? AND alert_id = ?", projectID, alertID).Update("first_viewed_at", time.Unix(viewedAt, 0)).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *Client) upsertAlert(ctx context.Context, data *model.Alert) (*model.Alert, error) {
