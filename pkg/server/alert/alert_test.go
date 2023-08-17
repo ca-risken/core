@@ -216,6 +216,68 @@ func TestPutAlert(t *testing.T) {
 	}
 }
 
+func TestPutAlertFirstViewedAt(t *testing.T) {
+	var ctx context.Context
+	now := time.Now()
+
+	cases := []struct {
+		name        string
+		input       *alert.PutAlertFirstViewedAtRequest
+		wantErr     bool
+		mockGetResp *model.Alert
+		mockGetErr  error
+		callUpdate  bool
+		mockUpErr   error
+	}{
+		{
+			name:        "OK",
+			input:       &alert.PutAlertFirstViewedAtRequest{ProjectId: 1001, AlertId: 1001},
+			mockGetResp: &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+			callUpdate:  true,
+		},
+		{
+			name:        "OK Already set",
+			input:       &alert.PutAlertFirstViewedAtRequest{ProjectId: 1001, AlertId: 1001},
+			mockGetResp: &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now, FirstViewedAt: now},
+		},
+		{
+			name:    "NG Validation Error",
+			input:   &alert.PutAlertFirstViewedAtRequest{AlertId: 1001},
+			wantErr: true,
+		},
+		{
+			name:       "NG GetAlert Error",
+			input:      &alert.PutAlertFirstViewedAtRequest{ProjectId: 1001, AlertId: 1001},
+			mockGetErr: errors.New("something error"),
+			wantErr:    true,
+		},
+		{
+			name:        "NG Update Error",
+			input:       &alert.PutAlertFirstViewedAtRequest{ProjectId: 1001, AlertId: 1001},
+			mockGetResp: &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+			callUpdate:  true,
+			mockUpErr:   errors.New("something error"),
+			wantErr:     true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			svc := AlertService{repository: mockDB, logger: logging.NewLogger()}
+			if c.mockGetResp != nil || c.mockGetErr != nil {
+				mockDB.On("GetAlert", test.RepeatMockAnything(3)...).Return(c.mockGetResp, c.mockGetErr).Once()
+			}
+			if c.callUpdate {
+				mockDB.On("UpdateAlertFirstViewedAt", test.RepeatMockAnything(4)...).Return(c.mockUpErr).Once()
+			}
+			_, err := svc.PutAlertFirstViewedAt(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
+}
+
 func TestDeleteAlert(t *testing.T) {
 	var ctx context.Context
 	cases := []struct {

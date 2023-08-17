@@ -661,6 +661,20 @@ func (_m *AlertRepository) ListRelAlertFinding(_a0 context.Context, _a1 uint32, 
 	return r0, r1
 }
 
+// UpdateAlertFirstViewedAt provides a mock function with given fields: _a0, _a1, _a2, _a3
+func (_m *AlertRepository) UpdateAlertFirstViewedAt(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 int64) error {
+	ret := _m.Called(_a0, _a1, _a2, _a3)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, int64) error); ok {
+		r0 = rf(_a0, _a1, _a2, _a3)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // UpsertAlert provides a mock function with given fields: _a0, _a1
 func (_m *AlertRepository) UpsertAlert(_a0 context.Context, _a1 *model.Alert) (*model.Alert, error) {
 	ret := _m.Called(_a0, _a1)

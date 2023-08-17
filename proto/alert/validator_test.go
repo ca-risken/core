@@ -134,6 +134,40 @@ func TestValidatePutAlertRequest(t *testing.T) {
 	}
 }
 
+func TestValidatePutAlertFirstViewedAtRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *PutAlertFirstViewedAtRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &PutAlertFirstViewedAtRequest{ProjectId: 1001, AlertId: 1001},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required(project_id)",
+			input:   &PutAlertFirstViewedAtRequest{AlertId: 1001},
+			wantErr: true,
+		},
+		{
+			name:    "NG Required(alert_id)",
+			input:   &PutAlertFirstViewedAtRequest{ProjectId: 1001},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
 func TestValidateDeleteAlertRequest(t *testing.T) {
 	cases := []struct {
 		name    string

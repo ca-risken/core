@@ -42,6 +42,14 @@ func (r *PutAlertRequest) Validate() error {
 	return r.Alert.Validate()
 }
 
+// Validate PutAlertRequest
+func (r *PutAlertFirstViewedAtRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.ProjectId, validation.Required),
+		validation.Field(&r.AlertId, validation.Required),
+	)
+}
+
 // Validate DeleteAlertRequest
 func (r *DeleteAlertRequest) Validate() error {
 	return validation.ValidateStruct(r,

@@ -206,6 +206,13 @@ put-alert:
 		-d '{"project_id":1001, "alert":{"alert_condition_id": 1001, "description":"hogehoge", "severity": "low", "status": 1, "project_id":1001}}' \
 		$(CORE_API_ADDR) core.alert.AlertService.PutAlert
 
+.PHONY: put-alert-first-viewed-at
+put-alert-first-viewed-at:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001, "alert_id":1001}' \
+		$(CORE_API_ADDR) core.alert.AlertService.PutAlertFirstViewedAt
+
 .PHONY: delete-alert
 delete-alert:
 	$(GRPCURL) \

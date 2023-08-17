@@ -11,6 +11,8 @@ service AlertService {
   rpc ListAlert(ListAlertRequest) returns (ListAlertResponse);
   rpc GetAlert(GetAlertRequest) returns (GetAlertResponse);
   rpc PutAlert(PutAlertRequest) returns (PutAlertResponse);
+  rpc PutAlertFirstViewedAt(PutAlertFirstViewedAtRequest)
+      returns (google.protobuf.Empty);
   rpc DeleteAlert(DeleteAlertRequest) returns (google.protobuf.Empty);
 
   // alert_history
@@ -108,6 +110,11 @@ message PutAlertRequest {
 }
 
 message PutAlertResponse { Alert alert = 1; }
+
+message PutAlertFirstViewedAtRequest {
+  uint32 project_id = 1;
+  uint32 alert_id = 2;
+}
 
 message DeleteAlertRequest {
   uint32 project_id = 1;

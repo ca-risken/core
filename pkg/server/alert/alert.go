@@ -136,6 +136,31 @@ func (a *AlertService) PutAlert(ctx context.Context, req *alert.PutAlertRequest)
 	return &alert.PutAlertResponse{Alert: convertAlert(registeredData)}, nil
 }
 
+func (a *AlertService) PutAlertFirstViewedAt(ctx context.Context, req *alert.PutAlertFirstViewedAtRequest) (*empty.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	// Alertの存在チェック
+	// 存在して、FirstViewedAtが0でない場合は終了
+	savedData, err := a.repository.GetAlert(ctx, req.ProjectId, req.AlertId)
+	if err != nil {
+		return nil, err
+	}
+	if !savedData.FirstViewedAt.IsZero() {
+		return &empty.Empty{}, nil
+	}
+	unixTime := time.Now().Unix()
+
+	// Fiding upsert
+	err = a.repository.UpdateAlertFirstViewedAt(ctx, req.ProjectId, req.AlertId, unixTime)
+	if err != nil {
+		return nil, err
+	}
+
+	return &empty.Empty{}, nil
+}
+
 func (a *AlertService) DeleteAlert(ctx context.Context, req *alert.DeleteAlertRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
