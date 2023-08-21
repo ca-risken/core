@@ -238,7 +238,7 @@ func TestPutAlertFirstViewedAt(t *testing.T) {
 		{
 			name:        "OK Already set",
 			input:       &alert.PutAlertFirstViewedAtRequest{ProjectId: 1001, AlertId: 1001},
-			mockGetResp: &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now, FirstViewedAt: now},
+			mockGetResp: &model.Alert{AlertID: 1001, ProjectID: 1001, AlertConditionID: 1001, Description: "desc", Severity: "high", Status: "ACTIVE", CreatedAt: now, UpdatedAt: now, FirstViewedAt: &now},
 		},
 		{
 			name:    "NG Validation Error",

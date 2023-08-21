@@ -10,7 +10,7 @@ type Alert struct {
 	Severity         string
 	ProjectID        uint32
 	Status           string
-	FirstViewedAt    time.Time
+	FirstViewedAt    *time.Time
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 }

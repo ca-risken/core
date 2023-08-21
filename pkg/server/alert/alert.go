@@ -147,7 +147,7 @@ func (a *AlertService) PutAlertFirstViewedAt(ctx context.Context, req *alert.Put
 	if err != nil {
 		return nil, err
 	}
-	if !savedData.FirstViewedAt.IsZero() {
+	if savedData.FirstViewedAt != nil && !savedData.FirstViewedAt.IsZero() {
 		return &empty.Empty{}, nil
 	}
 	unixTime := time.Now().Unix()

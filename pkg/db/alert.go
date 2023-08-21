@@ -94,7 +94,6 @@ func (c *Client) UpsertAlert(ctx context.Context, data *model.Alert) (*model.Ale
 }
 
 func (c *Client) UpdateAlertFirstViewedAt(ctx context.Context, projectID, alertID uint32, viewedAt int64) error {
-
 	if err := c.Master.WithContext(ctx).Model(&model.Alert{}).Where("project_id = ? AND alert_id = ?", projectID, alertID).Update("first_viewed_at", time.Unix(viewedAt, 0)).Error; err != nil {
 		return err
 	}
