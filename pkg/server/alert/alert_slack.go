@@ -34,8 +34,8 @@ const (
 	- Remove the root cause of the problem
 	- If it is an intentional setup/operation and the risk is small, archive it
 	- If the nature of the problem is not urgent and immediate action is difficult, set a target deadline and PEND`
-	slackNotificationAttachmentJa  = "その他、%d件すべてのFindingは <%s/#/alert/alert?project_id=%d&alert_id=%d&from=slack|アラート画面> からご確認ください。"
-	slackNotificationAttachmentEn  = "Please check all %d Findings from <%s/#/alert/alert?project_id=%d&alert_id=%d&from=slack|Alert screen>."
+	slackNotificationAttachmentJa  = "その他、%d件すべてのFindingは <%s/alert/alert?project_id=%d&alert_id=%d&from=slack|アラート画面> からご確認ください。"
+	slackNotificationAttachmentEn  = "Please check all %d Findings from <%s/alert/alert?project_id=%d&alert_id=%d&from=slack|Alert screen>."
 	slackNotificationTestMessageJa = "RISKENからのテスト通知です"
 	slackNotificationTestMessageEn = "This is a test notification from RISKEN"
 )
@@ -115,7 +115,7 @@ func getPayload(
 		Color: getColor(alert.Severity),
 		Fields: []slack.AttachmentField{
 			{
-				Value: fmt.Sprintf("<%s/#/alert/alert?project_id=%d&alert_id=%d&from=slack|%s>", url, project.ProjectId, alert.AlertID, alert.Description),
+				Value: fmt.Sprintf("<%s/alert/alert?project_id=%d&alert_id=%d&from=slack|%s>", url, project.ProjectId, alert.AlertID, alert.Description),
 			},
 			{
 				Title: "Rules",
@@ -230,7 +230,7 @@ func getFindingAttachment(url string, projectID, alertID uint32, findings *findi
 			Color: getColorByScore(f.Score),
 			Fields: []slack.AttachmentField{
 				{
-					Value: fmt.Sprintf("<%s/#/finding/finding?project_id=%d&finding_id=%d&from_score=0&status=1&alert_id=%d&from=slack|%s>", url, projectID, f.FindingID, alertID, f.Description),
+					Value: fmt.Sprintf("<%s/finding/finding?project_id=%d&finding_id=%d&from_score=0&status=1&alert_id=%d&from=slack|%s>", url, projectID, f.FindingID, alertID, f.Description),
 				},
 				{
 					Title: "DataSource",
