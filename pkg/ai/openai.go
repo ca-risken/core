@@ -3,10 +3,13 @@ package ai
 import (
 	"context"
 	"crypto/md5"
+	"errors"
 	"fmt"
+	"io"
 
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/proto/finding"
 	"github.com/coocood/freecache"
 	"github.com/sashabaranov/go-openai"
 )
@@ -32,6 +35,13 @@ Recommendation: %s
 
 type AIService interface {
 	AskAISummaryFromFinding(ctx context.Context, f *model.Finding, r *model.Recommend, lang string) (string, error)
+	AskAISummaryStreamFromFinding(
+		ctx context.Context,
+		f *model.Finding,
+		r *model.Recommend,
+		lang string,
+		stream finding.FindingService_GetAISummaryStreamServer,
+	) error
 }
 
 type AIClient struct {
@@ -106,6 +116,79 @@ func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding
 		return "", fmt.Errorf("cache set error: err=%w", err)
 	}
 	return answer, nil
+}
+
+func (a *AIClient) AskAISummaryStreamFromFinding(
+	ctx context.Context, f *model.Finding, r *model.Recommend, lang string, stream finding.FindingService_GetAISummaryStreamServer,
+) error {
+	cacheKey := generateCacheKey(fmt.Sprintf(CACHE_KEY_FORMAT, f.FindingID, lang))
+	if got, err := a.cache.Get(cacheKey); err == nil {
+		a.logger.Infof(ctx, "Cache HIT: finding_id=%d, lang=%s", f.FindingID, lang)
+		if sendErr := stream.Send(&finding.GetAISummaryResponse{Answer: string(got)}); err != nil {
+			return sendErr
+		}
+		return nil
+	}
+	promptSystem := PROMPT_SYSTEM_MSG_EN
+	promptSummary := PROMPT_SUMMARY_EN
+	if lang == LANG_JP {
+		promptSystem = PROMPT_SYSTEM_MSG_JP
+		promptSummary = PROMPT_SUMMARY_JP
+	}
+	streamResp, err := a.openaiClient.CreateChatCompletionStream(
+		ctx,
+		openai.ChatCompletionRequest{
+			Model: a.chatGPTModel,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleSystem,
+					Content: promptSystem,
+				},
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: promptSummary,
+				},
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: generateFindingDataForAI(f, r),
+				},
+			},
+			Stream: true,
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("openai API error: finding_id=%d, err=%w", f.FindingID, err)
+	}
+	defer streamResp.Close()
+
+	var usageTokens int
+	var answer string
+	for {
+		resp, err := streamResp.Recv()
+		if err != nil && !errors.Is(err, io.EOF) {
+			return fmt.Errorf("openai API streaming error: finding_id=%d, err=%w", f.FindingID, err)
+		}
+
+		if resp.Choices != nil || len(resp.Choices) > 0 {
+			if sendErr := stream.Send(&finding.GetAISummaryResponse{Answer: resp.Choices[0].Delta.Content}); err != nil {
+				return sendErr
+			}
+			usageTokens += resp.Usage.TotalTokens
+			answer += resp.Choices[0].Delta.Content
+		}
+		if errors.Is(err, io.EOF) {
+			break
+		}
+	}
+
+	fields := map[string]interface{}{
+		"openai_token": usageTokens,
+	}
+	a.logger.WithItemsf(ctx, logging.InfoLevel, fields, "OpenAI usage tokens: %d", usageTokens)
+	if err := a.cache.Set(cacheKey, []byte(answer), CACHE_EXPIRE_SEC); err != nil {
+		return fmt.Errorf("cache set error: err=%w", err)
+	}
+	return nil
 }
 
 func generateFindingDataForAI(f *model.Finding, r *model.Recommend) string {

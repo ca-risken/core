@@ -3628,7 +3628,7 @@ var file_finding_service_proto_rawDesc = []byte{
 	0x63, 0x74, 0x49, 0x64, 0x12, 0x23, 0x0a, 0x0d, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65,
 	0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x72, 0x65, 0x73,
 	0x6f, 0x75, 0x72, 0x63, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x10, 0x0a, 0x03, 0x74, 0x61, 0x67,
-	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x74, 0x61, 0x67, 0x32, 0xff, 0x15, 0x0a, 0x0e,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x74, 0x61, 0x67, 0x32, 0xde, 0x16, 0x0a, 0x0e,
 	0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x52,
 	0x0a, 0x0b, 0x4c, 0x69, 0x73, 0x74, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x12, 0x20, 0x2e,
 	0x63, 0x6f, 0x72, 0x65, 0x2e, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x4c, 0x69, 0x73,
@@ -3795,19 +3795,25 @@ var file_finding_service_proto_rawDesc = []byte{
 	0x6d, 0x6d, 0x61, 0x72, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x22, 0x2e, 0x63,
 	0x6f, 0x72, 0x65, 0x2e, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x47, 0x65, 0x74, 0x41,
 	0x49, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x12, 0x57, 0x0a, 0x13, 0x55, 0x6e, 0x74, 0x61, 0x67, 0x42, 0x79, 0x52, 0x65, 0x73, 0x6f, 0x75,
-	0x72, 0x63, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x28, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x66,
-	0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x55, 0x6e, 0x74, 0x61, 0x67, 0x42, 0x79, 0x52, 0x65,
-	0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x42, 0x0a, 0x10, 0x43, 0x6c, 0x65,
-	0x61, 0x6e, 0x4f, 0x6c, 0x64, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x12, 0x16, 0x2e,
-	0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e,
-	0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x42, 0x29, 0x5a,
-	0x27, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72,
-	0x69, 0x73, 0x6b, 0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x2f, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x12, 0x5d, 0x0a, 0x12, 0x47, 0x65, 0x74, 0x41, 0x49, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79,
+	0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x12, 0x21, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x66, 0x69,
+	0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x47, 0x65, 0x74, 0x41, 0x49, 0x53, 0x75, 0x6d, 0x6d, 0x61,
+	0x72, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x22, 0x2e, 0x63, 0x6f, 0x72, 0x65,
+	0x2e, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x47, 0x65, 0x74, 0x41, 0x49, 0x53, 0x75,
+	0x6d, 0x6d, 0x61, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x30, 0x01, 0x12,
+	0x57, 0x0a, 0x13, 0x55, 0x6e, 0x74, 0x61, 0x67, 0x42, 0x79, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72,
+	0x63, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x28, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x66, 0x69,
+	0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x55, 0x6e, 0x74, 0x61, 0x67, 0x42, 0x79, 0x52, 0x65, 0x73,
+	0x6f, 0x75, 0x72, 0x63, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
+	0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x42, 0x0a, 0x10, 0x43, 0x6c, 0x65, 0x61,
+	0x6e, 0x4f, 0x6c, 0x64, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x12, 0x16, 0x2e, 0x67,
+	0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45,
+	0x6d, 0x70, 0x74, 0x79, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x42, 0x29, 0x5a, 0x27,
+	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69,
+	0x73, 0x6b, 0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f,
+	0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -3953,42 +3959,44 @@ var file_finding_service_proto_depIdxs = []int32{
 	45, // 54: core.finding.FindingService.GetRecommend:input_type -> core.finding.GetRecommendRequest
 	47, // 55: core.finding.FindingService.PutRecommend:input_type -> core.finding.PutRecommendRequest
 	49, // 56: core.finding.FindingService.GetAISummary:input_type -> core.finding.GetAISummaryRequest
-	51, // 57: core.finding.FindingService.UntagByResourceName:input_type -> core.finding.UntagByResourceNameRequest
-	69, // 58: core.finding.FindingService.CleanOldResource:input_type -> google.protobuf.Empty
-	1,  // 59: core.finding.FindingService.ListFinding:output_type -> core.finding.ListFindingResponse
-	3,  // 60: core.finding.FindingService.BatchListFinding:output_type -> core.finding.BatchListFindingResponse
-	5,  // 61: core.finding.FindingService.GetFinding:output_type -> core.finding.GetFindingResponse
-	7,  // 62: core.finding.FindingService.PutFinding:output_type -> core.finding.PutFindingResponse
-	69, // 63: core.finding.FindingService.PutFindingBatch:output_type -> google.protobuf.Empty
-	69, // 64: core.finding.FindingService.DeleteFinding:output_type -> google.protobuf.Empty
-	11, // 65: core.finding.FindingService.ListFindingTag:output_type -> core.finding.ListFindingTagResponse
-	13, // 66: core.finding.FindingService.ListFindingTagName:output_type -> core.finding.ListFindingTagNameResponse
-	15, // 67: core.finding.FindingService.TagFinding:output_type -> core.finding.TagFindingResponse
-	69, // 68: core.finding.FindingService.UntagFinding:output_type -> google.protobuf.Empty
-	69, // 69: core.finding.FindingService.ClearScore:output_type -> google.protobuf.Empty
-	19, // 70: core.finding.FindingService.ListResource:output_type -> core.finding.ListResourceResponse
-	21, // 71: core.finding.FindingService.GetResource:output_type -> core.finding.GetResourceResponse
-	23, // 72: core.finding.FindingService.PutResource:output_type -> core.finding.PutResourceResponse
-	69, // 73: core.finding.FindingService.PutResourceBatch:output_type -> google.protobuf.Empty
-	69, // 74: core.finding.FindingService.DeleteResource:output_type -> google.protobuf.Empty
-	27, // 75: core.finding.FindingService.ListResourceTag:output_type -> core.finding.ListResourceTagResponse
-	29, // 76: core.finding.FindingService.ListResourceTagName:output_type -> core.finding.ListResourceTagNameResponse
-	31, // 77: core.finding.FindingService.TagResource:output_type -> core.finding.TagResourceResponse
-	69, // 78: core.finding.FindingService.UntagResource:output_type -> google.protobuf.Empty
-	34, // 79: core.finding.FindingService.GetPendFinding:output_type -> core.finding.GetPendFindingResponse
-	36, // 80: core.finding.FindingService.PutPendFinding:output_type -> core.finding.PutPendFindingResponse
-	69, // 81: core.finding.FindingService.DeletePendFinding:output_type -> google.protobuf.Empty
-	39, // 82: core.finding.FindingService.ListFindingSetting:output_type -> core.finding.ListFindingSettingResponse
-	41, // 83: core.finding.FindingService.GetFindingSetting:output_type -> core.finding.GetFindingSettingResponse
-	43, // 84: core.finding.FindingService.PutFindingSetting:output_type -> core.finding.PutFindingSettingResponse
-	69, // 85: core.finding.FindingService.DeleteFindingSetting:output_type -> google.protobuf.Empty
-	46, // 86: core.finding.FindingService.GetRecommend:output_type -> core.finding.GetRecommendResponse
-	48, // 87: core.finding.FindingService.PutRecommend:output_type -> core.finding.PutRecommendResponse
-	50, // 88: core.finding.FindingService.GetAISummary:output_type -> core.finding.GetAISummaryResponse
-	69, // 89: core.finding.FindingService.UntagByResourceName:output_type -> google.protobuf.Empty
-	69, // 90: core.finding.FindingService.CleanOldResource:output_type -> google.protobuf.Empty
-	59, // [59:91] is the sub-list for method output_type
-	27, // [27:59] is the sub-list for method input_type
+	49, // 57: core.finding.FindingService.GetAISummaryStream:input_type -> core.finding.GetAISummaryRequest
+	51, // 58: core.finding.FindingService.UntagByResourceName:input_type -> core.finding.UntagByResourceNameRequest
+	69, // 59: core.finding.FindingService.CleanOldResource:input_type -> google.protobuf.Empty
+	1,  // 60: core.finding.FindingService.ListFinding:output_type -> core.finding.ListFindingResponse
+	3,  // 61: core.finding.FindingService.BatchListFinding:output_type -> core.finding.BatchListFindingResponse
+	5,  // 62: core.finding.FindingService.GetFinding:output_type -> core.finding.GetFindingResponse
+	7,  // 63: core.finding.FindingService.PutFinding:output_type -> core.finding.PutFindingResponse
+	69, // 64: core.finding.FindingService.PutFindingBatch:output_type -> google.protobuf.Empty
+	69, // 65: core.finding.FindingService.DeleteFinding:output_type -> google.protobuf.Empty
+	11, // 66: core.finding.FindingService.ListFindingTag:output_type -> core.finding.ListFindingTagResponse
+	13, // 67: core.finding.FindingService.ListFindingTagName:output_type -> core.finding.ListFindingTagNameResponse
+	15, // 68: core.finding.FindingService.TagFinding:output_type -> core.finding.TagFindingResponse
+	69, // 69: core.finding.FindingService.UntagFinding:output_type -> google.protobuf.Empty
+	69, // 70: core.finding.FindingService.ClearScore:output_type -> google.protobuf.Empty
+	19, // 71: core.finding.FindingService.ListResource:output_type -> core.finding.ListResourceResponse
+	21, // 72: core.finding.FindingService.GetResource:output_type -> core.finding.GetResourceResponse
+	23, // 73: core.finding.FindingService.PutResource:output_type -> core.finding.PutResourceResponse
+	69, // 74: core.finding.FindingService.PutResourceBatch:output_type -> google.protobuf.Empty
+	69, // 75: core.finding.FindingService.DeleteResource:output_type -> google.protobuf.Empty
+	27, // 76: core.finding.FindingService.ListResourceTag:output_type -> core.finding.ListResourceTagResponse
+	29, // 77: core.finding.FindingService.ListResourceTagName:output_type -> core.finding.ListResourceTagNameResponse
+	31, // 78: core.finding.FindingService.TagResource:output_type -> core.finding.TagResourceResponse
+	69, // 79: core.finding.FindingService.UntagResource:output_type -> google.protobuf.Empty
+	34, // 80: core.finding.FindingService.GetPendFinding:output_type -> core.finding.GetPendFindingResponse
+	36, // 81: core.finding.FindingService.PutPendFinding:output_type -> core.finding.PutPendFindingResponse
+	69, // 82: core.finding.FindingService.DeletePendFinding:output_type -> google.protobuf.Empty
+	39, // 83: core.finding.FindingService.ListFindingSetting:output_type -> core.finding.ListFindingSettingResponse
+	41, // 84: core.finding.FindingService.GetFindingSetting:output_type -> core.finding.GetFindingSettingResponse
+	43, // 85: core.finding.FindingService.PutFindingSetting:output_type -> core.finding.PutFindingSettingResponse
+	69, // 86: core.finding.FindingService.DeleteFindingSetting:output_type -> google.protobuf.Empty
+	46, // 87: core.finding.FindingService.GetRecommend:output_type -> core.finding.GetRecommendResponse
+	48, // 88: core.finding.FindingService.PutRecommend:output_type -> core.finding.PutRecommendResponse
+	50, // 89: core.finding.FindingService.GetAISummary:output_type -> core.finding.GetAISummaryResponse
+	50, // 90: core.finding.FindingService.GetAISummaryStream:output_type -> core.finding.GetAISummaryResponse
+	69, // 91: core.finding.FindingService.UntagByResourceName:output_type -> google.protobuf.Empty
+	69, // 92: core.finding.FindingService.CleanOldResource:output_type -> google.protobuf.Empty
+	60, // [60:93] is the sub-list for method output_type
+	27, // [27:60] is the sub-list for method input_type
 	27, // [27:27] is the sub-list for extension type_name
 	27, // [27:27] is the sub-list for extension extendee
 	0,  // [0:27] is the sub-list for field type_name
@@ -4694,6 +4702,7 @@ type FindingServiceClient interface {
 	PutRecommend(ctx context.Context, in *PutRecommendRequest, opts ...grpc.CallOption) (*PutRecommendResponse, error)
 	// AI
 	GetAISummary(ctx context.Context, in *GetAISummaryRequest, opts ...grpc.CallOption) (*GetAISummaryResponse, error)
+	GetAISummaryStream(ctx context.Context, in *GetAISummaryRequest, opts ...grpc.CallOption) (FindingService_GetAISummaryStreamClient, error)
 	// finding/resource common
 	UntagByResourceName(ctx context.Context, in *UntagByResourceNameRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	CleanOldResource(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -4977,6 +4986,38 @@ func (c *findingServiceClient) GetAISummary(ctx context.Context, in *GetAISummar
 	return out, nil
 }
 
+func (c *findingServiceClient) GetAISummaryStream(ctx context.Context, in *GetAISummaryRequest, opts ...grpc.CallOption) (FindingService_GetAISummaryStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_FindingService_serviceDesc.Streams[0], "/core.finding.FindingService/GetAISummaryStream", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &findingServiceGetAISummaryStreamClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type FindingService_GetAISummaryStreamClient interface {
+	Recv() (*GetAISummaryResponse, error)
+	grpc.ClientStream
+}
+
+type findingServiceGetAISummaryStreamClient struct {
+	grpc.ClientStream
+}
+
+func (x *findingServiceGetAISummaryStreamClient) Recv() (*GetAISummaryResponse, error) {
+	m := new(GetAISummaryResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func (c *findingServiceClient) UntagByResourceName(ctx context.Context, in *UntagByResourceNameRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/core.finding.FindingService/UntagByResourceName", in, out, opts...)
@@ -5033,6 +5074,7 @@ type FindingServiceServer interface {
 	PutRecommend(context.Context, *PutRecommendRequest) (*PutRecommendResponse, error)
 	// AI
 	GetAISummary(context.Context, *GetAISummaryRequest) (*GetAISummaryResponse, error)
+	GetAISummaryStream(*GetAISummaryRequest, FindingService_GetAISummaryStreamServer) error
 	// finding/resource common
 	UntagByResourceName(context.Context, *UntagByResourceNameRequest) (*emptypb.Empty, error)
 	CleanOldResource(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
@@ -5131,6 +5173,9 @@ func (*UnimplementedFindingServiceServer) PutRecommend(context.Context, *PutReco
 }
 func (*UnimplementedFindingServiceServer) GetAISummary(context.Context, *GetAISummaryRequest) (*GetAISummaryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAISummary not implemented")
+}
+func (*UnimplementedFindingServiceServer) GetAISummaryStream(*GetAISummaryRequest, FindingService_GetAISummaryStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetAISummaryStream not implemented")
 }
 func (*UnimplementedFindingServiceServer) UntagByResourceName(context.Context, *UntagByResourceNameRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UntagByResourceName not implemented")
@@ -5683,6 +5728,27 @@ func _FindingService_GetAISummary_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FindingService_GetAISummaryStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetAISummaryRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(FindingServiceServer).GetAISummaryStream(m, &findingServiceGetAISummaryStreamServer{stream})
+}
+
+type FindingService_GetAISummaryStreamServer interface {
+	Send(*GetAISummaryResponse) error
+	grpc.ServerStream
+}
+
+type findingServiceGetAISummaryStreamServer struct {
+	grpc.ServerStream
+}
+
+func (x *findingServiceGetAISummaryStreamServer) Send(m *GetAISummaryResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 func _FindingService_UntagByResourceName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UntagByResourceNameRequest)
 	if err := dec(in); err != nil {
@@ -5852,6 +5918,12 @@ var _FindingService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _FindingService_CleanOldResource_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetAISummaryStream",
+			Handler:       _FindingService_GetAISummaryStream_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "finding/service.proto",
 }
