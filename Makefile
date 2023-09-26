@@ -661,7 +661,7 @@ get-ai-summary:
 get-ai-summary-stream:
 	$(GRPCURL) \
 		-plaintext \
-		-d '{"project_id":1001, "finding_id": 17730, "lang":"ja"}' \
+		-d '{"project_id":1001, "finding_id": 1001, "lang":"ja"}' \
 		$(CORE_API_ADDR) core.finding.FindingService.GetAISummaryStream
 
 .PHONY: clean-old-resource
