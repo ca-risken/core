@@ -56,6 +56,8 @@ service FindingService {
 
   // AI
   rpc GetAISummary(GetAISummaryRequest) returns (GetAISummaryResponse);
+  rpc GetAISummaryStream(GetAISummaryRequest)
+      returns (stream GetAISummaryResponse);
 
   // finding/resource common
   rpc UntagByResourceName(UntagByResourceNameRequest)

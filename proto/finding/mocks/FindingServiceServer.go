@@ -224,6 +224,20 @@ func (_m *FindingServiceServer) GetAISummary(_a0 context.Context, _a1 *finding.G
 	return r0, r1
 }
 
+// GetAISummaryStream provides a mock function with given fields: _a0, _a1
+func (_m *FindingServiceServer) GetAISummaryStream(_a0 *finding.GetAISummaryRequest, _a1 finding.FindingService_GetAISummaryStreamServer) error {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*finding.GetAISummaryRequest, finding.FindingService_GetAISummaryStreamServer) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetFinding provides a mock function with given fields: _a0, _a1
 func (_m *FindingServiceServer) GetFinding(_a0 context.Context, _a1 *finding.GetFindingRequest) (*finding.GetFindingResponse, error) {
 	ret := _m.Called(_a0, _a1)

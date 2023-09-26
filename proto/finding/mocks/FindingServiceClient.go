@@ -282,6 +282,39 @@ func (_m *FindingServiceClient) GetAISummary(ctx context.Context, in *finding.Ge
 	return r0, r1
 }
 
+// GetAISummaryStream provides a mock function with given fields: ctx, in, opts
+func (_m *FindingServiceClient) GetAISummaryStream(ctx context.Context, in *finding.GetAISummaryRequest, opts ...grpc.CallOption) (finding.FindingService_GetAISummaryStreamClient, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 finding.FindingService_GetAISummaryStreamClient
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *finding.GetAISummaryRequest, ...grpc.CallOption) (finding.FindingService_GetAISummaryStreamClient, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *finding.GetAISummaryRequest, ...grpc.CallOption) finding.FindingService_GetAISummaryStreamClient); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(finding.FindingService_GetAISummaryStreamClient)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *finding.GetAISummaryRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetFinding provides a mock function with given fields: ctx, in, opts
 func (_m *FindingServiceClient) GetFinding(ctx context.Context, in *finding.GetFindingRequest, opts ...grpc.CallOption) (*finding.GetFindingResponse, error) {
 	_va := make([]interface{}, len(opts))
