@@ -1415,11 +1415,6 @@ func TestValidate_PendFindingForUpsert(t *testing.T) {
 			input:   &PendFindingForUpsert{FindingId: 1},
 			wantErr: true,
 		},
-		{
-			name:    "NG length Note",
-			input:   &PendFindingForUpsert{FindingId: 1, ProjectId: 1, Note: len129string},
-			wantErr: true,
-		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
