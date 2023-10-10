@@ -154,6 +154,13 @@ func (p *ProjectService) createDefaultRole(ctx context.Context, ownerUserID, pro
 }
 
 func (p *ProjectService) isActiveProject(ctx context.Context, projectID uint32) (bool, error) {
+	projects, err := p.repository.ListProject(ctx, 0, projectID, "")
+	if err != nil {
+		return false, err
+	}
+	if len(*projects) == 0 {
+		return false, nil
+	}
 	resp, err := p.iamClient.ListUser(ctx, &iam.ListUserRequest{
 		ProjectId: projectID,
 		Activated: true,
