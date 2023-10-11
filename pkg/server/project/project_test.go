@@ -263,18 +263,27 @@ func TestDeleteProject(t *testing.T) {
 
 func TestIsActive(t *testing.T) {
 	cases := []struct {
-		name             string
-		input            *project.IsActiveRequest
-		want             *project.IsActiveResponse
-		wantErr          bool
-		listUserResponse *iam.ListUserResponse
-		mockError        error
+		name               string
+		input              *project.IsActiveRequest
+		want               *project.IsActiveResponse
+		wantErr            bool
+		listProjectResults *[]db.ProjectWithTag
+		listProjectError   error
+		listUserResponse   *iam.ListUserResponse
+		mockError          error
 	}{
 		{
-			name:             "OK",
-			input:            &project.IsActiveRequest{ProjectId: 1},
-			want:             &project.IsActiveResponse{Active: true},
-			listUserResponse: &iam.ListUserResponse{UserId: []uint32{1}},
+			name:               "OK",
+			input:              &project.IsActiveRequest{ProjectId: 1},
+			want:               &project.IsActiveResponse{Active: true},
+			listProjectResults: &[]db.ProjectWithTag{{ProjectID: 1}},
+			listUserResponse:   &iam.ListUserResponse{UserId: []uint32{1}},
+		},
+		{
+			name:               "OK No Project",
+			input:              &project.IsActiveRequest{ProjectId: 1},
+			want:               &project.IsActiveResponse{Active: false},
+			listProjectResults: &[]db.ProjectWithTag{},
 		},
 		{
 			name:    "NG Invalid params",
@@ -282,21 +291,35 @@ func TestIsActive(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG IAM service error",
-			input:     &project.IsActiveRequest{},
-			mockError: errors.New("Something error occured"),
-			wantErr:   true,
+			name:               "NG DB error",
+			input:              &project.IsActiveRequest{ProjectId: 1},
+			listProjectResults: &[]db.ProjectWithTag{},
+			listProjectError:   errors.New("something error occured"),
+			wantErr:            true,
+		},
+		{
+			name:               "NG IAM service error",
+			input:              &project.IsActiveRequest{ProjectId: 1},
+			listProjectResults: &[]db.ProjectWithTag{{ProjectID: 1}},
+			listUserResponse:   &iam.ListUserResponse{UserId: []uint32{1}},
+			mockError:          errors.New("Something error occured"),
+			wantErr:            true,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
+			mockRepository := mocks.NewProjectRepository(t)
 			mockIAM := iammock.NewIAMServiceClient(t)
 			svc := ProjectService{
-				iamClient: mockIAM,
+				iamClient:  mockIAM,
+				repository: mockRepository,
+			}
+			if c.listProjectResults != nil {
+				mockRepository.On("ListProject", test.RepeatMockAnything(4)...).Return(c.listProjectResults, c.listProjectError).Once()
 			}
 			if c.listUserResponse != nil {
-				mockIAM.On("ListUser", test.RepeatMockAnything(2)...).Return(c.listUserResponse, nil).Once()
+				mockIAM.On("ListUser", test.RepeatMockAnything(2)...).Return(c.listUserResponse, c.mockError).Once()
 			}
 			got, err := svc.IsActive(ctx, c.input)
 			if !c.wantErr && err != nil {
