@@ -64,11 +64,40 @@ func (c *Client) GetReportFindingAll(ctx context.Context, dataSource []string, f
 }
 
 func (c *Client) CollectReportFinding(ctx context.Context) error {
-	query := `insert into report_finding (report_date, project_id, data_source, score, count) 
-select DATE_ADD(CURRENT_DATE, INTERVAL -1 DAY) as report_date, project_id, data_source, score , count(*) as count 
-from finding f
-where not exists (select pend_finding.finding_id from pend_finding where f.finding_id = pend_finding.finding_id and (pend_finding.expired_at is NULL or pend_finding.expired_at <= NOW())) 
-group by f.project_id, data_source, score ON DUPLICATE KEY UPDATE count=values(count)`
+	query := `
+insert into report_finding (
+	report_date, 
+	project_id, 
+	data_source, 
+	score, 
+	count
+) 
+select 
+	DATE_ADD(CURRENT_DATE, INTERVAL -1 DAY) as report_date, 
+	project_id, 
+	data_source, 
+	score, 
+	count(*) as count 
+from 
+	finding f
+where 
+	not exists (
+		select 
+			pend_finding.finding_id 
+		from 
+			pend_finding 
+		where 
+			f.finding_id = pend_finding.finding_id 
+			and (
+				pend_finding.finding_id is NULL
+				or ( 
+					pend_finding.expired_at is not NULL 
+					and pend_finding.expired_at <= NOW()
+				)
+			)
+	) 
+group by 
+	f.project_id, data_source, score ON DUPLICATE KEY UPDATE count=values(count)`
 	var data []model.ReportFinding
 	if err := c.Master.WithContext(ctx).Raw(query).Scan(&data).Error; err != nil {
 		return err
