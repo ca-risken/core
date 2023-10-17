@@ -57,11 +57,12 @@ func convertPendFinding(f *model.PendFinding) *finding.PendFinding {
 		return &finding.PendFinding{}
 	}
 	converted := &finding.PendFinding{
-		FindingId: f.FindingID,
-		ProjectId: f.ProjectID,
-		Note:      f.Note,
-		CreatedAt: f.CreatedAt.Unix(),
-		UpdatedAt: f.UpdatedAt.Unix(),
+		FindingId:     f.FindingID,
+		ProjectId:     f.ProjectID,
+		Note:          f.Note,
+		FalsePositive: f.FalsePositive,
+		CreatedAt:     f.CreatedAt.Unix(),
+		UpdatedAt:     f.UpdatedAt.Unix(),
 	}
 	if !f.ExpiredAt.IsZero() {
 		converted.ExpiredAt = f.ExpiredAt.Unix()

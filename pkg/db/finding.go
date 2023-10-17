@@ -1040,9 +1040,9 @@ func (c *Client) GetPendFinding(ctx context.Context, projectID uint32, findingID
 
 const insertPendFinding = `
 INSERT INTO pend_finding
-  (finding_id, project_id, note, expired_at)
+  (finding_id, project_id, note, false_positive, expired_at)
 VALUES
-  (?, ?, ?, ?)
+  (?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   note = VALUES(note),
   expired_at = VALUES(expired_at)
@@ -1059,6 +1059,7 @@ func (c *Client) UpsertPendFinding(ctx context.Context, pend *finding.PendFindin
 		pend.FindingId,
 		pend.ProjectId,
 		pend.Note,
+		pend.FalsePositive,
 		expiredAt,
 	).Error; err != nil {
 		return nil, err
