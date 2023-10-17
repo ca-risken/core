@@ -110,7 +110,7 @@ func TestPutPendFinding(t *testing.T) {
 				mockDB.On("GetFinding", test.RepeatMockAnything(4)...).Return(c.mockGetResp, c.mockGetErr).Once()
 			}
 			if c.mockPendResp != nil || c.mockPendErr != nil {
-				mockDB.On("UpsertPendFinding", test.RepeatMockAnything(2)...).Return(c.mockPendResp, c.mockPendErr).Once()
+				mockDB.On("UpsertPendFinding", test.RepeatMockAnything(6)...).Return(c.mockPendResp, c.mockPendErr).Once()
 			}
 			got, err := svc.PutPendFinding(ctx, c.input)
 			if err != nil && !c.wantErr {
