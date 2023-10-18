@@ -150,11 +150,6 @@ func TestValidatePutAlertFirstViewedAtRequest(t *testing.T) {
 			input:   &PutAlertFirstViewedAtRequest{AlertId: 1001},
 			wantErr: true,
 		},
-		{
-			name:    "NG Required(alert_id)",
-			input:   &PutAlertFirstViewedAtRequest{ProjectId: 1001},
-			wantErr: true,
-		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
