@@ -3,6 +3,7 @@ package finding
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
@@ -35,7 +36,7 @@ func (f *FindingService) PutPendFinding(ctx context.Context, req *finding.PutPen
 		}
 		return nil, err // DB error or RecordNotFound error
 	}
-	registerd, err := f.repository.UpsertPendFinding(ctx, req.PendFinding)
+	registerd, err := f.repository.UpsertPendFinding(ctx, req.PendFinding.FindingId, req.ProjectId, req.PendFinding.Note, GetPendReasonString(req.PendFinding.Reason), req.PendFinding.ExpiredAt)
 	if err != nil {
 		return nil, err
 	}
@@ -60,6 +61,7 @@ func convertPendFinding(f *model.PendFinding) *finding.PendFinding {
 		FindingId: f.FindingID,
 		ProjectId: f.ProjectID,
 		Note:      f.Note,
+		Reason:    getPendReason(f.Reason),
 		CreatedAt: f.CreatedAt.Unix(),
 		UpdatedAt: f.UpdatedAt.Unix(),
 	}
@@ -67,4 +69,23 @@ func convertPendFinding(f *model.PendFinding) *finding.PendFinding {
 		converted.ExpiredAt = f.ExpiredAt.Unix()
 	}
 	return converted
+}
+
+func getPendReason(dbPendReason string) finding.PendReason {
+	statusKey := strings.ToUpper(dbPendReason)
+	switch statusKey {
+	case "FALSE_POSITIVE":
+		return finding.PendReason_PEND_REASON_FALSE_POSITIVE
+	default:
+		return finding.PendReason_PEND_REASON_UNKNOWN
+	}
+}
+
+func GetPendReasonString(status finding.PendReason) string {
+	switch status {
+	case finding.PendReason_PEND_REASON_FALSE_POSITIVE:
+		return "FALSE_POSITIVE"
+	default:
+		return "UNKNOWN"
+	}
 }

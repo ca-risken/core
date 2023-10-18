@@ -1050,25 +1050,25 @@ func (_m *FindingRepository) UpsertFindingSetting(ctx context.Context, data *mod
 	return r0, r1
 }
 
-// UpsertPendFinding provides a mock function with given fields: ctx, pend
-func (_m *FindingRepository) UpsertPendFinding(ctx context.Context, pend *finding.PendFindingForUpsert) (*model.PendFinding, error) {
-	ret := _m.Called(ctx, pend)
+// UpsertPendFinding provides a mock function with given fields: ctx, findingID, projectID, note, reason, expiredAtInt
+func (_m *FindingRepository) UpsertPendFinding(ctx context.Context, findingID uint64, projectID uint32, note string, reason string, expiredAtInt int64) (*model.PendFinding, error) {
+	ret := _m.Called(ctx, findingID, projectID, note, reason, expiredAtInt)
 
 	var r0 *model.PendFinding
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *finding.PendFindingForUpsert) (*model.PendFinding, error)); ok {
-		return rf(ctx, pend)
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint32, string, string, int64) (*model.PendFinding, error)); ok {
+		return rf(ctx, findingID, projectID, note, reason, expiredAtInt)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *finding.PendFindingForUpsert) *model.PendFinding); ok {
-		r0 = rf(ctx, pend)
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint32, string, string, int64) *model.PendFinding); ok {
+		r0 = rf(ctx, findingID, projectID, note, reason, expiredAtInt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.PendFinding)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *finding.PendFindingForUpsert) error); ok {
-		r1 = rf(ctx, pend)
+	if rf, ok := ret.Get(1).(func(context.Context, uint64, uint32, string, string, int64) error); ok {
+		r1 = rf(ctx, findingID, projectID, note, reason, expiredAtInt)
 	} else {
 		r1 = ret.Error(1)
 	}

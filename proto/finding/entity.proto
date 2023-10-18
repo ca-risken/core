@@ -100,6 +100,12 @@ message ResourceTagForUpsert {
   string tag = 3;
 }
 
+// PendReason
+enum PendReason {
+  PEND_REASON_UNKNOWN = 0;
+  PEND_REASON_FALSE_POSITIVE = 1;
+}
+
 // PendFinding
 message PendFinding {
   uint64 finding_id = 1;
@@ -108,6 +114,7 @@ message PendFinding {
   int64 created_at = 4;
   int64 updated_at = 5;
   int64 expired_at = 6;
+  PendReason reason = 7;
 }
 
 // PendFinding For upsert
@@ -116,6 +123,7 @@ message PendFindingForUpsert {
   uint32 project_id = 2;
   string note = 3;
   int64 expired_at = 4;
+  PendReason reason = 5;
 }
 
 // FindingStatus

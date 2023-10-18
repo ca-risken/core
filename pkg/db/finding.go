@@ -65,7 +65,7 @@ type FindingRepository interface {
 
 	// PendFinding
 	GetPendFinding(ctx context.Context, projectID uint32, findingID uint64) (*model.PendFinding, error)
-	UpsertPendFinding(ctx context.Context, pend *finding.PendFindingForUpsert) (*model.PendFinding, error)
+	UpsertPendFinding(ctx context.Context, findingID uint64, projectID uint32, note string, reason string, expiredAtInt int64) (*model.PendFinding, error)
 	DeletePendFinding(ctx context.Context, projectID uint32, findingID uint64) error
 
 	// FindingSetting
@@ -1040,30 +1040,32 @@ func (c *Client) GetPendFinding(ctx context.Context, projectID uint32, findingID
 
 const insertPendFinding = `
 INSERT INTO pend_finding
-  (finding_id, project_id, note, expired_at)
+  (finding_id, project_id, note, reason, expired_at)
 VALUES
-  (?, ?, ?, ?)
+  (?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   note = VALUES(note),
+  reason = VALUES(reason),
   expired_at = VALUES(expired_at)
 `
 
-func (c *Client) UpsertPendFinding(ctx context.Context, pend *finding.PendFindingForUpsert) (*model.PendFinding, error) {
+func (c *Client) UpsertPendFinding(ctx context.Context, findingID uint64, projectID uint32, note string, reason string, expiredAtInt int64) (*model.PendFinding, error) {
 	var expiredAt interface{}
-	if pend.ExpiredAt == 0 {
-		expiredAt = convertZeroValueToNull(pend.ExpiredAt) // if zero value, put NULL
+	if expiredAtInt == 0 {
+		expiredAt = convertZeroValueToNull(expiredAtInt) // if zero value, put NULL
 	} else {
-		expiredAt = time.Unix(pend.ExpiredAt, 0)
+		expiredAt = time.Unix(expiredAtInt, 0)
 	}
 	if err := c.Master.WithContext(ctx).Exec(insertPendFinding,
-		pend.FindingId,
-		pend.ProjectId,
-		pend.Note,
+		findingID,
+		projectID,
+		note,
+		reason,
 		expiredAt,
 	).Error; err != nil {
 		return nil, err
 	}
-	return c.GetPendFinding(ctx, pend.ProjectId, pend.FindingId)
+	return c.GetPendFinding(ctx, projectID, findingID)
 }
 
 const deletePendFinding = `delete from pend_finding where project_id = ? and finding_id = ?`
