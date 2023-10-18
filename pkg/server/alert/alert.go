@@ -169,7 +169,6 @@ func (a *AlertService) PutAlertFirstViewedAt(ctx context.Context, req *alert.Put
 		if err != nil {
 			return nil, err
 		}
-
 	}
 
 	return &empty.Empty{}, nil
