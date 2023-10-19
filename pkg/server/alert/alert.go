@@ -143,19 +143,32 @@ func (a *AlertService) PutAlertFirstViewedAt(ctx context.Context, req *alert.Put
 
 	// Alertの存在チェック
 	// 存在して、FirstViewedAtが0でない場合は終了
-	savedData, err := a.repository.GetAlert(ctx, req.ProjectId, req.AlertId)
+	alerts, err := a.repository.ListAlert(ctx, req.ProjectId, nil, nil, "", 0, time.Now().Unix())
 	if err != nil {
 		return nil, err
 	}
-	if savedData.FirstViewedAt != nil && !savedData.FirstViewedAt.IsZero() {
+	putAlertIDs := []uint32{}
+	for _, alert := range *alerts {
+		if req.AlertId != 0 && alert.AlertID != req.AlertId {
+			continue
+		}
+		if alert.FirstViewedAt != nil && !alert.FirstViewedAt.IsZero() {
+			continue
+		}
+		putAlertIDs = append(putAlertIDs, alert.AlertID)
+	}
+	if len(putAlertIDs) == 0 {
 		return &empty.Empty{}, nil
 	}
+
 	unixTime := time.Now().Unix()
 
 	// Fiding upsert
-	err = a.repository.UpdateAlertFirstViewedAt(ctx, req.ProjectId, req.AlertId, unixTime)
-	if err != nil {
-		return nil, err
+	for _, alertID := range putAlertIDs {
+		err = a.repository.UpdateAlertFirstViewedAt(ctx, req.ProjectId, alertID, unixTime)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &empty.Empty{}, nil

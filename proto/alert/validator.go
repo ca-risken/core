@@ -46,7 +46,6 @@ func (r *PutAlertRequest) Validate() error {
 func (r *PutAlertFirstViewedAtRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ProjectId, validation.Required),
-		validation.Field(&r.AlertId, validation.Required),
 	)
 }
 
