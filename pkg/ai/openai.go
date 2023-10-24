@@ -54,6 +54,9 @@ Type:
 
 Description: 
 %s
+
+ScanResult(json):
+%s
 `
 	RECOMMEND_FORMAT_FOR_AI = `Detail: %s
 Recommendation: %s
@@ -209,7 +212,7 @@ func (a *AIClient) AskAISummaryStreamFromFinding(
 }
 
 func generateFindingDataForAI(f *model.Finding, r *model.Recommend) string {
-	text := fmt.Sprintf(FINDING_FORMAT_FOR_AI, f.DataSource, f.Description)
+	text := fmt.Sprintf(FINDING_FORMAT_FOR_AI, f.DataSource, f.Description, f.Data)
 	if r != nil {
 		text += fmt.Sprintf(RECOMMEND_FORMAT_FOR_AI, r.Risk, r.Recommendation)
 	}
