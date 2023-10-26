@@ -369,7 +369,7 @@ func (p *PutRecommendRequest) Validate() error {
 		validation.Field(&p.ProjectId, validation.Required),
 		validation.Field(&p.FindingId, validation.Required),
 		validation.Field(&p.DataSource, validation.Required, validation.Length(0, 64)),
-		validation.Field(&p.Type, validation.Required, validation.Length(0, 128)),
+		validation.Field(&p.Type, validation.Required, validation.Length(0, 255)),
 	)
 }
 
