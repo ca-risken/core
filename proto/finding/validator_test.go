@@ -1177,7 +1177,7 @@ func TestValidate_PutRecommendRequest(t *testing.T) {
 		},
 		{
 			name:    "NG length(type)",
-			input:   &PutRecommendRequest{ProjectId: 1, FindingId: 1, DataSource: "ds", Type: len129string, Risk: "risk", Recommendation: "recommend"},
+			input:   &PutRecommendRequest{ProjectId: 1, FindingId: 1, DataSource: "ds", Type: len256string, Risk: "risk", Recommendation: "recommend"},
 			wantErr: true,
 		},
 	}

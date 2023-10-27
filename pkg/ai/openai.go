@@ -24,27 +24,27 @@ const (
 	PROMPT_SYSTEM_MSG_JP = "あなたは役に立つセキュリティアドバイザーです。セキュリティの専門家ではない人にも理解できるように説明をお願いします。"
 	PROMPT_SUMMARY_EN    = `I have detected the following security issue in my cloud environment. Please summarize the contents.
 Also, please include any ways to address the issue.
-Use the following format for your response.
-<Summary>
+Use the following markdown format for your response.
+## Summary
 
-<Detection content>
+## Detection content
 - aaa
 - bbb
 
-<How to fix>
+## How to fix
 - aaa
 - bbb
 `
 	PROMPT_SUMMARY_JP = `クラウド環境で以下のセキュリティの問題を検知しました。日本語で内容を要約してください。
 また、問題の対処方法もあれば含めてください。
-回答は以下のフォーマットでお願いします。
-＜要約＞
+回答は以下のMarkdownフォーマットでお願いします。(URLリンクは前後に半角スペースを入れてください)
+## 要約
 
-＜検出内容＞
+## 検出内容
 ・aaa
 ・bbb
 
-＜対処方法＞
+## 対処方法
 ・aaa
 ・bbb
 `
