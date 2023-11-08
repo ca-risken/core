@@ -34,8 +34,8 @@ const (
 	- Remove the root cause of the problem
 	- If it is an intentional setup/operation and the risk is small, archive it
 	- If the nature of the problem is not urgent and immediate action is difficult, set a target deadline and PEND`
-	slackNotificationAttachmentJa  = "その他、%d件すべてのFindingは <%s/alert/alert?project_id=%d&alert_id=%d&from=slack|アラート画面> からご確認ください。"
-	slackNotificationAttachmentEn  = "Please check all %d Findings from <%s/alert/alert?project_id=%d&alert_id=%d&from=slack|Alert screen>."
+	slackNotificationAttachmentJa  = "その他、%d件すべてのFindingは <%s/alert/alert?project_id=%d&from=slack|アラート画面> からご確認ください。"
+	slackNotificationAttachmentEn  = "Please check all %d Findings from <%s/alert/alert?project_id=%d&from=slack|Alert screen>."
 	slackNotificationTestMessageJa = "RISKENからのテスト通知です"
 	slackNotificationTestMessageEn = "This is a test notification from RISKEN"
 )
@@ -115,7 +115,7 @@ func getPayload(
 		Color: getColor(alert.Severity),
 		Fields: []slack.AttachmentField{
 			{
-				Value: fmt.Sprintf("<%s/alert/alert?project_id=%d&alert_id=%d&from=slack|%s>", url, project.ProjectId, alert.AlertID, alert.Description),
+				Value: fmt.Sprintf("<%s/alert/alert?project_id=%d&from=slack|%s>", url, project.ProjectId, alert.Description),
 			},
 			{
 				Title: "Rules",
@@ -145,7 +145,7 @@ func getPayload(
 		Text:        fmt.Sprintf(msgText, getMention(alert.Severity)),
 		Attachments: []slack.Attachment{attachment},
 	}
-	msg.Attachments = append(msg.Attachments, *getFindingAttachment(url, project.ProjectId, alert.AlertID, findings, locale)...)
+	msg.Attachments = append(msg.Attachments, *getFindingAttachment(url, project.ProjectId, findings, locale)...)
 
 	// override message
 	if message != "" {
@@ -223,14 +223,14 @@ func generateRuleList(rules *[]model.AlertRule) string {
 	return list
 }
 
-func getFindingAttachment(url string, projectID, alertID uint32, findings *findingDetail, locale string) *[]slack.Attachment {
+func getFindingAttachment(url string, projectID uint32, findings *findingDetail, locale string) *[]slack.Attachment {
 	attachments := []slack.Attachment{}
 	for _, f := range findings.Exampls {
 		a := slack.Attachment{
 			Color: getColorByScore(f.Score),
 			Fields: []slack.AttachmentField{
 				{
-					Value: fmt.Sprintf("<%s/finding/finding?project_id=%d&finding_id=%d&from_score=0&status=1&alert_id=%d&from=slack|%s>", url, projectID, f.FindingID, alertID, f.Description),
+					Value: fmt.Sprintf("<%s/finding/finding?project_id=%d&finding_id=%d&from_score=0&status=1&from=slack|%s>", url, projectID, f.FindingID, f.Description),
 				},
 				{
 					Title: "DataSource",
@@ -262,7 +262,7 @@ func getFindingAttachment(url string, projectID, alertID uint32, findings *findi
 			Color: "grey",
 			Fields: []slack.AttachmentField{
 				{
-					Value: fmt.Sprintf(attachmentText, findings.FindingCount, url, projectID, alertID),
+					Value: fmt.Sprintf(attachmentText, findings.FindingCount, url, projectID),
 				},
 			},
 			Ts: json.Number(strconv.FormatInt(time.Now().Unix(), 10)),
