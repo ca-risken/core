@@ -405,7 +405,7 @@ func (e *AlertRuleForUpsert) Validate() error {
 		validation.Field(&e.ProjectId, validation.Required),
 		validation.Field(&e.Name, validation.Required, validation.Length(0, 200)),
 		validation.Field(&e.Score, validation.Min(0.0), validation.Max(1.0)),
-		validation.Field(&e.ResourceName, validation.Length(0, 255)),
+		validation.Field(&e.ResourceName, validation.Length(0, 512)),
 		validation.Field(&e.Tag, validation.Length(0, 64)),
 		validation.Field(&e.FindingCnt, validation.Min(uint(1))),
 	)

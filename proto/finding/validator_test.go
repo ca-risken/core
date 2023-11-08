@@ -9,6 +9,7 @@ const (
 	len129string string = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789"
 	len201string string = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=1"
 	len256string string = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789=12345678901234567890123456789012345678901234567890123456"
+	len513string string = len256string + len256string + "1"
 	maxLimit     int32  = 200
 )
 
@@ -29,7 +30,7 @@ func TestValidate_ListFindingRequest(t *testing.T) {
 		},
 		{
 			name:    "NG too long resource_name",
-			input:   &ListFindingRequest{ProjectId: 1, ResourceName: []string{len256string}},
+			input:   &ListFindingRequest{ProjectId: 1, ResourceName: []string{len513string}},
 			wantErr: true,
 		},
 		{
@@ -117,7 +118,7 @@ func TestValidate_BatchListFindingRequest(t *testing.T) {
 		},
 		{
 			name:    "NG too long resource_name",
-			input:   &BatchListFindingRequest{ProjectId: 1, ResourceName: []string{len256string}},
+			input:   &BatchListFindingRequest{ProjectId: 1, ResourceName: []string{len513string}},
 			wantErr: true,
 		},
 		{
@@ -517,7 +518,7 @@ func TestValidate_ListResourceRequest(t *testing.T) {
 		},
 		{
 			name:    "NG Length(resource_name)",
-			input:   &ListResourceRequest{ProjectId: 1, ResourceName: []string{len256string}},
+			input:   &ListResourceRequest{ProjectId: 1, ResourceName: []string{len513string}},
 			wantErr: true,
 		},
 		{
@@ -1236,7 +1237,7 @@ func TestValidate_FindingForUpsert(t *testing.T) {
 		},
 		{
 			name:    "NG too long resource name",
-			input:   &FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: len256string, ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   &FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: len513string, ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
