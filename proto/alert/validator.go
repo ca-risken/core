@@ -446,6 +446,7 @@ func (e *AlertCondNotificationForUpsert) Validate() error {
 
 type slackNotifySetting struct {
 	WebhookURL string `json:"webhook_url"`
+	ChannelID  string `json:"channel_id"`
 }
 
 func validateNewNotifySetting(value interface{}) error {
@@ -457,10 +458,10 @@ func validateNewNotifySetting(value interface{}) error {
 	if err := json.Unmarshal([]byte(s), &setting); err != nil {
 		return fmt.Errorf("invalid json, %w", err)
 	}
-	if strings.TrimSpace(setting.WebhookURL) == "" {
-		return errors.New("required webhook url in json")
+	if strings.TrimSpace(setting.WebhookURL) == "" && strings.TrimSpace(setting.ChannelID) == "" {
+		return errors.New("required webhook_url or channel_id in json")
 	}
-	err := validation.Validate(strings.TrimSpace(setting.WebhookURL), validation.Required, is.URL)
+	err := validation.Validate(strings.TrimSpace(setting.WebhookURL), is.URL)
 	if err != nil {
 		return err
 	}

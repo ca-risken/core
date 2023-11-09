@@ -388,6 +388,13 @@ put-notification:
 		-d '{"project_id":1001,"notification":{"project_id":1001, "name":"test_notification","type":"slack", "notify_setting":"{\"webhook_url\":\"http://hogehoge.com/fuga/piyo\"}"}}' \
 		$(CORE_API_ADDR) core.alert.AlertService.PutNotification
 
+.PHONY: put-notification2
+put-notification2:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001,"notification":{"project_id":1001, "name":"test_notification","type":"slack", "notify_setting":"{\"channel_id\":\"C023QE39Q0J\"}"}}' \
+		$(CORE_API_ADDR) core.alert.AlertService.PutNotification
+
 .PHONY: delete-notification
 delete-notification:
 	$(GRPCURL) \

@@ -6,6 +6,7 @@ import (
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/project"
+	"github.com/slack-go/slack"
 )
 
 var _ alert.AlertServiceServer = (*AlertService)(nil)
@@ -18,6 +19,7 @@ type AlertService struct {
 	baseURL           string
 	logger            logging.Logger
 	defaultLocale     string
+	slackClient       slack.Client
 }
 
 func NewAlertService(
@@ -28,6 +30,7 @@ func NewAlertService(
 	repository db.AlertRepository,
 	logger logging.Logger,
 	defaultLocale string,
+	slackApiToken string,
 ) *AlertService {
 	return &AlertService{
 		repository:        repository,
@@ -37,5 +40,6 @@ func NewAlertService(
 		baseURL:           baseURL,
 		logger:            logger,
 		defaultLocale:     defaultLocale,
+		slackClient:       *slack.New(slackApiToken),
 	}
 }

@@ -57,15 +57,17 @@ type Config struct {
 	ChatGPTModel            string
 	defaultLocale           string
 	excludeDeleteDataSource []string
+	SlackAPIToken           string
 }
 
-func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, defaultLocale string, excludeDeleteDataSource []string) Config {
+func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, defaultLocale, SlackAPIToken string, excludeDeleteDataSource []string) Config {
 	return Config{
 		MaxAnalyzeAPICall:       maxAnalyzeAPICall,
 		BaseURL:                 baseURL,
 		OpenAIToken:             openaiToken,
 		ChatGPTModel:            chatGPTModel,
 		defaultLocale:           defaultLocale,
+		SlackAPIToken:           SlackAPIToken,
 		excludeDeleteDataSource: excludeDeleteDataSource,
 	}
 }
@@ -93,6 +95,7 @@ func (s *Server) Run(ctx context.Context) error {
 		s.db,
 		s.logger,
 		s.config.defaultLocale,
+		s.config.SlackAPIToken,
 	)
 	fsvc := findingserver.NewFindingService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.excludeDeleteDataSource, s.logger)
 	psvc := projectserver.NewProjectService(s.db, iamc, s.logger)
