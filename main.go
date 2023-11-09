@@ -34,6 +34,7 @@ type AppConf struct {
 	OpenAIToken             string   `split_words:"true"`
 	ChatGPTModel            string   `split_words:"true" default:"gpt-3.5-turbo-16k"`
 	DefaultLocale           string   `split_words:"true" default:"en"`
+	SlackAPIToken           string   `split_words:"true"`
 	ExcludeDeleteDataSource []string `split_words:"true" default:"code:gitleaks"`
 
 	// db
@@ -104,7 +105,7 @@ func main() {
 	if err != nil {
 		logger.Fatalf(ctx, "failed to create database client: %w", err)
 	}
-	c := server.NewConfig(conf.MaxAnalyzeAPICall, conf.BaseURL, conf.OpenAIToken, conf.ChatGPTModel, conf.DefaultLocale, conf.ExcludeDeleteDataSource)
+	c := server.NewConfig(conf.MaxAnalyzeAPICall, conf.BaseURL, conf.OpenAIToken, conf.ChatGPTModel, conf.DefaultLocale, conf.SlackAPIToken, conf.ExcludeDeleteDataSource)
 	server := server.NewServer("0.0.0.0", conf.Port, db, logger, c)
 
 	err = server.Run(ctx)

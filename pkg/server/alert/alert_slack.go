@@ -14,6 +14,7 @@ import (
 
 type slackNotifySetting struct {
 	WebhookURL string            `json:"webhook_url"`
+	ChannelID  string            `json:"channel_id"`
 	Data       slackNotifyOption `json:"data"`
 	Locale     string            `json:"locale"`
 }
@@ -40,7 +41,7 @@ const (
 	slackNotificationTestMessageEn = "This is a test notification from RISKEN"
 )
 
-func sendSlackNotification(
+func (a *AlertService) sendSlackNotification(
 	ctx context.Context, url, notifySetting string,
 	alert *model.Alert,
 	project *projectproto.Project,
@@ -52,9 +53,7 @@ func sendSlackNotification(
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
 	}
-	if setting.WebhookURL == "" {
-		return nil
-	}
+
 	var locale string
 	switch setting.Locale {
 	case LocaleJa:
@@ -65,22 +64,26 @@ func sendSlackNotification(
 		locale = defaultLocale
 	}
 
-	payload := getPayload(ctx, setting.Data.Channel, setting.Data.Message, url, alert, project, rules, findings, locale)
-	// TODO http tracing
-	if err := slack.PostWebhook(setting.WebhookURL, payload); err != nil {
-		return fmt.Errorf("failed to send slack: %w", err)
+	if setting.WebhookURL != "" {
+		webhookMsg := getWebhookMessage(setting.Data.Channel, setting.Data.Message, url, alert, project, rules, findings, locale)
+		if err := slack.PostWebhook(setting.WebhookURL, webhookMsg); err != nil {
+			return fmt.Errorf("failed to send slack(webhookurl): %w", err)
+		}
+	} else if setting.ChannelID != "" {
+		apiMsg := getApiMessage(setting.Data.Message, url, alert, project, rules, findings, locale)
+		if _, _, err := a.slackClient.PostMessage(setting.ChannelID, apiMsg...); err != nil {
+			return fmt.Errorf("failed to send slack(postmessage): %w", err)
+		}
 	}
 	return nil
 }
 
-func sendSlackTestNotification(ctx context.Context, url, notifySetting, defaultLocale string) error {
+func (a *AlertService) sendSlackTestNotification(ctx context.Context, url, notifySetting, defaultLocale string) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
 	}
-	if setting.WebhookURL == "" {
-		return nil
-	}
+
 	var locale string
 	switch setting.Locale {
 	case LocaleJa:
@@ -90,16 +93,23 @@ func sendSlackTestNotification(ctx context.Context, url, notifySetting, defaultL
 	default:
 		locale = defaultLocale
 	}
-	payload := getTestPayload(setting.Data.Channel, locale)
-	// TODO http tracing
-	if err := slack.PostWebhook(setting.WebhookURL, payload); err != nil {
-		return fmt.Errorf("failed to send slack: %w", err)
+
+	if setting.WebhookURL != "" {
+		webhookMsg := getTestWebhookMessage(setting.Data.Channel, locale)
+		if err := slack.PostWebhook(setting.WebhookURL, webhookMsg); err != nil {
+			return fmt.Errorf("failed to send slack(webhookurl): %w", err)
+		}
+	} else if setting.ChannelID != "" {
+		if _, _, err := a.slackClient.PostMessage(
+			setting.ChannelID, slack.MsgOptionText(getTestSlackMessageText(locale), false)); err != nil {
+			return fmt.Errorf("failed to send slack(postmessage): %w", err)
+		}
 	}
+
 	return nil
 }
 
-func getPayload(
-	ctx context.Context,
+func getWebhookMessage(
 	channel string,
 	message string,
 	url string,
@@ -109,9 +119,60 @@ func getPayload(
 	findings *findingDetail,
 	locale string,
 ) *slack.WebhookMessage {
+	msgText := getSlackMessageText(locale, alert.Severity)
+	alertAttachment := getAlertAttachment(url, alert, project, rules, findings)
+	findingAttachments := getFindingAttachment(url, project.ProjectId, findings, locale)
+	attachments := []slack.Attachment{}
+	attachments = append(attachments, alertAttachment)
+	attachments = append(attachments, findingAttachments...)
+	msg := slack.WebhookMessage{
+		Text:        msgText,
+		Attachments: attachments,
+	}
 
-	// attachments
-	attachment := slack.Attachment{
+	// override message
+	if message != "" {
+		msg.Text = message // update text
+	}
+	if channel != "" {
+		msg.Channel = channel // add channel
+	}
+	return &msg
+}
+
+func getApiMessage(
+	message string,
+	url string,
+	alert *model.Alert,
+	project *projectproto.Project,
+	rules *[]model.AlertRule,
+	findings *findingDetail,
+	locale string,
+) []slack.MsgOption {
+	msgOptions := []slack.MsgOption{}
+	text := getSlackMessageText(locale, alert.Severity)
+	if message != "" {
+		text = message // override message
+	}
+	alertAttachment := getAlertAttachment(url, alert, project, rules, findings)
+	findingAttachments := getFindingAttachment(url, project.ProjectId, findings, locale)
+	attachments := []slack.Attachment{}
+	attachments = append(attachments, alertAttachment)
+	attachments = append(attachments, findingAttachments...)
+
+	msgOptions = append(msgOptions, slack.MsgOptionText(text, false))
+	msgOptions = append(msgOptions, slack.MsgOptionAttachments(attachments...))
+	return msgOptions
+}
+
+func getAlertAttachment(
+	url string,
+	alert *model.Alert,
+	project *projectproto.Project,
+	rules *[]model.AlertRule,
+	findings *findingDetail,
+) slack.Attachment {
+	return slack.Attachment{
 		Color: getColor(alert.Severity),
 		Fields: []slack.AttachmentField{
 			{
@@ -133,31 +194,31 @@ func getPayload(
 			},
 		},
 	}
+}
 
+func getSlackMessageText(locale, severity string) string {
 	var msgText string
 	switch locale {
 	case LocaleJa:
-		msgText = slackNotificationMessageJa
+		msgText = fmt.Sprintf(slackNotificationMessageJa, getMention(severity))
 	default:
-		msgText = slackNotificationMessageEn
+		msgText = fmt.Sprintf(slackNotificationMessageEn, getMention(severity))
 	}
-	msg := slack.WebhookMessage{
-		Text:        fmt.Sprintf(msgText, getMention(alert.Severity)),
-		Attachments: []slack.Attachment{attachment},
-	}
-	msg.Attachments = append(msg.Attachments, *getFindingAttachment(url, project.ProjectId, findings, locale)...)
+	return msgText
+}
 
-	// override message
-	if message != "" {
-		msg.Text = message // update text
+func getTestWebhookMessage(channel, locale string) *slack.WebhookMessage {
+	msg := slack.WebhookMessage{
+		Text: getTestSlackMessageText(locale),
 	}
+	// override message
 	if channel != "" {
-		msg.Channel = channel // add channel
+		msg.Channel = channel
 	}
 	return &msg
 }
 
-func getTestPayload(channel, locale string) *slack.WebhookMessage {
+func getTestSlackMessageText(locale string) string {
 	var msgText string
 	switch locale {
 	case LocaleJa:
@@ -165,14 +226,7 @@ func getTestPayload(channel, locale string) *slack.WebhookMessage {
 	default:
 		msgText = slackNotificationTestMessageEn
 	}
-	msg := slack.WebhookMessage{
-		Text: msgText,
-	}
-	// override message
-	if channel != "" {
-		msg.Channel = channel
-	}
-	return &msg
+	return msgText
 }
 
 func getColor(severity string) string {
@@ -223,7 +277,7 @@ func generateRuleList(rules *[]model.AlertRule) string {
 	return list
 }
 
-func getFindingAttachment(url string, projectID uint32, findings *findingDetail, locale string) *[]slack.Attachment {
+func getFindingAttachment(url string, projectID uint32, findings *findingDetail, locale string) []slack.Attachment {
 	attachments := []slack.Attachment{}
 	for _, f := range findings.Exampls {
 		a := slack.Attachment{
@@ -268,7 +322,7 @@ func getFindingAttachment(url string, projectID uint32, findings *findingDetail,
 			Ts: json.Number(strconv.FormatInt(time.Now().Unix(), 10)),
 		})
 	}
-	return &attachments
+	return attachments
 }
 
 func getColorByScore(score float32) string {

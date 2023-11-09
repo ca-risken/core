@@ -208,7 +208,7 @@ func (a *AlertService) TestNotification(ctx context.Context, req *alert.TestNoti
 	}
 	switch notification.Type {
 	case "slack":
-		err = sendSlackTestNotification(ctx, a.baseURL, notification.NotifySetting, a.defaultLocale)
+		err = a.sendSlackTestNotification(ctx, a.baseURL, notification.NotifySetting, a.defaultLocale)
 		if err != nil {
 			a.logger.Errorf(ctx, "Error occured when sending test slack notification. err: %v", err)
 			return nil, err
@@ -250,14 +250,13 @@ func maskingNotifySetting(notificationType, notifySetting string) (string, error
 		if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 			return "", err
 		}
-		//　通常webhook_urlは存在するはずだが、万が一ない場合はそのまま返す
-		if zero.IsZeroVal(setting.WebhookURL) {
+		if setting.WebhookURL == "" {
 			return notifySetting, nil
 		}
 		setting.WebhookURL = maskRight(setting.WebhookURL, len(setting.WebhookURL)/2)
 		ret, err := json.Marshal(setting)
 		if err != nil {
-			return notifySetting, err
+			return "", err
 		}
 		return string(ret), err
 	default:
