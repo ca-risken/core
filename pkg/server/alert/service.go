@@ -1,11 +1,15 @@
 package alert
 
 import (
+	"context"
+	"time"
+
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/project"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/slack-go/slack"
 )
 
@@ -20,6 +24,7 @@ type AlertService struct {
 	logger            logging.Logger
 	defaultLocale     string
 	slackClient       slack.Client
+	retryer           backoff.BackOff
 }
 
 func NewAlertService(
@@ -41,5 +46,12 @@ func NewAlertService(
 		logger:            logger,
 		defaultLocale:     defaultLocale,
 		slackClient:       *slack.New(slackApiToken),
+		retryer:           backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10),
+	}
+}
+
+func (a *AlertService) newRetryLogger(ctx context.Context, funcName string) func(error, time.Duration) {
+	return func(err error, t time.Duration) {
+		a.logger.Warnf(ctx, "[RetryLogger] %s error: duration=%+v, err=%+v", funcName, t, err)
 	}
 }
