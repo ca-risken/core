@@ -19,7 +19,7 @@ func (l *ListFindingRequest) Validate() error {
 	return validation.ValidateStruct(l,
 		validation.Field(&l.ProjectId, validation.Required),
 		validation.Field(&l.DataSource, validation.Each(validation.Length(0, 64))),
-		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 512))),
+		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 255))),
 		validation.Field(&l.FromScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.ToScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.Tag, validation.Each(validation.Length(0, 64))),
@@ -36,7 +36,7 @@ func (b *BatchListFindingRequest) Validate() error {
 	return validation.ValidateStruct(b,
 		validation.Field(&b.ProjectId, validation.Required),
 		validation.Field(&b.DataSource, validation.Each(validation.Length(0, 64))),
-		validation.Field(&b.ResourceName, validation.Each(validation.Length(0, 512))),
+		validation.Field(&b.ResourceName, validation.Each(validation.Length(0, 255))),
 		validation.Field(&b.FromScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&b.ToScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&b.Tag, validation.Each(validation.Length(0, 64))),
@@ -165,7 +165,7 @@ func (c *ClearScoreRequest) Validate() error {
 func (l *ListResourceRequest) Validate() error {
 	return validation.ValidateStruct(l,
 		validation.Field(&l.ProjectId, validation.Required),
-		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 512))),
+		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 255))),
 		validation.Field(&l.Tag, validation.Each(validation.Length(0, 64))),
 		validation.Field(&l.Sort, validation.In(
 			"resource_id", "resource_name", "updated_at")),
@@ -383,7 +383,7 @@ func (f *FindingForUpsert) Validate() error {
 		validation.Field(&f.Description, validation.Length(0, 200)),
 		validation.Field(&f.DataSource, validation.Required, validation.Length(0, 64)),
 		validation.Field(&f.DataSourceId, validation.Required, validation.Length(0, 255)),
-		validation.Field(&f.ResourceName, validation.Required, validation.Length(0, 512)),
+		validation.Field(&f.ResourceName, validation.Required, validation.Length(0, 255)),
 		validation.Field(&f.OriginalScore, validation.Min(0.0), validation.Max(f.OriginalMaxScore)),
 		validation.Field(&f.OriginalMaxScore, validation.NilOrNotEmpty, validation.Min(0.0), validation.Max(999.99)),
 		validation.Field(&f.Data, is.JSON),
@@ -401,7 +401,7 @@ func (f *FindingTagForUpsert) Validate() error {
 // Validate ResourceForUpsert
 func (r *ResourceForUpsert) Validate() error {
 	return validation.ValidateStruct(r,
-		validation.Field(&r.ResourceName, validation.Required, validation.Length(0, 512)),
+		validation.Field(&r.ResourceName, validation.Required, validation.Length(0, 255)),
 	)
 }
 
@@ -419,6 +419,7 @@ func (p *PendFindingForUpsert) Validate() error {
 		validation.Field(&p.FindingId, validation.Required),
 		validation.Field(&p.ProjectId, validation.Required),
 		validation.Field(&p.ExpiredAt, validation.Min(0), validation.Max(253402268399)), //  1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+		validation.Field(&p.PendUserId, validation.Required),
 	)
 }
 

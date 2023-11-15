@@ -115,6 +115,7 @@ message PendFinding {
   int64 updated_at = 5;
   int64 expired_at = 6;
   PendReason reason = 7;
+  uint32 pend_user_id = 8;
 }
 
 // PendFinding For upsert
@@ -124,6 +125,7 @@ message PendFindingForUpsert {
   string note = 3;
   int64 expired_at = 4;
   PendReason reason = 5;
+  uint32 pend_user_id = 6;
 }
 
 // FindingStatus

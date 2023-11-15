@@ -1050,25 +1050,25 @@ func (_m *FindingRepository) UpsertFindingSetting(ctx context.Context, data *mod
 	return r0, r1
 }
 
-// UpsertPendFinding provides a mock function with given fields: ctx, findingID, projectID, note, reason, expiredAtInt
-func (_m *FindingRepository) UpsertPendFinding(ctx context.Context, findingID uint64, projectID uint32, note string, reason string, expiredAtInt int64) (*model.PendFinding, error) {
-	ret := _m.Called(ctx, findingID, projectID, note, reason, expiredAtInt)
+// UpsertPendFinding provides a mock function with given fields: ctx, findingID, projectID, pendUserID, note, reason, expiredAtInt
+func (_m *FindingRepository) UpsertPendFinding(ctx context.Context, findingID uint64, projectID uint32, pendUserID uint32, note string, reason string, expiredAtInt int64) (*model.PendFinding, error) {
+	ret := _m.Called(ctx, findingID, projectID, pendUserID, note, reason, expiredAtInt)
 
 	var r0 *model.PendFinding
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint32, string, string, int64) (*model.PendFinding, error)); ok {
-		return rf(ctx, findingID, projectID, note, reason, expiredAtInt)
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint32, uint32, string, string, int64) (*model.PendFinding, error)); ok {
+		return rf(ctx, findingID, projectID, pendUserID, note, reason, expiredAtInt)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint32, string, string, int64) *model.PendFinding); ok {
-		r0 = rf(ctx, findingID, projectID, note, reason, expiredAtInt)
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, uint32, uint32, string, string, int64) *model.PendFinding); ok {
+		r0 = rf(ctx, findingID, projectID, pendUserID, note, reason, expiredAtInt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.PendFinding)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uint64, uint32, string, string, int64) error); ok {
-		r1 = rf(ctx, findingID, projectID, note, reason, expiredAtInt)
+	if rf, ok := ret.Get(1).(func(context.Context, uint64, uint32, uint32, string, string, int64) error); ok {
+		r1 = rf(ctx, findingID, projectID, pendUserID, note, reason, expiredAtInt)
 	} else {
 		r1 = ret.Error(1)
 	}
