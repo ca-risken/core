@@ -3,12 +3,14 @@ package alert
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
 	projectproto "github.com/ca-risken/core/proto/project"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/slack-go/slack"
 )
 
@@ -71,7 +73,7 @@ func (a *AlertService) sendSlackNotification(
 		}
 	} else if setting.ChannelID != "" {
 		apiMsg := getApiMessage(setting.Data.Message, url, alert, project, rules, findings, locale)
-		if _, _, err := a.slackClient.PostMessage(setting.ChannelID, apiMsg...); err != nil {
+		if err := a.postMessageSlackWithRetry(ctx, setting.ChannelID, apiMsg...); err != nil {
 			return fmt.Errorf("failed to send slack(postmessage): %w", err)
 		}
 	}
@@ -100,13 +102,31 @@ func (a *AlertService) sendSlackTestNotification(ctx context.Context, url, notif
 			return fmt.Errorf("failed to send slack(webhookurl): %w", err)
 		}
 	} else if setting.ChannelID != "" {
-		if _, _, err := a.slackClient.PostMessage(
+		if err := a.postMessageSlackWithRetry(ctx,
 			setting.ChannelID, slack.MsgOptionText(getTestSlackMessageText(locale), false)); err != nil {
 			return fmt.Errorf("failed to send slack(postmessage): %w", err)
 		}
 	}
 
 	return nil
+}
+
+func (a *AlertService) postMessageSlack(channelID string, msg ...slack.MsgOption) error {
+	if _, _, err := a.slackClient.PostMessage(channelID, msg...); err != nil {
+		var rateLimitError *slack.RateLimitedError
+		if errors.As(err, &rateLimitError) {
+			time.Sleep(rateLimitError.RetryAfter)
+		}
+		return err
+	}
+	return nil
+}
+
+func (a *AlertService) postMessageSlackWithRetry(ctx context.Context, channelID string, msg ...slack.MsgOption) error {
+	operation := func() error {
+		return a.postMessageSlack(channelID, msg...)
+	}
+	return backoff.RetryNotify(operation, a.retryer, a.newRetryLogger(ctx, "postMessageSlack"))
 }
 
 func getWebhookMessage(
