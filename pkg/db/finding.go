@@ -1044,6 +1044,7 @@ INSERT INTO pend_finding
 VALUES
   (?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
+  pend_user_id = VALUES(pend_user_id),
   note = VALUES(note),
   reason = VALUES(reason),
   expired_at = VALUES(expired_at)
@@ -1059,7 +1060,7 @@ func (c *Client) UpsertPendFinding(ctx context.Context, findingID uint64, projec
 	if err := c.Master.WithContext(ctx).Exec(insertPendFinding,
 		findingID,
 		projectID,
-		pendUserID,
+		convertZeroValueToNull(pendUserID),
 		note,
 		reason,
 		expiredAt,
