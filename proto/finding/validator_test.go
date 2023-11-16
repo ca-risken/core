@@ -903,7 +903,7 @@ func TestValidate_PutPendFindingRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &PutPendFindingRequest{ProjectId: 1, PendFinding: &PendFindingForUpsert{FindingId: 1, ProjectId: 1}},
+			input:   &PutPendFindingRequest{ProjectId: 1, PendFinding: &PendFindingForUpsert{FindingId: 1, ProjectId: 1, PendUserId: 1}},
 			wantErr: false,
 		},
 		{
@@ -913,17 +913,17 @@ func TestValidate_PutPendFindingRequest(t *testing.T) {
 		},
 		{
 			name:    "NG Not Equal(project_id)",
-			input:   &PutPendFindingRequest{ProjectId: 999, PendFinding: &PendFindingForUpsert{FindingId: 1, ProjectId: 1}},
+			input:   &PutPendFindingRequest{ProjectId: 999, PendFinding: &PendFindingForUpsert{FindingId: 1, ProjectId: 1, PendUserId: 1}},
 			wantErr: true,
 		},
 		{
 			name:    "NG Min(expired_at)",
-			input:   &PutPendFindingRequest{ProjectId: 1, PendFinding: &PendFindingForUpsert{FindingId: 1, ProjectId: 1, ExpiredAt: -1}},
+			input:   &PutPendFindingRequest{ProjectId: 1, PendFinding: &PendFindingForUpsert{FindingId: 1, ProjectId: 1, PendUserId: 1, ExpiredAt: -1}},
 			wantErr: true,
 		},
 		{
 			name:    "NG Max(expired_at)",
-			input:   &PutPendFindingRequest{ProjectId: 1, PendFinding: &PendFindingForUpsert{FindingId: 1, ProjectId: 1, ExpiredAt: 253402268400}},
+			input:   &PutPendFindingRequest{ProjectId: 1, PendFinding: &PendFindingForUpsert{FindingId: 1, ProjectId: 1, PendUserId: 1, ExpiredAt: 253402268400}},
 			wantErr: true,
 		},
 	}
@@ -1403,17 +1403,17 @@ func TestValidate_PendFindingForUpsert(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &PendFindingForUpsert{FindingId: 1, ProjectId: 1, Note: "note"},
+			input:   &PendFindingForUpsert{FindingId: 1, ProjectId: 1, Note: "note", PendUserId: 1},
 			wantErr: false,
 		},
 		{
 			name:    "NG required FindingId",
-			input:   &PendFindingForUpsert{ProjectId: 1},
+			input:   &PendFindingForUpsert{ProjectId: 1, PendUserId: 1},
 			wantErr: true,
 		},
 		{
 			name:    "NG required ProjectID",
-			input:   &PendFindingForUpsert{FindingId: 1},
+			input:   &PendFindingForUpsert{FindingId: 1, PendUserId: 1},
 			wantErr: true,
 		},
 	}

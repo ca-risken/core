@@ -591,7 +591,7 @@ get-pend-finding:
 put-pend-finding:
 	$(GRPCURL) \
 		-plaintext \
-		-d '{"project_id":1001, "pend_finding":{"finding_id":1001, "project_id":1001, "note":"note"}}' \
+		-d '{"project_id":1001, "pend_finding":{"finding_id":1001, "project_id":1001, "pend_user_id":1001, "note":"note"}}' \
 		$(CORE_API_ADDR) core.finding.FindingService.PutPendFinding
 
 .PHONY: put-pend-finding-expired

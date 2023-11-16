@@ -36,7 +36,7 @@ func (f *FindingService) PutPendFinding(ctx context.Context, req *finding.PutPen
 		}
 		return nil, err // DB error or RecordNotFound error
 	}
-	registerd, err := f.repository.UpsertPendFinding(ctx, req.PendFinding.FindingId, req.ProjectId, req.PendFinding.Note, GetPendReasonString(req.PendFinding.Reason), req.PendFinding.ExpiredAt)
+	registerd, err := f.repository.UpsertPendFinding(ctx, req.PendFinding.FindingId, req.ProjectId, req.PendFinding.PendUserId, req.PendFinding.Note, GetPendReasonString(req.PendFinding.Reason), req.PendFinding.ExpiredAt)
 	if err != nil {
 		return nil, err
 	}
@@ -58,12 +58,13 @@ func convertPendFinding(f *model.PendFinding) *finding.PendFinding {
 		return &finding.PendFinding{}
 	}
 	converted := &finding.PendFinding{
-		FindingId: f.FindingID,
-		ProjectId: f.ProjectID,
-		Note:      f.Note,
-		Reason:    getPendReason(f.Reason),
-		CreatedAt: f.CreatedAt.Unix(),
-		UpdatedAt: f.UpdatedAt.Unix(),
+		FindingId:  f.FindingID,
+		ProjectId:  f.ProjectID,
+		PendUserId: f.PendUserID,
+		Note:       f.Note,
+		Reason:     getPendReason(f.Reason),
+		CreatedAt:  f.CreatedAt.Unix(),
+		UpdatedAt:  f.UpdatedAt.Unix(),
 	}
 	if !f.ExpiredAt.IsZero() {
 		converted.ExpiredAt = f.ExpiredAt.Unix()
