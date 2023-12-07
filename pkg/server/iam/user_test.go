@@ -59,7 +59,7 @@ func TestListUser(t *testing.T) {
 			svc := IAMService{repository: mock}
 
 			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("ListUser", test.RepeatMockAnything(6)...).Return(c.mockResponce, c.mockError).Once()
+				mock.On("ListUser", test.RepeatMockAnything(7)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.ListUser(ctx, c.input)
 			if err != nil && !c.wantErr {
