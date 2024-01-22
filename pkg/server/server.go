@@ -143,25 +143,6 @@ func (s *Server) Run(ctx context.Context) error {
 	return nil
 }
 
-func healthCheck(ctx context.Context, addr string) error {
-	conn, err := getGRPCConn(context.Background(), addr)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	client := grpc_health_v1.NewHealthClient(conn)
-	res, err := client.Check(ctx, &grpc_health_v1.HealthCheckRequest{})
-	if err != nil {
-		return err
-	}
-	if res.Status != grpc_health_v1.HealthCheckResponse_SERVING {
-		return fmt.Errorf("returned status is '%v'", res.Status)
-	}
-
-	return nil
-}
-
 func (s *Server) newFindingClient(svcAddr string) (finding.FindingServiceClient, error) {
 	ctx := context.Background()
 	conn, err := getGRPCConn(ctx, svcAddr)
