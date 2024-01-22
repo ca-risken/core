@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -126,23 +125,6 @@ func (s *Server) Run(ctx context.Context) error {
 	go func() {
 		if err := server.Serve(l); err != nil && err != grpc.ErrServerStopped {
 			s.logger.Errorf(ctx, "failed to serve grpc: %w", err)
-			errChan <- err
-		}
-	}()
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		if err := healthCheck(ctx, clientAddr); err != nil {
-			w.WriteHeader(http.StatusServiceUnavailable)
-			s.logger.Errorf(ctx, "health check is failed: %w", err)
-		} else {
-			fmt.Fprintln(w, "ok")
-		}
-	})
-
-	go func() {
-		if err := http.ListenAndServe(fmt.Sprintf("%s:3000", s.host), mux); err != http.ErrServerClosed {
-			s.logger.Errorf(ctx, "failed to start http server: %w", err)
 			errChan <- err
 		}
 	}()
