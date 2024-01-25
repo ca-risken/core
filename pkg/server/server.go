@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -130,23 +129,6 @@ func (s *Server) Run(ctx context.Context) error {
 		}
 	}()
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		if err := healthCheck(ctx, clientAddr); err != nil {
-			w.WriteHeader(http.StatusServiceUnavailable)
-			s.logger.Errorf(ctx, "health check is failed: %w", err)
-		} else {
-			fmt.Fprintln(w, "ok")
-		}
-	})
-
-	go func() {
-		if err := http.ListenAndServe(fmt.Sprintf("%s:3000", s.host), mux); err != http.ErrServerClosed {
-			s.logger.Errorf(ctx, "failed to start http server: %w", err)
-			errChan <- err
-		}
-	}()
-
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -156,25 +138,6 @@ func (s *Server) Run(ctx context.Context) error {
 	case <-ctx.Done():
 		s.logger.Info(ctx, "Shutdown gRPC server...")
 		server.GracefulStop()
-	}
-
-	return nil
-}
-
-func healthCheck(ctx context.Context, addr string) error {
-	conn, err := getGRPCConn(context.Background(), addr)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	client := grpc_health_v1.NewHealthClient(conn)
-	res, err := client.Check(ctx, &grpc_health_v1.HealthCheckRequest{})
-	if err != nil {
-		return err
-	}
-	if res.Status != grpc_health_v1.HealthCheckResponse_SERVING {
-		return fmt.Errorf("returned status is '%v'", res.Status)
 	}
 
 	return nil
