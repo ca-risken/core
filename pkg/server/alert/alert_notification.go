@@ -219,6 +219,30 @@ func (a *AlertService) TestNotification(ctx context.Context, req *alert.TestNoti
 	return &empty.Empty{}, nil
 }
 
+func (a *AlertService) RequestNotification(ctx context.Context, req *alert.SendNotificationRequest) (*empty.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	notification, err := a.repository.GetNotification(ctx, req.ProjectId, req.NotificationId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &empty.Empty{}, nil
+		}
+		return nil, err
+	}
+	switch notification.Type {
+	case "slack":
+		err = a.sendSlackRequestNotification(ctx, a.baseURL, notification.NotifySetting, a.defaultLocale, "s", "k")
+		if err != nil {
+			a.logger.Errorf(ctx, "Error occured when sending test slack notification. err: %v", err)
+			return nil, err
+		}
+	default:
+		a.logger.Warnf(ctx, "This notification_type is unimprement. type: %v", notification.Type)
+	}
+	return &empty.Empty{}, nil
+}
+
 func (a *AlertService) convertNotification(ctx context.Context, n *model.Notification, mask bool) (*alert.Notification, error) {
 	if n == nil {
 		return &alert.Notification{}, nil

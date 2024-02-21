@@ -37,10 +37,14 @@ const (
 	- Remove the root cause of the problem
 	- If it is an intentional setup/operation and the risk is small, archive it
 	- If the nature of the problem is not urgent and immediate action is difficult, set a target deadline and PEND`
-	slackNotificationAttachmentJa  = "その他、%d件すべてのFindingは <%s/alert/alert?project_id=%d&from=slack|アラート画面> からご確認ください。"
-	slackNotificationAttachmentEn  = "Please check all %d Findings from <%s/alert/alert?project_id=%d&from=slack|Alert screen>."
-	slackNotificationTestMessageJa = "RISKENからのテスト通知です"
-	slackNotificationTestMessageEn = "This is a test notification from RISKEN"
+	slackNotificationAttachmentJa     = "その他、%d件すべてのFindingは <%s/alert/alert?project_id=%d&from=slack|アラート画面> からご確認ください。"
+	slackNotificationAttachmentEn     = "Please check all %d Findings from <%s/alert/alert?project_id=%d&from=slack|Alert screen>."
+	slackNotificationTestMessageJa    = "RISKENからのテスト通知です"
+	slackNotificationTestMessageEn    = "This is a test notification from RISKEN"
+	slackRequestNotificationMessageJa = `%sさんが
+      あなたのプロジェクト%sへの権限を申請しました。
+      問題なければ次のリンクから%sさんを追加してください。`
+	slackRequestNotificationMessageEn = `%s %s %s`
 )
 
 func (a *AlertService) sendSlackNotification(
@@ -104,6 +108,37 @@ func (a *AlertService) sendSlackTestNotification(ctx context.Context, url, notif
 	} else if setting.ChannelID != "" {
 		if err := a.postMessageSlackWithRetry(ctx,
 			setting.ChannelID, slack.MsgOptionText(getTestSlackMessageText(locale), false)); err != nil {
+			return fmt.Errorf("failed to send slack(postmessage): %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (a *AlertService) sendSlackRequestNotification(ctx context.Context, url, notifySetting, defaultLocale, userName, projectName string) error {
+	var setting slackNotifySetting
+	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
+		return err
+	}
+
+	var locale string
+	switch setting.Locale {
+	case LocaleJa:
+		locale = LocaleJa
+	case LocaleEn:
+		locale = LocaleEn
+	default:
+		locale = defaultLocale
+	}
+
+	if setting.WebhookURL != "" {
+		webhookMsg := getRequestWebhookMessage(setting.Data.Channel, locale, userName, projectName)
+		if err := slack.PostWebhook(setting.WebhookURL, webhookMsg); err != nil {
+			return fmt.Errorf("failed to send slack(webhookurl): %w", err)
+		}
+	} else if setting.ChannelID != "" {
+		if err := a.postMessageSlackWithRetry(ctx,
+			setting.ChannelID, slack.MsgOptionText(getRequestSlackMessageText(locale, userName, projectName), false)); err != nil {
 			return fmt.Errorf("failed to send slack(postmessage): %w", err)
 		}
 	}
@@ -247,6 +282,28 @@ func getTestSlackMessageText(locale string) string {
 		msgText = slackNotificationTestMessageEn
 	}
 	return msgText
+}
+
+func getRequestWebhookMessage(channel, locale, userName, projectName string) *slack.WebhookMessage {
+	msg := slack.WebhookMessage{
+		Text: getRequestSlackMessageText(locale, userName, projectName),
+	}
+	// override message
+	if channel != "" {
+		msg.Channel = channel
+	}
+	return &msg
+}
+
+func getRequestSlackMessageText(locale, userName, projectName string) string {
+	var msgText string
+	switch locale {
+	case LocaleJa:
+		msgText = slackRequestNotificationMessageJa
+	default:
+		msgText = slackRequestNotificationMessageEn
+	}
+	return fmt.Sprintf(msgText, userName, projectName, userName)
 }
 
 func getColor(severity string) string {
