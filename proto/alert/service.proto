@@ -69,7 +69,8 @@ service AlertService {
   rpc DeleteNotification(DeleteNotificationRequest)
       returns (google.protobuf.Empty);
   rpc TestNotification(TestNotificationRequest) returns (google.protobuf.Empty);
-  rpc SendNotification(SendNotificationRequest) returns (google.protobuf.Empty);
+  rpc RequestAuthzNotification(RequestAuthzNotificationRequest)
+      returns (google.protobuf.Empty);
 
   // alert_cond_notification
   rpc ListAlertCondNotification(ListAlertCondNotificationRequest)
@@ -316,10 +317,10 @@ message TestNotificationRequest {
   uint32 notification_id = 2;
 }
 
-message SubmitNotificationRequest {
+message RequestAuthzNotificationRequest {
   uint32 project_id = 1;
-  uint32 notification_id = 2;
-  string message = 1;
+  string project_name = 2;
+  string user_name = 3;
 }
 
 message ListAlertCondNotificationRequest {

@@ -219,11 +219,12 @@ func (a *AlertService) TestNotification(ctx context.Context, req *alert.TestNoti
 	return &empty.Empty{}, nil
 }
 
-func (a *AlertService) RequestNotification(ctx context.Context, req *alert.SendNotificationRequest) (*empty.Empty, error) {
+func (a *AlertService) RequestAuthzNotification(ctx context.Context, req *alert.RequestAuthzNotificationRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	notification, err := a.repository.GetNotification(ctx, req.ProjectId, req.NotificationId)
+	notifications, err := a.repository.ListNotification(ctx, req.ProjectId, "slack", 0, time.Now().Unix())
+	notification := &(*notifications)[0]
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &empty.Empty{}, nil
@@ -232,7 +233,7 @@ func (a *AlertService) RequestNotification(ctx context.Context, req *alert.SendN
 	}
 	switch notification.Type {
 	case "slack":
-		err = a.sendSlackRequestNotification(ctx, a.baseURL, notification.NotifySetting, a.defaultLocale, "s", "k")
+		err = a.sendSlackRequestAuthzNotification(ctx, a.baseURL, notification.NotifySetting, a.defaultLocale, req.ProjectName, req.UserName)
 		if err != nil {
 			a.logger.Errorf(ctx, "Error occured when sending test slack notification. err: %v", err)
 			return nil, err
