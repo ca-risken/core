@@ -305,6 +305,15 @@ func (r *TestNotificationRequest) Validate() error {
 	)
 }
 
+// Validate RequestAuthzNotificationRequest
+func (r *RequestAuthzNotificationRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.ProjectId, validation.Required),
+		validation.Field(&r.ProjectName, validation.Required),
+		validation.Field(&r.UserName, validation.Required),
+	)
+}
+
 // Validate ListAlertCondNotificationRequest
 func (r *ListAlertCondNotificationRequest) Validate() error {
 	return validation.ValidateStruct(r,
