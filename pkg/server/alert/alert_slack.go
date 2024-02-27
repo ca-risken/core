@@ -41,10 +41,11 @@ const (
 	slackNotificationAttachmentEn          = "Please check all %d Findings from <%s/alert/alert?project_id=%d&from=slack|Alert screen>."
 	slackNotificationTestMessageJa         = "RISKENからのテスト通知です"
 	slackNotificationTestMessageEn         = "This is a test notification from RISKEN"
-	slackRequestAuthzNotificationMessageJa = `%sさんが
-      あなたのプロジェクト%sへの権限を申請しました。
-      問題なければ次のリンクから%sさんを追加してください。`
-	slackRequestAuthzNotificationMessageEn = `%s %s %s`
+	slackRequestAuthzNotificationMessageJa = `@here %sさんが
+      あなたのプロジェクト%sへのアクセスをリクエストしました。
+      問題がなければ<%s/iam/user?project_id=%d&from=slack|ユーザー一覧>から%sさんを招待してください。`
+	slackRequestAuthzNotificationMessageEn = `@here %s has requested access to your Project %s. 
+	  If there are no issues, please check <%s/iam/user?project_id=%d&from=slack|the user list> and invite Person %s.`
 )
 
 func (a *AlertService) sendSlackNotification(
@@ -115,7 +116,7 @@ func (a *AlertService) sendSlackTestNotification(ctx context.Context, url, notif
 	return nil
 }
 
-func (a *AlertService) sendSlackRequestAuthzNotification(ctx context.Context, url, notifySetting, defaultLocale, userName, projectName string) error {
+func (a *AlertService) sendSlackRequestAuthzNotification(ctx context.Context, url, notifySetting, defaultLocale, userName, projectName string, projectID uint32) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
@@ -132,13 +133,13 @@ func (a *AlertService) sendSlackRequestAuthzNotification(ctx context.Context, ur
 	}
 
 	if setting.WebhookURL != "" {
-		webhookMsg := getRequestAuthzWebhookMessage(setting.Data.Channel, locale, userName, projectName)
+		webhookMsg := getRequestAuthzWebhookMessage(setting.Data.Channel, locale, userName, projectName, url, projectID)
 		if err := slack.PostWebhook(setting.WebhookURL, webhookMsg); err != nil {
 			return fmt.Errorf("failed to send slack(webhookurl): %w", err)
 		}
 	} else if setting.ChannelID != "" {
 		if err := a.postMessageSlackWithRetry(ctx,
-			setting.ChannelID, slack.MsgOptionText(getRequestAuthzSlackMessageText(locale, userName, projectName), false)); err != nil {
+			setting.ChannelID, slack.MsgOptionText(getRequestAuthzSlackMessageText(locale, userName, projectName, url, projectID), false)); err != nil {
 			return fmt.Errorf("failed to send slack(postmessage): %w", err)
 		}
 	}
@@ -284,9 +285,9 @@ func getTestSlackMessageText(locale string) string {
 	return msgText
 }
 
-func getRequestAuthzWebhookMessage(channel, locale, userName, projectName string) *slack.WebhookMessage {
+func getRequestAuthzWebhookMessage(channel, locale, projectName, userName, url string, projectID uint32) *slack.WebhookMessage {
 	msg := slack.WebhookMessage{
-		Text: getRequestAuthzSlackMessageText(locale, userName, projectName),
+		Text: getRequestAuthzSlackMessageText(locale, userName, projectName, url, projectID),
 	}
 	// override message
 	if channel != "" {
@@ -295,7 +296,7 @@ func getRequestAuthzWebhookMessage(channel, locale, userName, projectName string
 	return &msg
 }
 
-func getRequestAuthzSlackMessageText(locale, userName, projectName string) string {
+func getRequestAuthzSlackMessageText(locale, projectName, userName, url string, projectID uint32) string {
 	var msgText string
 	switch locale {
 	case LocaleJa:
@@ -303,7 +304,7 @@ func getRequestAuthzSlackMessageText(locale, userName, projectName string) strin
 	default:
 		msgText = slackRequestAuthzNotificationMessageEn
 	}
-	return fmt.Sprintf(msgText, userName, projectName, userName)
+	return fmt.Sprintf(msgText, userName, projectName, url, projectID, userName)
 }
 
 func getColor(severity string) string {

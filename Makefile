@@ -409,6 +409,13 @@ test-notification:
 		-d '{"project_id":1001, "notification_id":1001}' \
 		$(CORE_API_ADDR) core.alert.AlertService.TestNotification
 
+.PHONY: request-authz-notification
+request-authz-notification:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001,  "project_name": "projectA", "user_name":"userA"}' \
+		$(CORE_API_ADDR) core.alert.AlertService.RequestAuthzNotification
+
 .PHONY: analyze-alert
 analyze-alert:
 	$(GRPCURL) \

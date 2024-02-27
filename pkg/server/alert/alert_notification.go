@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
@@ -224,6 +225,9 @@ func (a *AlertService) RequestAuthzNotification(ctx context.Context, req *alert.
 		return nil, err
 	}
 	notifications, err := a.repository.ListNotification(ctx, req.ProjectId, "slack", 0, time.Now().Unix())
+	sort.Slice((*notifications), func(i, j int) bool {
+		return (*notifications)[i].NotificationID < (*notifications)[j].NotificationID
+	})
 	notification := &(*notifications)[0]
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -233,9 +237,9 @@ func (a *AlertService) RequestAuthzNotification(ctx context.Context, req *alert.
 	}
 	switch notification.Type {
 	case "slack":
-		err = a.sendSlackRequestAuthzNotification(ctx, a.baseURL, notification.NotifySetting, a.defaultLocale, req.ProjectName, req.UserName)
+		err = a.sendSlackRequestAuthzNotification(ctx, a.baseURL, notification.NotifySetting, a.defaultLocale, req.UserName, req.ProjectName, req.ProjectId)
 		if err != nil {
-			a.logger.Errorf(ctx, "Error occured when sending test slack notification. err: %v", err)
+			a.logger.Errorf(ctx, "Error occured when sending request authz slack notification. err: %v", err)
 			return nil, err
 		}
 	default:
