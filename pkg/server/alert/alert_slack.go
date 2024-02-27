@@ -41,10 +41,10 @@ const (
 	slackNotificationAttachmentEn          = "Please check all %d Findings from <%s/alert/alert?project_id=%d&from=slack|Alert screen>."
 	slackNotificationTestMessageJa         = "RISKENからのテスト通知です"
 	slackNotificationTestMessageEn         = "This is a test notification from RISKEN"
-	slackRequestAuthzNotificationMessageJa = `@here %sさんが
+	slackRequestAuthzNotificationMessageJa = `<!here> %sさんが
       あなたのプロジェクト%sへのアクセスをリクエストしました。
       問題がなければ<%s/iam/user?project_id=%d&from=slack|ユーザー一覧>から%sさんを招待してください。`
-	slackRequestAuthzNotificationMessageEn = `@here %s has requested access to your Project %s. 
+	slackRequestAuthzNotificationMessageEn = `<!here> %s has requested access to your Project %s. 
 	  If there are no issues, please check <%s/iam/user?project_id=%d&from=slack|the user list> and invite Person %s.`
 )
 
