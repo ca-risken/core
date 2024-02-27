@@ -42,10 +42,10 @@ const (
 	slackNotificationTestMessageJa         = "RISKENからのテスト通知です"
 	slackNotificationTestMessageEn         = "This is a test notification from RISKEN"
 	slackRequestAuthzNotificationMessageJa = `<!here> %sさんが
-      あなたのプロジェクト%sへのアクセスをリクエストしました。
-      問題がなければ<%s/iam/user?project_id=%d&from=slack|ユーザー一覧>から%sさんを招待してください。`
+      プロジェクト%sへのアクセスをリクエストしました。
+      プロジェクト管理者は問題がなければ<%s/iam/user?project_id=%d&from=slack|ユーザー一覧>から%sさんを招待してください。`
 	slackRequestAuthzNotificationMessageEn = `<!here> %s has requested access to your Project %s. 
-	  If there are no issues, please check <%s/iam/user?project_id=%d&from=slack|the user list> and invite Person %s.`
+	  If there are no issues, the project administrator should  <%s/iam/user?project_id=%d&from=slack|the user list> and invite %s.`
 )
 
 func (a *AlertService) sendSlackNotification(
