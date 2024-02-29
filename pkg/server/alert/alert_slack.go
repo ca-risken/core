@@ -41,11 +41,8 @@ const (
 	slackNotificationAttachmentEn                = "Please check all %d Findings from <%s/alert/alert?project_id=%d&from=slack|Alert screen>."
 	slackNotificationTestMessageJa               = "RISKENからのテスト通知です"
 	slackNotificationTestMessageEn               = "This is a test notification from RISKEN"
-	slackRequestProjectRoleNotificationMessageJa = `<!here> %sさんが
-    プロジェクト%sへのアクセスをリクエストしました。
-    プロジェクト管理者は問題がなければ<%s/iam/user?project_id=%d&from=slack|ユーザー一覧>から%sさんを招待してください。`
-	slackRequestProjectRoleNotificationMessageEn = `<!here> %s has requested access to your Project %s. 
-	If there are no issues, the project administrator should  <%s/iam/user?project_id=%d&from=slack|the user list> and invite %s.`
+	slackRequestProjectRoleNotificationMessageJa = `<!here> %sさんがプロジェクト%sへのアクセスをリクエストしました。プロジェクト管理者は問題がなければ<%s/iam/user?project_id=%d&from=slack|ユーザー一覧>から%sさんを招待してください。`
+	slackRequestProjectRoleNotificationMessageEn = `<!here> %s has requested access to your Project %s. If there are no issues, the project administrator should  <%s/iam/user?project_id=%d&from=slack|the user list> and invite %s.`
 )
 
 func (a *AlertService) sendSlackNotification(
