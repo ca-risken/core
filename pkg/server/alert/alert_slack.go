@@ -37,15 +37,15 @@ const (
 	- Remove the root cause of the problem
 	- If it is an intentional setup/operation and the risk is small, archive it
 	- If the nature of the problem is not urgent and immediate action is difficult, set a target deadline and PEND`
-	slackNotificationAttachmentJa          = "その他、%d件すべてのFindingは <%s/alert/alert?project_id=%d&from=slack|アラート画面> からご確認ください。"
-	slackNotificationAttachmentEn          = "Please check all %d Findings from <%s/alert/alert?project_id=%d&from=slack|Alert screen>."
-	slackNotificationTestMessageJa         = "RISKENからのテスト通知です"
-	slackNotificationTestMessageEn         = "This is a test notification from RISKEN"
-	slackRequestAuthzNotificationMessageJa = `<!here> %sさんが
-      プロジェクト%sへのアクセスをリクエストしました。
-      プロジェクト管理者は問題がなければ<%s/iam/user?project_id=%d&from=slack|ユーザー一覧>から%sさんを招待してください。`
-	slackRequestAuthzNotificationMessageEn = `<!here> %s has requested access to your Project %s. 
-	  If there are no issues, the project administrator should  <%s/iam/user?project_id=%d&from=slack|the user list> and invite %s.`
+	slackNotificationAttachmentJa                = "その他、%d件すべてのFindingは <%s/alert/alert?project_id=%d&from=slack|アラート画面> からご確認ください。"
+	slackNotificationAttachmentEn                = "Please check all %d Findings from <%s/alert/alert?project_id=%d&from=slack|Alert screen>."
+	slackNotificationTestMessageJa               = "RISKENからのテスト通知です"
+	slackNotificationTestMessageEn               = "This is a test notification from RISKEN"
+	slackRequestProjectRoleNotificationMessageJa = `<!here> %sさんが
+    プロジェクト%sへのアクセスをリクエストしました。
+    プロジェクト管理者は問題がなければ<%s/iam/user?project_id=%d&from=slack|ユーザー一覧>から%sさんを招待してください。`
+	slackRequestProjectRoleNotificationMessageEn = `<!here> %s has requested access to your Project %s. 
+	If there are no issues, the project administrator should  <%s/iam/user?project_id=%d&from=slack|the user list> and invite %s.`
 )
 
 func (a *AlertService) sendSlackNotification(
@@ -116,7 +116,7 @@ func (a *AlertService) sendSlackTestNotification(ctx context.Context, url, notif
 	return nil
 }
 
-func (a *AlertService) sendSlackRequestAuthzNotification(ctx context.Context, url, notifySetting, defaultLocale, userName, projectName string, projectID uint32) error {
+func (a *AlertService) sendSlackRequestProjectRoleNotification(ctx context.Context, url, notifySetting, defaultLocale, userName, projectName string, projectID uint32) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
@@ -133,13 +133,13 @@ func (a *AlertService) sendSlackRequestAuthzNotification(ctx context.Context, ur
 	}
 
 	if setting.WebhookURL != "" {
-		webhookMsg := getRequestAuthzWebhookMessage(setting.Data.Channel, locale, userName, projectName, url, projectID)
+		webhookMsg := getRequestProjectRoleWebhookMessage(setting.Data.Channel, locale, userName, projectName, url, projectID)
 		if err := slack.PostWebhook(setting.WebhookURL, webhookMsg); err != nil {
 			return fmt.Errorf("failed to send slack(webhookurl): %w", err)
 		}
 	} else if setting.ChannelID != "" {
 		if err := a.postMessageSlackWithRetry(ctx,
-			setting.ChannelID, slack.MsgOptionText(getRequestAuthzSlackMessageText(locale, userName, projectName, url, projectID), false)); err != nil {
+			setting.ChannelID, slack.MsgOptionText(getRequestProjectRoleSlackMessageText(locale, userName, projectName, url, projectID), false)); err != nil {
 			return fmt.Errorf("failed to send slack(postmessage): %w", err)
 		}
 	}
@@ -285,9 +285,9 @@ func getTestSlackMessageText(locale string) string {
 	return msgText
 }
 
-func getRequestAuthzWebhookMessage(channel, locale, projectName, userName, url string, projectID uint32) *slack.WebhookMessage {
+func getRequestProjectRoleWebhookMessage(channel, locale, projectName, userName, url string, projectID uint32) *slack.WebhookMessage {
 	msg := slack.WebhookMessage{
-		Text: getRequestAuthzSlackMessageText(locale, userName, projectName, url, projectID),
+		Text: getRequestProjectRoleSlackMessageText(locale, userName, projectName, url, projectID),
 	}
 	// override message
 	if channel != "" {
@@ -296,13 +296,13 @@ func getRequestAuthzWebhookMessage(channel, locale, projectName, userName, url s
 	return &msg
 }
 
-func getRequestAuthzSlackMessageText(locale, projectName, userName, url string, projectID uint32) string {
+func getRequestProjectRoleSlackMessageText(locale, projectName, userName, url string, projectID uint32) string {
 	var msgText string
 	switch locale {
 	case LocaleJa:
-		msgText = slackRequestAuthzNotificationMessageJa
+		msgText = slackRequestProjectRoleNotificationMessageJa
 	default:
-		msgText = slackRequestAuthzNotificationMessageEn
+		msgText = slackRequestProjectRoleNotificationMessageEn
 	}
 	return fmt.Sprintf(msgText, userName, projectName, url, projectID, userName)
 }

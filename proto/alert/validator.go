@@ -305,12 +305,11 @@ func (r *TestNotificationRequest) Validate() error {
 	)
 }
 
-// Validate RequestAuthzNotificationRequest
-func (r *RequestAuthzNotificationRequest) Validate() error {
+// Validate RequestProjectRoleNotificationRequest
+func (r *RequestProjectRoleNotificationRequest) Validate() error {
 	return validation.ValidateStruct(r,
 		validation.Field(&r.ProjectId, validation.Required),
-		validation.Field(&r.ProjectName, validation.Required),
-		validation.Field(&r.UserName, validation.Required),
+		validation.Field(&r.UserId, validation.Required),
 	)
 }
 

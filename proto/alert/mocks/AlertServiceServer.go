@@ -1097,20 +1097,20 @@ func (_m *AlertServiceServer) PutRelAlertFinding(_a0 context.Context, _a1 *alert
 	return r0, r1
 }
 
-// RequestAuthzNotification provides a mock function with given fields: _a0, _a1
-func (_m *AlertServiceServer) RequestAuthzNotification(_a0 context.Context, _a1 *alert.RequestAuthzNotificationRequest) (*emptypb.Empty, error) {
+// RequestProjectRoleNotification provides a mock function with given fields: _a0, _a1
+func (_m *AlertServiceServer) RequestProjectRoleNotification(_a0 context.Context, _a1 *alert.RequestProjectRoleNotificationRequest) (*emptypb.Empty, error) {
 	ret := _m.Called(_a0, _a1)
 
 	if len(ret) == 0 {
-		panic("no return value specified for RequestAuthzNotification")
+		panic("no return value specified for RequestProjectRoleNotification")
 	}
 
 	var r0 *emptypb.Empty
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *alert.RequestAuthzNotificationRequest) (*emptypb.Empty, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *alert.RequestProjectRoleNotificationRequest) (*emptypb.Empty, error)); ok {
 		return rf(_a0, _a1)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *alert.RequestAuthzNotificationRequest) *emptypb.Empty); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *alert.RequestProjectRoleNotificationRequest) *emptypb.Empty); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
@@ -1118,7 +1118,7 @@ func (_m *AlertServiceServer) RequestAuthzNotification(_a0 context.Context, _a1 
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *alert.RequestAuthzNotificationRequest) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *alert.RequestProjectRoleNotificationRequest) error); ok {
 		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)

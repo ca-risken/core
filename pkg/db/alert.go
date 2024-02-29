@@ -402,7 +402,7 @@ func (c *Client) deleteAlertCondRule(ctx context.Context, projectID, alertCondit
 }
 
 func (c *Client) ListNotification(ctx context.Context, projectID uint32, notifyType string, fromAt, toAt int64) (*[]model.Notification, error) {
-	query := `select * from notification where project_id = ? and updated_at between ? and ?`
+	query := `select * from notification where project_id = ? and updated_at between ? and ? order by notification_id asc`
 	var params []interface{}
 	params = append(params, projectID, time.Unix(fromAt, 0), time.Unix(toAt, 0))
 	if !zero.IsZeroVal(notifyType) {

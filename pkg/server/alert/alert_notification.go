@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
+	"github.com/ca-risken/core/proto/iam"
+	"github.com/ca-risken/core/proto/project"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
 	"gorm.io/gorm"
@@ -215,20 +216,31 @@ func (a *AlertService) TestNotification(ctx context.Context, req *alert.TestNoti
 			return nil, err
 		}
 	default:
-		a.logger.Warnf(ctx, "This notification_type is unimprement. type: %v", notification.Type)
+		a.logger.Warnf(ctx, "This notification_type is unimplemented. type: %v", notification.Type)
 	}
 	return &empty.Empty{}, nil
 }
 
-func (a *AlertService) RequestAuthzNotification(ctx context.Context, req *alert.RequestAuthzNotificationRequest) (*empty.Empty, error) {
+func (a *AlertService) RequestProjectRoleNotification(ctx context.Context, req *alert.RequestProjectRoleNotificationRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 	notifications, err := a.repository.ListNotification(ctx, req.ProjectId, "slack", 0, time.Now().Unix())
-	sort.Slice((*notifications), func(i, j int) bool {
-		return (*notifications)[i].NotificationID < (*notifications)[j].NotificationID
-	})
-	notification := &(*notifications)[0]
+	notification := (*notifications)[0]
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &empty.Empty{}, nil
+		}
+		return nil, err
+	}
+	projects, err := a.projectClient.ListProject(ctx, &project.ListProjectRequest{ProjectId: req.ProjectId})
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &empty.Empty{}, nil
+		}
+		return nil, err
+	}
+	user, err := a.iamClient.GetUser(ctx, &iam.GetUserRequest{UserId: req.UserId})
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &empty.Empty{}, nil
@@ -237,13 +249,13 @@ func (a *AlertService) RequestAuthzNotification(ctx context.Context, req *alert.
 	}
 	switch notification.Type {
 	case "slack":
-		err = a.sendSlackRequestAuthzNotification(ctx, a.baseURL, notification.NotifySetting, a.defaultLocale, req.UserName, req.ProjectName, req.ProjectId)
+		err = a.sendSlackRequestProjectRoleNotification(ctx, a.baseURL, notification.NotifySetting, a.defaultLocale, user.User.Name, projects.Project[0].Name, req.ProjectId)
 		if err != nil {
 			a.logger.Errorf(ctx, "Error occured when sending request authz slack notification. err: %v", err)
 			return nil, err
 		}
 	default:
-		a.logger.Warnf(ctx, "This notification_type is unimprement. type: %v", notification.Type)
+		a.logger.Warnf(ctx, "This notification_type is unimplemented. type: %v", notification.Type)
 	}
 	return &empty.Empty{}, nil
 }

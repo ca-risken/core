@@ -8,6 +8,7 @@ import (
 	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
+	"github.com/ca-risken/core/proto/iam"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/slack-go/slack"
@@ -19,6 +20,7 @@ type AlertService struct {
 	repository        db.AlertRepository
 	findingClient     finding.FindingServiceClient
 	projectClient     project.ProjectServiceClient
+	iamClient         iam.IAMServiceClient
 	maxAnalyzeAPICall int64
 	baseURL           string
 	logger            logging.Logger
@@ -32,6 +34,7 @@ func NewAlertService(
 	baseURL string,
 	findingClient finding.FindingServiceClient,
 	projectClient project.ProjectServiceClient,
+	iamClient iam.IAMServiceClient,
 	repository db.AlertRepository,
 	logger logging.Logger,
 	defaultLocale string,
@@ -41,6 +44,7 @@ func NewAlertService(
 		repository:        repository,
 		findingClient:     findingClient,
 		projectClient:     projectClient,
+		iamClient:         iamClient,
 		maxAnalyzeAPICall: maxAnalyzeAPICall,
 		baseURL:           baseURL,
 		logger:            logger,

@@ -1351,8 +1351,8 @@ func (_m *AlertServiceClient) PutRelAlertFinding(ctx context.Context, in *alert.
 	return r0, r1
 }
 
-// RequestAuthzNotification provides a mock function with given fields: ctx, in, opts
-func (_m *AlertServiceClient) RequestAuthzNotification(ctx context.Context, in *alert.RequestAuthzNotificationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+// RequestProjectRoleNotification provides a mock function with given fields: ctx, in, opts
+func (_m *AlertServiceClient) RequestProjectRoleNotification(ctx context.Context, in *alert.RequestProjectRoleNotificationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -1363,15 +1363,15 @@ func (_m *AlertServiceClient) RequestAuthzNotification(ctx context.Context, in *
 	ret := _m.Called(_ca...)
 
 	if len(ret) == 0 {
-		panic("no return value specified for RequestAuthzNotification")
+		panic("no return value specified for RequestProjectRoleNotification")
 	}
 
 	var r0 *emptypb.Empty
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *alert.RequestAuthzNotificationRequest, ...grpc.CallOption) (*emptypb.Empty, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *alert.RequestProjectRoleNotificationRequest, ...grpc.CallOption) (*emptypb.Empty, error)); ok {
 		return rf(ctx, in, opts...)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *alert.RequestAuthzNotificationRequest, ...grpc.CallOption) *emptypb.Empty); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *alert.RequestProjectRoleNotificationRequest, ...grpc.CallOption) *emptypb.Empty); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
@@ -1379,7 +1379,7 @@ func (_m *AlertServiceClient) RequestAuthzNotification(ctx context.Context, in *
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *alert.RequestAuthzNotificationRequest, ...grpc.CallOption) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *alert.RequestProjectRoleNotificationRequest, ...grpc.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
