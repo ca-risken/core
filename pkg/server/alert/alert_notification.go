@@ -226,25 +226,16 @@ func (a *AlertService) RequestProjectRoleNotification(ctx context.Context, req *
 		return nil, err
 	}
 	notifications, err := a.repository.ListNotification(ctx, req.ProjectId, "slack", 0, time.Now().Unix())
-	notification := (*notifications)[0]
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &empty.Empty{}, nil
-		}
 		return nil, err
 	}
+	notification := (*notifications)[0]
 	projects, err := a.projectClient.ListProject(ctx, &project.ListProjectRequest{ProjectId: req.ProjectId})
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &empty.Empty{}, nil
-		}
 		return nil, err
 	}
 	user, err := a.iamClient.GetUser(ctx, &iam.GetUserRequest{UserId: req.UserId})
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &empty.Empty{}, nil
-		}
 		return nil, err
 	}
 	switch notification.Type {
@@ -256,6 +247,7 @@ func (a *AlertService) RequestProjectRoleNotification(ctx context.Context, req *
 		}
 	default:
 		a.logger.Warnf(ctx, "This notification_type is unimplemented. type: %v", notification.Type)
+		return nil, fmt.Errorf("This notification_type is unavailable. type: %v", notification.Type)
 	}
 	return &empty.Empty{}, nil
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/test"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 
@@ -17,7 +18,10 @@ import (
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
 	findingmock "github.com/ca-risken/core/proto/finding/mocks"
+	"github.com/ca-risken/core/proto/iam"
+	iammock "github.com/ca-risken/core/proto/iam/mocks"
 	"github.com/ca-risken/core/proto/project"
+	projectmock "github.com/ca-risken/core/proto/project/mocks"
 	"github.com/jarcoal/httpmock"
 )
 
@@ -318,6 +322,160 @@ func TestPutNotification(t *testing.T) {
 			}
 
 			got, err := svc.PutNotification(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestRequestProjectRoleNotification(t *testing.T) {
+	var ctx context.Context
+	type mockListNotification struct {
+		Resp *[]model.Notification
+		Err  error
+	}
+	type mockListProject struct {
+		Resp *project.ListProjectResponse
+		Err  error
+	}
+	type mockGetUser struct {
+		Resp *iam.GetUserResponse
+		Err  error
+	}
+	now := time.Now()
+	cases := []struct {
+		name             string
+		input            *alert.RequestProjectRoleNotificationRequest
+		want             *empty.Empty
+		wantErr          bool
+		listNotification mockListNotification
+		listProject      mockListProject
+		getUser          mockGetUser
+	}{
+		{
+			name:    "OK Request project role",
+			input:   &alert.RequestProjectRoleNotificationRequest{ProjectId: 1001, UserId: 1001},
+			want:    &empty.Empty{},
+			wantErr: false,
+			listNotification: mockListNotification{
+				Resp: &[]model.Notification{
+					{ProjectID: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
+				},
+				Err: nil,
+			},
+			getUser: mockGetUser{
+				Resp: &iam.GetUserResponse{
+					User: &iam.User{UserId: 1001, Name: "userName"},
+				},
+				Err: nil,
+			},
+			listProject: mockListProject{
+				Resp: &project.ListProjectResponse{
+					Project: []*project.Project{
+						{ProjectId: 1001, Name: "projectName"},
+					},
+				},
+				Err: nil,
+			},
+		},
+		{
+			name:    "NG unimplemented notification type",
+			input:   &alert.RequestProjectRoleNotificationRequest{ProjectId: 1001, UserId: 1001},
+			want:    nil,
+			wantErr: true,
+			listNotification: mockListNotification{
+				Resp: &[]model.Notification{
+					{ProjectID: 1001, Name: "name", Type: "unimplemented", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
+				},
+				Err: nil,
+			},
+			listProject: mockListProject{
+				Resp: &project.ListProjectResponse{
+					Project: []*project.Project{
+						{ProjectId: 1001, Name: "projectName"},
+					},
+				},
+				Err: nil,
+			},
+			getUser: mockGetUser{
+				Resp: &iam.GetUserResponse{
+					User: &iam.User{UserId: 1001, Name: "userName"},
+				},
+				Err: nil,
+			},
+		},
+		{
+			name:    "NG ListNotification (Notification Not Found)",
+			input:   &alert.RequestProjectRoleNotificationRequest{ProjectId: 1001, UserId: 1001},
+			want:    nil,
+			wantErr: true,
+			listNotification: mockListNotification{
+				Resp: &[]model.Notification{},
+				Err:  gorm.ErrRecordNotFound,
+			},
+		},
+		{
+			name:    "NG ListProject (API Error)",
+			input:   &alert.RequestProjectRoleNotificationRequest{ProjectId: 1001, UserId: 1001},
+			want:    nil,
+			wantErr: true,
+			listNotification: mockListNotification{
+				Resp: &[]model.Notification{
+					{ProjectID: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
+				},
+				Err: nil,
+			},
+			listProject: mockListProject{
+				Resp: &project.ListProjectResponse{
+					Project: []*project.Project{
+						{ProjectId: 1001, Name: "projectName"},
+					},
+				},
+				Err: errors.New("api error"),
+			},
+		},
+		{
+			name:    "NG GetUser (API Error)",
+			input:   &alert.RequestProjectRoleNotificationRequest{ProjectId: 1001, UserId: 1001},
+			want:    nil,
+			wantErr: true,
+			listNotification: mockListNotification{
+				Resp: &[]model.Notification{
+					{ProjectID: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
+				},
+				Err: errors.New("api error"),
+			},
+			listProject: mockListProject{
+				Resp: &project.ListProjectResponse{
+					Project: []*project.Project{
+						{ProjectId: 1001, Name: "projectName"},
+					},
+				},
+				Err: nil,
+			},
+			getUser: mockGetUser{
+				Resp: &iam.GetUserResponse{
+					User: &iam.User{UserId: 1001, Name: "userName"},
+				},
+				Err: gorm.ErrRecordNotFound,
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAlertRepository(t)
+			mockDB.On("ListNotification", test.RepeatMockAnything(5)...).Return(c.listNotification.Resp, c.listNotification.Err).Once()
+			mockProject := projectmock.ProjectServiceClient{}
+			mockProject.On("ListProject", mock.Anything, mock.Anything).Return(c.listProject.Resp, c.listProject.Err)
+			mockIAM := iammock.IAMServiceClient{}
+			mockIAM.On("GetUser", mock.Anything, mock.Anything).Return(c.getUser.Resp, c.getUser.Err)
+
+			svc := AlertService{projectClient: &mockProject, iamClient: &mockIAM, repository: mockDB, logger: logging.NewLogger()}
+			got, err := svc.RequestProjectRoleNotification(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
