@@ -247,7 +247,7 @@ func (a *AlertService) RequestProjectRoleNotification(ctx context.Context, req *
 		}
 	default:
 		a.logger.Warnf(ctx, "This notification_type is unimplemented. type: %v", notification.Type)
-		return nil, fmt.Errorf("This notification_type is unavailable. type: %v", notification.Type)
+		return nil, fmt.Errorf("this notification_type is unavailable. type: %v", notification.Type)
 	}
 	return &empty.Empty{}, nil
 }

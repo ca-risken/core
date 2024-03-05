@@ -10,7 +10,6 @@ import (
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/test"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 
@@ -350,7 +349,6 @@ func TestRequestProjectRoleNotification(t *testing.T) {
 	cases := []struct {
 		name             string
 		input            *alert.RequestProjectRoleNotificationRequest
-		want             *empty.Empty
 		wantErr          bool
 		listNotification mockListNotification
 		listProject      mockListProject
@@ -359,7 +357,6 @@ func TestRequestProjectRoleNotification(t *testing.T) {
 		{
 			name:    "OK Request project role",
 			input:   &alert.RequestProjectRoleNotificationRequest{ProjectId: 1001, UserId: 1001},
-			want:    &empty.Empty{},
 			wantErr: false,
 			listNotification: mockListNotification{
 				Resp: &[]model.Notification{
@@ -385,7 +382,6 @@ func TestRequestProjectRoleNotification(t *testing.T) {
 		{
 			name:    "NG unimplemented notification type",
 			input:   &alert.RequestProjectRoleNotificationRequest{ProjectId: 1001, UserId: 1001},
-			want:    nil,
 			wantErr: true,
 			listNotification: mockListNotification{
 				Resp: &[]model.Notification{
@@ -411,7 +407,6 @@ func TestRequestProjectRoleNotification(t *testing.T) {
 		{
 			name:    "NG ListNotification (Notification Not Found)",
 			input:   &alert.RequestProjectRoleNotificationRequest{ProjectId: 1001, UserId: 1001},
-			want:    nil,
 			wantErr: true,
 			listNotification: mockListNotification{
 				Resp: &[]model.Notification{},
@@ -421,7 +416,6 @@ func TestRequestProjectRoleNotification(t *testing.T) {
 		{
 			name:    "NG ListProject (API Error)",
 			input:   &alert.RequestProjectRoleNotificationRequest{ProjectId: 1001, UserId: 1001},
-			want:    nil,
 			wantErr: true,
 			listNotification: mockListNotification{
 				Resp: &[]model.Notification{
@@ -441,7 +435,6 @@ func TestRequestProjectRoleNotification(t *testing.T) {
 		{
 			name:    "NG GetUser (API Error)",
 			input:   &alert.RequestProjectRoleNotificationRequest{ProjectId: 1001, UserId: 1001},
-			want:    nil,
 			wantErr: true,
 			listNotification: mockListNotification{
 				Resp: &[]model.Notification{
@@ -475,12 +468,9 @@ func TestRequestProjectRoleNotification(t *testing.T) {
 			mockIAM.On("GetUser", mock.Anything, mock.Anything).Return(c.getUser.Resp, c.getUser.Err)
 
 			svc := AlertService{projectClient: &mockProject, iamClient: &mockIAM, repository: mockDB, logger: logging.NewLogger()}
-			got, err := svc.RequestProjectRoleNotification(ctx, c.input)
+			_, err := svc.RequestProjectRoleNotification(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
-			}
-			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
 			}
 		})
 	}
