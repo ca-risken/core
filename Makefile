@@ -409,6 +409,13 @@ test-notification:
 		-d '{"project_id":1001, "notification_id":1001}' \
 		$(CORE_API_ADDR) core.alert.AlertService.TestNotification
 
+.PHONY: request-project-role-notification
+request-project-role-notification:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001,  "user_id": 1001}' \
+		$(CORE_API_ADDR) core.alert.AlertService.RequestProjectRoleNotification
+
 .PHONY: analyze-alert
 analyze-alert:
 	$(GRPCURL) \

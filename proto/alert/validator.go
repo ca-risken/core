@@ -305,6 +305,14 @@ func (r *TestNotificationRequest) Validate() error {
 	)
 }
 
+// Validate RequestProjectRoleNotificationRequest
+func (r *RequestProjectRoleNotificationRequest) Validate() error {
+	return validation.ValidateStruct(r,
+		validation.Field(&r.ProjectId, validation.Required),
+		validation.Field(&r.UserId, validation.Required),
+	)
+}
+
 // Validate ListAlertCondNotificationRequest
 func (r *ListAlertCondNotificationRequest) Validate() error {
 	return validation.ValidateStruct(r,

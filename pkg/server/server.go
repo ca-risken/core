@@ -91,6 +91,7 @@ func (s *Server) Run(ctx context.Context) error {
 		s.config.BaseURL,
 		fc,
 		pc,
+		iamc,
 		s.db,
 		s.logger,
 		s.config.defaultLocale,

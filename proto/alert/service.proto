@@ -69,6 +69,8 @@ service AlertService {
   rpc DeleteNotification(DeleteNotificationRequest)
       returns (google.protobuf.Empty);
   rpc TestNotification(TestNotificationRequest) returns (google.protobuf.Empty);
+  rpc RequestProjectRoleNotification(RequestProjectRoleNotificationRequest)
+      returns (google.protobuf.Empty);
 
   // alert_cond_notification
   rpc ListAlertCondNotification(ListAlertCondNotificationRequest)
@@ -313,6 +315,11 @@ message DeleteNotificationRequest {
 message TestNotificationRequest {
   uint32 project_id = 1;
   uint32 notification_id = 2;
+}
+
+message RequestProjectRoleNotificationRequest {
+  uint32 project_id = 1;
+  uint32 user_id = 2;
 }
 
 message ListAlertCondNotificationRequest {

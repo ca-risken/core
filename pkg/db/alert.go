@@ -409,6 +409,7 @@ func (c *Client) ListNotification(ctx context.Context, projectID uint32, notifyT
 		query += " and type = ?"
 		params = append(params, notifyType)
 	}
+	query += " order by notification_id asc"
 	var data []model.Notification
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err

@@ -10,6 +10,8 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
+	"github.com/ca-risken/core/proto/iam"
+	"github.com/ca-risken/core/proto/project"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
 	"gorm.io/gorm"
@@ -214,7 +216,38 @@ func (a *AlertService) TestNotification(ctx context.Context, req *alert.TestNoti
 			return nil, err
 		}
 	default:
-		a.logger.Warnf(ctx, "This notification_type is unimprement. type: %v", notification.Type)
+		a.logger.Warnf(ctx, "This notification_type is unimplemented. type: %v", notification.Type)
+	}
+	return &empty.Empty{}, nil
+}
+
+func (a *AlertService) RequestProjectRoleNotification(ctx context.Context, req *alert.RequestProjectRoleNotificationRequest) (*empty.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	notifications, err := a.repository.ListNotification(ctx, req.ProjectId, "slack", 0, time.Now().Unix())
+	if err != nil {
+		return nil, err
+	}
+	notification := (*notifications)[0]
+	projects, err := a.projectClient.ListProject(ctx, &project.ListProjectRequest{ProjectId: req.ProjectId})
+	if err != nil {
+		return nil, err
+	}
+	user, err := a.iamClient.GetUser(ctx, &iam.GetUserRequest{UserId: req.UserId})
+	if err != nil {
+		return nil, err
+	}
+	switch notification.Type {
+	case "slack":
+		err = a.sendSlackRequestProjectRoleNotification(ctx, a.baseURL, notification.NotifySetting, a.defaultLocale, user.User.Name, projects.Project[0].Name, req.ProjectId)
+		if err != nil {
+			a.logger.Errorf(ctx, "Error occured when sending request authz slack notification. err: %v", err)
+			return nil, err
+		}
+	default:
+		a.logger.Warnf(ctx, "This notification_type is unimplemented. type: %v", notification.Type)
+		return nil, fmt.Errorf("this notification_type is unavailable. type: %v", notification.Type)
 	}
 	return &empty.Empty{}, nil
 }
