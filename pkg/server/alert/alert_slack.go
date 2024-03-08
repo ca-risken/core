@@ -282,7 +282,7 @@ func getTestSlackMessageText(locale string) string {
 	return msgText
 }
 
-func getRequestProjectRoleWebhookMessage(channel, locale, projectName, userName, url string, projectID uint32) *slack.WebhookMessage {
+func getRequestProjectRoleWebhookMessage(channel, locale, userName, projectName, url string, projectID uint32) *slack.WebhookMessage {
 	msg := slack.WebhookMessage{
 		Text: getRequestProjectRoleSlackMessageText(locale, userName, projectName, url, projectID),
 	}
@@ -293,7 +293,7 @@ func getRequestProjectRoleWebhookMessage(channel, locale, projectName, userName,
 	return &msg
 }
 
-func getRequestProjectRoleSlackMessageText(locale, projectName, userName, url string, projectID uint32) string {
+func getRequestProjectRoleSlackMessageText(locale, userName, projectName, url string, projectID uint32) string {
 	var msgText string
 	switch locale {
 	case LocaleJa:
