@@ -167,7 +167,12 @@ func (a *AlertService) replaceSlackNotifySetting(ctx context.Context, jsonNotify
 			return slackNotifySetting{}, err
 		}
 	}
-	if !zero.IsZeroVal(notifySettingUpdate.WebhookURL) {
+	if notifySettingUpdate.WebhookURL != "" {
+		notifySettingUpdate.ChannelID = ""
+		return notifySettingUpdate, nil
+	}
+	if notifySettingUpdate.ChannelID != "" {
+		notifySettingUpdate.Data = slackNotifyOption{}
 		return notifySettingUpdate, nil
 	}
 	notifySettingUpdate.WebhookURL = notifySettingExist.WebhookURL
