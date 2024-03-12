@@ -114,7 +114,7 @@ func (p *ProjectService) IsActive(ctx context.Context, req *project.IsActiveRequ
 }
 
 func (p *ProjectService) createDefaultRole(ctx context.Context, ownerUserID, projectID uint32) error {
-	defaultRoles := map[string]string{"project-admin": ".*", "project-finding-editor": "finding/.+", "project-viewer": "get|list"}
+	defaultRoles := map[string]string{"project-admin": ".*", "project-finding-editor": "finding/.+", "project-viewer": "get|list|is-admin"}
 	for name, actionPtn := range defaultRoles {
 		policy, err := p.iamClient.PutPolicy(ctx, &iam.PutPolicyRequest{
 			ProjectId: projectID,
