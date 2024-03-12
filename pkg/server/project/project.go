@@ -114,41 +114,46 @@ func (p *ProjectService) IsActive(ctx context.Context, req *project.IsActiveRequ
 }
 
 func (p *ProjectService) createDefaultRole(ctx context.Context, ownerUserID, projectID uint32) error {
-	policy, err := p.iamClient.PutPolicy(ctx, &iam.PutPolicyRequest{
-		ProjectId: projectID,
-		Policy: &iam.PolicyForUpsert{
-			Name:        "project-admin",
-			ProjectId:   projectID,
-			ActionPtn:   ".*",
-			ResourcePtn: ".*",
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("Could not put default policy, err=%+v", err)
-	}
-	role, err := p.iamClient.PutRole(ctx, &iam.PutRoleRequest{
-		ProjectId: projectID,
-		Role: &iam.RoleForUpsert{
-			Name:      "project-admin-role",
+	defaultRoles := map[string]string{"project-admin": ".*", "project-finding-editor": "finding/.+", "project-viewer": "get|list"}
+	for name, actionPtn := range defaultRoles {
+		policy, err := p.iamClient.PutPolicy(ctx, &iam.PutPolicyRequest{
 			ProjectId: projectID,
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("Could not put project-admin-role, err=%+v", err)
-	}
-	if _, err := p.iamClient.AttachPolicy(ctx, &iam.AttachPolicyRequest{
-		ProjectId: projectID,
-		RoleId:    role.Role.RoleId,
-		PolicyId:  policy.Policy.PolicyId,
-	}); err != nil {
-		return fmt.Errorf("Could not attach default policy, err=%+v", err)
-	}
-	if _, err := p.iamClient.AttachRole(ctx, &iam.AttachRoleRequest{
-		ProjectId: projectID,
-		UserId:    ownerUserID,
-		RoleId:    role.Role.RoleId,
-	}); err != nil {
-		return fmt.Errorf("Could not attach default role, err=%+v", err)
+			Policy: &iam.PolicyForUpsert{
+				Name:        name,
+				ProjectId:   projectID,
+				ActionPtn:   actionPtn,
+				ResourcePtn: ".*",
+			},
+		})
+		if err != nil {
+			return fmt.Errorf("Could not put default policy, err=%+v", err)
+		}
+		role, err := p.iamClient.PutRole(ctx, &iam.PutRoleRequest{
+			ProjectId: projectID,
+			Role: &iam.RoleForUpsert{
+				Name:      name + "-role",
+				ProjectId: projectID,
+			},
+		})
+		if err != nil {
+			return fmt.Errorf("Could not put %s-role, err=%+v", name, err)
+		}
+		if _, err := p.iamClient.AttachPolicy(ctx, &iam.AttachPolicyRequest{
+			ProjectId: projectID,
+			RoleId:    role.Role.RoleId,
+			PolicyId:  policy.Policy.PolicyId,
+		}); err != nil {
+			return fmt.Errorf("Could not attach default policy, err=%+v", err)
+		}
+		if name == "project-admin" {
+			if _, err := p.iamClient.AttachRole(ctx, &iam.AttachRoleRequest{
+				ProjectId: projectID,
+				UserId:    ownerUserID,
+				RoleId:    role.Role.RoleId,
+			}); err != nil {
+				return fmt.Errorf("Could not attach default role, err=%+v", err)
+			}
+		}
 	}
 	return nil
 }
