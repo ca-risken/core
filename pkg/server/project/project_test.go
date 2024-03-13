@@ -155,7 +155,7 @@ func TestCreateProject(t *testing.T) {
 				mockIAM.On("PutRole", test.RepeatMockAnything(2)...).Return(c.putRoleResponce, c.mockIAMError).Times(3)
 			}
 			if c.attachPolicyResponse != nil {
-				mockIAM.On("AttachPolicy", test.RepeatMockAnything(2)...).Return(c.attachPolicyResponse, c.mockIAMError).Times(3)
+				mockIAM.On("AttachPolicy", test.RepeatMockAnything(2)...).Return(c.attachPolicyResponse, c.mockIAMError).Times(4)
 			}
 			if c.attachRoleResponse != nil {
 				mockIAM.On("AttachRole", test.RepeatMockAnything(2)...).Return(c.attachRoleResponse, c.mockIAMError).Once()
