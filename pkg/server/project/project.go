@@ -117,8 +117,9 @@ func (p *ProjectService) createDefaultRole(ctx context.Context, ownerUserID, pro
 	projectAdmin := "project-admin"
 	projectViewer := "project-viewer"
 	findingEditor := "finding-editor"
+	viewerActionPtn := "get|list|is-admin|put-alert-first-viewed-at"
 
-	for name, actionPtn := range map[string]string{projectAdmin: ".*", projectViewer: "/finding/.+", findingEditor: "get|list|is-admin|/finding/.+"} {
+	for name, actionPtn := range map[string]string{projectAdmin: ".*", projectViewer: viewerActionPtn, findingEditor: viewerActionPtn + "|/finding/.+"} {
 		policy, err := p.iamClient.PutPolicy(ctx, &iam.PutPolicyRequest{
 			ProjectId: projectID,
 			Policy: &iam.PolicyForUpsert{
