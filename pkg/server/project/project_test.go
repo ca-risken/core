@@ -144,19 +144,22 @@ func TestCreateProject(t *testing.T) {
 			if c.createProjectResponse != nil || c.createProjectError != nil {
 				mockDB.On("CreateProject", test.RepeatMockAnything(2)...).Return(c.createProjectResponse, c.createProjectError).Once()
 			}
+			if c.putPolicyResponse != nil {
+				if c.wantErr {
+					mockIAM.On("PutPolicy", test.RepeatMockAnything(2)...).Return(c.putPolicyResponse, c.mockIAMError).Once()
+				} else {
+					mockIAM.On("PutPolicy", test.RepeatMockAnything(2)...).Return(c.putPolicyResponse, c.mockIAMError).Times(3)
+				}
+			}
 			if c.putRoleResponce != nil {
-				mockIAM.On("PutRole", test.RepeatMockAnything(2)...).Return(c.putRoleResponce, c.mockIAMError).Once()
+				mockIAM.On("PutRole", test.RepeatMockAnything(2)...).Return(c.putRoleResponce, c.mockIAMError).Times(3)
+			}
+			if c.attachPolicyResponse != nil {
+				mockIAM.On("AttachPolicy", test.RepeatMockAnything(2)...).Return(c.attachPolicyResponse, c.mockIAMError).Times(3)
 			}
 			if c.attachRoleResponse != nil {
 				mockIAM.On("AttachRole", test.RepeatMockAnything(2)...).Return(c.attachRoleResponse, c.mockIAMError).Once()
 			}
-			if c.putPolicyResponse != nil {
-				mockIAM.On("PutPolicy", test.RepeatMockAnything(2)...).Return(c.putPolicyResponse, c.mockIAMError).Once()
-			}
-			if c.attachPolicyResponse != nil {
-				mockIAM.On("AttachPolicy", test.RepeatMockAnything(2)...).Return(c.attachPolicyResponse, c.mockIAMError).Once()
-			}
-
 			result, err := svc.CreateProject(ctx, c.input)
 			if !c.wantErr && err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
