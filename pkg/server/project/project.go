@@ -114,12 +114,11 @@ func (p *ProjectService) IsActive(ctx context.Context, req *project.IsActiveRequ
 }
 
 func (p *ProjectService) createDefaultRole(ctx context.Context, ownerUserID, projectID uint32) error {
-	var projectViewerPolicyID uint32
 	projectAdmin := "project-admin"
 	projectViewer := "project-viewer"
 	findingEditor := "finding-editor"
 
-	for name, actionPtn := range map[string]string{projectAdmin: ".*", projectViewer: "/finding/.+", findingEditor: "get|list|is-admin"} {
+	for name, actionPtn := range map[string]string{projectAdmin: ".*", projectViewer: "/finding/.+", findingEditor: "get|list|is-admin|/finding/.+"} {
 		policy, err := p.iamClient.PutPolicy(ctx, &iam.PutPolicyRequest{
 			ProjectId: projectID,
 			Policy: &iam.PolicyForUpsert{
@@ -149,9 +148,6 @@ func (p *ProjectService) createDefaultRole(ctx context.Context, ownerUserID, pro
 		}); err != nil {
 			return fmt.Errorf("could not attach %s-policy to %s-role, err=%w", name, name, err)
 		}
-		if name == projectViewer {
-			projectViewerPolicyID = policy.Policy.PolicyId
-		}
 		if name == projectAdmin {
 			if _, err := p.iamClient.AttachRole(ctx, &iam.AttachRoleRequest{
 				ProjectId: projectID,
@@ -159,15 +155,6 @@ func (p *ProjectService) createDefaultRole(ctx context.Context, ownerUserID, pro
 				RoleId:    role.Role.RoleId,
 			}); err != nil {
 				return fmt.Errorf("could not attach default %s-role to project owner, err=%w", name, err)
-			}
-		}
-		if name == findingEditor {
-			if _, err := p.iamClient.AttachPolicy(ctx, &iam.AttachPolicyRequest{
-				ProjectId: projectID,
-				RoleId:    role.Role.RoleId,
-				PolicyId:  projectViewerPolicyID,
-			}); err != nil {
-				return fmt.Errorf("could not attach %s-policy to %s-role, err=%w", projectViewer, name, err)
 			}
 		}
 	}
