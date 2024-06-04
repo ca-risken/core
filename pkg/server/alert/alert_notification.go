@@ -234,6 +234,9 @@ func (a *AlertService) RequestProjectRoleNotification(ctx context.Context, req *
 	if err != nil {
 		return nil, err
 	}
+	if notifications == nil || len(*notifications) == 0 {
+		return nil, fmt.Errorf("notification not found. project_id: %d", req.ProjectId)
+	}
 	notification := (*notifications)[0]
 	projects, err := a.projectClient.ListProject(ctx, &project.ListProjectRequest{ProjectId: req.ProjectId})
 	if err != nil {
