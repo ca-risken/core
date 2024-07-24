@@ -13,7 +13,7 @@ import (
 type IAMRepository interface {
 	// User
 	ListUser(ctx context.Context, activated bool, projectID uint32, name string, userID uint32, admin bool, userIdpKey string) (*[]model.User, error)
-	GetUser(ctx context.Context, userID uint32, sub string) (*model.User, error)
+	GetUser(ctx context.Context, userID uint32, sub, userIdpKey string) (*model.User, error)
 	GetUserBySub(ctx context.Context, sub string) (*model.User, error)
 	CreateUser(ctx context.Context, u *model.User) (*model.User, error)
 	PutUser(ctx context.Context, u *model.User) (*model.User, error)
@@ -100,7 +100,7 @@ where
 	return &data, nil
 }
 
-func (c *Client) GetUser(ctx context.Context, userID uint32, sub string) (*model.User, error) {
+func (c *Client) GetUser(ctx context.Context, userID uint32, sub, userIdpKey string) (*model.User, error) {
 	query := `select * from user where activated = 'true'`
 	var params []interface{}
 	if !zero.IsZeroVal(userID) {
@@ -110,6 +110,10 @@ func (c *Client) GetUser(ctx context.Context, userID uint32, sub string) (*model
 	if !zero.IsZeroVal(sub) {
 		query += " and sub = ?"
 		params = append(params, sub)
+	}
+	if userIdpKey != "" {
+		query += " and user_idp_key = ?"
+		params = append(params, userIdpKey)
 	}
 	var data model.User
 	if err := c.Master.WithContext(ctx).Raw(query, params...).First(&data).Error; err != nil {
@@ -743,7 +747,7 @@ func (c *Client) ListExpiredAccessToken(ctx context.Context) (*[]model.AccessTok
 }
 
 func (c *Client) userExists(ctx context.Context, userID uint32) (bool, error) {
-	if _, err := c.GetUser(ctx, userID, ""); errors.Is(err, gorm.ErrRecordNotFound) {
+	if _, err := c.GetUser(ctx, userID, "", ""); errors.Is(err, gorm.ErrRecordNotFound) {
 		return false, nil
 	} else if err != nil {
 		return false, fmt.Errorf("failed to get user. user_id=%d, error: %w", userID, err)

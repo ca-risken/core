@@ -113,7 +113,7 @@ func TestGetUser(t *testing.T) {
 			svc := IAMService{repository: mock, logger: logging.NewLogger()}
 
 			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("GetUser", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
+				mock.On("GetUser", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.GetUser(ctx, c.input)
 			if err != nil && !c.wantErr {

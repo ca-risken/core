@@ -19,8 +19,9 @@ func (l *ListUserRequest) Validate() error {
 // Validate GetUserRequest
 func (g *GetUserRequest) Validate() error {
 	return validation.ValidateStruct(g,
-		validation.Field(&g.UserId, validation.When(zero.IsZeroVal(g.Sub), validation.Required.Error("UserId or Sub is required."))),
-		validation.Field(&g.Sub, validation.When(zero.IsZeroVal(g.UserId), validation.Required.Error("UserId or Sub is required."))),
+		validation.Field(&g.UserId, validation.When(zero.IsZeroVal(g.Sub) && g.UserIdpKey == "", validation.Required.Error("UserId or Sub or UserIdpKey is required."))),
+		validation.Field(&g.Sub, validation.When(zero.IsZeroVal(g.UserId) && g.UserIdpKey == "", validation.Required.Error("UserId or Sub or UserIdpKey is required."))),
+		validation.Field(&g.UserIdpKey, validation.When(zero.IsZeroVal(g.UserId) && g.Sub == "", validation.Required.Error("UserId or Sub or UserIdpKey is required."))),
 	)
 }
 
