@@ -17,10 +17,11 @@ func (l *ListUserRequest) Validate() error {
 
 // Validate GetUserRequest
 func (g *GetUserRequest) Validate() error {
+	errMsg := "UserId or Sub or UserIdpKey is required."
 	return validation.ValidateStruct(g,
-		validation.Field(&g.UserId, validation.When(g.Sub == "" && g.UserIdpKey == "", validation.Required.Error("UserId or Sub or UserIdpKey is required."))),
-		validation.Field(&g.Sub, validation.When(g.UserId == 0 && g.UserIdpKey == "", validation.Required.Error("UserId or Sub or UserIdpKey is required."))),
-		validation.Field(&g.UserIdpKey, validation.When(g.UserId == 0 && g.Sub == "", validation.Required.Error("UserId or Sub or UserIdpKey is required."))),
+		validation.Field(&g.UserId, validation.When(g.Sub == "" && g.UserIdpKey == "", validation.Required.Error(errMsg))),
+		validation.Field(&g.Sub, validation.When(g.UserId == 0 && g.UserIdpKey == "", validation.Required.Error(errMsg))),
+		validation.Field(&g.UserIdpKey, validation.When(g.UserId == 0 && g.Sub == "", validation.Required.Error(errMsg))),
 	)
 }
 
