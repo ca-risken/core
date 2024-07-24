@@ -6,7 +6,6 @@ import (
 	"regexp"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/vikyd/zero"
 )
 
 // Validate ListUserRequest
@@ -19,9 +18,9 @@ func (l *ListUserRequest) Validate() error {
 // Validate GetUserRequest
 func (g *GetUserRequest) Validate() error {
 	return validation.ValidateStruct(g,
-		validation.Field(&g.UserId, validation.When(zero.IsZeroVal(g.Sub) && g.UserIdpKey == "", validation.Required.Error("UserId or Sub or UserIdpKey is required."))),
-		validation.Field(&g.Sub, validation.When(zero.IsZeroVal(g.UserId) && g.UserIdpKey == "", validation.Required.Error("UserId or Sub or UserIdpKey is required."))),
-		validation.Field(&g.UserIdpKey, validation.When(zero.IsZeroVal(g.UserId) && g.Sub == "", validation.Required.Error("UserId or Sub or UserIdpKey is required."))),
+		validation.Field(&g.UserId, validation.When(g.Sub == "" && g.UserIdpKey == "", validation.Required.Error("UserId or Sub or UserIdpKey is required."))),
+		validation.Field(&g.Sub, validation.When(g.UserId == 0 && g.UserIdpKey == "", validation.Required.Error("UserId or Sub or UserIdpKey is required."))),
+		validation.Field(&g.UserIdpKey, validation.When(g.UserId == 0 && g.Sub == "", validation.Required.Error("UserId or Sub or UserIdpKey is required."))),
 	)
 }
 
