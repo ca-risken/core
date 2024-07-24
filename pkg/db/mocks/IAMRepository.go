@@ -490,25 +490,25 @@ func (_m *IAMRepository) GetTokenPolicy(ctx context.Context, accessTokenID uint3
 	return r0, r1
 }
 
-// GetUser provides a mock function with given fields: ctx, userID, sub
-func (_m *IAMRepository) GetUser(ctx context.Context, userID uint32, sub string) (*model.User, error) {
-	ret := _m.Called(ctx, userID, sub)
+// GetUser provides a mock function with given fields: ctx, userID, sub, userIdpKey
+func (_m *IAMRepository) GetUser(ctx context.Context, userID uint32, sub string, userIdpKey string) (*model.User, error) {
+	ret := _m.Called(ctx, userID, sub, userIdpKey)
 
 	var r0 *model.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) (*model.User, error)); ok {
-		return rf(ctx, userID, sub)
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string, string) (*model.User, error)); ok {
+		return rf(ctx, userID, sub, userIdpKey)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) *model.User); ok {
-		r0 = rf(ctx, userID, sub)
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string, string) *model.User); ok {
+		r0 = rf(ctx, userID, sub, userIdpKey)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, string) error); ok {
-		r1 = rf(ctx, userID, sub)
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, string, string) error); ok {
+		r1 = rf(ctx, userID, sub, userIdpKey)
 	} else {
 		r1 = ret.Error(1)
 	}
