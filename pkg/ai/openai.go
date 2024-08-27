@@ -24,7 +24,16 @@ const (
 	PROMPT_SYSTEM_MSG_JP = "あなたは役に立つセキュリティアドバイザーです。セキュリティの専門家ではない人にも理解できるように説明をお願いします。"
 	PROMPT_SUMMARY_EN    = `I have detected the following security issue in my cloud environment. Please summarize the contents.
 Also, please include any ways to address the issue.
+
+The definition of the score is as follows. If the score is low, the problem may be resolved.
+<score>
+- 0.0 ~ 0.3 [Low]: Already low risk. If you are curious, check it.
+- 0.4 ~ 0.7 [Midium]: There is a risk of being connected. It's not necessary to do it immediately, but check it when you have time.
+- 0.8 ~ 1.0 [High]: It's dangerous. Check it immediately if necessary.
+</score>
+
 Use the following markdown format for your response.
+<format>
 ## Summary
 
 ## Detection content
@@ -34,10 +43,20 @@ Use the following markdown format for your response.
 ## How to fix
 - aaa
 - bbb
+</format>
 `
 	PROMPT_SUMMARY_JP = `クラウド環境で以下のセキュリティの問題を検知しました。日本語で内容を要約してください。
 また、問題の対処方法もあれば含めてください。
+
+スコアの定義は以下を参考にしてください。スコアが低い場合には問題が解決されてる可能性があります。
+<score>
+- 0.0 ~ 0.3 [低]: 無視しても大丈夫です。既に十分リスクは低い状態ですが気になる場合は確認してください。
+- 0.4 ~ 0.7 [中]: リスクにつながる可能性があります。すぐにではないですが時間がある時に確認してください。
+- 0.8 ~ 1.0 [高]: 危険という判定です。すぐに確認し必要があればインシデント発生前に対処すべきです。
+</score>
+
 回答は以下のMarkdownフォーマットでお願いします。(URLリンクは前後に半角スペースを入れてください)
+<format>
 ## 要約
 
 ## 検出内容
@@ -47,8 +66,12 @@ Use the following markdown format for your response.
 ## 対処方法
 ・aaa
 ・bbb
+</format>
 `
 	FINDING_FORMAT_FOR_AI = `The RISKEN tool detected the following issue related to cloud security.
+Score: 
+%.1f
+
 Type: 
 %s
 
@@ -58,7 +81,9 @@ Description:
 ScanResult(json):
 %s
 `
-	RECOMMEND_FORMAT_FOR_AI = `Detail: %s
+	RECOMMEND_FORMAT_FOR_AI = `
+Detail: %s
+
 Recommendation: %s
 `
 )
@@ -137,7 +162,7 @@ func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding
 	}
 	a.logger.WithItemsf(ctx, logging.InfoLevel, fields, "OpenAI usage: %+v", resp.Usage)
 	answer := resp.Choices[0].Message.Content
-	if err := a.setAISummaryCache(ctx, f.FindingID, lang, answer); err != nil {
+	if err := a.setAISummaryCache(f.FindingID, lang, answer); err != nil {
 		return "", fmt.Errorf("cache set error: err=%w", err)
 	}
 	return answer, nil
@@ -205,14 +230,14 @@ func (a *AIClient) AskAISummaryStreamFromFinding(
 		"openai_token": usageTokens,
 	}
 	a.logger.WithItemsf(ctx, logging.InfoLevel, fields, "OpenAI usage tokens: %d", usageTokens)
-	if err := a.setAISummaryCache(ctx, f.FindingID, lang, answer); err != nil {
+	if err := a.setAISummaryCache(f.FindingID, lang, answer); err != nil {
 		return fmt.Errorf("cache set error: err=%w", err)
 	}
 	return nil
 }
 
 func generateFindingDataForAI(f *model.Finding, r *model.Recommend) string {
-	text := fmt.Sprintf(FINDING_FORMAT_FOR_AI, f.DataSource, f.Description, f.Data)
+	text := fmt.Sprintf(FINDING_FORMAT_FOR_AI, f.Score, f.DataSource, f.Description, f.Data)
 	if r != nil {
 		text += fmt.Sprintf(RECOMMEND_FORMAT_FOR_AI, r.Risk, r.Recommendation)
 	}
@@ -233,7 +258,7 @@ func (a *AIClient) getAISummaryCache(ctx context.Context, findingID uint64, lang
 	return ""
 }
 
-func (a *AIClient) setAISummaryCache(ctx context.Context, findingID uint64, lang, answer string) error {
+func (a *AIClient) setAISummaryCache(findingID uint64, lang, answer string) error {
 	cacheKey := generateCacheKey(fmt.Sprintf(CACHE_KEY_FORMAT, findingID, lang))
 	if err := a.cache.Set(cacheKey, []byte(answer), CACHE_EXPIRE_SEC); err != nil {
 		return err
