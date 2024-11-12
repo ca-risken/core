@@ -364,7 +364,7 @@ func (c *Client) DetachRole(ctx context.Context, projectID, roleID, userID uint3
 			"not found user or role: user_id=%d, role_id=%d, project_id=%d", userID, roleID, projectID)
 	}
 	if zero.IsZeroVal(projectID) {
-		return c.Master.WithContext(ctx).Exec(deleteDetachAdminRole, userID, roleID, projectID).Error
+		return c.Master.WithContext(ctx).Exec(deleteDetachAdminRole, userID, roleID).Error
 	} else {
 		return c.Master.WithContext(ctx).Exec(deleteDetachProjectRole, userID, roleID, projectID).Error
 	}

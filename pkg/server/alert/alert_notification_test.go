@@ -332,6 +332,12 @@ func TestPutNotification(t *testing.T) {
 }
 
 func TestRequestProjectRoleNotification(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+	// External HTTP mock for slack notification
+	httpmock.RegisterResponder("POST", "https://example.com",
+		httpmock.NewStringResponder(200, "ok"))
+
 	var ctx context.Context
 	type mockListNotification struct {
 		Resp *[]model.Notification
@@ -360,7 +366,14 @@ func TestRequestProjectRoleNotification(t *testing.T) {
 			wantErr: false,
 			listNotification: mockListNotification{
 				Resp: &[]model.Notification{
-					{ProjectID: 1001, Name: "name", Type: "slack", NotifySetting: `{"webhook_url": "https://example.com"}`, CreatedAt: now, UpdatedAt: now},
+					{
+						ProjectID:     1001,
+						Name:          "name",
+						Type:          "slack",
+						NotifySetting: `{"webhook_url": "https://example.com"}`,
+						CreatedAt:     now,
+						UpdatedAt:     now,
+					},
 				},
 				Err: nil,
 			},
