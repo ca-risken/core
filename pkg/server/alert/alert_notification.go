@@ -163,16 +163,20 @@ func (a *AlertService) replaceSlackNotifySetting(ctx context.Context, jsonNotify
 		a.logger.Errorf(ctx, "Error occured when unmarshal exist.NotifySetting. err: %v", err)
 		return slackNotifySetting{}, err
 	}
+
+	// Slack Options
+	// webhookURL and ChannelID are mutually exclusive
 	if notifySettingUpdate.WebhookURL != "" {
 		notifySettingUpdate.ChannelID = ""
 		return notifySettingUpdate, nil
 	}
 	if notifySettingUpdate.ChannelID != "" {
-		notifySettingUpdate.Data = slackNotifyOption{}
+		notifySettingUpdate.WebhookURL = ""
 		return notifySettingUpdate, nil
 	}
-	notifySettingUpdate.WebhookURL = notifySettingExist.WebhookURL
 
+	// No update options
+	notifySettingUpdate = notifySettingExist // overwrite existing data
 	return notifySettingUpdate, nil
 }
 
