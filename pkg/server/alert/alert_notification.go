@@ -155,17 +155,13 @@ func (a *AlertService) PutNotification(ctx context.Context, req *alert.PutNotifi
 func (a *AlertService) replaceSlackNotifySetting(ctx context.Context, jsonNotifySettingExist, jsonNotifySettingUpdate string) (slackNotifySetting, error) {
 	var notifySettingUpdate slackNotifySetting
 	if err := json.Unmarshal([]byte(jsonNotifySettingUpdate), &notifySettingUpdate); err != nil {
-		if err != nil {
-			a.logger.Errorf(ctx, "Error occured when unmarshal update.NotifySetting. err: %v", err)
-			return slackNotifySetting{}, err
-		}
+		a.logger.Errorf(ctx, "Error occured when unmarshal update.NotifySetting. err: %v", err)
+		return slackNotifySetting{}, err
 	}
 	var notifySettingExist slackNotifySetting
 	if err := json.Unmarshal([]byte(jsonNotifySettingExist), &notifySettingExist); err != nil {
-		if err != nil {
-			a.logger.Errorf(ctx, "Error occured when unmarshal exist.NotifySetting. err: %v", err)
-			return slackNotifySetting{}, err
-		}
+		a.logger.Errorf(ctx, "Error occured when unmarshal exist.NotifySetting. err: %v", err)
+		return slackNotifySetting{}, err
 	}
 	if notifySettingUpdate.WebhookURL != "" {
 		notifySettingUpdate.ChannelID = ""
@@ -215,7 +211,7 @@ func (a *AlertService) TestNotification(ctx context.Context, req *alert.TestNoti
 	}
 	switch notification.Type {
 	case "slack":
-		err = a.sendSlackTestNotification(ctx, a.baseURL, notification.NotifySetting, a.defaultLocale)
+		err = a.sendSlackTestNotification(ctx, notification.NotifySetting, a.defaultLocale)
 		if err != nil {
 			a.logger.Errorf(ctx, "Error occured when sending test slack notification. err: %v", err)
 			return nil, err

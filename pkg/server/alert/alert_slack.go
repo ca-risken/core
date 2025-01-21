@@ -82,7 +82,7 @@ func (a *AlertService) sendSlackNotification(
 	return nil
 }
 
-func (a *AlertService) sendSlackTestNotification(ctx context.Context, url, notifySetting, defaultLocale string) error {
+func (a *AlertService) sendSlackTestNotification(ctx context.Context, notifySetting, defaultLocale string) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
