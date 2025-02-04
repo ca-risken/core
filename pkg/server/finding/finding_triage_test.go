@@ -116,7 +116,7 @@ func TestEvaluateSystemExposure(t *testing.T) {
 		{
 			name: "missing_public",
 			input: &SystemExposure{
-				AccessControl: Ptr("NONE"),
+				AccessControl: Ptr(ACCESS_CONTROL_NONE),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(TRIAGE_UNKNOWN),
@@ -126,7 +126,7 @@ func TestEvaluateSystemExposure(t *testing.T) {
 		{
 			name: "unknown_access",
 			input: &SystemExposure{
-				PublicFacing:  Ptr("OPEN"),
+				PublicFacing:  Ptr(PUBLIC_FACING_OPEN),
 				AccessControl: Ptr(TRIAGE_UNKNOWN),
 			},
 			want: &AssessmentDetail{
@@ -137,8 +137,8 @@ func TestEvaluateSystemExposure(t *testing.T) {
 		{
 			name: "open",
 			input: &SystemExposure{
-				PublicFacing:  Ptr("OPEN"),
-				AccessControl: Ptr("NONE"),
+				PublicFacing:  Ptr(PUBLIC_FACING_OPEN),
+				AccessControl: Ptr(ACCESS_CONTROL_NONE),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(SYSTEM_EXPOSURE_OPEN),
@@ -148,8 +148,8 @@ func TestEvaluateSystemExposure(t *testing.T) {
 		{
 			name: "controlled_from_open",
 			input: &SystemExposure{
-				PublicFacing:  Ptr("OPEN"),
-				AccessControl: Ptr("AUTHENTICATED"),
+				PublicFacing:  Ptr(PUBLIC_FACING_OPEN),
+				AccessControl: Ptr(ACCESS_CONTROL_AUTHENTICATED),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(SYSTEM_EXPOSURE_CONTROLLED),
@@ -159,8 +159,8 @@ func TestEvaluateSystemExposure(t *testing.T) {
 		{
 			name: "internal_controlled",
 			input: &SystemExposure{
-				PublicFacing:  Ptr("INTERNAL"),
-				AccessControl: Ptr("NONE"),
+				PublicFacing:  Ptr(PUBLIC_FACING_INTERNAL),
+				AccessControl: Ptr(ACCESS_CONTROL_NONE),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(SYSTEM_EXPOSURE_CONTROLLED),
@@ -170,8 +170,8 @@ func TestEvaluateSystemExposure(t *testing.T) {
 		{
 			name: "internal_small",
 			input: &SystemExposure{
-				AccessControl: Ptr("LIMITED_IP"),
-				PublicFacing:  Ptr("INTERNAL"),
+				AccessControl: Ptr(ACCESS_CONTROL_LIMITED_IP),
+				PublicFacing:  Ptr(PUBLIC_FACING_INTERNAL),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(SYSTEM_EXPOSURE_SMALL),
@@ -218,7 +218,7 @@ func TestEvaluateUtility(t *testing.T) {
 		{
 			name: "missing_automatable",
 			input: &Utility{
-				ValueDensity: Ptr("CONCENTRATED"),
+				ValueDensity: Ptr(VALUE_DENSITY_CONCENTRATED),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(TRIAGE_UNKNOWN),
@@ -228,7 +228,7 @@ func TestEvaluateUtility(t *testing.T) {
 		{
 			name: "missing_valdensity",
 			input: &Utility{
-				Automatable: Ptr("YES"),
+				Automatable: Ptr(AUTOMATABLE_YES),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(TRIAGE_UNKNOWN),
@@ -238,8 +238,8 @@ func TestEvaluateUtility(t *testing.T) {
 		{
 			name: "super_efficient",
 			input: &Utility{
-				Automatable:  Ptr("YES"),
-				ValueDensity: Ptr("CONCENTRATED"),
+				Automatable:  Ptr(AUTOMATABLE_YES),
+				ValueDensity: Ptr(VALUE_DENSITY_CONCENTRATED),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(UTILITY_SUPER_EFFICIENT),
@@ -249,8 +249,8 @@ func TestEvaluateUtility(t *testing.T) {
 		{
 			name: "efficient_from_automatable",
 			input: &Utility{
-				Automatable:  Ptr("YES"),
-				ValueDensity: Ptr("DIFFUSE"),
+				Automatable:  Ptr(AUTOMATABLE_YES),
+				ValueDensity: Ptr(VALUE_DENSITY_DIFFUSE),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(UTILITY_EFFICIENT),
@@ -260,8 +260,8 @@ func TestEvaluateUtility(t *testing.T) {
 		{
 			name: "efficient_from_valdensity",
 			input: &Utility{
-				Automatable:  Ptr("NO"),
-				ValueDensity: Ptr("CONCENTRATED"),
+				Automatable:  Ptr(AUTOMATABLE_NO),
+				ValueDensity: Ptr(VALUE_DENSITY_CONCENTRATED),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(UTILITY_EFFICIENT),
@@ -271,8 +271,8 @@ func TestEvaluateUtility(t *testing.T) {
 		{
 			name: "laborious",
 			input: &Utility{
-				Automatable:  Ptr("NO"),
-				ValueDensity: Ptr("DIFFUSE"),
+				Automatable:  Ptr(AUTOMATABLE_NO),
+				ValueDensity: Ptr(VALUE_DENSITY_DIFFUSE),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(UTILITY_LABORIOUS),
@@ -319,7 +319,7 @@ func TestEvaluateHumanImpact(t *testing.T) {
 		{
 			name: "very_high_from_safety",
 			input: &HumanImpact{
-				SafetyImpact:  Ptr("CATASTROPHIC"),
+				SafetyImpact:  Ptr(SAFETY_IMPACT_CATASTROPHIC),
 				MissionImpact: Ptr(TRIAGE_UNKNOWN),
 			},
 			want: &AssessmentDetail{
@@ -331,7 +331,7 @@ func TestEvaluateHumanImpact(t *testing.T) {
 			name: "very_high_from_mission",
 			input: &HumanImpact{
 				SafetyImpact:  Ptr(TRIAGE_UNKNOWN),
-				MissionImpact: Ptr("MISSION_FAILURE"),
+				MissionImpact: Ptr(MISSION_IMPACT_MISSION_FAILURE),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(HUMAN_IMPACT_VERY_HIGH),
@@ -341,8 +341,8 @@ func TestEvaluateHumanImpact(t *testing.T) {
 		{
 			name: "high_from_critical",
 			input: &HumanImpact{
-				SafetyImpact:  Ptr("CRITICAL"),
-				MissionImpact: Ptr("NONE"),
+				SafetyImpact:  Ptr(SAFETY_IMPACT_CRITICAL),
+				MissionImpact: Ptr(MISSION_IMPACT_NONE),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(HUMAN_IMPACT_HIGH),
@@ -352,8 +352,8 @@ func TestEvaluateHumanImpact(t *testing.T) {
 		{
 			name: "high_from_marginal_mef",
 			input: &HumanImpact{
-				SafetyImpact:  Ptr("MARGINAL"),
-				MissionImpact: Ptr("MEF_FAILURE"),
+				SafetyImpact:  Ptr(SAFETY_IMPACT_MARGINAL),
+				MissionImpact: Ptr(MISSION_IMPACT_MEF_FAILURE),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(HUMAN_IMPACT_HIGH),
@@ -363,8 +363,8 @@ func TestEvaluateHumanImpact(t *testing.T) {
 		{
 			name: "medium_from_negligible",
 			input: &HumanImpact{
-				SafetyImpact:  Ptr("NEGLIGIBLE"),
-				MissionImpact: Ptr("MEF_FAILURE"),
+				SafetyImpact:  Ptr(SAFETY_IMPACT_NEGLIGIBLE),
+				MissionImpact: Ptr(MISSION_IMPACT_MEF_FAILURE),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(HUMAN_IMPACT_MEDIUM),
@@ -374,8 +374,8 @@ func TestEvaluateHumanImpact(t *testing.T) {
 		{
 			name: "medium_from_marginal",
 			input: &HumanImpact{
-				SafetyImpact:  Ptr("MARGINAL"),
-				MissionImpact: Ptr("NONE"),
+				SafetyImpact:  Ptr(SAFETY_IMPACT_MARGINAL),
+				MissionImpact: Ptr(MISSION_IMPACT_NONE),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(HUMAN_IMPACT_MEDIUM),
@@ -385,8 +385,8 @@ func TestEvaluateHumanImpact(t *testing.T) {
 		{
 			name: "low",
 			input: &HumanImpact{
-				SafetyImpact:  Ptr("NEGLIGIBLE"),
-				MissionImpact: Ptr("DEGRADED"),
+				SafetyImpact:  Ptr(SAFETY_IMPACT_NEGLIGIBLE),
+				MissionImpact: Ptr(MISSION_IMPACT_DEGRADED),
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(HUMAN_IMPACT_LOW),
