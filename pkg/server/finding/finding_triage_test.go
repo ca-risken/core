@@ -18,7 +18,7 @@ func TestEvaluateExploitation(t *testing.T) {
 			name:  "nil",
 			input: &Exploitation{},
 			want: &AssessmentDetail{
-				Result: Ptr("UNKNOWN"),
+				Result: Ptr(TRIAGE_UNKNOWN),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -28,7 +28,7 @@ func TestEvaluateExploitation(t *testing.T) {
 				HasCVE: Ptr(false),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("UNKNOWN"),
+				Result: Ptr(TRIAGE_UNKNOWN),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -38,7 +38,7 @@ func TestEvaluateExploitation(t *testing.T) {
 				HasCVE: Ptr(true),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("NONE"),
+				Result: Ptr(EXPLOITATION_RESULT_NONE),
 				Score:  Ptr(float32(-0.1)),
 			},
 		},
@@ -49,7 +49,7 @@ func TestEvaluateExploitation(t *testing.T) {
 				HasKEV: Ptr(true),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("ACTIVE"),
+				Result: Ptr(EXPLOITATION_RESULT_ACTIVE),
 				Score:  Ptr(float32(0.0)),
 			},
 		},
@@ -61,7 +61,7 @@ func TestEvaluateExploitation(t *testing.T) {
 				EpssScore: Ptr(float32(0.01)),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("ACTIVE"),
+				Result: Ptr(EXPLOITATION_RESULT_ACTIVE),
 				Score:  Ptr(float32(0.0)),
 			},
 		},
@@ -73,7 +73,7 @@ func TestEvaluateExploitation(t *testing.T) {
 				EpssScore: Ptr(float32(0.009)),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("PUBLIC_POC"),
+				Result: Ptr(EXPLOITATION_RESULT_PUBLIC_POC),
 				Score:  Ptr(float32(-0.1)),
 			},
 		},
@@ -99,7 +99,7 @@ func TestEvaluateSystemExposure(t *testing.T) {
 			name:  "nil",
 			input: &SystemExposure{},
 			want: &AssessmentDetail{
-				Result: Ptr("UNKNOWN"),
+				Result: Ptr(TRIAGE_UNKNOWN),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -109,7 +109,7 @@ func TestEvaluateSystemExposure(t *testing.T) {
 				PublicFacing: Ptr("OPEN"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("UNKNOWN"),
+				Result: Ptr(TRIAGE_UNKNOWN),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -119,7 +119,7 @@ func TestEvaluateSystemExposure(t *testing.T) {
 				AccessControl: Ptr("NONE"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("UNKNOWN"),
+				Result: Ptr(TRIAGE_UNKNOWN),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -127,10 +127,10 @@ func TestEvaluateSystemExposure(t *testing.T) {
 			name: "unknown_access",
 			input: &SystemExposure{
 				PublicFacing:  Ptr("OPEN"),
-				AccessControl: Ptr("UNKNOWN"),
+				AccessControl: Ptr(TRIAGE_UNKNOWN),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("UNKNOWN"),
+				Result: Ptr(TRIAGE_UNKNOWN),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -141,7 +141,7 @@ func TestEvaluateSystemExposure(t *testing.T) {
 				AccessControl: Ptr("NONE"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("OPEN"),
+				Result: Ptr(SYSTEM_EXPOSURE_OPEN),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -152,7 +152,7 @@ func TestEvaluateSystemExposure(t *testing.T) {
 				AccessControl: Ptr("AUTHENTICATED"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("CONTROLLED"),
+				Result: Ptr(SYSTEM_EXPOSURE_CONTROLLED),
 				Score:  Ptr(float32(-0.1)),
 			},
 		},
@@ -163,7 +163,7 @@ func TestEvaluateSystemExposure(t *testing.T) {
 				AccessControl: Ptr("NONE"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("CONTROLLED"),
+				Result: Ptr(SYSTEM_EXPOSURE_CONTROLLED),
 				Score:  Ptr(float32(-0.1)),
 			},
 		},
@@ -174,7 +174,7 @@ func TestEvaluateSystemExposure(t *testing.T) {
 				PublicFacing:  Ptr("INTERNAL"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("SMALL"),
+				Result: Ptr(SYSTEM_EXPOSURE_SMALL),
 				Score:  Ptr(float32(-0.1)),
 			},
 		},
@@ -185,7 +185,7 @@ func TestEvaluateSystemExposure(t *testing.T) {
 				PublicFacing:  Ptr("FUGA"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("UNKNOWN"),
+				Result: Ptr(TRIAGE_UNKNOWN),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -211,7 +211,7 @@ func TestEvaluateUtility(t *testing.T) {
 			name:  "nil",
 			input: &Utility{},
 			want: &AssessmentDetail{
-				Result: Ptr("UNKNOWN"),
+				Result: Ptr(TRIAGE_UNKNOWN),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -221,7 +221,7 @@ func TestEvaluateUtility(t *testing.T) {
 				ValueDensity: Ptr("CONCENTRATED"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("UNKNOWN"),
+				Result: Ptr(TRIAGE_UNKNOWN),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -231,7 +231,7 @@ func TestEvaluateUtility(t *testing.T) {
 				Automatable: Ptr("YES"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("UNKNOWN"),
+				Result: Ptr(TRIAGE_UNKNOWN),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -242,7 +242,7 @@ func TestEvaluateUtility(t *testing.T) {
 				ValueDensity: Ptr("CONCENTRATED"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("SUPER_EFFICIENT"),
+				Result: Ptr(UTILITY_SUPER_EFFICIENT),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -253,7 +253,7 @@ func TestEvaluateUtility(t *testing.T) {
 				ValueDensity: Ptr("DIFFUSE"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("EFFICIENT"),
+				Result: Ptr(UTILITY_EFFICIENT),
 				Score:  Ptr(float32(-0.1)),
 			},
 		},
@@ -264,7 +264,7 @@ func TestEvaluateUtility(t *testing.T) {
 				ValueDensity: Ptr("CONCENTRATED"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("EFFICIENT"),
+				Result: Ptr(UTILITY_EFFICIENT),
 				Score:  Ptr(float32(-0.1)),
 			},
 		},
@@ -275,7 +275,7 @@ func TestEvaluateUtility(t *testing.T) {
 				ValueDensity: Ptr("DIFFUSE"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("LABORIOUS"),
+				Result: Ptr(UTILITY_LABORIOUS),
 				Score:  Ptr(float32(-0.1)),
 			},
 		},
@@ -286,7 +286,7 @@ func TestEvaluateUtility(t *testing.T) {
 				ValueDensity: Ptr("FUGA"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("UNKNOWN"),
+				Result: Ptr(TRIAGE_UNKNOWN),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -312,7 +312,7 @@ func TestEvaluateHumanImpact(t *testing.T) {
 			name:  "nil",
 			input: &HumanImpact{},
 			want: &AssessmentDetail{
-				Result: Ptr("UNKNOWN"),
+				Result: Ptr(TRIAGE_UNKNOWN),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -320,21 +320,21 @@ func TestEvaluateHumanImpact(t *testing.T) {
 			name: "very_high_from_safety",
 			input: &HumanImpact{
 				SafetyImpact:  Ptr("CATASTROPHIC"),
-				MissionImpact: Ptr("UNKNOWN"),
+				MissionImpact: Ptr(TRIAGE_UNKNOWN),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("VERY_HIGH"),
+				Result: Ptr(HUMAN_IMPACT_VERY_HIGH),
 				Score:  Ptr(float32(0)),
 			},
 		},
 		{
 			name: "very_high_from_mission",
 			input: &HumanImpact{
-				SafetyImpact:  Ptr("UNKNOWN"),
+				SafetyImpact:  Ptr(TRIAGE_UNKNOWN),
 				MissionImpact: Ptr("MISSION_FAILURE"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("VERY_HIGH"),
+				Result: Ptr(HUMAN_IMPACT_VERY_HIGH),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -345,7 +345,7 @@ func TestEvaluateHumanImpact(t *testing.T) {
 				MissionImpact: Ptr("NONE"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("HIGH"),
+				Result: Ptr(HUMAN_IMPACT_HIGH),
 				Score:  Ptr(float32(-0.1)),
 			},
 		},
@@ -356,7 +356,7 @@ func TestEvaluateHumanImpact(t *testing.T) {
 				MissionImpact: Ptr("MEF_FAILURE"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("HIGH"),
+				Result: Ptr(HUMAN_IMPACT_HIGH),
 				Score:  Ptr(float32(-0.1)),
 			},
 		},
@@ -367,7 +367,7 @@ func TestEvaluateHumanImpact(t *testing.T) {
 				MissionImpact: Ptr("MEF_FAILURE"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("MEDIUM"),
+				Result: Ptr(HUMAN_IMPACT_MEDIUM),
 				Score:  Ptr(float32(-0.1)),
 			},
 		},
@@ -378,7 +378,7 @@ func TestEvaluateHumanImpact(t *testing.T) {
 				MissionImpact: Ptr("NONE"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("MEDIUM"),
+				Result: Ptr(HUMAN_IMPACT_MEDIUM),
 				Score:  Ptr(float32(-0.1)),
 			},
 		},
@@ -389,7 +389,7 @@ func TestEvaluateHumanImpact(t *testing.T) {
 				MissionImpact: Ptr("DEGRADED"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("LOW"),
+				Result: Ptr(HUMAN_IMPACT_LOW),
 				Score:  Ptr(float32(0)),
 			},
 		},
@@ -400,7 +400,7 @@ func TestEvaluateHumanImpact(t *testing.T) {
 				MissionImpact: Ptr("FUGA"),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr("UNKNOWN"),
+				Result: Ptr(TRIAGE_UNKNOWN),
 				Score:  Ptr(float32(0)),
 			},
 		},

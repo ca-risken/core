@@ -4,8 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/ca-risken/core/pkg/model"
+)
+
+const (
+	TRIAGE_UNKNOWN = "UNKNOWN"
 )
 
 type RiskenTriage struct {
@@ -57,9 +62,11 @@ type AssessmentDetail struct {
 }
 
 func (f *FindingService) TriageFinding(ctx context.Context, finding *model.Finding) (*model.Finding, error) {
-	findingData := finding.Data
+	if strings.TrimSpace(finding.Data) == "" {
+		return finding, nil // no triage data
+	}
 	riskenTriage := RiskenTriage{}
-	if err := json.Unmarshal([]byte(findingData), &riskenTriage); err != nil {
+	if err := json.Unmarshal([]byte(finding.Data), &riskenTriage); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal finding data: %w", err)
 	}
 	if riskenTriage.Source == nil {
@@ -98,11 +105,18 @@ func (f *FindingService) TriageFinding(ctx context.Context, finding *model.Findi
 	return updatedFinding, nil
 }
 
+const (
+	// Exploitation
+	EXPLOITATION_RESULT_ACTIVE     = "ACTIVE"
+	EXPLOITATION_RESULT_PUBLIC_POC = "PUBLIC_POC"
+	EXPLOITATION_RESULT_NONE       = "NONE"
+)
+
 // evaluateExploitation return ACTIVE, PUBLIC_POC, UNKNOWN
 // @ref https://certcc.github.io/SSVC/reference/decision_points/exploitation/
 func evaluateExploitation(source *Exploitation) *AssessmentDetail {
 	assessment := AssessmentDetail{
-		Result: Ptr("UNKNOWN"),
+		Result: Ptr(TRIAGE_UNKNOWN),
 		Score:  Ptr(float32(0)),
 	}
 	if source.HasCVE == nil || !*source.HasCVE {
@@ -111,31 +125,47 @@ func evaluateExploitation(source *Exploitation) *AssessmentDetail {
 	}
 	if source.HasKEV != nil && *source.HasKEV {
 		// has KEV
-		assessment.Result = Ptr("ACTIVE")
+		assessment.Result = Ptr(EXPLOITATION_RESULT_ACTIVE)
 		return &assessment
 	}
 	if source.PublicPOC != nil && *source.PublicPOC {
 		// has public POC
-		assessment.Result = Ptr("PUBLIC_POC")
+		assessment.Result = Ptr(EXPLOITATION_RESULT_PUBLIC_POC)
 		assessment.Score = Ptr(float32(-0.1))
 		if source.EpssScore != nil && *source.EpssScore >= 0.01 {
 			// epss >= 1%
-			assessment.Result = Ptr("ACTIVE")
+			assessment.Result = Ptr(EXPLOITATION_RESULT_ACTIVE)
 			assessment.Score = Ptr(float32(0.0))
 			return &assessment
 		}
 		return &assessment
 	}
-	assessment.Result = Ptr("NONE")
+	assessment.Result = Ptr(EXPLOITATION_RESULT_NONE)
 	assessment.Score = Ptr(float32(-0.1))
 	return &assessment
 }
+
+const (
+	// PublicFacing
+	PUBLIC_FACING_OPEN     = "OPEN"
+	PUBLIC_FACING_INTERNAL = "INTERNAL"
+
+	// AccessControl
+	ACCESS_CONTROL_NONE          = "NONE"
+	ACCESS_CONTROL_LIMITED_IP    = "LIMITED_IP"
+	ACCESS_CONTROL_AUTHENTICATED = "AUTHENTICATED"
+
+	// SystemExposure
+	SYSTEM_EXPOSURE_OPEN       = "OPEN"
+	SYSTEM_EXPOSURE_CONTROLLED = "CONTROLLED"
+	SYSTEM_EXPOSURE_SMALL      = "SMALL"
+)
 
 // evaluateSystemExposure return OPEN, CONTROLLED, SMALL, UNKNOWN
 // @ref https://certcc.github.io/SSVC/reference/decision_points/system_exposure/
 func evaluateSystemExposure(source *SystemExposure) *AssessmentDetail {
 	assessment := AssessmentDetail{
-		Result: Ptr("UNKNOWN"),
+		Result: Ptr(TRIAGE_UNKNOWN),
 		Score:  Ptr(float32(0)),
 	}
 
@@ -143,41 +173,41 @@ func evaluateSystemExposure(source *SystemExposure) *AssessmentDetail {
 	if source.PublicFacing == nil || source.AccessControl == nil {
 		return &assessment
 	}
-	if *source.PublicFacing == "UNKNOWN" || *source.AccessControl == "UNKNOWN" {
+	if *source.PublicFacing == TRIAGE_UNKNOWN || *source.AccessControl == TRIAGE_UNKNOWN {
 		return &assessment
 	}
 
 	// OPEN
-	if *source.PublicFacing == "OPEN" && *source.AccessControl == "NONE" {
-		assessment.Result = Ptr("OPEN")
+	if *source.PublicFacing == PUBLIC_FACING_OPEN && *source.AccessControl == ACCESS_CONTROL_NONE {
+		assessment.Result = Ptr(SYSTEM_EXPOSURE_OPEN)
 		return &assessment
 	}
 
 	// CONTROLLED
-	if *source.PublicFacing == "OPEN" && *source.AccessControl == "LIMITED_IP" {
-		assessment.Result = Ptr("CONTROLLED")
+	if *source.PublicFacing == PUBLIC_FACING_OPEN && *source.AccessControl == ACCESS_CONTROL_LIMITED_IP {
+		assessment.Result = Ptr(SYSTEM_EXPOSURE_CONTROLLED)
 		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
-	if *source.PublicFacing == "OPEN" && *source.AccessControl == "AUTHENTICATED" {
-		assessment.Result = Ptr("CONTROLLED")
+	if *source.PublicFacing == PUBLIC_FACING_OPEN && *source.AccessControl == ACCESS_CONTROL_AUTHENTICATED {
+		assessment.Result = Ptr(SYSTEM_EXPOSURE_CONTROLLED)
 		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
-	if *source.PublicFacing == "INTERNAL" && *source.AccessControl == "NONE" {
-		assessment.Result = Ptr("CONTROLLED")
+	if *source.PublicFacing == PUBLIC_FACING_INTERNAL && *source.AccessControl == ACCESS_CONTROL_NONE {
+		assessment.Result = Ptr(SYSTEM_EXPOSURE_CONTROLLED)
 		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
 
 	// SMALL
-	if *source.PublicFacing == "INTERNAL" && *source.AccessControl == "LIMITED_IP" {
-		assessment.Result = Ptr("SMALL")
+	if *source.PublicFacing == PUBLIC_FACING_INTERNAL && *source.AccessControl == ACCESS_CONTROL_LIMITED_IP {
+		assessment.Result = Ptr(SYSTEM_EXPOSURE_SMALL)
 		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
-	if *source.PublicFacing == "INTERNAL" && *source.AccessControl == "AUTHENTICATED" {
-		assessment.Result = Ptr("SMALL")
+	if *source.PublicFacing == PUBLIC_FACING_INTERNAL && *source.AccessControl == ACCESS_CONTROL_AUTHENTICATED {
+		assessment.Result = Ptr(SYSTEM_EXPOSURE_SMALL)
 		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
@@ -186,11 +216,26 @@ func evaluateSystemExposure(source *SystemExposure) *AssessmentDetail {
 	return &assessment
 }
 
+const (
+	// Automatable
+	AUTOMATABLE_YES = "YES"
+	AUTOMATABLE_NO  = "NO"
+
+	// ValueDensity
+	VALUE_DENSITY_CONCENTRATED = "CONCENTRATED"
+	VALUE_DENSITY_DIFFUSE      = "DIFFUSE"
+
+	// Utility
+	UTILITY_SUPER_EFFICIENT = "SUPER_EFFICIENT"
+	UTILITY_EFFICIENT       = "EFFICIENT"
+	UTILITY_LABORIOUS       = "LABORIOUS"
+)
+
 // evaluateUtility return SUPER_EFFICIENT, EFFICIENT, LABORIOUS, UNKNOWN
 // @ref https://certcc.github.io/SSVC/reference/decision_points/utility/
 func evaluateUtility(source *Utility) *AssessmentDetail {
 	assessment := AssessmentDetail{
-		Result: Ptr("UNKNOWN"),
+		Result: Ptr(TRIAGE_UNKNOWN),
 		Score:  Ptr(float32(0)),
 	}
 	// UNKNOWN
@@ -199,26 +244,26 @@ func evaluateUtility(source *Utility) *AssessmentDetail {
 	}
 
 	// SUPER_EFFICIENT
-	if *source.Automatable == "YES" && *source.ValueDensity == "CONCENTRATED" {
-		assessment.Result = Ptr("SUPER_EFFICIENT")
+	if *source.Automatable == AUTOMATABLE_YES && *source.ValueDensity == VALUE_DENSITY_CONCENTRATED {
+		assessment.Result = Ptr(UTILITY_SUPER_EFFICIENT)
 		return &assessment
 	}
 
 	// EFFICIENT
-	if *source.Automatable == "YES" {
-		assessment.Result = Ptr("EFFICIENT")
+	if *source.Automatable == AUTOMATABLE_YES {
+		assessment.Result = Ptr(UTILITY_EFFICIENT)
 		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
-	if *source.ValueDensity == "CONCENTRATED" {
-		assessment.Result = Ptr("EFFICIENT")
+	if *source.ValueDensity == VALUE_DENSITY_CONCENTRATED {
+		assessment.Result = Ptr(UTILITY_EFFICIENT)
 		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
 
 	// LABORIOUS
-	if *source.Automatable == "NO" && *source.ValueDensity == "DIFFUSE" {
-		assessment.Result = Ptr("LABORIOUS")
+	if *source.Automatable == AUTOMATABLE_NO && *source.ValueDensity == VALUE_DENSITY_DIFFUSE {
+		assessment.Result = Ptr(UTILITY_LABORIOUS)
 		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
@@ -227,11 +272,32 @@ func evaluateUtility(source *Utility) *AssessmentDetail {
 	return &assessment
 }
 
+const (
+	// SafetyImpact
+	SAFETY_IMPACT_CATASTROPHIC = "CATASTROPHIC"
+	SAFETY_IMPACT_CRITICAL     = "CRITICAL"
+	SAFETY_IMPACT_MARGINAL     = "MARGINAL"
+	SAFETY_IMPACT_NEGLIGIBLE   = "NEGLIGIBLE"
+
+	// MissionImpact
+	MISSION_IMPACT_MISSION_FAILURE = "MISSION_FAILURE"
+	MISSION_IMPACT_MEF_FAILURE     = "MEF_FAILURE"
+	MISSION_IMPACT_NONE            = "NONE"
+	MISSION_IMPACT_DEGRADED        = "DEGRADED"
+	MISSION_IMPACT_CRIPPLED        = "CRIPPLED"
+
+	// HumanImpact
+	HUMAN_IMPACT_VERY_HIGH = "VERY_HIGH"
+	HUMAN_IMPACT_HIGH      = "HIGH"
+	HUMAN_IMPACT_MEDIUM    = "MEDIUM"
+	HUMAN_IMPACT_LOW       = "LOW"
+)
+
 // evaluateHumanImpact return VERY_HIGH, HIGH, MEDIUM, LOW, UNKNOWN
 // @ref https://certcc.github.io/SSVC/reference/decision_points/human_impact/
 func evaluateHumanImpact(source *HumanImpact) *AssessmentDetail {
 	assessment := AssessmentDetail{
-		Result: Ptr("UNKNOWN"),
+		Result: Ptr(TRIAGE_UNKNOWN),
 		Score:  Ptr(float32(0)),
 	}
 
@@ -241,38 +307,47 @@ func evaluateHumanImpact(source *HumanImpact) *AssessmentDetail {
 	}
 
 	// VERY_HIGH
-	if *source.SafetyImpact == "CATASTROPHIC" || *source.MissionImpact == "MISSION_FAILURE" {
-		assessment.Result = Ptr("VERY_HIGH")
+	if *source.SafetyImpact == SAFETY_IMPACT_CATASTROPHIC || *source.MissionImpact == MISSION_IMPACT_MISSION_FAILURE {
+		assessment.Result = Ptr(HUMAN_IMPACT_VERY_HIGH)
 		return &assessment
 	}
 
 	// HIGH
-	if *source.SafetyImpact == "CRITICAL" && (*source.MissionImpact == "NONE" || *source.MissionImpact == "DEGRADED" || *source.MissionImpact == "CRIPPLED") {
-		assessment.Result = Ptr("HIGH")
+	if *source.SafetyImpact == SAFETY_IMPACT_CRITICAL &&
+		(*source.MissionImpact == MISSION_IMPACT_NONE ||
+			*source.MissionImpact == MISSION_IMPACT_DEGRADED ||
+			*source.MissionImpact == MISSION_IMPACT_CRIPPLED) {
+		assessment.Result = Ptr(HUMAN_IMPACT_HIGH)
 		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
-	if *source.SafetyImpact == "MARGINAL" && *source.MissionImpact == "MEF_FAILURE" {
-		assessment.Result = Ptr("HIGH")
+	if *source.SafetyImpact == SAFETY_IMPACT_MARGINAL && *source.MissionImpact == MISSION_IMPACT_MEF_FAILURE {
+		assessment.Result = Ptr(HUMAN_IMPACT_HIGH)
 		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
 
 	// MEDIUM
-	if *source.SafetyImpact == "NEGLIGIBLE" && *source.MissionImpact == "MEF_FAILURE" {
-		assessment.Result = Ptr("MEDIUM")
+	if *source.SafetyImpact == SAFETY_IMPACT_NEGLIGIBLE && *source.MissionImpact == MISSION_IMPACT_MEF_FAILURE {
+		assessment.Result = Ptr(HUMAN_IMPACT_MEDIUM)
 		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
-	if *source.SafetyImpact == "MARGINAL" && (*source.MissionImpact == "NONE" || *source.MissionImpact == "DEGRADED" || *source.MissionImpact == "CRIPPLED") {
-		assessment.Result = Ptr("MEDIUM")
+	if *source.SafetyImpact == SAFETY_IMPACT_MARGINAL &&
+		(*source.MissionImpact == MISSION_IMPACT_NONE ||
+			*source.MissionImpact == MISSION_IMPACT_DEGRADED ||
+			*source.MissionImpact == MISSION_IMPACT_CRIPPLED) {
+		assessment.Result = Ptr(HUMAN_IMPACT_MEDIUM)
 		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
 
 	// LOW
-	if *source.SafetyImpact == "NEGLIGIBLE" && (*source.MissionImpact == "NONE" || *source.MissionImpact == "DEGRADED" || *source.MissionImpact == "CRIPPLED") {
-		assessment.Result = Ptr("LOW")
+	if *source.SafetyImpact == SAFETY_IMPACT_NEGLIGIBLE &&
+		(*source.MissionImpact == MISSION_IMPACT_NONE ||
+			*source.MissionImpact == MISSION_IMPACT_DEGRADED ||
+			*source.MissionImpact == MISSION_IMPACT_CRIPPLED) {
+		assessment.Result = Ptr(HUMAN_IMPACT_LOW)
 		return &assessment
 	}
 
