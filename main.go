@@ -32,7 +32,7 @@ type AppConf struct {
 	MaxAnalyzeAPICall       int64    `split_words:"true" default:"10"`
 	BaseURL                 string   `split_words:"true" default:"http://localhost"`
 	OpenAIToken             string   `split_words:"true"`
-	ChatGPTModel            string   `split_words:"true" default:"gpt-3.5-turbo-16k"`
+	ChatGPTModel            string   `split_words:"true" default:"gpt-4o-mini"`
 	DefaultLocale           string   `split_words:"true" default:"en"`
 	SlackAPIToken           string   `split_words:"true"`
 	ExcludeDeleteDataSource []string `split_words:"true" default:"code:gitleaks"`
