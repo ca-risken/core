@@ -349,7 +349,8 @@ func (f *FindingService) getFindingDataForUpsert(ctx context.Context, req *findi
 	if err != nil {
 		return nil, err
 	}
-	return &model.Finding{
+
+	findingModel := &model.Finding{
 		FindingID:     findingID,
 		Description:   req.Description,
 		DataSource:    req.DataSource,
@@ -359,7 +360,14 @@ func (f *FindingService) getFindingDataForUpsert(ctx context.Context, req *findi
 		OriginalScore: req.OriginalScore,
 		Score:         calculateScore(req.OriginalScore, req.OriginalMaxScore, fs),
 		Data:          req.Data,
-	}, nil
+	}
+
+	// Auto-Triage
+	triaged, err := f.TriageFinding(ctx, findingModel)
+	if err != nil {
+		return nil, err
+	}
+	return triaged, nil
 }
 
 func (f *FindingService) getFindingTagForUpsert(ctx context.Context, projectID uint32, findingID uint64, tag string) (*model.FindingTag, error) {
