@@ -119,8 +119,14 @@ func evaluateExploitation(source *Exploitation) *AssessmentDetail {
 		Result: Ptr(TRIAGE_UNKNOWN),
 		Score:  Ptr(float32(0)),
 	}
-	if source.HasCVE == nil || !*source.HasCVE {
-		// no CVE
+	if source.HasCVE == nil {
+		// no CVE data
+		return &assessment
+	}
+	if !*source.HasCVE {
+		// no vulnerability
+		assessment.Result = Ptr(EXPLOITATION_RESULT_NONE)
+		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
 	if source.HasKEV != nil && *source.HasKEV {

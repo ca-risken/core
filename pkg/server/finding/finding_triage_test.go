@@ -28,8 +28,8 @@ func TestEvaluateExploitation(t *testing.T) {
 				HasCVE: Ptr(false),
 			},
 			want: &AssessmentDetail{
-				Result: Ptr(TRIAGE_UNKNOWN),
-				Score:  Ptr(float32(0)),
+				Result: Ptr(EXPLOITATION_RESULT_NONE),
+				Score:  Ptr(float32(-0.1)),
 			},
 		},
 		{
