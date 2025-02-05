@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/ca-risken/core/pkg/model"
@@ -12,6 +13,10 @@ import (
 const (
 	TRIAGE_UNKNOWN = "UNKNOWN"
 )
+
+type FindingDataTriage struct {
+	Triage *RiskenTriage `json:"risken_triage,omitempty"`
+}
 
 type RiskenTriage struct {
 	BaseScore     *float32          `json:"base_score,omitempty"`
@@ -65,15 +70,15 @@ func (f *FindingService) TriageFinding(ctx context.Context, finding *model.Findi
 	if strings.TrimSpace(finding.Data) == "" {
 		return finding, nil // no triage data
 	}
-	riskenTriage := RiskenTriage{}
+	riskenTriage := FindingDataTriage{}
 	if err := json.Unmarshal([]byte(finding.Data), &riskenTriage); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal finding data: %w", err)
 	}
-	if riskenTriage.Source == nil {
+	if riskenTriage.Triage == nil || riskenTriage.Triage.Source == nil {
 		return finding, nil // no triage data
 	}
 
-	source := riskenTriage.Source
+	source := riskenTriage.Triage.Source
 	assessment := TriageAssessment{}
 
 	// 1. Exploitation
@@ -95,9 +100,10 @@ func (f *FindingService) TriageFinding(ctx context.Context, finding *model.Findi
 	if source.HumanImpact != nil {
 		assessment.HumanImpact = evaluateHumanImpact(source.HumanImpact)
 	}
+	riskenTriage.Triage.Assessment = &assessment
 
 	// Adjust score
-	triaged := adjustScore(&riskenTriage, &assessment, finding)
+	triaged := adjustScore(riskenTriage.Triage, finding)
 	updatedFinding, err := updateFindingData(finding, triaged)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update finding data: %w", err)
@@ -256,19 +262,16 @@ func evaluateUtility(source *Utility) *AssessmentDetail {
 	}
 
 	// EFFICIENT
-	if *source.Automatable == AUTOMATABLE_YES {
-		assessment.Result = Ptr(UTILITY_EFFICIENT)
-		assessment.Score = Ptr(float32(-0.1))
-		return &assessment
-	}
-	if *source.ValueDensity == VALUE_DENSITY_CONCENTRATED {
+	if *source.Automatable == AUTOMATABLE_YES ||
+		*source.ValueDensity == VALUE_DENSITY_CONCENTRATED {
 		assessment.Result = Ptr(UTILITY_EFFICIENT)
 		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
 
 	// LABORIOUS
-	if *source.Automatable == AUTOMATABLE_NO && *source.ValueDensity == VALUE_DENSITY_DIFFUSE {
+	if *source.Automatable == AUTOMATABLE_NO ||
+		*source.ValueDensity == VALUE_DENSITY_DIFFUSE {
 		assessment.Result = Ptr(UTILITY_LABORIOUS)
 		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
@@ -361,8 +364,9 @@ func evaluateHumanImpact(source *HumanImpact) *AssessmentDetail {
 	return &assessment
 }
 
-func adjustScore(triage *RiskenTriage, assessment *TriageAssessment, finding *model.Finding) *RiskenTriage {
+func adjustScore(triage *RiskenTriage, finding *model.Finding) *RiskenTriage {
 	baseScore := finding.Score
+	assessment := triage.Assessment
 	adjustment := float32(0.0)
 	if assessment.Exploitation != nil {
 		adjustment += *assessment.Exploitation.Score
@@ -379,7 +383,7 @@ func adjustScore(triage *RiskenTriage, assessment *TriageAssessment, finding *mo
 
 	// overwrite
 	triage.BaseScore = Ptr(baseScore)
-	triage.AdjustedScore = Ptr(baseScore + adjustment)
+	triage.AdjustedScore = Ptr(float32(math.Round(float64(baseScore+adjustment)*100) / 100))
 	if *triage.AdjustedScore < 0 {
 		*triage.AdjustedScore = 0
 	}
@@ -403,8 +407,8 @@ func updateFindingData(finding *model.Finding, triaged *RiskenTriage) (*model.Fi
 		return nil, fmt.Errorf("failed to unmarshal recalculated risken triage JSON: %w", err)
 	}
 
-	// Replace the risken_triarge part of the original data with the recalculated triaged data
-	originalData["risken_triarge"] = triagedData
+	// Replace the risken_triage part of the original data with the recalculated triaged data
+	originalData["risken_triage"] = triagedData
 
 	// Encode the updated map to JSON
 	updatedJSON, err := json.Marshal(originalData)
@@ -412,6 +416,9 @@ func updateFindingData(finding *model.Finding, triaged *RiskenTriage) (*model.Fi
 		return nil, fmt.Errorf("failed to marshal updated data: %w", err)
 	}
 	finding.Data = string(updatedJSON)
+	if triaged.AdjustedScore != nil {
+		finding.Score = *triaged.AdjustedScore
+	}
 	return finding, nil
 }
 
