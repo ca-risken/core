@@ -1,6 +1,7 @@
 package finding
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 
@@ -499,9 +500,11 @@ func TestAdjustScore(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			// Create an empty RiskenTriage
-			triage := &RiskenTriage{}
-			result := adjustScore(triage, tc.input.assessment, tc.input.finding)
+			// Create RiskenTriage
+			triage := &RiskenTriage{
+				Assessment: tc.input.assessment,
+			}
+			result := adjustScore(triage, tc.input.finding)
 
 			if result.BaseScore == nil {
 				t.Errorf("[%s] base score is nil; expected %v", tc.name, tc.expectedBaseScore)
@@ -528,7 +531,7 @@ func TestUpdateFindingData(t *testing.T) {
 		expectedData map[string]interface{}
 	}{
 		{
-			name: "missing_risken_triarge",
+			name: "missing_risken_triage",
 			input: args{
 				finding: &model.Finding{Data: `{"other_field": "value"}`},
 				triaged: &RiskenTriage{
@@ -538,16 +541,16 @@ func TestUpdateFindingData(t *testing.T) {
 			},
 			expectedData: map[string]interface{}{
 				"other_field": "value",
-				"risken_triarge": map[string]interface{}{
+				"risken_triage": map[string]interface{}{
 					"base_score":     1.0,
 					"adjusted_score": 0.5,
 				},
 			},
 		},
 		{
-			name: "existing_risken_triarge",
+			name: "existing_risken_triage",
 			input: args{
-				finding: &model.Finding{Data: `{"other_field": "value", "risken_triarge": {"dummy": "old"}}`},
+				finding: &model.Finding{Data: `{"other_field": "value", "risken_triage": {"dummy": "old"}}`},
 				triaged: &RiskenTriage{
 					BaseScore:     Ptr(float32(2.0)),
 					AdjustedScore: Ptr(float32(1.5)),
@@ -555,7 +558,7 @@ func TestUpdateFindingData(t *testing.T) {
 			},
 			expectedData: map[string]interface{}{
 				"other_field": "value",
-				"risken_triarge": map[string]interface{}{
+				"risken_triage": map[string]interface{}{
 					"base_score":     2.0,
 					"adjusted_score": 1.5,
 				},
@@ -575,6 +578,104 @@ func TestUpdateFindingData(t *testing.T) {
 			}
 			if diff := cmp.Diff(tc.expectedData, updatedMap); diff != "" {
 				t.Errorf("updateFindingData mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestTriageFinding(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *model.Finding
+		want    *model.Finding
+		wantErr bool
+	}{
+		{
+			name: "success to triage finding",
+			input: &model.Finding{
+				Score: 0.8,
+				Data: `{
+					"data": {
+						"key1": "value1",
+						"key2": "value2"
+					},
+					"risken_triage": {
+						"source": {
+							"utility": {
+								"automatable": "NO",
+								"value_density": "UNKNOWN"
+							},
+							"exploitation": {
+								"has_cve": true,
+								"has_kev": false,
+								"epss_score": 0.00116,
+								"public_poc": false
+							}
+						}
+					}
+				}`,
+			},
+			want: &model.Finding{
+				Score: 0.6,
+				Data: `{
+					"data": {
+						"key1": "value1",
+						"key2": "value2"
+					},
+					"risken_triage": {
+						"base_score": 0.8,
+						"adjusted_score": 0.6,
+						"source": {
+							"utility": {
+								"automatable": "NO",
+								"value_density": "UNKNOWN"
+							},
+							"exploitation": {
+								"has_cve": true,
+								"has_kev": false,
+								"epss_score": 0.00116,
+								"public_poc": false
+							}
+						},
+						"assessment": {
+							"exploitation": {
+								"result": "NONE",
+								"score": -0.1
+							},
+							"utility": {
+								"result": "LABORIOUS",
+								"score": -0.1
+							}
+						}
+					}
+				}`,
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			svc := FindingService{}
+			got, err := svc.TriageFinding(context.Background(), c.input)
+			if err != nil {
+				if !c.wantErr {
+					t.Fatalf("unexpected error: %+v", err)
+				}
+				return
+			}
+			if c.wantErr {
+				t.Fatal("expected error but got nil")
+			}
+
+			var gotData, wantData map[string]interface{}
+			if err := json.Unmarshal([]byte(got.Data), &gotData); err != nil {
+				t.Fatalf("failed to unmarshal got data: %+v", err)
+			}
+			if err := json.Unmarshal([]byte(c.want.Data), &wantData); err != nil {
+				t.Fatalf("failed to unmarshal want data: %+v", err)
+			}
+
+			if diff := cmp.Diff(wantData, gotData); diff != "" {
+				t.Errorf("Data mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
