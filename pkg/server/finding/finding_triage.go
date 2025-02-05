@@ -265,7 +265,6 @@ func evaluateUtility(source *Utility) *AssessmentDetail {
 	if *source.Automatable == AUTOMATABLE_YES ||
 		*source.ValueDensity == VALUE_DENSITY_CONCENTRATED {
 		assessment.Result = Ptr(UTILITY_EFFICIENT)
-		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
 
