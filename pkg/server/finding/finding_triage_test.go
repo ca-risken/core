@@ -255,7 +255,7 @@ func TestEvaluateUtility(t *testing.T) {
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(UTILITY_EFFICIENT),
-				Score:  Ptr(float32(-0.1)),
+				Score:  Ptr(float32(0)),
 			},
 		},
 		{
@@ -266,7 +266,7 @@ func TestEvaluateUtility(t *testing.T) {
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(UTILITY_EFFICIENT),
-				Score:  Ptr(float32(-0.1)),
+				Score:  Ptr(float32(0)),
 			},
 		},
 		{
