@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package core.ai;
+option go_package = "github.com/ca-risken/core/proto/ai";
+
+/*
+ * Entity
+ */
+
+// ChatHistory
+message ChatHistory {
+  ChatRole role = 1;
+  string content = 2;
+}
+
+// ChatRole
+enum ChatRole {
+  CHAT_ROLE_UNSPECIFIED = 0;
+  CHAT_ROLE_USER = 1;
+  CHAT_ROLE_ASSISTANT = 2;
+  CHAT_ROLE_SYSTEM = 3;
+}
