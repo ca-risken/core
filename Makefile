@@ -916,4 +916,11 @@ delete-user-reserved:
 		-d '{"project_id":1001, "reserved_id": 1006}' \
 		$(CORE_API_ADDR) core.iam.IAMService.DeleteUserReserved
 
+.PHONY: chat-ai
+chat-ai:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"question":"What is the top 10 risk of AWS GuardDuty?", "chat_history": [{"role":1, "content":"hello!"}]}' \
+		$(CORE_API_ADDR) core.ai.AIService.ChatAI
+
 FAKE:

@@ -12,11 +12,13 @@ import (
 	"github.com/ca-risken/common/pkg/logging"
 	mimosarpc "github.com/ca-risken/common/pkg/rpc"
 	"github.com/ca-risken/core/pkg/db"
+	aiserver "github.com/ca-risken/core/pkg/server/ai"
 	alertserver "github.com/ca-risken/core/pkg/server/alert"
 	findingserver "github.com/ca-risken/core/pkg/server/finding"
 	iamserver "github.com/ca-risken/core/pkg/server/iam"
 	projectserver "github.com/ca-risken/core/pkg/server/project"
 	reportserver "github.com/ca-risken/core/pkg/server/report"
+	"github.com/ca-risken/core/proto/ai"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/iam"
@@ -100,6 +102,7 @@ func (s *Server) Run(ctx context.Context) error {
 	fsvc := findingserver.NewFindingService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.excludeDeleteDataSource, s.logger)
 	psvc := projectserver.NewProjectService(s.db, iamc, s.logger)
 	rsvc := reportserver.NewReportService(s.db, s.logger)
+	aisvc := aiserver.NewAIService(s.config.OpenAIToken, s.config.ChatGPTModel, s.logger)
 	hsvc := health.NewServer()
 
 	server := grpc.NewServer(
@@ -112,6 +115,7 @@ func (s *Server) Run(ctx context.Context) error {
 	alert.RegisterAlertServiceServer(server, asvc)
 	finding.RegisterFindingServiceServer(server, fsvc)
 	project.RegisterProjectServiceServer(server, psvc)
+	ai.RegisterAIServiceServer(server, aisvc)
 	grpc_health_v1.RegisterHealthServer(server, hsvc)
 
 	reflection.Register(server) // enable reflection API
