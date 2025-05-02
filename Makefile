@@ -920,7 +920,7 @@ delete-user-reserved:
 chat-ai:
 	$(GRPCURL) \
 		-plaintext \
-		-d '{"question":"What is the top 10 risk of AWS GuardDuty?", "chat_history": [{"role":1, "content":"hello!"}]}' \
+		-d '{"question":"What mountain is the highest in the world?", "chat_history": [{"role":1, "content":"hello!"}, {"role":2, "content":"Hi, I am a chatbot."}]}' \
 		$(CORE_API_ADDR) core.ai.AIService.ChatAI
 
 FAKE:
