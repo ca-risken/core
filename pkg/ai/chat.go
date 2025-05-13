@@ -13,7 +13,7 @@ func (a *AIClient) ChatAI(ctx context.Context, req *ai.ChatAIRequest) (*ai.ChatA
 	messages := []openai.ChatCompletionMessage{
 		{
 			Role:    openai.ChatMessageRoleSystem,
-			Content: "あなたはAIチャットアシスタントです。ユーザの質問に対して丁寧かつ簡潔に回答してください。",
+			Content: "You are an AI chat assistant. Please respond to user questions politely and concisely. Please generate appropriate responses according to the user's language.",
 		},
 	}
 	for _, h := range req.ChatHistory {
