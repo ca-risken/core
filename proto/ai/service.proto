@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package core.ai;
+option go_package = "github.com/ca-risken/core/proto/ai";
+
+import "ai/entity.proto";
+import "validate/validate.proto";
+
+service AIService { rpc ChatAI(ChatAIRequest) returns (ChatAIResponse); }
+
+message ChatAIRequest {
+  string question = 1 [ (validate.rules).string.min_len = 1 ]; // Required
+  repeated ChatHistory chat_history = 2;
+}
+
+message ChatAIResponse { string answer = 1; }

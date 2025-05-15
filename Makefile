@@ -1,4 +1,4 @@
-TARGETS = alert finding iam project report
+TARGETS = ai alert finding iam project report
 MOCK_TARGETS = $(TARGETS:=.mock)
 BUILD_OPT=""
 IMAGE_TAG=latest
@@ -45,7 +45,7 @@ proto-without-validate: fmt
 # build with protoc-gen-validate
 .PHONY: proto-validate
 proto-validate: fmt
-	for svc in "project" "report"; do \
+	for svc in "project" "report" "ai"; do \
 		protoc \
 			--proto_path=proto \
 			--error_format=gcc \
@@ -915,5 +915,12 @@ delete-user-reserved:
 		-plaintext \
 		-d '{"project_id":1001, "reserved_id": 1006}' \
 		$(CORE_API_ADDR) core.iam.IAMService.DeleteUserReserved
+
+.PHONY: chat-ai
+chat-ai:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"question":"What mountain is the highest in the world?", "chat_history": [{"role":1, "content":"hello!"}, {"role":2, "content":"Hi, I am a chatbot."}]}' \
+		$(CORE_API_ADDR) core.ai.AIService.ChatAI
 
 FAKE:
