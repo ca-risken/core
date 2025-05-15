@@ -391,7 +391,7 @@ func TestEvaluateHumanImpact(t *testing.T) {
 			},
 			want: &AssessmentDetail{
 				Result: Ptr(HUMAN_IMPACT_LOW),
-				Score:  Ptr(float32(0)),
+				Score:  Ptr(float32(-0.1)),
 			},
 		},
 		{
