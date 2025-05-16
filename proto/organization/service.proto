@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package core.organization;
+option go_package = "github.com/ca-risken/core/proto/organization";
+
+import "google/protobuf/empty.proto";
+import "organization/entity.proto";
+
+// List Organization
+message ListOrganizationRequest {
+  uint32 organization_id = 1;
+  string name = 2;
+}
+
+message ListOrganizationResponse { repeated Organization organization = 1; }
+
+// Create Organization
+message CreateOrganizationRequest {
+  string name = 1;
+  string description = 2;
+}
+
+message CreateOrganizationResponse { Organization organization = 1; }
+
+// Update Organization
+message UpdateOrganizationRequest {
+  uint32 organization_id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message UpdateOrganizationResponse { Organization organization = 1; }
+
+// Delete Organization
+message DeleteOrganizationRequest { uint32 organization_id = 1; }
+
+// Organization service
+service OrganizationService {
+  rpc ListOrganization(ListOrganizationRequest)
+      returns (ListOrganizationResponse) {}
+  rpc CreateOrganization(CreateOrganizationRequest)
+      returns (CreateOrganizationResponse) {}
+  rpc UpdateOrganization(UpdateOrganizationRequest)
+      returns (UpdateOrganizationResponse) {}
+  rpc DeleteOrganization(DeleteOrganizationRequest)
+      returns (google.protobuf.Empty) {}
+}
