@@ -45,7 +45,7 @@ func TestListOrganization(t *testing.T) {
 		},
 		{
 			name:    "NG Invalid params",
-			input:   &organization.ListOrganizationRequest{Name: ""},
+			input:   &organization.ListOrganizationRequest{Name: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abc"},
 			wantErr: true,
 		},
 		{
