@@ -63,36 +63,6 @@ func (_m *OrganizationRepository) DeleteOrganization(ctx context.Context, organi
 	return r0
 }
 
-// GetOrganization provides a mock function with given fields: ctx, organizationID
-func (_m *OrganizationRepository) GetOrganization(ctx context.Context, organizationID uint32) (*model.Organization, error) {
-	ret := _m.Called(ctx, organizationID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetOrganization")
-	}
-
-	var r0 *model.Organization
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32) (*model.Organization, error)); ok {
-		return rf(ctx, organizationID)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32) *model.Organization); ok {
-		r0 = rf(ctx, organizationID)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Organization)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, uint32) error); ok {
-		r1 = rf(ctx, organizationID)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // ListOrganization provides a mock function with given fields: ctx, organizationID, name
 func (_m *OrganizationRepository) ListOrganization(ctx context.Context, organizationID uint32, name string) (*[]model.Organization, error) {
 	ret := _m.Called(ctx, organizationID, name)

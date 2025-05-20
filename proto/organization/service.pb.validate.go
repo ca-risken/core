@@ -57,9 +57,27 @@ func (m *ListOrganizationRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for OrganizationId
+	if m.GetOrganizationId() <= 0 {
+		err := ListOrganizationRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for Name
+	if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 64 {
+		err := ListOrganizationRequestValidationError{
+			field:  "Name",
+			reason: "value length must be between 1 and 64 runes, inclusive",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return ListOrganizationRequestMultiError(errors)
@@ -299,9 +317,27 @@ func (m *CreateOrganizationRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Name
+	if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 64 {
+		err := CreateOrganizationRequestValidationError{
+			field:  "Name",
+			reason: "value length must be between 1 and 64 runes, inclusive",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for Description
+	if l := utf8.RuneCountInString(m.GetDescription()); l < 0 || l > 255 {
+		err := CreateOrganizationRequestValidationError{
+			field:  "Description",
+			reason: "value length must be between 0 and 255 runes, inclusive",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return CreateOrganizationRequestMultiError(errors)
@@ -536,11 +572,38 @@ func (m *UpdateOrganizationRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for OrganizationId
+	if m.GetOrganizationId() <= 0 {
+		err := UpdateOrganizationRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for Name
+	if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 64 {
+		err := UpdateOrganizationRequestValidationError{
+			field:  "Name",
+			reason: "value length must be between 1 and 64 runes, inclusive",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for Description
+	if l := utf8.RuneCountInString(m.GetDescription()); l < 0 || l > 255 {
+		err := UpdateOrganizationRequestValidationError{
+			field:  "Description",
+			reason: "value length must be between 0 and 255 runes, inclusive",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return UpdateOrganizationRequestMultiError(errors)
@@ -775,7 +838,16 @@ func (m *DeleteOrganizationRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for OrganizationId
+	if m.GetOrganizationId() <= 0 {
+		err := DeleteOrganizationRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return DeleteOrganizationRequestMultiError(errors)

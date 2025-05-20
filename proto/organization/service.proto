@@ -5,34 +5,39 @@ option go_package = "github.com/ca-risken/core/proto/organization";
 
 import "google/protobuf/empty.proto";
 import "organization/entity.proto";
+import "validate/validate.proto";
 
 // List Organization
 message ListOrganizationRequest {
-  uint32 organization_id = 1;
-  string name = 2;
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  string name = 2 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
 }
 
 message ListOrganizationResponse { repeated Organization organization = 1; }
 
 // Create Organization
 message CreateOrganizationRequest {
-  string name = 1;
-  string description = 2;
+  string name = 1 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
+  string description = 2
+      [ (validate.rules).string = {min_len : 0, max_len : 255} ];
 }
 
 message CreateOrganizationResponse { Organization organization = 1; }
 
 // Update Organization
 message UpdateOrganizationRequest {
-  uint32 organization_id = 1;
-  string name = 2;
-  string description = 3;
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  string name = 2 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
+  string description = 3
+      [ (validate.rules).string = {min_len : 0, max_len : 255} ];
 }
 
 message UpdateOrganizationResponse { Organization organization = 1; }
 
 // Delete Organization
-message DeleteOrganizationRequest { uint32 organization_id = 1; }
+message DeleteOrganizationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+}
 
 // Organization service
 service OrganizationService {

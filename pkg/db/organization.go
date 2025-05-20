@@ -6,13 +6,13 @@ import (
 	"fmt"
 
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/vikyd/zero"
 	"gorm.io/gorm"
 )
 
 type OrganizationRepository interface {
 	// Organization
 	ListOrganization(ctx context.Context, organizationID uint32, name string) (*[]model.Organization, error)
-	GetOrganization(ctx context.Context, organizationID uint32) (*model.Organization, error)
 	CreateOrganization(ctx context.Context, name, description string) (*model.Organization, error)
 	UpdateOrganization(ctx context.Context, organizationID uint32, name, description string) (*model.Organization, error)
 	DeleteOrganization(ctx context.Context, organizationID uint32) error
@@ -20,36 +20,23 @@ type OrganizationRepository interface {
 
 var _ OrganizationRepository = (*Client)(nil)
 
-const selectListOrganization = `
-select
-  o.*
-from
-  organization o
-where
-  (? = 0 or o.organization_id = ?)
-  and (? = '' or o.name like ?)
-order by
-  o.organization_id`
-
 func (c *Client) ListOrganization(ctx context.Context, organizationID uint32, name string) (*[]model.Organization, error) {
+	query := `select * from organization o where 1 = 1`
+	var params []interface{}
+	if !zero.IsZeroVal(organizationID) {
+		query += " and o.organization_id = ?"
+		params = append(params, organizationID)
+	}
+	if !zero.IsZeroVal(name) {
+		query += " and o.name = ?"
+		params = append(params, name)
+	}
+	query += " order by o.organization_id"
 	var organizations []model.Organization
-	if err := c.Slave.WithContext(ctx).Raw(selectListOrganization,
-		organizationID, organizationID,
-		name, fmt.Sprintf("%%%s%%", name),
-	).Scan(&organizations).Error; err != nil {
+	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&organizations).Error; err != nil {
 		return nil, err
 	}
 	return &organizations, nil
-}
-
-const selectGetOrganization = `select * from organization where organization_id = ?`
-
-func (c *Client) GetOrganization(ctx context.Context, organizationID uint32) (*model.Organization, error) {
-	var data model.Organization
-	if err := c.Master.WithContext(ctx).Raw(selectGetOrganization, organizationID).First(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
 }
 
 const selectGetOrganizationByName = `select * from organization where name = ?`
