@@ -22,7 +22,7 @@ func TestListOrganization(t *testing.T) {
 		input        *organization.ListOrganizationRequest
 		want         *organization.ListOrganizationResponse
 		wantErr      bool
-		mockResponce *[]model.Organization
+		mockResponce []*model.Organization
 		mockError    error
 	}{
 		{
@@ -33,7 +33,7 @@ func TestListOrganization(t *testing.T) {
 					{OrganizationId: 1, Name: "test", Description: "test desc", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 				},
 			},
-			mockResponce: &[]model.Organization{
+			mockResponce: []*model.Organization{
 				{OrganizationID: 1, Name: "test", Description: "test desc", CreatedAt: now, UpdatedAt: now},
 			},
 		},

@@ -22,8 +22,8 @@ func (o *OrganizationService) ListOrganization(ctx context.Context, req *organiz
 		return nil, err
 	}
 	var orgs []*organization.Organization
-	for _, org := range *list {
-		orgs = append(orgs, convertOrganization(&org))
+	for _, org := range list {
+		orgs = append(orgs, convertOrganization(org))
 	}
 	return &organization.ListOrganizationResponse{Organization: orgs}, nil
 }

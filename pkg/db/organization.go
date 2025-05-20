@@ -6,13 +6,12 @@ import (
 	"fmt"
 
 	"github.com/ca-risken/core/pkg/model"
-	"github.com/vikyd/zero"
 	"gorm.io/gorm"
 )
 
 type OrganizationRepository interface {
 	// Organization
-	ListOrganization(ctx context.Context, organizationID uint32, name string) (*[]model.Organization, error)
+	ListOrganization(ctx context.Context, organizationID uint32, name string) ([]*model.Organization, error)
 	CreateOrganization(ctx context.Context, name, description string) (*model.Organization, error)
 	UpdateOrganization(ctx context.Context, organizationID uint32, name, description string) (*model.Organization, error)
 	DeleteOrganization(ctx context.Context, organizationID uint32) error
@@ -20,23 +19,23 @@ type OrganizationRepository interface {
 
 var _ OrganizationRepository = (*Client)(nil)
 
-func (c *Client) ListOrganization(ctx context.Context, organizationID uint32, name string) (*[]model.Organization, error) {
+func (c *Client) ListOrganization(ctx context.Context, organizationID uint32, name string) ([]*model.Organization, error) {
 	query := `select * from organization o where 1 = 1`
 	var params []interface{}
-	if !zero.IsZeroVal(organizationID) {
+	if organizationID != 0 {
 		query += " and o.organization_id = ?"
 		params = append(params, organizationID)
 	}
-	if !zero.IsZeroVal(name) {
+	if name != "" {
 		query += " and o.name = ?"
 		params = append(params, name)
 	}
 	query += " order by o.organization_id"
-	var organizations []model.Organization
+	var organizations []*model.Organization
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&organizations).Error; err != nil {
 		return nil, err
 	}
-	return &organizations, nil
+	return organizations, nil
 }
 
 const selectGetOrganizationByName = `select * from organization where name = ?`
