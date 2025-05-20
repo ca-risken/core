@@ -57,27 +57,9 @@ func (m *ListOrganizationRequest) validate(all bool) error {
 
 	var errors []error
 
-	if m.GetOrganizationId() <= 0 {
-		err := ListOrganizationRequestValidationError{
-			field:  "OrganizationId",
-			reason: "value must be greater than 0",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for OrganizationId
 
-	if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 64 {
-		err := ListOrganizationRequestValidationError{
-			field:  "Name",
-			reason: "value length must be between 1 and 64 runes, inclusive",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for Name
 
 	if len(errors) > 0 {
 		return ListOrganizationRequestMultiError(errors)

@@ -9,8 +9,8 @@ import "validate/validate.proto";
 
 // List Organization
 message ListOrganizationRequest {
-  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
-  string name = 2 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
+  uint32 organization_id = 1;
+  string name = 2;
 }
 
 message ListOrganizationResponse { repeated Organization organization = 1; }
