@@ -356,6 +356,7 @@ func evaluateHumanImpact(source *HumanImpact) *AssessmentDetail {
 			*source.MissionImpact == MISSION_IMPACT_DEGRADED ||
 			*source.MissionImpact == MISSION_IMPACT_CRIPPLED) {
 		assessment.Result = Ptr(HUMAN_IMPACT_LOW)
+		assessment.Score = Ptr(float32(-0.1))
 		return &assessment
 	}
 
