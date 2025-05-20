@@ -59,7 +59,16 @@ func (m *ListOrganizationRequest) validate(all bool) error {
 
 	// no validation rules for OrganizationId
 
-	// no validation rules for Name
+	if utf8.RuneCountInString(m.GetName()) > 64 {
+		err := ListOrganizationRequestValidationError{
+			field:  "Name",
+			reason: "value length must be at most 64 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return ListOrganizationRequestMultiError(errors)
