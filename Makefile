@@ -45,7 +45,7 @@ proto-without-validate: fmt
 # build with protoc-gen-validate
 .PHONY: proto-validate
 proto-validate: fmt
-	for svc in "project" "report" "ai" "organization"; do \
+	for svc in "project" "report" "ai" "organization" "organization_iam"; do \
 		protoc \
 			--proto_path=proto \
 			--error_format=gcc \

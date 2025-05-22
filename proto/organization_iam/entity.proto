@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package core.organization_iam;
+option go_package = "github.com/ca-risken/core/proto/organization_iam";
+
+import "validate/validate.proto";
+
+// OrganizationRole
+message OrganizationRole {
+  uint32 role_id = 1;
+  string name = 2;
+  uint32 organization_id = 3;
+  int64 created_at = 4;
+  int64 updated_at = 5;
+}
+
+// OrganizationRoleForUpsert
+message OrganizationRoleForUpsert {
+  string name = 1 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
+  uint32 organization_id = 2 [ (validate.rules).uint32.gt = 0 ];
+}
+
+// OrganizationPolicy
+message OrganizationPolicy {
+  uint32 policy_id = 1;
+  string name = 2;
+  uint32 organization_id = 3;
+  string action_ptn = 4;
+  int64 created_at = 5;
+  int64 updated_at = 6;
+}
+
+message OrganizationPolicyForUpsert {
+  string name = 1 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
+  uint32 organization_id = 2 [ (validate.rules).uint32.gt = 0 ];
+  string action_ptn = 3;
+}
