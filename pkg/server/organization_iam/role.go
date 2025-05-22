@@ -12,9 +12,8 @@ import (
 )
 
 func (i *OrganizationIAMService) ListOrganizationRole(ctx context.Context, req *organization_iam.ListOrganizationRoleRequest) (*organization_iam.ListOrganizationRoleResponse, error) {
-	errForUser := req.Validate()
-	if errForUser != nil {
-		return nil, errForUser
+	if err := req.Validate(); err != nil {
+		return nil, err
 	}
 	list, err := i.repository.ListOrganizationRole(ctx, req.OrganizationId, req.Name, req.UserId)
 	if err != nil {
@@ -31,9 +30,8 @@ func (i *OrganizationIAMService) ListOrganizationRole(ctx context.Context, req *
 }
 
 func (i *OrganizationIAMService) GetOrganizationRole(ctx context.Context, req *organization_iam.GetOrganizationRoleRequest) (*organization_iam.GetOrganizationRoleResponse, error) {
-	errForUser := req.Validate()
-	if errForUser != nil {
-		return nil, errForUser
+	if err := req.Validate(); err != nil {
+		return nil, err
 	}
 	role, err := i.repository.GetOrganizationRole(ctx, req.OrganizationId, req.RoleId)
 	if err != nil {
@@ -67,7 +65,6 @@ func (i *OrganizationIAMService) PutOrganizationRole(ctx context.Context, req *o
 	if err != nil && !noRecord {
 		return nil, err
 	}
-
 	var roleID uint32
 	if !noRecord {
 		roleID = savedData.RoleID
@@ -77,7 +74,6 @@ func (i *OrganizationIAMService) PutOrganizationRole(ctx context.Context, req *o
 		Name:           req.Role.Name,
 		OrganizationID: req.Role.OrganizationId,
 	}
-
 	registerdData, err := i.repository.PutOrganizationRole(ctx, r)
 	if err != nil {
 		return nil, err

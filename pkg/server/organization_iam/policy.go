@@ -59,7 +59,7 @@ func (i *OrganizationIAMService) PutOrganizationPolicy(ctx context.Context, req 
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if req.OrganizationId != req.Policy.OrganizationId {
+	if req.OrganizationId != 0 && req.OrganizationId != req.Policy.OrganizationId {
 		return nil, fmt.Errorf("unexpected organization_id: organization_id=%d, policy.organization_id=%d", req.OrganizationId, req.Policy.OrganizationId)
 	}
 	if _, err := regexp.Compile(req.Policy.ActionPtn); err != nil {
@@ -70,8 +70,6 @@ func (i *OrganizationIAMService) PutOrganizationPolicy(ctx context.Context, req 
 	if err != nil && !noRecord {
 		return nil, err
 	}
-
-	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
 	var policyID uint32
 	if !noRecord {
 		policyID = savedData.PolicyID
@@ -82,8 +80,6 @@ func (i *OrganizationIAMService) PutOrganizationPolicy(ctx context.Context, req 
 		OrganizationID: req.Policy.OrganizationId,
 		ActionPtn:      req.Policy.ActionPtn,
 	}
-
-	// upsert
 	registerdData, err := i.repository.PutOrganizationPolicy(ctx, p)
 	if err != nil {
 		return nil, err
