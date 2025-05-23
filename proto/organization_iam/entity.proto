@@ -16,8 +16,9 @@ message OrganizationRole {
 
 // OrganizationRoleForUpsert
 message OrganizationRoleForUpsert {
-  string name = 1 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
-  uint32 organization_id = 2 [ (validate.rules).uint32.gt = 0 ];
+  string name = 1
+      [ (validate.rules).string = {min_len : 1, max_len : 64} ]; // Required
+  uint32 organization_id = 2 [ (validate.rules).uint32.gt = 0 ]; // Required
 }
 
 // OrganizationPolicy
@@ -31,7 +32,8 @@ message OrganizationPolicy {
 }
 
 message OrganizationPolicyForUpsert {
-  string name = 1 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
-  uint32 organization_id = 2 [ (validate.rules).uint32.gt = 0 ];
-  string action_ptn = 3;
+  string name = 1
+      [ (validate.rules).string = {min_len : 1, max_len : 64} ]; // Required
+  uint32 organization_id = 2 [ (validate.rules).uint32.gt = 0 ]; // Required
+  string action_ptn = 3 [ (validate.rules).string.min_len = 1 ]; // Required
 }

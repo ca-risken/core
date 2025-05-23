@@ -16,21 +16,20 @@ message ListOrganizationRoleRequest {
 message ListOrganizationRoleResponse { repeated uint32 role_id = 1; }
 
 message GetOrganizationRoleRequest {
-  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
-  uint32 role_id = 2 [ (validate.rules).uint32.gt = 0 ];
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 role_id = 2 [ (validate.rules).uint32.gt = 0 ];         // Required
 }
 
 message GetOrganizationRoleResponse { OrganizationRole role = 1; }
 
 message PutOrganizationRoleRequest {
   uint32 organization_id = 1;
-  OrganizationRoleForUpsert role = 2
-      [ (validate.rules).message.required = true ];
+  OrganizationRoleForUpsert role = 2;
 }
 
 message PutOrganizationRoleResponse { OrganizationRole role = 1; }
 
 message DeleteOrganizationRoleRequest {
-  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
-  uint32 role_id = 2 [ (validate.rules).uint32.gt = 0 ];
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 role_id = 2 [ (validate.rules).uint32.gt = 0 ];         // Required
 }

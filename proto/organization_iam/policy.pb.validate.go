@@ -535,16 +535,7 @@ func (m *PutOrganizationPolicyRequest) validate(all bool) error {
 
 	var errors []error
 
-	if m.GetOrganizationId() <= 0 {
-		err := PutOrganizationPolicyRequestValidationError{
-			field:  "OrganizationId",
-			reason: "value must be greater than 0",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for OrganizationId
 
 	if all {
 		switch v := interface{}(m.GetPolicy()).(type) {

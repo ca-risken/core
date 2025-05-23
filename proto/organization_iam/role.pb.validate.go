@@ -538,17 +538,6 @@ func (m *PutOrganizationRoleRequest) validate(all bool) error {
 
 	// no validation rules for OrganizationId
 
-	if m.GetRole() == nil {
-		err := PutOrganizationRoleRequestValidationError{
-			field:  "Role",
-			reason: "value is required",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
 	if all {
 		switch v := interface{}(m.GetRole()).(type) {
 		case interface{ ValidateAll() error }:

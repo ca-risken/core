@@ -427,7 +427,16 @@ func (m *OrganizationPolicyForUpsert) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	// no validation rules for ActionPtn
+	if utf8.RuneCountInString(m.GetActionPtn()) < 1 {
+		err := OrganizationPolicyForUpsertValidationError{
+			field:  "ActionPtn",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return OrganizationPolicyForUpsertMultiError(errors)

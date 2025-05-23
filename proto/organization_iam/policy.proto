@@ -22,7 +22,7 @@ message GetOrganizationPolicyRequest {
 message GetOrganizationPolicyResponse { OrganizationPolicy policy = 1; }
 
 message PutOrganizationPolicyRequest {
-  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 organization_id = 1;
   OrganizationPolicyForUpsert policy = 2;
 }
 
