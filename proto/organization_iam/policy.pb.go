@@ -136,8 +136,8 @@ type GetOrganizationPolicyRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	OrganizationId uint32 `protobuf:"varint,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
-	PolicyId       uint32 `protobuf:"varint,2,opt,name=policy_id,json=policyId,proto3" json:"policy_id,omitempty"`
+	OrganizationId uint32 `protobuf:"varint,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"` // Required
+	PolicyId       uint32 `protobuf:"varint,2,opt,name=policy_id,json=policyId,proto3" json:"policy_id,omitempty"`                   // Required
 }
 
 func (x *GetOrganizationPolicyRequest) Reset() {
@@ -340,8 +340,8 @@ type DeleteOrganizationPolicyRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	OrganizationId uint32 `protobuf:"varint,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
-	PolicyId       uint32 `protobuf:"varint,2,opt,name=policy_id,json=policyId,proto3" json:"policy_id,omitempty"`
+	OrganizationId uint32 `protobuf:"varint,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"` // Required
+	PolicyId       uint32 `protobuf:"varint,2,opt,name=policy_id,json=policyId,proto3" json:"policy_id,omitempty"`                   // Required
 }
 
 func (x *DeleteOrganizationPolicyRequest) Reset() {

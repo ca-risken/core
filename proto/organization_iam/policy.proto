@@ -15,8 +15,8 @@ message ListOrganizationPolicyRequest {
 message ListOrganizationPolicyResponse { repeated uint32 policy_id = 1; }
 
 message GetOrganizationPolicyRequest {
-  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
-  uint32 policy_id = 2 [ (validate.rules).uint32.gt = 0 ];
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 policy_id = 2 [ (validate.rules).uint32.gt = 0 ];       // Required
 }
 
 message GetOrganizationPolicyResponse { OrganizationPolicy policy = 1; }
@@ -29,6 +29,6 @@ message PutOrganizationPolicyRequest {
 message PutOrganizationPolicyResponse { OrganizationPolicy policy = 1; }
 
 message DeleteOrganizationPolicyRequest {
-  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
-  uint32 policy_id = 2 [ (validate.rules).uint32.gt = 0 ];
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 policy_id = 2 [ (validate.rules).uint32.gt = 0 ];       // Required
 }
