@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package core.organization_iam;
+option go_package = "github.com/ca-risken/core/proto/organization_iam";
+
+import "google/protobuf/empty.proto";
+import "iam/user.proto";
+import "organization_iam/role.proto";
+import "organization_iam/policy.proto";
+
+service OrganizationIAMService {
+  // Role
+  rpc ListOrganizationRole(ListOrganizationRoleRequest)
+      returns (ListOrganizationRoleResponse);
+  rpc GetOrganizationRole(GetOrganizationRoleRequest)
+      returns (GetOrganizationRoleResponse);
+  rpc PutOrganizationRole(PutOrganizationRoleRequest)
+      returns (PutOrganizationRoleResponse);
+  rpc DeleteOrganizationRole(DeleteOrganizationRoleRequest)
+      returns (google.protobuf.Empty);
+
+  // Policy
+  rpc ListOrganizationPolicy(ListOrganizationPolicyRequest)
+      returns (ListOrganizationPolicyResponse);
+  rpc GetOrganizationPolicy(GetOrganizationPolicyRequest)
+      returns (GetOrganizationPolicyResponse);
+  rpc PutOrganizationPolicy(PutOrganizationPolicyRequest)
+      returns (PutOrganizationPolicyResponse);
+  rpc DeleteOrganizationPolicy(DeleteOrganizationPolicyRequest)
+      returns (google.protobuf.Empty);
+}

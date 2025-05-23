@@ -17,6 +17,7 @@ import (
 	findingserver "github.com/ca-risken/core/pkg/server/finding"
 	iamserver "github.com/ca-risken/core/pkg/server/iam"
 	organizationserver "github.com/ca-risken/core/pkg/server/organization"
+	organization_iamserver "github.com/ca-risken/core/pkg/server/organization_iam"
 	projectserver "github.com/ca-risken/core/pkg/server/project"
 	reportserver "github.com/ca-risken/core/pkg/server/report"
 	"github.com/ca-risken/core/proto/ai"
@@ -24,6 +25,7 @@ import (
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/iam"
 	"github.com/ca-risken/core/proto/organization"
+	"github.com/ca-risken/core/proto/organization_iam"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/ca-risken/core/proto/report"
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -106,6 +108,7 @@ func (s *Server) Run(ctx context.Context) error {
 	rsvc := reportserver.NewReportService(s.db, s.logger)
 	aisvc := aiserver.NewAIService(s.config.OpenAIToken, s.config.ChatGPTModel, s.logger)
 	osvc := organizationserver.NewOrganizationService(s.db, s.logger)
+	oisvc := organization_iamserver.NewOrganizationIAMService(s.db, s.logger)
 	hsvc := health.NewServer()
 
 	server := grpc.NewServer(
@@ -120,6 +123,7 @@ func (s *Server) Run(ctx context.Context) error {
 	project.RegisterProjectServiceServer(server, psvc)
 	ai.RegisterAIServiceServer(server, aisvc)
 	organization.RegisterOrganizationServiceServer(server, osvc)
+	organization_iam.RegisterOrganizationIAMServiceServer(server, oisvc)
 	grpc_health_v1.RegisterHealthServer(server, hsvc)
 
 	reflection.Register(server) // enable reflection API
