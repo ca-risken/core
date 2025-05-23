@@ -56,13 +56,18 @@ func (c *Client) GetOrganizationRole(ctx context.Context, organizationID, roleID
 		params = append(params, organizationID)
 	}
 	var data model.OrganizationRole
-	if err := c.Master.WithContext(ctx).Raw(query, params...).First(&data).Error; err != nil {
+	if err := c.Slave.WithContext(ctx).Raw(query, params...).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
-const getOrganizationRoleByName = `select * from organization_role where organization_id = ? and name =?`
+const getOrganizationRoleByName = `
+	select * 
+	from organization_role 
+	where organization_id = ? 
+		and name = ?
+`
 
 func (c *Client) GetOrganizationRoleByName(ctx context.Context, organizationID uint32, name string) (*model.OrganizationRole, error) {
 	var data model.OrganizationRole
@@ -72,7 +77,19 @@ func (c *Client) GetOrganizationRoleByName(ctx context.Context, organizationID u
 	return &data, nil
 }
 
-const putOrganizationRole = `INSERT INTO organization_role (role_id, name, organization_id) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), organization_id=VALUES(organization_id)`
+const putOrganizationRole = `
+	INSERT INTO organization_role (
+		role_id,
+		name,
+		organization_id
+	) VALUES (
+		?,
+		?,
+		?
+	) ON DUPLICATE KEY UPDATE
+		name = VALUES(name),
+		organization_id = VALUES(organization_id)
+`
 
 func (c *Client) PutOrganizationRole(ctx context.Context, r *model.OrganizationRole) (*model.OrganizationRole, error) {
 	if err := c.Master.WithContext(ctx).Exec(putOrganizationRole, r.RoleID, r.Name, r.OrganizationID).Error; err != nil {
@@ -81,7 +98,11 @@ func (c *Client) PutOrganizationRole(ctx context.Context, r *model.OrganizationR
 	return c.GetOrganizationRoleByName(ctx, r.OrganizationID, r.Name)
 }
 
-const deleteOrganizationRole = `delete from organization_role where organization_id = ? and role_id = ?`
+const deleteOrganizationRole = `
+	delete from organization_role 
+	where organization_id = ? 
+		and role_id = ?
+`
 
 func (c *Client) DeleteOrganizationRole(ctx context.Context, organizationID, roleID uint32) error {
 	return c.Master.WithContext(ctx).Exec(deleteOrganizationRole, organizationID, roleID).Error
@@ -107,17 +128,27 @@ func (c *Client) ListOrganizationPolicy(ctx context.Context, organizationID uint
 	return data, nil
 }
 
-const getOrganizationPolicy = `select * from organization_policy where organization_id = ? and policy_id =?`
+const getOrganizationPolicy = `
+	select * 
+	from organization_policy 
+	where organization_id = ? 
+		and policy_id = ?
+`
 
 func (c *Client) GetOrganizationPolicy(ctx context.Context, organizationID, policyID uint32) (*model.OrganizationPolicy, error) {
 	var data model.OrganizationPolicy
-	if err := c.Master.WithContext(ctx).Raw(getOrganizationPolicy, organizationID, policyID).First(&data).Error; err != nil {
+	if err := c.Slave.WithContext(ctx).Raw(getOrganizationPolicy, organizationID, policyID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
-const getOrganizationPolicyByName = `select * from organization_policy where organization_id = ? and name =?`
+const getOrganizationPolicyByName = `
+	select * 
+	from organization_policy 
+	where organization_id = ? 
+		and name = ?
+`
 
 func (c *Client) GetOrganizationPolicyByName(ctx context.Context, organizationID uint32, name string) (*model.OrganizationPolicy, error) {
 	var data model.OrganizationPolicy
@@ -127,7 +158,22 @@ func (c *Client) GetOrganizationPolicyByName(ctx context.Context, organizationID
 	return &data, nil
 }
 
-const putOrganizationPolicy = `INSERT INTO organization_policy (policy_id, name, organization_id, action_ptn) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), organization_id=VALUES(organization_id), action_ptn=VALUES(action_ptn)`
+const putOrganizationPolicy = `
+	INSERT INTO organization_policy (
+		policy_id,
+		name,
+		organization_id,
+		action_ptn
+	) VALUES (
+		?,
+		?,
+		?,
+		?
+	) ON DUPLICATE KEY UPDATE
+		name = VALUES(name),
+		organization_id = VALUES(organization_id),
+		action_ptn = VALUES(action_ptn)
+`
 
 func (c *Client) PutOrganizationPolicy(ctx context.Context, p *model.OrganizationPolicy) (*model.OrganizationPolicy, error) {
 	if err := c.Master.WithContext(ctx).Exec(putOrganizationPolicy, p.PolicyID, p.Name, p.OrganizationID, p.ActionPtn).Error; err != nil {
@@ -136,7 +182,11 @@ func (c *Client) PutOrganizationPolicy(ctx context.Context, p *model.Organizatio
 	return c.GetOrganizationPolicyByName(ctx, p.OrganizationID, p.Name)
 }
 
-const deleteOrganizationPolicy = `delete from organization_policy where organization_id = ? and policy_id = ?`
+const deleteOrganizationPolicy = `
+	delete from organization_policy 
+	where organization_id = ? 
+		and policy_id = ?
+`
 
 func (c *Client) DeleteOrganizationPolicy(ctx context.Context, organizationID, policyID uint32) error {
 	return c.Master.WithContext(ctx).Exec(deleteOrganizationPolicy, organizationID, policyID).Error
