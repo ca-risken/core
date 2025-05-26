@@ -15,6 +15,9 @@ type OrganizationRepository interface {
 	CreateOrganization(ctx context.Context, name, description string) (*model.Organization, error)
 	UpdateOrganization(ctx context.Context, organizationID uint32, name, description string) (*model.Organization, error)
 	DeleteOrganization(ctx context.Context, organizationID uint32) error
+
+	// OrganizationProject
+	InviteProject(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error)
 }
 
 var _ OrganizationRepository = (*Client)(nil)
@@ -76,4 +79,25 @@ const deleteOrganization = `delete from organization where organization_id = ?`
 
 func (c *Client) DeleteOrganization(ctx context.Context, organizationID uint32) error {
 	return c.Master.WithContext(ctx).Exec(deleteOrganization, organizationID).Error
+}
+
+const insertInviteProject = `
+	INSERT INTO organization_project (
+		organization_id,
+		project_id
+	) VALUES (
+		?,
+		?
+	)
+`
+
+func (c *Client) InviteProject(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error) {
+	if err := c.Master.WithContext(ctx).Exec(insertInviteProject, organizationID, projectID).Error; err != nil {
+		return nil, err
+	}
+	var data model.OrganizationProject
+	if err := c.Master.WithContext(ctx).Raw("SELECT * FROM organization_project WHERE organization_id = ? AND project_id = ?", organizationID, projectID).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
 }

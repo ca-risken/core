@@ -40,6 +40,14 @@ message DeleteOrganizationRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
 }
 
+// Invite Project
+message InviteProjectRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
+}
+
+message InviteProjectResponse { OrganizationProject organization_project = 1; }
+
 // Organization service
 service OrganizationService {
   rpc ListOrganization(ListOrganizationRequest)
@@ -50,4 +58,5 @@ service OrganizationService {
       returns (UpdateOrganizationResponse) {}
   rpc DeleteOrganization(DeleteOrganizationRequest)
       returns (google.protobuf.Empty) {}
+  rpc InviteProject(InviteProjectRequest) returns (InviteProjectResponse) {}
 }

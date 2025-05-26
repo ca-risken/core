@@ -12,6 +12,8 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/organization"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 )
 
@@ -216,6 +218,83 @@ func TestDeleteOrganization(t *testing.T) {
 			if !c.wantErr && err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
+		})
+	}
+}
+
+func TestInviteProject(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name         string
+		input        *organization.InviteProjectRequest
+		want         *organization.InviteProjectResponse
+		mockResponse *model.OrganizationProject
+		mockErr      error
+		wantErr      bool
+	}{
+		{
+			name: "OK",
+			input: &organization.InviteProjectRequest{
+				OrganizationId: 1,
+				ProjectId:      1,
+			},
+			want: &organization.InviteProjectResponse{
+				OrganizationProject: &organization.OrganizationProject{
+					OrganizationId: 1,
+					ProjectId:      1,
+					CreatedAt:      now.Unix(),
+					UpdatedAt:      now.Unix(),
+				},
+			},
+			mockResponse: &model.OrganizationProject{
+				OrganizationID: 1,
+				ProjectID:      1,
+				CreatedAt:      now,
+				UpdatedAt:      now,
+			},
+			wantErr: false,
+		},
+		{
+			name: "NG Invalid request",
+			input: &organization.InviteProjectRequest{
+				OrganizationId: 0,
+				ProjectId:      1,
+			},
+			want:         nil,
+			mockResponse: nil,
+			wantErr:      true,
+		},
+		{
+			name: "NG DB error",
+			input: &organization.InviteProjectRequest{
+				OrganizationId: 1,
+				ProjectId:      1,
+			},
+			want:         nil,
+			mockResponse: nil,
+			mockErr:      assert.AnError,
+			wantErr:      true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewOrganizationRepository(t)
+			svc := OrganizationService{
+				repository: mockDB,
+				logger:     logging.NewLogger(),
+			}
+
+			if !c.wantErr || c.mockErr != nil {
+				mockDB.On("InviteProject", mock.Anything, c.input.OrganizationId, c.input.ProjectId).Return(c.mockResponse, c.mockErr)
+			}
+
+			got, err := svc.InviteProject(context.Background(), c.input)
+			if c.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, c.want, got)
 		})
 	}
 }

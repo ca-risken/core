@@ -919,3 +919,258 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DeleteOrganizationRequestValidationError{}
+
+// Validate checks the field values on InviteProjectRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *InviteProjectRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on InviteProjectRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// InviteProjectRequestMultiError, or nil if none found.
+func (m *InviteProjectRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *InviteProjectRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() <= 0 {
+		err := InviteProjectRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetProjectId() <= 0 {
+		err := InviteProjectRequestValidationError{
+			field:  "ProjectId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return InviteProjectRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// InviteProjectRequestMultiError is an error wrapping multiple validation
+// errors returned by InviteProjectRequest.ValidateAll() if the designated
+// constraints aren't met.
+type InviteProjectRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m InviteProjectRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m InviteProjectRequestMultiError) AllErrors() []error { return m }
+
+// InviteProjectRequestValidationError is the validation error returned by
+// InviteProjectRequest.Validate if the designated constraints aren't met.
+type InviteProjectRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e InviteProjectRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e InviteProjectRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e InviteProjectRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e InviteProjectRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e InviteProjectRequestValidationError) ErrorName() string {
+	return "InviteProjectRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e InviteProjectRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sInviteProjectRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = InviteProjectRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = InviteProjectRequestValidationError{}
+
+// Validate checks the field values on InviteProjectResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *InviteProjectResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on InviteProjectResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// InviteProjectResponseMultiError, or nil if none found.
+func (m *InviteProjectResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *InviteProjectResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetOrganizationProject()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, InviteProjectResponseValidationError{
+					field:  "OrganizationProject",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, InviteProjectResponseValidationError{
+					field:  "OrganizationProject",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetOrganizationProject()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return InviteProjectResponseValidationError{
+				field:  "OrganizationProject",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return InviteProjectResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// InviteProjectResponseMultiError is an error wrapping multiple validation
+// errors returned by InviteProjectResponse.ValidateAll() if the designated
+// constraints aren't met.
+type InviteProjectResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m InviteProjectResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m InviteProjectResponseMultiError) AllErrors() []error { return m }
+
+// InviteProjectResponseValidationError is the validation error returned by
+// InviteProjectResponse.Validate if the designated constraints aren't met.
+type InviteProjectResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e InviteProjectResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e InviteProjectResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e InviteProjectResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e InviteProjectResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e InviteProjectResponseValidationError) ErrorName() string {
+	return "InviteProjectResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e InviteProjectResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sInviteProjectResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = InviteProjectResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = InviteProjectResponseValidationError{}

@@ -71,3 +71,24 @@ func (o *OrganizationService) DeleteOrganization(ctx context.Context, req *organ
 	o.logger.Infof(ctx, "Organization deleted: organization=%+v", req.OrganizationId)
 	return &empty.Empty{}, nil
 }
+
+func (o *OrganizationService) InviteProject(ctx context.Context, req *organization.InviteProjectRequest) (*organization.InviteProjectResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	orgProject, err := o.repository.InviteProject(ctx, req.OrganizationId, req.ProjectId)
+	if err != nil {
+		return nil, err
+	}
+	o.logger.Infof(ctx, "Project invited to organization: organizationProject=%+v", orgProject)
+	return &organization.InviteProjectResponse{OrganizationProject: convertOrganizationProject(orgProject)}, nil
+}
+
+func convertOrganizationProject(op *model.OrganizationProject) *organization.OrganizationProject {
+	return &organization.OrganizationProject{
+		OrganizationId: op.OrganizationID,
+		ProjectId:      op.ProjectID,
+		CreatedAt:      op.CreatedAt.Unix(),
+		UpdatedAt:      op.UpdatedAt.Unix(),
+	}
+}
