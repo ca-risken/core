@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package core.organization_iam;
+option go_package = "github.com/ca-risken/core/proto/organization_iam";
+
+import "organization_iam/entity.proto";
+import "validate/validate.proto";
+
+message ListOrganizationPolicyRequest {
+  uint32 organization_id = 1;
+  string name = 2 [ (validate.rules).string.max_len = 64 ];
+  uint32 role_id = 3;
+}
+
+message ListOrganizationPolicyResponse { repeated uint32 policy_id = 1; }
+
+message GetOrganizationPolicyRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 policy_id = 2 [ (validate.rules).uint32.gt = 0 ];       // Required
+}
+
+message GetOrganizationPolicyResponse { OrganizationPolicy policy = 1; }
+
+message PutOrganizationPolicyRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  string name = 2
+      [ (validate.rules).string = {min_len : 1, max_len : 64} ]; // Required
+  string action_ptn = 3 [ (validate.rules).string.min_len = 1 ]; // Required
+}
+
+message PutOrganizationPolicyResponse { OrganizationPolicy policy = 1; }
+
+message DeleteOrganizationPolicyRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 policy_id = 2 [ (validate.rules).uint32.gt = 0 ];       // Required
+}
