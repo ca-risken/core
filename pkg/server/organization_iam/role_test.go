@@ -142,32 +142,32 @@ func TestPutOrganizationRole(t *testing.T) {
 	}{
 		{
 			name:        "OK Insert",
-			input:       &organization_iam.PutOrganizationRoleRequest{Role: &organization_iam.OrganizationRoleForUpsert{Name: "nm", OrganizationId: 123}},
+			input:       &organization_iam.PutOrganizationRoleRequest{Name: "nm", OrganizationId: 123},
 			want:        &organization_iam.PutOrganizationRoleResponse{Role: &organization_iam.OrganizationRole{RoleId: 1, Name: "nm", OrganizationId: 123, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetErr:  gorm.ErrRecordNotFound,
 			mockUpdResp: &model.OrganizationRole{RoleID: 1, Name: "nm", OrganizationID: 123, CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:        "OK Update",
-			input:       &organization_iam.PutOrganizationRoleRequest{Role: &organization_iam.OrganizationRoleForUpsert{Name: "after", OrganizationId: 123}},
+			input:       &organization_iam.PutOrganizationRoleRequest{Name: "after", OrganizationId: 123},
 			want:        &organization_iam.PutOrganizationRoleResponse{Role: &organization_iam.OrganizationRole{RoleId: 1, Name: "after", OrganizationId: 123, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetResp: &model.OrganizationRole{RoleID: 1, Name: "before", OrganizationID: 123, CreatedAt: now, UpdatedAt: now},
 			mockUpdResp: &model.OrganizationRole{RoleID: 1, Name: "after", OrganizationID: 123, CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:    "NG Invalid param",
-			input:   &organization_iam.PutOrganizationRoleRequest{Role: &organization_iam.OrganizationRoleForUpsert{Name: "nm"}},
+			input:   &organization_iam.PutOrganizationRoleRequest{Name: "nm"},
 			wantErr: true,
 		},
 		{
 			name:       "NG DB error(GetOrganizationRoleByName)",
-			input:      &organization_iam.PutOrganizationRoleRequest{Role: &organization_iam.OrganizationRoleForUpsert{Name: "nm", OrganizationId: 123}},
+			input:      &organization_iam.PutOrganizationRoleRequest{Name: "nm", OrganizationId: 123},
 			mockGetErr: gorm.ErrInvalidTransaction,
 			wantErr:    true,
 		},
 		{
 			name:       "NG DB error(PutOrganizationRole)",
-			input:      &organization_iam.PutOrganizationRoleRequest{Role: &organization_iam.OrganizationRoleForUpsert{Name: "nm", OrganizationId: 123}},
+			input:      &organization_iam.PutOrganizationRoleRequest{Name: "nm", OrganizationId: 123},
 			mockGetErr: gorm.ErrRecordNotFound,
 			mockUpdErr: gorm.ErrInvalidTransaction,
 			wantErr:    true,

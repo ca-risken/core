@@ -59,13 +59,10 @@ func (i *OrganizationIAMService) PutOrganizationPolicy(ctx context.Context, req 
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if req.OrganizationId != 0 && req.OrganizationId != req.Policy.OrganizationId {
-		return nil, fmt.Errorf("unexpected organization_id: organization_id=%d, policy.organization_id=%d", req.OrganizationId, req.Policy.OrganizationId)
+	if _, err := regexp.Compile(req.ActionPtn); err != nil {
+		return nil, fmt.Errorf("could not regexp complie, pattern=%s, err=%+v", req.ActionPtn, err)
 	}
-	if _, err := regexp.Compile(req.Policy.ActionPtn); err != nil {
-		return nil, fmt.Errorf("could not regexp complie, pattern=%s, err=%+v", req.Policy.ActionPtn, err)
-	}
-	savedData, err := i.repository.GetOrganizationPolicyByName(ctx, req.Policy.OrganizationId, req.Policy.Name)
+	savedData, err := i.repository.GetOrganizationPolicyByName(ctx, req.OrganizationId, req.Name)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
@@ -76,9 +73,9 @@ func (i *OrganizationIAMService) PutOrganizationPolicy(ctx context.Context, req 
 	}
 	p := &model.OrganizationPolicy{
 		PolicyID:       policyID,
-		Name:           req.Policy.Name,
-		OrganizationID: req.Policy.OrganizationId,
-		ActionPtn:      req.Policy.ActionPtn,
+		Name:           req.Name,
+		OrganizationID: req.OrganizationId,
+		ActionPtn:      req.ActionPtn,
 	}
 	registerdData, err := i.repository.PutOrganizationPolicy(ctx, p)
 	if err != nil {

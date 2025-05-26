@@ -22,8 +22,10 @@ message GetOrganizationPolicyRequest {
 message GetOrganizationPolicyResponse { OrganizationPolicy policy = 1; }
 
 message PutOrganizationPolicyRequest {
-  uint32 organization_id = 1;
-  OrganizationPolicyForUpsert policy = 2;
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  string name = 2
+      [ (validate.rules).string = {min_len : 1, max_len : 64} ]; // Required
+  string action_ptn = 3 [ (validate.rules).string.min_len = 1 ]; // Required
 }
 
 message PutOrganizationPolicyResponse { OrganizationPolicy policy = 1; }

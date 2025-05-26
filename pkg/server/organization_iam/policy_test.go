@@ -138,32 +138,32 @@ func TestPutOrganizationPolicy(t *testing.T) {
 	}{
 		{
 			name:        "OK Insert",
-			input:       &organization_iam.PutOrganizationPolicyRequest{OrganizationId: 123, Policy: &organization_iam.OrganizationPolicyForUpsert{Name: "nm", OrganizationId: 123, ActionPtn: ".*"}},
+			input:       &organization_iam.PutOrganizationPolicyRequest{Name: "nm", OrganizationId: 123, ActionPtn: ".*"},
 			want:        &organization_iam.PutOrganizationPolicyResponse{Policy: &organization_iam.OrganizationPolicy{PolicyId: 1, Name: "nm", OrganizationId: 123, ActionPtn: ".*", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetErr:  gorm.ErrRecordNotFound,
 			mockUpdResp: &model.OrganizationPolicy{PolicyID: 1, Name: "nm", OrganizationID: 123, ActionPtn: ".*", CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:        "OK Update",
-			input:       &organization_iam.PutOrganizationPolicyRequest{OrganizationId: 123, Policy: &organization_iam.OrganizationPolicyForUpsert{Name: "nm", OrganizationId: 123, ActionPtn: ".*"}},
+			input:       &organization_iam.PutOrganizationPolicyRequest{Name: "nm", OrganizationId: 123, ActionPtn: ".*"},
 			want:        &organization_iam.PutOrganizationPolicyResponse{Policy: &organization_iam.OrganizationPolicy{PolicyId: 1, Name: "nm", OrganizationId: 123, ActionPtn: ".*", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetResp: &model.OrganizationPolicy{PolicyID: 1, Name: "nm", OrganizationID: 123, ActionPtn: ".+", CreatedAt: now, UpdatedAt: now},
 			mockUpdResp: &model.OrganizationPolicy{PolicyID: 1, Name: "nm", OrganizationID: 123, ActionPtn: ".*", CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:    "NG Invalid param",
-			input:   &organization_iam.PutOrganizationPolicyRequest{Policy: &organization_iam.OrganizationPolicyForUpsert{Name: "nm", OrganizationId: 0, ActionPtn: ".*"}},
+			input:   &organization_iam.PutOrganizationPolicyRequest{Name: "nm", OrganizationId: 0, ActionPtn: ".*"},
 			wantErr: true,
 		},
 		{
 			name:       "NG DB error(GetPolicyByName)",
-			input:      &organization_iam.PutOrganizationPolicyRequest{OrganizationId: 123, Policy: &organization_iam.OrganizationPolicyForUpsert{Name: "nm", OrganizationId: 123, ActionPtn: ".*"}},
+			input:      &organization_iam.PutOrganizationPolicyRequest{Name: "nm", OrganizationId: 123, ActionPtn: ".*"},
 			mockGetErr: gorm.ErrInvalidTransaction,
 			wantErr:    true,
 		},
 		{
 			name:       "NG DB error(PutPolicy)",
-			input:      &organization_iam.PutOrganizationPolicyRequest{OrganizationId: 123, Policy: &organization_iam.OrganizationPolicyForUpsert{Name: "nm", OrganizationId: 123, ActionPtn: ".*"}},
+			input:      &organization_iam.PutOrganizationPolicyRequest{Name: "nm", OrganizationId: 123, ActionPtn: ".*"},
 			mockGetErr: gorm.ErrRecordNotFound,
 			mockUpdErr: gorm.ErrInvalidTransaction,
 			wantErr:    true,

@@ -3,7 +3,6 @@ package organization_iam
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/organization_iam"
@@ -57,10 +56,7 @@ func (i *OrganizationIAMService) PutOrganizationRole(ctx context.Context, req *o
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if req.OrganizationId != 0 && req.OrganizationId != req.Role.OrganizationId {
-		return nil, fmt.Errorf("unexpected organization_id: organization_id=%d, role.organization_id=%d", req.OrganizationId, req.Role.OrganizationId)
-	}
-	savedData, err := i.repository.GetOrganizationRoleByName(ctx, req.Role.OrganizationId, req.Role.Name)
+	savedData, err := i.repository.GetOrganizationRoleByName(ctx, req.OrganizationId, req.Name)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
@@ -71,8 +67,8 @@ func (i *OrganizationIAMService) PutOrganizationRole(ctx context.Context, req *o
 	}
 	r := &model.OrganizationRole{
 		RoleID:         roleID,
-		Name:           req.Role.Name,
-		OrganizationID: req.Role.OrganizationId,
+		Name:           req.Name,
+		OrganizationID: req.OrganizationId,
 	}
 	registerdData, err := i.repository.PutOrganizationRole(ctx, r)
 	if err != nil {

@@ -535,35 +535,37 @@ func (m *PutOrganizationPolicyRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for OrganizationId
+	if m.GetOrganizationId() <= 0 {
+		err := PutOrganizationPolicyRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	if all {
-		switch v := interface{}(m.GetPolicy()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, PutOrganizationPolicyRequestValidationError{
-					field:  "Policy",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, PutOrganizationPolicyRequestValidationError{
-					field:  "Policy",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
+	if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 64 {
+		err := PutOrganizationPolicyRequestValidationError{
+			field:  "Name",
+			reason: "value length must be between 1 and 64 runes, inclusive",
 		}
-	} else if v, ok := interface{}(m.GetPolicy()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return PutOrganizationPolicyRequestValidationError{
-				field:  "Policy",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
+		if !all {
+			return err
 		}
+		errors = append(errors, err)
+	}
+
+	if utf8.RuneCountInString(m.GetActionPtn()) < 1 {
+		err := PutOrganizationPolicyRequestValidationError{
+			field:  "ActionPtn",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
 	}
 
 	if len(errors) > 0 {

@@ -536,35 +536,26 @@ func (m *PutOrganizationRoleRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for OrganizationId
+	if m.GetOrganizationId() <= 0 {
+		err := PutOrganizationRoleRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	if all {
-		switch v := interface{}(m.GetRole()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, PutOrganizationRoleRequestValidationError{
-					field:  "Role",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, PutOrganizationRoleRequestValidationError{
-					field:  "Role",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
+	if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 64 {
+		err := PutOrganizationRoleRequestValidationError{
+			field:  "Name",
+			reason: "value length must be between 1 and 64 runes, inclusive",
 		}
-	} else if v, ok := interface{}(m.GetRole()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return PutOrganizationRoleRequestValidationError{
-				field:  "Role",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
+		if !all {
+			return err
 		}
+		errors = append(errors, err)
 	}
 
 	if len(errors) > 0 {
