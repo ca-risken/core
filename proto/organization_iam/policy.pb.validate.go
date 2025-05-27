@@ -905,3 +905,387 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DeleteOrganizationPolicyRequestValidationError{}
+
+// Validate checks the field values on AttachOrganizationPolicyRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *AttachOrganizationPolicyRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AttachOrganizationPolicyRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// AttachOrganizationPolicyRequestMultiError, or nil if none found.
+func (m *AttachOrganizationPolicyRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AttachOrganizationPolicyRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetRoleId() <= 0 {
+		err := AttachOrganizationPolicyRequestValidationError{
+			field:  "RoleId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetPolicyId() <= 0 {
+		err := AttachOrganizationPolicyRequestValidationError{
+			field:  "PolicyId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return AttachOrganizationPolicyRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// AttachOrganizationPolicyRequestMultiError is an error wrapping multiple
+// validation errors returned by AttachOrganizationPolicyRequest.ValidateAll()
+// if the designated constraints aren't met.
+type AttachOrganizationPolicyRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AttachOrganizationPolicyRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AttachOrganizationPolicyRequestMultiError) AllErrors() []error { return m }
+
+// AttachOrganizationPolicyRequestValidationError is the validation error
+// returned by AttachOrganizationPolicyRequest.Validate if the designated
+// constraints aren't met.
+type AttachOrganizationPolicyRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AttachOrganizationPolicyRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AttachOrganizationPolicyRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AttachOrganizationPolicyRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AttachOrganizationPolicyRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AttachOrganizationPolicyRequestValidationError) ErrorName() string {
+	return "AttachOrganizationPolicyRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AttachOrganizationPolicyRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAttachOrganizationPolicyRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AttachOrganizationPolicyRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AttachOrganizationPolicyRequestValidationError{}
+
+// Validate checks the field values on AttachOrganizationPolicyResponse with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *AttachOrganizationPolicyResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AttachOrganizationPolicyResponse with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// AttachOrganizationPolicyResponseMultiError, or nil if none found.
+func (m *AttachOrganizationPolicyResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AttachOrganizationPolicyResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetPolicy()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, AttachOrganizationPolicyResponseValidationError{
+					field:  "Policy",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, AttachOrganizationPolicyResponseValidationError{
+					field:  "Policy",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetPolicy()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return AttachOrganizationPolicyResponseValidationError{
+				field:  "Policy",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return AttachOrganizationPolicyResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// AttachOrganizationPolicyResponseMultiError is an error wrapping multiple
+// validation errors returned by
+// AttachOrganizationPolicyResponse.ValidateAll() if the designated
+// constraints aren't met.
+type AttachOrganizationPolicyResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AttachOrganizationPolicyResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AttachOrganizationPolicyResponseMultiError) AllErrors() []error { return m }
+
+// AttachOrganizationPolicyResponseValidationError is the validation error
+// returned by AttachOrganizationPolicyResponse.Validate if the designated
+// constraints aren't met.
+type AttachOrganizationPolicyResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AttachOrganizationPolicyResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AttachOrganizationPolicyResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AttachOrganizationPolicyResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AttachOrganizationPolicyResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AttachOrganizationPolicyResponseValidationError) ErrorName() string {
+	return "AttachOrganizationPolicyResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AttachOrganizationPolicyResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAttachOrganizationPolicyResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AttachOrganizationPolicyResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AttachOrganizationPolicyResponseValidationError{}
+
+// Validate checks the field values on DetachOrganizationPolicyRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *DetachOrganizationPolicyRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DetachOrganizationPolicyRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// DetachOrganizationPolicyRequestMultiError, or nil if none found.
+func (m *DetachOrganizationPolicyRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DetachOrganizationPolicyRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetRoleId() <= 0 {
+		err := DetachOrganizationPolicyRequestValidationError{
+			field:  "RoleId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetPolicyId() <= 0 {
+		err := DetachOrganizationPolicyRequestValidationError{
+			field:  "PolicyId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return DetachOrganizationPolicyRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// DetachOrganizationPolicyRequestMultiError is an error wrapping multiple
+// validation errors returned by DetachOrganizationPolicyRequest.ValidateAll()
+// if the designated constraints aren't met.
+type DetachOrganizationPolicyRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DetachOrganizationPolicyRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DetachOrganizationPolicyRequestMultiError) AllErrors() []error { return m }
+
+// DetachOrganizationPolicyRequestValidationError is the validation error
+// returned by DetachOrganizationPolicyRequest.Validate if the designated
+// constraints aren't met.
+type DetachOrganizationPolicyRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DetachOrganizationPolicyRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DetachOrganizationPolicyRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DetachOrganizationPolicyRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DetachOrganizationPolicyRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DetachOrganizationPolicyRequestValidationError) ErrorName() string {
+	return "DetachOrganizationPolicyRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DetachOrganizationPolicyRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDetachOrganizationPolicyRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DetachOrganizationPolicyRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DetachOrganizationPolicyRequestValidationError{}

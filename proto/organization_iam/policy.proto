@@ -34,3 +34,15 @@ message DeleteOrganizationPolicyRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
   uint32 policy_id = 2 [ (validate.rules).uint32.gt = 0 ];       // Required
 }
+
+message AttachOrganizationPolicyRequest {
+  uint32 role_id = 1 [ (validate.rules).uint32.gt = 0 ];   // Required
+  uint32 policy_id = 2 [ (validate.rules).uint32.gt = 0 ]; // Required
+}
+
+message AttachOrganizationPolicyResponse { OrganizationPolicy policy = 1; }
+
+message DetachOrganizationPolicyRequest {
+  uint32 role_id = 1 [ (validate.rules).uint32.gt = 0 ];   // Required
+  uint32 policy_id = 2 [ (validate.rules).uint32.gt = 0 ]; // Required
+}

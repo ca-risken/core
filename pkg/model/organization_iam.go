@@ -20,3 +20,17 @@ type OrganizationPolicy struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 }
+
+type UserOrganizationRole struct {
+	RoleID    uint32
+	UserID    uint32
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type OrganizationRolePolicy struct {
+	RoleID    uint32
+	PolicyID  uint32
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}

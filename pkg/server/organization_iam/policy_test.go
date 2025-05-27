@@ -236,3 +236,124 @@ func TestDeleteOrganizationPolicy(t *testing.T) {
 		})
 	}
 }
+
+func TestAttachOrganizationPolicy(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name         string
+		input        *organization_iam.AttachOrganizationPolicyRequest
+		want         *organization_iam.AttachOrganizationPolicyResponse
+		mockResponse *model.OrganizationPolicy
+		mockErr      error
+		wantErr      bool
+	}{
+		{
+			name: "OK",
+			input: &organization_iam.AttachOrganizationPolicyRequest{
+				RoleId:   1,
+				PolicyId: 1,
+			},
+			want: &organization_iam.AttachOrganizationPolicyResponse{
+				Policy: &organization_iam.OrganizationPolicy{
+					PolicyId:  1,
+					Name:      "test-policy",
+					ActionPtn: "test:*",
+					CreatedAt: now.Unix(),
+					UpdatedAt: now.Unix(),
+				},
+			},
+			mockResponse: &model.OrganizationPolicy{
+				PolicyID:  1,
+				Name:      "test-policy",
+				ActionPtn: "test:*",
+				CreatedAt: now,
+				UpdatedAt: now,
+			},
+		},
+		{
+			name: "NG Invalid param",
+			input: &organization_iam.AttachOrganizationPolicyRequest{
+				RoleId:   0,
+				PolicyId: 1,
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG DB error",
+			input: &organization_iam.AttachOrganizationPolicyRequest{
+				RoleId:   1,
+				PolicyId: 1,
+			},
+			mockErr: gorm.ErrInvalidDB,
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewOrganizationIAMRepository(t)
+			svc := OrganizationIAMService{repository: mockDB}
+			if c.mockErr != nil || c.mockResponse != nil {
+				mockDB.On("AttachOrganizationPolicy", test.RepeatMockAnything(3)...).Return(c.mockResponse, c.mockErr).Once()
+			}
+			got, err := svc.AttachOrganizationPolicy(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v, wantErr: %+v", err, c.wantErr)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestDetachOrganizationPolicy(t *testing.T) {
+	cases := []struct {
+		name     string
+		input    *organization_iam.DetachOrganizationPolicyRequest
+		mockErr  error
+		wantErr  bool
+		mockCall bool
+	}{
+		{
+			name: "OK",
+			input: &organization_iam.DetachOrganizationPolicyRequest{
+				RoleId:   1,
+				PolicyId: 1,
+			},
+			mockCall: true,
+		},
+		{
+			name: "NG Invalid param",
+			input: &organization_iam.DetachOrganizationPolicyRequest{
+				RoleId:   0,
+				PolicyId: 1,
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG DB error",
+			input: &organization_iam.DetachOrganizationPolicyRequest{
+				RoleId:   1,
+				PolicyId: 1,
+			},
+			mockCall: true,
+			mockErr:  gorm.ErrInvalidDB,
+			wantErr:  true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewOrganizationIAMRepository(t)
+			svc := OrganizationIAMService{repository: mockDB}
+			if c.mockCall {
+				mockDB.On("DetachOrganizationPolicy", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
+			}
+			_, err := svc.DetachOrganizationPolicy(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v, wantErr: %+v", err, c.wantErr)
+			}
+		})
+	}
+}
