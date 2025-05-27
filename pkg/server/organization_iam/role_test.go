@@ -240,3 +240,122 @@ func TestDeleteOrganizationRole(t *testing.T) {
 		})
 	}
 }
+
+func TestAttachOrganizationRole(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name         string
+		input        *organization_iam.AttachOrganizationRoleRequest
+		want         *organization_iam.AttachOrganizationRoleResponse
+		mockResponse *model.OrganizationRole
+		mockErr      error
+		wantErr      bool
+	}{
+		{
+			name: "OK",
+			input: &organization_iam.AttachOrganizationRoleRequest{
+				RoleId: 1,
+				UserId: 1,
+			},
+			want: &organization_iam.AttachOrganizationRoleResponse{
+				Role: &organization_iam.OrganizationRole{
+					RoleId:    1,
+					Name:      "test-role",
+					CreatedAt: now.Unix(),
+					UpdatedAt: now.Unix(),
+				},
+			},
+			mockResponse: &model.OrganizationRole{
+				RoleID:    1,
+				Name:      "test-role",
+				CreatedAt: now,
+				UpdatedAt: now,
+			},
+		},
+		{
+			name: "NG Invalid param",
+			input: &organization_iam.AttachOrganizationRoleRequest{
+				RoleId: 0,
+				UserId: 1,
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG DB error",
+			input: &organization_iam.AttachOrganizationRoleRequest{
+				RoleId: 1,
+				UserId: 1,
+			},
+			mockErr: gorm.ErrInvalidDB,
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			mockDB := mocks.NewOrganizationIAMRepository(t)
+			svc := OrganizationIAMService{repository: mockDB}
+			if c.mockErr != nil || c.mockResponse != nil {
+				mockDB.On("AttachOrganizationRole", test.RepeatMockAnything(3)...).Return(c.mockResponse, c.mockErr).Once()
+			}
+			got, err := svc.AttachOrganizationRole(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v, wantErr: %+v", err, c.wantErr)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestDetachOrganizationRole(t *testing.T) {
+	cases := []struct {
+		name     string
+		input    *organization_iam.DetachOrganizationRoleRequest
+		mockErr  error
+		wantErr  bool
+		mockCall bool
+	}{
+		{
+			name: "OK",
+			input: &organization_iam.DetachOrganizationRoleRequest{
+				RoleId: 1,
+				UserId: 1,
+			},
+			mockCall: true,
+		},
+		{
+			name: "NG Invalid param",
+			input: &organization_iam.DetachOrganizationRoleRequest{
+				RoleId: 0,
+				UserId: 1,
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG DB error",
+			input: &organization_iam.DetachOrganizationRoleRequest{
+				RoleId: 1,
+				UserId: 1,
+			},
+			mockCall: true,
+			mockErr:  gorm.ErrInvalidDB,
+			wantErr:  true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			mockDB := mocks.NewOrganizationIAMRepository(t)
+			svc := OrganizationIAMService{repository: mockDB}
+			if c.mockCall {
+				mockDB.On("DetachOrganizationRole", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
+			}
+			_, err := svc.DetachOrganizationRole(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v, wantErr: %+v", err, c.wantErr)
+			}
+		})
+	}
+}

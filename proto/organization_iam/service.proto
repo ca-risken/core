@@ -18,6 +18,10 @@ service OrganizationIAMService {
       returns (PutOrganizationRoleResponse);
   rpc DeleteOrganizationRole(DeleteOrganizationRoleRequest)
       returns (google.protobuf.Empty);
+  rpc AttachOrganizationRole(AttachOrganizationRoleRequest)
+      returns (AttachOrganizationRoleResponse);
+  rpc DetachOrganizationRole(DetachOrganizationRoleRequest)
+      returns (google.protobuf.Empty);
 
   // Policy
   rpc ListOrganizationPolicy(ListOrganizationPolicyRequest)
@@ -27,5 +31,9 @@ service OrganizationIAMService {
   rpc PutOrganizationPolicy(PutOrganizationPolicyRequest)
       returns (PutOrganizationPolicyResponse);
   rpc DeleteOrganizationPolicy(DeleteOrganizationPolicyRequest)
+      returns (google.protobuf.Empty);
+  rpc AttachOrganizationPolicy(AttachOrganizationPolicyRequest)
+      returns (AttachOrganizationPolicyResponse);
+  rpc DetachOrganizationPolicy(DetachOrganizationPolicyRequest)
       returns (google.protobuf.Empty);
 }

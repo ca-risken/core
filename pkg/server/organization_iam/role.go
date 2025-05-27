@@ -86,3 +86,24 @@ func (i *OrganizationIAMService) DeleteOrganizationRole(ctx context.Context, req
 	}
 	return &empty.Empty{}, nil
 }
+
+func (s *OrganizationIAMService) AttachOrganizationRole(ctx context.Context, req *organization_iam.AttachOrganizationRoleRequest) (*organization_iam.AttachOrganizationRoleResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	role, err := s.repository.AttachOrganizationRole(ctx, req.RoleId, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+	return &organization_iam.AttachOrganizationRoleResponse{Role: convertOrganizationRole(role)}, nil
+}
+
+func (s *OrganizationIAMService) DetachOrganizationRole(ctx context.Context, req *organization_iam.DetachOrganizationRoleRequest) (*empty.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	if err := s.repository.DetachOrganizationRole(ctx, req.RoleId, req.UserId); err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
+}

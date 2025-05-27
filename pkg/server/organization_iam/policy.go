@@ -93,3 +93,24 @@ func (i *OrganizationIAMService) DeleteOrganizationPolicy(ctx context.Context, r
 	}
 	return &empty.Empty{}, nil
 }
+
+func (s *OrganizationIAMService) AttachOrganizationPolicy(ctx context.Context, req *organization_iam.AttachOrganizationPolicyRequest) (*organization_iam.AttachOrganizationPolicyResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	policy, err := s.repository.AttachOrganizationPolicy(ctx, req.PolicyId, req.RoleId)
+	if err != nil {
+		return nil, err
+	}
+	return &organization_iam.AttachOrganizationPolicyResponse{Policy: convertOrganizationPolicy(policy)}, nil
+}
+
+func (s *OrganizationIAMService) DetachOrganizationPolicy(ctx context.Context, req *organization_iam.DetachOrganizationPolicyRequest) (*empty.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	if err := s.repository.DetachOrganizationPolicy(ctx, req.PolicyId, req.RoleId); err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
+}

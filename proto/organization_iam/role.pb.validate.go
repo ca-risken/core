@@ -894,3 +894,385 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DeleteOrganizationRoleRequestValidationError{}
+
+// Validate checks the field values on AttachOrganizationRoleRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *AttachOrganizationRoleRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AttachOrganizationRoleRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// AttachOrganizationRoleRequestMultiError, or nil if none found.
+func (m *AttachOrganizationRoleRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AttachOrganizationRoleRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetUserId() <= 0 {
+		err := AttachOrganizationRoleRequestValidationError{
+			field:  "UserId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetRoleId() <= 0 {
+		err := AttachOrganizationRoleRequestValidationError{
+			field:  "RoleId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return AttachOrganizationRoleRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// AttachOrganizationRoleRequestMultiError is an error wrapping multiple
+// validation errors returned by AttachOrganizationRoleRequest.ValidateAll()
+// if the designated constraints aren't met.
+type AttachOrganizationRoleRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AttachOrganizationRoleRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AttachOrganizationRoleRequestMultiError) AllErrors() []error { return m }
+
+// AttachOrganizationRoleRequestValidationError is the validation error
+// returned by AttachOrganizationRoleRequest.Validate if the designated
+// constraints aren't met.
+type AttachOrganizationRoleRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AttachOrganizationRoleRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AttachOrganizationRoleRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AttachOrganizationRoleRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AttachOrganizationRoleRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AttachOrganizationRoleRequestValidationError) ErrorName() string {
+	return "AttachOrganizationRoleRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AttachOrganizationRoleRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAttachOrganizationRoleRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AttachOrganizationRoleRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AttachOrganizationRoleRequestValidationError{}
+
+// Validate checks the field values on AttachOrganizationRoleResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *AttachOrganizationRoleResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AttachOrganizationRoleResponse with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// AttachOrganizationRoleResponseMultiError, or nil if none found.
+func (m *AttachOrganizationRoleResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AttachOrganizationRoleResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetRole()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, AttachOrganizationRoleResponseValidationError{
+					field:  "Role",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, AttachOrganizationRoleResponseValidationError{
+					field:  "Role",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetRole()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return AttachOrganizationRoleResponseValidationError{
+				field:  "Role",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return AttachOrganizationRoleResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// AttachOrganizationRoleResponseMultiError is an error wrapping multiple
+// validation errors returned by AttachOrganizationRoleResponse.ValidateAll()
+// if the designated constraints aren't met.
+type AttachOrganizationRoleResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AttachOrganizationRoleResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AttachOrganizationRoleResponseMultiError) AllErrors() []error { return m }
+
+// AttachOrganizationRoleResponseValidationError is the validation error
+// returned by AttachOrganizationRoleResponse.Validate if the designated
+// constraints aren't met.
+type AttachOrganizationRoleResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AttachOrganizationRoleResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AttachOrganizationRoleResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AttachOrganizationRoleResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AttachOrganizationRoleResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AttachOrganizationRoleResponseValidationError) ErrorName() string {
+	return "AttachOrganizationRoleResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AttachOrganizationRoleResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAttachOrganizationRoleResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AttachOrganizationRoleResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AttachOrganizationRoleResponseValidationError{}
+
+// Validate checks the field values on DetachOrganizationRoleRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *DetachOrganizationRoleRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DetachOrganizationRoleRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// DetachOrganizationRoleRequestMultiError, or nil if none found.
+func (m *DetachOrganizationRoleRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DetachOrganizationRoleRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetUserId() <= 0 {
+		err := DetachOrganizationRoleRequestValidationError{
+			field:  "UserId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetRoleId() <= 0 {
+		err := DetachOrganizationRoleRequestValidationError{
+			field:  "RoleId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return DetachOrganizationRoleRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// DetachOrganizationRoleRequestMultiError is an error wrapping multiple
+// validation errors returned by DetachOrganizationRoleRequest.ValidateAll()
+// if the designated constraints aren't met.
+type DetachOrganizationRoleRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DetachOrganizationRoleRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DetachOrganizationRoleRequestMultiError) AllErrors() []error { return m }
+
+// DetachOrganizationRoleRequestValidationError is the validation error
+// returned by DetachOrganizationRoleRequest.Validate if the designated
+// constraints aren't met.
+type DetachOrganizationRoleRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DetachOrganizationRoleRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DetachOrganizationRoleRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DetachOrganizationRoleRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DetachOrganizationRoleRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DetachOrganizationRoleRequestValidationError) ErrorName() string {
+	return "DetachOrganizationRoleRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DetachOrganizationRoleRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDetachOrganizationRoleRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DetachOrganizationRoleRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DetachOrganizationRoleRequestValidationError{}

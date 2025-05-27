@@ -38,7 +38,7 @@ var file_organization_iam_service_proto_rawDesc = []byte{
 	0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x2f, 0x72, 0x6f, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74,
 	0x6f, 0x1a, 0x1d, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f,
 	0x69, 0x61, 0x6d, 0x2f, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x32, 0xfb, 0x07, 0x0a, 0x16, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f,
+	0x32, 0xe5, 0x0b, 0x0a, 0x16, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f,
 	0x6e, 0x49, 0x41, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x7f, 0x0a, 0x14, 0x4c,
 	0x69, 0x73, 0x74, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52,
 	0x6f, 0x6c, 0x65, 0x12, 0x32, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e,
@@ -68,6 +68,21 @@ var file_organization_iam_service_proto_rawDesc = []byte{
 	0x6c, 0x65, 0x12, 0x34, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69,
 	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74,
 	0x65, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x6f, 0x6c,
+	0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
+	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
+	0x12, 0x85, 0x01, 0x0a, 0x16, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x4f, 0x72, 0x67, 0x61, 0x6e,
+	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x34, 0x2e, 0x63, 0x6f,
+	0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f,
+	0x69, 0x61, 0x6d, 0x2e, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69,
+	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x35, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x2e, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68,
+	0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x6f, 0x6c, 0x65,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x66, 0x0a, 0x16, 0x44, 0x65, 0x74, 0x61,
+	0x63, 0x68, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x6f,
+	0x6c, 0x65, 0x12, 0x34, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69,
+	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x2e, 0x44, 0x65, 0x74, 0x61, 0x63,
+	0x68, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x6f, 0x6c,
 	0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
 	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
 	0x12, 0x85, 0x01, 0x0a, 0x16, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a,
@@ -101,49 +116,79 @@ var file_organization_iam_service_proto_rawDesc = []byte{
 	0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4f, 0x72, 0x67,
 	0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52,
 	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x42, 0x32,
-	0x5a, 0x30, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d,
-	0x72, 0x69, 0x73, 0x6b, 0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x2f, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69,
-	0x61, 0x6d, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x8b,
+	0x01, 0x0a, 0x18, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x12, 0x36, 0x2e, 0x63, 0x6f,
+	0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f,
+	0x69, 0x61, 0x6d, 0x2e, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69,
+	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x37, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e,
+	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x2e, 0x41, 0x74, 0x74, 0x61,
+	0x63, 0x68, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x6f,
+	0x6c, 0x69, 0x63, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x6a, 0x0a, 0x18,
+	0x44, 0x65, 0x74, 0x61, 0x63, 0x68, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x12, 0x36, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e,
+	0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d,
+	0x2e, 0x44, 0x65, 0x74, 0x61, 0x63, 0x68, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
+	0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x42, 0x32, 0x5a, 0x30, 0x67, 0x69, 0x74, 0x68,
+	0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69, 0x73, 0x6b, 0x65, 0x6e,
+	0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x6f, 0x72, 0x67, 0x61,
+	0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x62, 0x06, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x33,
 }
 
 var file_organization_iam_service_proto_goTypes = []interface{}{
-	(*ListOrganizationRoleRequest)(nil),     // 0: core.organization_iam.ListOrganizationRoleRequest
-	(*GetOrganizationRoleRequest)(nil),      // 1: core.organization_iam.GetOrganizationRoleRequest
-	(*PutOrganizationRoleRequest)(nil),      // 2: core.organization_iam.PutOrganizationRoleRequest
-	(*DeleteOrganizationRoleRequest)(nil),   // 3: core.organization_iam.DeleteOrganizationRoleRequest
-	(*ListOrganizationPolicyRequest)(nil),   // 4: core.organization_iam.ListOrganizationPolicyRequest
-	(*GetOrganizationPolicyRequest)(nil),    // 5: core.organization_iam.GetOrganizationPolicyRequest
-	(*PutOrganizationPolicyRequest)(nil),    // 6: core.organization_iam.PutOrganizationPolicyRequest
-	(*DeleteOrganizationPolicyRequest)(nil), // 7: core.organization_iam.DeleteOrganizationPolicyRequest
-	(*ListOrganizationRoleResponse)(nil),    // 8: core.organization_iam.ListOrganizationRoleResponse
-	(*GetOrganizationRoleResponse)(nil),     // 9: core.organization_iam.GetOrganizationRoleResponse
-	(*PutOrganizationRoleResponse)(nil),     // 10: core.organization_iam.PutOrganizationRoleResponse
-	(*emptypb.Empty)(nil),                   // 11: google.protobuf.Empty
-	(*ListOrganizationPolicyResponse)(nil),  // 12: core.organization_iam.ListOrganizationPolicyResponse
-	(*GetOrganizationPolicyResponse)(nil),   // 13: core.organization_iam.GetOrganizationPolicyResponse
-	(*PutOrganizationPolicyResponse)(nil),   // 14: core.organization_iam.PutOrganizationPolicyResponse
+	(*ListOrganizationRoleRequest)(nil),      // 0: core.organization_iam.ListOrganizationRoleRequest
+	(*GetOrganizationRoleRequest)(nil),       // 1: core.organization_iam.GetOrganizationRoleRequest
+	(*PutOrganizationRoleRequest)(nil),       // 2: core.organization_iam.PutOrganizationRoleRequest
+	(*DeleteOrganizationRoleRequest)(nil),    // 3: core.organization_iam.DeleteOrganizationRoleRequest
+	(*AttachOrganizationRoleRequest)(nil),    // 4: core.organization_iam.AttachOrganizationRoleRequest
+	(*DetachOrganizationRoleRequest)(nil),    // 5: core.organization_iam.DetachOrganizationRoleRequest
+	(*ListOrganizationPolicyRequest)(nil),    // 6: core.organization_iam.ListOrganizationPolicyRequest
+	(*GetOrganizationPolicyRequest)(nil),     // 7: core.organization_iam.GetOrganizationPolicyRequest
+	(*PutOrganizationPolicyRequest)(nil),     // 8: core.organization_iam.PutOrganizationPolicyRequest
+	(*DeleteOrganizationPolicyRequest)(nil),  // 9: core.organization_iam.DeleteOrganizationPolicyRequest
+	(*AttachOrganizationPolicyRequest)(nil),  // 10: core.organization_iam.AttachOrganizationPolicyRequest
+	(*DetachOrganizationPolicyRequest)(nil),  // 11: core.organization_iam.DetachOrganizationPolicyRequest
+	(*ListOrganizationRoleResponse)(nil),     // 12: core.organization_iam.ListOrganizationRoleResponse
+	(*GetOrganizationRoleResponse)(nil),      // 13: core.organization_iam.GetOrganizationRoleResponse
+	(*PutOrganizationRoleResponse)(nil),      // 14: core.organization_iam.PutOrganizationRoleResponse
+	(*emptypb.Empty)(nil),                    // 15: google.protobuf.Empty
+	(*AttachOrganizationRoleResponse)(nil),   // 16: core.organization_iam.AttachOrganizationRoleResponse
+	(*ListOrganizationPolicyResponse)(nil),   // 17: core.organization_iam.ListOrganizationPolicyResponse
+	(*GetOrganizationPolicyResponse)(nil),    // 18: core.organization_iam.GetOrganizationPolicyResponse
+	(*PutOrganizationPolicyResponse)(nil),    // 19: core.organization_iam.PutOrganizationPolicyResponse
+	(*AttachOrganizationPolicyResponse)(nil), // 20: core.organization_iam.AttachOrganizationPolicyResponse
 }
 var file_organization_iam_service_proto_depIdxs = []int32{
 	0,  // 0: core.organization_iam.OrganizationIAMService.ListOrganizationRole:input_type -> core.organization_iam.ListOrganizationRoleRequest
 	1,  // 1: core.organization_iam.OrganizationIAMService.GetOrganizationRole:input_type -> core.organization_iam.GetOrganizationRoleRequest
 	2,  // 2: core.organization_iam.OrganizationIAMService.PutOrganizationRole:input_type -> core.organization_iam.PutOrganizationRoleRequest
 	3,  // 3: core.organization_iam.OrganizationIAMService.DeleteOrganizationRole:input_type -> core.organization_iam.DeleteOrganizationRoleRequest
-	4,  // 4: core.organization_iam.OrganizationIAMService.ListOrganizationPolicy:input_type -> core.organization_iam.ListOrganizationPolicyRequest
-	5,  // 5: core.organization_iam.OrganizationIAMService.GetOrganizationPolicy:input_type -> core.organization_iam.GetOrganizationPolicyRequest
-	6,  // 6: core.organization_iam.OrganizationIAMService.PutOrganizationPolicy:input_type -> core.organization_iam.PutOrganizationPolicyRequest
-	7,  // 7: core.organization_iam.OrganizationIAMService.DeleteOrganizationPolicy:input_type -> core.organization_iam.DeleteOrganizationPolicyRequest
-	8,  // 8: core.organization_iam.OrganizationIAMService.ListOrganizationRole:output_type -> core.organization_iam.ListOrganizationRoleResponse
-	9,  // 9: core.organization_iam.OrganizationIAMService.GetOrganizationRole:output_type -> core.organization_iam.GetOrganizationRoleResponse
-	10, // 10: core.organization_iam.OrganizationIAMService.PutOrganizationRole:output_type -> core.organization_iam.PutOrganizationRoleResponse
-	11, // 11: core.organization_iam.OrganizationIAMService.DeleteOrganizationRole:output_type -> google.protobuf.Empty
-	12, // 12: core.organization_iam.OrganizationIAMService.ListOrganizationPolicy:output_type -> core.organization_iam.ListOrganizationPolicyResponse
-	13, // 13: core.organization_iam.OrganizationIAMService.GetOrganizationPolicy:output_type -> core.organization_iam.GetOrganizationPolicyResponse
-	14, // 14: core.organization_iam.OrganizationIAMService.PutOrganizationPolicy:output_type -> core.organization_iam.PutOrganizationPolicyResponse
-	11, // 15: core.organization_iam.OrganizationIAMService.DeleteOrganizationPolicy:output_type -> google.protobuf.Empty
-	8,  // [8:16] is the sub-list for method output_type
-	0,  // [0:8] is the sub-list for method input_type
+	4,  // 4: core.organization_iam.OrganizationIAMService.AttachOrganizationRole:input_type -> core.organization_iam.AttachOrganizationRoleRequest
+	5,  // 5: core.organization_iam.OrganizationIAMService.DetachOrganizationRole:input_type -> core.organization_iam.DetachOrganizationRoleRequest
+	6,  // 6: core.organization_iam.OrganizationIAMService.ListOrganizationPolicy:input_type -> core.organization_iam.ListOrganizationPolicyRequest
+	7,  // 7: core.organization_iam.OrganizationIAMService.GetOrganizationPolicy:input_type -> core.organization_iam.GetOrganizationPolicyRequest
+	8,  // 8: core.organization_iam.OrganizationIAMService.PutOrganizationPolicy:input_type -> core.organization_iam.PutOrganizationPolicyRequest
+	9,  // 9: core.organization_iam.OrganizationIAMService.DeleteOrganizationPolicy:input_type -> core.organization_iam.DeleteOrganizationPolicyRequest
+	10, // 10: core.organization_iam.OrganizationIAMService.AttachOrganizationPolicy:input_type -> core.organization_iam.AttachOrganizationPolicyRequest
+	11, // 11: core.organization_iam.OrganizationIAMService.DetachOrganizationPolicy:input_type -> core.organization_iam.DetachOrganizationPolicyRequest
+	12, // 12: core.organization_iam.OrganizationIAMService.ListOrganizationRole:output_type -> core.organization_iam.ListOrganizationRoleResponse
+	13, // 13: core.organization_iam.OrganizationIAMService.GetOrganizationRole:output_type -> core.organization_iam.GetOrganizationRoleResponse
+	14, // 14: core.organization_iam.OrganizationIAMService.PutOrganizationRole:output_type -> core.organization_iam.PutOrganizationRoleResponse
+	15, // 15: core.organization_iam.OrganizationIAMService.DeleteOrganizationRole:output_type -> google.protobuf.Empty
+	16, // 16: core.organization_iam.OrganizationIAMService.AttachOrganizationRole:output_type -> core.organization_iam.AttachOrganizationRoleResponse
+	15, // 17: core.organization_iam.OrganizationIAMService.DetachOrganizationRole:output_type -> google.protobuf.Empty
+	17, // 18: core.organization_iam.OrganizationIAMService.ListOrganizationPolicy:output_type -> core.organization_iam.ListOrganizationPolicyResponse
+	18, // 19: core.organization_iam.OrganizationIAMService.GetOrganizationPolicy:output_type -> core.organization_iam.GetOrganizationPolicyResponse
+	19, // 20: core.organization_iam.OrganizationIAMService.PutOrganizationPolicy:output_type -> core.organization_iam.PutOrganizationPolicyResponse
+	15, // 21: core.organization_iam.OrganizationIAMService.DeleteOrganizationPolicy:output_type -> google.protobuf.Empty
+	20, // 22: core.organization_iam.OrganizationIAMService.AttachOrganizationPolicy:output_type -> core.organization_iam.AttachOrganizationPolicyResponse
+	15, // 23: core.organization_iam.OrganizationIAMService.DetachOrganizationPolicy:output_type -> google.protobuf.Empty
+	12, // [12:24] is the sub-list for method output_type
+	0,  // [0:12] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
@@ -192,11 +237,15 @@ type OrganizationIAMServiceClient interface {
 	GetOrganizationRole(ctx context.Context, in *GetOrganizationRoleRequest, opts ...grpc.CallOption) (*GetOrganizationRoleResponse, error)
 	PutOrganizationRole(ctx context.Context, in *PutOrganizationRoleRequest, opts ...grpc.CallOption) (*PutOrganizationRoleResponse, error)
 	DeleteOrganizationRole(ctx context.Context, in *DeleteOrganizationRoleRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	AttachOrganizationRole(ctx context.Context, in *AttachOrganizationRoleRequest, opts ...grpc.CallOption) (*AttachOrganizationRoleResponse, error)
+	DetachOrganizationRole(ctx context.Context, in *DetachOrganizationRoleRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// Policy
 	ListOrganizationPolicy(ctx context.Context, in *ListOrganizationPolicyRequest, opts ...grpc.CallOption) (*ListOrganizationPolicyResponse, error)
 	GetOrganizationPolicy(ctx context.Context, in *GetOrganizationPolicyRequest, opts ...grpc.CallOption) (*GetOrganizationPolicyResponse, error)
 	PutOrganizationPolicy(ctx context.Context, in *PutOrganizationPolicyRequest, opts ...grpc.CallOption) (*PutOrganizationPolicyResponse, error)
 	DeleteOrganizationPolicy(ctx context.Context, in *DeleteOrganizationPolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	AttachOrganizationPolicy(ctx context.Context, in *AttachOrganizationPolicyRequest, opts ...grpc.CallOption) (*AttachOrganizationPolicyResponse, error)
+	DetachOrganizationPolicy(ctx context.Context, in *DetachOrganizationPolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type organizationIAMServiceClient struct {
@@ -243,6 +292,24 @@ func (c *organizationIAMServiceClient) DeleteOrganizationRole(ctx context.Contex
 	return out, nil
 }
 
+func (c *organizationIAMServiceClient) AttachOrganizationRole(ctx context.Context, in *AttachOrganizationRoleRequest, opts ...grpc.CallOption) (*AttachOrganizationRoleResponse, error) {
+	out := new(AttachOrganizationRoleResponse)
+	err := c.cc.Invoke(ctx, "/core.organization_iam.OrganizationIAMService/AttachOrganizationRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *organizationIAMServiceClient) DetachOrganizationRole(ctx context.Context, in *DetachOrganizationRoleRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/core.organization_iam.OrganizationIAMService/DetachOrganizationRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *organizationIAMServiceClient) ListOrganizationPolicy(ctx context.Context, in *ListOrganizationPolicyRequest, opts ...grpc.CallOption) (*ListOrganizationPolicyResponse, error) {
 	out := new(ListOrganizationPolicyResponse)
 	err := c.cc.Invoke(ctx, "/core.organization_iam.OrganizationIAMService/ListOrganizationPolicy", in, out, opts...)
@@ -279,6 +346,24 @@ func (c *organizationIAMServiceClient) DeleteOrganizationPolicy(ctx context.Cont
 	return out, nil
 }
 
+func (c *organizationIAMServiceClient) AttachOrganizationPolicy(ctx context.Context, in *AttachOrganizationPolicyRequest, opts ...grpc.CallOption) (*AttachOrganizationPolicyResponse, error) {
+	out := new(AttachOrganizationPolicyResponse)
+	err := c.cc.Invoke(ctx, "/core.organization_iam.OrganizationIAMService/AttachOrganizationPolicy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *organizationIAMServiceClient) DetachOrganizationPolicy(ctx context.Context, in *DetachOrganizationPolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/core.organization_iam.OrganizationIAMService/DetachOrganizationPolicy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrganizationIAMServiceServer is the server API for OrganizationIAMService service.
 type OrganizationIAMServiceServer interface {
 	// Role
@@ -286,11 +371,15 @@ type OrganizationIAMServiceServer interface {
 	GetOrganizationRole(context.Context, *GetOrganizationRoleRequest) (*GetOrganizationRoleResponse, error)
 	PutOrganizationRole(context.Context, *PutOrganizationRoleRequest) (*PutOrganizationRoleResponse, error)
 	DeleteOrganizationRole(context.Context, *DeleteOrganizationRoleRequest) (*emptypb.Empty, error)
+	AttachOrganizationRole(context.Context, *AttachOrganizationRoleRequest) (*AttachOrganizationRoleResponse, error)
+	DetachOrganizationRole(context.Context, *DetachOrganizationRoleRequest) (*emptypb.Empty, error)
 	// Policy
 	ListOrganizationPolicy(context.Context, *ListOrganizationPolicyRequest) (*ListOrganizationPolicyResponse, error)
 	GetOrganizationPolicy(context.Context, *GetOrganizationPolicyRequest) (*GetOrganizationPolicyResponse, error)
 	PutOrganizationPolicy(context.Context, *PutOrganizationPolicyRequest) (*PutOrganizationPolicyResponse, error)
 	DeleteOrganizationPolicy(context.Context, *DeleteOrganizationPolicyRequest) (*emptypb.Empty, error)
+	AttachOrganizationPolicy(context.Context, *AttachOrganizationPolicyRequest) (*AttachOrganizationPolicyResponse, error)
+	DetachOrganizationPolicy(context.Context, *DetachOrganizationPolicyRequest) (*emptypb.Empty, error)
 }
 
 // UnimplementedOrganizationIAMServiceServer can be embedded to have forward compatible implementations.
@@ -309,6 +398,12 @@ func (*UnimplementedOrganizationIAMServiceServer) PutOrganizationRole(context.Co
 func (*UnimplementedOrganizationIAMServiceServer) DeleteOrganizationRole(context.Context, *DeleteOrganizationRoleRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteOrganizationRole not implemented")
 }
+func (*UnimplementedOrganizationIAMServiceServer) AttachOrganizationRole(context.Context, *AttachOrganizationRoleRequest) (*AttachOrganizationRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AttachOrganizationRole not implemented")
+}
+func (*UnimplementedOrganizationIAMServiceServer) DetachOrganizationRole(context.Context, *DetachOrganizationRoleRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DetachOrganizationRole not implemented")
+}
 func (*UnimplementedOrganizationIAMServiceServer) ListOrganizationPolicy(context.Context, *ListOrganizationPolicyRequest) (*ListOrganizationPolicyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListOrganizationPolicy not implemented")
 }
@@ -320,6 +415,12 @@ func (*UnimplementedOrganizationIAMServiceServer) PutOrganizationPolicy(context.
 }
 func (*UnimplementedOrganizationIAMServiceServer) DeleteOrganizationPolicy(context.Context, *DeleteOrganizationPolicyRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteOrganizationPolicy not implemented")
+}
+func (*UnimplementedOrganizationIAMServiceServer) AttachOrganizationPolicy(context.Context, *AttachOrganizationPolicyRequest) (*AttachOrganizationPolicyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AttachOrganizationPolicy not implemented")
+}
+func (*UnimplementedOrganizationIAMServiceServer) DetachOrganizationPolicy(context.Context, *DetachOrganizationPolicyRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DetachOrganizationPolicy not implemented")
 }
 
 func RegisterOrganizationIAMServiceServer(s *grpc.Server, srv OrganizationIAMServiceServer) {
@@ -398,6 +499,42 @@ func _OrganizationIAMService_DeleteOrganizationRole_Handler(srv interface{}, ctx
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrganizationIAMService_AttachOrganizationRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AttachOrganizationRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrganizationIAMServiceServer).AttachOrganizationRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.organization_iam.OrganizationIAMService/AttachOrganizationRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrganizationIAMServiceServer).AttachOrganizationRole(ctx, req.(*AttachOrganizationRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrganizationIAMService_DetachOrganizationRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DetachOrganizationRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrganizationIAMServiceServer).DetachOrganizationRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.organization_iam.OrganizationIAMService/DetachOrganizationRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrganizationIAMServiceServer).DetachOrganizationRole(ctx, req.(*DetachOrganizationRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _OrganizationIAMService_ListOrganizationPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListOrganizationPolicyRequest)
 	if err := dec(in); err != nil {
@@ -470,6 +607,42 @@ func _OrganizationIAMService_DeleteOrganizationPolicy_Handler(srv interface{}, c
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrganizationIAMService_AttachOrganizationPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AttachOrganizationPolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrganizationIAMServiceServer).AttachOrganizationPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.organization_iam.OrganizationIAMService/AttachOrganizationPolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrganizationIAMServiceServer).AttachOrganizationPolicy(ctx, req.(*AttachOrganizationPolicyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrganizationIAMService_DetachOrganizationPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DetachOrganizationPolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrganizationIAMServiceServer).DetachOrganizationPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.organization_iam.OrganizationIAMService/DetachOrganizationPolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrganizationIAMServiceServer).DetachOrganizationPolicy(ctx, req.(*DetachOrganizationPolicyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _OrganizationIAMService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "core.organization_iam.OrganizationIAMService",
 	HandlerType: (*OrganizationIAMServiceServer)(nil),
@@ -491,6 +664,14 @@ var _OrganizationIAMService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _OrganizationIAMService_DeleteOrganizationRole_Handler,
 		},
 		{
+			MethodName: "AttachOrganizationRole",
+			Handler:    _OrganizationIAMService_AttachOrganizationRole_Handler,
+		},
+		{
+			MethodName: "DetachOrganizationRole",
+			Handler:    _OrganizationIAMService_DetachOrganizationRole_Handler,
+		},
+		{
 			MethodName: "ListOrganizationPolicy",
 			Handler:    _OrganizationIAMService_ListOrganizationPolicy_Handler,
 		},
@@ -505,6 +686,14 @@ var _OrganizationIAMService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteOrganizationPolicy",
 			Handler:    _OrganizationIAMService_DeleteOrganizationPolicy_Handler,
+		},
+		{
+			MethodName: "AttachOrganizationPolicy",
+			Handler:    _OrganizationIAMService_AttachOrganizationPolicy_Handler,
+		},
+		{
+			MethodName: "DetachOrganizationPolicy",
+			Handler:    _OrganizationIAMService_DetachOrganizationPolicy_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

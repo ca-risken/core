@@ -15,6 +15,66 @@ type OrganizationIAMRepository struct {
 	mock.Mock
 }
 
+// AttachOrganizationPolicy provides a mock function with given fields: ctx, policyID, roleID
+func (_m *OrganizationIAMRepository) AttachOrganizationPolicy(ctx context.Context, policyID uint32, roleID uint32) (*model.OrganizationPolicy, error) {
+	ret := _m.Called(ctx, policyID, roleID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AttachOrganizationPolicy")
+	}
+
+	var r0 *model.OrganizationPolicy
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) (*model.OrganizationPolicy, error)); ok {
+		return rf(ctx, policyID, roleID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) *model.OrganizationPolicy); ok {
+		r0 = rf(ctx, policyID, roleID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.OrganizationPolicy)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
+		r1 = rf(ctx, policyID, roleID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// AttachOrganizationRole provides a mock function with given fields: ctx, roleID, userID
+func (_m *OrganizationIAMRepository) AttachOrganizationRole(ctx context.Context, roleID uint32, userID uint32) (*model.OrganizationRole, error) {
+	ret := _m.Called(ctx, roleID, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AttachOrganizationRole")
+	}
+
+	var r0 *model.OrganizationRole
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) (*model.OrganizationRole, error)); ok {
+		return rf(ctx, roleID, userID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) *model.OrganizationRole); ok {
+		r0 = rf(ctx, roleID, userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.OrganizationRole)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
+		r1 = rf(ctx, roleID, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteOrganizationPolicy provides a mock function with given fields: ctx, organizationID, policyID
 func (_m *OrganizationIAMRepository) DeleteOrganizationPolicy(ctx context.Context, organizationID uint32, policyID uint32) error {
 	ret := _m.Called(ctx, organizationID, policyID)
@@ -44,6 +104,42 @@ func (_m *OrganizationIAMRepository) DeleteOrganizationRole(ctx context.Context,
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) error); ok {
 		r0 = rf(ctx, organizationID, roleID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DetachOrganizationPolicy provides a mock function with given fields: ctx, policyID, roleID
+func (_m *OrganizationIAMRepository) DetachOrganizationPolicy(ctx context.Context, policyID uint32, roleID uint32) error {
+	ret := _m.Called(ctx, policyID, roleID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DetachOrganizationPolicy")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) error); ok {
+		r0 = rf(ctx, policyID, roleID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DetachOrganizationRole provides a mock function with given fields: ctx, roleID, userID
+func (_m *OrganizationIAMRepository) DetachOrganizationRole(ctx context.Context, roleID uint32, userID uint32) error {
+	ret := _m.Called(ctx, roleID, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DetachOrganizationRole")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) error); ok {
+		r0 = rf(ctx, roleID, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
