@@ -939,9 +939,9 @@ func (m *AttachOrganizationPolicyRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if m.GetPolicyId() <= 0 {
+	if m.GetRoleId() <= 0 {
 		err := AttachOrganizationPolicyRequestValidationError{
-			field:  "PolicyId",
+			field:  "RoleId",
 			reason: "value must be greater than 0",
 		}
 		if !all {
@@ -950,9 +950,9 @@ func (m *AttachOrganizationPolicyRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if m.GetRoleId() <= 0 {
+	if m.GetPolicyId() <= 0 {
 		err := AttachOrganizationPolicyRequestValidationError{
-			field:  "RoleId",
+			field:  "PolicyId",
 			reason: "value must be greater than 0",
 		}
 		if !all {
@@ -1209,9 +1209,9 @@ func (m *DetachOrganizationPolicyRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if m.GetPolicyId() <= 0 {
+	if m.GetRoleId() <= 0 {
 		err := DetachOrganizationPolicyRequestValidationError{
-			field:  "PolicyId",
+			field:  "RoleId",
 			reason: "value must be greater than 0",
 		}
 		if !all {
@@ -1220,9 +1220,9 @@ func (m *DetachOrganizationPolicyRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if m.GetRoleId() <= 0 {
+	if m.GetPolicyId() <= 0 {
 		err := DetachOrganizationPolicyRequestValidationError{
-			field:  "RoleId",
+			field:  "PolicyId",
 			reason: "value must be greater than 0",
 		}
 		if !all {
