@@ -254,42 +254,37 @@ func TestAttachOrganizationRole(t *testing.T) {
 		{
 			name: "OK",
 			input: &organization_iam.AttachOrganizationRoleRequest{
-				OrganizationId: 1,
-				RoleId:         1,
-				UserId:         1,
+				RoleId: 1,
+				UserId: 1,
 			},
 			want: &organization_iam.AttachOrganizationRoleResponse{
 				Role: &organization_iam.OrganizationRole{
-					OrganizationId: 1,
-					RoleId:         1,
-					Name:           "test-role",
-					CreatedAt:      now.Unix(),
-					UpdatedAt:      now.Unix(),
+					RoleId:    1,
+					Name:      "test-role",
+					CreatedAt: now.Unix(),
+					UpdatedAt: now.Unix(),
 				},
 			},
 			mockResponse: &model.OrganizationRole{
-				OrganizationID: 1,
-				RoleID:         1,
-				Name:           "test-role",
-				CreatedAt:      now,
-				UpdatedAt:      now,
+				RoleID:    1,
+				Name:      "test-role",
+				CreatedAt: now,
+				UpdatedAt: now,
 			},
 		},
 		{
 			name: "NG Invalid param",
 			input: &organization_iam.AttachOrganizationRoleRequest{
-				OrganizationId: 0,
-				RoleId:         1,
-				UserId:         1,
+				RoleId: 0,
+				UserId: 1,
 			},
 			wantErr: true,
 		},
 		{
 			name: "NG DB error",
 			input: &organization_iam.AttachOrganizationRoleRequest{
-				OrganizationId: 1,
-				RoleId:         1,
-				UserId:         1,
+				RoleId: 1,
+				UserId: 1,
 			},
 			mockErr: gorm.ErrInvalidDB,
 			wantErr: true,
@@ -301,7 +296,7 @@ func TestAttachOrganizationRole(t *testing.T) {
 			mockDB := mocks.NewOrganizationIAMRepository(t)
 			svc := OrganizationIAMService{repository: mockDB}
 			if c.mockErr != nil || c.mockResponse != nil {
-				mockDB.On("AttachOrganizationRole", test.RepeatMockAnything(4)...).Return(c.mockResponse, c.mockErr).Once()
+				mockDB.On("AttachOrganizationRole", test.RepeatMockAnything(3)...).Return(c.mockResponse, c.mockErr).Once()
 			}
 			got, err := svc.AttachOrganizationRole(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -325,27 +320,24 @@ func TestDetachOrganizationRole(t *testing.T) {
 		{
 			name: "OK",
 			input: &organization_iam.DetachOrganizationRoleRequest{
-				OrganizationId: 1,
-				RoleId:         1,
-				UserId:         1,
+				RoleId: 1,
+				UserId: 1,
 			},
 			mockCall: true,
 		},
 		{
 			name: "NG Invalid param",
 			input: &organization_iam.DetachOrganizationRoleRequest{
-				OrganizationId: 0,
-				RoleId:         1,
-				UserId:         1,
+				RoleId: 0,
+				UserId: 1,
 			},
 			wantErr: true,
 		},
 		{
 			name: "NG DB error",
 			input: &organization_iam.DetachOrganizationRoleRequest{
-				OrganizationId: 1,
-				RoleId:         1,
-				UserId:         1,
+				RoleId: 1,
+				UserId: 1,
 			},
 			mockCall: true,
 			mockErr:  gorm.ErrInvalidDB,
@@ -358,7 +350,7 @@ func TestDetachOrganizationRole(t *testing.T) {
 			mockDB := mocks.NewOrganizationIAMRepository(t)
 			svc := OrganizationIAMService{repository: mockDB}
 			if c.mockCall {
-				mockDB.On("DetachOrganizationRole", test.RepeatMockAnything(4)...).Return(c.mockErr).Once()
+				mockDB.On("DetachOrganizationRole", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
 			}
 			_, err := svc.DetachOrganizationRole(ctx, c.input)
 			if err != nil && !c.wantErr {

@@ -98,7 +98,7 @@ func (s *OrganizationIAMService) AttachOrganizationPolicy(ctx context.Context, r
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	policy, err := s.repository.AttachOrganizationPolicy(ctx, req.OrganizationId, req.PolicyId, req.RoleId)
+	policy, err := s.repository.AttachOrganizationPolicy(ctx, req.PolicyId, req.RoleId)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (s *OrganizationIAMService) DetachOrganizationPolicy(ctx context.Context, r
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if err := s.repository.DetachOrganizationPolicy(ctx, req.OrganizationId, req.PolicyId, req.RoleId); err != nil {
+	if err := s.repository.DetachOrganizationPolicy(ctx, req.PolicyId, req.RoleId); err != nil {
 		return nil, err
 	}
 	return &empty.Empty{}, nil
