@@ -201,14 +201,12 @@ func (c *Client) DeleteOrganizationPolicy(ctx context.Context, organizationID, p
 const insertAttachOrganizationRole = `
 	insert into user_organization_role (
 		role_id,
-		user_id,
-		organization_id
+		user_id
 	) values (
 	 	?, 
-		?, 
 		?
 	) on duplicate key update
-		organization_id = values(organization_id)`
+		role_id = values(role_id)`
 
 func (c *Client) AttachOrganizationRole(ctx context.Context, organizationID, roleID, userID uint32) (*model.OrganizationRole, error) {
 	roleExists, err := c.organizationRoleExists(ctx, organizationID, roleID)
@@ -225,7 +223,7 @@ func (c *Client) AttachOrganizationRole(ctx context.Context, organizationID, rol
 	if !userExists {
 		return nil, fmt.Errorf("user not found: userID=%d", userID)
 	}
-	if err := c.Master.WithContext(ctx).Exec(insertAttachOrganizationRole, organizationID, roleID, userID).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(insertAttachOrganizationRole, roleID, userID).Error; err != nil {
 		return nil, err
 	}
 	return c.GetOrganizationRole(ctx, organizationID, roleID)
@@ -233,8 +231,7 @@ func (c *Client) AttachOrganizationRole(ctx context.Context, organizationID, rol
 
 const deleteDetachOrganizationRole = `
 	delete from user_organization_role 
-	where organization_id = ? 
-		and role_id = ? 
+	where role_id = ? 
 		and user_id = ?
 `
 
@@ -253,20 +250,18 @@ func (c *Client) DetachOrganizationRole(ctx context.Context, organizationID, rol
 	if !userExists {
 		return fmt.Errorf("user not found: userID=%d", userID)
 	}
-	return c.Master.WithContext(ctx).Exec(deleteDetachOrganizationRole, organizationID, roleID, userID).Error
+	return c.Master.WithContext(ctx).Exec(deleteDetachOrganizationRole, roleID, userID).Error
 }
 
 const insertAttachOrganizationPolicy = `
 	insert into organization_role_policy (
 		role_id,
-		policy_id,
-		organization_id
+		policy_id
 	) values (
 	 	?, 
-		?, 
 		?
 	) on duplicate key update
-		organization_id = values(organization_id)`
+		role_id = values(role_id)`
 
 func (c *Client) AttachOrganizationPolicy(ctx context.Context, organizationID, policyID, roleID uint32) (*model.OrganizationPolicy, error) {
 	roleExists, err := c.organizationRoleExists(ctx, organizationID, roleID)
@@ -283,7 +278,7 @@ func (c *Client) AttachOrganizationPolicy(ctx context.Context, organizationID, p
 	if !policyExists {
 		return nil, fmt.Errorf("policy not found: organizationID=%d, policyID=%d", organizationID, policyID)
 	}
-	if err := c.Master.WithContext(ctx).Exec(insertAttachOrganizationPolicy, roleID, policyID, organizationID).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(insertAttachOrganizationPolicy, roleID, policyID).Error; err != nil {
 		return nil, err
 	}
 	return c.GetOrganizationPolicy(ctx, organizationID, policyID)
@@ -292,8 +287,7 @@ func (c *Client) AttachOrganizationPolicy(ctx context.Context, organizationID, p
 const deleteDetachOrganizationPolicy = `
 	delete from organization_role_policy 
 	where role_id = ? 
-		and policy_id = ? 
-		and organization_id = ?
+		and policy_id = ?
 `
 
 func (c *Client) DetachOrganizationPolicy(ctx context.Context, organizationID, policyID, roleID uint32) error {
@@ -311,7 +305,7 @@ func (c *Client) DetachOrganizationPolicy(ctx context.Context, organizationID, p
 	if !policyExists {
 		return fmt.Errorf("policy not found: organizationID=%d, policyID=%d", organizationID, policyID)
 	}
-	return c.Master.WithContext(ctx).Exec(deleteDetachOrganizationPolicy, roleID, policyID, organizationID).Error
+	return c.Master.WithContext(ctx).Exec(deleteDetachOrganizationPolicy, roleID, policyID).Error
 }
 
 func (c *Client) organizationRoleExists(ctx context.Context, organizationID, roleID uint32) (bool, error) {

@@ -22,17 +22,15 @@ type OrganizationPolicy struct {
 }
 
 type UserOrganizationRole struct {
-	OrganizationID uint32
-	RoleID         uint32
-	UserID         uint32
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	RoleID    uint32
+	UserID    uint32
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type OrganizationRolePolicy struct {
-	OrganizationID uint32
-	RoleID         uint32
-	PolicyID       uint32
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	RoleID    uint32
+	PolicyID  uint32
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
