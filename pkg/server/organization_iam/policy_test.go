@@ -6,12 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/organization_iam"
-	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
 
@@ -291,7 +289,7 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 				RoleId:         1,
 				PolicyId:       1,
 			},
-			mockErr: assert.AnError,
+			mockErr: gorm.ErrInvalidDB,
 			wantErr: true,
 		},
 	}
@@ -299,10 +297,7 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mockDB := mocks.NewOrganizationIAMRepository(t)
-			svc := OrganizationIAMService{
-				repository: mockDB,
-				logger:     logging.NewLogger(),
-			}
+			svc := OrganizationIAMService{repository: mockDB}
 			if c.mockErr != nil || c.mockResponse != nil {
 				mockDB.On("AttachOrganizationPolicy", test.RepeatMockAnything(4)...).Return(c.mockResponse, c.mockErr).Once()
 			}
@@ -351,7 +346,7 @@ func TestDetachOrganizationPolicy(t *testing.T) {
 				PolicyId:       1,
 			},
 			mockCall: true,
-			mockErr:  assert.AnError,
+			mockErr:  gorm.ErrInvalidDB,
 			wantErr:  true,
 		},
 	}
@@ -359,10 +354,7 @@ func TestDetachOrganizationPolicy(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mockDB := mocks.NewOrganizationIAMRepository(t)
-			svc := OrganizationIAMService{
-				repository: mockDB,
-				logger:     logging.NewLogger(),
-			}
+			svc := OrganizationIAMService{repository: mockDB}
 			if c.mockCall {
 				mockDB.On("DetachOrganizationPolicy", test.RepeatMockAnything(4)...).Return(c.mockErr).Once()
 			}

@@ -84,17 +84,17 @@ func (c *Client) GetOrganizationRoleByName(ctx context.Context, organizationID u
 }
 
 const putOrganizationRole = `
-	INSERT INTO organization_role (
+	insert into organization_role (
 		role_id,
 		name,
 		organization_id
-	) VALUES (
+	) values (
 		?,
 		?,
 		?
-	) ON DUPLICATE KEY UPDATE
-		name = VALUES(name),
-		organization_id = VALUES(organization_id)
+	) on duplicate key update
+		name = values(name),
+		organization_id = values(organization_id)
 `
 
 func (c *Client) PutOrganizationRole(ctx context.Context, r *model.OrganizationRole) (*model.OrganizationRole, error) {
@@ -203,9 +203,12 @@ const insertAttachOrganizationRole = `
 		role_id,
 		user_id,
 		organization_id
-	) values (?, ?, ?)
-	ON DUPLICATE KEY UPDATE
-		organization_id = VALUES(organization_id)`
+	) values (
+	 	?, 
+		?, 
+		?
+	) on duplicate key update
+		organization_id = values(organization_id)`
 
 func (c *Client) AttachOrganizationRole(ctx context.Context, organizationID, roleID, userID uint32) (*model.OrganizationRole, error) {
 	roleExists, err := c.organizationRoleExists(ctx, organizationID, roleID)
@@ -258,9 +261,12 @@ const insertAttachOrganizationPolicy = `
 		role_id,
 		policy_id,
 		organization_id
-	) values (?, ?, ?)
-	ON DUPLICATE KEY UPDATE
-		organization_id = VALUES(organization_id)`
+	) values (
+	 	?, 
+		?, 
+		?
+	) on duplicate key update
+		organization_id = values(organization_id)`
 
 func (c *Client) AttachOrganizationPolicy(ctx context.Context, organizationID, policyID, roleID uint32) (*model.OrganizationPolicy, error) {
 	roleExists, err := c.organizationRoleExists(ctx, organizationID, roleID)
@@ -270,15 +276,13 @@ func (c *Client) AttachOrganizationPolicy(ctx context.Context, organizationID, p
 	if !roleExists {
 		return nil, fmt.Errorf("role not found: organizationID=%d, roleID=%d", organizationID, roleID)
 	}
-	/*
-		policyExists, err := c.organizationPolicyExists(ctx, organizationID, policyID)
-		if err != nil {
-			return nil, err
-		}
-		if !policyExists {
-			return nil, fmt.Errorf("policy not found: organizationID=%d, policyID=%d", organizationID, policyID)
-		}
-	*/
+	policyExists, err := c.organizationPolicyExists(ctx, organizationID, policyID)
+	if err != nil {
+		return nil, err
+	}
+	if !policyExists {
+		return nil, fmt.Errorf("policy not found: organizationID=%d, policyID=%d", organizationID, policyID)
+	}
 	if err := c.Master.WithContext(ctx).Exec(insertAttachOrganizationPolicy, roleID, policyID, organizationID).Error; err != nil {
 		return nil, err
 	}

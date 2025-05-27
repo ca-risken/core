@@ -6,12 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/organization_iam"
-	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
 
@@ -301,20 +299,17 @@ func TestAttachOrganizationRole(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			ctx := context.Background()
 			mockDB := mocks.NewOrganizationIAMRepository(t)
-			svc := OrganizationIAMService{
-				repository: mockDB,
-				logger:     logging.NewLogger(),
-			}
+			svc := OrganizationIAMService{repository: mockDB}
 			if c.mockErr != nil || c.mockResponse != nil {
 				mockDB.On("AttachOrganizationRole", test.RepeatMockAnything(4)...).Return(c.mockResponse, c.mockErr).Once()
 			}
 			got, err := svc.AttachOrganizationRole(ctx, c.input)
-			if c.wantErr {
-				assert.Error(t, err)
-				return
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v, wantErr: %+v", err, c.wantErr)
 			}
-			assert.NoError(t, err)
-			assert.Equal(t, c.want, got)
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
 		})
 	}
 }
@@ -361,19 +356,14 @@ func TestDetachOrganizationRole(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			ctx := context.Background()
 			mockDB := mocks.NewOrganizationIAMRepository(t)
-			svc := OrganizationIAMService{
-				repository: mockDB,
-				logger:     logging.NewLogger(),
-			}
+			svc := OrganizationIAMService{repository: mockDB}
 			if c.mockCall {
 				mockDB.On("DetachOrganizationRole", test.RepeatMockAnything(4)...).Return(c.mockErr).Once()
 			}
 			_, err := svc.DetachOrganizationRole(ctx, c.input)
-			if c.wantErr {
-				assert.Error(t, err)
-				return
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v, wantErr: %+v", err, c.wantErr)
 			}
-			assert.NoError(t, err)
 		})
 	}
 }
