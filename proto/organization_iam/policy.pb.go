@@ -398,6 +398,179 @@ func (x *DeleteOrganizationPolicyRequest) GetPolicyId() uint32 {
 	return 0
 }
 
+type AttachOrganizationPolicyRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	OrganizationId uint32 `protobuf:"varint,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"` // Required
+	PolicyId       uint32 `protobuf:"varint,2,opt,name=policy_id,json=policyId,proto3" json:"policy_id,omitempty"`                   // Required
+	RoleId         uint32 `protobuf:"varint,3,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`                         // Required
+}
+
+func (x *AttachOrganizationPolicyRequest) Reset() {
+	*x = AttachOrganizationPolicyRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_iam_policy_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AttachOrganizationPolicyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AttachOrganizationPolicyRequest) ProtoMessage() {}
+
+func (x *AttachOrganizationPolicyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_iam_policy_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AttachOrganizationPolicyRequest.ProtoReflect.Descriptor instead.
+func (*AttachOrganizationPolicyRequest) Descriptor() ([]byte, []int) {
+	return file_organization_iam_policy_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *AttachOrganizationPolicyRequest) GetOrganizationId() uint32 {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return 0
+}
+
+func (x *AttachOrganizationPolicyRequest) GetPolicyId() uint32 {
+	if x != nil {
+		return x.PolicyId
+	}
+	return 0
+}
+
+func (x *AttachOrganizationPolicyRequest) GetRoleId() uint32 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+type AttachOrganizationPolicyResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Policy *OrganizationPolicy `protobuf:"bytes,1,opt,name=policy,proto3" json:"policy,omitempty"`
+}
+
+func (x *AttachOrganizationPolicyResponse) Reset() {
+	*x = AttachOrganizationPolicyResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_iam_policy_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AttachOrganizationPolicyResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AttachOrganizationPolicyResponse) ProtoMessage() {}
+
+func (x *AttachOrganizationPolicyResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_iam_policy_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AttachOrganizationPolicyResponse.ProtoReflect.Descriptor instead.
+func (*AttachOrganizationPolicyResponse) Descriptor() ([]byte, []int) {
+	return file_organization_iam_policy_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *AttachOrganizationPolicyResponse) GetPolicy() *OrganizationPolicy {
+	if x != nil {
+		return x.Policy
+	}
+	return nil
+}
+
+type DetachOrganizationPolicyRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	OrganizationId uint32 `protobuf:"varint,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"` // Required
+	PolicyId       uint32 `protobuf:"varint,2,opt,name=policy_id,json=policyId,proto3" json:"policy_id,omitempty"`                   // Required
+	RoleId         uint32 `protobuf:"varint,3,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`                         // Required
+}
+
+func (x *DetachOrganizationPolicyRequest) Reset() {
+	*x = DetachOrganizationPolicyRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_iam_policy_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DetachOrganizationPolicyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DetachOrganizationPolicyRequest) ProtoMessage() {}
+
+func (x *DetachOrganizationPolicyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_iam_policy_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DetachOrganizationPolicyRequest.ProtoReflect.Descriptor instead.
+func (*DetachOrganizationPolicyRequest) Descriptor() ([]byte, []int) {
+	return file_organization_iam_policy_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *DetachOrganizationPolicyRequest) GetOrganizationId() uint32 {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return 0
+}
+
+func (x *DetachOrganizationPolicyRequest) GetPolicyId() uint32 {
+	if x != nil {
+		return x.PolicyId
+	}
+	return 0
+}
+
+func (x *DetachOrganizationPolicyRequest) GetRoleId() uint32 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
 var File_organization_iam_policy_proto protoreflect.FileDescriptor
 
 var file_organization_iam_policy_proto_rawDesc = []byte{
@@ -457,10 +630,37 @@ var file_organization_iam_policy_proto_rawDesc = []byte{
 	0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x24, 0x0a, 0x09,
 	0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x42,
 	0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x08, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79,
-	0x49, 0x64, 0x42, 0x32, 0x5a, 0x30, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d,
-	0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69, 0x73, 0x6b, 0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x49, 0x64, 0x22, 0x9b, 0x01, 0x0a, 0x1f, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x4f, 0x72, 0x67,
+	0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x30, 0x0a, 0x0f, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69,
+	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x42,
+	0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x0e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69,
+	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x24, 0x0a, 0x09, 0x70, 0x6f, 0x6c, 0x69,
+	0x63, 0x79, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa, 0x42, 0x04,
+	0x2a, 0x02, 0x20, 0x00, 0x52, 0x08, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x49, 0x64, 0x12, 0x20,
+	0x0a, 0x07, 0x72, 0x6f, 0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x42,
+	0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x06, 0x72, 0x6f, 0x6c, 0x65, 0x49, 0x64,
+	0x22, 0x65, 0x0a, 0x20, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69,
+	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x41, 0x0a, 0x06, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x29, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61,
+	0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x2e, 0x4f, 0x72, 0x67,
+	0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52,
+	0x06, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x22, 0x9b, 0x01, 0x0a, 0x1f, 0x44, 0x65, 0x74, 0x61,
+	0x63, 0x68, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x6f,
+	0x6c, 0x69, 0x63, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x30, 0x0a, 0x0f, 0x6f,
+	0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x0e, 0x6f,
+	0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x24, 0x0a,
+	0x09, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d,
+	0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x08, 0x70, 0x6f, 0x6c, 0x69, 0x63,
+	0x79, 0x49, 0x64, 0x12, 0x20, 0x0a, 0x07, 0x72, 0x6f, 0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x06, 0x72,
+	0x6f, 0x6c, 0x65, 0x49, 0x64, 0x42, 0x32, 0x5a, 0x30, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e,
+	0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69, 0x73, 0x6b, 0x65, 0x6e, 0x2f, 0x63, 0x6f,
+	0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x33,
 }
 
 var (
@@ -475,25 +675,29 @@ func file_organization_iam_policy_proto_rawDescGZIP() []byte {
 	return file_organization_iam_policy_proto_rawDescData
 }
 
-var file_organization_iam_policy_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_organization_iam_policy_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_organization_iam_policy_proto_goTypes = []interface{}{
-	(*ListOrganizationPolicyRequest)(nil),   // 0: core.organization_iam.ListOrganizationPolicyRequest
-	(*ListOrganizationPolicyResponse)(nil),  // 1: core.organization_iam.ListOrganizationPolicyResponse
-	(*GetOrganizationPolicyRequest)(nil),    // 2: core.organization_iam.GetOrganizationPolicyRequest
-	(*GetOrganizationPolicyResponse)(nil),   // 3: core.organization_iam.GetOrganizationPolicyResponse
-	(*PutOrganizationPolicyRequest)(nil),    // 4: core.organization_iam.PutOrganizationPolicyRequest
-	(*PutOrganizationPolicyResponse)(nil),   // 5: core.organization_iam.PutOrganizationPolicyResponse
-	(*DeleteOrganizationPolicyRequest)(nil), // 6: core.organization_iam.DeleteOrganizationPolicyRequest
-	(*OrganizationPolicy)(nil),              // 7: core.organization_iam.OrganizationPolicy
+	(*ListOrganizationPolicyRequest)(nil),    // 0: core.organization_iam.ListOrganizationPolicyRequest
+	(*ListOrganizationPolicyResponse)(nil),   // 1: core.organization_iam.ListOrganizationPolicyResponse
+	(*GetOrganizationPolicyRequest)(nil),     // 2: core.organization_iam.GetOrganizationPolicyRequest
+	(*GetOrganizationPolicyResponse)(nil),    // 3: core.organization_iam.GetOrganizationPolicyResponse
+	(*PutOrganizationPolicyRequest)(nil),     // 4: core.organization_iam.PutOrganizationPolicyRequest
+	(*PutOrganizationPolicyResponse)(nil),    // 5: core.organization_iam.PutOrganizationPolicyResponse
+	(*DeleteOrganizationPolicyRequest)(nil),  // 6: core.organization_iam.DeleteOrganizationPolicyRequest
+	(*AttachOrganizationPolicyRequest)(nil),  // 7: core.organization_iam.AttachOrganizationPolicyRequest
+	(*AttachOrganizationPolicyResponse)(nil), // 8: core.organization_iam.AttachOrganizationPolicyResponse
+	(*DetachOrganizationPolicyRequest)(nil),  // 9: core.organization_iam.DetachOrganizationPolicyRequest
+	(*OrganizationPolicy)(nil),               // 10: core.organization_iam.OrganizationPolicy
 }
 var file_organization_iam_policy_proto_depIdxs = []int32{
-	7, // 0: core.organization_iam.GetOrganizationPolicyResponse.policy:type_name -> core.organization_iam.OrganizationPolicy
-	7, // 1: core.organization_iam.PutOrganizationPolicyResponse.policy:type_name -> core.organization_iam.OrganizationPolicy
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	10, // 0: core.organization_iam.GetOrganizationPolicyResponse.policy:type_name -> core.organization_iam.OrganizationPolicy
+	10, // 1: core.organization_iam.PutOrganizationPolicyResponse.policy:type_name -> core.organization_iam.OrganizationPolicy
+	10, // 2: core.organization_iam.AttachOrganizationPolicyResponse.policy:type_name -> core.organization_iam.OrganizationPolicy
+	3,  // [3:3] is the sub-list for method output_type
+	3,  // [3:3] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_organization_iam_policy_proto_init() }
@@ -587,6 +791,42 @@ func file_organization_iam_policy_proto_init() {
 				return nil
 			}
 		}
+		file_organization_iam_policy_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AttachOrganizationPolicyRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_organization_iam_policy_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AttachOrganizationPolicyResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_organization_iam_policy_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DetachOrganizationPolicyRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -594,7 +834,7 @@ func file_organization_iam_policy_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_organization_iam_policy_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

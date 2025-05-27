@@ -34,3 +34,17 @@ message DeleteOrganizationRoleRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
   uint32 role_id = 2 [ (validate.rules).uint32.gt = 0 ];         // Required
 }
+
+message AttachOrganizationRoleRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 role_id = 2 [ (validate.rules).uint32.gt = 0 ];         // Required
+  uint32 user_id = 3 [ (validate.rules).uint32.gt = 0 ];         // Required
+}
+
+message AttachOrganizationRoleResponse { OrganizationRole role = 1; }
+
+message DetachOrganizationRoleRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 role_id = 2 [ (validate.rules).uint32.gt = 0 ];         // Required
+  uint32 user_id = 3 [ (validate.rules).uint32.gt = 0 ];         // Required
+}
