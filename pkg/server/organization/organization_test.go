@@ -236,7 +236,7 @@ func TestListOrganizationInvitation(t *testing.T) {
 			input: &organization.ListOrganizationInvitationRequest{OrganizationId: 1, ProjectId: 1},
 			want: &organization.ListOrganizationInvitationResponse{
 				OrganizationInvitations: []*organization.OrganizationInvitation{
-					{OrganizationId: 1, ProjectId: 1, Status: "PENDING", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+					{OrganizationId: 1, ProjectId: 1, Status: organization.OrganizationInvitationStatus_PENDING, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 				},
 			},
 			mockResponse: []*model.OrganizationInvitation{
@@ -296,7 +296,7 @@ func TestCreateOrganizationInvitation(t *testing.T) {
 			input: &organization.CreateOrganizationInvitationRequest{OrganizationId: 1, ProjectId: 1},
 			want: &organization.CreateOrganizationInvitationResponse{
 				OrganizationInvitation: &organization.OrganizationInvitation{
-					OrganizationId: 1, ProjectId: 1, Status: "PENDING", CreatedAt: now.Unix(), UpdatedAt: now.Unix(),
+					OrganizationId: 1, ProjectId: 1, Status: organization.OrganizationInvitationStatus_PENDING, CreatedAt: now.Unix(), UpdatedAt: now.Unix(),
 				},
 			},
 			mockResponse: &model.OrganizationInvitation{OrganizationID: 1, ProjectID: 1, Status: "PENDING", CreatedAt: now, UpdatedAt: now},
@@ -326,6 +326,92 @@ func TestCreateOrganizationInvitation(t *testing.T) {
 				mockDB.On("CreateOrganizationInvitation", test.RepeatMockAnything(3)...).Return(c.mockResponse, c.mockError).Once()
 			}
 			result, err := svc.CreateOrganizationInvitation(ctx, c.input)
+			if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(result, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
+			}
+		})
+	}
+}
+
+func TestUpdateOrganizationInvitationStatus(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name         string
+		input        *organization.UpdateOrganizationInvitationStatusRequest
+		want         *organization.UpdateOrganizationInvitationStatusResponse
+		wantErr      bool
+		mockResponse *model.OrganizationInvitation
+		mockError    error
+	}{
+		{
+			name: "OK ACCEPTED",
+			input: &organization.UpdateOrganizationInvitationStatusRequest{
+				OrganizationId: 1,
+				ProjectId:      1,
+				Status:         organization.OrganizationInvitationStatus_ACCEPTED,
+			},
+			want: &organization.UpdateOrganizationInvitationStatusResponse{
+				OrganizationInvitation: &organization.OrganizationInvitation{
+					OrganizationId: 1,
+					ProjectId:      1,
+					Status:         organization.OrganizationInvitationStatus_ACCEPTED,
+					CreatedAt:      now.Unix(),
+					UpdatedAt:      now.Unix(),
+				},
+			},
+			mockResponse: &model.OrganizationInvitation{
+				OrganizationID: 1,
+				ProjectID:      1,
+				Status:         "ACCEPTED",
+				CreatedAt:      now,
+				UpdatedAt:      now,
+			},
+		},
+		{
+			name: "NG Invalid params - organization_id is zero",
+			input: &organization.UpdateOrganizationInvitationStatusRequest{
+				OrganizationId: 0,
+				ProjectId:      1,
+				Status:         organization.OrganizationInvitationStatus_ACCEPTED,
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG Invalid params - status is invalid",
+			input: &organization.UpdateOrganizationInvitationStatusRequest{
+				OrganizationId: 1,
+				ProjectId:      1,
+				Status:         organization.OrganizationInvitationStatus_UNKNOWN,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Invalid DB error",
+			input: &organization.UpdateOrganizationInvitationStatusRequest{
+				OrganizationId: 1,
+				ProjectId:      1,
+				Status:         organization.OrganizationInvitationStatus_ACCEPTED,
+			},
+			mockError: gorm.ErrInvalidDB,
+			wantErr:   true,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewOrganizationRepository(t)
+			svc := OrganizationService{
+				repository: mockDB,
+				logger:     logging.NewLogger(),
+			}
+			if c.mockResponse != nil || c.mockError != nil {
+				mockDB.On("UpdateOrganizationInvitationStatus", test.RepeatMockAnything(4)...).Return(c.mockResponse, c.mockError).Once()
+			}
+			result, err := svc.UpdateOrganizationInvitationStatus(ctx, c.input)
 			if !c.wantErr && err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
 			}

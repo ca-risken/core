@@ -61,6 +61,20 @@ message CreateOrganizationInvitationResponse {
   OrganizationInvitation organization_invitation = 1;
 }
 
+// Update Organization Invitation Status
+message UpdateOrganizationInvitationStatusRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
+  OrganizationInvitationStatus status = 3 [ (validate.rules).enum = {
+    defined_only : true,
+    not_in : [ 0 ]
+  } ];
+}
+
+message UpdateOrganizationInvitationStatusResponse {
+  OrganizationInvitation organization_invitation = 1;
+}
+
 // List Projects By Organization
 message ListProjectsByOrganizationRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
@@ -92,6 +106,9 @@ service OrganizationService {
       returns (ListOrganizationInvitationResponse) {}
   rpc CreateOrganizationInvitation(CreateOrganizationInvitationRequest)
       returns (CreateOrganizationInvitationResponse) {}
+  rpc UpdateOrganizationInvitationStatus(
+      UpdateOrganizationInvitationStatusRequest)
+      returns (UpdateOrganizationInvitationStatusResponse) {}
   rpc ListProjectsByOrganization(ListProjectsByOrganizationRequest)
       returns (ListProjectsByOrganizationResponse) {}
   rpc AddProjects(AddProjectsRequest) returns (AddProjectsResponse) {}

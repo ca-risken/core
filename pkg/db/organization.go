@@ -23,6 +23,7 @@ type OrganizationRepository interface {
 	// OrganizationInvitation
 	ListOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) ([]*model.OrganizationInvitation, error)
 	CreateOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationInvitation, error)
+	UpdateOrganizationInvitationStatus(ctx context.Context, organizationID, projectID uint32, status string) (*model.OrganizationInvitation, error)
 }
 
 var _ OrganizationRepository = (*Client)(nil)
@@ -168,4 +169,18 @@ func (c *Client) CreateOrganizationInvitation(ctx context.Context, organizationI
 		return nil, err
 	}
 	return &data, nil
+}
+
+const updateOrganizationInvitationStatus = `
+	UPDATE organization_invitation 
+	SET status = ? 
+	WHERE organization_id = ? 
+	AND project_id = ?`
+
+func (c *Client) UpdateOrganizationInvitationStatus(ctx context.Context, organizationID, projectID uint32, status string) (*model.OrganizationInvitation, error) {
+	var invitation model.OrganizationInvitation
+	if err := c.Master.WithContext(ctx).Raw(updateOrganizationInvitationStatus, status, organizationID, projectID).First(&invitation).Error; err != nil {
+		return nil, err
+	}
+	return &invitation, nil
 }

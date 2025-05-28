@@ -3,6 +3,7 @@ package organization
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/organization"
@@ -126,6 +127,19 @@ func (o *OrganizationService) CreateOrganizationInvitation(ctx context.Context, 
 	return &organization.CreateOrganizationInvitationResponse{OrganizationInvitation: convertOrganizationInvitation(invitation)}, nil
 }
 
+func (o *OrganizationService) UpdateOrganizationInvitationStatus(ctx context.Context, req *organization.UpdateOrganizationInvitationStatusRequest) (*organization.UpdateOrganizationInvitationStatusResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	status := organization.OrganizationInvitationStatus_name[int32(req.Status)]
+	invitation, err := o.repository.UpdateOrganizationInvitationStatus(ctx, req.OrganizationId, req.ProjectId, status)
+	if err != nil {
+		return nil, err
+	}
+	o.logger.Infof(ctx, "Organization invitation status updated: organization_id=%d, project_id=%d, status=%s", req.OrganizationId, req.ProjectId, req.Status)
+	return &organization.UpdateOrganizationInvitationStatusResponse{OrganizationInvitation: convertOrganizationInvitation(invitation)}, nil
+}
+
 func convertOrganization(o *model.Organization) *organization.Organization {
 	return &organization.Organization{
 		OrganizationId: o.OrganizationID,
@@ -140,8 +154,25 @@ func convertOrganizationInvitation(oi *model.OrganizationInvitation) *organizati
 	return &organization.OrganizationInvitation{
 		OrganizationId: oi.OrganizationID,
 		ProjectId:      oi.ProjectID,
-		Status:         oi.Status,
+		Status:         getOrganizationInvitationStatus(oi.Status),
 		CreatedAt:      oi.CreatedAt.Unix(),
 		UpdatedAt:      oi.UpdatedAt.Unix(),
+	}
+}
+
+func getOrganizationInvitationStatus(s string) organization.OrganizationInvitationStatus {
+	statusKey := strings.ToUpper(s)
+	if _, ok := organization.OrganizationInvitationStatus_value[statusKey]; !ok {
+		return organization.OrganizationInvitationStatus_UNKNOWN
+	}
+	switch statusKey {
+	case organization.OrganizationInvitationStatus_PENDING.String():
+		return organization.OrganizationInvitationStatus_PENDING
+	case organization.OrganizationInvitationStatus_ACCEPTED.String():
+		return organization.OrganizationInvitationStatus_ACCEPTED
+	case organization.OrganizationInvitationStatus_REJECTED.String():
+		return organization.OrganizationInvitationStatus_REJECTED
+	default:
+		return organization.OrganizationInvitationStatus_UNKNOWN
 	}
 }

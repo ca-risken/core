@@ -243,6 +243,36 @@ func (_m *OrganizationRepository) UpdateOrganization(ctx context.Context, organi
 	return r0, r1
 }
 
+// UpdateOrganizationInvitationStatus provides a mock function with given fields: ctx, organizationID, projectID, status
+func (_m *OrganizationRepository) UpdateOrganizationInvitationStatus(ctx context.Context, organizationID uint32, projectID uint32, status string) (*model.OrganizationInvitation, error) {
+	ret := _m.Called(ctx, organizationID, projectID, status)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateOrganizationInvitationStatus")
+	}
+
+	var r0 *model.OrganizationInvitation
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, string) (*model.OrganizationInvitation, error)); ok {
+		return rf(ctx, organizationID, projectID, status)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, string) *model.OrganizationInvitation); ok {
+		r0 = rf(ctx, organizationID, projectID, status)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.OrganizationInvitation)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, string) error); ok {
+		r1 = rf(ctx, organizationID, projectID, status)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewOrganizationRepository creates a new instance of OrganizationRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewOrganizationRepository(t interface {

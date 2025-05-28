@@ -23,7 +23,7 @@ type OrganizationProject struct {
 type OrganizationInvitation struct {
 	OrganizationID uint32
 	ProjectID      uint32
-	Status         string // PENDING, ACCEPTED, REJECTED
+	Status         string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 }

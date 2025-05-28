@@ -598,6 +598,117 @@ func (x *CreateOrganizationInvitationResponse) GetOrganizationInvitation() *Orga
 	return nil
 }
 
+// Update Organization Invitation Status
+type UpdateOrganizationInvitationStatusRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	OrganizationId uint32                       `protobuf:"varint,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	ProjectId      uint32                       `protobuf:"varint,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Status         OrganizationInvitationStatus `protobuf:"varint,3,opt,name=status,proto3,enum=core.organization.OrganizationInvitationStatus" json:"status,omitempty"`
+}
+
+func (x *UpdateOrganizationInvitationStatusRequest) Reset() {
+	*x = UpdateOrganizationInvitationStatusRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_service_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateOrganizationInvitationStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateOrganizationInvitationStatusRequest) ProtoMessage() {}
+
+func (x *UpdateOrganizationInvitationStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_service_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateOrganizationInvitationStatusRequest.ProtoReflect.Descriptor instead.
+func (*UpdateOrganizationInvitationStatusRequest) Descriptor() ([]byte, []int) {
+	return file_organization_service_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *UpdateOrganizationInvitationStatusRequest) GetOrganizationId() uint32 {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return 0
+}
+
+func (x *UpdateOrganizationInvitationStatusRequest) GetProjectId() uint32 {
+	if x != nil {
+		return x.ProjectId
+	}
+	return 0
+}
+
+func (x *UpdateOrganizationInvitationStatusRequest) GetStatus() OrganizationInvitationStatus {
+	if x != nil {
+		return x.Status
+	}
+	return OrganizationInvitationStatus_UNKNOWN
+}
+
+type UpdateOrganizationInvitationStatusResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	OrganizationInvitation *OrganizationInvitation `protobuf:"bytes,1,opt,name=organization_invitation,json=organizationInvitation,proto3" json:"organization_invitation,omitempty"`
+}
+
+func (x *UpdateOrganizationInvitationStatusResponse) Reset() {
+	*x = UpdateOrganizationInvitationStatusResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_service_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateOrganizationInvitationStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateOrganizationInvitationStatusResponse) ProtoMessage() {}
+
+func (x *UpdateOrganizationInvitationStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_service_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateOrganizationInvitationStatusResponse.ProtoReflect.Descriptor instead.
+func (*UpdateOrganizationInvitationStatusResponse) Descriptor() ([]byte, []int) {
+	return file_organization_service_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *UpdateOrganizationInvitationStatusResponse) GetOrganizationInvitation() *OrganizationInvitation {
+	if x != nil {
+		return x.OrganizationInvitation
+	}
+	return nil
+}
+
 // List Projects By Organization
 type ListProjectsByOrganizationRequest struct {
 	state         protoimpl.MessageState
@@ -610,7 +721,7 @@ type ListProjectsByOrganizationRequest struct {
 func (x *ListProjectsByOrganizationRequest) Reset() {
 	*x = ListProjectsByOrganizationRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_organization_service_proto_msgTypes[11]
+		mi := &file_organization_service_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -623,7 +734,7 @@ func (x *ListProjectsByOrganizationRequest) String() string {
 func (*ListProjectsByOrganizationRequest) ProtoMessage() {}
 
 func (x *ListProjectsByOrganizationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_organization_service_proto_msgTypes[11]
+	mi := &file_organization_service_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -636,7 +747,7 @@ func (x *ListProjectsByOrganizationRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ListProjectsByOrganizationRequest.ProtoReflect.Descriptor instead.
 func (*ListProjectsByOrganizationRequest) Descriptor() ([]byte, []int) {
-	return file_organization_service_proto_rawDescGZIP(), []int{11}
+	return file_organization_service_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ListProjectsByOrganizationRequest) GetOrganizationId() uint32 {
@@ -657,7 +768,7 @@ type ListProjectsByOrganizationResponse struct {
 func (x *ListProjectsByOrganizationResponse) Reset() {
 	*x = ListProjectsByOrganizationResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_organization_service_proto_msgTypes[12]
+		mi := &file_organization_service_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -670,7 +781,7 @@ func (x *ListProjectsByOrganizationResponse) String() string {
 func (*ListProjectsByOrganizationResponse) ProtoMessage() {}
 
 func (x *ListProjectsByOrganizationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_organization_service_proto_msgTypes[12]
+	mi := &file_organization_service_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -683,7 +794,7 @@ func (x *ListProjectsByOrganizationResponse) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ListProjectsByOrganizationResponse.ProtoReflect.Descriptor instead.
 func (*ListProjectsByOrganizationResponse) Descriptor() ([]byte, []int) {
-	return file_organization_service_proto_rawDescGZIP(), []int{12}
+	return file_organization_service_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ListProjectsByOrganizationResponse) GetProject() []*project.Project {
@@ -706,7 +817,7 @@ type AddProjectsRequest struct {
 func (x *AddProjectsRequest) Reset() {
 	*x = AddProjectsRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_organization_service_proto_msgTypes[13]
+		mi := &file_organization_service_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -719,7 +830,7 @@ func (x *AddProjectsRequest) String() string {
 func (*AddProjectsRequest) ProtoMessage() {}
 
 func (x *AddProjectsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_organization_service_proto_msgTypes[13]
+	mi := &file_organization_service_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -732,7 +843,7 @@ func (x *AddProjectsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddProjectsRequest.ProtoReflect.Descriptor instead.
 func (*AddProjectsRequest) Descriptor() ([]byte, []int) {
-	return file_organization_service_proto_rawDescGZIP(), []int{13}
+	return file_organization_service_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *AddProjectsRequest) GetOrganizationId() uint32 {
@@ -760,7 +871,7 @@ type AddProjectsResponse struct {
 func (x *AddProjectsResponse) Reset() {
 	*x = AddProjectsResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_organization_service_proto_msgTypes[14]
+		mi := &file_organization_service_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -773,7 +884,7 @@ func (x *AddProjectsResponse) String() string {
 func (*AddProjectsResponse) ProtoMessage() {}
 
 func (x *AddProjectsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_organization_service_proto_msgTypes[14]
+	mi := &file_organization_service_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -786,7 +897,7 @@ func (x *AddProjectsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddProjectsResponse.ProtoReflect.Descriptor instead.
 func (*AddProjectsResponse) Descriptor() ([]byte, []int) {
-	return file_organization_service_proto_rawDescGZIP(), []int{14}
+	return file_organization_service_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *AddProjectsResponse) GetOrganizationProject() *OrganizationProject {
@@ -887,6 +998,29 @@ var file_organization_service_proto_rawDesc = []byte{
 	0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e,
 	0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x6e, 0x76, 0x69,
 	0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x16, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x49, 0x6e, 0x76, 0x69, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0xda,
+	0x01, 0x0a, 0x29, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x6e, 0x76, 0x69, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53,
+	0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x30, 0x0a, 0x0f,
+	0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x0e,
+	0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x26,
+	0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x0d, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x09, 0x70, 0x72, 0x6f,
+	0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x53, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x2f, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72,
+	0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x4f, 0x72, 0x67, 0x61, 0x6e,
+	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x6e, 0x76, 0x69, 0x74, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x42, 0x0a, 0xfa, 0x42, 0x07, 0x82, 0x01, 0x04, 0x10,
+	0x01, 0x20, 0x00, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x90, 0x01, 0x0a, 0x2a,
+	0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x49, 0x6e, 0x76, 0x69, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x74, 0x61, 0x74,
+	0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x62, 0x0a, 0x17, 0x6f, 0x72,
+	0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x6e, 0x76, 0x69, 0x74,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x29, 0x2e, 0x63, 0x6f,
+	0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e,
+	0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x6e, 0x76, 0x69,
+	0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x16, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61,
 	0x74, 0x69, 0x6f, 0x6e, 0x49, 0x6e, 0x76, 0x69, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x55,
 	0x0a, 0x21, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x42, 0x79,
 	0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75,
@@ -912,8 +1046,8 @@ var file_organization_service_proto_rawDesc = []byte{
 	0x0b, 0x32, 0x26, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a,
 	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69,
 	0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x13, 0x6f, 0x72, 0x67, 0x61, 0x6e,
-	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x32, 0xdc,
-	0x07, 0x0a, 0x13, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53,
+	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x32, 0x82,
+	0x09, 0x0a, 0x13, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53,
 	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x6d, 0x0a, 0x10, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x72,
 	0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x2a, 0x2e, 0x63, 0x6f, 0x72,
 	0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x4c,
@@ -960,25 +1094,35 @@ var file_organization_service_proto_rawDesc = []byte{
 	0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x4f,
 	0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x6e, 0x76, 0x69, 0x74,
 	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12,
-	0x8b, 0x01, 0x0a, 0x1a, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x73,
-	0x42, 0x79, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x34,
-	0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x42,
-	0x79, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x1a, 0x35, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61,
+	0xa3, 0x01, 0x0a, 0x22, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69,
+	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x6e, 0x76, 0x69, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x3c, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72,
+	0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x6e, 0x76,
+	0x69, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x3d, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61,
+	0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4f,
+	0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x6e, 0x76, 0x69, 0x74,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x8b, 0x01, 0x0a, 0x1a, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x72,
+	0x6f, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x42, 0x79, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x12, 0x34, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61,
 	0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x50, 0x72, 0x6f,
 	0x6a, 0x65, 0x63, 0x74, 0x73, 0x42, 0x79, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x5e, 0x0a,
-	0x0b, 0x41, 0x64, 0x64, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x12, 0x25, 0x2e, 0x63,
-	0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x2e, 0x41, 0x64, 0x64, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x1a, 0x26, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e,
-	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x41, 0x64, 0x64, 0x50, 0x72, 0x6f, 0x6a, 0x65,
-	0x63, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x2e, 0x5a,
-	0x2c, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72,
-	0x69, 0x73, 0x6b, 0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x2f, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x35, 0x2e, 0x63, 0x6f, 0x72,
+	0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x4c,
+	0x69, 0x73, 0x74, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x42, 0x79, 0x4f, 0x72, 0x67,
+	0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x22, 0x00, 0x12, 0x5e, 0x0a, 0x0b, 0x41, 0x64, 0x64, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63,
+	0x74, 0x73, 0x12, 0x25, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69,
+	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x41, 0x64, 0x64, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63,
+	0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x26, 0x2e, 0x63, 0x6f, 0x72, 0x65,
+	0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x41, 0x64,
+	0x64, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x22, 0x00, 0x42, 0x2e, 0x5a, 0x2c, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
+	0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69, 0x73, 0x6b, 0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65,
+	0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -993,58 +1137,65 @@ func file_organization_service_proto_rawDescGZIP() []byte {
 	return file_organization_service_proto_rawDescData
 }
 
-var file_organization_service_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_organization_service_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_organization_service_proto_goTypes = []interface{}{
-	(*ListOrganizationRequest)(nil),              // 0: core.organization.ListOrganizationRequest
-	(*ListOrganizationResponse)(nil),             // 1: core.organization.ListOrganizationResponse
-	(*CreateOrganizationRequest)(nil),            // 2: core.organization.CreateOrganizationRequest
-	(*CreateOrganizationResponse)(nil),           // 3: core.organization.CreateOrganizationResponse
-	(*UpdateOrganizationRequest)(nil),            // 4: core.organization.UpdateOrganizationRequest
-	(*UpdateOrganizationResponse)(nil),           // 5: core.organization.UpdateOrganizationResponse
-	(*DeleteOrganizationRequest)(nil),            // 6: core.organization.DeleteOrganizationRequest
-	(*ListOrganizationInvitationRequest)(nil),    // 7: core.organization.ListOrganizationInvitationRequest
-	(*ListOrganizationInvitationResponse)(nil),   // 8: core.organization.ListOrganizationInvitationResponse
-	(*CreateOrganizationInvitationRequest)(nil),  // 9: core.organization.CreateOrganizationInvitationRequest
-	(*CreateOrganizationInvitationResponse)(nil), // 10: core.organization.CreateOrganizationInvitationResponse
-	(*ListProjectsByOrganizationRequest)(nil),    // 11: core.organization.ListProjectsByOrganizationRequest
-	(*ListProjectsByOrganizationResponse)(nil),   // 12: core.organization.ListProjectsByOrganizationResponse
-	(*AddProjectsRequest)(nil),                   // 13: core.organization.AddProjectsRequest
-	(*AddProjectsResponse)(nil),                  // 14: core.organization.AddProjectsResponse
-	(*Organization)(nil),                         // 15: core.organization.Organization
-	(*OrganizationInvitation)(nil),               // 16: core.organization.OrganizationInvitation
-	(*project.Project)(nil),                      // 17: core.project.Project
-	(*OrganizationProject)(nil),                  // 18: core.organization.OrganizationProject
-	(*emptypb.Empty)(nil),                        // 19: google.protobuf.Empty
+	(*ListOrganizationRequest)(nil),                    // 0: core.organization.ListOrganizationRequest
+	(*ListOrganizationResponse)(nil),                   // 1: core.organization.ListOrganizationResponse
+	(*CreateOrganizationRequest)(nil),                  // 2: core.organization.CreateOrganizationRequest
+	(*CreateOrganizationResponse)(nil),                 // 3: core.organization.CreateOrganizationResponse
+	(*UpdateOrganizationRequest)(nil),                  // 4: core.organization.UpdateOrganizationRequest
+	(*UpdateOrganizationResponse)(nil),                 // 5: core.organization.UpdateOrganizationResponse
+	(*DeleteOrganizationRequest)(nil),                  // 6: core.organization.DeleteOrganizationRequest
+	(*ListOrganizationInvitationRequest)(nil),          // 7: core.organization.ListOrganizationInvitationRequest
+	(*ListOrganizationInvitationResponse)(nil),         // 8: core.organization.ListOrganizationInvitationResponse
+	(*CreateOrganizationInvitationRequest)(nil),        // 9: core.organization.CreateOrganizationInvitationRequest
+	(*CreateOrganizationInvitationResponse)(nil),       // 10: core.organization.CreateOrganizationInvitationResponse
+	(*UpdateOrganizationInvitationStatusRequest)(nil),  // 11: core.organization.UpdateOrganizationInvitationStatusRequest
+	(*UpdateOrganizationInvitationStatusResponse)(nil), // 12: core.organization.UpdateOrganizationInvitationStatusResponse
+	(*ListProjectsByOrganizationRequest)(nil),          // 13: core.organization.ListProjectsByOrganizationRequest
+	(*ListProjectsByOrganizationResponse)(nil),         // 14: core.organization.ListProjectsByOrganizationResponse
+	(*AddProjectsRequest)(nil),                         // 15: core.organization.AddProjectsRequest
+	(*AddProjectsResponse)(nil),                        // 16: core.organization.AddProjectsResponse
+	(*Organization)(nil),                               // 17: core.organization.Organization
+	(*OrganizationInvitation)(nil),                     // 18: core.organization.OrganizationInvitation
+	(OrganizationInvitationStatus)(0),                  // 19: core.organization.OrganizationInvitationStatus
+	(*project.Project)(nil),                            // 20: core.project.Project
+	(*OrganizationProject)(nil),                        // 21: core.organization.OrganizationProject
+	(*emptypb.Empty)(nil),                              // 22: google.protobuf.Empty
 }
 var file_organization_service_proto_depIdxs = []int32{
-	15, // 0: core.organization.ListOrganizationResponse.organization:type_name -> core.organization.Organization
-	15, // 1: core.organization.CreateOrganizationResponse.organization:type_name -> core.organization.Organization
-	15, // 2: core.organization.UpdateOrganizationResponse.organization:type_name -> core.organization.Organization
-	16, // 3: core.organization.ListOrganizationInvitationResponse.organization_invitations:type_name -> core.organization.OrganizationInvitation
-	16, // 4: core.organization.CreateOrganizationInvitationResponse.organization_invitation:type_name -> core.organization.OrganizationInvitation
-	17, // 5: core.organization.ListProjectsByOrganizationResponse.project:type_name -> core.project.Project
-	18, // 6: core.organization.AddProjectsResponse.organization_project:type_name -> core.organization.OrganizationProject
-	0,  // 7: core.organization.OrganizationService.ListOrganization:input_type -> core.organization.ListOrganizationRequest
-	2,  // 8: core.organization.OrganizationService.CreateOrganization:input_type -> core.organization.CreateOrganizationRequest
-	4,  // 9: core.organization.OrganizationService.UpdateOrganization:input_type -> core.organization.UpdateOrganizationRequest
-	6,  // 10: core.organization.OrganizationService.DeleteOrganization:input_type -> core.organization.DeleteOrganizationRequest
-	7,  // 11: core.organization.OrganizationService.ListOrganizationInvitation:input_type -> core.organization.ListOrganizationInvitationRequest
-	9,  // 12: core.organization.OrganizationService.CreateOrganizationInvitation:input_type -> core.organization.CreateOrganizationInvitationRequest
-	11, // 13: core.organization.OrganizationService.ListProjectsByOrganization:input_type -> core.organization.ListProjectsByOrganizationRequest
-	13, // 14: core.organization.OrganizationService.AddProjects:input_type -> core.organization.AddProjectsRequest
-	1,  // 15: core.organization.OrganizationService.ListOrganization:output_type -> core.organization.ListOrganizationResponse
-	3,  // 16: core.organization.OrganizationService.CreateOrganization:output_type -> core.organization.CreateOrganizationResponse
-	5,  // 17: core.organization.OrganizationService.UpdateOrganization:output_type -> core.organization.UpdateOrganizationResponse
-	19, // 18: core.organization.OrganizationService.DeleteOrganization:output_type -> google.protobuf.Empty
-	8,  // 19: core.organization.OrganizationService.ListOrganizationInvitation:output_type -> core.organization.ListOrganizationInvitationResponse
-	10, // 20: core.organization.OrganizationService.CreateOrganizationInvitation:output_type -> core.organization.CreateOrganizationInvitationResponse
-	12, // 21: core.organization.OrganizationService.ListProjectsByOrganization:output_type -> core.organization.ListProjectsByOrganizationResponse
-	14, // 22: core.organization.OrganizationService.AddProjects:output_type -> core.organization.AddProjectsResponse
-	15, // [15:23] is the sub-list for method output_type
-	7,  // [7:15] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	17, // 0: core.organization.ListOrganizationResponse.organization:type_name -> core.organization.Organization
+	17, // 1: core.organization.CreateOrganizationResponse.organization:type_name -> core.organization.Organization
+	17, // 2: core.organization.UpdateOrganizationResponse.organization:type_name -> core.organization.Organization
+	18, // 3: core.organization.ListOrganizationInvitationResponse.organization_invitations:type_name -> core.organization.OrganizationInvitation
+	18, // 4: core.organization.CreateOrganizationInvitationResponse.organization_invitation:type_name -> core.organization.OrganizationInvitation
+	19, // 5: core.organization.UpdateOrganizationInvitationStatusRequest.status:type_name -> core.organization.OrganizationInvitationStatus
+	18, // 6: core.organization.UpdateOrganizationInvitationStatusResponse.organization_invitation:type_name -> core.organization.OrganizationInvitation
+	20, // 7: core.organization.ListProjectsByOrganizationResponse.project:type_name -> core.project.Project
+	21, // 8: core.organization.AddProjectsResponse.organization_project:type_name -> core.organization.OrganizationProject
+	0,  // 9: core.organization.OrganizationService.ListOrganization:input_type -> core.organization.ListOrganizationRequest
+	2,  // 10: core.organization.OrganizationService.CreateOrganization:input_type -> core.organization.CreateOrganizationRequest
+	4,  // 11: core.organization.OrganizationService.UpdateOrganization:input_type -> core.organization.UpdateOrganizationRequest
+	6,  // 12: core.organization.OrganizationService.DeleteOrganization:input_type -> core.organization.DeleteOrganizationRequest
+	7,  // 13: core.organization.OrganizationService.ListOrganizationInvitation:input_type -> core.organization.ListOrganizationInvitationRequest
+	9,  // 14: core.organization.OrganizationService.CreateOrganizationInvitation:input_type -> core.organization.CreateOrganizationInvitationRequest
+	11, // 15: core.organization.OrganizationService.UpdateOrganizationInvitationStatus:input_type -> core.organization.UpdateOrganizationInvitationStatusRequest
+	13, // 16: core.organization.OrganizationService.ListProjectsByOrganization:input_type -> core.organization.ListProjectsByOrganizationRequest
+	15, // 17: core.organization.OrganizationService.AddProjects:input_type -> core.organization.AddProjectsRequest
+	1,  // 18: core.organization.OrganizationService.ListOrganization:output_type -> core.organization.ListOrganizationResponse
+	3,  // 19: core.organization.OrganizationService.CreateOrganization:output_type -> core.organization.CreateOrganizationResponse
+	5,  // 20: core.organization.OrganizationService.UpdateOrganization:output_type -> core.organization.UpdateOrganizationResponse
+	22, // 21: core.organization.OrganizationService.DeleteOrganization:output_type -> google.protobuf.Empty
+	8,  // 22: core.organization.OrganizationService.ListOrganizationInvitation:output_type -> core.organization.ListOrganizationInvitationResponse
+	10, // 23: core.organization.OrganizationService.CreateOrganizationInvitation:output_type -> core.organization.CreateOrganizationInvitationResponse
+	12, // 24: core.organization.OrganizationService.UpdateOrganizationInvitationStatus:output_type -> core.organization.UpdateOrganizationInvitationStatusResponse
+	14, // 25: core.organization.OrganizationService.ListProjectsByOrganization:output_type -> core.organization.ListProjectsByOrganizationResponse
+	16, // 26: core.organization.OrganizationService.AddProjects:output_type -> core.organization.AddProjectsResponse
+	18, // [18:27] is the sub-list for method output_type
+	9,  // [9:18] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_organization_service_proto_init() }
@@ -1187,7 +1338,7 @@ func file_organization_service_proto_init() {
 			}
 		}
 		file_organization_service_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListProjectsByOrganizationRequest); i {
+			switch v := v.(*UpdateOrganizationInvitationStatusRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1199,7 +1350,7 @@ func file_organization_service_proto_init() {
 			}
 		}
 		file_organization_service_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListProjectsByOrganizationResponse); i {
+			switch v := v.(*UpdateOrganizationInvitationStatusResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1211,7 +1362,7 @@ func file_organization_service_proto_init() {
 			}
 		}
 		file_organization_service_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AddProjectsRequest); i {
+			switch v := v.(*ListProjectsByOrganizationRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1223,6 +1374,30 @@ func file_organization_service_proto_init() {
 			}
 		}
 		file_organization_service_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListProjectsByOrganizationResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_organization_service_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AddProjectsRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_organization_service_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*AddProjectsResponse); i {
 			case 0:
 				return &v.state
@@ -1241,7 +1416,7 @@ func file_organization_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_organization_service_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -1273,6 +1448,7 @@ type OrganizationServiceClient interface {
 	DeleteOrganization(ctx context.Context, in *DeleteOrganizationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ListOrganizationInvitation(ctx context.Context, in *ListOrganizationInvitationRequest, opts ...grpc.CallOption) (*ListOrganizationInvitationResponse, error)
 	CreateOrganizationInvitation(ctx context.Context, in *CreateOrganizationInvitationRequest, opts ...grpc.CallOption) (*CreateOrganizationInvitationResponse, error)
+	UpdateOrganizationInvitationStatus(ctx context.Context, in *UpdateOrganizationInvitationStatusRequest, opts ...grpc.CallOption) (*UpdateOrganizationInvitationStatusResponse, error)
 	ListProjectsByOrganization(ctx context.Context, in *ListProjectsByOrganizationRequest, opts ...grpc.CallOption) (*ListProjectsByOrganizationResponse, error)
 	AddProjects(ctx context.Context, in *AddProjectsRequest, opts ...grpc.CallOption) (*AddProjectsResponse, error)
 }
@@ -1339,6 +1515,15 @@ func (c *organizationServiceClient) CreateOrganizationInvitation(ctx context.Con
 	return out, nil
 }
 
+func (c *organizationServiceClient) UpdateOrganizationInvitationStatus(ctx context.Context, in *UpdateOrganizationInvitationStatusRequest, opts ...grpc.CallOption) (*UpdateOrganizationInvitationStatusResponse, error) {
+	out := new(UpdateOrganizationInvitationStatusResponse)
+	err := c.cc.Invoke(ctx, "/core.organization.OrganizationService/UpdateOrganizationInvitationStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *organizationServiceClient) ListProjectsByOrganization(ctx context.Context, in *ListProjectsByOrganizationRequest, opts ...grpc.CallOption) (*ListProjectsByOrganizationResponse, error) {
 	out := new(ListProjectsByOrganizationResponse)
 	err := c.cc.Invoke(ctx, "/core.organization.OrganizationService/ListProjectsByOrganization", in, out, opts...)
@@ -1365,6 +1550,7 @@ type OrganizationServiceServer interface {
 	DeleteOrganization(context.Context, *DeleteOrganizationRequest) (*emptypb.Empty, error)
 	ListOrganizationInvitation(context.Context, *ListOrganizationInvitationRequest) (*ListOrganizationInvitationResponse, error)
 	CreateOrganizationInvitation(context.Context, *CreateOrganizationInvitationRequest) (*CreateOrganizationInvitationResponse, error)
+	UpdateOrganizationInvitationStatus(context.Context, *UpdateOrganizationInvitationStatusRequest) (*UpdateOrganizationInvitationStatusResponse, error)
 	ListProjectsByOrganization(context.Context, *ListProjectsByOrganizationRequest) (*ListProjectsByOrganizationResponse, error)
 	AddProjects(context.Context, *AddProjectsRequest) (*AddProjectsResponse, error)
 }
@@ -1390,6 +1576,9 @@ func (*UnimplementedOrganizationServiceServer) ListOrganizationInvitation(contex
 }
 func (*UnimplementedOrganizationServiceServer) CreateOrganizationInvitation(context.Context, *CreateOrganizationInvitationRequest) (*CreateOrganizationInvitationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateOrganizationInvitation not implemented")
+}
+func (*UnimplementedOrganizationServiceServer) UpdateOrganizationInvitationStatus(context.Context, *UpdateOrganizationInvitationStatusRequest) (*UpdateOrganizationInvitationStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateOrganizationInvitationStatus not implemented")
 }
 func (*UnimplementedOrganizationServiceServer) ListProjectsByOrganization(context.Context, *ListProjectsByOrganizationRequest) (*ListProjectsByOrganizationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListProjectsByOrganization not implemented")
@@ -1510,6 +1699,24 @@ func _OrganizationService_CreateOrganizationInvitation_Handler(srv interface{}, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrganizationService_UpdateOrganizationInvitationStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateOrganizationInvitationStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrganizationServiceServer).UpdateOrganizationInvitationStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.organization.OrganizationService/UpdateOrganizationInvitationStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrganizationServiceServer).UpdateOrganizationInvitationStatus(ctx, req.(*UpdateOrganizationInvitationStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _OrganizationService_ListProjectsByOrganization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListProjectsByOrganizationRequest)
 	if err := dec(in); err != nil {
@@ -1573,6 +1780,10 @@ var _OrganizationService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateOrganizationInvitation",
 			Handler:    _OrganizationService_CreateOrganizationInvitation_Handler,
+		},
+		{
+			MethodName: "UpdateOrganizationInvitationStatus",
+			Handler:    _OrganizationService_UpdateOrganizationInvitationStatus_Handler,
 		},
 		{
 			MethodName: "ListProjectsByOrganization",
