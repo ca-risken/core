@@ -12,8 +12,7 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/organization"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"github.com/ca-risken/core/proto/project"
 	"gorm.io/gorm"
 )
 
@@ -222,23 +221,195 @@ func TestDeleteOrganization(t *testing.T) {
 	}
 }
 
-func TestInviteProject(t *testing.T) {
+func TestListOrganizationInvitation(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
 		name         string
-		input        *organization.InviteProjectRequest
-		want         *organization.InviteProjectResponse
-		mockResponse *model.OrganizationProject
-		mockErr      error
+		input        *organization.ListOrganizationInvitationRequest
+		want         *organization.ListOrganizationInvitationResponse
 		wantErr      bool
+		mockResponse []*model.OrganizationInvitation
+		mockError    error
 	}{
 		{
-			name: "OK",
-			input: &organization.InviteProjectRequest{
-				OrganizationId: 1,
-				ProjectId:      1,
+			name:  "OK",
+			input: &organization.ListOrganizationInvitationRequest{OrganizationId: 1, ProjectId: 1},
+			want: &organization.ListOrganizationInvitationResponse{
+				OrganizationInvitations: []*organization.OrganizationInvitation{
+					{OrganizationId: 1, ProjectId: 1, Status: "PENDING", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+				},
 			},
-			want: &organization.InviteProjectResponse{
+			mockResponse: []*model.OrganizationInvitation{
+				{OrganizationID: 1, ProjectID: 1, Status: "PENDING", CreatedAt: now, UpdatedAt: now},
+			},
+		},
+		{
+			name:         "OK No record",
+			input:        &organization.ListOrganizationInvitationRequest{OrganizationId: 999, ProjectId: 999},
+			want:         &organization.ListOrganizationInvitationResponse{},
+			mockResponse: []*model.OrganizationInvitation{},
+		},
+		{
+			name:    "NG Invalid params",
+			input:   &organization.ListOrganizationInvitationRequest{OrganizationId: 0, ProjectId: 1},
+			wantErr: true,
+		},
+		{
+			name:      "Invalid DB error",
+			input:     &organization.ListOrganizationInvitationRequest{OrganizationId: 1, ProjectId: 1},
+			mockError: gorm.ErrInvalidDB,
+			wantErr:   true,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewOrganizationRepository(t)
+			svc := OrganizationService{repository: mockDB}
+			if c.mockResponse != nil || c.mockError != nil {
+				mockDB.On("ListOrganizationInvitation", test.RepeatMockAnything(3)...).Return(c.mockResponse, c.mockError).Once()
+			}
+			result, err := svc.ListOrganizationInvitation(ctx, c.input)
+			if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(result, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
+			}
+		})
+	}
+}
+
+func TestCreateOrganizationInvitation(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name         string
+		input        *organization.CreateOrganizationInvitationRequest
+		want         *organization.CreateOrganizationInvitationResponse
+		wantErr      bool
+		mockResponse *model.OrganizationInvitation
+		mockError    error
+	}{
+		{
+			name:  "OK",
+			input: &organization.CreateOrganizationInvitationRequest{OrganizationId: 1, ProjectId: 1},
+			want: &organization.CreateOrganizationInvitationResponse{
+				OrganizationInvitation: &organization.OrganizationInvitation{
+					OrganizationId: 1, ProjectId: 1, Status: "PENDING", CreatedAt: now.Unix(), UpdatedAt: now.Unix(),
+				},
+			},
+			mockResponse: &model.OrganizationInvitation{OrganizationID: 1, ProjectID: 1, Status: "PENDING", CreatedAt: now, UpdatedAt: now},
+		},
+		{
+			name:    "NG Invalid params",
+			input:   &organization.CreateOrganizationInvitationRequest{OrganizationId: 0, ProjectId: 1},
+			wantErr: true,
+		},
+		{
+			name:      "Invalid DB error",
+			input:     &organization.CreateOrganizationInvitationRequest{OrganizationId: 1, ProjectId: 1},
+			mockError: gorm.ErrInvalidDB,
+			wantErr:   true,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewOrganizationRepository(t)
+			svc := OrganizationService{
+				repository: mockDB,
+				logger:     logging.NewLogger(),
+			}
+			if c.mockResponse != nil || c.mockError != nil {
+				mockDB.On("CreateOrganizationInvitation", test.RepeatMockAnything(3)...).Return(c.mockResponse, c.mockError).Once()
+			}
+			result, err := svc.CreateOrganizationInvitation(ctx, c.input)
+			if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(result, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
+			}
+		})
+	}
+}
+
+func TestListProjectsByOrganization(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name         string
+		input        *organization.ListProjectsByOrganizationRequest
+		want         *organization.ListProjectsByOrganizationResponse
+		wantErr      bool
+		mockResponse []*model.Project
+		mockError    error
+	}{
+		{
+			name:  "OK",
+			input: &organization.ListProjectsByOrganizationRequest{OrganizationId: 1},
+			want: &organization.ListProjectsByOrganizationResponse{
+				Project: []*project.Project{
+					{ProjectId: 1, Name: "test-project", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+				},
+			},
+			mockResponse: []*model.Project{
+				{ProjectID: 1, Name: "test-project", CreatedAt: now, UpdatedAt: now},
+			},
+		},
+		{
+			name:         "OK No record",
+			input:        &organization.ListProjectsByOrganizationRequest{OrganizationId: 999},
+			want:         &organization.ListProjectsByOrganizationResponse{},
+			mockResponse: []*model.Project{},
+		},
+		{
+			name:    "NG Invalid params",
+			input:   &organization.ListProjectsByOrganizationRequest{OrganizationId: 0},
+			wantErr: true,
+		},
+		{
+			name:      "Invalid DB error",
+			input:     &organization.ListProjectsByOrganizationRequest{OrganizationId: 1},
+			mockError: gorm.ErrInvalidDB,
+			wantErr:   true,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewOrganizationRepository(t)
+			svc := OrganizationService{repository: mockDB}
+			if c.mockResponse != nil || c.mockError != nil {
+				mockDB.On("ListProjectsByOrganization", test.RepeatMockAnything(2)...).Return(c.mockResponse, c.mockError).Once()
+			}
+			result, err := svc.ListProjectsByOrganization(ctx, c.input)
+			if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(result, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
+			}
+		})
+	}
+}
+
+func TestAddProjects(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name         string
+		input        *organization.AddProjectsRequest
+		want         *organization.AddProjectsResponse
+		wantErr      bool
+		mockResponse *model.OrganizationProject
+		mockError    error
+	}{
+		{
+			name:  "OK",
+			input: &organization.AddProjectsRequest{OrganizationId: 1, ProjectId: 1},
+			want: &organization.AddProjectsResponse{
 				OrganizationProject: &organization.OrganizationProject{
 					OrganizationId: 1,
 					ProjectId:      1,
@@ -252,49 +423,40 @@ func TestInviteProject(t *testing.T) {
 				CreatedAt:      now,
 				UpdatedAt:      now,
 			},
-			wantErr: false,
 		},
 		{
-			name: "NG Invalid request",
-			input: &organization.InviteProjectRequest{
-				OrganizationId: 0,
-				ProjectId:      1,
-			},
-			want:         nil,
-			mockResponse: nil,
-			wantErr:      true,
+			name:    "NG Invalid params - organization_id is zero",
+			input:   &organization.AddProjectsRequest{OrganizationId: 0, ProjectId: 1},
+			wantErr: true,
 		},
 		{
-			name: "NG DB error",
-			input: &organization.InviteProjectRequest{
-				OrganizationId: 1,
-				ProjectId:      1,
-			},
-			want:         nil,
-			mockResponse: nil,
-			mockErr:      assert.AnError,
-			wantErr:      true,
+			name:    "NG Invalid params - project_id is zero",
+			input:   &organization.AddProjectsRequest{OrganizationId: 1, ProjectId: 0},
+			wantErr: true,
+		},
+		{
+			name:      "Invalid DB error",
+			input:     &organization.AddProjectsRequest{OrganizationId: 1, ProjectId: 1},
+			mockError: gorm.ErrInvalidDB,
+			wantErr:   true,
 		},
 	}
+
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
 			mockDB := mocks.NewOrganizationRepository(t)
-			svc := OrganizationService{
-				repository: mockDB,
-				logger:     logging.NewLogger(),
+			svc := OrganizationService{repository: mockDB}
+			if c.mockResponse != nil || c.mockError != nil {
+				mockDB.On("AddProjects", test.RepeatMockAnything(3)...).Return(c.mockResponse, c.mockError).Once()
 			}
-
-			if !c.wantErr || c.mockErr != nil {
-				mockDB.On("InviteProject", mock.Anything, c.input.OrganizationId, c.input.ProjectId).Return(c.mockResponse, c.mockErr)
+			result, err := svc.AddProjects(ctx, c.input)
+			if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
 			}
-
-			got, err := svc.InviteProject(context.Background(), c.input)
-			if c.wantErr {
-				assert.Error(t, err)
-				return
+			if !reflect.DeepEqual(result, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
 			}
-			assert.NoError(t, err)
-			assert.Equal(t, c.want, got)
 		})
 	}
 }

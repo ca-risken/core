@@ -16,6 +16,15 @@ message Organization {
 message OrganizationProject {
   uint32 organization_id = 1;
   uint32 project_id = 2;
-  int64 created_at = 3;
-  int64 updated_at = 4;
+  int64 created_at = 4;
+  int64 updated_at = 5;
+}
+
+// OrganizationInvitation message
+message OrganizationInvitation {
+  uint32 organization_id = 1;
+  uint32 project_id = 2;
+  string status = 3;
+  int64 created_at = 4;
+  int64 updated_at = 5;
 }

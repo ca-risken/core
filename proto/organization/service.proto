@@ -5,6 +5,7 @@ option go_package = "github.com/ca-risken/core/proto/organization";
 
 import "google/protobuf/empty.proto";
 import "organization/entity.proto";
+import "project/entity.proto";
 import "validate/validate.proto";
 
 // List Organization
@@ -40,13 +41,42 @@ message DeleteOrganizationRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
 }
 
-// Invite Project
-message InviteProjectRequest {
+// List Organization Invitation
+message ListOrganizationInvitationRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
   uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
 }
 
-message InviteProjectResponse { OrganizationProject organization_project = 1; }
+message ListOrganizationInvitationResponse {
+  repeated OrganizationInvitation organization_invitations = 1;
+}
+
+// Create Organization Invitation
+message CreateOrganizationInvitationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
+}
+
+message CreateOrganizationInvitationResponse {
+  OrganizationInvitation organization_invitation = 1;
+}
+
+// List Projects By Organization
+message ListProjectsByOrganizationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+}
+
+message ListProjectsByOrganizationResponse {
+  repeated project.Project project = 1;
+}
+
+// Add Projects
+message AddProjectsRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
+}
+
+message AddProjectsResponse { OrganizationProject organization_project = 1; }
 
 // Organization service
 service OrganizationService {
@@ -58,5 +88,11 @@ service OrganizationService {
       returns (UpdateOrganizationResponse) {}
   rpc DeleteOrganization(DeleteOrganizationRequest)
       returns (google.protobuf.Empty) {}
-  rpc InviteProject(InviteProjectRequest) returns (InviteProjectResponse) {}
+  rpc ListOrganizationInvitation(ListOrganizationInvitationRequest)
+      returns (ListOrganizationInvitationResponse) {}
+  rpc CreateOrganizationInvitation(CreateOrganizationInvitationRequest)
+      returns (CreateOrganizationInvitationResponse) {}
+  rpc ListProjectsByOrganization(ListProjectsByOrganizationRequest)
+      returns (ListProjectsByOrganizationResponse) {}
+  rpc AddProjects(AddProjectsRequest) returns (AddProjectsResponse) {}
 }

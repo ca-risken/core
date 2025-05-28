@@ -4,7 +4,6 @@ package core.organization_iam;
 option go_package = "github.com/ca-risken/core/proto/organization_iam";
 
 import "google/protobuf/empty.proto";
-import "iam/user.proto";
 import "organization_iam/role.proto";
 import "organization_iam/policy.proto";
 

@@ -17,7 +17,12 @@ type OrganizationRepository interface {
 	DeleteOrganization(ctx context.Context, organizationID uint32) error
 
 	// OrganizationProject
-	InviteProject(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error)
+	ListProjectsByOrganization(ctx context.Context, organizationID uint32) ([]*model.Project, error)
+	AddProjects(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error)
+
+	// OrganizationInvitation
+	ListOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) ([]*model.OrganizationInvitation, error)
+	CreateOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationInvitation, error)
 }
 
 var _ OrganizationRepository = (*Client)(nil)
@@ -81,7 +86,22 @@ func (c *Client) DeleteOrganization(ctx context.Context, organizationID uint32) 
 	return c.Master.WithContext(ctx).Exec(deleteOrganization, organizationID).Error
 }
 
-const insertInviteProject = `
+const listProjectsByOrganization = `
+	SELECT p.*
+	FROM project p
+	JOIN organization_project op ON p.project_id = op.project_id
+	WHERE op.organization_id = ?
+`
+
+func (c *Client) ListProjectsByOrganization(ctx context.Context, organizationID uint32) ([]*model.Project, error) {
+	var projects []*model.Project
+	if err := c.Slave.WithContext(ctx).Raw(listProjectsByOrganization, organizationID).Scan(&projects).Error; err != nil {
+		return nil, err
+	}
+	return projects, nil
+}
+
+const addProjects = `
 	INSERT INTO organization_project (
 		organization_id,
 		project_id
@@ -89,14 +109,62 @@ const insertInviteProject = `
 		?,
 		?
 	)
+	ON DUPLICATE KEY UPDATE updated_at = NOW()
 `
 
-func (c *Client) InviteProject(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error) {
-	if err := c.Master.WithContext(ctx).Exec(insertInviteProject, organizationID, projectID).Error; err != nil {
+func (c *Client) AddProjects(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error) {
+	if err := c.Master.WithContext(ctx).Exec(addProjects, organizationID, projectID).Error; err != nil {
 		return nil, err
 	}
 	var data model.OrganizationProject
 	if err := c.Master.WithContext(ctx).Raw("SELECT * FROM organization_project WHERE organization_id = ? AND project_id = ?", organizationID, projectID).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (c *Client) ListOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) ([]*model.OrganizationInvitation, error) {
+	var invitations []*model.OrganizationInvitation
+	var query string
+	var params []interface{}
+
+	if organizationID > 0 && projectID > 0 {
+		query = `SELECT * FROM organization_invitation WHERE organization_id = ? AND project_id = ?`
+		params = append(params, organizationID, projectID)
+	} else if organizationID > 0 {
+		query = `SELECT * FROM organization_invitation WHERE organization_id = ?`
+		params = append(params, organizationID)
+	} else if projectID > 0 {
+		query = `SELECT * FROM organization_invitation WHERE project_id = ?`
+		params = append(params, projectID)
+	} else {
+		return nil, errors.New("at least one of organizationID or projectID must be specified")
+	}
+
+	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&invitations).Error; err != nil {
+		return nil, err
+	}
+	return invitations, nil
+}
+
+const insertCreateOrganizationInvitation = `
+	INSERT INTO organization_invitation (
+		organization_id,
+		project_id,
+		status
+	) VALUES (
+		?,
+		?,
+		'PENDING'
+	)
+`
+
+func (c *Client) CreateOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationInvitation, error) {
+	if err := c.Master.WithContext(ctx).Exec(insertCreateOrganizationInvitation, organizationID, projectID).Error; err != nil {
+		return nil, err
+	}
+	var data model.OrganizationInvitation
+	if err := c.Master.WithContext(ctx).Raw("SELECT * FROM organization_invitation WHERE organization_id = ? AND project_id = ?", organizationID, projectID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

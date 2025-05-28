@@ -15,6 +15,36 @@ type OrganizationRepository struct {
 	mock.Mock
 }
 
+// AddProjects provides a mock function with given fields: ctx, organizationID, projectID
+func (_m *OrganizationRepository) AddProjects(ctx context.Context, organizationID uint32, projectID uint32) (*model.OrganizationProject, error) {
+	ret := _m.Called(ctx, organizationID, projectID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AddProjects")
+	}
+
+	var r0 *model.OrganizationProject
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) (*model.OrganizationProject, error)); ok {
+		return rf(ctx, organizationID, projectID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) *model.OrganizationProject); ok {
+		r0 = rf(ctx, organizationID, projectID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.OrganizationProject)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
+		r1 = rf(ctx, organizationID, projectID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateOrganization provides a mock function with given fields: ctx, name, description
 func (_m *OrganizationRepository) CreateOrganization(ctx context.Context, name string, description string) (*model.Organization, error) {
 	ret := _m.Called(ctx, name, description)
@@ -45,6 +75,36 @@ func (_m *OrganizationRepository) CreateOrganization(ctx context.Context, name s
 	return r0, r1
 }
 
+// CreateOrganizationInvitation provides a mock function with given fields: ctx, organizationID, projectID
+func (_m *OrganizationRepository) CreateOrganizationInvitation(ctx context.Context, organizationID uint32, projectID uint32) (*model.OrganizationInvitation, error) {
+	ret := _m.Called(ctx, organizationID, projectID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateOrganizationInvitation")
+	}
+
+	var r0 *model.OrganizationInvitation
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) (*model.OrganizationInvitation, error)); ok {
+		return rf(ctx, organizationID, projectID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) *model.OrganizationInvitation); ok {
+		r0 = rf(ctx, organizationID, projectID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.OrganizationInvitation)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
+		r1 = rf(ctx, organizationID, projectID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteOrganization provides a mock function with given fields: ctx, organizationID
 func (_m *OrganizationRepository) DeleteOrganization(ctx context.Context, organizationID uint32) error {
 	ret := _m.Called(ctx, organizationID)
@@ -61,36 +121,6 @@ func (_m *OrganizationRepository) DeleteOrganization(ctx context.Context, organi
 	}
 
 	return r0
-}
-
-// InviteProject provides a mock function with given fields: ctx, organizationID, projectID
-func (_m *OrganizationRepository) InviteProject(ctx context.Context, organizationID uint32, projectID uint32) (*model.OrganizationProject, error) {
-	ret := _m.Called(ctx, organizationID, projectID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for InviteProject")
-	}
-
-	var r0 *model.OrganizationProject
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) (*model.OrganizationProject, error)); ok {
-		return rf(ctx, organizationID, projectID)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) *model.OrganizationProject); ok {
-		r0 = rf(ctx, organizationID, projectID)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.OrganizationProject)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
-		r1 = rf(ctx, organizationID, projectID)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
 }
 
 // ListOrganization provides a mock function with given fields: ctx, organizationID, name
@@ -116,6 +146,66 @@ func (_m *OrganizationRepository) ListOrganization(ctx context.Context, organiza
 
 	if rf, ok := ret.Get(1).(func(context.Context, uint32, string) error); ok {
 		r1 = rf(ctx, organizationID, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListOrganizationInvitation provides a mock function with given fields: ctx, organizationID, projectID
+func (_m *OrganizationRepository) ListOrganizationInvitation(ctx context.Context, organizationID uint32, projectID uint32) ([]*model.OrganizationInvitation, error) {
+	ret := _m.Called(ctx, organizationID, projectID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListOrganizationInvitation")
+	}
+
+	var r0 []*model.OrganizationInvitation
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) ([]*model.OrganizationInvitation, error)); ok {
+		return rf(ctx, organizationID, projectID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) []*model.OrganizationInvitation); ok {
+		r0 = rf(ctx, organizationID, projectID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.OrganizationInvitation)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
+		r1 = rf(ctx, organizationID, projectID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListProjectsByOrganization provides a mock function with given fields: ctx, organizationID
+func (_m *OrganizationRepository) ListProjectsByOrganization(ctx context.Context, organizationID uint32) ([]*model.Project, error) {
+	ret := _m.Called(ctx, organizationID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListProjectsByOrganization")
+	}
+
+	var r0 []*model.Project
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) ([]*model.Project, error)); ok {
+		return rf(ctx, organizationID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) []*model.Project); ok {
+		r0 = rf(ctx, organizationID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Project)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32) error); ok {
+		r1 = rf(ctx, organizationID)
 	} else {
 		r1 = ret.Error(1)
 	}
