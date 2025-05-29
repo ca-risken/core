@@ -103,12 +103,3 @@ func convertOrganization(o *model.Organization) *organization.Organization {
 		UpdatedAt:      o.UpdatedAt.Unix(),
 	}
 }
-
-func convertOrganizationProject(op *model.OrganizationProject) *organization.OrganizationProject {
-	return &organization.OrganizationProject{
-		OrganizationId: op.OrganizationID,
-		ProjectId:      op.ProjectID,
-		CreatedAt:      op.CreatedAt.Unix(),
-		UpdatedAt:      op.UpdatedAt.Unix(),
-	}
-}

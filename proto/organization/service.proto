@@ -50,7 +50,7 @@ message ListProjectsInOrganizationResponse {
   repeated project.Project project = 1;
 }
 
-// Delete Projects In Organizaiton
+// Remove Projects In Organizaiton
 message RemoveProjectsInOrganizationRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
   uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];

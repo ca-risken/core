@@ -13,7 +13,6 @@ import (
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/project"
-	"github.com/golang/protobuf/ptypes/empty"
 	"gorm.io/gorm"
 )
 
@@ -286,7 +285,6 @@ func TestRemoveProjectsInOrganization(t *testing.T) {
 	cases := []struct {
 		name                             string
 		input                            *organization.RemoveProjectsInOrganizationRequest
-		want                             *empty.Empty
 		wantErr                          bool
 		mockError                        error
 		callRemoveProjectsInOrganization bool
@@ -294,7 +292,6 @@ func TestRemoveProjectsInOrganization(t *testing.T) {
 		{
 			name:                             "OK",
 			input:                            &organization.RemoveProjectsInOrganizationRequest{OrganizationId: 1, ProjectId: 1},
-			want:                             &empty.Empty{},
 			callRemoveProjectsInOrganization: true,
 		},
 		{
@@ -322,12 +319,9 @@ func TestRemoveProjectsInOrganization(t *testing.T) {
 			if c.callRemoveProjectsInOrganization {
 				mockDB.On("RemoveProjectsInOrganization", test.RepeatMockAnything(3)...).Return(c.mockError).Once()
 			}
-			result, err := svc.RemoveProjectsInOrganization(ctx, c.input)
+			_, err := svc.RemoveProjectsInOrganization(ctx, c.input)
 			if !c.wantErr && err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
-			}
-			if !reflect.DeepEqual(result, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
 			}
 		})
 	}

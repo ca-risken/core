@@ -17,7 +17,7 @@ type OrganizationRepository interface {
 	DeleteOrganization(ctx context.Context, organizationID uint32) error
 
 	// OrganizationProject
-	CreateOrganizationProject(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error)
+	PutOrganizationProject(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error)
 	ListProjectsInOrganization(ctx context.Context, organizationID uint32) ([]*model.Project, error)
 	RemoveProjectsInOrganization(ctx context.Context, organizationID, projectID uint32) error
 }
@@ -83,33 +83,42 @@ func (c *Client) DeleteOrganization(ctx context.Context, organizationID uint32) 
 	return c.Master.WithContext(ctx).Exec(deleteOrganization, organizationID).Error
 }
 
-const createOrganizationProject = `
-	INSERT INTO organization_project (
-		organization_id,
-		project_id
-	) VALUES (
-		?,
-		?
-	)
-	ON DUPLICATE KEY UPDATE updated_at = NOW()
-`
+const (
+	putOrganizationProject = `
+		insert into organization_project (
+			organization_id,
+			project_id
+		) values (
+			?,
+			?
+		)
+		on duplicate key update
+			updated_at=NOW()
+	`
+	selectGetOrganizationProject = `
+		select *
+		from organization_project
+		where organization_id = ? 
+		  and project_id = ?
+	`
+)
 
-func (c *Client) CreateOrganizationProject(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error) {
-	if err := c.Master.WithContext(ctx).Exec(createOrganizationProject, organizationID, projectID).Error; err != nil {
+func (c *Client) PutOrganizationProject(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error) {
+	if err := c.Master.WithContext(ctx).Exec(putOrganizationProject, organizationID, projectID).Error; err != nil {
 		return nil, err
 	}
 	var data model.OrganizationProject
-	if err := c.Master.WithContext(ctx).Raw("SELECT * FROM organization_project WHERE organization_id = ? AND project_id = ?", organizationID, projectID).First(&data).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Raw(selectGetOrganizationProject, organizationID, projectID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
 }
 
 const listProjectsInOrganization = `
-	SELECT p.*
-	FROM project p
-	JOIN organization_project op ON p.project_id = op.project_id
-	WHERE op.organization_id = ?
+	select p.*
+	from project p
+	join organization_project op on p.project_id = op.project_id
+	where op.organization_id = ?
 `
 
 func (c *Client) ListProjectsInOrganization(ctx context.Context, organizationID uint32) ([]*model.Project, error) {

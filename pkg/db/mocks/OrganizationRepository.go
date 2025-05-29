@@ -45,36 +45,6 @@ func (_m *OrganizationRepository) CreateOrganization(ctx context.Context, name s
 	return r0, r1
 }
 
-// CreateOrganizationProject provides a mock function with given fields: ctx, organizationID, projectID
-func (_m *OrganizationRepository) CreateOrganizationProject(ctx context.Context, organizationID uint32, projectID uint32) (*model.OrganizationProject, error) {
-	ret := _m.Called(ctx, organizationID, projectID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for CreateOrganizationProject")
-	}
-
-	var r0 *model.OrganizationProject
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) (*model.OrganizationProject, error)); ok {
-		return rf(ctx, organizationID, projectID)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) *model.OrganizationProject); ok {
-		r0 = rf(ctx, organizationID, projectID)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.OrganizationProject)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
-		r1 = rf(ctx, organizationID, projectID)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // DeleteOrganization provides a mock function with given fields: ctx, organizationID
 func (_m *OrganizationRepository) DeleteOrganization(ctx context.Context, organizationID uint32) error {
 	ret := _m.Called(ctx, organizationID)
@@ -146,6 +116,36 @@ func (_m *OrganizationRepository) ListProjectsInOrganization(ctx context.Context
 
 	if rf, ok := ret.Get(1).(func(context.Context, uint32) error); ok {
 		r1 = rf(ctx, organizationID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PutOrganizationProject provides a mock function with given fields: ctx, organizationID, projectID
+func (_m *OrganizationRepository) PutOrganizationProject(ctx context.Context, organizationID uint32, projectID uint32) (*model.OrganizationProject, error) {
+	ret := _m.Called(ctx, organizationID, projectID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PutOrganizationProject")
+	}
+
+	var r0 *model.OrganizationProject
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) (*model.OrganizationProject, error)); ok {
+		return rf(ctx, organizationID, projectID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) *model.OrganizationProject); ok {
+		r0 = rf(ctx, organizationID, projectID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.OrganizationProject)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
+		r1 = rf(ctx, organizationID, projectID)
 	} else {
 		r1 = ret.Error(1)
 	}
