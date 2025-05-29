@@ -45,6 +45,36 @@ func (_m *OrganizationRepository) CreateOrganization(ctx context.Context, name s
 	return r0, r1
 }
 
+// CreateOrganizationInvitation provides a mock function with given fields: ctx, organizationID, projectID
+func (_m *OrganizationRepository) CreateOrganizationInvitation(ctx context.Context, organizationID uint32, projectID uint32) (*model.OrganizationInvitation, error) {
+	ret := _m.Called(ctx, organizationID, projectID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateOrganizationInvitation")
+	}
+
+	var r0 *model.OrganizationInvitation
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) (*model.OrganizationInvitation, error)); ok {
+		return rf(ctx, organizationID, projectID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) *model.OrganizationInvitation); ok {
+		r0 = rf(ctx, organizationID, projectID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.OrganizationInvitation)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
+		r1 = rf(ctx, organizationID, projectID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteOrganization provides a mock function with given fields: ctx, organizationID
 func (_m *OrganizationRepository) DeleteOrganization(ctx context.Context, organizationID uint32) error {
 	ret := _m.Called(ctx, organizationID)
@@ -56,6 +86,24 @@ func (_m *OrganizationRepository) DeleteOrganization(ctx context.Context, organi
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, uint32) error); ok {
 		r0 = rf(ctx, organizationID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteOrganizationInvitation provides a mock function with given fields: ctx, organizationID, projectID
+func (_m *OrganizationRepository) DeleteOrganizationInvitation(ctx context.Context, organizationID uint32, projectID uint32) error {
+	ret := _m.Called(ctx, organizationID, projectID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteOrganizationInvitation")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) error); ok {
+		r0 = rf(ctx, organizationID, projectID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -86,6 +134,36 @@ func (_m *OrganizationRepository) ListOrganization(ctx context.Context, organiza
 
 	if rf, ok := ret.Get(1).(func(context.Context, uint32, string) error); ok {
 		r1 = rf(ctx, organizationID, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListOrganizationInvitation provides a mock function with given fields: ctx, organizationID, projectID
+func (_m *OrganizationRepository) ListOrganizationInvitation(ctx context.Context, organizationID uint32, projectID uint32) ([]*model.OrganizationInvitation, error) {
+	ret := _m.Called(ctx, organizationID, projectID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListOrganizationInvitation")
+	}
+
+	var r0 []*model.OrganizationInvitation
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) ([]*model.OrganizationInvitation, error)); ok {
+		return rf(ctx, organizationID, projectID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) []*model.OrganizationInvitation); ok {
+		r0 = rf(ctx, organizationID, projectID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.OrganizationInvitation)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
+		r1 = rf(ctx, organizationID, projectID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -194,6 +272,36 @@ func (_m *OrganizationRepository) UpdateOrganization(ctx context.Context, organi
 
 	if rf, ok := ret.Get(1).(func(context.Context, uint32, string, string) error); ok {
 		r1 = rf(ctx, organizationID, name, description)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateOrganizationInvitation provides a mock function with given fields: ctx, organizationID, projectID, status
+func (_m *OrganizationRepository) UpdateOrganizationInvitation(ctx context.Context, organizationID uint32, projectID uint32, status string) (*model.OrganizationInvitation, error) {
+	ret := _m.Called(ctx, organizationID, projectID, status)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateOrganizationInvitation")
+	}
+
+	var r0 *model.OrganizationInvitation
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, string) (*model.OrganizationInvitation, error)); ok {
+		return rf(ctx, organizationID, projectID, status)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, string) *model.OrganizationInvitation); ok {
+		r0 = rf(ctx, organizationID, projectID, status)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.OrganizationInvitation)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, string) error); ok {
+		r1 = rf(ctx, organizationID, projectID, status)
 	} else {
 		r1 = ret.Error(1)
 	}

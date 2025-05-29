@@ -1301,3 +1301,1231 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = RemoveProjectsInOrganizationRequestValidationError{}
+
+// Validate checks the field values on ListOrganizationInvitationRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *ListOrganizationInvitationRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListOrganizationInvitationRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// ListOrganizationInvitationRequestMultiError, or nil if none found.
+func (m *ListOrganizationInvitationRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListOrganizationInvitationRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() <= 0 {
+		err := ListOrganizationInvitationRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetProjectId() <= 0 {
+		err := ListOrganizationInvitationRequestValidationError{
+			field:  "ProjectId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return ListOrganizationInvitationRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListOrganizationInvitationRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// ListOrganizationInvitationRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ListOrganizationInvitationRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListOrganizationInvitationRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListOrganizationInvitationRequestMultiError) AllErrors() []error { return m }
+
+// ListOrganizationInvitationRequestValidationError is the validation error
+// returned by ListOrganizationInvitationRequest.Validate if the designated
+// constraints aren't met.
+type ListOrganizationInvitationRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListOrganizationInvitationRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListOrganizationInvitationRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListOrganizationInvitationRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListOrganizationInvitationRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListOrganizationInvitationRequestValidationError) ErrorName() string {
+	return "ListOrganizationInvitationRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListOrganizationInvitationRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListOrganizationInvitationRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListOrganizationInvitationRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListOrganizationInvitationRequestValidationError{}
+
+// Validate checks the field values on ListOrganizationInvitationResponse with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *ListOrganizationInvitationResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListOrganizationInvitationResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// ListOrganizationInvitationResponseMultiError, or nil if none found.
+func (m *ListOrganizationInvitationResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListOrganizationInvitationResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetOrganizationInvitations() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ListOrganizationInvitationResponseValidationError{
+						field:  fmt.Sprintf("OrganizationInvitations[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ListOrganizationInvitationResponseValidationError{
+						field:  fmt.Sprintf("OrganizationInvitations[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListOrganizationInvitationResponseValidationError{
+					field:  fmt.Sprintf("OrganizationInvitations[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ListOrganizationInvitationResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListOrganizationInvitationResponseMultiError is an error wrapping multiple
+// validation errors returned by
+// ListOrganizationInvitationResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ListOrganizationInvitationResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListOrganizationInvitationResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListOrganizationInvitationResponseMultiError) AllErrors() []error { return m }
+
+// ListOrganizationInvitationResponseValidationError is the validation error
+// returned by ListOrganizationInvitationResponse.Validate if the designated
+// constraints aren't met.
+type ListOrganizationInvitationResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListOrganizationInvitationResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListOrganizationInvitationResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListOrganizationInvitationResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListOrganizationInvitationResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListOrganizationInvitationResponseValidationError) ErrorName() string {
+	return "ListOrganizationInvitationResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListOrganizationInvitationResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListOrganizationInvitationResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListOrganizationInvitationResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListOrganizationInvitationResponseValidationError{}
+
+// Validate checks the field values on CreateOrganizationInvitationRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *CreateOrganizationInvitationRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreateOrganizationInvitationRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// CreateOrganizationInvitationRequestMultiError, or nil if none found.
+func (m *CreateOrganizationInvitationRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreateOrganizationInvitationRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() <= 0 {
+		err := CreateOrganizationInvitationRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetProjectId() <= 0 {
+		err := CreateOrganizationInvitationRequestValidationError{
+			field:  "ProjectId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return CreateOrganizationInvitationRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreateOrganizationInvitationRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// CreateOrganizationInvitationRequest.ValidateAll() if the designated
+// constraints aren't met.
+type CreateOrganizationInvitationRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreateOrganizationInvitationRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreateOrganizationInvitationRequestMultiError) AllErrors() []error { return m }
+
+// CreateOrganizationInvitationRequestValidationError is the validation error
+// returned by CreateOrganizationInvitationRequest.Validate if the designated
+// constraints aren't met.
+type CreateOrganizationInvitationRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateOrganizationInvitationRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateOrganizationInvitationRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateOrganizationInvitationRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateOrganizationInvitationRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateOrganizationInvitationRequestValidationError) ErrorName() string {
+	return "CreateOrganizationInvitationRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreateOrganizationInvitationRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateOrganizationInvitationRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateOrganizationInvitationRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateOrganizationInvitationRequestValidationError{}
+
+// Validate checks the field values on CreateOrganizationInvitationResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *CreateOrganizationInvitationResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreateOrganizationInvitationResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// CreateOrganizationInvitationResponseMultiError, or nil if none found.
+func (m *CreateOrganizationInvitationResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreateOrganizationInvitationResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetOrganizationInvitation()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CreateOrganizationInvitationResponseValidationError{
+					field:  "OrganizationInvitation",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CreateOrganizationInvitationResponseValidationError{
+					field:  "OrganizationInvitation",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetOrganizationInvitation()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CreateOrganizationInvitationResponseValidationError{
+				field:  "OrganizationInvitation",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return CreateOrganizationInvitationResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreateOrganizationInvitationResponseMultiError is an error wrapping multiple
+// validation errors returned by
+// CreateOrganizationInvitationResponse.ValidateAll() if the designated
+// constraints aren't met.
+type CreateOrganizationInvitationResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreateOrganizationInvitationResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreateOrganizationInvitationResponseMultiError) AllErrors() []error { return m }
+
+// CreateOrganizationInvitationResponseValidationError is the validation error
+// returned by CreateOrganizationInvitationResponse.Validate if the designated
+// constraints aren't met.
+type CreateOrganizationInvitationResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateOrganizationInvitationResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateOrganizationInvitationResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateOrganizationInvitationResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateOrganizationInvitationResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateOrganizationInvitationResponseValidationError) ErrorName() string {
+	return "CreateOrganizationInvitationResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreateOrganizationInvitationResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateOrganizationInvitationResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateOrganizationInvitationResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateOrganizationInvitationResponseValidationError{}
+
+// Validate checks the field values on UpdateOrganizationInvitationRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *UpdateOrganizationInvitationRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateOrganizationInvitationRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// UpdateOrganizationInvitationRequestMultiError, or nil if none found.
+func (m *UpdateOrganizationInvitationRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateOrganizationInvitationRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() <= 0 {
+		err := UpdateOrganizationInvitationRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetProjectId() <= 0 {
+		err := UpdateOrganizationInvitationRequestValidationError{
+			field:  "ProjectId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if _, ok := _UpdateOrganizationInvitationRequest_Status_NotInLookup[m.GetStatus()]; ok {
+		err := UpdateOrganizationInvitationRequestValidationError{
+			field:  "Status",
+			reason: "value must not be in list [0]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if _, ok := OrganizationInvitationStatus_name[int32(m.GetStatus())]; !ok {
+		err := UpdateOrganizationInvitationRequestValidationError{
+			field:  "Status",
+			reason: "value must be one of the defined enum values",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return UpdateOrganizationInvitationRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateOrganizationInvitationRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// UpdateOrganizationInvitationRequest.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateOrganizationInvitationRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateOrganizationInvitationRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateOrganizationInvitationRequestMultiError) AllErrors() []error { return m }
+
+// UpdateOrganizationInvitationRequestValidationError is the validation error
+// returned by UpdateOrganizationInvitationRequest.Validate if the designated
+// constraints aren't met.
+type UpdateOrganizationInvitationRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateOrganizationInvitationRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateOrganizationInvitationRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateOrganizationInvitationRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateOrganizationInvitationRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateOrganizationInvitationRequestValidationError) ErrorName() string {
+	return "UpdateOrganizationInvitationRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateOrganizationInvitationRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateOrganizationInvitationRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateOrganizationInvitationRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateOrganizationInvitationRequestValidationError{}
+
+var _UpdateOrganizationInvitationRequest_Status_NotInLookup = map[OrganizationInvitationStatus]struct{}{
+	0: {},
+}
+
+// Validate checks the field values on UpdateOrganizationInvitationResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *UpdateOrganizationInvitationResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateOrganizationInvitationResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// UpdateOrganizationInvitationResponseMultiError, or nil if none found.
+func (m *UpdateOrganizationInvitationResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateOrganizationInvitationResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetOrganizationInvitation()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UpdateOrganizationInvitationResponseValidationError{
+					field:  "OrganizationInvitation",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UpdateOrganizationInvitationResponseValidationError{
+					field:  "OrganizationInvitation",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetOrganizationInvitation()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateOrganizationInvitationResponseValidationError{
+				field:  "OrganizationInvitation",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return UpdateOrganizationInvitationResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateOrganizationInvitationResponseMultiError is an error wrapping multiple
+// validation errors returned by
+// UpdateOrganizationInvitationResponse.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateOrganizationInvitationResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateOrganizationInvitationResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateOrganizationInvitationResponseMultiError) AllErrors() []error { return m }
+
+// UpdateOrganizationInvitationResponseValidationError is the validation error
+// returned by UpdateOrganizationInvitationResponse.Validate if the designated
+// constraints aren't met.
+type UpdateOrganizationInvitationResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateOrganizationInvitationResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateOrganizationInvitationResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateOrganizationInvitationResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateOrganizationInvitationResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateOrganizationInvitationResponseValidationError) ErrorName() string {
+	return "UpdateOrganizationInvitationResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateOrganizationInvitationResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateOrganizationInvitationResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateOrganizationInvitationResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateOrganizationInvitationResponseValidationError{}
+
+// Validate checks the field values on DeleteOrganizationInvitationRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *DeleteOrganizationInvitationRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DeleteOrganizationInvitationRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// DeleteOrganizationInvitationRequestMultiError, or nil if none found.
+func (m *DeleteOrganizationInvitationRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DeleteOrganizationInvitationRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() <= 0 {
+		err := DeleteOrganizationInvitationRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetProjectId() <= 0 {
+		err := DeleteOrganizationInvitationRequestValidationError{
+			field:  "ProjectId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return DeleteOrganizationInvitationRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// DeleteOrganizationInvitationRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// DeleteOrganizationInvitationRequest.ValidateAll() if the designated
+// constraints aren't met.
+type DeleteOrganizationInvitationRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DeleteOrganizationInvitationRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DeleteOrganizationInvitationRequestMultiError) AllErrors() []error { return m }
+
+// DeleteOrganizationInvitationRequestValidationError is the validation error
+// returned by DeleteOrganizationInvitationRequest.Validate if the designated
+// constraints aren't met.
+type DeleteOrganizationInvitationRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DeleteOrganizationInvitationRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DeleteOrganizationInvitationRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DeleteOrganizationInvitationRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DeleteOrganizationInvitationRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DeleteOrganizationInvitationRequestValidationError) ErrorName() string {
+	return "DeleteOrganizationInvitationRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DeleteOrganizationInvitationRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDeleteOrganizationInvitationRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DeleteOrganizationInvitationRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DeleteOrganizationInvitationRequestValidationError{}
+
+// Validate checks the field values on ReplyOrganizationInvitationRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *ReplyOrganizationInvitationRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ReplyOrganizationInvitationRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// ReplyOrganizationInvitationRequestMultiError, or nil if none found.
+func (m *ReplyOrganizationInvitationRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ReplyOrganizationInvitationRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() <= 0 {
+		err := ReplyOrganizationInvitationRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetProjectId() <= 0 {
+		err := ReplyOrganizationInvitationRequestValidationError{
+			field:  "ProjectId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if _, ok := _ReplyOrganizationInvitationRequest_Status_NotInLookup[m.GetStatus()]; ok {
+		err := ReplyOrganizationInvitationRequestValidationError{
+			field:  "Status",
+			reason: "value must not be in list [0]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if _, ok := OrganizationInvitationStatus_name[int32(m.GetStatus())]; !ok {
+		err := ReplyOrganizationInvitationRequestValidationError{
+			field:  "Status",
+			reason: "value must be one of the defined enum values",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return ReplyOrganizationInvitationRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ReplyOrganizationInvitationRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// ReplyOrganizationInvitationRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ReplyOrganizationInvitationRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ReplyOrganizationInvitationRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ReplyOrganizationInvitationRequestMultiError) AllErrors() []error { return m }
+
+// ReplyOrganizationInvitationRequestValidationError is the validation error
+// returned by ReplyOrganizationInvitationRequest.Validate if the designated
+// constraints aren't met.
+type ReplyOrganizationInvitationRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ReplyOrganizationInvitationRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ReplyOrganizationInvitationRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ReplyOrganizationInvitationRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ReplyOrganizationInvitationRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ReplyOrganizationInvitationRequestValidationError) ErrorName() string {
+	return "ReplyOrganizationInvitationRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ReplyOrganizationInvitationRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sReplyOrganizationInvitationRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ReplyOrganizationInvitationRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ReplyOrganizationInvitationRequestValidationError{}
+
+var _ReplyOrganizationInvitationRequest_Status_NotInLookup = map[OrganizationInvitationStatus]struct{}{
+	0: {},
+}
+
+// Validate checks the field values on ReplyOrganizationInvitationResponse with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *ReplyOrganizationInvitationResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ReplyOrganizationInvitationResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// ReplyOrganizationInvitationResponseMultiError, or nil if none found.
+func (m *ReplyOrganizationInvitationResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ReplyOrganizationInvitationResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetOrganizationProject()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ReplyOrganizationInvitationResponseValidationError{
+					field:  "OrganizationProject",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ReplyOrganizationInvitationResponseValidationError{
+					field:  "OrganizationProject",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetOrganizationProject()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ReplyOrganizationInvitationResponseValidationError{
+				field:  "OrganizationProject",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return ReplyOrganizationInvitationResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ReplyOrganizationInvitationResponseMultiError is an error wrapping multiple
+// validation errors returned by
+// ReplyOrganizationInvitationResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ReplyOrganizationInvitationResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ReplyOrganizationInvitationResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ReplyOrganizationInvitationResponseMultiError) AllErrors() []error { return m }
+
+// ReplyOrganizationInvitationResponseValidationError is the validation error
+// returned by ReplyOrganizationInvitationResponse.Validate if the designated
+// constraints aren't met.
+type ReplyOrganizationInvitationResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ReplyOrganizationInvitationResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ReplyOrganizationInvitationResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ReplyOrganizationInvitationResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ReplyOrganizationInvitationResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ReplyOrganizationInvitationResponseValidationError) ErrorName() string {
+	return "ReplyOrganizationInvitationResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ReplyOrganizationInvitationResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sReplyOrganizationInvitationResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ReplyOrganizationInvitationResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ReplyOrganizationInvitationResponseValidationError{}

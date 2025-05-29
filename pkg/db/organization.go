@@ -20,6 +20,12 @@ type OrganizationRepository interface {
 	PutOrganizationProject(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error)
 	ListProjectsInOrganization(ctx context.Context, organizationID uint32) ([]*model.Project, error)
 	RemoveProjectsInOrganization(ctx context.Context, organizationID, projectID uint32) error
+
+	// OrganizationInvitation
+	ListOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) ([]*model.OrganizationInvitation, error)
+	CreateOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationInvitation, error)
+	UpdateOrganizationInvitation(ctx context.Context, organizationID, projectID uint32, status string) (*model.OrganizationInvitation, error)
+	DeleteOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) error
 }
 
 var _ OrganizationRepository = (*Client)(nil)
@@ -137,4 +143,75 @@ const removeProjectsInOrganization = `
 
 func (c *Client) RemoveProjectsInOrganization(ctx context.Context, organizationID, projectID uint32) error {
 	return c.Master.WithContext(ctx).Exec(removeProjectsInOrganization, organizationID, projectID).Error
+}
+
+func (c *Client) ListOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) ([]*model.OrganizationInvitation, error) {
+	var invitations []*model.OrganizationInvitation
+	var query string
+	var params []interface{}
+
+	if organizationID > 0 && projectID > 0 {
+		query = `SELECT * FROM organization_invitation WHERE organization_id = ? AND project_id = ?`
+		params = append(params, organizationID, projectID)
+	} else if organizationID > 0 {
+		query = `SELECT * FROM organization_invitation WHERE organization_id = ?`
+		params = append(params, organizationID)
+	} else if projectID > 0 {
+		query = `SELECT * FROM organization_invitation WHERE project_id = ?`
+		params = append(params, projectID)
+	} else {
+		return nil, errors.New("at least one of organizationID or projectID must be specified")
+	}
+
+	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&invitations).Error; err != nil {
+		return nil, err
+	}
+	return invitations, nil
+}
+
+const insertCreateOrganizationInvitation = `
+	INSERT INTO organization_invitation (
+		organization_id,
+		project_id,
+		status
+	) VALUES (
+		?,
+		?,
+		'PENDING'
+	)
+`
+
+func (c *Client) CreateOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationInvitation, error) {
+	if err := c.Master.WithContext(ctx).Exec(insertCreateOrganizationInvitation, organizationID, projectID).Error; err != nil {
+		return nil, err
+	}
+	var data model.OrganizationInvitation
+	if err := c.Master.WithContext(ctx).Raw("SELECT * FROM organization_invitation WHERE organization_id = ? AND project_id = ?", organizationID, projectID).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const updateOrganizationInvitation = `
+	UPDATE organization_invitation 
+	SET status = ? 
+	WHERE organization_id = ? 
+	AND project_id = ?`
+
+func (c *Client) UpdateOrganizationInvitation(ctx context.Context, organizationID, projectID uint32, status string) (*model.OrganizationInvitation, error) {
+	var invitation model.OrganizationInvitation
+	if err := c.Master.WithContext(ctx).Raw(updateOrganizationInvitation, status, organizationID, projectID).First(&invitation).Error; err != nil {
+		return nil, err
+	}
+	return &invitation, nil
+}
+
+const deleteOrganizationInvitation = `
+    delete from organization_invitation 
+    where organization_id = ? 
+    and project_id = ?
+`
+
+func (c *Client) DeleteOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) error {
+	return c.Master.WithContext(ctx).Exec(deleteOrganizationInvitation, organizationID, projectID).Error
 }
