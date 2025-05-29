@@ -6,6 +6,7 @@ import (
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/organization"
+	"github.com/ca-risken/core/proto/project"
 	"github.com/golang/protobuf/ptypes/empty"
 	"gorm.io/gorm"
 )
@@ -26,16 +27,6 @@ func (o *OrganizationService) ListOrganization(ctx context.Context, req *organiz
 		orgs = append(orgs, convertOrganization(org))
 	}
 	return &organization.ListOrganizationResponse{Organization: orgs}, nil
-}
-
-func convertOrganization(o *model.Organization) *organization.Organization {
-	return &organization.Organization{
-		OrganizationId: o.OrganizationID,
-		Name:           o.Name,
-		Description:    o.Description,
-		CreatedAt:      o.CreatedAt.Unix(),
-		UpdatedAt:      o.UpdatedAt.Unix(),
-	}
 }
 
 func (o *OrganizationService) CreateOrganization(ctx context.Context, req *organization.CreateOrganizationRequest) (*organization.CreateOrganizationResponse, error) {
@@ -70,4 +61,54 @@ func (o *OrganizationService) DeleteOrganization(ctx context.Context, req *organ
 	}
 	o.logger.Infof(ctx, "Organization deleted: organization=%+v", req.OrganizationId)
 	return &empty.Empty{}, nil
+}
+
+func (o *OrganizationService) ListProjectsInOrganization(ctx context.Context, req *organization.ListProjectsInOrganizationRequest) (*organization.ListProjectsInOrganizationResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	projects, err := o.repository.ListProjectsInOrganization(ctx, req.OrganizationId)
+	if err != nil {
+		return nil, err
+	}
+	var result []*project.Project
+	for _, p := range projects {
+		result = append(result, &project.Project{
+			ProjectId: p.ProjectID,
+			Name:      p.Name,
+			CreatedAt: p.CreatedAt.Unix(),
+			UpdatedAt: p.UpdatedAt.Unix(),
+		})
+	}
+	return &organization.ListProjectsInOrganizationResponse{Project: result}, nil
+}
+
+func (o *OrganizationService) RemoveProjectsInOrganization(ctx context.Context, req *organization.RemoveProjectsInOrganizationRequest) (*empty.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	if err := o.repository.RemoveProjectsInOrganization(ctx, req.OrganizationId, req.ProjectId); err != nil {
+		return nil, err
+	}
+	o.logger.Infof(ctx, "Projects removed from organization: organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
+	return &empty.Empty{}, nil
+}
+
+func convertOrganization(o *model.Organization) *organization.Organization {
+	return &organization.Organization{
+		OrganizationId: o.OrganizationID,
+		Name:           o.Name,
+		Description:    o.Description,
+		CreatedAt:      o.CreatedAt.Unix(),
+		UpdatedAt:      o.UpdatedAt.Unix(),
+	}
+}
+
+func convertOrganizationProject(op *model.OrganizationProject) *organization.OrganizationProject {
+	return &organization.OrganizationProject{
+		OrganizationId: op.OrganizationID,
+		ProjectId:      op.ProjectID,
+		CreatedAt:      op.CreatedAt.Unix(),
+		UpdatedAt:      op.UpdatedAt.Unix(),
+	}
 }

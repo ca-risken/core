@@ -12,6 +12,8 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/organization"
+	"github.com/ca-risken/core/proto/project"
+	"github.com/golang/protobuf/ptypes/empty"
 	"gorm.io/gorm"
 )
 
@@ -215,6 +217,117 @@ func TestDeleteOrganization(t *testing.T) {
 			_, err := svc.DeleteOrganization(ctx, c.input)
 			if !c.wantErr && err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
+}
+
+func TestListProjectsInOrganization(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name         string
+		input        *organization.ListProjectsInOrganizationRequest
+		want         *organization.ListProjectsInOrganizationResponse
+		wantErr      bool
+		mockResponse []*model.Project
+		mockError    error
+	}{
+		{
+			name:  "OK",
+			input: &organization.ListProjectsInOrganizationRequest{OrganizationId: 1},
+			want: &organization.ListProjectsInOrganizationResponse{
+				Project: []*project.Project{
+					{ProjectId: 1, Name: "test-project", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+				},
+			},
+			mockResponse: []*model.Project{
+				{ProjectID: 1, Name: "test-project", CreatedAt: now, UpdatedAt: now},
+			},
+		},
+		{
+			name:         "OK No record",
+			input:        &organization.ListProjectsInOrganizationRequest{OrganizationId: 999},
+			want:         &organization.ListProjectsInOrganizationResponse{},
+			mockResponse: []*model.Project{},
+		},
+		{
+			name:    "NG Invalid params",
+			input:   &organization.ListProjectsInOrganizationRequest{OrganizationId: 0},
+			wantErr: true,
+		},
+		{
+			name:      "Invalid DB error",
+			input:     &organization.ListProjectsInOrganizationRequest{OrganizationId: 1},
+			mockError: gorm.ErrInvalidDB,
+			wantErr:   true,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewOrganizationRepository(t)
+			svc := OrganizationService{repository: mockDB}
+			if c.mockResponse != nil || c.mockError != nil {
+				mockDB.On("ListProjectsInOrganization", test.RepeatMockAnything(2)...).Return(c.mockResponse, c.mockError).Once()
+			}
+			result, err := svc.ListProjectsInOrganization(ctx, c.input)
+			if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(result, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
+			}
+		})
+	}
+}
+
+func TestRemoveProjectsInOrganization(t *testing.T) {
+	cases := []struct {
+		name                             string
+		input                            *organization.RemoveProjectsInOrganizationRequest
+		want                             *empty.Empty
+		wantErr                          bool
+		mockError                        error
+		callRemoveProjectsInOrganization bool
+	}{
+		{
+			name:                             "OK",
+			input:                            &organization.RemoveProjectsInOrganizationRequest{OrganizationId: 1, ProjectId: 1},
+			want:                             &empty.Empty{},
+			callRemoveProjectsInOrganization: true,
+		},
+		{
+			name:    "NG Invalid params - organization_id is zero",
+			input:   &organization.RemoveProjectsInOrganizationRequest{OrganizationId: 0, ProjectId: 1},
+			wantErr: true,
+		},
+		{
+			name:                             "Invalid DB error",
+			input:                            &organization.RemoveProjectsInOrganizationRequest{OrganizationId: 1, ProjectId: 1},
+			mockError:                        gorm.ErrInvalidDB,
+			wantErr:                          true,
+			callRemoveProjectsInOrganization: true,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewOrganizationRepository(t)
+			svc := OrganizationService{
+				repository: mockDB,
+				logger:     logging.NewLogger(),
+			}
+			if c.callRemoveProjectsInOrganization {
+				mockDB.On("RemoveProjectsInOrganization", test.RepeatMockAnything(3)...).Return(c.mockError).Once()
+			}
+			result, err := svc.RemoveProjectsInOrganization(ctx, c.input)
+			if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(result, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
 			}
 		})
 	}

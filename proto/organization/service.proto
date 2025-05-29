@@ -5,6 +5,7 @@ option go_package = "github.com/ca-risken/core/proto/organization";
 
 import "google/protobuf/empty.proto";
 import "organization/entity.proto";
+import "project/entity.proto";
 import "validate/validate.proto";
 
 // List Organization
@@ -40,8 +41,24 @@ message DeleteOrganizationRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
 }
 
+// List Projects In Organization
+message ListProjectsInOrganizationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+}
+
+message ListProjectsInOrganizationResponse {
+  repeated project.Project project = 1;
+}
+
+// Delete Projects In Organizaiton
+message RemoveProjectsInOrganizationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
+}
+
 // Organization service
 service OrganizationService {
+  // Organization
   rpc ListOrganization(ListOrganizationRequest)
       returns (ListOrganizationResponse) {}
   rpc CreateOrganization(CreateOrganizationRequest)
@@ -49,5 +66,11 @@ service OrganizationService {
   rpc UpdateOrganization(UpdateOrganizationRequest)
       returns (UpdateOrganizationResponse) {}
   rpc DeleteOrganization(DeleteOrganizationRequest)
+      returns (google.protobuf.Empty) {}
+
+  // Organization Project
+  rpc ListProjectsInOrganization(ListProjectsInOrganizationRequest)
+      returns (ListProjectsInOrganizationResponse) {}
+  rpc RemoveProjectsInOrganization(RemoveProjectsInOrganizationRequest)
       returns (google.protobuf.Empty) {}
 }
