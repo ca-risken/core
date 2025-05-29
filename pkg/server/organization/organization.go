@@ -64,11 +64,11 @@ func (o *OrganizationService) DeleteOrganization(ctx context.Context, req *organ
 	return &empty.Empty{}, nil
 }
 
-func (o *OrganizationService) ListProjectsByOrganization(ctx context.Context, req *organization.ListProjectsByOrganizationRequest) (*organization.ListProjectsByOrganizationResponse, error) {
+func (o *OrganizationService) ListProjectsInOrganization(ctx context.Context, req *organization.ListProjectsInOrganizationRequest) (*organization.ListProjectsInOrganizationResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	projects, err := o.repository.ListProjectsByOrganization(ctx, req.OrganizationId)
+	projects, err := o.repository.ListProjectsInOrganization(ctx, req.OrganizationId)
 	if err != nil {
 		return nil, err
 	}
@@ -81,23 +81,18 @@ func (o *OrganizationService) ListProjectsByOrganization(ctx context.Context, re
 			UpdatedAt: p.UpdatedAt.Unix(),
 		})
 	}
-	return &organization.ListProjectsByOrganizationResponse{Project: result}, nil
+	return &organization.ListProjectsInOrganizationResponse{Project: result}, nil
 }
 
-func (o *OrganizationService) AddProjects(ctx context.Context, req *organization.AddProjectsRequest) (*organization.AddProjectsResponse, error) {
+func (o *OrganizationService) RemoveProjectsInOrganization(ctx context.Context, req *organization.RemoveProjectsInOrganizationRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	orgProject, err := o.repository.AddProjects(ctx, req.OrganizationId, req.ProjectId)
-	if err != nil {
+	if err := o.repository.RemoveProjectsInOrganization(ctx, req.OrganizationId, req.ProjectId); err != nil {
 		return nil, err
 	}
-	return &organization.AddProjectsResponse{OrganizationProject: &organization.OrganizationProject{
-		OrganizationId: orgProject.OrganizationID,
-		ProjectId:      orgProject.ProjectID,
-		CreatedAt:      orgProject.CreatedAt.Unix(),
-		UpdatedAt:      orgProject.UpdatedAt.Unix(),
-	}}, nil
+	o.logger.Infof(ctx, "Projects removed from organization: organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
+	return &empty.Empty{}, nil
 }
 
 func (o *OrganizationService) ListOrganizationInvitation(ctx context.Context, req *organization.ListOrganizationInvitationRequest) (*organization.ListOrganizationInvitationResponse, error) {
@@ -127,7 +122,19 @@ func (o *OrganizationService) CreateOrganizationInvitation(ctx context.Context, 
 	return &organization.CreateOrganizationInvitationResponse{OrganizationInvitation: convertOrganizationInvitation(invitation)}, nil
 }
 
-func (o *OrganizationService) UpdateOrganizationInvitationStatus(ctx context.Context, req *organization.UpdateOrganizationInvitationStatusRequest) (*organization.UpdateOrganizationInvitationStatusResponse, error) {
+func (o *OrganizationService) DeleteOrganizationInvitation(ctx context.Context, req *organization.DeleteOrganizationInvitationRequest) (*empty.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	if err := o.repository.DeleteOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId); err != nil {
+		return nil, err
+	}
+	o.logger.Infof(ctx, "Organization invitation deleted: organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
+	return &empty.Empty{}, nil
+}
+
+func (o *OrganizationService) ReplyOrganizationInvitation(ctx context.Context, req *organization.ReplyOrganizationInvitationRequest) (*organization.ReplyOrganizationInvitationResponse, error) {
+	var orgProject *model.OrganizationProject
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
@@ -136,8 +143,14 @@ func (o *OrganizationService) UpdateOrganizationInvitationStatus(ctx context.Con
 	if err != nil {
 		return nil, err
 	}
-	o.logger.Infof(ctx, "Organization invitation status updated: organization_id=%d, project_id=%d, status=%s", req.OrganizationId, req.ProjectId, req.Status)
-	return &organization.UpdateOrganizationInvitationStatusResponse{OrganizationInvitation: convertOrganizationInvitation(invitation)}, nil
+	if invitation.Status == organization.OrganizationInvitationStatus_ACCEPTED.String() {
+		orgProject, err = o.repository.CreateOrganizationProject(ctx, req.OrganizationId, req.ProjectId)
+		if err != nil {
+			return nil, err
+		}
+		return &organization.ReplyOrganizationInvitationResponse{OrganizationProject: convertOrganizationProject(orgProject)}, nil
+	}
+	return &organization.ReplyOrganizationInvitationResponse{}, nil
 }
 
 func convertOrganization(o *model.Organization) *organization.Organization {
@@ -157,6 +170,15 @@ func convertOrganizationInvitation(oi *model.OrganizationInvitation) *organizati
 		Status:         getOrganizationInvitationStatus(oi.Status),
 		CreatedAt:      oi.CreatedAt.Unix(),
 		UpdatedAt:      oi.UpdatedAt.Unix(),
+	}
+}
+
+func convertOrganizationProject(op *model.OrganizationProject) *organization.OrganizationProject {
+	return &organization.OrganizationProject{
+		OrganizationId: op.OrganizationID,
+		ProjectId:      op.ProjectID,
+		CreatedAt:      op.CreatedAt.Unix(),
+		UpdatedAt:      op.UpdatedAt.Unix(),
 	}
 }
 

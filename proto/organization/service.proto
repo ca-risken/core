@@ -61,8 +61,14 @@ message CreateOrganizationInvitationResponse {
   OrganizationInvitation organization_invitation = 1;
 }
 
-// Update Organization Invitation Status
-message UpdateOrganizationInvitationStatusRequest {
+// Delete Organization Invitation
+message DeleteOrganizationInvitationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
+}
+
+// Reply Organizaiton Invitation
+message ReplyOrganizationInvitationRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
   uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
   OrganizationInvitationStatus status = 3 [ (validate.rules).enum = {
@@ -71,29 +77,28 @@ message UpdateOrganizationInvitationStatusRequest {
   } ];
 }
 
-message UpdateOrganizationInvitationStatusResponse {
-  OrganizationInvitation organization_invitation = 1;
+message ReplyOrganizationInvitationResponse {
+  OrganizationProject organization_project = 1;
 }
 
-// List Projects By Organization
-message ListProjectsByOrganizationRequest {
+// List Projects In Organization
+message ListProjectsInOrganizationRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
 }
 
-message ListProjectsByOrganizationResponse {
+message ListProjectsInOrganizationResponse {
   repeated project.Project project = 1;
 }
 
-// Add Projects
-message AddProjectsRequest {
+// Delete Projects In Organizaiton
+message RemoveProjectsInOrganizationRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
   uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
 }
 
-message AddProjectsResponse { OrganizationProject organization_project = 1; }
-
 // Organization service
 service OrganizationService {
+  // Organization
   rpc ListOrganization(ListOrganizationRequest)
       returns (ListOrganizationResponse) {}
   rpc CreateOrganization(CreateOrganizationRequest)
@@ -102,14 +107,20 @@ service OrganizationService {
       returns (UpdateOrganizationResponse) {}
   rpc DeleteOrganization(DeleteOrganizationRequest)
       returns (google.protobuf.Empty) {}
+
+  // Organization Invitation
   rpc ListOrganizationInvitation(ListOrganizationInvitationRequest)
       returns (ListOrganizationInvitationResponse) {}
   rpc CreateOrganizationInvitation(CreateOrganizationInvitationRequest)
       returns (CreateOrganizationInvitationResponse) {}
-  rpc UpdateOrganizationInvitationStatus(
-      UpdateOrganizationInvitationStatusRequest)
-      returns (UpdateOrganizationInvitationStatusResponse) {}
-  rpc ListProjectsByOrganization(ListProjectsByOrganizationRequest)
-      returns (ListProjectsByOrganizationResponse) {}
-  rpc AddProjects(AddProjectsRequest) returns (AddProjectsResponse) {}
+  rpc DeleteOrganizationInvitation(DeleteOrganizationInvitationRequest)
+      returns (google.protobuf.Empty) {}
+  rpc ReplyOrganizationInvitation(ReplyOrganizationInvitationRequest)
+      returns (ReplyOrganizationInvitationResponse) {}
+
+  // Organization Project
+  rpc ListProjectsInOrganization(ListProjectsInOrganizationRequest)
+      returns (ListProjectsInOrganizationResponse) {}
+  rpc RemoveProjectsInOrganization(RemoveProjectsInOrganizationRequest)
+      returns (google.protobuf.Empty) {}
 }

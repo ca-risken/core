@@ -17,13 +17,15 @@ type OrganizationRepository interface {
 	DeleteOrganization(ctx context.Context, organizationID uint32) error
 
 	// OrganizationProject
-	ListProjectsByOrganization(ctx context.Context, organizationID uint32) ([]*model.Project, error)
-	AddProjects(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error)
+	CreateOrganizationProject(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error)
+	ListProjectsInOrganization(ctx context.Context, organizationID uint32) ([]*model.Project, error)
+	RemoveProjectsInOrganization(ctx context.Context, organizationID, projectID uint32) error
 
 	// OrganizationInvitation
 	ListOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) ([]*model.OrganizationInvitation, error)
 	CreateOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationInvitation, error)
 	UpdateOrganizationInvitationStatus(ctx context.Context, organizationID, projectID uint32, status string) (*model.OrganizationInvitation, error)
+	DeleteOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) error
 }
 
 var _ OrganizationRepository = (*Client)(nil)
@@ -87,22 +89,7 @@ func (c *Client) DeleteOrganization(ctx context.Context, organizationID uint32) 
 	return c.Master.WithContext(ctx).Exec(deleteOrganization, organizationID).Error
 }
 
-const listProjectsByOrganization = `
-	SELECT p.*
-	FROM project p
-	JOIN organization_project op ON p.project_id = op.project_id
-	WHERE op.organization_id = ?
-`
-
-func (c *Client) ListProjectsByOrganization(ctx context.Context, organizationID uint32) ([]*model.Project, error) {
-	var projects []*model.Project
-	if err := c.Slave.WithContext(ctx).Raw(listProjectsByOrganization, organizationID).Scan(&projects).Error; err != nil {
-		return nil, err
-	}
-	return projects, nil
-}
-
-const addProjects = `
+const createOrganizationProject = `
 	INSERT INTO organization_project (
 		organization_id,
 		project_id
@@ -113,8 +100,8 @@ const addProjects = `
 	ON DUPLICATE KEY UPDATE updated_at = NOW()
 `
 
-func (c *Client) AddProjects(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error) {
-	if err := c.Master.WithContext(ctx).Exec(addProjects, organizationID, projectID).Error; err != nil {
+func (c *Client) CreateOrganizationProject(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error) {
+	if err := c.Master.WithContext(ctx).Exec(createOrganizationProject, organizationID, projectID).Error; err != nil {
 		return nil, err
 	}
 	var data model.OrganizationProject
@@ -122,6 +109,31 @@ func (c *Client) AddProjects(ctx context.Context, organizationID, projectID uint
 		return nil, err
 	}
 	return &data, nil
+}
+
+const listProjectsInOrganization = `
+	SELECT p.*
+	FROM project p
+	JOIN organization_project op ON p.project_id = op.project_id
+	WHERE op.organization_id = ?
+`
+
+func (c *Client) ListProjectsInOrganization(ctx context.Context, organizationID uint32) ([]*model.Project, error) {
+	var projects []*model.Project
+	if err := c.Slave.WithContext(ctx).Raw(listProjectsInOrganization, organizationID).Scan(&projects).Error; err != nil {
+		return nil, err
+	}
+	return projects, nil
+}
+
+const removeProjectsInOrganization = `
+    delete from organization_project 
+    where organization_id = ? 
+    and project_id = ?
+`
+
+func (c *Client) RemoveProjectsInOrganization(ctx context.Context, organizationID, projectID uint32) error {
+	return c.Master.WithContext(ctx).Exec(removeProjectsInOrganization, organizationID, projectID).Error
 }
 
 func (c *Client) ListOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) ([]*model.OrganizationInvitation, error) {
@@ -183,4 +195,14 @@ func (c *Client) UpdateOrganizationInvitationStatus(ctx context.Context, organiz
 		return nil, err
 	}
 	return &invitation, nil
+}
+
+const deleteOrganizationInvitation = `
+    delete from organization_invitation 
+    where organization_id = ? 
+    and project_id = ?
+`
+
+func (c *Client) DeleteOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) error {
+	return c.Master.WithContext(ctx).Exec(deleteOrganizationInvitation, organizationID, projectID).Error
 }
