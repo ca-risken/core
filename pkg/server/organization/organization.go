@@ -133,13 +133,24 @@ func (o *OrganizationService) DeleteOrganizationInvitation(ctx context.Context, 
 	return &empty.Empty{}, nil
 }
 
+func (o *OrganizationService) UpdateOrganizationInvitation(ctx context.Context, req *organization.UpdateOrganizationInvitationRequest) (*organization.UpdateOrganizationInvitationResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	invitation, err := o.repository.UpdateOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId, req.Status.String())
+	if err != nil {
+		return nil, err
+	}
+	o.logger.Infof(ctx, "Organization invitation updated: organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
+	return &organization.UpdateOrganizationInvitationResponse{OrganizationInvitation: convertOrganizationInvitation(invitation)}, nil
+}
+
 func (o *OrganizationService) ReplyOrganizationInvitation(ctx context.Context, req *organization.ReplyOrganizationInvitationRequest) (*organization.ReplyOrganizationInvitationResponse, error) {
 	var orgProject *model.OrganizationProject
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	status := organization.OrganizationInvitationStatus_name[int32(req.Status)]
-	invitation, err := o.repository.UpdateOrganizationInvitationStatus(ctx, req.OrganizationId, req.ProjectId, status)
+	invitation, err := o.repository.UpdateOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId, req.Status.String())
 	if err != nil {
 		return nil, err
 	}

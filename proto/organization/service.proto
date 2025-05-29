@@ -61,6 +61,20 @@ message CreateOrganizationInvitationResponse {
   OrganizationInvitation organization_invitation = 1;
 }
 
+// Update Organization Invitation
+message UpdateOrganizationInvitationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
+  OrganizationInvitationStatus status = 3 [ (validate.rules).enum = {
+    defined_only : true,
+    not_in : [ 0 ]
+  } ];
+}
+
+message UpdateOrganizationInvitationResponse {
+  OrganizationInvitation organization_invitation = 1;
+}
+
 // Delete Organization Invitation
 message DeleteOrganizationInvitationRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
@@ -113,6 +127,8 @@ service OrganizationService {
       returns (ListOrganizationInvitationResponse) {}
   rpc CreateOrganizationInvitation(CreateOrganizationInvitationRequest)
       returns (CreateOrganizationInvitationResponse) {}
+  rpc UpdateOrganizationInvitation(UpdateOrganizationInvitationRequest)
+      returns (UpdateOrganizationInvitationResponse) {}
   rpc DeleteOrganizationInvitation(DeleteOrganizationInvitationRequest)
       returns (google.protobuf.Empty) {}
   rpc ReplyOrganizationInvitation(ReplyOrganizationInvitationRequest)
