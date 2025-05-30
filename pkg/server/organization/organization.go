@@ -110,16 +110,15 @@ func (o *OrganizationService) ListOrganizationInvitation(ctx context.Context, re
 	return &organization.ListOrganizationInvitationResponse{OrganizationInvitations: result}, nil
 }
 
-func (o *OrganizationService) CreateOrganizationInvitation(ctx context.Context, req *organization.CreateOrganizationInvitationRequest) (*organization.CreateOrganizationInvitationResponse, error) {
+func (o *OrganizationService) PutOrganizationInvitation(ctx context.Context, req *organization.PutOrganizationInvitationRequest) (*organization.PutOrganizationInvitationResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	invitation, err := o.repository.CreateOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId)
+	invitation, err := o.repository.PutOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId, req.Status.String())
 	if err != nil {
 		return nil, err
 	}
-	o.logger.Infof(ctx, "Organization invitation created: organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
-	return &organization.CreateOrganizationInvitationResponse{OrganizationInvitation: convertOrganizationInvitation(invitation)}, nil
+	return &organization.PutOrganizationInvitationResponse{OrganizationInvitation: convertOrganizationInvitation(invitation)}, nil
 }
 
 func (o *OrganizationService) DeleteOrganizationInvitation(ctx context.Context, req *organization.DeleteOrganizationInvitationRequest) (*empty.Empty, error) {
@@ -133,24 +132,12 @@ func (o *OrganizationService) DeleteOrganizationInvitation(ctx context.Context, 
 	return &empty.Empty{}, nil
 }
 
-func (o *OrganizationService) UpdateOrganizationInvitation(ctx context.Context, req *organization.UpdateOrganizationInvitationRequest) (*organization.UpdateOrganizationInvitationResponse, error) {
-	if err := req.Validate(); err != nil {
-		return nil, err
-	}
-	invitation, err := o.repository.UpdateOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId, req.Status.String())
-	if err != nil {
-		return nil, err
-	}
-	o.logger.Infof(ctx, "Organization invitation updated: organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
-	return &organization.UpdateOrganizationInvitationResponse{OrganizationInvitation: convertOrganizationInvitation(invitation)}, nil
-}
-
 func (o *OrganizationService) ReplyOrganizationInvitation(ctx context.Context, req *organization.ReplyOrganizationInvitationRequest) (*organization.ReplyOrganizationInvitationResponse, error) {
 	var orgProject *model.OrganizationProject
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	invitation, err := o.repository.UpdateOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId, req.Status.String())
+	invitation, err := o.repository.PutOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId, req.Status.String())
 	if err != nil {
 		return nil, err
 	}

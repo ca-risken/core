@@ -23,8 +23,7 @@ type OrganizationRepository interface {
 
 	// OrganizationInvitation
 	ListOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) ([]*model.OrganizationInvitation, error)
-	CreateOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationInvitation, error)
-	UpdateOrganizationInvitation(ctx context.Context, organizationID, projectID uint32, status string) (*model.OrganizationInvitation, error)
+	PutOrganizationInvitation(ctx context.Context, organizationID, projectID uint32, status string) (*model.OrganizationInvitation, error)
 	DeleteOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) error
 }
 
@@ -169,7 +168,22 @@ func (c *Client) ListOrganizationInvitation(ctx context.Context, organizationID,
 	return invitations, nil
 }
 
-const insertCreateOrganizationInvitation = `
+const selectGetOrganizationInvitation = `
+	select *
+	from organization_invitation
+	where organization_id = ?
+	and project_id = ?
+`
+
+func (c *Client) getOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationInvitation, error) {
+	var invitation model.OrganizationInvitation
+	if err := c.Master.WithContext(ctx).Raw(selectGetOrganizationInvitation, organizationID, projectID).First(&invitation).Error; err != nil {
+		return nil, err
+	}
+	return &invitation, nil
+}
+
+const putOrganizationInvitation = `
 	INSERT INTO organization_invitation (
 		organization_id,
 		project_id,
@@ -177,33 +191,16 @@ const insertCreateOrganizationInvitation = `
 	) VALUES (
 		?,
 		?,
-		'PENDING'
-	)
+		?
+	) ON DUPLICATE KEY UPDATE
+		status = VALUES(status)
 `
 
-func (c *Client) CreateOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationInvitation, error) {
-	if err := c.Master.WithContext(ctx).Exec(insertCreateOrganizationInvitation, organizationID, projectID).Error; err != nil {
+func (c *Client) PutOrganizationInvitation(ctx context.Context, organizationID, projectID uint32, status string) (*model.OrganizationInvitation, error) {
+	if err := c.Master.WithContext(ctx).Exec(putOrganizationInvitation, organizationID, projectID, status).Error; err != nil {
 		return nil, err
 	}
-	var data model.OrganizationInvitation
-	if err := c.Master.WithContext(ctx).Raw("SELECT * FROM organization_invitation WHERE organization_id = ? AND project_id = ?", organizationID, projectID).First(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
-const updateOrganizationInvitation = `
-	UPDATE organization_invitation 
-	SET status = ? 
-	WHERE organization_id = ? 
-	AND project_id = ?`
-
-func (c *Client) UpdateOrganizationInvitation(ctx context.Context, organizationID, projectID uint32, status string) (*model.OrganizationInvitation, error) {
-	var invitation model.OrganizationInvitation
-	if err := c.Master.WithContext(ctx).Raw(updateOrganizationInvitation, status, organizationID, projectID).First(&invitation).Error; err != nil {
-		return nil, err
-	}
-	return &invitation, nil
+	return c.getOrganizationInvitation(ctx, organizationID, projectID)
 }
 
 const deleteOrganizationInvitation = `

@@ -66,18 +66,8 @@ message ListOrganizationInvitationResponse {
   repeated OrganizationInvitation organization_invitations = 1;
 }
 
-// Create Organization Invitation
-message CreateOrganizationInvitationRequest {
-  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
-  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
-}
-
-message CreateOrganizationInvitationResponse {
-  OrganizationInvitation organization_invitation = 1;
-}
-
-// Update Organization Invitation
-message UpdateOrganizationInvitationRequest {
+// Put Organization Invitation (Create or Update)
+message PutOrganizationInvitationRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
   uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
   OrganizationInvitationStatus status = 3 [ (validate.rules).enum = {
@@ -86,7 +76,7 @@ message UpdateOrganizationInvitationRequest {
   } ];
 }
 
-message UpdateOrganizationInvitationResponse {
+message PutOrganizationInvitationResponse {
   OrganizationInvitation organization_invitation = 1;
 }
 
@@ -131,10 +121,8 @@ service OrganizationService {
   // Organization Invitation
   rpc ListOrganizationInvitation(ListOrganizationInvitationRequest)
       returns (ListOrganizationInvitationResponse) {}
-  rpc CreateOrganizationInvitation(CreateOrganizationInvitationRequest)
-      returns (CreateOrganizationInvitationResponse) {}
-  rpc UpdateOrganizationInvitation(UpdateOrganizationInvitationRequest)
-      returns (UpdateOrganizationInvitationResponse) {}
+  rpc PutOrganizationInvitation(PutOrganizationInvitationRequest)
+      returns (PutOrganizationInvitationResponse) {}
   rpc DeleteOrganizationInvitation(DeleteOrganizationInvitationRequest)
       returns (google.protobuf.Empty) {}
   rpc ReplyOrganizationInvitation(ReplyOrganizationInvitationRequest)
