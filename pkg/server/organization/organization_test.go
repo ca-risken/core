@@ -494,6 +494,55 @@ func TestPutOrganizationInvitation(t *testing.T) {
 	}
 }
 
+func TestDeleteOrganizationInvitation(t *testing.T) {
+	cases := []struct {
+		name                             string
+		input                            *organization.DeleteOrganizationInvitationRequest
+		wantErr                          bool
+		mockError                        error
+		callDeleteOrganizationInvitation bool
+	}{
+		{
+			name: "OK",
+			input: &organization.DeleteOrganizationInvitationRequest{
+				OrganizationId: 1,
+				ProjectId:      1,
+			},
+			callDeleteOrganizationInvitation: true,
+		},
+		{
+			name:    "NG Invalid params - organization_id is zero",
+			input:   &organization.DeleteOrganizationInvitationRequest{OrganizationId: 0, ProjectId: 1},
+			wantErr: true,
+		},
+		{
+			name:                             "Invalid DB error",
+			input:                            &organization.DeleteOrganizationInvitationRequest{OrganizationId: 1, ProjectId: 1},
+			mockError:                        gorm.ErrInvalidDB,
+			wantErr:                          true,
+			callDeleteOrganizationInvitation: true,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewOrganizationRepository(t)
+			svc := OrganizationService{
+				repository: mockDB,
+				logger:     logging.NewLogger(),
+			}
+			if c.callDeleteOrganizationInvitation {
+				mockDB.On("DeleteOrganizationInvitation", test.RepeatMockAnything(3)...).Return(c.mockError).Once()
+			}
+			_, err := svc.DeleteOrganizationInvitation(ctx, c.input)
+			if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
+}
+
 func TestReplyOrganizationInvitation(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
