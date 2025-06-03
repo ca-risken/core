@@ -27,38 +27,28 @@ func TestIsAuthorizedByOrganizationPolicy(t *testing.T) {
 		wantErr        bool
 	}{
 		{
-			name:           "OK Authorized organization get",
-			organizationID: 1,
-			action:         "organization/get-organization",
-			policy:         validPolicies,
-			want:           true,
+			name:   "OK Authorized organization get",
+			action: "organization/get-organization",
+			policy: validPolicies,
+			want:   true,
 		},
 		{
-			name:           "OK Unauthorized different organization",
-			organizationID: 999,
-			action:         "organization/create-organization",
-			policy:         validPolicies,
-			want:           false,
+			name:   "OK Unauthorized action not allowed",
+			action: "organization/delete-organization",
+			policy: &[]model.OrganizationPolicy{{PolicyID: 2, Name: "organization-viewer", OrganizationID: 1, ActionPtn: "organization/(get|list)"}},
+			want:   false,
 		},
 		{
-			name:           "OK Unauthorized action not allowed",
-			organizationID: 1,
-			action:         "organization/delete-organization",
-			policy:         &[]model.OrganizationPolicy{{PolicyID: 2, Name: "organization-viewer", OrganizationID: 1, ActionPtn: "organization/(get|list)"}},
-			want:           false,
-		},
-		{
-			name:           "NG Error invalid regex pattern",
-			organizationID: 1,
-			action:         "organization/get",
-			policy:         &[]model.OrganizationPolicy{{PolicyID: 1, Name: "invalid-pattern", OrganizationID: 1, ActionPtn: "[invalid regex"}},
-			wantErr:        true,
+			name:    "NG Error invalid regex pattern",
+			action:  "organization/get",
+			policy:  &[]model.OrganizationPolicy{{PolicyID: 1, Name: "invalid-pattern", OrganizationID: 1, ActionPtn: "[invalid regex"}},
+			wantErr: true,
 		},
 	}
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := isAuthorizedByOrganizationPolicy(c.organizationID, c.action, c.policy)
+			got, err := isAuthorizedByOrganizationPolicy(c.action, c.policy)
 			if (err != nil) != c.wantErr {
 				t.Errorf("isAuthorizedByOrganizationPolicy() error = %v, wantErr %v", err, c.wantErr)
 				return
@@ -151,7 +141,7 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 			svc := NewOrganizationIAMService(mockRepo, logger)
 
 			if c.mockResponse != nil || c.mockError != nil {
-				mockRepo.On("GetOrganizationPolicyByUserID", test.RepeatMockAnything(2)...).Return(c.mockResponse, c.mockError).Once()
+				mockRepo.On("GetOrganizationPolicyByUserID", test.RepeatMockAnything(3)...).Return(c.mockResponse, c.mockError).Once()
 			}
 
 			result, err := svc.IsAuthorizedOrganization(ctx, c.input)
