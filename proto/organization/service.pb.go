@@ -487,7 +487,7 @@ func (x *ListProjectsInOrganizationResponse) GetProject() []*project.Project {
 	return nil
 }
 
-// Delete Projects In Organizaiton
+// Remove Projects In Organizaiton
 type RemoveProjectsInOrganizationRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
