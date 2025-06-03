@@ -79,7 +79,16 @@ func (m *IsAuthorizedOrganizationRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	// no validation rules for ActionName
+	if utf8.RuneCountInString(m.GetActionName()) < 1 {
+		err := IsAuthorizedOrganizationRequestValidationError{
+			field:  "ActionName",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return IsAuthorizedOrganizationRequestMultiError(errors)

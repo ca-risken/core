@@ -11,3 +11,28 @@ message Organization {
   int64 created_at = 5;
   int64 updated_at = 6;
 }
+
+// OrganizationProject message
+message OrganizationProject {
+  uint32 organization_id = 1;
+  uint32 project_id = 2;
+  int64 created_at = 4;
+  int64 updated_at = 5;
+}
+
+// OrganizationInvitation message
+message OrganizationInvitation {
+  uint32 organization_id = 1;
+  uint32 project_id = 2;
+  OrganizationInvitationStatus status = 3;
+  int64 created_at = 4;
+  int64 updated_at = 5;
+}
+
+// OrganizationInvitationStatus
+enum OrganizationInvitationStatus {
+  UNKNOWN = 0;
+  PENDING = 1;
+  ACCEPTED = 2;
+  REJECTED = 3;
+}
