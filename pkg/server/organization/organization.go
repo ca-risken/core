@@ -3,6 +3,7 @@ package organization
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/organization"
@@ -94,6 +95,65 @@ func (o *OrganizationService) RemoveProjectsInOrganization(ctx context.Context, 
 	return &empty.Empty{}, nil
 }
 
+func (o *OrganizationService) ListOrganizationInvitation(ctx context.Context, req *organization.ListOrganizationInvitationRequest) (*organization.ListOrganizationInvitationResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	if req.OrganizationId == 0 && req.ProjectId == 0 {
+		return nil, errors.New("at least one of organizationID or projectID must be specified")
+	}
+	invitations, err := o.repository.ListOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId)
+	if err != nil {
+		return nil, err
+	}
+	var result []*organization.OrganizationInvitation
+	for _, invitation := range invitations {
+		result = append(result, convertOrganizationInvitation(invitation))
+	}
+	return &organization.ListOrganizationInvitationResponse{OrganizationInvitations: result}, nil
+}
+
+func (o *OrganizationService) PutOrganizationInvitation(ctx context.Context, req *organization.PutOrganizationInvitationRequest) (*organization.PutOrganizationInvitationResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	invitation, err := o.repository.PutOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId, req.Status.String())
+	if err != nil {
+		return nil, err
+	}
+	return &organization.PutOrganizationInvitationResponse{OrganizationInvitation: convertOrganizationInvitation(invitation)}, nil
+}
+
+func (o *OrganizationService) DeleteOrganizationInvitation(ctx context.Context, req *organization.DeleteOrganizationInvitationRequest) (*empty.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	if err := o.repository.DeleteOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId); err != nil {
+		return nil, err
+	}
+	o.logger.Infof(ctx, "Organization invitation deleted: organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
+	return &empty.Empty{}, nil
+}
+
+func (o *OrganizationService) ReplyOrganizationInvitation(ctx context.Context, req *organization.ReplyOrganizationInvitationRequest) (*organization.ReplyOrganizationInvitationResponse, error) {
+	var orgProject *model.OrganizationProject
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	invitation, err := o.repository.PutOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId, req.Status.String())
+	if err != nil {
+		return nil, err
+	}
+	if invitation.Status == organization.OrganizationInvitationStatus_ACCEPTED.String() {
+		orgProject, err = o.repository.PutOrganizationProject(ctx, req.OrganizationId, req.ProjectId)
+		if err != nil {
+			return nil, err
+		}
+		return &organization.ReplyOrganizationInvitationResponse{OrganizationProject: convertOrganizationProject(orgProject)}, nil
+	}
+	return &organization.ReplyOrganizationInvitationResponse{}, nil
+}
+
 func convertOrganization(o *model.Organization) *organization.Organization {
 	return &organization.Organization{
 		OrganizationId: o.OrganizationID,
@@ -101,5 +161,41 @@ func convertOrganization(o *model.Organization) *organization.Organization {
 		Description:    o.Description,
 		CreatedAt:      o.CreatedAt.Unix(),
 		UpdatedAt:      o.UpdatedAt.Unix(),
+	}
+}
+
+func convertOrganizationInvitation(oi *model.OrganizationInvitation) *organization.OrganizationInvitation {
+	return &organization.OrganizationInvitation{
+		OrganizationId: oi.OrganizationID,
+		ProjectId:      oi.ProjectID,
+		Status:         getOrganizationInvitationStatus(oi.Status),
+		CreatedAt:      oi.CreatedAt.Unix(),
+		UpdatedAt:      oi.UpdatedAt.Unix(),
+	}
+}
+
+func convertOrganizationProject(op *model.OrganizationProject) *organization.OrganizationProject {
+	return &organization.OrganizationProject{
+		OrganizationId: op.OrganizationID,
+		ProjectId:      op.ProjectID,
+		CreatedAt:      op.CreatedAt.Unix(),
+		UpdatedAt:      op.UpdatedAt.Unix(),
+	}
+}
+
+func getOrganizationInvitationStatus(s string) organization.OrganizationInvitationStatus {
+	statusKey := strings.ToUpper(s)
+	if _, ok := organization.OrganizationInvitationStatus_value[statusKey]; !ok {
+		return organization.OrganizationInvitationStatus_UNKNOWN
+	}
+	switch statusKey {
+	case organization.OrganizationInvitationStatus_PENDING.String():
+		return organization.OrganizationInvitationStatus_PENDING
+	case organization.OrganizationInvitationStatus_ACCEPTED.String():
+		return organization.OrganizationInvitationStatus_ACCEPTED
+	case organization.OrganizationInvitationStatus_REJECTED.String():
+		return organization.OrganizationInvitationStatus_REJECTED
+	default:
+		return organization.OrganizationInvitationStatus_UNKNOWN
 	}
 }
