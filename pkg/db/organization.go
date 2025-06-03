@@ -137,23 +137,17 @@ func (c *Client) RemoveProjectsInOrganization(ctx context.Context, organizationI
 }
 
 func (c *Client) ListOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) ([]*model.OrganizationInvitation, error) {
-	var invitations []*model.OrganizationInvitation
-	var query string
+	query := `select * from organization_invitation oi where 1 = 1`
 	var params []interface{}
-
-	if organizationID > 0 && projectID > 0 {
-		query = `SELECT * FROM organization_invitation WHERE organization_id = ? AND project_id = ?`
-		params = append(params, organizationID, projectID)
-	} else if organizationID > 0 {
-		query = `SELECT * FROM organization_invitation WHERE organization_id = ?`
+	if organizationID != 0 {
+		query += " and oi.organization_id = ?"
 		params = append(params, organizationID)
-	} else if projectID > 0 {
-		query = `SELECT * FROM organization_invitation WHERE project_id = ?`
-		params = append(params, projectID)
-	} else {
-		return nil, errors.New("at least one of organizationID or projectID must be specified")
 	}
-
+	if projectID != 0 {
+		query += " and oi.project_id = ?"
+		params = append(params, projectID)
+	}
+	var invitations []*model.OrganizationInvitation
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&invitations).Error; err != nil {
 		return nil, err
 	}

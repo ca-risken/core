@@ -363,7 +363,7 @@ func TestListOrganizationInvitation(t *testing.T) {
 		},
 		{
 			name:    "NG Invalid params",
-			input:   &organization.ListOrganizationInvitationRequest{OrganizationId: 0, ProjectId: 1},
+			input:   &organization.ListOrganizationInvitationRequest{OrganizationId: 0, ProjectId: 0},
 			wantErr: true,
 		},
 		{

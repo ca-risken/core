@@ -99,6 +99,9 @@ func (o *OrganizationService) ListOrganizationInvitation(ctx context.Context, re
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
+	if req.OrganizationId == 0 && req.ProjectId == 0 {
+		return nil, errors.New("at least one of organizationID or projectID must be specified")
+	}
 	invitations, err := o.repository.ListOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId)
 	if err != nil {
 		return nil, err

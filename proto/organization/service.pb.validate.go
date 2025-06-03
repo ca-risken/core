@@ -943,27 +943,9 @@ func (m *ListOrganizationInvitationRequest) validate(all bool) error {
 
 	var errors []error
 
-	if m.GetOrganizationId() <= 0 {
-		err := ListOrganizationInvitationRequestValidationError{
-			field:  "OrganizationId",
-			reason: "value must be greater than 0",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for OrganizationId
 
-	if m.GetProjectId() <= 0 {
-		err := ListOrganizationInvitationRequestValidationError{
-			field:  "ProjectId",
-			reason: "value must be greater than 0",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for ProjectId
 
 	if len(errors) > 0 {
 		return ListOrganizationInvitationRequestMultiError(errors)
