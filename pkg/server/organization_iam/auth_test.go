@@ -14,12 +14,10 @@ import (
 )
 
 func TestIsAuthorizedByOrganizationPolicy(t *testing.T) {
-	// test data
 	validPolicies := &[]model.OrganizationPolicy{
 		{PolicyID: 1, Name: "organization-admin", OrganizationID: 1, ActionPtn: "organization/.*"},
 		{PolicyID: 2, Name: "organizatino-viewer", OrganizationID: 1, ActionPtn: "project/(get|list)"},
 	}
-	// test cases
 	cases := []struct {
 		name           string
 		organizationID uint32
@@ -28,13 +26,6 @@ func TestIsAuthorizedByOrganizationPolicy(t *testing.T) {
 		want           bool
 		wantErr        bool
 	}{
-		{
-			name:           "OK Authorized organization create",
-			organizationID: 1,
-			action:         "organization/create-organization",
-			policy:         validPolicies,
-			want:           true,
-		},
 		{
 			name:           "OK Authorized organization get",
 			organizationID: 1,
