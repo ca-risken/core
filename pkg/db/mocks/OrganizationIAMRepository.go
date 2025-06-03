@@ -207,6 +207,36 @@ func (_m *OrganizationIAMRepository) GetOrganizationPolicyByName(ctx context.Con
 	return r0, r1
 }
 
+// GetOrganizationPolicyByUserID provides a mock function with given fields: ctx, userID, organizationID
+func (_m *OrganizationIAMRepository) GetOrganizationPolicyByUserID(ctx context.Context, userID uint32, organizationID uint32) (*[]model.OrganizationPolicy, error) {
+	ret := _m.Called(ctx, userID, organizationID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetOrganizationPolicyByUserID")
+	}
+
+	var r0 *[]model.OrganizationPolicy
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) (*[]model.OrganizationPolicy, error)); ok {
+		return rf(ctx, userID, organizationID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) *[]model.OrganizationPolicy); ok {
+		r0 = rf(ctx, userID, organizationID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*[]model.OrganizationPolicy)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
+		r1 = rf(ctx, userID, organizationID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetOrganizationRole provides a mock function with given fields: ctx, organizationID, roleID
 func (_m *OrganizationIAMRepository) GetOrganizationRole(ctx context.Context, organizationID uint32, roleID uint32) (*model.OrganizationRole, error) {
 	ret := _m.Called(ctx, organizationID, roleID)

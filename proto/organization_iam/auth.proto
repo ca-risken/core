@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package core.organization_iam;
+option go_package = "github.com/ca-risken/core/proto/organization_iam";
+
+import "validate/validate.proto";
+
+// IsAuthorizedOrganizationRequest
+message IsAuthorizedOrganizationRequest {
+  uint32 user_id = 1 [ (validate.rules).uint32.gt = 0 ];          // Required
+  uint32 organization_id = 2 [ (validate.rules).uint32.gt = 0 ];  // Required
+  string action_name = 3 [ (validate.rules).string.min_len = 1 ]; // Required
+}
+
+message IsAuthorizedOrganizationResponse { bool ok = 1; }
