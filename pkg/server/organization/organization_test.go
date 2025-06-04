@@ -15,9 +15,6 @@ import (
 	"github.com/ca-risken/core/proto/organization_iam"
 	organization_iammock "github.com/ca-risken/core/proto/organization_iam/mocks"
 	"github.com/ca-risken/core/proto/project"
-	"github.com/stretchr/testify/mock"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
 )
 
@@ -698,74 +695,4 @@ func TestReplyOrganizationInvitation(t *testing.T) {
 			}
 		})
 	}
-}
-
-// MockOrganizationIAMServiceClient is a manual mock for the OrganizationIAMServiceClient
-type MockOrganizationIAMServiceClient struct {
-	mock.Mock
-}
-
-func (m *MockOrganizationIAMServiceClient) ListOrganizationRole(ctx context.Context, in *organization_iam.ListOrganizationRoleRequest, opts ...grpc.CallOption) (*organization_iam.ListOrganizationRoleResponse, error) {
-	args := m.Called(ctx, in)
-	return args.Get(0).(*organization_iam.ListOrganizationRoleResponse), args.Error(1)
-}
-
-func (m *MockOrganizationIAMServiceClient) GetOrganizationRole(ctx context.Context, in *organization_iam.GetOrganizationRoleRequest, opts ...grpc.CallOption) (*organization_iam.GetOrganizationRoleResponse, error) {
-	args := m.Called(ctx, in)
-	return args.Get(0).(*organization_iam.GetOrganizationRoleResponse), args.Error(1)
-}
-
-func (m *MockOrganizationIAMServiceClient) PutOrganizationRole(ctx context.Context, in *organization_iam.PutOrganizationRoleRequest, opts ...grpc.CallOption) (*organization_iam.PutOrganizationRoleResponse, error) {
-	args := m.Called(ctx, in)
-	return args.Get(0).(*organization_iam.PutOrganizationRoleResponse), args.Error(1)
-}
-
-func (m *MockOrganizationIAMServiceClient) DeleteOrganizationRole(ctx context.Context, in *organization_iam.DeleteOrganizationRoleRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	args := m.Called(ctx, in)
-	return args.Get(0).(*emptypb.Empty), args.Error(1)
-}
-
-func (m *MockOrganizationIAMServiceClient) AttachOrganizationRole(ctx context.Context, in *organization_iam.AttachOrganizationRoleRequest, opts ...grpc.CallOption) (*organization_iam.AttachOrganizationRoleResponse, error) {
-	args := m.Called(ctx, in)
-	return args.Get(0).(*organization_iam.AttachOrganizationRoleResponse), args.Error(1)
-}
-
-func (m *MockOrganizationIAMServiceClient) DetachOrganizationRole(ctx context.Context, in *organization_iam.DetachOrganizationRoleRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	args := m.Called(ctx, in)
-	return args.Get(0).(*emptypb.Empty), args.Error(1)
-}
-
-func (m *MockOrganizationIAMServiceClient) ListOrganizationPolicy(ctx context.Context, in *organization_iam.ListOrganizationPolicyRequest, opts ...grpc.CallOption) (*organization_iam.ListOrganizationPolicyResponse, error) {
-	args := m.Called(ctx, in)
-	return args.Get(0).(*organization_iam.ListOrganizationPolicyResponse), args.Error(1)
-}
-
-func (m *MockOrganizationIAMServiceClient) GetOrganizationPolicy(ctx context.Context, in *organization_iam.GetOrganizationPolicyRequest, opts ...grpc.CallOption) (*organization_iam.GetOrganizationPolicyResponse, error) {
-	args := m.Called(ctx, in)
-	return args.Get(0).(*organization_iam.GetOrganizationPolicyResponse), args.Error(1)
-}
-
-func (m *MockOrganizationIAMServiceClient) PutOrganizationPolicy(ctx context.Context, in *organization_iam.PutOrganizationPolicyRequest, opts ...grpc.CallOption) (*organization_iam.PutOrganizationPolicyResponse, error) {
-	args := m.Called(ctx, in)
-	return args.Get(0).(*organization_iam.PutOrganizationPolicyResponse), args.Error(1)
-}
-
-func (m *MockOrganizationIAMServiceClient) DeleteOrganizationPolicy(ctx context.Context, in *organization_iam.DeleteOrganizationPolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	args := m.Called(ctx, in)
-	return args.Get(0).(*emptypb.Empty), args.Error(1)
-}
-
-func (m *MockOrganizationIAMServiceClient) AttachOrganizationPolicy(ctx context.Context, in *organization_iam.AttachOrganizationPolicyRequest, opts ...grpc.CallOption) (*organization_iam.AttachOrganizationPolicyResponse, error) {
-	args := m.Called(ctx, in)
-	return args.Get(0).(*organization_iam.AttachOrganizationPolicyResponse), args.Error(1)
-}
-
-func (m *MockOrganizationIAMServiceClient) DetachOrganizationPolicy(ctx context.Context, in *organization_iam.DetachOrganizationPolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	args := m.Called(ctx, in)
-	return args.Get(0).(*emptypb.Empty), args.Error(1)
-}
-
-func (m *MockOrganizationIAMServiceClient) IsAuthorizedOrganization(ctx context.Context, in *organization_iam.IsAuthorizedOrganizationRequest, opts ...grpc.CallOption) (*organization_iam.IsAuthorizedOrganizationResponse, error) {
-	args := m.Called(ctx, in)
-	return args.Get(0).(*organization_iam.IsAuthorizedOrganizationResponse), args.Error(1)
 }

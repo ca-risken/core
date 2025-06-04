@@ -162,7 +162,7 @@ func (o *OrganizationService) ReplyOrganizationInvitation(ctx context.Context, r
 func (o *OrganizationService) createDefaultRole(ctx context.Context, ownerUserID, organizationID uint32) error {
 	organizationAdmin := "organization-admin"
 	organizationViewer := "organization-viewer"
-	viewerActionPtn := "get|list|is-admin"
+	viewerActionPtn := "get|list|is-admin|put-alert-first-viewed-at"
 
 	for name, actionPtn := range map[string]string{
 		organizationAdmin:  ".*",
