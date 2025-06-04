@@ -66,8 +66,6 @@ func TestListOrganization(t *testing.T) {
 	}
 }
 
-
-
 func TestGetOrganizationByName(t *testing.T) {
 	now := time.Now()
 	type args struct {
@@ -81,9 +79,9 @@ func TestGetOrganizationByName(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{name: "org1"},
-			want: &model.Organization{OrganizationID: 1, Name: "org1", Description: "desc1", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{name: "org1"},
+			want:    &model.Organization{OrganizationID: 1, Name: "org1", Description: "desc1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrganizationByName)).WillReturnRows(sqlmock.NewRows([]string{
@@ -137,9 +135,9 @@ func TestCreateOrganization(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{name: "org1", description: "desc1"},
-			want: &model.Organization{OrganizationID: 1, Name: "org1", Description: "desc1", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{name: "org1", description: "desc1"},
+			want:    &model.Organization{OrganizationID: 1, Name: "org1", Description: "desc1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrganizationByName)).WillReturnError(gorm.ErrRecordNotFound)
@@ -208,9 +206,9 @@ func TestUpdateOrganization(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{organizationID: 1, name: "org1", description: "desc1"},
-			want: &model.Organization{OrganizationID: 1, Name: "org1", Description: "desc1", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{organizationID: 1, name: "org1", description: "desc1"},
+			want:    &model.Organization{OrganizationID: 1, Name: "org1", Description: "desc1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(regexp.QuoteMeta(updateUpdateOrganization)).WillReturnResult(sqlmock.NewResult(1, 1))
@@ -486,9 +484,9 @@ func TestPutOrganizationInvitation(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{organizationID: 1, projectID: 1},
-			want: &model.OrganizationInvitation{OrganizationID: 1, ProjectID: 1, CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{organizationID: 1, projectID: 1},
+			want:    &model.OrganizationInvitation{OrganizationID: 1, ProjectID: 1, CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(regexp.QuoteMeta(putOrganizationInvitation)).WillReturnResult(sqlmock.NewResult(1, 1))

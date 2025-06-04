@@ -89,9 +89,9 @@ func TestGetAlert(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{projectID: 1, alertID: 1},
-			want: &model.Alert{AlertID: 1, ProjectID: 1, Status: "ACTIVE", Severity: "HIGH", Description: "test", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{projectID: 1, alertID: 1},
+			want:    &model.Alert{AlertID: 1, ProjectID: 1, Status: "ACTIVE", Severity: "HIGH", Description: "test", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `alert` WHERE project_id = ? AND alert_id = ? ORDER BY `alert`.`alert_id` LIMIT 1")).WillReturnRows(sqlmock.NewRows([]string{
@@ -144,9 +144,9 @@ func TestUpsertAlert(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{alert: &model.Alert{AlertID: 1, ProjectID: 1, Status: "ACTIVE", Severity: "HIGH", Description: "test"}},
-			want: &model.Alert{AlertID: 1, ProjectID: 1, Status: "ACTIVE", Severity: "HIGH", Description: "test", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{alert: &model.Alert{AlertID: 1, ProjectID: 1, Status: "ACTIVE", Severity: "HIGH", Description: "test"}},
+			want:    &model.Alert{AlertID: 1, ProjectID: 1, Status: "ACTIVE", Severity: "HIGH", Description: "test", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `alert` WHERE project_id = ? AND alert_id = ?")).WillReturnError(gorm.ErrRecordNotFound)
@@ -368,9 +368,9 @@ func TestGetAlertCondition(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{projectID: 1, alertConditionID: 1},
-			want: &model.AlertCondition{AlertConditionID: 1, ProjectID: 1, Severity: "HIGH", Enabled: true, CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{projectID: 1, alertConditionID: 1},
+			want:    &model.AlertCondition{AlertConditionID: 1, ProjectID: 1, Severity: "HIGH", Enabled: true, CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `alert_condition` WHERE project_id = ? AND alert_condition_id = ? ORDER BY `alert_condition`.`alert_condition_id` LIMIT 1")).WillReturnRows(sqlmock.NewRows([]string{
@@ -423,9 +423,9 @@ func TestUpsertAlertCondition(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{alertCondition: &model.AlertCondition{AlertConditionID: 1, ProjectID: 1, Severity: "HIGH", Enabled: true}},
-			want: &model.AlertCondition{AlertConditionID: 1, ProjectID: 1, Severity: "HIGH", Enabled: true, CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{alertCondition: &model.AlertCondition{AlertConditionID: 1, ProjectID: 1, Severity: "HIGH", Enabled: true}},
+			want:    &model.AlertCondition{AlertConditionID: 1, ProjectID: 1, Severity: "HIGH", Enabled: true, CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(regexp.QuoteMeta("INSERT INTO `alert_condition`")).WillReturnResult(sqlmock.NewResult(1, 1))
@@ -587,9 +587,9 @@ func TestGetNotification(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{projectID: 1, notificationID: 1},
-			want: &model.Notification{NotificationID: 1, ProjectID: 1, Name: "notification1", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{projectID: 1, notificationID: 1},
+			want:    &model.Notification{NotificationID: 1, ProjectID: 1, Name: "notification1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `notification` WHERE project_id = ? AND notification_id = ? ORDER BY `notification`.`notification_id` LIMIT 1")).WillReturnRows(sqlmock.NewRows([]string{
@@ -642,9 +642,9 @@ func TestUpsertNotification(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{notification: &model.Notification{NotificationID: 1, ProjectID: 1, Name: "notification1"}},
-			want: &model.Notification{NotificationID: 1, ProjectID: 1, Name: "notification1", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{notification: &model.Notification{NotificationID: 1, ProjectID: 1, Name: "notification1"}},
+			want:    &model.Notification{NotificationID: 1, ProjectID: 1, Name: "notification1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(regexp.QuoteMeta("INSERT INTO `notification`")).WillReturnResult(sqlmock.NewResult(1, 1))

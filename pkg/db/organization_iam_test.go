@@ -85,12 +85,12 @@ func TestGetOrganizationRole(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{organizationID: 1, roleID: 1},
-			want: &model.OrganizationRole{RoleID: 1, OrganizationID: 1, Name: "role1", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{organizationID: 1, roleID: 1},
+			want:    &model.OrganizationRole{RoleID: 1, OrganizationID: 1, Name: "role1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `organization_role` WHERE organization_id = ? AND role_id = ? ORDER BY `organization_role`.`role_id` LIMIT 1")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id =? and r.organization_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 			},
@@ -101,7 +101,7 @@ func TestGetOrganizationRole(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `organization_role` WHERE organization_id = ? AND role_id = ? ORDER BY `organization_role`.`role_id` LIMIT 1")).WillReturnError(errors.New("DB error"))
+				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id =? and r.organization_id = ?")).WillReturnError(errors.New("DB error"))
 			},
 		},
 	}
@@ -141,9 +141,9 @@ func TestGetOrganizationRoleByName(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{organizationID: 1, name: "role1"},
-			want: &model.OrganizationRole{RoleID: 1, OrganizationID: 1, Name: "role1", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{organizationID: 1, name: "role1"},
+			want:    &model.OrganizationRole{RoleID: 1, OrganizationID: 1, Name: "role1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRoleByName)).WillReturnRows(sqlmock.NewRows([]string{
@@ -196,9 +196,9 @@ func TestPutOrganizationRole(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{role: &model.OrganizationRole{RoleID: 1, OrganizationID: 1, Name: "role1"}},
-			want: &model.OrganizationRole{RoleID: 1, OrganizationID: 1, Name: "role1", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{role: &model.OrganizationRole{RoleID: 1, OrganizationID: 1, Name: "role1"}},
+			want:    &model.OrganizationRole{RoleID: 1, OrganizationID: 1, Name: "role1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(regexp.QuoteMeta(putOrganizationRole)).WillReturnResult(sqlmock.NewResult(1, 1))
@@ -369,9 +369,9 @@ func TestGetOrganizationPolicy(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{organizationID: 1, policyID: 1},
-			want: &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{organizationID: 1, policyID: 1},
+			want:    &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationPolicy)).WillReturnRows(sqlmock.NewRows([]string{
@@ -425,9 +425,9 @@ func TestGetOrganizationPolicyByName(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{organizationID: 1, name: "policy1"},
-			want: &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{organizationID: 1, name: "policy1"},
+			want:    &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationPolicyByName)).WillReturnRows(sqlmock.NewRows([]string{
@@ -481,9 +481,9 @@ func TestGetOrganizationPolicyByUserID(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{organizationID: 1, userID: 1},
-			want: &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{organizationID: 1, userID: 1},
+			want:    &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationPolicyByUserID)).WillReturnRows(sqlmock.NewRows([]string{
@@ -536,9 +536,9 @@ func TestPutOrganizationPolicy(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{policy: &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1"}},
-			want: &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{policy: &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1"}},
+			want:    &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(regexp.QuoteMeta(putOrganizationPolicy)).WillReturnResult(sqlmock.NewResult(1, 1))
@@ -650,9 +650,9 @@ func TestAttachOrganizationRole(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{roleID: 1, userID: 1},
-			want: &model.OrganizationRole{RoleID: 1, OrganizationID: 1, Name: "role1", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{roleID: 1, userID: 1},
+			want:    &model.OrganizationRole{RoleID: 1, OrganizationID: 1, Name: "role1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(regexp.QuoteMeta(insertAttachOrganizationRole)).WillReturnResult(sqlmock.NewResult(1, 1))
@@ -764,9 +764,9 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{roleID: 1, policyID: 1},
-			want: &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
+			name:    "OK",
+			args:    args{roleID: 1, policyID: 1},
+			want:    &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(regexp.QuoteMeta(insertAttachOrganizationPolicy)).WillReturnResult(sqlmock.NewResult(1, 1))
