@@ -22,6 +22,7 @@ message CreateOrganizationRequest {
   string name = 1 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
   string description = 2
       [ (validate.rules).string = {min_len : 0, max_len : 255} ];
+  uint32 user_id = 3 [ (validate.rules).uint32.gt = 0 ]; // project owner
 }
 
 message CreateOrganizationResponse { Organization organization = 1; }

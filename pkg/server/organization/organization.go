@@ -3,10 +3,12 @@ package organization
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/organization"
+	"github.com/ca-risken/core/proto/organization_iam"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/golang/protobuf/ptypes/empty"
 	"gorm.io/gorm"
@@ -36,6 +38,9 @@ func (o *OrganizationService) CreateOrganization(ctx context.Context, req *organ
 	}
 	org, err := o.repository.CreateOrganization(ctx, req.Name, req.Description)
 	if err != nil {
+		return nil, err
+	}
+	if err := o.createDefaultRole(ctx, req.UserId, org.OrganizationID); err != nil {
 		return nil, err
 	}
 	o.logger.Infof(ctx, "Organization created: organization=%+v", org)
@@ -152,6 +157,48 @@ func (o *OrganizationService) ReplyOrganizationInvitation(ctx context.Context, r
 		return &organization.ReplyOrganizationInvitationResponse{OrganizationProject: convertOrganizationProject(orgProject)}, nil
 	}
 	return &organization.ReplyOrganizationInvitationResponse{}, nil
+}
+
+func (o *OrganizationService) createDefaultRole(ctx context.Context, ownerUserID, organizationID uint32) error {
+	organizationAdmin := "organization-admin"
+	organizationViewer := "organization-viewer"
+	viewerActionPtn := "get|list|is-admin"
+
+	for name, actionPtn := range map[string]string{
+		organizationAdmin:  ".*",
+		organizationViewer: viewerActionPtn,
+	} {
+		policy, err := o.organizationIamClient.PutOrganizationPolicy(ctx, &organization_iam.PutOrganizationPolicyRequest{
+			OrganizationId: organizationID,
+			Name:           name,
+			ActionPtn:      actionPtn,
+		})
+		if err != nil {
+			return fmt.Errorf("could not put %s-policy, err=%w", name, err)
+		}
+		role, err := o.organizationIamClient.PutOrganizationRole(ctx, &organization_iam.PutOrganizationRoleRequest{
+			OrganizationId: organizationID,
+			Name:           name + "-role",
+		})
+		if err != nil {
+			return fmt.Errorf("could not put %s-role, err=%w", name, err)
+		}
+		if _, err := o.organizationIamClient.AttachOrganizationPolicy(ctx, &organization_iam.AttachOrganizationPolicyRequest{
+			RoleId:   role.Role.RoleId,
+			PolicyId: policy.Policy.PolicyId,
+		}); err != nil {
+			return fmt.Errorf("could not attach %s-policy to %s-role, err=%w", name, name, err)
+		}
+		if name == organizationAdmin {
+			if _, err := o.organizationIamClient.AttachOrganizationRole(ctx, &organization_iam.AttachOrganizationRoleRequest{
+				UserId: ownerUserID,
+				RoleId: role.Role.RoleId,
+			}); err != nil {
+				return fmt.Errorf("could not attach default %s-role to organization owner, err=%w", name, err)
+			}
+		}
+	}
+	return nil
 }
 
 func convertOrganization(o *model.Organization) *organization.Organization {
