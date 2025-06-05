@@ -2261,3 +2261,260 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ReplyOrganizationInvitationResponseValidationError{}
+
+// Validate checks the field values on PutOrganizationProjectRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *PutOrganizationProjectRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on PutOrganizationProjectRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// PutOrganizationProjectRequestMultiError, or nil if none found.
+func (m *PutOrganizationProjectRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *PutOrganizationProjectRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() <= 0 {
+		err := PutOrganizationProjectRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetProjectId() <= 0 {
+		err := PutOrganizationProjectRequestValidationError{
+			field:  "ProjectId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return PutOrganizationProjectRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// PutOrganizationProjectRequestMultiError is an error wrapping multiple
+// validation errors returned by PutOrganizationProjectRequest.ValidateAll()
+// if the designated constraints aren't met.
+type PutOrganizationProjectRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PutOrganizationProjectRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PutOrganizationProjectRequestMultiError) AllErrors() []error { return m }
+
+// PutOrganizationProjectRequestValidationError is the validation error
+// returned by PutOrganizationProjectRequest.Validate if the designated
+// constraints aren't met.
+type PutOrganizationProjectRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PutOrganizationProjectRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PutOrganizationProjectRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PutOrganizationProjectRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PutOrganizationProjectRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PutOrganizationProjectRequestValidationError) ErrorName() string {
+	return "PutOrganizationProjectRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e PutOrganizationProjectRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPutOrganizationProjectRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PutOrganizationProjectRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PutOrganizationProjectRequestValidationError{}
+
+// Validate checks the field values on PutOrganizationProjectResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *PutOrganizationProjectResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on PutOrganizationProjectResponse with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// PutOrganizationProjectResponseMultiError, or nil if none found.
+func (m *PutOrganizationProjectResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *PutOrganizationProjectResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetOrganizationProject()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, PutOrganizationProjectResponseValidationError{
+					field:  "OrganizationProject",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, PutOrganizationProjectResponseValidationError{
+					field:  "OrganizationProject",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetOrganizationProject()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return PutOrganizationProjectResponseValidationError{
+				field:  "OrganizationProject",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return PutOrganizationProjectResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// PutOrganizationProjectResponseMultiError is an error wrapping multiple
+// validation errors returned by PutOrganizationProjectResponse.ValidateAll()
+// if the designated constraints aren't met.
+type PutOrganizationProjectResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PutOrganizationProjectResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PutOrganizationProjectResponseMultiError) AllErrors() []error { return m }
+
+// PutOrganizationProjectResponseValidationError is the validation error
+// returned by PutOrganizationProjectResponse.Validate if the designated
+// constraints aren't met.
+type PutOrganizationProjectResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PutOrganizationProjectResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PutOrganizationProjectResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PutOrganizationProjectResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PutOrganizationProjectResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PutOrganizationProjectResponseValidationError) ErrorName() string {
+	return "PutOrganizationProjectResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e PutOrganizationProjectResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPutOrganizationProjectResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PutOrganizationProjectResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PutOrganizationProjectResponseValidationError{}

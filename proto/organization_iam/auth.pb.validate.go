@@ -277,3 +277,216 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = IsAuthorizedOrganizationResponseValidationError{}
+
+// Validate checks the field values on IsAdminRequest with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *IsAdminRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on IsAdminRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in IsAdminRequestMultiError,
+// or nil if none found.
+func (m *IsAdminRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *IsAdminRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetUserId() <= 0 {
+		err := IsAdminRequestValidationError{
+			field:  "UserId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return IsAdminRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// IsAdminRequestMultiError is an error wrapping multiple validation errors
+// returned by IsAdminRequest.ValidateAll() if the designated constraints
+// aren't met.
+type IsAdminRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m IsAdminRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m IsAdminRequestMultiError) AllErrors() []error { return m }
+
+// IsAdminRequestValidationError is the validation error returned by
+// IsAdminRequest.Validate if the designated constraints aren't met.
+type IsAdminRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e IsAdminRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e IsAdminRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e IsAdminRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e IsAdminRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e IsAdminRequestValidationError) ErrorName() string { return "IsAdminRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e IsAdminRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sIsAdminRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = IsAdminRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = IsAdminRequestValidationError{}
+
+// Validate checks the field values on IsAdminResponse with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *IsAdminResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on IsAdminResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// IsAdminResponseMultiError, or nil if none found.
+func (m *IsAdminResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *IsAdminResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Ok
+
+	if len(errors) > 0 {
+		return IsAdminResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// IsAdminResponseMultiError is an error wrapping multiple validation errors
+// returned by IsAdminResponse.ValidateAll() if the designated constraints
+// aren't met.
+type IsAdminResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m IsAdminResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m IsAdminResponseMultiError) AllErrors() []error { return m }
+
+// IsAdminResponseValidationError is the validation error returned by
+// IsAdminResponse.Validate if the designated constraints aren't met.
+type IsAdminResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e IsAdminResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e IsAdminResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e IsAdminResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e IsAdminResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e IsAdminResponseValidationError) ErrorName() string { return "IsAdminResponseValidationError" }
+
+// Error satisfies the builtin error interface
+func (e IsAdminResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sIsAdminResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = IsAdminResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = IsAdminResponseValidationError{}

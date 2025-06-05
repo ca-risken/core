@@ -157,3 +157,80 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 		})
 	}
 }
+
+func TestIsAdmin(t *testing.T) {
+	cases := []struct {
+		name         string
+		input        *organization_iam.IsAdminRequest
+		want         *organization_iam.IsAdminResponse
+		wantErr      bool
+		mockResponse *[]model.OrganizationPolicy
+		mockError    error
+	}{
+		{
+			name:  "OK Admin user",
+			input: &organization_iam.IsAdminRequest{UserId: 111},
+			want:  &organization_iam.IsAdminResponse{Ok: true},
+			mockResponse: &[]model.OrganizationPolicy{
+				{PolicyID: 101, Name: "organization-admin", OrganizationID: 1, ActionPtn: ".*"},
+			},
+		},
+		{
+			name:  "OK Non-admin user - different organization",
+			input: &organization_iam.IsAdminRequest{UserId: 222},
+			want:  &organization_iam.IsAdminResponse{Ok: false},
+			mockResponse: &[]model.OrganizationPolicy{
+				{PolicyID: 102, Name: "organization-admin", OrganizationID: 2, ActionPtn: ".*"}, // Different organization
+			},
+		},
+		{
+			name:  "OK Non-admin user - different policy name",
+			input: &organization_iam.IsAdminRequest{UserId: 333},
+			want:  &organization_iam.IsAdminResponse{Ok: false},
+			mockResponse: &[]model.OrganizationPolicy{
+				{PolicyID: 103, Name: "organization-viewer", OrganizationID: 1, ActionPtn: "organization/(get|list)"}, // Different policy name
+			},
+		},
+		{
+			name:      "OK No admin policies found",
+			input:     &organization_iam.IsAdminRequest{UserId: 444},
+			want:      &organization_iam.IsAdminResponse{Ok: false},
+			mockError: gorm.ErrRecordNotFound,
+		},
+		{
+			name:    "NG Invalid params - user_id is zero",
+			input:   &organization_iam.IsAdminRequest{UserId: 0},
+			wantErr: true,
+		},
+		{
+			name:      "NG Database error",
+			input:     &organization_iam.IsAdminRequest{UserId: 555},
+			mockError: gorm.ErrInvalidDB,
+			wantErr:   true,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			mockRepo := mocks.NewOrganizationIAMRepository(t)
+			logger := logging.NewLogger()
+			svc := NewOrganizationIAMService(mockRepo, logger)
+
+			if c.mockResponse != nil || c.mockError != nil {
+				mockRepo.On("GetAdminOrganizationPolicy", test.RepeatMockAnything(2)...).Return(c.mockResponse, c.mockError).Once()
+			}
+
+			result, err := svc.IsAdmin(ctx, c.input)
+			if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if c.wantErr && err == nil {
+				t.Fatal("Expected error but got nil")
+			}
+			if !c.wantErr && !reflect.DeepEqual(result, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
+			}
+		})
+	}
+}

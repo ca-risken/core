@@ -346,10 +346,3 @@ func compilableRegexp(ptn string) validation.RuleFunc {
 		return nil
 	}
 }
-
-// Validate IsAdmin
-func (i *IsAdminRequest) Validate() error {
-	return validation.ValidateStruct(i,
-		validation.Field(&i.UserId, validation.Required),
-	)
-}

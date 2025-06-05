@@ -13,10 +13,12 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
+	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/project"
 	"gorm.io/gorm"
 
 	iammock "github.com/ca-risken/core/proto/iam/mocks"
+	organizationmock "github.com/ca-risken/core/proto/organization/mocks"
 )
 
 func TestListProject(t *testing.T) {
@@ -89,17 +91,20 @@ func TestListProject(t *testing.T) {
 func TestCreateProject(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
-		name                  string
-		input                 *project.CreateProjectRequest
-		want                  *project.CreateProjectResponse
-		wantErr               bool
-		createProjectResponse *model.Project
-		createProjectError    error
-		putPolicyResponse     *iam.PutPolicyResponse
-		putRoleResponce       *iam.PutRoleResponse
-		attachPolicyResponse  *iam.AttachPolicyResponse
-		attachRoleResponse    *iam.AttachRoleResponse
-		mockIAMError          error
+		name                           string
+		input                          *project.CreateProjectRequest
+		want                           *project.CreateProjectResponse
+		wantErr                        bool
+		createProjectResponse          *model.Project
+		createProjectError             error
+		putPolicyResponse              *iam.PutPolicyResponse
+		putRoleResponce                *iam.PutRoleResponse
+		attachPolicyResponse           *iam.AttachPolicyResponse
+		attachRoleResponse             *iam.AttachRoleResponse
+		mockIAMError                   error
+		listOrganizationResponse       *organization.ListOrganizationResponse
+		putOrganizationProjectResponse *organization.PutOrganizationProjectResponse
+		mockOrganizationError          error
 	}{
 		{
 			name:                  "OK",
@@ -110,6 +115,12 @@ func TestCreateProject(t *testing.T) {
 			putPolicyResponse:     &iam.PutPolicyResponse{Policy: &iam.Policy{PolicyId: 1, Name: "nm", ActionPtn: "ap", ResourcePtn: "rp", ProjectId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			attachPolicyResponse:  &iam.AttachPolicyResponse{RolePolicy: &iam.RolePolicy{RoleId: 1, ProjectId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			attachRoleResponse:    &iam.AttachRoleResponse{UserRole: &iam.UserRole{RoleId: 1, ProjectId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			listOrganizationResponse: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{{OrganizationId: 1, Name: "Admin Organization"}},
+			},
+			putOrganizationProjectResponse: &organization.PutOrganizationProjectResponse{
+				OrganizationProject: &organization.OrganizationProject{OrganizationId: 1, ProjectId: 1},
+			},
 		},
 		{
 			name:    "NG Invalid param",
@@ -130,22 +141,38 @@ func TestCreateProject(t *testing.T) {
 			mockIAMError:          errors.New("Something error occured"),
 			wantErr:               true,
 		},
+		{
+			name:                  "OK with organization service error (should not fail)",
+			input:                 &project.CreateProjectRequest{UserId: 1, Name: "nm"},
+			want:                  &project.CreateProjectResponse{Project: &project.Project{ProjectId: 1, Name: "nm", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			createProjectResponse: &model.Project{ProjectID: 1, Name: "nm", CreatedAt: now, UpdatedAt: now},
+			putRoleResponce:       &iam.PutRoleResponse{Role: &iam.Role{RoleId: 1, ProjectId: 1, Name: "nm", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			putPolicyResponse:     &iam.PutPolicyResponse{Policy: &iam.Policy{PolicyId: 1, Name: "nm", ActionPtn: "ap", ResourcePtn: "rp", ProjectId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			attachPolicyResponse:  &iam.AttachPolicyResponse{RolePolicy: &iam.RolePolicy{RoleId: 1, ProjectId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			attachRoleResponse:    &iam.AttachRoleResponse{UserRole: &iam.UserRole{RoleId: 1, ProjectId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			listOrganizationResponse: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{{OrganizationId: 1, Name: "Admin Organization"}},
+			},
+			mockOrganizationError: errors.New("Organization service error"),
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mockDB := mocks.NewProjectRepository(t)
 			mockIAM := iammock.NewIAMServiceClient(t)
+			mockOrganization := organizationmock.NewOrganizationServiceClient(t)
 			svc := ProjectService{
-				repository: mockDB,
-				iamClient:  mockIAM,
-				logger:     logging.NewLogger(),
+				repository:         mockDB,
+				iamClient:          mockIAM,
+				organizationClient: mockOrganization,
+				logger:             logging.NewLogger(),
 			}
 			if c.createProjectResponse != nil || c.createProjectError != nil {
 				mockDB.On("CreateProject", test.RepeatMockAnything(2)...).Return(c.createProjectResponse, c.createProjectError).Once()
 			}
 			if c.putPolicyResponse != nil {
-				if c.wantErr {
+				if c.wantErr && c.mockIAMError != nil {
 					mockIAM.On("PutPolicy", test.RepeatMockAnything(2)...).Return(c.putPolicyResponse, c.mockIAMError).Once()
 				} else {
 					mockIAM.On("PutPolicy", test.RepeatMockAnything(2)...).Return(c.putPolicyResponse, c.mockIAMError).Times(3)
@@ -159,6 +186,12 @@ func TestCreateProject(t *testing.T) {
 			}
 			if c.attachRoleResponse != nil {
 				mockIAM.On("AttachRole", test.RepeatMockAnything(2)...).Return(c.attachRoleResponse, c.mockIAMError).Once()
+			}
+			if c.listOrganizationResponse != nil {
+				mockOrganization.On("ListOrganization", test.RepeatMockAnything(2)...).Return(c.listOrganizationResponse, c.mockOrganizationError).Once()
+			}
+			if c.putOrganizationProjectResponse != nil {
+				mockOrganization.On("PutOrganizationProject", test.RepeatMockAnything(2)...).Return(c.putOrganizationProjectResponse, c.mockOrganizationError).Once()
 			}
 			result, err := svc.CreateProject(ctx, c.input)
 			if !c.wantErr && err != nil {

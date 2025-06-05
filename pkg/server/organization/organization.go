@@ -100,6 +100,18 @@ func (o *OrganizationService) RemoveProjectsInOrganization(ctx context.Context, 
 	return &empty.Empty{}, nil
 }
 
+func (o *OrganizationService) PutOrganizationProject(ctx context.Context, req *organization.PutOrganizationProjectRequest) (*organization.PutOrganizationProjectResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	orgProject, err := o.repository.PutOrganizationProject(ctx, req.OrganizationId, req.ProjectId)
+	if err != nil {
+		return nil, err
+	}
+	o.logger.Infof(ctx, "Project added to organization: organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
+	return &organization.PutOrganizationProjectResponse{OrganizationProject: convertOrganizationProject(orgProject)}, nil
+}
+
 func (o *OrganizationService) ListOrganizationInvitation(ctx context.Context, req *organization.ListOrganizationInvitationRequest) (*organization.ListOrganizationInvitationResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err

@@ -132,6 +132,101 @@ func (x *IsAuthorizedOrganizationResponse) GetOk() bool {
 	return false
 }
 
+// IsAdminRequest
+type IsAdminRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId uint32 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // Required
+}
+
+func (x *IsAdminRequest) Reset() {
+	*x = IsAdminRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_iam_auth_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *IsAdminRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IsAdminRequest) ProtoMessage() {}
+
+func (x *IsAdminRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_iam_auth_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IsAdminRequest.ProtoReflect.Descriptor instead.
+func (*IsAdminRequest) Descriptor() ([]byte, []int) {
+	return file_organization_iam_auth_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *IsAdminRequest) GetUserId() uint32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type IsAdminResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Ok bool `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+}
+
+func (x *IsAdminResponse) Reset() {
+	*x = IsAdminResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_iam_auth_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *IsAdminResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IsAdminResponse) ProtoMessage() {}
+
+func (x *IsAdminResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_iam_auth_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IsAdminResponse.ProtoReflect.Descriptor instead.
+func (*IsAdminResponse) Descriptor() ([]byte, []int) {
+	return file_organization_iam_auth_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *IsAdminResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
 var File_organization_iam_auth_proto protoreflect.FileDescriptor
 
 var file_organization_iam_auth_proto_rawDesc = []byte{
@@ -153,10 +248,16 @@ var file_organization_iam_auth_proto_rawDesc = []byte{
 	0x32, 0x0a, 0x20, 0x49, 0x73, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x65, 0x64, 0x4f,
 	0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f,
 	0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x6f, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52,
-	0x02, 0x6f, 0x6b, 0x42, 0x32, 0x5a, 0x30, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69, 0x73, 0x6b, 0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65,
-	0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x02, 0x6f, 0x6b, 0x22, 0x32, 0x0a, 0x0e, 0x49, 0x73, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x20, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52,
+	0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x21, 0x0a, 0x0f, 0x49, 0x73, 0x41, 0x64, 0x6d,
+	0x69, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x6f, 0x6b,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x02, 0x6f, 0x6b, 0x42, 0x32, 0x5a, 0x30, 0x67, 0x69,
+	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69, 0x73, 0x6b,
+	0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x6f, 0x72,
+	0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -171,10 +272,12 @@ func file_organization_iam_auth_proto_rawDescGZIP() []byte {
 	return file_organization_iam_auth_proto_rawDescData
 }
 
-var file_organization_iam_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_organization_iam_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_organization_iam_auth_proto_goTypes = []interface{}{
 	(*IsAuthorizedOrganizationRequest)(nil),  // 0: core.organization_iam.IsAuthorizedOrganizationRequest
 	(*IsAuthorizedOrganizationResponse)(nil), // 1: core.organization_iam.IsAuthorizedOrganizationResponse
+	(*IsAdminRequest)(nil),                   // 2: core.organization_iam.IsAdminRequest
+	(*IsAdminResponse)(nil),                  // 3: core.organization_iam.IsAdminResponse
 }
 var file_organization_iam_auth_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -214,6 +317,30 @@ func file_organization_iam_auth_proto_init() {
 				return nil
 			}
 		}
+		file_organization_iam_auth_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*IsAdminRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_organization_iam_auth_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*IsAdminResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -221,7 +348,7 @@ func file_organization_iam_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_organization_iam_auth_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

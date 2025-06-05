@@ -8,6 +8,7 @@ import (
 	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/iam"
+	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/golang/protobuf/ptypes/empty"
 	"gorm.io/gorm"
@@ -73,6 +74,11 @@ func (p *ProjectService) CreateProject(ctx context.Context, req *project.CreateP
 	}
 	if err := p.createDefaultRole(ctx, req.UserId, pr.ProjectID); err != nil {
 		return nil, err
+	}
+	if err := p.addProjectToAdminOrganization(ctx, pr.ProjectID); err != nil {
+		p.logger.Warnf(ctx, "Failed to add project to Admin Organization: project_id=%d, error=%v", pr.ProjectID, err)
+		// Note: We don't return error here to avoid rolling back project creation
+		// Admin can manually add projects to Admin Organization if needed
 	}
 	p.logger.Infof(ctx, "Project created: owner=%d, project=%+v", req.UserId, pr)
 
@@ -192,4 +198,28 @@ func (p *ProjectService) CleanProject(ctx context.Context, _ *empty.Empty) (*emp
 		return nil, err
 	}
 	return &empty.Empty{}, nil
+}
+
+func (p *ProjectService) addProjectToAdminOrganization(ctx context.Context, projectID uint32) error {
+	const adminOrganizationID = 1
+
+	orgs, err := p.organizationClient.ListOrganization(ctx, &organization.ListOrganizationRequest{
+		OrganizationId: adminOrganizationID,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to check admin organization: %w", err)
+	}
+	if len(orgs.Organization) == 0 {
+		return fmt.Errorf("admin organization (ID=%d) not found", adminOrganizationID)
+	}
+	_, err = p.organizationClient.PutOrganizationProject(ctx, &organization.PutOrganizationProjectRequest{
+		OrganizationId: adminOrganizationID,
+		ProjectId:      projectID,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to add project to Admin Organization: %w", err)
+	}
+
+	p.logger.Infof(ctx, "Project added to Admin Organization: project_id=%d, organization_id=%d", projectID, adminOrganizationID)
+	return nil
 }

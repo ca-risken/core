@@ -102,23 +102,3 @@ func isAuthorizedByPolicy(projectID uint32, action, resource string, policies *[
 	return false, nil
 
 }
-
-func (i *IAMService) IsAdmin(ctx context.Context, req *iam.IsAdminRequest) (*iam.IsAdminResponse, error) {
-	if err := req.Validate(); err != nil {
-		return nil, err
-	}
-
-	policy, err := i.repository.GetAdminPolicy(ctx, req.UserId)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &iam.IsAdminResponse{Ok: false}, nil
-		}
-		return nil, err
-	}
-	if policy == nil || len(*policy) < 1 {
-		return &iam.IsAdminResponse{Ok: false}, nil
-	}
-	i.logger.Debugf(ctx, "user(%d) is admin, policies: %d", req.UserId, len(*policy))
-
-	return &iam.IsAdminResponse{Ok: true}, nil
-}

@@ -13,3 +13,10 @@ message IsAuthorizedOrganizationRequest {
 }
 
 message IsAuthorizedOrganizationResponse { bool ok = 1; }
+
+// IsAdminRequest
+message IsAdminRequest {
+  uint32 user_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+}
+
+message IsAdminResponse { bool ok = 1; }

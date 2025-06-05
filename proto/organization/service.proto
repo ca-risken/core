@@ -101,6 +101,16 @@ message ReplyOrganizationInvitationResponse {
   OrganizationProject organization_project = 1;
 }
 
+// Put Organization Project (Create or Update)
+message PutOrganizationProjectRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
+}
+
+message PutOrganizationProjectResponse {
+  OrganizationProject organization_project = 1;
+}
+
 // Organization service
 service OrganizationService {
   // Organization
@@ -116,6 +126,8 @@ service OrganizationService {
   // Organization Project
   rpc ListProjectsInOrganization(ListProjectsInOrganizationRequest)
       returns (ListProjectsInOrganizationResponse) {}
+  rpc PutOrganizationProject(PutOrganizationProjectRequest)
+      returns (PutOrganizationProjectResponse) {}
   rpc RemoveProjectsInOrganization(RemoveProjectsInOrganizationRequest)
       returns (google.protobuf.Empty) {}
 

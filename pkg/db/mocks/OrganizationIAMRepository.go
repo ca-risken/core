@@ -147,6 +147,36 @@ func (_m *OrganizationIAMRepository) DetachOrganizationRole(ctx context.Context,
 	return r0
 }
 
+// GetAdminOrganizationPolicy provides a mock function with given fields: ctx, userID
+func (_m *OrganizationIAMRepository) GetAdminOrganizationPolicy(ctx context.Context, userID uint32) (*[]model.OrganizationPolicy, error) {
+	ret := _m.Called(ctx, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetAdminOrganizationPolicy")
+	}
+
+	var r0 *[]model.OrganizationPolicy
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) (*[]model.OrganizationPolicy, error)); ok {
+		return rf(ctx, userID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) *[]model.OrganizationPolicy); ok {
+		r0 = rf(ctx, userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*[]model.OrganizationPolicy)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32) error); ok {
+		r1 = rf(ctx, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetOrganizationPolicy provides a mock function with given fields: ctx, organizationID, policyID
 func (_m *OrganizationIAMRepository) GetOrganizationPolicy(ctx context.Context, organizationID uint32, policyID uint32) (*model.OrganizationPolicy, error) {
 	ret := _m.Called(ctx, organizationID, policyID)

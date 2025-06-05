@@ -573,43 +573,6 @@ func (_m *IAMServiceClient) GetUser(ctx context.Context, in *iam.GetUserRequest,
 	return r0, r1
 }
 
-// IsAdmin provides a mock function with given fields: ctx, in, opts
-func (_m *IAMServiceClient) IsAdmin(ctx context.Context, in *iam.IsAdminRequest, opts ...grpc.CallOption) (*iam.IsAdminResponse, error) {
-	_va := make([]interface{}, len(opts))
-	for _i := range opts {
-		_va[_i] = opts[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, in)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
-
-	if len(ret) == 0 {
-		panic("no return value specified for IsAdmin")
-	}
-
-	var r0 *iam.IsAdminResponse
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *iam.IsAdminRequest, ...grpc.CallOption) (*iam.IsAdminResponse, error)); ok {
-		return rf(ctx, in, opts...)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, *iam.IsAdminRequest, ...grpc.CallOption) *iam.IsAdminResponse); ok {
-		r0 = rf(ctx, in, opts...)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*iam.IsAdminResponse)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, *iam.IsAdminRequest, ...grpc.CallOption) error); ok {
-		r1 = rf(ctx, in, opts...)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // IsAuthorized provides a mock function with given fields: ctx, in, opts
 func (_m *IAMServiceClient) IsAuthorized(ctx context.Context, in *iam.IsAuthorizedRequest, opts ...grpc.CallOption) (*iam.IsAuthorizedResponse, error) {
 	_va := make([]interface{}, len(opts))

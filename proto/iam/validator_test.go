@@ -1210,7 +1210,7 @@ func TestValidate_IsAuthorizedTokenRequest(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG Required(projectID)",
+			name:    "NG Required(project_id)",
 			input:   &IsAuthorizedTokenRequest{AccessTokenId: 1, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/hoge-bucket"},
 			wantErr: true,
 		},
@@ -1237,35 +1237,6 @@ func TestValidate_IsAuthorizedTokenRequest(t *testing.T) {
 		{
 			name:    "NG Invalid format(ResourceName)",
 			input:   &IsAuthorizedTokenRequest{AccessTokenId: 1, ProjectId: 1, ActionName: "finding/PutFinding", ResourceName: "/hoge-bucket"},
-			wantErr: true,
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			err := c.input.Validate()
-			if c.wantErr && err == nil {
-				t.Fatal("Unexpected no error")
-			} else if !c.wantErr && err != nil {
-				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
-			}
-		})
-	}
-}
-
-func TestValidate_IsAdminRequest(t *testing.T) {
-	cases := []struct {
-		name    string
-		input   *IsAdminRequest
-		wantErr bool
-	}{
-		{
-			name:    "OK",
-			input:   &IsAdminRequest{UserId: 1},
-			wantErr: false,
-		},
-		{
-			name:    "NG Required(userID)",
-			input:   &IsAdminRequest{UserId: 0},
 			wantErr: true,
 		},
 	}

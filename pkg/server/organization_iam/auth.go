@@ -51,3 +51,30 @@ func isAuthorizedByOrganizationPolicy(action string, policies *[]model.Organizat
 	}
 	return false, nil
 }
+
+func (o *OrganizationIAMService) IsAdmin(ctx context.Context, req *organization_iam.IsAdminRequest) (*organization_iam.IsAdminResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	policy, err := o.repository.GetAdminOrganizationPolicy(ctx, req.UserId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &organization_iam.IsAdminResponse{Ok: false}, nil
+		}
+		return nil, err
+	}
+	if policy == nil || len(*policy) < 1 {
+		return &organization_iam.IsAdminResponse{Ok: false}, nil
+	}
+
+	// Check if user has organization-admin policy in Admin Organization (ID=1)
+	for _, p := range *policy {
+		if p.OrganizationID == 1 && p.Name == "organization-admin" {
+			o.logger.Debugf(ctx, "user(%d) is admin with organization-admin policy in Admin Organization", req.UserId)
+			return &organization_iam.IsAdminResponse{Ok: true}, nil
+		}
+	}
+
+	o.logger.Debugf(ctx, "user(%d) has Admin Organization policies but no organization-admin role, policies: %d", req.UserId, len(*policy))
+	return &organization_iam.IsAdminResponse{Ok: false}, nil
+}

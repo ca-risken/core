@@ -1,4 +1,4 @@
-TARGETS = ai alert finding iam project report organization_iam
+TARGETS = ai alert finding iam project report organization_iam organization
 MOCK_TARGETS = $(TARGETS:=.mock)
 BUILD_OPT=""
 IMAGE_TAG=latest

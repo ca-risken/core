@@ -256,6 +256,36 @@ func (_m *OrganizationIAMServiceServer) GetOrganizationRole(_a0 context.Context,
 	return r0, r1
 }
 
+// IsAdmin provides a mock function with given fields: _a0, _a1
+func (_m *OrganizationIAMServiceServer) IsAdmin(_a0 context.Context, _a1 *organization_iam.IsAdminRequest) (*organization_iam.IsAdminResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsAdmin")
+	}
+
+	var r0 *organization_iam.IsAdminResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.IsAdminRequest) (*organization_iam.IsAdminResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.IsAdminRequest) *organization_iam.IsAdminResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization_iam.IsAdminResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.IsAdminRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // IsAuthorizedOrganization provides a mock function with given fields: _a0, _a1
 func (_m *OrganizationIAMServiceServer) IsAuthorizedOrganization(_a0 context.Context, _a1 *organization_iam.IsAuthorizedOrganizationRequest) (*organization_iam.IsAuthorizedOrganizationResponse, error) {
 	ret := _m.Called(_a0, _a1)
