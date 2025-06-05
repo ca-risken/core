@@ -67,13 +67,20 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 	if !noRecord {
 		userID = savedData.UserID
 	}
+
+	isAdmin := req.User.IsAdmin
+	if isFisrstUser {
+		isAdmin = true
+		i.logger.Infof(ctx, "Setting first user as admin, sub=%s", req.User.Sub)
+	}
+
 	u := &model.User{
 		UserID:     userID,
 		Sub:        req.User.Sub,
 		Name:       req.User.Name,
 		UserIdpKey: req.User.UserIdpKey,
 		Activated:  req.User.Activated,
-		IsAdmin:    req.User.IsAdmin,
+		IsAdmin:    isAdmin,
 	}
 	var registerdData *model.User
 	// 登録済みユーザーの場合、update
@@ -89,13 +96,6 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 		}
 	}
 
-	if isFisrstUser {
-		// attach admin roles
-		if err := i.repository.AttachAllAdminRole(ctx, registerdData.UserID); err != nil {
-			return nil, err
-		}
-		i.logger.Infof(ctx, "Attach admin role for first user, user_id=%d", registerdData.UserID)
-	}
 	// 新規ユーザーの場合、user_reservedからロールの追加
 	if userID == 0 {
 		if err := i.AttachRoleByUserReserved(ctx, registerdData.UserID, registerdData.UserIdpKey); err != nil {
