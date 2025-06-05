@@ -73,6 +73,7 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 		Name:       req.User.Name,
 		UserIdpKey: req.User.UserIdpKey,
 		Activated:  req.User.Activated,
+		IsAdmin:    req.User.IsAdmin,
 	}
 	var registerdData *model.User
 	// 登録済みユーザーの場合、update
@@ -112,6 +113,7 @@ func convertUser(u *model.User) *iam.User {
 		Name:       u.Name,
 		UserIdpKey: u.UserIdpKey,
 		Activated:  u.Activated,
+		IsAdmin:    u.IsAdmin,
 		CreatedAt:  u.CreatedAt.Unix(),
 		UpdatedAt:  u.UpdatedAt.Unix(),
 	}
