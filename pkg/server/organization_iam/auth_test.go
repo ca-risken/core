@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
@@ -145,6 +146,73 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 			}
 
 			result, err := svc.IsAuthorizedOrganization(ctx, c.input)
+			if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if c.wantErr && err == nil {
+				t.Fatal("Expected error but got nil")
+			}
+			if !c.wantErr && !reflect.DeepEqual(result, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
+			}
+		})
+	}
+}
+
+func TestGetSystemAdminOrganizationPolicy(t *testing.T) {
+	mockTime := time.Date(2020, 12, 31, 23, 59, 59, 0, time.UTC)
+	cases := []struct {
+		name         string
+		input        *organization_iam.GetSystemAdminOrganizationPolicyRequest
+		want         *organization_iam.GetSystemAdminOrganizationPolicyResponse
+		wantErr      bool
+		mockResponse *[]model.OrganizationPolicy
+		mockError    error
+	}{
+		{
+			name: "OK System admin with policies",
+			input: &organization_iam.GetSystemAdminOrganizationPolicyRequest{
+				UserId: 1,
+			},
+			want: &organization_iam.GetSystemAdminOrganizationPolicyResponse{
+				OrganizationPolicies: []*organization_iam.OrganizationPolicy{
+					{PolicyId: 1, Name: "system-admin", OrganizationId: 0, ActionPtn: ".*", CreatedAt: mockTime.Unix(), UpdatedAt: mockTime.Unix()},
+				},
+			},
+			mockResponse: &[]model.OrganizationPolicy{
+				{PolicyID: 1, Name: "system-admin", OrganizationID: 0, ActionPtn: ".*", CreatedAt: mockTime, UpdatedAt: mockTime},
+			},
+		},
+		{
+			name: "OK No system admin policies",
+			input: &organization_iam.GetSystemAdminOrganizationPolicyRequest{
+				UserId: 1,
+			},
+			want:      &organization_iam.GetSystemAdminOrganizationPolicyResponse{},
+			mockError: gorm.ErrRecordNotFound,
+		},
+		{
+			name: "NG Invalid DB error",
+			input: &organization_iam.GetSystemAdminOrganizationPolicyRequest{
+				UserId: 1,
+			},
+			mockError: gorm.ErrInvalidDB,
+			wantErr:   true,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			mockRepo := mocks.NewOrganizationIAMRepository(t)
+			logger := logging.NewLogger()
+			svc := NewOrganizationIAMService(mockRepo, logger)
+
+			if c.mockResponse != nil || c.mockError != nil {
+				mockRepo.On("GetSystemAdminOrganizationPolicy", test.RepeatMockAnything(2)...).Return(c.mockResponse, c.mockError).Once()
+			}
+
+			result, err := svc.GetSystemAdminOrganizationPolicy(ctx, c.input)
 			if !c.wantErr && err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
 			}

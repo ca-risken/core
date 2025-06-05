@@ -3,6 +3,7 @@ syntax = "proto3";
 package core.organization_iam;
 option go_package = "github.com/ca-risken/core/proto/organization_iam";
 
+import "organization_iam/entity.proto";
 import "validate/validate.proto";
 
 // IsAuthorizedOrganizationRequest
@@ -13,3 +14,12 @@ message IsAuthorizedOrganizationRequest {
 }
 
 message IsAuthorizedOrganizationResponse { bool ok = 1; }
+
+// GetSystemAdminOrganizationPolicy
+message GetSystemAdminOrganizationPolicyRequest {
+  uint32 user_id = 1; // Required
+}
+
+message GetSystemAdminOrganizationPolicyResponse {
+  repeated OrganizationPolicy organization_policies = 1;
+}

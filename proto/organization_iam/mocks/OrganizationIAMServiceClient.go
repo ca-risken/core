@@ -314,6 +314,43 @@ func (_m *OrganizationIAMServiceClient) GetOrganizationRole(ctx context.Context,
 	return r0, r1
 }
 
+// GetSystemAdminOrganizationPolicy provides a mock function with given fields: ctx, in, opts
+func (_m *OrganizationIAMServiceClient) GetSystemAdminOrganizationPolicy(ctx context.Context, in *organization_iam.GetSystemAdminOrganizationPolicyRequest, opts ...grpc.CallOption) (*organization_iam.GetSystemAdminOrganizationPolicyResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetSystemAdminOrganizationPolicy")
+	}
+
+	var r0 *organization_iam.GetSystemAdminOrganizationPolicyResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.GetSystemAdminOrganizationPolicyRequest, ...grpc.CallOption) (*organization_iam.GetSystemAdminOrganizationPolicyResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.GetSystemAdminOrganizationPolicyRequest, ...grpc.CallOption) *organization_iam.GetSystemAdminOrganizationPolicyResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization_iam.GetSystemAdminOrganizationPolicyResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.GetSystemAdminOrganizationPolicyRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // IsAuthorizedOrganization provides a mock function with given fields: ctx, in, opts
 func (_m *OrganizationIAMServiceClient) IsAuthorizedOrganization(ctx context.Context, in *organization_iam.IsAuthorizedOrganizationRequest, opts ...grpc.CallOption) (*organization_iam.IsAuthorizedOrganizationResponse, error) {
 	_va := make([]interface{}, len(opts))

@@ -40,4 +40,6 @@ service OrganizationIAMService {
   // Authorization
   rpc IsAuthorizedOrganization(IsAuthorizedOrganizationRequest)
       returns (IsAuthorizedOrganizationResponse);
+  rpc GetSystemAdminOrganizationPolicy(GetSystemAdminOrganizationPolicyRequest)
+      returns (GetSystemAdminOrganizationPolicyResponse);
 }

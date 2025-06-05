@@ -10,6 +10,8 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
+	"github.com/ca-risken/core/proto/organization_iam"
+	oimocks "github.com/ca-risken/core/proto/organization_iam/mocks"
 	"gorm.io/gorm"
 )
 
@@ -71,27 +73,46 @@ func TestIsAuthorized(t *testing.T) {
 
 func TestIsAuthorizedAdmin(t *testing.T) {
 	cases := []struct {
-		name         string
-		input        *iam.IsAuthorizedAdminRequest
-		want         *iam.IsAuthorizedAdminResponse
-		wantErr      bool
-		mockResponce *[]model.Policy
-		mockError    error
+		name            string
+		input           *iam.IsAuthorizedAdminRequest
+		want            *iam.IsAuthorizedAdminResponse
+		wantErr         bool
+		mockIAMResponce *[]model.Policy
+		mockIAMError    error
+		mockOrgIAMResp  *organization_iam.GetSystemAdminOrganizationPolicyResponse
+		mockOrgIAMError error
 	}{
 		{
-			name:  "OK Authorized",
+			name:  "OK Authorized (both IAM and Org IAM policies)",
 			input: &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
 			want:  &iam.IsAuthorizedAdminResponse{Ok: true},
-			mockResponce: &[]model.Policy{
+			mockIAMResponce: &[]model.Policy{
 				{PolicyID: 1, Name: "viewer", ActionPtn: "finding/(Get|List|Describe)", ResourcePtn: ".*"},
 				{PolicyID: 2, Name: "put for aws", ActionPtn: "finding/Put.*", ResourcePtn: "aws:.*"},
 			},
+			mockOrgIAMResp: &organization_iam.GetSystemAdminOrganizationPolicyResponse{
+				OrganizationPolicies: []*organization_iam.OrganizationPolicy{
+					{PolicyId: 1, Name: "system-admin", OrganizationId: 0, ActionPtn: ".*"},
+				},
+			},
 		},
 		{
-			name:      "OK Record not found",
-			input:     &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
-			want:      &iam.IsAuthorizedAdminResponse{Ok: false},
-			mockError: gorm.ErrRecordNotFound,
+			name:         "OK Not Admin (no IAM policies)",
+			input:        &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			want:         &iam.IsAuthorizedAdminResponse{Ok: false},
+			mockIAMError: gorm.ErrRecordNotFound,
+		},
+		{
+			name:  "OK Not Admin (no Org IAM policies)",
+			input: &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			want:  &iam.IsAuthorizedAdminResponse{Ok: false},
+			mockIAMResponce: &[]model.Policy{
+				{PolicyID: 1, Name: "viewer", ActionPtn: "finding/(Get|List|Describe)", ResourcePtn: ".*"},
+				{PolicyID: 2, Name: "put for aws", ActionPtn: "finding/Put.*", ResourcePtn: "aws:.*"},
+			},
+			mockOrgIAMResp: &organization_iam.GetSystemAdminOrganizationPolicyResponse{
+				OrganizationPolicies: []*organization_iam.OrganizationPolicy{},
+			},
 		},
 		{
 			name:    "NG Invalid parameter (invalid actionName format)",
@@ -99,20 +120,34 @@ func TestIsAuthorizedAdmin(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG Invalid DB error",
-			input:     &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
-			wantErr:   true,
-			mockError: gorm.ErrInvalidDB,
+			name:         "NG Invalid IAM DB error",
+			input:        &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			wantErr:      true,
+			mockIAMError: gorm.ErrInvalidDB,
+		},
+		{
+			name:    "NG Invalid Org IAM service error",
+			input:   &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			wantErr: true,
+			mockIAMResponce: &[]model.Policy{
+				{PolicyID: 1, Name: "viewer", ActionPtn: "finding/(Get|List|Describe)", ResourcePtn: ".*"},
+				{PolicyID: 2, Name: "put for aws", ActionPtn: "finding/Put.*", ResourcePtn: "aws:.*"},
+			},
+			mockOrgIAMError: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mock := mocks.NewIAMRepository(t)
-			svc := IAMService{repository: mock, logger: logging.NewLogger()}
+			orgIamMock := oimocks.NewOrganizationIAMServiceClient(t)
+			svc := IAMService{repository: mock, organizationIamClient: orgIamMock, logger: logging.NewLogger()}
 
-			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("GetAdminPolicy", test.RepeatMockAnything(2)...).Return(c.mockResponce, c.mockError).Once()
+			if c.mockIAMResponce != nil || c.mockIAMError != nil {
+				mock.On("GetAdminPolicy", test.RepeatMockAnything(2)...).Return(c.mockIAMResponce, c.mockIAMError).Once()
+			}
+			if c.mockOrgIAMResp != nil || c.mockOrgIAMError != nil {
+				orgIamMock.On("GetSystemAdminOrganizationPolicy", test.RepeatMockAnything(3)...).Return(c.mockOrgIAMResp, c.mockOrgIAMError).Once()
 			}
 			got, err := svc.IsAuthorizedAdmin(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -312,47 +347,78 @@ func TestIsAuthorizedByPolicy(t *testing.T) {
 
 func TestIsAdmin(t *testing.T) {
 	cases := []struct {
-		name         string
-		input        *iam.IsAdminRequest
-		want         *iam.IsAdminResponse
-		wantErr      bool
-		mockResponce *[]model.Policy
-		mockError    error
+		name            string
+		input           *iam.IsAdminRequest
+		want            *iam.IsAdminResponse
+		wantErr         bool
+		mockIAMResponce *[]model.Policy
+		mockIAMError    error
+		mockOrgIAMResp  *organization_iam.GetSystemAdminOrganizationPolicyResponse
+		mockOrgIAMError error
 	}{
 		{
-			name:  "OK Admin",
+			name:  "OK Admin (both IAM and Org IAM policies)",
 			input: &iam.IsAdminRequest{UserId: 1},
 			want:  &iam.IsAdminResponse{Ok: true},
-			mockResponce: &[]model.Policy{
+			mockIAMResponce: &[]model.Policy{
 				{PolicyID: 1, Name: "no-project-policy", ProjectID: 0, ActionPtn: ".*", ResourcePtn: ".*"},
+			},
+			mockOrgIAMResp: &organization_iam.GetSystemAdminOrganizationPolicyResponse{
+				OrganizationPolicies: []*organization_iam.OrganizationPolicy{
+					{PolicyId: 1, Name: "system-admin", OrganizationId: 0, ActionPtn: ".*"},
+				},
 			},
 		},
 		{
-			name:      "OK Not Admin",
-			input:     &iam.IsAdminRequest{UserId: 1},
-			want:      &iam.IsAdminResponse{Ok: false},
-			mockError: gorm.ErrRecordNotFound,
+			name:         "OK Not Admin (no IAM policies)",
+			input:        &iam.IsAdminRequest{UserId: 1},
+			want:         &iam.IsAdminResponse{Ok: false},
+			mockIAMError: gorm.ErrRecordNotFound,
 		},
 		{
-			name:    "NG Invalid parameter (invalid actionName format)",
+			name:  "OK Not Admin (no Org IAM policies)",
+			input: &iam.IsAdminRequest{UserId: 1},
+			want:  &iam.IsAdminResponse{Ok: false},
+			mockIAMResponce: &[]model.Policy{
+				{PolicyID: 1, Name: "no-project-policy", ProjectID: 0, ActionPtn: ".*", ResourcePtn: ".*"},
+			},
+			mockOrgIAMResp: &organization_iam.GetSystemAdminOrganizationPolicyResponse{
+				OrganizationPolicies: []*organization_iam.OrganizationPolicy{},
+			},
+		},
+		{
+			name:    "NG Invalid parameter",
 			input:   &iam.IsAdminRequest{UserId: 0},
 			wantErr: true,
 		},
 		{
-			name:      "Invalid DB error",
-			input:     &iam.IsAdminRequest{UserId: 1},
-			wantErr:   true,
-			mockError: gorm.ErrInvalidDB,
+			name:         "NG Invalid IAM DB error",
+			input:        &iam.IsAdminRequest{UserId: 1},
+			wantErr:      true,
+			mockIAMError: gorm.ErrInvalidDB,
+		},
+		{
+			name:    "NG Invalid Org IAM service error",
+			input:   &iam.IsAdminRequest{UserId: 1},
+			wantErr: true,
+			mockIAMResponce: &[]model.Policy{
+				{PolicyID: 1, Name: "no-project-policy", ProjectID: 0, ActionPtn: ".*", ResourcePtn: ".*"},
+			},
+			mockOrgIAMError: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mock := mocks.NewIAMRepository(t)
-			svc := IAMService{repository: mock, logger: logging.NewLogger()}
+			orgIamMock := oimocks.NewOrganizationIAMServiceClient(t)
+			svc := IAMService{repository: mock, organizationIamClient: orgIamMock, logger: logging.NewLogger()}
 
-			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("GetAdminPolicy", test.RepeatMockAnything(2)...).Return(c.mockResponce, c.mockError).Once()
+			if c.mockIAMResponce != nil || c.mockIAMError != nil {
+				mock.On("GetAdminPolicy", test.RepeatMockAnything(2)...).Return(c.mockIAMResponce, c.mockIAMError).Once()
+			}
+			if c.mockOrgIAMResp != nil || c.mockOrgIAMError != nil {
+				orgIamMock.On("GetSystemAdminOrganizationPolicy", test.RepeatMockAnything(3)...).Return(c.mockOrgIAMResp, c.mockOrgIAMError).Once()
 			}
 			got, err := svc.IsAdmin(ctx, c.input)
 			if err != nil && !c.wantErr {

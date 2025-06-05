@@ -277,3 +277,251 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = IsAuthorizedOrganizationResponseValidationError{}
+
+// Validate checks the field values on GetSystemAdminOrganizationPolicyRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *GetSystemAdminOrganizationPolicyRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// GetSystemAdminOrganizationPolicyRequest with the rules defined in the proto
+// definition for this message. If any rules are violated, the result is a
+// list of violation errors wrapped in
+// GetSystemAdminOrganizationPolicyRequestMultiError, or nil if none found.
+func (m *GetSystemAdminOrganizationPolicyRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetSystemAdminOrganizationPolicyRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for UserId
+
+	if len(errors) > 0 {
+		return GetSystemAdminOrganizationPolicyRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetSystemAdminOrganizationPolicyRequestMultiError is an error wrapping
+// multiple validation errors returned by
+// GetSystemAdminOrganizationPolicyRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GetSystemAdminOrganizationPolicyRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetSystemAdminOrganizationPolicyRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetSystemAdminOrganizationPolicyRequestMultiError) AllErrors() []error { return m }
+
+// GetSystemAdminOrganizationPolicyRequestValidationError is the validation
+// error returned by GetSystemAdminOrganizationPolicyRequest.Validate if the
+// designated constraints aren't met.
+type GetSystemAdminOrganizationPolicyRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetSystemAdminOrganizationPolicyRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetSystemAdminOrganizationPolicyRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetSystemAdminOrganizationPolicyRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetSystemAdminOrganizationPolicyRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetSystemAdminOrganizationPolicyRequestValidationError) ErrorName() string {
+	return "GetSystemAdminOrganizationPolicyRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetSystemAdminOrganizationPolicyRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetSystemAdminOrganizationPolicyRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetSystemAdminOrganizationPolicyRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetSystemAdminOrganizationPolicyRequestValidationError{}
+
+// Validate checks the field values on GetSystemAdminOrganizationPolicyResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *GetSystemAdminOrganizationPolicyResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// GetSystemAdminOrganizationPolicyResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// GetSystemAdminOrganizationPolicyResponseMultiError, or nil if none found.
+func (m *GetSystemAdminOrganizationPolicyResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetSystemAdminOrganizationPolicyResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetOrganizationPolicies() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GetSystemAdminOrganizationPolicyResponseValidationError{
+						field:  fmt.Sprintf("OrganizationPolicies[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GetSystemAdminOrganizationPolicyResponseValidationError{
+						field:  fmt.Sprintf("OrganizationPolicies[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetSystemAdminOrganizationPolicyResponseValidationError{
+					field:  fmt.Sprintf("OrganizationPolicies[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return GetSystemAdminOrganizationPolicyResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetSystemAdminOrganizationPolicyResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// GetSystemAdminOrganizationPolicyResponse.ValidateAll() if the designated
+// constraints aren't met.
+type GetSystemAdminOrganizationPolicyResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetSystemAdminOrganizationPolicyResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetSystemAdminOrganizationPolicyResponseMultiError) AllErrors() []error { return m }
+
+// GetSystemAdminOrganizationPolicyResponseValidationError is the validation
+// error returned by GetSystemAdminOrganizationPolicyResponse.Validate if the
+// designated constraints aren't met.
+type GetSystemAdminOrganizationPolicyResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetSystemAdminOrganizationPolicyResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetSystemAdminOrganizationPolicyResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetSystemAdminOrganizationPolicyResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetSystemAdminOrganizationPolicyResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetSystemAdminOrganizationPolicyResponseValidationError) ErrorName() string {
+	return "GetSystemAdminOrganizationPolicyResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetSystemAdminOrganizationPolicyResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetSystemAdminOrganizationPolicyResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetSystemAdminOrganizationPolicyResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetSystemAdminOrganizationPolicyResponseValidationError{}

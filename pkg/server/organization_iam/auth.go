@@ -51,3 +51,28 @@ func isAuthorizedByOrganizationPolicy(action string, policies *[]model.Organizat
 	}
 	return false, nil
 }
+
+func (i *OrganizationIAMService) GetSystemAdminOrganizationPolicy(ctx context.Context, req *organization_iam.GetSystemAdminOrganizationPolicyRequest) (*organization_iam.GetSystemAdminOrganizationPolicyResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	policies, err := i.repository.GetSystemAdminOrganizationPolicy(ctx, req.UserId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &organization_iam.GetSystemAdminOrganizationPolicyResponse{}, nil
+		}
+		return nil, err
+	}
+	var orgPolicies []*organization_iam.OrganizationPolicy
+	for _, p := range *policies {
+		orgPolicies = append(orgPolicies, &organization_iam.OrganizationPolicy{
+			PolicyId:       p.PolicyID,
+			Name:           p.Name,
+			OrganizationId: p.OrganizationID,
+			ActionPtn:      p.ActionPtn,
+			CreatedAt:      p.CreatedAt.Unix(),
+			UpdatedAt:      p.UpdatedAt.Unix(),
+		})
+	}
+	return &organization_iam.GetSystemAdminOrganizationPolicyResponse{OrganizationPolicies: orgPolicies}, nil
+}

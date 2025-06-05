@@ -24,6 +24,7 @@ type OrganizationIAMRepository interface {
 	GetOrganizationPolicy(ctx context.Context, organizationID, policyID uint32) (*model.OrganizationPolicy, error)
 	GetOrganizationPolicyByName(ctx context.Context, organizationID uint32, name string) (*model.OrganizationPolicy, error)
 	GetOrganizationPolicyByUserID(ctx context.Context, userID, organizationID uint32) (*[]model.OrganizationPolicy, error)
+	GetSystemAdminOrganizationPolicy(ctx context.Context, userID uint32) (*[]model.OrganizationPolicy, error)
 	PutOrganizationPolicy(ctx context.Context, p *model.OrganizationPolicy) (*model.OrganizationPolicy, error)
 	DeleteOrganizationPolicy(ctx context.Context, organizationID, policyID uint32) error
 	AttachOrganizationPolicy(ctx context.Context, policyID, roleID uint32) (*model.OrganizationPolicy, error)
@@ -182,6 +183,28 @@ where
 func (c *Client) GetOrganizationPolicyByUserID(ctx context.Context, userID, organizationID uint32) (*[]model.OrganizationPolicy, error) {
 	var data []model.OrganizationPolicy
 	if err := c.Slave.WithContext(ctx).Raw(getOrganizationPolicyByUserID, userID, organizationID).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const getSystemAdminOrganizationPolicy = `
+select
+  op.* 
+from
+  user u
+  inner join user_organization_role uor using(user_id)
+  inner join organization_role_policy orp using(role_id)
+  inner join organization_policy op using(policy_id) 
+where
+  u.activated = 'true'
+  and u.user_id = ?
+  and op.organization_id IS NULL
+`
+
+func (c *Client) GetSystemAdminOrganizationPolicy(ctx context.Context, userID uint32) (*[]model.OrganizationPolicy, error) {
+	var data []model.OrganizationPolicy
+	if err := c.Slave.WithContext(ctx).Raw(getSystemAdminOrganizationPolicy, userID).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
