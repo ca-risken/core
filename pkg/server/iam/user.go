@@ -68,7 +68,7 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 		userID = savedData.UserID
 	}
 
-	isAdmin := req.User.IsAdmin
+	isAdmin := false
 	if isFisrstUser {
 		isAdmin = true
 		i.logger.Infof(ctx, "Setting first user as admin, sub=%s", req.User.Sub)

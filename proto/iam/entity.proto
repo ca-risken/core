@@ -26,7 +26,6 @@ message UserForUpsert {
   string name = 2;
   bool activated = 3;
   string user_idp_key = 4;
-  bool is_admin = 5;
 }
 
 // Role
