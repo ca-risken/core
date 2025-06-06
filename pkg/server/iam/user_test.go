@@ -85,7 +85,7 @@ func TestGetUser(t *testing.T) {
 		{
 			name:         "OK",
 			input:        &iam.GetUserRequest{UserId: 111, Sub: "sub"},
-			want:         &iam.GetUserResponse{User: &iam.User{UserId: 111, Sub: "sub", Name: "nm", Activated: true, IsAdmin: false, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			want:         &iam.GetUserResponse{User: &iam.User{UserId: 111, Sub: "sub", Name: "nm", Activated: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockResponce: &model.User{UserID: 111, Sub: "sub", Name: "nm", Activated: true, IsAdmin: false, CreatedAt: now, UpdatedAt: now},
 		},
 		{
@@ -147,7 +147,7 @@ func TestPutUser(t *testing.T) {
 		{
 			name:                     "OK Insert",
 			input:                    &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true}},
-			want:                     &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, IsAdmin: false, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			want:                     &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetErr:               gorm.ErrRecordNotFound,
 			mockInsertResp:           &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, IsAdmin: false, CreatedAt: now, UpdatedAt: now},
 			mockListUserReservedResp: &[]db.UserReservedWithProjectID{},
@@ -156,7 +156,7 @@ func TestPutUser(t *testing.T) {
 		{
 			name:                     "OK Insert First User (Auto Admin)",
 			input:                    &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true}},
-			want:                     &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, IsAdmin: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			want:                     &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetErr:               gorm.ErrRecordNotFound,
 			mockInsertResp:           &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, IsAdmin: true, CreatedAt: now, UpdatedAt: now},
 			mockListUserReservedResp: &[]db.UserReservedWithProjectID{},
@@ -165,7 +165,7 @@ func TestPutUser(t *testing.T) {
 		{
 			name:                   "OK Update",
 			input:                  &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true}},
-			want:                   &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, IsAdmin: false, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			want:                   &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetResp:            &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, IsAdmin: false, CreatedAt: now, UpdatedAt: now},
 			mockUpdResp:            &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, IsAdmin: false, CreatedAt: now, UpdatedAt: now},
 			callGetActiveUserCount: false,
