@@ -886,6 +886,36 @@ func (_m *IAMServiceServer) PutUserReserved(_a0 context.Context, _a1 *iam.PutUse
 	return r0, r1
 }
 
+// UpdateUserAdmin provides a mock function with given fields: _a0, _a1
+func (_m *IAMServiceServer) UpdateUserAdmin(_a0 context.Context, _a1 *iam.UpdateUserAdminRequest) (*iam.UpdateUserAdminResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateUserAdmin")
+	}
+
+	var r0 *iam.UpdateUserAdminResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *iam.UpdateUserAdminRequest) (*iam.UpdateUserAdminResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *iam.UpdateUserAdminRequest) *iam.UpdateUserAdminResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*iam.UpdateUserAdminResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *iam.UpdateUserAdminRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewIAMServiceServer creates a new instance of IAMServiceServer. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewIAMServiceServer(t interface {

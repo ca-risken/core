@@ -236,3 +236,57 @@ func TestPutUser(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateUserAdmin(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name     string
+		input    *iam.UpdateUserAdminRequest
+		want     *iam.UpdateUserAdminResponse
+		wantErr  bool
+		mockResp *model.User
+		mockErr  error
+	}{
+		{
+			name:     "OK Set Admin True",
+			input:    &iam.UpdateUserAdminRequest{UserId: 1, IsAdmin: true},
+			want:     &iam.UpdateUserAdminResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", Activated: true, IsAdmin: true, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockResp: &model.User{UserID: 1, Sub: "sub", Name: "nm", Activated: true, IsAdmin: true, CreatedAt: now, UpdatedAt: now},
+		},
+		{
+			name:     "OK Set Admin False",
+			input:    &iam.UpdateUserAdminRequest{UserId: 1, IsAdmin: false},
+			want:     &iam.UpdateUserAdminResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", Activated: true, IsAdmin: false, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockResp: &model.User{UserID: 1, Sub: "sub", Name: "nm", Activated: true, IsAdmin: false, CreatedAt: now, UpdatedAt: now},
+		},
+		{
+			name:    "NG Invalid parameter",
+			input:   &iam.UpdateUserAdminRequest{UserId: 0, IsAdmin: true},
+			wantErr: true,
+		},
+		{
+			name:    "NG DB error",
+			input:   &iam.UpdateUserAdminRequest{UserId: 1, IsAdmin: true},
+			mockErr: gorm.ErrInvalidTransaction,
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewIAMRepository(t)
+			svc := IAMService{repository: mock, logger: logging.NewLogger()}
+
+			if c.mockResp != nil || c.mockErr != nil {
+				mock.On("UpdateUserAdmin", test.RepeatMockAnything(3)...).Return(c.mockResp, c.mockErr).Once()
+			}
+			got, err := svc.UpdateUserAdmin(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
