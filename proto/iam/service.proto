@@ -4,6 +4,7 @@ package core.iam;
 option go_package = "github.com/ca-risken/core/proto/iam";
 
 import "google/protobuf/empty.proto";
+import "iam/entity.proto";
 import "iam/user.proto";
 import "iam/role.proto";
 import "iam/policy.proto";
@@ -15,6 +16,7 @@ service IAMService {
   rpc ListUser(ListUserRequest) returns (ListUserResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
   rpc PutUser(PutUserRequest) returns (PutUserResponse);
+  rpc UpdateUserAdmin(UpdateUserAdminRequest) returns (UpdateUserAdminResponse);
 
   // Role
   rpc ListRole(ListRoleRequest) returns (ListRoleResponse);
@@ -108,3 +110,13 @@ message IsAuthorizedTokenResponse { bool ok = 1; }
 message IsAdminRequest { uint32 user_id = 1; }
 
 message IsAdminResponse { bool ok = 1; }
+
+// UpdateUserAdminRequest
+message UpdateUserAdminRequest {
+  uint32 user_id = 1;
+  bool is_admin = 2;
+}
+
+message UpdateUserAdminResponse {
+  User user = 1; // 更新後のユーザー情報
+}

@@ -106,6 +106,19 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 	return &iam.PutUserResponse{User: convertUser(registerdData)}, nil
 }
 
+func (i *IAMService) UpdateUserAdmin(ctx context.Context, req *iam.UpdateUserAdminRequest) (*iam.UpdateUserAdminResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	updatedUser, err := i.repository.UpdateUserAdmin(ctx, req.UserId, req.IsAdmin)
+	if err != nil {
+		return nil, err
+	}
+
+	return &iam.UpdateUserAdminResponse{User: convertUser(updatedUser)}, nil
+}
+
 func convertUser(u *model.User) *iam.User {
 	return &iam.User{
 		UserId:     u.UserID,
@@ -113,6 +126,7 @@ func convertUser(u *model.User) *iam.User {
 		Name:       u.Name,
 		UserIdpKey: u.UserIdpKey,
 		Activated:  u.Activated,
+		IsAdmin:    u.IsAdmin,
 		CreatedAt:  u.CreatedAt.Unix(),
 		UpdatedAt:  u.UpdatedAt.Unix(),
 	}
