@@ -52,15 +52,15 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 		return nil, err
 	}
 	// check first user
-	isFisrstUser := false
+	isFirstUser := false
 	if noRecord {
 		users, err := i.repository.GetActiveUserCount(ctx)
 		if err != nil {
 			return nil, err
 		}
-		isFisrstUser = users == nil || *users == 0
+		isFirstUser = users == nil || *users == 0
 	}
-	i.logger.Debugf(ctx, "isFisrstUser: %t", isFisrstUser)
+	i.logger.Debugf(ctx, "isFirstUser: %t", isFirstUser)
 
 	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
 	var userID uint32
@@ -69,7 +69,7 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 	}
 
 	isAdmin := false
-	if isFisrstUser {
+	if isFirstUser {
 		isAdmin = true
 		i.logger.Infof(ctx, "Setting first user as admin, sub=%s", req.User.Sub)
 	}
@@ -104,6 +104,19 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 	}
 
 	return &iam.PutUserResponse{User: convertUser(registerdData)}, nil
+}
+
+func (i *IAMService) UpdateUserAdmin(ctx context.Context, req *iam.UpdateUserAdminRequest) (*iam.UpdateUserAdminResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	updatedUser, err := i.repository.UpdateUserAdmin(ctx, req.UserId, req.IsAdmin)
+	if err != nil {
+		return nil, err
+	}
+
+	return &iam.UpdateUserAdminResponse{User: convertUser(updatedUser)}, nil
 }
 
 func convertUser(u *model.User) *iam.User {
