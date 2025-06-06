@@ -9,6 +9,7 @@ type User struct {
 	Name       string
 	UserIdpKey string
 	Activated  bool
+	IsAdmin    bool
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }

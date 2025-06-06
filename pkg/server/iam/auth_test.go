@@ -15,27 +15,50 @@ import (
 
 func TestIsAuthorized(t *testing.T) {
 	cases := []struct {
-		name         string
-		input        *iam.IsAuthorizedRequest
-		want         *iam.IsAuthorizedResponse
-		wantErr      bool
-		mockResponce *[]model.Policy
-		mockError    error
+		name          string
+		input         *iam.IsAuthorizedRequest
+		want          *iam.IsAuthorizedResponse
+		wantErr       bool
+		mockUser      *model.User
+		mockUserErr   error
+		mockPolicies  *[]model.Policy
+		mockPolicyErr error
 	}{
 		{
-			name:  "OK Authorized",
+			name:  "OK Admin user (always authorized)",
+			input: &iam.IsAuthorizedRequest{UserId: 1, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
+			want:  &iam.IsAuthorizedResponse{Ok: true},
+			mockUser: &model.User{
+				UserID: 1, Sub: "admin", Name: "Admin User", Activated: true, IsAdmin: true,
+			},
+		},
+		{
+			name:  "OK Non-admin user with valid policies",
 			input: &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
 			want:  &iam.IsAuthorizedResponse{Ok: true},
-			mockResponce: &[]model.Policy{
+			mockUser: &model.User{
+				UserID: 111, Sub: "user", Name: "Regular User", Activated: true, IsAdmin: false,
+			},
+			mockPolicies: &[]model.Policy{
 				{PolicyID: 101, Name: "viewer", ProjectID: 1001, ActionPtn: "finding/(Get|List|Describe)", ResourcePtn: ".*"},
 				{PolicyID: 102, Name: "put for aws", ProjectID: 1001, ActionPtn: "finding/Put.*", ResourcePtn: "aws:.*"},
 			},
 		},
 		{
-			name:      "OK Record not found",
-			input:     &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
-			want:      &iam.IsAuthorizedResponse{Ok: false},
-			mockError: gorm.ErrRecordNotFound,
+			name:  "OK Non-admin user without valid policies",
+			input: &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			want:  &iam.IsAuthorizedResponse{Ok: false},
+			mockUser: &model.User{
+				UserID: 111, Sub: "user", Name: "Regular User", Activated: true, IsAdmin: false,
+			},
+			mockPolicyErr: gorm.ErrRecordNotFound,
+		},
+		{
+			name:          "OK User not found",
+			input:         &iam.IsAuthorizedRequest{UserId: 999, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
+			want:          &iam.IsAuthorizedResponse{Ok: false},
+			mockUserErr:   gorm.ErrRecordNotFound,
+			mockPolicyErr: gorm.ErrRecordNotFound,
 		},
 		{
 			name:    "NG Invalid parameter (invalid actionName format)",
@@ -43,10 +66,10 @@ func TestIsAuthorized(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG Invalid DB error",
-			input:     &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
-			wantErr:   true,
-			mockError: gorm.ErrInvalidDB,
+			name:        "NG Invalid DB error",
+			input:       &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			wantErr:     true,
+			mockUserErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -55,8 +78,11 @@ func TestIsAuthorized(t *testing.T) {
 			mock := mocks.NewIAMRepository(t)
 			svc := IAMService{repository: mock, logger: logging.NewLogger()}
 
-			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("GetUserPolicy", test.RepeatMockAnything(2)...).Return(c.mockResponce, c.mockError).Once()
+			if c.mockUser != nil || c.mockUserErr != nil {
+				mock.On("GetUser", test.RepeatMockAnything(4)...).Return(c.mockUser, c.mockUserErr).Once()
+			}
+			if c.mockPolicies != nil || c.mockPolicyErr != nil {
+				mock.On("GetUserPolicy", test.RepeatMockAnything(2)...).Return(c.mockPolicies, c.mockPolicyErr).Once()
 			}
 			got, err := svc.IsAuthorized(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -71,27 +97,34 @@ func TestIsAuthorized(t *testing.T) {
 
 func TestIsAuthorizedAdmin(t *testing.T) {
 	cases := []struct {
-		name         string
-		input        *iam.IsAuthorizedAdminRequest
-		want         *iam.IsAuthorizedAdminResponse
-		wantErr      bool
-		mockResponce *[]model.Policy
-		mockError    error
+		name        string
+		input       *iam.IsAuthorizedAdminRequest
+		want        *iam.IsAuthorizedAdminResponse
+		wantErr     bool
+		mockUser    *model.User
+		mockUserErr error
 	}{
 		{
-			name:  "OK Authorized",
+			name:  "OK Admin user",
 			input: &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
 			want:  &iam.IsAuthorizedAdminResponse{Ok: true},
-			mockResponce: &[]model.Policy{
-				{PolicyID: 1, Name: "viewer", ActionPtn: "finding/(Get|List|Describe)", ResourcePtn: ".*"},
-				{PolicyID: 2, Name: "put for aws", ActionPtn: "finding/Put.*", ResourcePtn: "aws:.*"},
+			mockUser: &model.User{
+				UserID: 1, Sub: "admin", Name: "Admin User", Activated: true, IsAdmin: true,
 			},
 		},
 		{
-			name:      "OK Record not found",
-			input:     &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
-			want:      &iam.IsAuthorizedAdminResponse{Ok: false},
-			mockError: gorm.ErrRecordNotFound,
+			name:  "OK Non-admin user",
+			input: &iam.IsAuthorizedAdminRequest{UserId: 2, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
+			want:  &iam.IsAuthorizedAdminResponse{Ok: false},
+			mockUser: &model.User{
+				UserID: 2, Sub: "user", Name: "Regular User", Activated: true, IsAdmin: false,
+			},
+		},
+		{
+			name:        "OK User not found",
+			input:       &iam.IsAuthorizedAdminRequest{UserId: 999, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
+			want:        &iam.IsAuthorizedAdminResponse{Ok: false},
+			mockUserErr: gorm.ErrRecordNotFound,
 		},
 		{
 			name:    "NG Invalid parameter (invalid actionName format)",
@@ -99,10 +132,10 @@ func TestIsAuthorizedAdmin(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "NG Invalid DB error",
-			input:     &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
-			wantErr:   true,
-			mockError: gorm.ErrInvalidDB,
+			name:        "NG Invalid DB error",
+			input:       &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			wantErr:     true,
+			mockUserErr: gorm.ErrInvalidDB,
 		},
 	}
 	for _, c := range cases {
@@ -111,8 +144,8 @@ func TestIsAuthorizedAdmin(t *testing.T) {
 			mock := mocks.NewIAMRepository(t)
 			svc := IAMService{repository: mock, logger: logging.NewLogger()}
 
-			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("GetAdminPolicy", test.RepeatMockAnything(2)...).Return(c.mockResponce, c.mockError).Once()
+			if c.mockUser != nil || c.mockUserErr != nil {
+				mock.On("GetUser", test.RepeatMockAnything(4)...).Return(c.mockUser, c.mockUserErr).Once()
 			}
 			got, err := svc.IsAuthorizedAdmin(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -312,34 +345,42 @@ func TestIsAuthorizedByPolicy(t *testing.T) {
 
 func TestIsAdmin(t *testing.T) {
 	cases := []struct {
-		name         string
-		input        *iam.IsAdminRequest
-		want         *iam.IsAdminResponse
-		wantErr      bool
-		mockResponce *[]model.Policy
-		mockError    error
+		name      string
+		input     *iam.IsAdminRequest
+		want      *iam.IsAdminResponse
+		wantErr   bool
+		mockUser  *model.User
+		mockError error
 	}{
 		{
 			name:  "OK Admin",
 			input: &iam.IsAdminRequest{UserId: 1},
 			want:  &iam.IsAdminResponse{Ok: true},
-			mockResponce: &[]model.Policy{
-				{PolicyID: 1, Name: "no-project-policy", ProjectID: 0, ActionPtn: ".*", ResourcePtn: ".*"},
+			mockUser: &model.User{
+				UserID: 1, Sub: "admin", Name: "Admin User", Activated: true, IsAdmin: true,
 			},
 		},
 		{
-			name:      "OK Not Admin",
-			input:     &iam.IsAdminRequest{UserId: 1},
+			name:  "OK Not Admin",
+			input: &iam.IsAdminRequest{UserId: 2},
+			want:  &iam.IsAdminResponse{Ok: false},
+			mockUser: &model.User{
+				UserID: 2, Sub: "user", Name: "Regular User", Activated: true, IsAdmin: false,
+			},
+		},
+		{
+			name:      "OK User not found",
+			input:     &iam.IsAdminRequest{UserId: 999},
 			want:      &iam.IsAdminResponse{Ok: false},
 			mockError: gorm.ErrRecordNotFound,
 		},
 		{
-			name:    "NG Invalid parameter (invalid actionName format)",
+			name:    "NG Invalid parameter",
 			input:   &iam.IsAdminRequest{UserId: 0},
 			wantErr: true,
 		},
 		{
-			name:      "Invalid DB error",
+			name:      "NG DB error",
 			input:     &iam.IsAdminRequest{UserId: 1},
 			wantErr:   true,
 			mockError: gorm.ErrInvalidDB,
@@ -351,8 +392,8 @@ func TestIsAdmin(t *testing.T) {
 			mock := mocks.NewIAMRepository(t)
 			svc := IAMService{repository: mock, logger: logging.NewLogger()}
 
-			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("GetAdminPolicy", test.RepeatMockAnything(2)...).Return(c.mockResponce, c.mockError).Once()
+			if c.mockUser != nil || c.mockError != nil {
+				mock.On("GetUser", test.RepeatMockAnything(4)...).Return(c.mockUser, c.mockError).Once()
 			}
 			got, err := svc.IsAdmin(ctx, c.input)
 			if err != nil && !c.wantErr {

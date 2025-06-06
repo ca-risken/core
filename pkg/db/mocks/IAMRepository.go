@@ -46,24 +46,6 @@ func (_m *IAMRepository) AttachAccessTokenRole(ctx context.Context, projectID ui
 	return r0, r1
 }
 
-// AttachAllAdminRole provides a mock function with given fields: ctx, userID
-func (_m *IAMRepository) AttachAllAdminRole(ctx context.Context, userID uint32) error {
-	ret := _m.Called(ctx, userID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for AttachAllAdminRole")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32) error); ok {
-		r0 = rf(ctx, userID)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // AttachPolicy provides a mock function with given fields: ctx, projectID, roleID, policyID
 func (_m *IAMRepository) AttachPolicy(ctx context.Context, projectID uint32, roleID uint32, policyID uint32) (*model.RolePolicy, error) {
 	ret := _m.Called(ctx, projectID, roleID, policyID)
@@ -391,36 +373,6 @@ func (_m *IAMRepository) GetActiveUserCount(ctx context.Context) (*int, error) {
 
 	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
 		r1 = rf(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetAdminPolicy provides a mock function with given fields: ctx, userID
-func (_m *IAMRepository) GetAdminPolicy(ctx context.Context, userID uint32) (*[]model.Policy, error) {
-	ret := _m.Called(ctx, userID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetAdminPolicy")
-	}
-
-	var r0 *[]model.Policy
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32) (*[]model.Policy, error)); ok {
-		return rf(ctx, userID)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32) *[]model.Policy); ok {
-		r0 = rf(ctx, userID)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*[]model.Policy)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, uint32) error); ok {
-		r1 = rf(ctx, userID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1051,6 +1003,36 @@ func (_m *IAMRepository) PutUserReserved(ctx context.Context, u *model.UserReser
 
 	if rf, ok := ret.Get(1).(func(context.Context, *model.UserReserved) error); ok {
 		r1 = rf(ctx, u)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateUserAdmin provides a mock function with given fields: ctx, userID, isAdmin
+func (_m *IAMRepository) UpdateUserAdmin(ctx context.Context, userID uint32, isAdmin bool) (*model.User, error) {
+	ret := _m.Called(ctx, userID, isAdmin)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateUserAdmin")
+	}
+
+	var r0 *model.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, bool) (*model.User, error)); ok {
+		return rf(ctx, userID, isAdmin)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, bool) *model.User); ok {
+		r0 = rf(ctx, userID, isAdmin)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, bool) error); ok {
+		r1 = rf(ctx, userID, isAdmin)
 	} else {
 		r1 = ret.Error(1)
 	}
