@@ -11,36 +11,18 @@ import (
 	"gorm.io/gorm"
 )
 
-// isUserAdmin checks if the user is admin
-func (i *IAMService) isUserAdmin(ctx context.Context, userID uint32) (bool, error) {
-	user, err := i.repository.GetUser(ctx, userID, "", "")
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return false, nil
-		}
-		return false, err
-	}
-	return user.IsAdmin, nil
-}
-
 func (i *IAMService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequest) (*iam.IsAuthorizedResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-
-	// Check if user is admin first
 	isAdmin, err := i.isUserAdmin(ctx, req.UserId)
 	if err != nil {
 		return nil, err
 	}
-
-	// If user is admin, always return true
 	if isAdmin {
 		i.logger.Infof(ctx, "Authorized admin user action, request=%+v", req)
 		return &iam.IsAuthorizedResponse{Ok: true}, nil
 	}
-
-	// If user exists but is not admin, check policies
 	policies, err := i.repository.GetUserPolicy(ctx, req.UserId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -62,12 +44,10 @@ func (i *IAMService) IsAuthorizedAdmin(ctx context.Context, req *iam.IsAuthorize
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-
 	isAdmin, err := i.isUserAdmin(ctx, req.UserId)
 	if err != nil {
 		return nil, err
 	}
-
 	return &iam.IsAuthorizedAdminResponse{Ok: isAdmin}, nil
 }
 
@@ -118,19 +98,27 @@ func isAuthorizedByPolicy(projectID uint32, action, resource string, policies *[
 		}
 	}
 	return false, nil
-
 }
 
 func (i *IAMService) IsAdmin(ctx context.Context, req *iam.IsAdminRequest) (*iam.IsAdminResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-
 	isAdmin, err := i.isUserAdmin(ctx, req.UserId)
 	if err != nil {
 		return nil, err
 	}
-
 	i.logger.Debugf(ctx, "user(%d) is_admin: %t", req.UserId, isAdmin)
 	return &iam.IsAdminResponse{Ok: isAdmin}, nil
+}
+
+func (i *IAMService) isUserAdmin(ctx context.Context, userID uint32) (bool, error) {
+	user, err := i.repository.GetUser(ctx, userID, "", "")
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+	return user.IsAdmin, nil
 }
