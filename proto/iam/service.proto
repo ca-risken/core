@@ -117,6 +117,4 @@ message UpdateUserAdminRequest {
   bool is_admin = 2;
 }
 
-message UpdateUserAdminResponse {
-  User user = 1; // 更新後のユーザー情報
-}
+message UpdateUserAdminResponse { User user = 1; }
