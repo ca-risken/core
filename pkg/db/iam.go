@@ -28,13 +28,11 @@ type IAMRepository interface {
 	PutRole(ctx context.Context, r *model.Role) (*model.Role, error)
 	DeleteRole(ctx context.Context, projectID, roleID uint32) error
 	AttachRole(ctx context.Context, projectID, roleID, userID uint32) (*model.UserRole, error)
-	AttachAllAdminRole(ctx context.Context, userID uint32) error
 	DetachRole(ctx context.Context, projectID, roleID, userID uint32) error
 
 	// Policy
 	GetUserPolicy(ctx context.Context, userID uint32) (*[]model.Policy, error)
 	GetTokenPolicy(ctx context.Context, accessTokenID uint32) (*[]model.Policy, error)
-	GetAdminPolicy(ctx context.Context, userID uint32) (*[]model.Policy, error)
 	ListPolicy(ctx context.Context, projectID uint32, name string, roleID uint32) (*[]model.Policy, error)
 	GetPolicy(ctx context.Context, projectID, policyID uint32) (*model.Policy, error)
 	GetPolicyByName(ctx context.Context, projectID uint32, name string) (*model.Policy, error)
@@ -266,35 +264,17 @@ func (c *Client) DeleteRole(ctx context.Context, projectID, roleID uint32) error
 	return c.Master.WithContext(ctx).Exec(deleteDeleteRole, projectID, roleID).Error
 }
 
-const (
-	selectGetAdminUserRole   = `select * from user_role where project_id is null and user_id = ? and role_id = ?`
-	selectGetProjectUserRole = `select * from user_role where project_id = ?     and user_id = ? and role_id = ?`
-)
+const selectGetProjectUserRole = `select * from user_role where project_id = ? and user_id = ? and role_id = ?`
 
 func (c *Client) GetUserRole(ctx context.Context, projectID, userID, roleID uint32) (*model.UserRole, error) {
 	var data model.UserRole
-	if zero.IsZeroVal(projectID) {
-		if err := c.Master.WithContext(ctx).Raw(selectGetAdminUserRole, userID, roleID).First(&data).Error; err != nil {
-			return nil, err
-		}
-	} else {
-		if err := c.Master.WithContext(ctx).Raw(selectGetProjectUserRole, projectID, userID, roleID).First(&data).Error; err != nil {
-			return nil, err
-		}
+	if err := c.Master.WithContext(ctx).Raw(selectGetProjectUserRole, projectID, userID, roleID).First(&data).Error; err != nil {
+		return nil, err
 	}
 	return &data, nil
 }
 
-const (
-	insertAttachAdminRole = `
-INSERT INTO user_role
-  (user_id, role_id, project_id)
-VALUES
-  (?, ?, null)
-ON DUPLICATE KEY UPDATE
-  updated_at=NOW()
-`
-	insertAttachProjectRole = `
+const insertAttachProjectRole = `
 INSERT INTO user_role
   (user_id, role_id, project_id)
 VALUES
@@ -302,7 +282,6 @@ VALUES
 ON DUPLICATE KEY UPDATE
   updated_at=NOW()
 `
-)
 
 func (c *Client) AttachRole(ctx context.Context, projectID, roleID, userID uint32) (*model.UserRole, error) {
 	userExists, err := c.userExists(ctx, userID)
@@ -317,46 +296,17 @@ func (c *Client) AttachRole(ctx context.Context, projectID, roleID, userID uint3
 		return nil, fmt.Errorf(
 			"not found user or role: user_id=%d, role_id=%d, project_id=%d", userID, roleID, projectID)
 	}
-	if zero.IsZeroVal(projectID) {
-		if err := c.Master.WithContext(ctx).Exec(insertAttachAdminRole, userID, roleID).Error; err != nil {
-			return nil, err
-		}
-	} else {
-		if err := c.Master.WithContext(ctx).Exec(insertAttachProjectRole, userID, roleID, projectID).Error; err != nil {
-			return nil, err
-		}
+	if err := c.Master.WithContext(ctx).Exec(insertAttachProjectRole, userID, roleID, projectID).Error; err != nil {
+		return nil, err
 	}
 	return c.GetUserRole(ctx, projectID, userID, roleID)
 }
 
-const insertAttachAllAdminRole = `
-INSERT INTO user_role
-  (user_id, role_id, project_id)
-SELECT
-  ?, role_id, null
-FROM 
-  role
-WHERE
-  project_id is null
-ON DUPLICATE KEY UPDATE
-  updated_at=NOW()
-`
-
-func (c *Client) AttachAllAdminRole(ctx context.Context, userID uint32) error {
-	exists, err := c.userExists(ctx, userID)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		return fmt.Errorf("not found user: user_id=%d", userID)
-	}
-	return c.Master.WithContext(ctx).Exec(insertAttachAllAdminRole, userID).Error
-}
-
-const (
-	deleteDetachAdminRole   = `delete from user_role where user_id = ? and role_id = ? and project_id is null`
-	deleteDetachProjectRole = `delete from user_role where user_id = ? and role_id = ? and project_id = ?`
-)
+const deleteDetachProjectRole = `
+delete from user_role
+where user_id = ?
+  and role_id = ?
+  and project_id = ?`
 
 func (c *Client) DetachRole(ctx context.Context, projectID, roleID, userID uint32) error {
 	userExists, err := c.userExists(ctx, userID)
@@ -371,11 +321,7 @@ func (c *Client) DetachRole(ctx context.Context, projectID, roleID, userID uint3
 		return fmt.Errorf(
 			"not found user or role: user_id=%d, role_id=%d, project_id=%d", userID, roleID, projectID)
 	}
-	if zero.IsZeroVal(projectID) {
-		return c.Master.WithContext(ctx).Exec(deleteDetachAdminRole, userID, roleID).Error
-	} else {
-		return c.Master.WithContext(ctx).Exec(deleteDetachProjectRole, userID, roleID, projectID).Error
-	}
+	return c.Master.WithContext(ctx).Exec(deleteDetachProjectRole, userID, roleID, projectID).Error
 }
 
 const selectGetUserPolicy = `
@@ -415,30 +361,6 @@ where
 func (c *Client) GetTokenPolicy(ctx context.Context, accessTokenID uint32) (*[]model.Policy, error) {
 	var data []model.Policy
 	if err := c.Slave.WithContext(ctx).Raw(selectGetTokenPolicy, accessTokenID).Scan(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
-const selectGetAdminPolicy = `
-select
-  p.* 
-from
-  user u
-	inner join user_role ur using(user_id)
-	inner join role r using(role_id)
-  inner join role_policy rp using(role_id)
-  inner join policy p using(policy_id) 
-where
-	u.activated = 'true'
-	and r.project_id is null
-	and p.project_id is null
-  and u.user_id = ?
-`
-
-func (c *Client) GetAdminPolicy(ctx context.Context, userID uint32) (*[]model.Policy, error) {
-	var data []model.Policy
-	if err := c.Slave.WithContext(ctx).Raw(selectGetAdminPolicy, userID).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

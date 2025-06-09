@@ -94,14 +94,6 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 			return nil, err
 		}
 	}
-
-	if isFirstUser {
-		// attach admin roles
-		if err := i.repository.AttachAllAdminRole(ctx, registerdData.UserID); err != nil {
-			return nil, err
-		}
-		i.logger.Infof(ctx, "Attach admin role for first user, user_id=%d", registerdData.UserID)
-	}
 	// 新規ユーザーの場合、user_reservedからロールの追加
 	if userID == 0 {
 		if err := i.AttachRoleByUserReserved(ctx, registerdData.UserID, registerdData.UserIdpKey); err != nil {

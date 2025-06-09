@@ -11,15 +11,8 @@ import (
 )
 
 func (i *IAMService) ListRole(ctx context.Context, req *iam.ListRoleRequest) (*iam.ListRoleResponse, error) {
-	errForUser := req.Validate()
-	errForAdmin := req.ValidateForAdmin()
-	if errForUser != nil && errForAdmin != nil {
-		if errForUser != nil {
-			return nil, errForUser
-		}
-		if errForAdmin != nil {
-			return nil, errForAdmin
-		}
+	if err := req.Validate(); err != nil {
+		return nil, err
 	}
 	list, err := i.repository.ListRole(ctx, req.ProjectId, req.Name, req.UserId, req.AccessTokenId)
 	if err != nil {
@@ -36,15 +29,8 @@ func (i *IAMService) ListRole(ctx context.Context, req *iam.ListRoleRequest) (*i
 }
 
 func (i *IAMService) GetRole(ctx context.Context, req *iam.GetRoleRequest) (*iam.GetRoleResponse, error) {
-	errForUser := req.Validate()
-	errForAdmin := req.ValidateForAdmin()
-	if errForUser != nil && errForAdmin != nil {
-		if errForUser != nil {
-			return nil, errForUser
-		}
-		if errForAdmin != nil {
-			return nil, errForAdmin
-		}
+	if err := req.Validate(); err != nil {
+		return nil, err
 	}
 	role, err := i.repository.GetRole(ctx, req.ProjectId, req.RoleId)
 	if err != nil {
@@ -106,15 +92,8 @@ func (i *IAMService) DeleteRole(ctx context.Context, req *iam.DeleteRoleRequest)
 }
 
 func (i *IAMService) AttachRole(ctx context.Context, req *iam.AttachRoleRequest) (*iam.AttachRoleResponse, error) {
-	errForUser := req.Validate()
-	errForAdmin := req.ValidateForAdmin()
-	if errForUser != nil && errForAdmin != nil {
-		if errForUser != nil {
-			return nil, errForUser
-		}
-		if errForAdmin != nil {
-			return nil, errForAdmin
-		}
+	if err := req.Validate(); err != nil {
+		return nil, err
 	}
 	ur, err := i.repository.AttachRole(ctx, req.ProjectId, req.RoleId, req.UserId)
 	if err != nil {
@@ -134,15 +113,8 @@ func convertUserRole(ur *model.UserRole) *iam.UserRole {
 }
 
 func (i *IAMService) DetachRole(ctx context.Context, req *iam.DetachRoleRequest) (*empty.Empty, error) {
-	errForUser := req.Validate()
-	errForAdmin := req.ValidateForAdmin()
-	if errForUser != nil && errForAdmin != nil {
-		if errForUser != nil {
-			return nil, errForUser
-		}
-		if errForAdmin != nil {
-			return nil, errForAdmin
-		}
+	if err := req.Validate(); err != nil {
+		return nil, err
 	}
 	if err := i.repository.DetachRole(ctx, req.ProjectId, req.RoleId, req.UserId); err != nil {
 		return nil, err
