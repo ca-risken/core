@@ -62,13 +62,17 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 	}
 	i.logger.Debugf(ctx, "isFisrstUser: %t", isFirstUser)
 
+	isAdmin := false
+	if isFirstUser {
+		isAdmin = true
+		i.logger.Infof(ctx, "Setting first user as admin, sub=%s", req.User.Sub)
+	}
 	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
 	var userID uint32
 	if !noRecord {
 		userID = savedData.UserID
+		isAdmin = savedData.IsAdmin
 	}
-
-	isAdmin := false
 	u := &model.User{
 		UserID:     userID,
 		Sub:        req.User.Sub,

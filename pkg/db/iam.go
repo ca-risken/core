@@ -88,7 +88,7 @@ where
 		params = append(params, userID)
 	}
 	if admin {
-		query += " and exists (select * from user_role ur where ur.user_id = u.user_id and ur.project_id is null)"
+		query += " and u.is_admin = true"
 	}
 	if userIdpKey != "" {
 		query += " and u.user_idp_key = ?"
