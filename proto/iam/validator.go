@@ -353,3 +353,10 @@ func (i *IsAdminRequest) Validate() error {
 		validation.Field(&i.UserId, validation.Required),
 	)
 }
+
+// Validate UpdateUserAdminRequest
+func (u *UpdateUserAdminRequest) Validate() error {
+	return validation.ValidateStruct(u,
+		validation.Field(&u.UserId, validation.Required),
+	)
+}

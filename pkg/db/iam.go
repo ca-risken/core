@@ -17,6 +17,7 @@ type IAMRepository interface {
 	GetUserBySub(ctx context.Context, sub string) (*model.User, error)
 	CreateUser(ctx context.Context, u *model.User) (*model.User, error)
 	PutUser(ctx context.Context, u *model.User) (*model.User, error)
+	UpdateUserAdmin(ctx context.Context, userID uint32, isAdmin bool) (*model.User, error)
 	GetActiveUserCount(ctx context.Context) (*int, error)
 	GetUserByUserIdpKey(ctx context.Context, userIdpKey string) (*model.User, error)
 
@@ -168,6 +169,13 @@ func (c *Client) PutUser(ctx context.Context, u *model.User) (*model.User, error
 		return nil, err
 	}
 	return c.GetUserBySub(ctx, u.Sub)
+}
+
+func (c *Client) UpdateUserAdmin(ctx context.Context, userID uint32, isAdmin bool) (*model.User, error) {
+	if err := c.Master.WithContext(ctx).Model(&model.User{}).Where("user_id = ?", userID).Update("is_admin", isAdmin).Error; err != nil {
+		return nil, err
+	}
+	return c.GetUser(ctx, userID, "", "")
 }
 
 const selectGetActiveUserCount = `select count(*) from user where activated = 'true'`

@@ -402,3 +402,92 @@ func TestDeleteUserReserved(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateUserAdmin(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name        string
+		userID      uint32
+		isAdmin     bool
+		want        *model.User
+		wantError   bool
+		mockClosure func(mock sqlmock.Sqlmock)
+	}{
+		{
+			name:    "OK Update to admin",
+			userID:  1,
+			isAdmin: true,
+			want:    &model.User{UserID: 1, Sub: "test@example.com", Name: "Test User", Activated: true, IsAdmin: true, CreatedAt: now, UpdatedAt: now},
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec("UPDATE `user` SET `is_admin`=\\?,`updated_at`=\\? WHERE user_id = \\?").
+					WithArgs(true, sqlmock.AnyArg(), 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectCommit()
+				rows := sqlmock.NewRows([]string{"user_id", "sub", "name", "user_idp_key", "activated", "is_admin", "created_at", "updated_at"}).
+					AddRow(1, "test@example.com", "Test User", nil, true, true, now, now)
+				mock.ExpectQuery("select \\* from user where activated = 'true'").
+					WithArgs(1).
+					WillReturnRows(rows)
+			},
+		},
+		{
+			name:    "OK Update to non-admin",
+			userID:  1,
+			isAdmin: false,
+			want:    &model.User{UserID: 1, Sub: "test@example.com", Name: "Test User", Activated: true, IsAdmin: false, CreatedAt: now, UpdatedAt: now},
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec("UPDATE `user` SET `is_admin`=\\?,`updated_at`=\\? WHERE user_id = \\?").
+					WithArgs(false, sqlmock.AnyArg(), 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectCommit()
+				rows := sqlmock.NewRows([]string{"user_id", "sub", "name", "user_idp_key", "activated", "is_admin", "created_at", "updated_at"}).
+					AddRow(1, "test@example.com", "Test User", nil, true, false, now, now)
+				mock.ExpectQuery("select \\* from user where activated = 'true'").
+					WithArgs(1).
+					WillReturnRows(rows)
+			},
+		},
+		{
+			name:      "NG Update error",
+			userID:    1,
+			isAdmin:   true,
+			wantError: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec("UPDATE `user` SET `is_admin`=\\?,`updated_at`=\\? WHERE user_id = \\?").
+					WithArgs(true, sqlmock.AnyArg(), 1).
+					WillReturnError(errors.New("DB error"))
+				mock.ExpectRollback()
+			},
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			client, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("Failed to create mock client: %v", err)
+			}
+			c.mockClosure(mock)
+			got, err := client.UpdateUserAdmin(ctx, c.userID, c.isAdmin)
+			if c.wantError {
+				if err == nil {
+					t.Fatalf("Expected error but got none")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected result: want=%+v, got=%+v", c.want, got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("Unmet expectations: %v", err)
+			}
+		})
+	}
+}

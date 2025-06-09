@@ -358,6 +358,108 @@ func (x *PutUserResponse) GetUser() *User {
 	return nil
 }
 
+type UpdateUserAdminRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId  uint32 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	IsAdmin bool   `protobuf:"varint,2,opt,name=is_admin,json=isAdmin,proto3" json:"is_admin,omitempty"`
+}
+
+func (x *UpdateUserAdminRequest) Reset() {
+	*x = UpdateUserAdminRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_iam_user_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateUserAdminRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateUserAdminRequest) ProtoMessage() {}
+
+func (x *UpdateUserAdminRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_iam_user_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateUserAdminRequest.ProtoReflect.Descriptor instead.
+func (*UpdateUserAdminRequest) Descriptor() ([]byte, []int) {
+	return file_iam_user_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *UpdateUserAdminRequest) GetUserId() uint32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *UpdateUserAdminRequest) GetIsAdmin() bool {
+	if x != nil {
+		return x.IsAdmin
+	}
+	return false
+}
+
+type UpdateUserAdminResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	User *User `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+}
+
+func (x *UpdateUserAdminResponse) Reset() {
+	*x = UpdateUserAdminResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_iam_user_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateUserAdminResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateUserAdminResponse) ProtoMessage() {}
+
+func (x *UpdateUserAdminResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_iam_user_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateUserAdminResponse.ProtoReflect.Descriptor instead.
+func (*UpdateUserAdminResponse) Descriptor() ([]byte, []int) {
+	return file_iam_user_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *UpdateUserAdminResponse) GetUser() *User {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
 var File_iam_user_proto protoreflect.FileDescriptor
 
 var file_iam_user_proto_rawDesc = []byte{
@@ -394,10 +496,19 @@ var file_iam_user_proto_rawDesc = []byte{
 	0x75, 0x73, 0x65, 0x72, 0x22, 0x35, 0x0a, 0x0f, 0x50, 0x75, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52,
 	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x22, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x18,
 	0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d,
-	0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x42, 0x25, 0x5a, 0x23, 0x67,
-	0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69, 0x73,
-	0x6b, 0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x69,
-	0x61, 0x6d, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x22, 0x4c, 0x0a, 0x16, 0x55,
+	0x70, 0x64, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x19,
+	0x0a, 0x08, 0x69, 0x73, 0x5f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x08,
+	0x52, 0x07, 0x69, 0x73, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x22, 0x3d, 0x0a, 0x17, 0x55, 0x70, 0x64,
+	0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x22, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x69, 0x61, 0x6d, 0x2e, 0x55, 0x73,
+	0x65, 0x72, 0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x42, 0x25, 0x5a, 0x23, 0x67, 0x69, 0x74, 0x68,
+	0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69, 0x73, 0x6b, 0x65, 0x6e,
+	0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x69, 0x61, 0x6d, 0x62,
+	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -412,26 +523,29 @@ func file_iam_user_proto_rawDescGZIP() []byte {
 	return file_iam_user_proto_rawDescData
 }
 
-var file_iam_user_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_iam_user_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_iam_user_proto_goTypes = []interface{}{
-	(*ListUserRequest)(nil),  // 0: core.iam.ListUserRequest
-	(*ListUserResponse)(nil), // 1: core.iam.ListUserResponse
-	(*GetUserRequest)(nil),   // 2: core.iam.GetUserRequest
-	(*GetUserResponse)(nil),  // 3: core.iam.GetUserResponse
-	(*PutUserRequest)(nil),   // 4: core.iam.PutUserRequest
-	(*PutUserResponse)(nil),  // 5: core.iam.PutUserResponse
-	(*User)(nil),             // 6: core.iam.User
-	(*UserForUpsert)(nil),    // 7: core.iam.UserForUpsert
+	(*ListUserRequest)(nil),         // 0: core.iam.ListUserRequest
+	(*ListUserResponse)(nil),        // 1: core.iam.ListUserResponse
+	(*GetUserRequest)(nil),          // 2: core.iam.GetUserRequest
+	(*GetUserResponse)(nil),         // 3: core.iam.GetUserResponse
+	(*PutUserRequest)(nil),          // 4: core.iam.PutUserRequest
+	(*PutUserResponse)(nil),         // 5: core.iam.PutUserResponse
+	(*UpdateUserAdminRequest)(nil),  // 6: core.iam.UpdateUserAdminRequest
+	(*UpdateUserAdminResponse)(nil), // 7: core.iam.UpdateUserAdminResponse
+	(*User)(nil),                    // 8: core.iam.User
+	(*UserForUpsert)(nil),           // 9: core.iam.UserForUpsert
 }
 var file_iam_user_proto_depIdxs = []int32{
-	6, // 0: core.iam.GetUserResponse.user:type_name -> core.iam.User
-	7, // 1: core.iam.PutUserRequest.user:type_name -> core.iam.UserForUpsert
-	6, // 2: core.iam.PutUserResponse.user:type_name -> core.iam.User
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	8, // 0: core.iam.GetUserResponse.user:type_name -> core.iam.User
+	9, // 1: core.iam.PutUserRequest.user:type_name -> core.iam.UserForUpsert
+	8, // 2: core.iam.PutUserResponse.user:type_name -> core.iam.User
+	8, // 3: core.iam.UpdateUserAdminResponse.user:type_name -> core.iam.User
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_iam_user_proto_init() }
@@ -513,6 +627,30 @@ func file_iam_user_proto_init() {
 				return nil
 			}
 		}
+		file_iam_user_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateUserAdminRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_iam_user_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateUserAdminResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -520,7 +658,7 @@ func file_iam_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_iam_user_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

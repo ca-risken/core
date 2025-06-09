@@ -1058,6 +1058,36 @@ func (_m *IAMRepository) PutUserReserved(ctx context.Context, u *model.UserReser
 	return r0, r1
 }
 
+// UpdateUserAdmin provides a mock function with given fields: ctx, userID, isAdmin
+func (_m *IAMRepository) UpdateUserAdmin(ctx context.Context, userID uint32, isAdmin bool) (*model.User, error) {
+	ret := _m.Called(ctx, userID, isAdmin)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateUserAdmin")
+	}
+
+	var r0 *model.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, bool) (*model.User, error)); ok {
+		return rf(ctx, userID, isAdmin)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, bool) *model.User); ok {
+		r0 = rf(ctx, userID, isAdmin)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, bool) error); ok {
+		r1 = rf(ctx, userID, isAdmin)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewIAMRepository creates a new instance of IAMRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewIAMRepository(t interface {
