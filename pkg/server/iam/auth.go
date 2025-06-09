@@ -122,3 +122,14 @@ func (i *IAMService) IsAdmin(ctx context.Context, req *iam.IsAdminRequest) (*iam
 
 	return &iam.IsAdminResponse{Ok: true}, nil
 }
+
+func (i *IAMService) isUserAdmin(ctx context.Context, userID uint32) (bool, error) {
+	user, err := i.repository.GetUser(ctx, userID, "", "")
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+	return user.IsAdmin, nil
+}

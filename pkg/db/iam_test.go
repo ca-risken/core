@@ -24,15 +24,15 @@ func TestCreateUser(t *testing.T) {
 		{
 			name: "OK",
 			input: &model.User{
-				UserID: 1, Sub: "sub", Name: "name", UserIdpKey: "user_idp_key", Activated: true,
+				UserID: 1, Sub: "sub", Name: "name", UserIdpKey: "user_idp_key", Activated: true, IsAdmin: false,
 			},
-			want:    &model.User{UserID: 1, Sub: "sub", Name: "name", UserIdpKey: "user_idp_key", Activated: true, UpdatedAt: now, CreatedAt: now},
+			want:    &model.User{UserID: 1, Sub: "sub", Name: "name", UserIdpKey: "user_idp_key", Activated: true, IsAdmin: false, UpdatedAt: now, CreatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(regexp.QuoteMeta(insertUser)).WillReturnResult(sqlmock.NewResult(1, 1))
 				mock.ExpectQuery(regexp.QuoteMeta(selectGetUserBySub)).WillReturnRows(sqlmock.NewRows([]string{
-					"user_id", "sub", "name", "user_idp_key", "activated", "created_at", "updated_at"}).
-					AddRow(uint32(1), "sub", "name", "user_idp_key", true, now, now))
+					"user_id", "sub", "name", "user_idp_key", "activated", "is_admin", "created_at", "updated_at"}).
+					AddRow(uint32(1), "sub", "name", "user_idp_key", true, false, now, now))
 			},
 		},
 		{
@@ -94,21 +94,21 @@ func TestPutUser(t *testing.T) {
 		{
 			name: "OK",
 			input: &model.User{
-				UserID: 1, Sub: "sub", Name: "name", UserIdpKey: "user_idp_key", Activated: true,
+				UserID: 1, Sub: "sub", Name: "name", UserIdpKey: "user_idp_key", Activated: true, IsAdmin: false,
 			},
-			want:    &model.User{UserID: 1, Sub: "sub", Name: "name", UserIdpKey: "user_idp_key", Activated: true, UpdatedAt: now, CreatedAt: now},
+			want:    &model.User{UserID: 1, Sub: "sub", Name: "name", UserIdpKey: "user_idp_key", Activated: true, IsAdmin: false, UpdatedAt: now, CreatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(regexp.QuoteMeta(updateUser)).WillReturnResult(sqlmock.NewResult(1, 1))
 				mock.ExpectQuery(regexp.QuoteMeta(selectGetUserBySub)).WillReturnRows(sqlmock.NewRows([]string{
-					"user_id", "sub", "name", "user_idp_key", "activated", "created_at", "updated_at"}).
-					AddRow(uint32(1), "sub", "name", "user_idp_key", true, now, now))
+					"user_id", "sub", "name", "user_idp_key", "activated", "is_admin", "created_at", "updated_at"}).
+					AddRow(uint32(1), "sub", "name", "user_idp_key", true, false, now, now))
 			},
 		},
 		{
 			name: "NG failed to insert user",
 			input: &model.User{
-				UserID: 1, Sub: "sub", Name: "name", UserIdpKey: "user_idp_key", Activated: true,
+				UserID: 1, Sub: "sub", Name: "name", UserIdpKey: "user_idp_key", Activated: true, IsAdmin: false,
 			},
 			want:    nil,
 			wantErr: true,
@@ -120,7 +120,7 @@ func TestPutUser(t *testing.T) {
 		{
 			name: "NG failed to get user",
 			input: &model.User{
-				UserID: 1, Sub: "sub", Name: "name", UserIdpKey: "user_idp_key", Activated: true,
+				UserID: 1, Sub: "sub", Name: "name", UserIdpKey: "user_idp_key", Activated: true, IsAdmin: false,
 			},
 			want:    nil,
 			wantErr: true,

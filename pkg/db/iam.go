@@ -142,13 +142,12 @@ func (c *Client) GetUserByUserIdpKey(ctx context.Context, userIdpKey string) (*m
 
 const insertUser = `
 INSERT INTO user
-  (user_id, sub, name, user_idp_key, activated)
-  VALUES (?, ?, ?, ?, ?)
+  (user_id, sub, name, user_idp_key, activated, is_admin)
+  VALUES (?, ?, ?, ?, ?, ?)
 `
 
 func (c *Client) CreateUser(ctx context.Context, u *model.User) (*model.User, error) {
-
-	if err := c.Master.WithContext(ctx).Exec(insertUser, u.UserID, u.Sub, u.Name, convertZeroValueToNull(u.UserIdpKey), fmt.Sprintf("%t", u.Activated)).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(insertUser, u.UserID, u.Sub, u.Name, convertZeroValueToNull(u.UserIdpKey), fmt.Sprintf("%t", u.Activated), u.IsAdmin).Error; err != nil {
 		return nil, err
 	}
 	return c.GetUserBySub(ctx, u.Sub)
@@ -159,12 +158,13 @@ UPDATE user
   SET 
     name = ?,
     user_idp_key = ?,
-    activated = ?
+    activated = ?,
+    is_admin = ?
   WHERE user_id = ?
 `
 
 func (c *Client) PutUser(ctx context.Context, u *model.User) (*model.User, error) {
-	if err := c.Master.WithContext(ctx).Exec(updateUser, u.Name, convertZeroValueToNull(u.UserIdpKey), fmt.Sprintf("%t", u.Activated), u.UserID).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(updateUser, u.Name, convertZeroValueToNull(u.UserIdpKey), fmt.Sprintf("%t", u.Activated), u.IsAdmin, u.UserID).Error; err != nil {
 		return nil, err
 	}
 	return c.GetUserBySub(ctx, u.Sub)
