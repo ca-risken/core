@@ -28,7 +28,7 @@ func TestListOrganizationRole(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
+			name: "OK - no filters",
 			args: args{organizationID: 1, name: "", userID: 0},
 			want: []*model.OrganizationRole{
 				{RoleID: 1, OrganizationID: 1, Name: "role1", CreatedAt: now, UpdatedAt: now},
@@ -43,7 +43,7 @@ func TestListOrganizationRole(t *testing.T) {
 			},
 		},
 		{
-			name: "OK with userID",
+			name: "OK - with userID filter",
 			args: args{organizationID: 1, name: "", userID: 123},
 			want: []*model.OrganizationRole{
 				{RoleID: 1, OrganizationID: 1, Name: "role1", CreatedAt: now, UpdatedAt: now},
@@ -56,7 +56,7 @@ func TestListOrganizationRole(t *testing.T) {
 			},
 		},
 		{
-			name: "OK with name",
+			name: "OK - with name filter",
 			args: args{organizationID: 1, name: "admin", userID: 0},
 			want: []*model.OrganizationRole{
 				{RoleID: 1, OrganizationID: 1, Name: "admin", CreatedAt: now, UpdatedAt: now},
@@ -69,7 +69,7 @@ func TestListOrganizationRole(t *testing.T) {
 			},
 		},
 		{
-			name: "OK with name and userID",
+			name: "OK - with both filters",
 			args: args{organizationID: 1, name: "admin", userID: 123},
 			want: []*model.OrganizationRole{
 				{RoleID: 1, OrganizationID: 1, Name: "admin", CreatedAt: now, UpdatedAt: now},
@@ -353,7 +353,7 @@ func TestListOrganizationPolicy(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
+			name: "OK - no filters",
 			args: args{organizationID: 1, name: "", roleID: 0},
 			want: []*model.OrganizationPolicy{
 				{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
@@ -368,7 +368,7 @@ func TestListOrganizationPolicy(t *testing.T) {
 			},
 		},
 		{
-			name: "OK with roleID",
+			name: "OK - with roleID filter",
 			args: args{organizationID: 1, name: "", roleID: 456},
 			want: []*model.OrganizationPolicy{
 				{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
@@ -381,7 +381,7 @@ func TestListOrganizationPolicy(t *testing.T) {
 			},
 		},
 		{
-			name: "OK with name",
+			name: "OK - with name filter",
 			args: args{organizationID: 1, name: "read-only", roleID: 0},
 			want: []*model.OrganizationPolicy{
 				{PolicyID: 1, OrganizationID: 1, Name: "read-only", CreatedAt: now, UpdatedAt: now},
@@ -394,7 +394,7 @@ func TestListOrganizationPolicy(t *testing.T) {
 			},
 		},
 		{
-			name: "OK with name and roleID",
+			name: "OK - with both filters",
 			args: args{organizationID: 1, name: "read-only", roleID: 456},
 			want: []*model.OrganizationPolicy{
 				{PolicyID: 1, OrganizationID: 1, Name: "read-only", CreatedAt: now, UpdatedAt: now},
