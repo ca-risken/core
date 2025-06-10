@@ -9,6 +9,8 @@ import (
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
+	"github.com/ca-risken/core/proto/iam"
+	iammock "github.com/ca-risken/core/proto/iam/mocks"
 	"github.com/ca-risken/core/proto/organization_iam"
 	"gorm.io/gorm"
 )
@@ -62,46 +64,77 @@ func TestIsAuthorizedByOrganizationPolicy(t *testing.T) {
 
 func TestIsAuthorizedOrganization(t *testing.T) {
 	cases := []struct {
-		name         string
-		input        *organization_iam.IsAuthorizedOrganizationRequest
-		want         *organization_iam.IsAuthorizedOrganizationResponse
-		wantErr      bool
-		mockResponse *[]model.OrganizationPolicy
-		mockError    error
+		name              string
+		input             *organization_iam.IsAuthorizedOrganizationRequest
+		want              *organization_iam.IsAuthorizedOrganizationResponse
+		wantErr           bool
+		mockResponse      *[]model.OrganizationPolicy
+		mockError         error
+		mockIsAdminResp   bool
+		mockIsAdminErr    error
+		expectIsAdminCall bool
 	}{
 		{
-			name: "OK Authorized",
+			name: "OK Admin user - immediate authorization",
 			input: &organization_iam.IsAuthorizedOrganizationRequest{
 				UserId:         111,
 				OrganizationId: 1001,
 				ActionName:     "organization/update-organization",
 			},
-			want: &organization_iam.IsAuthorizedOrganizationResponse{Ok: true},
+			want:              &organization_iam.IsAuthorizedOrganizationResponse{Ok: true},
+			mockIsAdminResp:   true,
+			expectIsAdminCall: true,
+		},
+		{
+			name: "OK Authorized - non-admin user with matching policy",
+			input: &organization_iam.IsAuthorizedOrganizationRequest{
+				UserId:         111,
+				OrganizationId: 1001,
+				ActionName:     "organization/update-organization",
+			},
+			want:              &organization_iam.IsAuthorizedOrganizationResponse{Ok: true},
+			mockIsAdminResp:   false,
+			expectIsAdminCall: true,
 			mockResponse: &[]model.OrganizationPolicy{
 				{PolicyID: 101, Name: "organization-admin", OrganizationID: 1001, ActionPtn: "organization/.*"},
 			},
 		},
 		{
-			name: "OK Unauthorized - no matching policy",
+			name: "OK Unauthorized - non-admin user with no matching policy",
 			input: &organization_iam.IsAuthorizedOrganizationRequest{
 				UserId:         111,
 				OrganizationId: 1001,
 				ActionName:     "organization/delete-organization",
 			},
-			want: &organization_iam.IsAuthorizedOrganizationResponse{Ok: false},
+			want:              &organization_iam.IsAuthorizedOrganizationResponse{Ok: false},
+			mockIsAdminResp:   false,
+			expectIsAdminCall: true,
 			mockResponse: &[]model.OrganizationPolicy{
 				{PolicyID: 102, Name: "organization-viewer", OrganizationID: 1001, ActionPtn: "organization/(get|list)"},
 			},
 		},
 		{
-			name: "OK No policies found",
+			name: "OK Unauthorized - non-admin user with no policies found",
 			input: &organization_iam.IsAuthorizedOrganizationRequest{
 				UserId:         111,
 				OrganizationId: 1001,
 				ActionName:     "organization/create-organization",
 			},
-			want:      &organization_iam.IsAuthorizedOrganizationResponse{Ok: false},
-			mockError: gorm.ErrRecordNotFound,
+			want:              &organization_iam.IsAuthorizedOrganizationResponse{Ok: false},
+			mockIsAdminResp:   false,
+			expectIsAdminCall: true,
+			mockError:         gorm.ErrRecordNotFound,
+		},
+		{
+			name: "NG IsAdmin check error",
+			input: &organization_iam.IsAuthorizedOrganizationRequest{
+				UserId:         111,
+				OrganizationId: 1001,
+				ActionName:     "organization/update-organization",
+			},
+			mockIsAdminErr:    gorm.ErrInvalidDB,
+			expectIsAdminCall: true,
+			wantErr:           true,
 		},
 		{
 			name: "NG Invalid params - organization_id is zero",
@@ -122,14 +155,16 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Invalid DB error",
+			name: "NG Invalid DB error in policy check",
 			input: &organization_iam.IsAuthorizedOrganizationRequest{
 				UserId:         111,
 				OrganizationId: 1001,
 				ActionName:     "organization/create-organization",
 			},
-			mockError: gorm.ErrInvalidDB,
-			wantErr:   true,
+			mockIsAdminResp:   false,
+			expectIsAdminCall: true,
+			mockError:         gorm.ErrInvalidDB,
+			wantErr:           true,
 		},
 	}
 
@@ -138,9 +173,18 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 			ctx := context.Background()
 			mockRepo := mocks.NewOrganizationIAMRepository(t)
 			logger := logging.NewLogger()
-			svc := NewOrganizationIAMService(mockRepo, logger)
+			mockIAM := iammock.NewIAMServiceClient(t)
+			svc := NewOrganizationIAMService(mockRepo, mockIAM, logger)
 
-			if c.mockResponse != nil || c.mockError != nil {
+			if c.expectIsAdminCall {
+				if c.mockIsAdminErr != nil {
+					mockIAM.On("IsAdmin", test.RepeatMockAnything(2)...).Return(nil, c.mockIsAdminErr).Once()
+				} else {
+					mockIAM.On("IsAdmin", test.RepeatMockAnything(2)...).Return(&iam.IsAdminResponse{Ok: c.mockIsAdminResp}, nil).Once()
+				}
+			}
+
+			if !c.mockIsAdminResp && c.mockIsAdminErr == nil && c.expectIsAdminCall && (c.mockResponse != nil || c.mockError != nil) {
 				mockRepo.On("GetOrganizationPolicyByUserID", test.RepeatMockAnything(3)...).Return(c.mockResponse, c.mockError).Once()
 			}
 
