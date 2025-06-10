@@ -10,6 +10,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/ca-risken/core/pkg/model"
+	"gorm.io/gorm"
 )
 
 func TestListOrganizationRole(t *testing.T) {
@@ -780,6 +781,27 @@ func TestAttachOrganizationRole(t *testing.T) {
 				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id =?")).WillReturnError(errors.New("DB error"))
 			},
 		},
+		{
+			name:    "NG role not found",
+			args:    args{roleID: 999, userID: 1},
+			want:    nil,
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id =?")).WillReturnError(gorm.ErrRecordNotFound)
+			},
+		},
+		{
+			name:    "NG user not found",
+			args:    args{roleID: 1, userID: 999},
+			want:    nil,
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id =?")).WillReturnRows(sqlmock.NewRows([]string{
+					"role_id", "organization_id", "name", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "role1", now, now))
+				mock.ExpectQuery(regexp.QuoteMeta("select * from user where activated = 'true' and user_id = ?")).WillReturnError(gorm.ErrRecordNotFound)
+			},
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -923,6 +945,27 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 					AddRow(uint32(1), uint32(1), "policy1", now, now))
 				mock.ExpectExec(regexp.QuoteMeta(insertAttachOrganizationPolicy)).WillReturnResult(sqlmock.NewResult(1, 1))
 				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationPolicy)).WillReturnError(errors.New("DB error"))
+			},
+		},
+		{
+			name:    "NG role not found",
+			args:    args{roleID: 999, policyID: 1},
+			want:    nil,
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id =?")).WillReturnError(gorm.ErrRecordNotFound)
+			},
+		},
+		{
+			name:    "NG policy not found",
+			args:    args{roleID: 1, policyID: 999},
+			want:    nil,
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id =?")).WillReturnRows(sqlmock.NewRows([]string{
+					"role_id", "organization_id", "name", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "role1", now, now))
+				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationPolicy)).WillReturnError(gorm.ErrRecordNotFound)
 			},
 		},
 	}
