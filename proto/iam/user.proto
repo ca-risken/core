@@ -27,3 +27,10 @@ message GetUserResponse { User user = 1; }
 message PutUserRequest { UserForUpsert user = 1; }
 
 message PutUserResponse { User user = 1; }
+
+message UpdateUserAdminRequest {
+  uint32 user_id = 1;
+  bool is_admin = 2;
+}
+
+message UpdateUserAdminResponse { User user = 1; }

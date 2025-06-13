@@ -52,20 +52,26 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 		return nil, err
 	}
 	// check first user
-	isFisrstUser := false
+	isFirstUser := false
 	if noRecord {
 		users, err := i.repository.GetActiveUserCount(ctx)
 		if err != nil {
 			return nil, err
 		}
-		isFisrstUser = users == nil || *users == 0
+		isFirstUser = users == nil || *users == 0
 	}
-	i.logger.Debugf(ctx, "isFisrstUser: %t", isFisrstUser)
+	i.logger.Debugf(ctx, "isFisrstUser: %t", isFirstUser)
 
+	isAdmin := false
+	if isFirstUser {
+		isAdmin = true
+		i.logger.Infof(ctx, "Setting first user as admin, sub=%s", req.User.Sub)
+	}
 	// PKが登録済みの場合は取得した値をセット。未登録はゼロ値のママでAutoIncrementさせる（更新の都度、無駄にAutoIncrementさせないように）
 	var userID uint32
 	if !noRecord {
 		userID = savedData.UserID
+		isAdmin = savedData.IsAdmin
 	}
 	u := &model.User{
 		UserID:     userID,
@@ -73,6 +79,7 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 		Name:       req.User.Name,
 		UserIdpKey: req.User.UserIdpKey,
 		Activated:  req.User.Activated,
+		IsAdmin:    isAdmin,
 	}
 	var registerdData *model.User
 	// 登録済みユーザーの場合、update
@@ -87,14 +94,6 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 			return nil, err
 		}
 	}
-
-	if isFisrstUser {
-		// attach admin roles
-		if err := i.repository.AttachAllAdminRole(ctx, registerdData.UserID); err != nil {
-			return nil, err
-		}
-		i.logger.Infof(ctx, "Attach admin role for first user, user_id=%d", registerdData.UserID)
-	}
 	// 新規ユーザーの場合、user_reservedからロールの追加
 	if userID == 0 {
 		if err := i.AttachRoleByUserReserved(ctx, registerdData.UserID, registerdData.UserIdpKey); err != nil {
@@ -105,6 +104,19 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 	return &iam.PutUserResponse{User: convertUser(registerdData)}, nil
 }
 
+func (i *IAMService) UpdateUserAdmin(ctx context.Context, req *iam.UpdateUserAdminRequest) (*iam.UpdateUserAdminResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	updatedUser, err := i.repository.UpdateUserAdmin(ctx, req.UserId, req.IsAdmin)
+	if err != nil {
+		return nil, err
+	}
+
+	return &iam.UpdateUserAdminResponse{User: convertUser(updatedUser)}, nil
+}
+
 func convertUser(u *model.User) *iam.User {
 	return &iam.User{
 		UserId:     u.UserID,
@@ -112,6 +124,7 @@ func convertUser(u *model.User) *iam.User {
 		Name:       u.Name,
 		UserIdpKey: u.UserIdpKey,
 		Activated:  u.Activated,
+		IsAdmin:    u.IsAdmin,
 		CreatedAt:  u.CreatedAt.Unix(),
 		UpdatedAt:  u.UpdatedAt.Unix(),
 	}
