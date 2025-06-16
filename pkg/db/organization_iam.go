@@ -55,7 +55,7 @@ func (c *Client) ListOrganizationRole(ctx context.Context, organizationID uint32
 }
 
 func (c *Client) GetOrganizationRole(ctx context.Context, organizationID, roleID uint32) (*model.OrganizationRole, error) {
-	query := `select * from organization_role r where role_id =?`
+	query := `select * from organization_role r where role_id = ?`
 	var params []interface{}
 	params = append(params, roleID)
 	if organizationID != 0 {
@@ -135,16 +135,18 @@ func (c *Client) ListOrganizationPolicy(ctx context.Context, organizationID uint
 	return data, nil
 }
 
-const getOrganizationPolicy = `
-	select * 
-	from organization_policy 
-	where organization_id = ? 
-		and policy_id = ?
-`
+const getOrganizationPolicy = `select * from organization_policy p where policy_id = ?`
 
 func (c *Client) GetOrganizationPolicy(ctx context.Context, organizationID, policyID uint32) (*model.OrganizationPolicy, error) {
+	query := getOrganizationPolicy
+	var params []interface{}
+	params = append(params, policyID)
+	if organizationID != 0 {
+		query += " and p.organization_id = ?"
+		params = append(params, organizationID)
+	}
 	var data model.OrganizationPolicy
-	if err := c.Slave.WithContext(ctx).Raw(getOrganizationPolicy, organizationID, policyID).First(&data).Error; err != nil {
+	if err := c.Slave.WithContext(ctx).Raw(query, params...).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
