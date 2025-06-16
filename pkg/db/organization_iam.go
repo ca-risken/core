@@ -54,8 +54,10 @@ func (c *Client) ListOrganizationRole(ctx context.Context, organizationID uint32
 	return data, nil
 }
 
+const getOrganizationRole = `select * from organization_role r where role_id = ?`
+
 func (c *Client) GetOrganizationRole(ctx context.Context, organizationID, roleID uint32) (*model.OrganizationRole, error) {
-	query := `select * from organization_role r where role_id = ?`
+	query := getOrganizationRole
 	var params []interface{}
 	params = append(params, roleID)
 	if organizationID != 0 {
