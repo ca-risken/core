@@ -842,7 +842,7 @@ func TestDetachOrganizationRole(t *testing.T) {
 			args:    args{roleID: 1, userID: 1},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRole)).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 				mock.ExpectQuery(regexp.QuoteMeta("select * from user where activated = 'true' and user_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
@@ -856,7 +856,7 @@ func TestDetachOrganizationRole(t *testing.T) {
 			args:    args{roleID: 1, userID: 1},
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRole)).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 				mock.ExpectQuery(regexp.QuoteMeta("select * from user where activated = 'true' and user_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
@@ -904,7 +904,7 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 			want:    &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRole)).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationPolicy)).WillReturnRows(sqlmock.NewRows([]string{
@@ -922,7 +922,7 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRole)).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationPolicy)).WillReturnRows(sqlmock.NewRows([]string{
@@ -937,7 +937,7 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRole)).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationPolicy)).WillReturnRows(sqlmock.NewRows([]string{
@@ -953,7 +953,7 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id = ?")).WillReturnError(gorm.ErrRecordNotFound)
+				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRole)).WillReturnError(gorm.ErrRecordNotFound)
 			},
 		},
 		{
@@ -962,7 +962,7 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRole)).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationPolicy)).WillReturnError(gorm.ErrRecordNotFound)
@@ -1008,7 +1008,7 @@ func TestDetachOrganizationPolicy(t *testing.T) {
 			args:    args{roleID: 1, policyID: 1},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRole)).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationPolicy)).WillReturnRows(sqlmock.NewRows([]string{
@@ -1022,7 +1022,7 @@ func TestDetachOrganizationPolicy(t *testing.T) {
 			args:    args{roleID: 1, policyID: 1},
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role r where role_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRole)).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationPolicy)).WillReturnRows(sqlmock.NewRows([]string{
