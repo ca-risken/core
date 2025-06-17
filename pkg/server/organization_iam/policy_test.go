@@ -83,8 +83,8 @@ func TestGetOrganizationPolicy(t *testing.T) {
 		{
 			name:         "OK",
 			input:        &organization_iam.GetOrganizationPolicyRequest{PolicyId: 111, OrganizationId: 123},
-			want:         &organization_iam.GetOrganizationPolicyResponse{Policy: &organization_iam.OrganizationPolicy{PolicyId: 111, Name: "nm", OrganizationId: 123, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockResponce: &model.OrganizationPolicy{PolicyID: 111, Name: "nm", OrganizationID: 123, CreatedAt: now, UpdatedAt: now},
+			want:         &organization_iam.GetOrganizationPolicyResponse{Policy: &organization_iam.OrganizationPolicy{PolicyId: 111, Name: "nm", ActionPtn: ".*", OrganizationId: 123, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockResponce: &model.OrganizationPolicy{PolicyID: 111, Name: "nm", ActionPtn: ".*", OrganizationID: 123, CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:      "OK Record Not Found",
@@ -255,19 +255,21 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 			},
 			want: &organization_iam.AttachOrganizationPolicyResponse{
 				Policy: &organization_iam.OrganizationPolicy{
-					PolicyId:  1,
-					Name:      "test-policy",
-					ActionPtn: "test:*",
-					CreatedAt: now.Unix(),
-					UpdatedAt: now.Unix(),
+					PolicyId:       1,
+					Name:           "test-policy",
+					ActionPtn:      "test:*",
+					OrganizationId: 1,
+					CreatedAt:      now.Unix(),
+					UpdatedAt:      now.Unix(),
 				},
 			},
 			mockResponse: &model.OrganizationPolicy{
-				PolicyID:  1,
-				Name:      "test-policy",
-				ActionPtn: "test:*",
-				CreatedAt: now,
-				UpdatedAt: now,
+				PolicyID:       1,
+				Name:           "test-policy",
+				ActionPtn:      "test:*",
+				OrganizationID: 1,
+				CreatedAt:      now,
+				UpdatedAt:      now,
 			},
 		},
 		{
