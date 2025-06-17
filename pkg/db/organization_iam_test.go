@@ -36,7 +36,7 @@ func TestListOrganizationRole(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role or where 1=1 and r.organization_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and or.organization_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now).
 					AddRow(uint32(2), uint32(1), "role2", now, now))
@@ -50,7 +50,7 @@ func TestListOrganizationRole(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role or where 1=1 and r.organization_id = ? and exists (select * from user_organization_role uor where uor.role_id = r.role_id and uor.user_id = ? )")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and or.organization_id = ? and exists (select * from user_organization_role uor where uor.role_id = or.role_id and uor.user_id = ? )")).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 			},
@@ -63,7 +63,7 @@ func TestListOrganizationRole(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role or where 1=1 and r.organization_id = ? and r.name = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and or.organization_id = ? and or.name = ?")).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "admin", now, now))
 			},
@@ -76,7 +76,7 @@ func TestListOrganizationRole(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role or where 1=1 and r.organization_id = ? and r.name = ? and exists (select * from user_organization_role uor where uor.role_id = r.role_id and uor.user_id = ? )")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and or.organization_id = ? and or.name = ? and exists (select * from user_organization_role uor where uor.role_id = or.role_id and uor.user_id = ? )")).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "admin", now, now))
 			},
@@ -87,7 +87,7 @@ func TestListOrganizationRole(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_role or where 1=1 and r.organization_id = ?")).WillReturnError(errors.New("DB error"))
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and or.organization_id = ?")).WillReturnError(errors.New("DB error"))
 			},
 		},
 	}
@@ -361,7 +361,7 @@ func TestListOrganizationPolicy(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from policy p where p.organization_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationPolicy)).WillReturnRows(sqlmock.NewRows([]string{
 					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "policy1", now, now).
 					AddRow(uint32(2), uint32(1), "policy2", now, now))
@@ -375,7 +375,7 @@ func TestListOrganizationPolicy(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from policy p where p.organization_id = ? and exists(select * from organization_role_policy orp where orp.policy_id = p.policy_id and orp.role_id = ?)")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationPolicy + " and exists(select * from organization_role_policy orp where orp.policy_id = op.policy_id and orp.role_id = ?)")).WillReturnRows(sqlmock.NewRows([]string{
 					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "policy1", now, now))
 			},
@@ -388,7 +388,7 @@ func TestListOrganizationPolicy(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from policy p where p.organization_id = ? and p.name = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationPolicy + " and op.name = ?")).WillReturnRows(sqlmock.NewRows([]string{
 					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "read-only", now, now))
 			},
@@ -401,7 +401,7 @@ func TestListOrganizationPolicy(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from policy p where p.organization_id = ? and p.name = ? and exists(select * from organization_role_policy orp where orp.policy_id = p.policy_id and orp.role_id = ?)")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationPolicy + " and op.name = ? and exists(select * from organization_role_policy orp where orp.policy_id = op.policy_id and orp.role_id = ?)")).WillReturnRows(sqlmock.NewRows([]string{
 					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "read-only", now, now))
 			},
@@ -412,7 +412,7 @@ func TestListOrganizationPolicy(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from policy p where p.organization_id = ?")).WillReturnError(errors.New("DB error"))
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationPolicy)).WillReturnError(errors.New("DB error"))
 			},
 		},
 	}
