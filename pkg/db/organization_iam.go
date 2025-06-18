@@ -32,21 +32,21 @@ type OrganizationIAMRepository interface {
 
 var _ OrganizationIAMRepository = (*Client)(nil)
 
-const ListOrganizationRole = `select * from organization_role or where 1=1`
+const ListOrganizationRole = `select * from organization_role r where 1=1`
 
 func (c *Client) ListOrganizationRole(ctx context.Context, organizationID uint32, name string, userID uint32) ([]*model.OrganizationRole, error) {
 	query := ListOrganizationRole
 	var params []interface{}
 	if organizationID != 0 {
-		query += " and or.organization_id = ?"
+		query += " and r.organization_id = ?"
 		params = append(params, organizationID)
 	}
 	if name != "" {
-		query += " and or.name = ?"
+		query += " and r.name = ?"
 		params = append(params, name)
 	}
 	if userID != 0 {
-		query += " and exists (select * from user_organization_role uor where uor.role_id = or.role_id and uor.user_id = ? )"
+		query += " and exists (select * from user_organization_role uor where uor.role_id = r.role_id and uor.user_id = ? )"
 		params = append(params, userID)
 	}
 	var data []*model.OrganizationRole

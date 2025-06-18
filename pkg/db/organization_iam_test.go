@@ -36,7 +36,7 @@ func TestListOrganizationRole(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and or.organization_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and r.organization_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now).
 					AddRow(uint32(2), uint32(1), "role2", now, now))
@@ -50,7 +50,7 @@ func TestListOrganizationRole(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and or.organization_id = ? and exists (select * from user_organization_role uor where uor.role_id = or.role_id and uor.user_id = ? )")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and r.organization_id = ? and exists (select * from user_organization_role uor where uor.role_id = r.role_id and uor.user_id = ? )")).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 			},
@@ -63,7 +63,7 @@ func TestListOrganizationRole(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and or.organization_id = ? and or.name = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and r.organization_id = ? and r.name = ?")).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "admin", now, now))
 			},
@@ -76,7 +76,7 @@ func TestListOrganizationRole(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and or.organization_id = ? and or.name = ? and exists (select * from user_organization_role uor where uor.role_id = or.role_id and uor.user_id = ? )")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and r.organization_id = ? and r.name = ? and exists (select * from user_organization_role uor where uor.role_id = r.role_id and uor.user_id = ? )")).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "admin", now, now))
 			},
@@ -87,7 +87,7 @@ func TestListOrganizationRole(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and or.organization_id = ?")).WillReturnError(errors.New("DB error"))
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and r.organization_id = ?")).WillReturnError(errors.New("DB error"))
 			},
 		},
 	}
