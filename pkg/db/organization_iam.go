@@ -32,19 +32,21 @@ type OrganizationIAMRepository interface {
 
 var _ OrganizationIAMRepository = (*Client)(nil)
 
+const ListOrganizationRole = `select * from organization_role or where 1=1`
+
 func (c *Client) ListOrganizationRole(ctx context.Context, organizationID uint32, name string, userID uint32) ([]*model.OrganizationRole, error) {
-	query := `select * from organization_role or where 1=1`
+	query := ListOrganizationRole
 	var params []interface{}
 	if organizationID != 0 {
-		query += " and r.organization_id = ?"
+		query += " and or.organization_id = ?"
 		params = append(params, organizationID)
 	}
 	if name != "" {
-		query += " and r.name = ?"
+		query += " and or.name = ?"
 		params = append(params, name)
 	}
 	if userID != 0 {
-		query += " and exists (select * from user_organization_role uor where uor.role_id = r.role_id and uor.user_id = ? )"
+		query += " and exists (select * from user_organization_role uor where uor.role_id = or.role_id and uor.user_id = ? )"
 		params = append(params, userID)
 	}
 	var data []*model.OrganizationRole
@@ -117,17 +119,19 @@ func (c *Client) DeleteOrganizationRole(ctx context.Context, organizationID, rol
 	return c.Master.WithContext(ctx).Exec(deleteOrganizationRole, organizationID, roleID).Error
 }
 
+const ListOrganizationPolicy = `select * from organization_policy op where op.organization_id = ?`
+
 // OrganizationPolicy
 func (c *Client) ListOrganizationPolicy(ctx context.Context, organizationID uint32, name string, roleID uint32) ([]*model.OrganizationPolicy, error) {
-	query := `select * from policy p where p.organization_id = ?`
+	query := ListOrganizationPolicy
 	var params []interface{}
 	params = append(params, organizationID)
 	if name != "" {
-		query += " and p.name = ?"
+		query += " and op.name = ?"
 		params = append(params, name)
 	}
 	if roleID != 0 {
-		query += " and exists(select * from organization_role_policy orp where orp.policy_id = p.policy_id and orp.role_id = ?)"
+		query += " and exists(select * from organization_role_policy orp where orp.policy_id = op.policy_id and orp.role_id = ?)"
 		params = append(params, roleID)
 	}
 	var data []*model.OrganizationPolicy
