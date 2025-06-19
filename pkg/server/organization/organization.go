@@ -184,15 +184,17 @@ func (o *OrganizationService) createDefaultRole(ctx context.Context, ownerUserID
 			return fmt.Errorf("could not put %s-role, err=%w", name, err)
 		}
 		if _, err := o.organizationIamClient.AttachOrganizationPolicy(ctx, &organization_iam.AttachOrganizationPolicyRequest{
-			RoleId:   role.Role.RoleId,
-			PolicyId: policy.Policy.PolicyId,
+			OrganizationId: organizationID,
+			RoleId:         role.Role.RoleId,
+			PolicyId:       policy.Policy.PolicyId,
 		}); err != nil {
 			return fmt.Errorf("could not attach %s-policy to %s-role, err=%w", name, name, err)
 		}
 		if name == organizationAdmin {
 			if _, err := o.organizationIamClient.AttachOrganizationRole(ctx, &organization_iam.AttachOrganizationRoleRequest{
-				UserId: ownerUserID,
-				RoleId: role.Role.RoleId,
+				OrganizationId: organizationID,
+				UserId:         ownerUserID,
+				RoleId:         role.Role.RoleId,
 			}); err != nil {
 				return fmt.Errorf("could not attach default %s-role to organization owner, err=%w", name, err)
 			}

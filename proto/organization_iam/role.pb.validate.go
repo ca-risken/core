@@ -939,6 +939,17 @@ func (m *AttachOrganizationRoleRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	if m.GetOrganizationId() <= 0 {
+		err := AttachOrganizationRoleRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
 	if len(errors) > 0 {
 		return AttachOrganizationRoleRequestMultiError(errors)
 	}
@@ -1188,6 +1199,17 @@ func (m *DetachOrganizationRoleRequest) validate(all bool) error {
 	if m.GetRoleId() <= 0 {
 		err := DetachOrganizationRoleRequestValidationError{
 			field:  "RoleId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetOrganizationId() <= 0 {
+		err := DetachOrganizationRoleRequestValidationError{
+			field:  "OrganizationId",
 			reason: "value must be greater than 0",
 		}
 		if !all {
