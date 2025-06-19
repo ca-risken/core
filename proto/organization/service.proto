@@ -12,7 +12,7 @@ import "validate/validate.proto";
 message ListOrganizationRequest {
   uint32 organization_id = 1;
   string name = 2 [ (validate.rules).string = {max_len : 64} ];
-  ;
+  uint32 project_id = 3;
 }
 
 message ListOrganizationResponse { repeated Organization organization = 1; }
