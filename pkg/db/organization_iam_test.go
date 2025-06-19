@@ -36,7 +36,7 @@ func TestListOrganizationRole(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and or.organization_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and r.organization_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now).
 					AddRow(uint32(2), uint32(1), "role2", now, now))
@@ -50,7 +50,7 @@ func TestListOrganizationRole(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and or.organization_id = ? and exists (select * from user_organization_role uor where uor.role_id = or.role_id and uor.user_id = ? )")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and r.organization_id = ? and exists (select * from user_organization_role uor where uor.role_id = r.role_id and uor.user_id = ? )")).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 			},
@@ -63,7 +63,7 @@ func TestListOrganizationRole(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and or.organization_id = ? and or.name = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and r.organization_id = ? and r.name = ?")).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "admin", now, now))
 			},
@@ -76,7 +76,7 @@ func TestListOrganizationRole(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and or.organization_id = ? and or.name = ? and exists (select * from user_organization_role uor where uor.role_id = or.role_id and uor.user_id = ? )")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and r.organization_id = ? and r.name = ? and exists (select * from user_organization_role uor where uor.role_id = r.role_id and uor.user_id = ? )")).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "admin", now, now))
 			},
@@ -87,7 +87,7 @@ func TestListOrganizationRole(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and or.organization_id = ?")).WillReturnError(errors.New("DB error"))
+				mock.ExpectQuery(regexp.QuoteMeta(ListOrganizationRole + " and r.organization_id = ?")).WillReturnError(errors.New("DB error"))
 			},
 		},
 	}
@@ -722,8 +722,9 @@ func TestDeleteOrganizationPolicy(t *testing.T) {
 func TestAttachOrganizationRole(t *testing.T) {
 	now := time.Now()
 	type args struct {
-		roleID uint32
-		userID uint32
+		organizationID uint32
+		roleID         uint32
+		userID         uint32
 	}
 	cases := []struct {
 		name        string
@@ -734,7 +735,7 @@ func TestAttachOrganizationRole(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			args:    args{roleID: 1, userID: 1},
+			args:    args{organizationID: 1, roleID: 1, userID: 1},
 			want:    &model.OrganizationRole{RoleID: 1, OrganizationID: 1, Name: "role1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
@@ -752,7 +753,7 @@ func TestAttachOrganizationRole(t *testing.T) {
 		},
 		{
 			name:    "NG failed to attach role",
-			args:    args{roleID: 1, userID: 1},
+			args:    args{organizationID: 1, roleID: 1, userID: 1},
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
@@ -766,24 +767,8 @@ func TestAttachOrganizationRole(t *testing.T) {
 			},
 		},
 		{
-			name:    "NG failed to get role",
-			args:    args{roleID: 1, userID: 1},
-			want:    nil,
-			wantErr: true,
-			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRole)).WillReturnRows(sqlmock.NewRows([]string{
-					"role_id", "organization_id", "name", "created_at", "updated_at"}).
-					AddRow(uint32(1), uint32(1), "role1", now, now))
-				mock.ExpectQuery(regexp.QuoteMeta("select * from user where activated = 'true' and user_id = ?")).WillReturnRows(sqlmock.NewRows([]string{
-					"user_id", "sub", "name", "user_idp_key", "activated", "created_at", "updated_at"}).
-					AddRow(uint32(1), "sub1", "user1", "key1", true, now, now))
-				mock.ExpectExec(regexp.QuoteMeta(insertAttachOrganizationRole)).WillReturnResult(sqlmock.NewResult(1, 1))
-				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRole)).WillReturnError(errors.New("DB error"))
-			},
-		},
-		{
 			name:    "NG role not found",
-			args:    args{roleID: 999, userID: 1},
+			args:    args{organizationID: 1, roleID: 999, userID: 1},
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
@@ -792,7 +777,7 @@ func TestAttachOrganizationRole(t *testing.T) {
 		},
 		{
 			name:    "NG user not found",
-			args:    args{roleID: 1, userID: 999},
+			args:    args{organizationID: 1, roleID: 1, userID: 999},
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
@@ -811,7 +796,7 @@ func TestAttachOrganizationRole(t *testing.T) {
 				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
 			}
 			c.mockClosure(mock)
-			got, err := db.AttachOrganizationRole(ctx, c.args.roleID, c.args.userID)
+			got, err := db.AttachOrganizationRole(ctx, c.args.organizationID, c.args.roleID, c.args.userID)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -828,8 +813,9 @@ func TestAttachOrganizationRole(t *testing.T) {
 func TestDetachOrganizationRole(t *testing.T) {
 	now := time.Now()
 	type args struct {
-		roleID uint32
-		userID uint32
+		organizationID uint32
+		roleID         uint32
+		userID         uint32
 	}
 	cases := []struct {
 		name        string
@@ -839,7 +825,7 @@ func TestDetachOrganizationRole(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			args:    args{roleID: 1, userID: 1},
+			args:    args{organizationID: 1, roleID: 1, userID: 1},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRole)).WillReturnRows(sqlmock.NewRows([]string{
@@ -853,7 +839,7 @@ func TestDetachOrganizationRole(t *testing.T) {
 		},
 		{
 			name:    "NG DB error",
-			args:    args{roleID: 1, userID: 1},
+			args:    args{organizationID: 1, roleID: 1, userID: 1},
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRole)).WillReturnRows(sqlmock.NewRows([]string{
@@ -874,7 +860,7 @@ func TestDetachOrganizationRole(t *testing.T) {
 				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
 			}
 			c.mockClosure(mock)
-			err = db.DetachOrganizationRole(ctx, c.args.roleID, c.args.userID)
+			err = db.DetachOrganizationRole(ctx, c.args.organizationID, c.args.roleID, c.args.userID)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -888,8 +874,9 @@ func TestDetachOrganizationRole(t *testing.T) {
 func TestAttachOrganizationPolicy(t *testing.T) {
 	now := time.Now()
 	type args struct {
-		roleID   uint32
-		policyID uint32
+		organizationID uint32
+		roleID         uint32
+		policyID       uint32
 	}
 	cases := []struct {
 		name        string
@@ -900,7 +887,7 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			args:    args{roleID: 1, policyID: 1},
+			args:    args{organizationID: 1, roleID: 1, policyID: 1},
 			want:    &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
@@ -918,7 +905,7 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 		},
 		{
 			name:    "NG failed to attach policy",
-			args:    args{roleID: 1, policyID: 1},
+			args:    args{organizationID: 1, roleID: 1, policyID: 1},
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
@@ -933,7 +920,7 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 		},
 		{
 			name:    "NG failed to get policy",
-			args:    args{roleID: 1, policyID: 1},
+			args:    args{organizationID: 1, roleID: 1, policyID: 1},
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
@@ -949,7 +936,7 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 		},
 		{
 			name:    "NG role not found",
-			args:    args{roleID: 999, policyID: 1},
+			args:    args{organizationID: 1, roleID: 999, policyID: 1},
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
@@ -958,7 +945,7 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 		},
 		{
 			name:    "NG policy not found",
-			args:    args{roleID: 1, policyID: 999},
+			args:    args{organizationID: 1, roleID: 1, policyID: 999},
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
@@ -977,7 +964,7 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
 			}
 			c.mockClosure(mock)
-			got, err := db.AttachOrganizationPolicy(ctx, c.args.roleID, c.args.policyID)
+			got, err := db.AttachOrganizationPolicy(ctx, c.args.organizationID, c.args.policyID, c.args.roleID)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -994,8 +981,9 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 func TestDetachOrganizationPolicy(t *testing.T) {
 	now := time.Now()
 	type args struct {
-		roleID   uint32
-		policyID uint32
+		organizationID uint32
+		roleID         uint32
+		policyID       uint32
 	}
 	cases := []struct {
 		name        string
@@ -1005,7 +993,7 @@ func TestDetachOrganizationPolicy(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			args:    args{roleID: 1, policyID: 1},
+			args:    args{organizationID: 1, roleID: 1, policyID: 1},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRole)).WillReturnRows(sqlmock.NewRows([]string{
@@ -1019,7 +1007,7 @@ func TestDetachOrganizationPolicy(t *testing.T) {
 		},
 		{
 			name:    "NG DB error",
-			args:    args{roleID: 1, policyID: 1},
+			args:    args{organizationID: 1, roleID: 1, policyID: 1},
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationRole)).WillReturnRows(sqlmock.NewRows([]string{
@@ -1040,7 +1028,7 @@ func TestDetachOrganizationPolicy(t *testing.T) {
 				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
 			}
 			c.mockClosure(mock)
-			err = db.DetachOrganizationPolicy(ctx, c.args.roleID, c.args.policyID)
+			err = db.DetachOrganizationPolicy(ctx, c.args.organizationID, c.args.policyID, c.args.roleID)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}

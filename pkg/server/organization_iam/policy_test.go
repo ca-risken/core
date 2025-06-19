@@ -250,8 +250,9 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 		{
 			name: "OK",
 			input: &organization_iam.AttachOrganizationPolicyRequest{
-				RoleId:   1,
-				PolicyId: 1,
+				OrganizationId: 1,
+				RoleId:         1,
+				PolicyId:       1,
 			},
 			want: &organization_iam.AttachOrganizationPolicyResponse{
 				Policy: &organization_iam.OrganizationPolicy{
@@ -275,16 +276,18 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 		{
 			name: "NG Invalid param",
 			input: &organization_iam.AttachOrganizationPolicyRequest{
-				RoleId:   0,
-				PolicyId: 1,
+				OrganizationId: 1,
+				RoleId:         0,
+				PolicyId:       1,
 			},
 			wantErr: true,
 		},
 		{
 			name: "NG DB error",
 			input: &organization_iam.AttachOrganizationPolicyRequest{
-				RoleId:   1,
-				PolicyId: 1,
+				OrganizationId: 1,
+				RoleId:         1,
+				PolicyId:       1,
 			},
 			mockErr: gorm.ErrInvalidDB,
 			wantErr: true,
@@ -296,7 +299,7 @@ func TestAttachOrganizationPolicy(t *testing.T) {
 			mockDB := mocks.NewOrganizationIAMRepository(t)
 			svc := OrganizationIAMService{repository: mockDB}
 			if c.mockErr != nil || c.mockResponse != nil {
-				mockDB.On("AttachOrganizationPolicy", test.RepeatMockAnything(3)...).Return(c.mockResponse, c.mockErr).Once()
+				mockDB.On("AttachOrganizationPolicy", test.RepeatMockAnything(4)...).Return(c.mockResponse, c.mockErr).Once()
 			}
 			got, err := svc.AttachOrganizationPolicy(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -320,24 +323,27 @@ func TestDetachOrganizationPolicy(t *testing.T) {
 		{
 			name: "OK",
 			input: &organization_iam.DetachOrganizationPolicyRequest{
-				RoleId:   1,
-				PolicyId: 1,
+				OrganizationId: 1,
+				RoleId:         1,
+				PolicyId:       1,
 			},
 			mockCall: true,
 		},
 		{
 			name: "NG Invalid param",
 			input: &organization_iam.DetachOrganizationPolicyRequest{
-				RoleId:   0,
-				PolicyId: 1,
+				OrganizationId: 1,
+				RoleId:         0,
+				PolicyId:       1,
 			},
 			wantErr: true,
 		},
 		{
 			name: "NG DB error",
 			input: &organization_iam.DetachOrganizationPolicyRequest{
-				RoleId:   1,
-				PolicyId: 1,
+				OrganizationId: 1,
+				RoleId:         1,
+				PolicyId:       1,
 			},
 			mockCall: true,
 			mockErr:  gorm.ErrInvalidDB,
@@ -350,7 +356,7 @@ func TestDetachOrganizationPolicy(t *testing.T) {
 			mockDB := mocks.NewOrganizationIAMRepository(t)
 			svc := OrganizationIAMService{repository: mockDB}
 			if c.mockCall {
-				mockDB.On("DetachOrganizationPolicy", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
+				mockDB.On("DetachOrganizationPolicy", test.RepeatMockAnything(4)...).Return(c.mockErr).Once()
 			}
 			_, err := svc.DetachOrganizationPolicy(ctx, c.input)
 			if err != nil && !c.wantErr {
