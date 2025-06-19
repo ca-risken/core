@@ -91,7 +91,7 @@ func (s *OrganizationIAMService) AttachOrganizationRole(ctx context.Context, req
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	role, err := s.repository.AttachOrganizationRole(ctx, req.RoleId, req.UserId)
+	role, err := s.repository.AttachOrganizationRole(ctx, req.OrganizationId, req.RoleId, req.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func (s *OrganizationIAMService) DetachOrganizationRole(ctx context.Context, req
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if err := s.repository.DetachOrganizationRole(ctx, req.RoleId, req.UserId); err != nil {
+	if err := s.repository.DetachOrganizationRole(ctx, req.OrganizationId, req.RoleId, req.UserId); err != nil {
 		return nil, err
 	}
 	return &empty.Empty{}, nil
