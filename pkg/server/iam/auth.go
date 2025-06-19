@@ -26,18 +26,19 @@ func (i *IAMService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequ
 		return &iam.IsAuthorizedResponse{Ok: true}, nil
 	}
 
-	// Check project-level policies first
+	// Check project-level policies
 	policies, err := i.repository.GetUserPolicy(ctx, req.UserId)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 
+	var isAuthorizedByProject bool
 	if policies != nil {
-		isAuthorized, err := isAuthorizedByPolicy(req.ProjectId, req.ActionName, req.ResourceName, policies)
+		isAuthorizedByProject, err = isAuthorizedByPolicy(req.ProjectId, req.ActionName, req.ResourceName, policies)
 		if err != nil {
 			return &iam.IsAuthorizedResponse{Ok: false}, err
 		}
-		if isAuthorized {
+		if isAuthorizedByProject {
 			i.logger.Infof(ctx, "Authorized user action by project policy, request=%+v", req)
 			return &iam.IsAuthorizedResponse{Ok: true}, nil
 		}
@@ -46,13 +47,16 @@ func (i *IAMService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequ
 	// Check organization-level policies for the project
 	isAuthorizedByOrg, err := i.checkOrganizationAuthorization(ctx, req.UserId, req.ProjectId, req.ActionName)
 	if err != nil {
-		return &iam.IsAuthorizedResponse{Ok: false}, err
+		// Log error but don't fail completely if organization check fails
+		i.logger.Warnf(ctx, "Organization authorization check failed: %v", err)
+		isAuthorizedByOrg = false
 	}
 	if isAuthorizedByOrg {
 		i.logger.Infof(ctx, "Authorized user action by organization policy, request=%+v", req)
 		return &iam.IsAuthorizedResponse{Ok: true}, nil
 	}
 
+	i.logger.Debugf(ctx, "User not authorized: user_id=%d, project_id=%d, action=%s, resource=%s", req.UserId, req.ProjectId, req.ActionName, req.ResourceName)
 	return &iam.IsAuthorizedResponse{Ok: false}, nil
 }
 
@@ -145,26 +149,40 @@ func (i *IAMService) checkOrganizationAuthorization(ctx context.Context, userID,
 		i.logger.Debugf(ctx, "Organization clients not available, skipping organization authorization check")
 		return false, nil
 	}
+
+	i.logger.Debugf(ctx, "Checking organization authorization: user_id=%d, project_id=%d, action=%s", userID, projectID, actionName)
+
 	orgList, err := i.organizationClient.ListOrganization(ctx, &organization.ListOrganizationRequest{
 		ProjectId: projectID,
 	})
 	if err != nil {
+		i.logger.Warnf(ctx, "Failed to list organizations for project %d: %v", projectID, err)
 		return false, err
 	}
+
+	i.logger.Debugf(ctx, "Found %d organizations for project %d", len(orgList.Organization), projectID)
+
 	for _, org := range orgList.Organization {
+		i.logger.Debugf(ctx, "Checking authorization for organization %d (%s)", org.OrganizationId, org.Name)
+
 		isAuthorized, err := i.organizationIamClient.IsAuthorizedOrganization(ctx, &organization_iam.IsAuthorizedOrganizationRequest{
 			UserId:         userID,
 			OrganizationId: org.OrganizationId,
 			ActionName:     actionName,
 		})
 		if err != nil {
-			i.logger.Warnf(ctx, "Failed to check organization authorization: org_id=%d, user_id=%d, error=%v", org.OrganizationId, userID, err)
+			i.logger.Warnf(ctx, "Failed to check organization authorization: org_id=%d, user_id=%d, action=%s, error=%v", org.OrganizationId, userID, actionName, err)
 			continue
 		}
+
+		i.logger.Debugf(ctx, "Organization %d authorization result: %t", org.OrganizationId, isAuthorized.Ok)
+
 		if isAuthorized.Ok {
 			i.logger.Infof(ctx, "User authorized through organization: user_id=%d, organization_id=%d, action=%s", userID, org.OrganizationId, actionName)
 			return true, nil
 		}
 	}
+
+	i.logger.Debugf(ctx, "User not authorized through any organization: user_id=%d, project_id=%d, action=%s", userID, projectID, actionName)
 	return false, nil
 }

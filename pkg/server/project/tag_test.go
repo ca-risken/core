@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
@@ -45,7 +46,12 @@ func TestTagProject(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mockDB := mocks.NewProjectRepository(t)
-			svc := ProjectService{repository: mockDB}
+			svc := ProjectService{
+				repository:            mockDB,
+				organizationClient:    nil,
+				organizationIamClient: nil,
+				logger:                logging.NewLogger(),
+			}
 
 			if c.mockResponce != nil || c.mockError != nil {
 				mockDB.On("TagProject", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
@@ -92,7 +98,12 @@ func TestUntagProject(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mockDB := mocks.NewProjectRepository(t)
-			svc := ProjectService{repository: mockDB}
+			svc := ProjectService{
+				repository:            mockDB,
+				organizationClient:    nil,
+				organizationIamClient: nil,
+				logger:                logging.NewLogger(),
+			}
 
 			if c.callMock {
 				mockDB.On("UntagProject", test.RepeatMockAnything(3)...).Return(c.mockError).Once()
