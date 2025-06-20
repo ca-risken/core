@@ -42,7 +42,7 @@ func (c *Client) ListOrganization(ctx context.Context, organizationID uint32, na
 		params = append(params, name)
 	}
 	if userID != 0 {
-		query += " and exists (select * from user_organization_role ur inner join organization_role r using(organization_id, role_id) where ur.organization_id = o.organization_id and user_id = ?)"
+		query += " and exists (select 1 from user_organization_role ur inner join organization_role r on ur.role_id = r.role_id where r.organization_id = o.organization_id and ur.user_id = ?)"
 		params = append(params, userID)
 	}
 	if projectID != 0 {

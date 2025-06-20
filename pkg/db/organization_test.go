@@ -77,7 +77,7 @@ func TestListOrganization(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization o where 1 = 1 and exists (select * from user_organization_role ur inner join organization_role r using(organization_id, role_id) where ur.organization_id = o.organization_id and user_id = ?) order by o.organization_id")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta("select * from organization o where 1 = 1 and exists (select 1 from user_organization_role ur inner join organization_role r on ur.role_id = r.role_id where r.organization_id = o.organization_id and ur.user_id = ?) order by o.organization_id")).WillReturnRows(sqlmock.NewRows([]string{
 					"organization_id", "name", "description", "created_at", "updated_at"}).
 					AddRow(uint32(1), "org1", "desc1", now, now))
 			},
@@ -103,7 +103,7 @@ func TestListOrganization(t *testing.T) {
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization o where 1 = 1 and o.organization_id = ? and o.name = ? and exists (select * from user_organization_role ur inner join organization_role r using(organization_id, role_id) where ur.organization_id = o.organization_id and user_id = ?) and exists (select * from organization_project op where op.organization_id = o.organization_id and op.project_id = ?) order by o.organization_id")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta("select * from organization o where 1 = 1 and o.organization_id = ? and o.name = ? and exists (select 1 from user_organization_role ur inner join organization_role r on ur.role_id = r.role_id where r.organization_id = o.organization_id and ur.user_id = ?) and exists (select * from organization_project op where op.organization_id = o.organization_id and op.project_id = ?) order by o.organization_id")).WillReturnRows(sqlmock.NewRows([]string{
 					"organization_id", "name", "description", "created_at", "updated_at"}).
 					AddRow(uint32(1), "org1", "desc1", now, now))
 			},
