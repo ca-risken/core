@@ -18,7 +18,7 @@ func (o *OrganizationService) ListOrganization(ctx context.Context, req *organiz
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := o.repository.ListOrganization(ctx, req.OrganizationId, req.Name, req.ProjectId)
+	list, err := o.repository.ListOrganization(ctx, req.OrganizationId, req.Name, req.UserId, req.ProjectId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &organization.ListOrganizationResponse{}, nil

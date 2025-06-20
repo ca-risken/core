@@ -91,7 +91,7 @@ func TestListOrganization(t *testing.T) {
 			mockDB := mocks.NewOrganizationRepository(t)
 			svc := OrganizationService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("ListOrganization", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("ListOrganization", test.RepeatMockAnything(5)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.ListOrganization(ctx, c.input)
 			if !c.wantErr && err != nil {

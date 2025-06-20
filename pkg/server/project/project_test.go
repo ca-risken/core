@@ -13,10 +13,12 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
+	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/project"
 	"gorm.io/gorm"
 
 	iammock "github.com/ca-risken/core/proto/iam/mocks"
+	organizationmock "github.com/ca-risken/core/proto/organization/mocks"
 )
 
 func TestListProject(t *testing.T) {
@@ -64,12 +66,17 @@ func TestListProject(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mockDB := mocks.NewProjectRepository(t)
-			// Create service with nil organization clients for basic testing
+			mockOrg := organizationmock.NewOrganizationServiceClient(t)
+
+			// Setup organization mock to return empty results for organization lookup
+			mockOrg.On("ListOrganization", test.RepeatMockAnything(5)...).Return(&organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{},
+			}, nil).Maybe()
+
 			svc := ProjectService{
-				repository:            mockDB,
-				organizationClient:    nil,
-				organizationIamClient: nil,
-				logger:                logging.NewLogger(),
+				repository:         mockDB,
+				organizationClient: mockOrg,
+				logger:             logging.NewLogger(),
 			}
 			if c.mockResponce != nil || c.mockError != nil {
 				mockDB.On("ListProject", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
@@ -158,10 +165,13 @@ func TestCreateProject(t *testing.T) {
 			var ctx context.Context
 			mockDB := mocks.NewProjectRepository(t)
 			mockIAM := iammock.NewIAMServiceClient(t)
+			mockOrg := organizationmock.NewOrganizationServiceClient(t)
+
 			svc := ProjectService{
-				repository: mockDB,
-				iamClient:  mockIAM,
-				logger:     logging.NewLogger(),
+				repository:         mockDB,
+				iamClient:          mockIAM,
+				organizationClient: mockOrg,
+				logger:             logging.NewLogger(),
 			}
 			if c.createProjectResponse != nil || c.createProjectError != nil {
 				mockDB.On("CreateProject", test.RepeatMockAnything(2)...).Return(c.createProjectResponse, c.createProjectError).Once()
@@ -225,11 +235,14 @@ func TestUpdateProject(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mockDB := mocks.NewProjectRepository(t)
+			mockIAM := iammock.NewIAMServiceClient(t)
+			mockOrg := organizationmock.NewOrganizationServiceClient(t)
+
 			svc := ProjectService{
-				repository:            mockDB,
-				organizationClient:    nil,
-				organizationIamClient: nil,
-				logger:                logging.NewLogger(),
+				repository:         mockDB,
+				iamClient:          mockIAM,
+				organizationClient: mockOrg,
+				logger:             logging.NewLogger(),
 			}
 			if c.mockResponce != nil || c.mockError != nil {
 				mockDB.On("UpdateProject", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
@@ -276,9 +289,14 @@ func TestDeleteProject(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			mockDB := mocks.NewProjectRepository(t)
+			mockIAM := iammock.NewIAMServiceClient(t)
+			mockOrg := organizationmock.NewOrganizationServiceClient(t)
+
 			svc := ProjectService{
-				repository: mockDB,
-				logger:     logging.NewLogger(),
+				repository:         mockDB,
+				iamClient:          mockIAM,
+				organizationClient: mockOrg,
+				logger:             logging.NewLogger(),
 			}
 			if c.callDeleteProject {
 				mockDB.On("DeleteProject", test.RepeatMockAnything(2)...).Return(c.mockErr).Once()
@@ -341,12 +359,13 @@ func TestIsActive(t *testing.T) {
 			var ctx context.Context
 			mockRepository := mocks.NewProjectRepository(t)
 			mockIAM := iammock.NewIAMServiceClient(t)
+			mockOrg := organizationmock.NewOrganizationServiceClient(t)
+
 			svc := ProjectService{
-				iamClient:             mockIAM,
-				repository:            mockRepository,
-				organizationClient:    nil,
-				organizationIamClient: nil,
-				logger:                logging.NewLogger(),
+				iamClient:          mockIAM,
+				repository:         mockRepository,
+				organizationClient: mockOrg,
+				logger:             logging.NewLogger(),
 			}
 			if c.listProjectResults != nil {
 				mockRepository.On("ListProject", test.RepeatMockAnything(4)...).Return(c.listProjectResults, c.listProjectError).Once()
@@ -368,20 +387,88 @@ func TestIsActive(t *testing.T) {
 func TestListProjectWithOrganization(t *testing.T) {
 	now := time.Now()
 
-	t.Run("OK organization clients nil", func(t *testing.T) {
+	t.Run("OK with organization access", func(t *testing.T) {
 		var ctx context.Context
 
 		mockDB := mocks.NewProjectRepository(t)
+		mockOrg := organizationmock.NewOrganizationServiceClient(t)
+
 		svc := ProjectService{
-			repository:            mockDB,
-			organizationClient:    nil,
-			organizationIamClient: nil,
-			logger:                logging.NewLogger(),
+			repository:         mockDB,
+			organizationClient: mockOrg,
+			logger:             logging.NewLogger(),
+		}
+
+		// Mock direct projects
+		mockDB.On("ListProject", ctx, uint32(1), uint32(0), "").Return(&[]db.ProjectWithTag{
+			{ProjectID: 1, Name: "direct-project", CreatedAt: now, UpdatedAt: now},
+		}, nil).Once()
+
+		// Mock organization listing with userID - return organizations where user has roles
+		mockOrg.On("ListOrganization", test.RepeatMockAnything(5)...).Return(&organization.ListOrganizationResponse{
+			Organization: []*organization.Organization{
+				{OrganizationId: 1, Name: "test-org"},
+			},
+		}, nil).Once()
+
+		// Mock organization projects
+		mockOrg.On("ListProjectsInOrganization", test.RepeatMockAnything(2)...).Return(&organization.ListProjectsInOrganizationResponse{
+			Project: []*project.Project{
+				{ProjectId: 2, Name: "org-project"},
+			},
+		}, nil).Once()
+
+		// Mock getting project details for org project
+		mockDB.On("ListProject", ctx, uint32(0), uint32(2), "").Return(&[]db.ProjectWithTag{
+			{ProjectID: 2, Name: "org-project", CreatedAt: now, UpdatedAt: now},
+		}, nil).Once()
+
+		// Execute test
+		result, err := svc.ListProject(ctx, &project.ListProjectRequest{UserId: 1})
+
+		// Verify results
+		if err != nil {
+			t.Fatalf("Unexpected error: %+v", err)
+		}
+
+		if len(result.Project) != 2 {
+			t.Fatalf("Expected 2 projects, got %d", len(result.Project))
+		}
+
+		// Verify both direct and organization projects are returned
+		projectNames := make(map[string]bool)
+		for _, proj := range result.Project {
+			projectNames[proj.Name] = true
+		}
+
+		if !projectNames["direct-project"] {
+			t.Fatalf("Expected direct-project to be included")
+		}
+		if !projectNames["org-project"] {
+			t.Fatalf("Expected org-project to be included")
+		}
+	})
+
+	t.Run("OK no organization roles", func(t *testing.T) {
+		var ctx context.Context
+
+		mockDB := mocks.NewProjectRepository(t)
+		mockOrg := organizationmock.NewOrganizationServiceClient(t)
+
+		svc := ProjectService{
+			repository:         mockDB,
+			organizationClient: mockOrg,
+			logger:             logging.NewLogger(),
 		}
 
 		// Mock direct projects only
 		mockDB.On("ListProject", ctx, uint32(1), uint32(0), "").Return(&[]db.ProjectWithTag{
 			{ProjectID: 1, Name: "direct-project", CreatedAt: now, UpdatedAt: now},
+		}, nil).Once()
+
+		// Mock organization listing with userID - return empty (no roles)
+		mockOrg.On("ListOrganization", test.RepeatMockAnything(5)...).Return(&organization.ListOrganizationResponse{
+			Organization: []*organization.Organization{},
 		}, nil).Once()
 
 		// Execute test
@@ -397,7 +484,7 @@ func TestListProjectWithOrganization(t *testing.T) {
 		}
 
 		if result.Project[0].ProjectId != 1 || result.Project[0].Name != "direct-project" {
-			t.Fatalf("Expected direct project, got %+v", result.Project[0])
+			t.Fatalf("Expected only direct project, got %+v", result.Project[0])
 		}
 	})
 }

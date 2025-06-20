@@ -70,6 +70,8 @@ func (m *ListOrganizationRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	// no validation rules for UserId
+
 	// no validation rules for ProjectId
 
 	if len(errors) > 0 {

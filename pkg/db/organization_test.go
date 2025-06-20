@@ -18,6 +18,7 @@ func TestListOrganization(t *testing.T) {
 	type args struct {
 		organizationID uint32
 		name           string
+		userID         uint32
 		projectID      uint32
 	}
 	cases := []struct {
@@ -29,7 +30,7 @@ func TestListOrganization(t *testing.T) {
 	}{
 		{
 			name: "OK - no filters",
-			args: args{organizationID: 0, name: "", projectID: 0},
+			args: args{organizationID: 0, name: "", userID: 0, projectID: 0},
 			want: []*model.Organization{
 				{OrganizationID: 1, Name: "org1", Description: "desc1", CreatedAt: now, UpdatedAt: now},
 				{OrganizationID: 2, Name: "org2", Description: "desc2", CreatedAt: now, UpdatedAt: now},
@@ -44,7 +45,7 @@ func TestListOrganization(t *testing.T) {
 		},
 		{
 			name: "OK - with organizationID filter",
-			args: args{organizationID: 1, name: "", projectID: 0},
+			args: args{organizationID: 1, name: "", userID: 0, projectID: 0},
 			want: []*model.Organization{
 				{OrganizationID: 1, Name: "org1", Description: "desc1", CreatedAt: now, UpdatedAt: now},
 			},
@@ -57,7 +58,7 @@ func TestListOrganization(t *testing.T) {
 		},
 		{
 			name: "OK - with name filter",
-			args: args{organizationID: 0, name: "org1", projectID: 0},
+			args: args{organizationID: 0, name: "org1", userID: 0, projectID: 0},
 			want: []*model.Organization{
 				{OrganizationID: 1, Name: "org1", Description: "desc1", CreatedAt: now, UpdatedAt: now},
 			},
@@ -69,14 +70,40 @@ func TestListOrganization(t *testing.T) {
 			},
 		},
 		{
-			name: "OK - with both filters",
-			args: args{organizationID: 1, name: "org1", projectID: 0},
+			name: "OK - with userID filter",
+			args: args{organizationID: 0, name: "", userID: 1, projectID: 0},
 			want: []*model.Organization{
 				{OrganizationID: 1, Name: "org1", Description: "desc1", CreatedAt: now, UpdatedAt: now},
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization o where 1=1 and o.organization_id = ? and o.name = ? order by o.organization_id")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta("select * from organization o where 1=1 and exists (select * from user_organization_role ur inner join organization_role r using(organization_id, role_id) where ur.organization_id = o.organization_id and user_id = ?) order by o.organization_id")).WillReturnRows(sqlmock.NewRows([]string{
+					"organization_id", "name", "description", "created_at", "updated_at"}).
+					AddRow(uint32(1), "org1", "desc1", now, now))
+			},
+		},
+		{
+			name: "OK - with projectID filter",
+			args: args{organizationID: 0, name: "", userID: 0, projectID: 1},
+			want: []*model.Organization{
+				{OrganizationID: 1, Name: "org1", Description: "desc1", CreatedAt: now, UpdatedAt: now},
+			},
+			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta("select * from organization o where 1=1 and exists (select * from organization_project op where op.organization_id = o.organization_id and op.project_id = ?) order by o.organization_id")).WillReturnRows(sqlmock.NewRows([]string{
+					"organization_id", "name", "description", "created_at", "updated_at"}).
+					AddRow(uint32(1), "org1", "desc1", now, now))
+			},
+		},
+		{
+			name: "OK - with all filters",
+			args: args{organizationID: 1, name: "org1", userID: 1, projectID: 1},
+			want: []*model.Organization{
+				{OrganizationID: 1, Name: "org1", Description: "desc1", CreatedAt: now, UpdatedAt: now},
+			},
+			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta("select * from organization o where 1=1 and o.organization_id = ? and o.name = ? and exists (select * from user_organization_role ur inner join organization_role r using(organization_id, role_id) where ur.organization_id = o.organization_id and user_id = ?) and exists (select * from organization_project op where op.organization_id = o.organization_id and op.project_id = ?) order by o.organization_id")).WillReturnRows(sqlmock.NewRows([]string{
 					"organization_id", "name", "description", "created_at", "updated_at"}).
 					AddRow(uint32(1), "org1", "desc1", now, now))
 			},
@@ -90,32 +117,6 @@ func TestListOrganization(t *testing.T) {
 				mock.ExpectQuery(regexp.QuoteMeta("select * from organization o where 1=1 order by o.organization_id")).WillReturnError(errors.New("DB error"))
 			},
 		},
-		{
-			name: "OK - with projectID filter",
-			args: args{organizationID: 0, name: "", projectID: 1},
-			want: []*model.Organization{
-				{OrganizationID: 1, Name: "org1", Description: "desc1", CreatedAt: now, UpdatedAt: now},
-			},
-			wantErr: false,
-			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization o where 1=1 and exists (select * from organization_project op where op.organization_id = o.organization_id and op.project_id = ?) order by o.organization_id")).WillReturnRows(sqlmock.NewRows([]string{
-					"organization_id", "name", "description", "created_at", "updated_at"}).
-					AddRow(uint32(1), "org1", "desc1", now, now))
-			},
-		},
-		{
-			name: "OK - with projectID and organizationID filters",
-			args: args{organizationID: 1, name: "", projectID: 1},
-			want: []*model.Organization{
-				{OrganizationID: 1, Name: "org1", Description: "desc1", CreatedAt: now, UpdatedAt: now},
-			},
-			wantErr: false,
-			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization o where 1=1 and o.organization_id = ? and exists (select * from organization_project op where op.organization_id = o.organization_id and op.project_id = ?) order by o.organization_id")).WillReturnRows(sqlmock.NewRows([]string{
-					"organization_id", "name", "description", "created_at", "updated_at"}).
-					AddRow(uint32(1), "org1", "desc1", now, now))
-			},
-		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -125,7 +126,7 @@ func TestListOrganization(t *testing.T) {
 				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
 			}
 			c.mockClosure(mock)
-			got, err := db.ListOrganization(ctx, c.args.organizationID, c.args.name, c.args.projectID)
+			got, err := db.ListOrganization(ctx, c.args.organizationID, c.args.name, c.args.userID, c.args.projectID)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}

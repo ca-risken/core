@@ -12,6 +12,8 @@ import (
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/project"
 	"gorm.io/gorm"
+
+	organizationmock "github.com/ca-risken/core/proto/organization/mocks"
 )
 
 func TestTagProject(t *testing.T) {
@@ -46,11 +48,12 @@ func TestTagProject(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mockDB := mocks.NewProjectRepository(t)
+			mockOrg := organizationmock.NewOrganizationServiceClient(t)
+
 			svc := ProjectService{
-				repository:            mockDB,
-				organizationClient:    nil,
-				organizationIamClient: nil,
-				logger:                logging.NewLogger(),
+				repository:         mockDB,
+				organizationClient: mockOrg,
+				logger:             logging.NewLogger(),
 			}
 
 			if c.mockResponce != nil || c.mockError != nil {
@@ -98,11 +101,12 @@ func TestUntagProject(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mockDB := mocks.NewProjectRepository(t)
+			mockOrg := organizationmock.NewOrganizationServiceClient(t)
+
 			svc := ProjectService{
-				repository:            mockDB,
-				organizationClient:    nil,
-				organizationIamClient: nil,
-				logger:                logging.NewLogger(),
+				repository:         mockDB,
+				organizationClient: mockOrg,
+				logger:             logging.NewLogger(),
 			}
 
 			if c.callMock {
