@@ -46,7 +46,7 @@ func (c *Client) ListOrganization(ctx context.Context, organizationID uint32, na
 		params = append(params, userID)
 	}
 	if projectID != 0 {
-		query += " and exists (select * from organization_project op where op.organization_id = o.organization_id and op.project_id = ?)"
+		query += " and exists (select 1 from organization_project op where op.organization_id = o.organization_id and op.project_id = ?)"
 		params = append(params, projectID)
 	}
 
