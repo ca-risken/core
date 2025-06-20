@@ -11,7 +11,7 @@ import (
 
 type OrganizationRepository interface {
 	// Organization
-	ListOrganization(ctx context.Context, organizationID uint32, name string) ([]*model.Organization, error)
+	ListOrganization(ctx context.Context, organizationID uint32, name string, userID, projectID uint32) ([]*model.Organization, error)
 	CreateOrganization(ctx context.Context, name, description string) (*model.Organization, error)
 	UpdateOrganization(ctx context.Context, organizationID uint32, name, description string) (*model.Organization, error)
 	DeleteOrganization(ctx context.Context, organizationID uint32) error
@@ -29,9 +29,10 @@ type OrganizationRepository interface {
 
 var _ OrganizationRepository = (*Client)(nil)
 
-func (c *Client) ListOrganization(ctx context.Context, organizationID uint32, name string) ([]*model.Organization, error) {
+func (c *Client) ListOrganization(ctx context.Context, organizationID uint32, name string, userID, projectID uint32) ([]*model.Organization, error) {
 	query := `select * from organization o where 1 = 1`
 	var params []interface{}
+
 	if organizationID != 0 {
 		query += " and o.organization_id = ?"
 		params = append(params, organizationID)
@@ -40,6 +41,15 @@ func (c *Client) ListOrganization(ctx context.Context, organizationID uint32, na
 		query += " and o.name = ?"
 		params = append(params, name)
 	}
+	if userID != 0 {
+		query += " and exists (select 1 from user_organization_role ur inner join organization_role r on ur.role_id = r.role_id where r.organization_id = o.organization_id and ur.user_id = ?)"
+		params = append(params, userID)
+	}
+	if projectID != 0 {
+		query += " and exists (select 1 from organization_project op where op.organization_id = o.organization_id and op.project_id = ?)"
+		params = append(params, projectID)
+	}
+
 	query += " order by o.organization_id"
 	var organizations []*model.Organization
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&organizations).Error; err != nil {
