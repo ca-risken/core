@@ -33,7 +33,7 @@ func TestIsAuthorized(t *testing.T) {
 			},
 		},
 		{
-			name:  "OK Non-admin user with valid policies",
+			name:  "OK Non-admin user with valid project policies",
 			input: &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
 			want:  &iam.IsAuthorizedResponse{Ok: true},
 			mockUser: &model.User{
@@ -75,15 +75,21 @@ func TestIsAuthorized(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
-			mock := mocks.NewIAMRepository(t)
-			svc := IAMService{repository: mock, logger: logging.NewLogger()}
+			mockRepo := mocks.NewIAMRepository(t)
+
+			// Create service with nil clients for basic testing
+			svc := IAMService{
+				repository: mockRepo,
+				logger:     logging.NewLogger(),
+			}
 
 			if c.mockUser != nil || c.mockUserErr != nil {
-				mock.On("GetUser", test.RepeatMockAnything(4)...).Return(c.mockUser, c.mockUserErr).Once()
+				mockRepo.On("GetUser", test.RepeatMockAnything(4)...).Return(c.mockUser, c.mockUserErr).Once()
 			}
 			if c.mockPolicies != nil || c.mockPolicyErr != nil {
-				mock.On("GetUserPolicy", test.RepeatMockAnything(2)...).Return(c.mockPolicies, c.mockPolicyErr).Once()
+				mockRepo.On("GetUserPolicy", test.RepeatMockAnything(2)...).Return(c.mockPolicies, c.mockPolicyErr).Once()
 			}
+
 			got, err := svc.IsAuthorized(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -397,6 +403,61 @@ func TestIsAdmin(t *testing.T) {
 			}
 			got, err := svc.IsAdmin(ctx, c.input)
 			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestCheckOrganizationAuthorization(t *testing.T) {
+	// This test is focused on the new organization authorization logic
+	// We'll test it indirectly through IsAuthorized with organization clients set to nil
+	// to verify the error handling when organization services are not available
+
+	cases := []struct {
+		name          string
+		input         *iam.IsAuthorizedRequest
+		want          *iam.IsAuthorizedResponse
+		mockUser      *model.User
+		mockPolicies  *[]model.Policy
+		mockPolicyErr error
+	}{
+		{
+			name:  "OK Non-admin user falls back to false when no project policies and no org clients",
+			input: &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			want:  &iam.IsAuthorizedResponse{Ok: false},
+			mockUser: &model.User{
+				UserID: 111, Sub: "user", Name: "Regular User", Activated: true, IsAdmin: false,
+			},
+			mockPolicyErr: gorm.ErrRecordNotFound,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockRepo := mocks.NewIAMRepository(t)
+
+			// Create service with nil organization clients to test fallback behavior
+			svc := IAMService{
+				repository:            mockRepo,
+				organizationClient:    nil,
+				organizationIamClient: nil,
+				logger:                logging.NewLogger(),
+			}
+
+			if c.mockUser != nil {
+				mockRepo.On("GetUser", test.RepeatMockAnything(4)...).Return(c.mockUser, nil).Once()
+			}
+			if c.mockPolicyErr != nil {
+				mockRepo.On("GetUserPolicy", test.RepeatMockAnything(2)...).Return(c.mockPolicies, c.mockPolicyErr).Once()
+			}
+
+			got, err := svc.IsAuthorized(ctx, c.input)
+			if err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
 			if !reflect.DeepEqual(got, c.want) {

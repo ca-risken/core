@@ -41,6 +41,32 @@ func TestListOrganization(t *testing.T) {
 			},
 		},
 		{
+			name:  "OK with ProjectId",
+			input: &organization.ListOrganizationRequest{ProjectId: 123},
+			want: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{
+					{OrganizationId: 1, Name: "org1", Description: "org1 desc", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+					{OrganizationId: 2, Name: "org2", Description: "org2 desc", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+				},
+			},
+			mockResponce: []*model.Organization{
+				{OrganizationID: 1, Name: "org1", Description: "org1 desc", CreatedAt: now, UpdatedAt: now},
+				{OrganizationID: 2, Name: "org2", Description: "org2 desc", CreatedAt: now, UpdatedAt: now},
+			},
+		},
+		{
+			name:  "OK with all filters",
+			input: &organization.ListOrganizationRequest{OrganizationId: 1, Name: "test", ProjectId: 123},
+			want: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{
+					{OrganizationId: 1, Name: "test", Description: "test desc", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+				},
+			},
+			mockResponce: []*model.Organization{
+				{OrganizationID: 1, Name: "test", Description: "test desc", CreatedAt: now, UpdatedAt: now},
+			},
+		},
+		{
 			name:      "OK No record",
 			input:     &organization.ListOrganizationRequest{OrganizationId: 999, Name: "not-exist"},
 			want:      &organization.ListOrganizationResponse{},
@@ -65,7 +91,7 @@ func TestListOrganization(t *testing.T) {
 			mockDB := mocks.NewOrganizationRepository(t)
 			svc := OrganizationService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("ListOrganization", test.RepeatMockAnything(3)...).Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("ListOrganization", test.RepeatMockAnything(5)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.ListOrganization(ctx, c.input)
 			if !c.wantErr && err != nil {
