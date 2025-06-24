@@ -14,10 +14,12 @@ import (
 
 func (i *IAMService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequest) (*iam.IsAuthorizedResponse, error) {
 	if err := req.Validate(); err != nil {
+		i.logger.Warnf(ctx, "Failed to validate request: %v", err)
 		return nil, err
 	}
 	isAdmin, err := i.isUserAdmin(ctx, req.UserId)
 	if err != nil {
+		i.logger.Warnf(ctx, "Failed to check user admin: %v", err)
 		return nil, err
 	}
 	if isAdmin {
@@ -25,12 +27,10 @@ func (i *IAMService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequ
 		return &iam.IsAuthorizedResponse{Ok: true}, nil
 	}
 
-	// Check project-level policies
 	policies, err := i.repository.GetUserPolicy(ctx, req.UserId)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
-
 	var isAuthorizedByProject bool
 	if policies != nil {
 		isAuthorizedByProject, err = isAuthorizedByPolicy(req.ProjectId, req.ActionName, req.ResourceName, policies)
@@ -43,10 +43,8 @@ func (i *IAMService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequ
 		}
 	}
 
-	// Check organization-level policies for the project
 	isAuthorizedByOrg, err := i.checkOrganizationAuthorization(ctx, req.UserId, req.ProjectId, req.ActionName)
 	if err != nil {
-		// Log error but don't fail completely if organization check fails
 		i.logger.Warnf(ctx, "Organization authorization check failed: %v", err)
 		isAuthorizedByOrg = false
 	}
@@ -144,13 +142,6 @@ func (i *IAMService) isUserAdmin(ctx context.Context, userID uint32) (bool, erro
 }
 
 func (i *IAMService) checkOrganizationAuthorization(ctx context.Context, userID, projectID uint32, actionName string) (bool, error) {
-	if i.organizationClient == nil || i.organizationIamClient == nil {
-		i.logger.Debugf(ctx, "Organization clients not available, skipping organization authorization check")
-		return false, nil
-	}
-
-	i.logger.Debugf(ctx, "Checking organization authorization: user_id=%d, project_id=%d, action=%s", userID, projectID, actionName)
-
 	orgList, err := i.organizationClient.ListOrganization(ctx, &organization.ListOrganizationRequest{
 		ProjectId: projectID,
 	})
@@ -158,12 +149,7 @@ func (i *IAMService) checkOrganizationAuthorization(ctx context.Context, userID,
 		i.logger.Warnf(ctx, "Failed to list organizations for project %d: %v", projectID, err)
 		return false, err
 	}
-
-	i.logger.Debugf(ctx, "Found %d organizations for project %d", len(orgList.Organization), projectID)
-
 	for _, org := range orgList.Organization {
-		i.logger.Debugf(ctx, "Checking authorization for organization %d (%s)", org.OrganizationId, org.Name)
-
 		isAuthorized, err := i.organizationIamClient.IsAuthorizedOrganization(ctx, &organization_iam.IsAuthorizedOrganizationRequest{
 			UserId:         userID,
 			OrganizationId: org.OrganizationId,
@@ -173,15 +159,11 @@ func (i *IAMService) checkOrganizationAuthorization(ctx context.Context, userID,
 			i.logger.Warnf(ctx, "Failed to check organization authorization: org_id=%d, user_id=%d, action=%s, error=%v", org.OrganizationId, userID, actionName, err)
 			continue
 		}
-
-		i.logger.Debugf(ctx, "Organization %d authorization result: %t", org.OrganizationId, isAuthorized.Ok)
-
 		if isAuthorized.Ok {
 			i.logger.Infof(ctx, "User authorized through organization: user_id=%d, organization_id=%d, action=%s", userID, org.OrganizationId, actionName)
 			return true, nil
 		}
 	}
-
 	i.logger.Debugf(ctx, "User not authorized through any organization: user_id=%d, project_id=%d, action=%s", userID, projectID, actionName)
 	return false, nil
 }

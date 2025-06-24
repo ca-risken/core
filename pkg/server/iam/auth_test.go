@@ -10,19 +10,28 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
+	"github.com/ca-risken/core/proto/organization"
+	organizationmock "github.com/ca-risken/core/proto/organization/mocks"
+	"github.com/ca-risken/core/proto/organization_iam"
+	organizationiammock "github.com/ca-risken/core/proto/organization_iam/mocks"
 	"gorm.io/gorm"
 )
 
 func TestIsAuthorized(t *testing.T) {
 	cases := []struct {
-		name          string
-		input         *iam.IsAuthorizedRequest
-		want          *iam.IsAuthorizedResponse
-		wantErr       bool
-		mockUser      *model.User
-		mockUserErr   error
-		mockPolicies  *[]model.Policy
-		mockPolicyErr error
+		name                        string
+		input                       *iam.IsAuthorizedRequest
+		want                        *iam.IsAuthorizedResponse
+		wantErr                     bool
+		mockUser                    *model.User
+		mockUserErr                 error
+		mockPolicies                *[]model.Policy
+		mockPolicyErr               error
+		mockOrganizationListResp    *organization.ListOrganizationResponse
+		mockOrganizationListErr     error
+		mockOrgIAMAuthResp          *organization_iam.IsAuthorizedOrganizationResponse
+		mockOrgIAMAuthErr           error
+		expectOrganizationAuthCheck bool
 	}{
 		{
 			name:  "OK Admin user (always authorized)",
@@ -45,20 +54,37 @@ func TestIsAuthorized(t *testing.T) {
 			},
 		},
 		{
-			name:  "OK Non-admin user without valid policies",
+			name:  "OK Non-admin user authorized through organization",
+			input: &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
+			want:  &iam.IsAuthorizedResponse{Ok: true},
+			mockUser: &model.User{
+				UserID: 111, Sub: "user", Name: "Regular User", Activated: true, IsAdmin: false,
+			},
+			mockPolicyErr:               gorm.ErrRecordNotFound,
+			expectOrganizationAuthCheck: true,
+			mockOrganizationListResp: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{
+					{OrganizationId: 3001, Name: "test-org"},
+				},
+			},
+			mockOrgIAMAuthResp: &organization_iam.IsAuthorizedOrganizationResponse{Ok: true},
+		},
+		{
+			name:  "OK Non-admin user without valid policies and no organization access",
 			input: &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
 			want:  &iam.IsAuthorizedResponse{Ok: false},
 			mockUser: &model.User{
 				UserID: 111, Sub: "user", Name: "Regular User", Activated: true, IsAdmin: false,
 			},
 			mockPolicyErr: gorm.ErrRecordNotFound,
-		},
-		{
-			name:          "OK User not found",
-			input:         &iam.IsAuthorizedRequest{UserId: 999, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
-			want:          &iam.IsAuthorizedResponse{Ok: false},
-			mockUserErr:   gorm.ErrRecordNotFound,
-			mockPolicyErr: gorm.ErrRecordNotFound,
+
+			expectOrganizationAuthCheck: true,
+			mockOrganizationListResp: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{
+					{OrganizationId: 3001, Name: "test-org"},
+				},
+			},
+			mockOrgIAMAuthResp: &organization_iam.IsAuthorizedOrganizationResponse{Ok: false},
 		},
 		{
 			name:    "NG Invalid parameter (invalid actionName format)",
@@ -74,22 +100,28 @@ func TestIsAuthorized(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			var ctx context.Context
+			ctx := context.Background()
 			mockRepo := mocks.NewIAMRepository(t)
-
-			// Create service with nil clients for basic testing
-			svc := IAMService{
-				repository: mockRepo,
-				logger:     logging.NewLogger(),
+			mockOrgClient := organizationmock.NewOrganizationServiceClient(t)
+			mockOrgIAMClient := organizationiammock.NewOrganizationIAMServiceClient(t)
+			svc := &IAMService{
+				repository:            mockRepo,
+				organizationClient:    mockOrgClient,
+				organizationIamClient: mockOrgIAMClient,
+				logger:                logging.NewLogger(),
 			}
-
+			if c.expectOrganizationAuthCheck {
+				mockOrgClient.On("ListOrganization", test.RepeatMockAnything(2)...).Return(c.mockOrganizationListResp, c.mockOrganizationListErr).Once()
+				if c.mockOrganizationListResp != nil && len(c.mockOrganizationListResp.Organization) > 0 {
+					mockOrgIAMClient.On("IsAuthorizedOrganization", test.RepeatMockAnything(2)...).Return(c.mockOrgIAMAuthResp, c.mockOrgIAMAuthErr).Once()
+				}
+			}
 			if c.mockUser != nil || c.mockUserErr != nil {
 				mockRepo.On("GetUser", test.RepeatMockAnything(4)...).Return(c.mockUser, c.mockUserErr).Once()
 			}
 			if c.mockPolicies != nil || c.mockPolicyErr != nil {
 				mockRepo.On("GetUserPolicy", test.RepeatMockAnything(2)...).Return(c.mockPolicies, c.mockPolicyErr).Once()
 			}
-
 			got, err := svc.IsAuthorized(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -413,55 +445,134 @@ func TestIsAdmin(t *testing.T) {
 }
 
 func TestCheckOrganizationAuthorization(t *testing.T) {
-	// This test is focused on the new organization authorization logic
-	// We'll test it indirectly through IsAuthorized with organization clients set to nil
-	// to verify the error handling when organization services are not available
-
 	cases := []struct {
-		name          string
-		input         *iam.IsAuthorizedRequest
-		want          *iam.IsAuthorizedResponse
-		mockUser      *model.User
-		mockPolicies  *[]model.Policy
-		mockPolicyErr error
+		name                     string
+		userID                   uint32
+		projectID                uint32
+		actionName               string
+		want                     bool
+		wantErr                  bool
+		mockOrganizationListResp *organization.ListOrganizationResponse
+		mockOrganizationListErr  error
+		mockOrgIAMAuthResp       []*organization_iam.IsAuthorizedOrganizationResponse
+		mockOrgIAMAuthErr        []error
+		expectOrgIAMAuthCalls    int
 	}{
 		{
-			name:  "OK Non-admin user falls back to false when no project policies and no org clients",
-			input: &iam.IsAuthorizedRequest{UserId: 111, ProjectId: 1001, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
-			want:  &iam.IsAuthorizedResponse{Ok: false},
-			mockUser: &model.User{
-				UserID: 111, Sub: "user", Name: "Regular User", Activated: true, IsAdmin: false,
+			name:       "OK - User authorized through organization",
+			userID:     1001,
+			projectID:  2001,
+			actionName: "finding/put-finding",
+			want:       true,
+			wantErr:    false,
+			mockOrganizationListResp: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{
+					{OrganizationId: 3001, Name: "test-org-1"},
+					{OrganizationId: 3002, Name: "test-org-2"},
+				},
 			},
-			mockPolicyErr: gorm.ErrRecordNotFound,
+			expectOrgIAMAuthCalls: 2,
+			mockOrgIAMAuthResp: []*organization_iam.IsAuthorizedOrganizationResponse{
+				{Ok: false},
+				{Ok: true},
+			},
+			mockOrgIAMAuthErr: []error{nil, nil},
+		},
+		{
+			name:       "OK - User not authorized through any organization",
+			userID:     1001,
+			projectID:  2001,
+			actionName: "finding/delete-finding",
+			want:       false,
+			wantErr:    false,
+			mockOrganizationListResp: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{
+					{OrganizationId: 3001, Name: "test-org-1"},
+					{OrganizationId: 3002, Name: "test-org-2"},
+				},
+			},
+			expectOrgIAMAuthCalls: 2,
+			mockOrgIAMAuthResp: []*organization_iam.IsAuthorizedOrganizationResponse{
+				{Ok: false},
+				{Ok: false},
+			},
+			mockOrgIAMAuthErr: []error{nil, nil},
+		},
+		{
+			name:       "OK - No organizations found for project",
+			userID:     1001,
+			projectID:  2001,
+			actionName: "finding/put-finding",
+			want:       false,
+			wantErr:    false,
+			mockOrganizationListResp: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{},
+			},
+			expectOrgIAMAuthCalls: 0,
+		},
+		{
+			name:                    "NG - Organization list error",
+			userID:                  1001,
+			projectID:               2001,
+			actionName:              "finding/put-finding",
+			want:                    false,
+			wantErr:                 true,
+			mockOrganizationListErr: gorm.ErrInvalidDB,
+			expectOrgIAMAuthCalls:   0,
+		},
+		{
+			name:       "OK - Organization IAM auth error (continues to next org)",
+			userID:     1001,
+			projectID:  2001,
+			actionName: "finding/put-finding",
+			want:       true,
+			wantErr:    false,
+			mockOrganizationListResp: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{
+					{OrganizationId: 3001, Name: "test-org-1"},
+					{OrganizationId: 3002, Name: "test-org-2"},
+				},
+			},
+			expectOrgIAMAuthCalls: 2,
+			mockOrgIAMAuthResp: []*organization_iam.IsAuthorizedOrganizationResponse{
+				nil,
+				{Ok: true},
+			},
+			mockOrgIAMAuthErr: []error{gorm.ErrInvalidDB, nil},
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			var ctx context.Context
+			ctx := context.Background()
 			mockRepo := mocks.NewIAMRepository(t)
-
-			// Create service with nil organization clients to test fallback behavior
-			svc := IAMService{
+			logger := logging.NewLogger()
+			mockOrgClient := organizationmock.NewOrganizationServiceClient(t)
+			mockOrgIAMClient := organizationiammock.NewOrganizationIAMServiceClient(t)
+			svc := &IAMService{
 				repository:            mockRepo,
-				organizationClient:    nil,
-				organizationIamClient: nil,
-				logger:                logging.NewLogger(),
+				logger:                logger,
+				organizationClient:    mockOrgClient,
+				organizationIamClient: mockOrgIAMClient,
 			}
-
-			if c.mockUser != nil {
-				mockRepo.On("GetUser", test.RepeatMockAnything(4)...).Return(c.mockUser, nil).Once()
+			mockOrgClient.On("ListOrganization", test.RepeatMockAnything(2)...).Return(c.mockOrganizationListResp, c.mockOrganizationListErr).Once()
+			for i := 0; i < c.expectOrgIAMAuthCalls; i++ {
+				var resp *organization_iam.IsAuthorizedOrganizationResponse
+				var err error
+				if i < len(c.mockOrgIAMAuthResp) {
+					resp = c.mockOrgIAMAuthResp[i]
+				}
+				if i < len(c.mockOrgIAMAuthErr) {
+					err = c.mockOrgIAMAuthErr[i]
+				}
+				mockOrgIAMClient.On("IsAuthorizedOrganization", test.RepeatMockAnything(2)...).Return(resp, err).Once()
 			}
-			if c.mockPolicyErr != nil {
-				mockRepo.On("GetUserPolicy", test.RepeatMockAnything(2)...).Return(c.mockPolicies, c.mockPolicyErr).Once()
+			got, err := svc.checkOrganizationAuthorization(ctx, c.userID, c.projectID, c.actionName)
+			if err != nil && !c.wantErr {
+				t.Errorf("checkOrganizationAuthorization() error = %v, wantErr %v", err, c.wantErr)
+				return
 			}
-
-			got, err := svc.IsAuthorized(ctx, c.input)
-			if err != nil {
-				t.Fatalf("Unexpected error: %+v", err)
-			}
-			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			if got != c.want {
+				t.Errorf("checkOrganizationAuthorization() = %v, want %v", got, c.want)
 			}
 		})
 	}
