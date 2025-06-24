@@ -42,7 +42,6 @@ func (p *ProjectService) ListProject(ctx context.Context, req *project.ListProje
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-
 	directProjects, err := p.repository.ListProject(ctx, req.UserId, req.ProjectId, req.Name)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
@@ -54,7 +53,6 @@ func (p *ProjectService) ListProject(ctx context.Context, req *project.ListProje
 			projectMap[pr.ProjectID] = &prCopy
 		}
 	}
-
 	orgProjects, err := p.getProjectsFromUserOrganizations(ctx, req.UserId, req.ProjectId, req.Name)
 	if err != nil {
 		p.logger.Warnf(ctx, "Failed to get projects from user organizations: %v", err)
@@ -65,7 +63,9 @@ func (p *ProjectService) ListProject(ctx context.Context, req *project.ListProje
 			}
 		}
 	}
-
+	if len(projectMap) == 0 {
+		return &project.ListProjectResponse{Project: []*project.Project{}}, nil
+	}
 	var prs []*project.Project
 	for _, pr := range projectMap {
 		prs = append(prs, convertProjectWithTag(pr))

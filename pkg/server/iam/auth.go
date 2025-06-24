@@ -14,19 +14,16 @@ import (
 
 func (i *IAMService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequest) (*iam.IsAuthorizedResponse, error) {
 	if err := req.Validate(); err != nil {
-		i.logger.Warnf(ctx, "Failed to validate request: %v", err)
 		return nil, err
 	}
 	isAdmin, err := i.isUserAdmin(ctx, req.UserId)
 	if err != nil {
-		i.logger.Warnf(ctx, "Failed to check user admin: %v", err)
 		return nil, err
 	}
 	if isAdmin {
 		i.logger.Infof(ctx, "Authorized admin user action, request=%+v", req)
 		return &iam.IsAuthorizedResponse{Ok: true}, nil
 	}
-
 	policies, err := i.repository.GetUserPolicy(ctx, req.UserId)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
