@@ -10,7 +10,8 @@ import (
 	"github.com/ca-risken/core/proto/ai"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/coocood/freecache"
-	"github.com/sashabaranov/go-openai"
+	"github.com/openai/openai-go"
+	"github.com/openai/openai-go/option"
 )
 
 const (
@@ -47,8 +48,11 @@ func NewAIClient(token, model string, logger logging.Logger) AIService {
 	if model == "" {
 		return nil
 	}
+	openaiClient := openai.NewClient(
+		option.WithAPIKey(token),
+	)
 	client := AIClient{
-		openaiClient: openai.NewClient(token),
+		openaiClient: &openaiClient,
 		logger:       logger,
 		chatGPTModel: model,
 		cache:        freecache.NewCache(CACHE_SIZE),

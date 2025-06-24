@@ -2,14 +2,12 @@ package ai
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"io"
 
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
-	"github.com/sashabaranov/go-openai"
+	"github.com/openai/openai-go"
 )
 
 const (
@@ -89,20 +87,12 @@ func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding
 	}
 
 	promptSystem, promptSummary := getAskAISummaryPrompt(lang)
-	messages := []openai.ChatCompletionMessage{
-		{
-			Role:    openai.ChatMessageRoleSystem,
-			Content: promptSystem,
-		},
-		{
-			Role:    openai.ChatMessageRoleUser,
-			Content: promptSummary,
-		},
-		{
-			Role:    openai.ChatMessageRoleUser,
-			Content: generateFindingDataForAI(f, r),
-		},
+	messages := []openai.ChatCompletionMessageParamUnion{
+		openai.SystemMessage(promptSystem),
+		openai.UserMessage(promptSummary),
+		openai.UserMessage(generateFindingDataForAI(f, r)),
 	}
+
 	answer, err := a.chatOpenAI(ctx, messages)
 	if err != nil {
 		return "", fmt.Errorf("openai API error: finding_id=%d, err=%w", f.FindingID, err)
@@ -125,53 +115,34 @@ func (a *AIClient) AskAISummaryStreamFromFinding(
 	}
 
 	promptSystem, promptSummary := getAskAISummaryPrompt(lang)
-	streamResp, err := a.openaiClient.CreateChatCompletionStream(
+	streamResp := a.openaiClient.Chat.Completions.NewStreaming(
 		ctx,
-		openai.ChatCompletionRequest{
+		openai.ChatCompletionNewParams{
 			Model: a.chatGPTModel,
-			Messages: []openai.ChatCompletionMessage{
-				{
-					Role:    openai.ChatMessageRoleSystem,
-					Content: promptSystem,
-				},
-				{
-					Role:    openai.ChatMessageRoleUser,
-					Content: promptSummary,
-				},
-				{
-					Role:    openai.ChatMessageRoleUser,
-					Content: generateFindingDataForAI(f, r),
-				},
+			Messages: []openai.ChatCompletionMessageParamUnion{
+				openai.SystemMessage(promptSystem),
+				openai.AssistantMessage(promptSummary),
+				openai.UserMessage(generateFindingDataForAI(f, r)),
 			},
-			Stream: true,
+			Seed: openai.Int(1),
 		},
 	)
-	if err != nil {
-		return fmt.Errorf("openai API error: finding_id=%d, err=%w", f.FindingID, err)
-	}
 	defer streamResp.Close()
 
-	var usageTokens int
+	var usageTokens int64
 	var answer string
-	for {
-		resp, err := streamResp.Recv()
-		if err != nil && !errors.Is(err, io.EOF) {
-			return fmt.Errorf("openai API streaming error: finding_id=%d, err=%w", f.FindingID, err)
-		}
-
-		if resp.Choices != nil || len(resp.Choices) > 0 {
-			if sendErr := stream.Send(&finding.GetAISummaryResponse{Answer: resp.Choices[0].Delta.Content}); sendErr != nil {
+	for streamResp.Next() {
+		event := streamResp.Current()
+		if len(event.Choices) > 0 {
+			if sendErr := stream.Send(&finding.GetAISummaryResponse{Answer: event.Choices[0].Delta.Content}); sendErr != nil {
 				return sendErr
 			}
-			usageTokens += resp.Usage.TotalTokens
-			answer += resp.Choices[0].Delta.Content
-		}
-		if errors.Is(err, io.EOF) {
-			break
+			usageTokens += event.Usage.TotalTokens
+			answer += event.Choices[0].Delta.Content
 		}
 	}
 
-	fields := map[string]interface{}{
+	fields := map[string]any{
 		"openai_token": usageTokens,
 	}
 	a.logger.WithItemsf(ctx, logging.InfoLevel, fields, "OpenAI usage tokens: %d", usageTokens)
