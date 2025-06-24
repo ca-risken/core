@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 
 	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/iam"
+	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/golang/protobuf/ptypes/empty"
 	"gorm.io/gorm"
@@ -40,18 +42,74 @@ func (p *ProjectService) ListProject(ctx context.Context, req *project.ListProje
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := p.repository.ListProject(ctx, req.UserId, req.ProjectId, req.Name)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &project.ListProjectResponse{}, nil
-		}
+
+	directProjects, err := p.repository.ListProject(ctx, req.UserId, req.ProjectId, req.Name)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
-	var prs []*project.Project
-	for _, pr := range *list {
-		prs = append(prs, convertProjectWithTag(&pr))
+	projectMap := make(map[uint32]*db.ProjectWithTag)
+	if directProjects != nil {
+		for _, pr := range *directProjects {
+			prCopy := pr
+			projectMap[pr.ProjectID] = &prCopy
+		}
 	}
+
+	orgProjects, err := p.getProjectsFromUserOrganizations(ctx, req.UserId, req.ProjectId, req.Name)
+	if err != nil {
+		p.logger.Warnf(ctx, "Failed to get projects from user organizations: %v", err)
+	} else {
+		for _, pr := range orgProjects {
+			if _, exists := projectMap[pr.ProjectID]; !exists {
+				projectMap[pr.ProjectID] = pr
+			}
+		}
+	}
+
+	var prs []*project.Project
+	for _, pr := range projectMap {
+		prs = append(prs, convertProjectWithTag(pr))
+	}
+	sort.Slice(prs, func(i, j int) bool {
+		return prs[i].ProjectId < prs[j].ProjectId
+	})
 	return &project.ListProjectResponse{Project: prs}, nil
+}
+
+func (p *ProjectService) getProjectsFromUserOrganizations(ctx context.Context, userID, projectID uint32, name string) ([]*db.ProjectWithTag, error) {
+	userOrgs, err := p.organizationClient.ListOrganization(ctx, &organization.ListOrganizationRequest{
+		UserId: userID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to list organizations for user %d: %w", userID, err)
+	}
+	var allProjects []*db.ProjectWithTag
+	for _, org := range userOrgs.Organization {
+		orgProjectsResp, err := p.organizationClient.ListProjectsInOrganization(ctx, &organization.ListProjectsInOrganizationRequest{
+			OrganizationId: org.OrganizationId,
+		})
+		if err != nil {
+			p.logger.Warnf(ctx, "Failed to get projects for organization %d: %v", org.OrganizationId, err)
+			continue
+		}
+		for _, orgProject := range orgProjectsResp.Project {
+			if projectID != 0 && orgProject.ProjectId != projectID {
+				continue
+			}
+			if name != "" && orgProject.Name != name {
+				continue
+			}
+			projectWithTags, err := p.repository.ListProject(ctx, 0, orgProject.ProjectId, "")
+			if err != nil {
+				p.logger.Warnf(ctx, "Failed to get project details for project %d: %v", orgProject.ProjectId, err)
+				continue
+			}
+			if projectWithTags != nil && len(*projectWithTags) > 0 {
+				allProjects = append(allProjects, &(*projectWithTags)[0])
+			}
+		}
+	}
+	return allProjects, nil
 }
 
 func convertProject(p *model.Project) *project.Project {
