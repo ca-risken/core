@@ -28,9 +28,8 @@ func (i *IAMService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequ
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
-	var isAuthorizedByProject bool
 	if policies != nil {
-		isAuthorizedByProject, err = isAuthorizedByPolicy(req.ProjectId, req.ActionName, req.ResourceName, policies)
+		isAuthorizedByProject, err := isAuthorizedByPolicy(req.ProjectId, req.ActionName, req.ResourceName, policies)
 		if err != nil {
 			return &iam.IsAuthorizedResponse{Ok: false}, err
 		}

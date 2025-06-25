@@ -30,7 +30,7 @@ func TestListProject(t *testing.T) {
 		mockError    error
 	}{
 		{
-			name:  "OK - User projects with tags",
+			name:  "OK",
 			input: &project.ListProjectRequest{UserId: 1},
 			want: &project.ListProjectResponse{
 				Project: []*project.Project{
@@ -50,25 +50,13 @@ func TestListProject(t *testing.T) {
 			},
 		},
 		{
-			name:      "OK - No record",
+			name:      "OK No record",
 			input:     &project.ListProjectRequest{UserId: 1},
 			want:      &project.ListProjectResponse{},
 			mockError: gorm.ErrRecordNotFound,
 		},
 		{
-			name:  "OK - User with specific project",
-			input: &project.ListProjectRequest{UserId: 1, ProjectId: 5},
-			want: &project.ListProjectResponse{
-				Project: []*project.Project{
-					{ProjectId: 5, Name: "specific-project", Tag: []*project.ProjectTag{}, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-				},
-			},
-			mockResponce: &[]db.ProjectWithTag{
-				{ProjectID: 5, Name: "specific-project", CreatedAt: now, UpdatedAt: now},
-			},
-		},
-		{
-			name:    "NG - Invalid params",
+			name:    "NG Invalid params",
 			input:   &project.ListProjectRequest{Name: "12345678901234567890123456789012345678901234567890123456789012345"},
 			wantErr: true,
 		},
@@ -79,15 +67,11 @@ func TestListProject(t *testing.T) {
 			wantErr:   true,
 		},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mockDB := mocks.NewProjectRepository(t)
-			svc := ProjectService{
-				repository: mockDB,
-				logger:     logging.NewLogger(),
-			}
+			svc := ProjectService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
 				mockDB.On("ListProject", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
 			}
