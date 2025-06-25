@@ -24,22 +24,18 @@ func (i *IAMService) IsAuthorized(ctx context.Context, req *iam.IsAuthorizedRequ
 		i.logger.Infof(ctx, "Authorized admin user action, request=%+v", req)
 		return &iam.IsAuthorizedResponse{Ok: true}, nil
 	}
-	policies, err := i.repository.GetUserPolicy(ctx, req.UserId)
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+
+	isAuthorizedByProject, err := i.isAuthorizedByProject(ctx, req.UserId, req.ProjectId, req.ActionName, req.ResourceName)
+	if err != nil {
+		i.logger.Warnf(ctx, "Project authorization check failed: %v", err)
 		return nil, err
 	}
-	if policies != nil {
-		isAuthorizedByProject, err := isAuthorizedByPolicy(req.ProjectId, req.ActionName, req.ResourceName, policies)
-		if err != nil {
-			return &iam.IsAuthorizedResponse{Ok: false}, err
-		}
-		if isAuthorizedByProject {
-			i.logger.Infof(ctx, "Authorized user action by project policy, request=%+v", req)
-			return &iam.IsAuthorizedResponse{Ok: true}, nil
-		}
+	if isAuthorizedByProject {
+		i.logger.Infof(ctx, "Authorized user action by project policy, request=%+v", req)
+		return &iam.IsAuthorizedResponse{Ok: true}, nil
 	}
 
-	isAuthorizedByOrg, err := i.checkOrganizationAuthorization(ctx, req.UserId, req.ProjectId, req.ActionName)
+	isAuthorizedByOrg, err := i.isAuthorizedByOrganizations(ctx, req.UserId, req.ProjectId, req.ActionName)
 	if err != nil {
 		i.logger.Warnf(ctx, "Organization authorization check failed: %v", err)
 		isAuthorizedByOrg = false
@@ -137,9 +133,10 @@ func (i *IAMService) isUserAdmin(ctx context.Context, userID uint32) (bool, erro
 	return user.IsAdmin, nil
 }
 
-func (i *IAMService) checkOrganizationAuthorization(ctx context.Context, userID, projectID uint32, actionName string) (bool, error) {
+func (i *IAMService) isAuthorizedByOrganizations(ctx context.Context, userID, projectID uint32, actionName string) (bool, error) {
 	orgList, err := i.organizationClient.ListOrganization(ctx, &organization.ListOrganizationRequest{
 		ProjectId: projectID,
+		UserId:    userID,
 	})
 	if err != nil {
 		i.logger.Warnf(ctx, "Failed to list organizations for project %d: %v", projectID, err)
@@ -161,5 +158,25 @@ func (i *IAMService) checkOrganizationAuthorization(ctx context.Context, userID,
 		}
 	}
 	i.logger.Debugf(ctx, "User not authorized through any organization: user_id=%d, project_id=%d, action=%s", userID, projectID, actionName)
+	return false, nil
+}
+
+func (i *IAMService) isAuthorizedByProject(ctx context.Context, userID, projectID uint32, actionName, resourceName string) (bool, error) {
+	policies, err := i.repository.GetUserPolicy(ctx, userID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+	if policies != nil {
+		isAuthorizedByProject, err := isAuthorizedByPolicy(projectID, actionName, resourceName, policies)
+		if err != nil {
+			return false, err
+		}
+		if isAuthorizedByProject {
+			return true, nil
+		}
+	}
 	return false, nil
 }

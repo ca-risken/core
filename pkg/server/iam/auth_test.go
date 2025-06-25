@@ -444,7 +444,7 @@ func TestIsAdmin(t *testing.T) {
 	}
 }
 
-func TestCheckOrganizationAuthorization(t *testing.T) {
+func TestIsAuthorizedByOrganizations(t *testing.T) {
 	cases := []struct {
 		name                     string
 		userID                   uint32
@@ -566,13 +566,104 @@ func TestCheckOrganizationAuthorization(t *testing.T) {
 				}
 				mockOrgIAMClient.On("IsAuthorizedOrganization", test.RepeatMockAnything(2)...).Return(resp, err).Once()
 			}
-			got, err := svc.checkOrganizationAuthorization(ctx, c.userID, c.projectID, c.actionName)
+			got, err := svc.isAuthorizedByOrganizations(ctx, c.userID, c.projectID, c.actionName)
 			if err != nil && !c.wantErr {
-				t.Errorf("checkOrganizationAuthorization() error = %v, wantErr %v", err, c.wantErr)
+				t.Errorf("isAuthorizedByOrganizations() error = %v, wantErr %v", err, c.wantErr)
 				return
 			}
 			if got != c.want {
-				t.Errorf("checkOrganizationAuthorization() = %v, want %v", got, c.want)
+				t.Errorf("isAuthorizedByOrganizations() = %v, want %v", got, c.want)
+			}
+		})
+	}
+}
+
+func TestIsAuthorizedByProject(t *testing.T) {
+	cases := []struct {
+		name           string
+		userID         uint32
+		projectID      uint32
+		actionName     string
+		resourceName   string
+		want           bool
+		wantErr        bool
+		mockPolicyResp *[]model.Policy
+		mockPolicyErr  error
+	}{
+		{
+			name:         "OK - User authorized by project policy",
+			userID:       1001,
+			projectID:    1,
+			actionName:   "finding/get-finding",
+			resourceName: "aws:guardduty/ec2-instance-id",
+			want:         true,
+			wantErr:      false,
+			mockPolicyResp: &[]model.Policy{
+				{PolicyID: 1, Name: "viewer", ProjectID: 1, ActionPtn: "finding/(get|list|describe)", ResourcePtn: "aws:guardduty/ec2-instance-id"},
+			},
+		},
+		{
+			name:         "OK - User not authorized by project policy",
+			userID:       1001,
+			projectID:    1,
+			actionName:   "finding/delete-finding",
+			resourceName: "aws:guardduty/ec2-instance-id",
+			want:         false,
+			wantErr:      false,
+			mockPolicyResp: &[]model.Policy{
+				{PolicyID: 1, Name: "viewer", ProjectID: 1, ActionPtn: "finding/(Get|List|Describe)", ResourcePtn: "aws:guardduty/ec2-instance-id"},
+			},
+		},
+		{
+			name:           "OK - No policies found for project",
+			userID:         1001,
+			projectID:      1,
+			actionName:     "finding/put-finding",
+			resourceName:   "aws:guardduty/ec2-instance-id",
+			want:           false,
+			wantErr:        false,
+			mockPolicyResp: &[]model.Policy{},
+			mockPolicyErr:  gorm.ErrRecordNotFound,
+		},
+		{
+			name:       "NG - Policy compile error",
+			userID:     1001,
+			projectID:  1,
+			actionName: "finding/put-finding",
+			want:       false,
+			wantErr:    true,
+			mockPolicyResp: &[]model.Policy{
+				{PolicyID: 1, Name: "viewer", ProjectID: 1, ActionPtn: "[", ResourcePtn: ".*"},
+			},
+		},
+		{
+			name:          "NG - Policy list error",
+			userID:        1001,
+			projectID:     1,
+			actionName:    "finding/put-finding",
+			resourceName:  "aws:guardduty/ec2-instance-id",
+			want:          false,
+			wantErr:       true,
+			mockPolicyErr: gorm.ErrInvalidDB,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			mockRepo := mocks.NewIAMRepository(t)
+			logger := logging.NewLogger()
+			svc := &IAMService{
+				repository: mockRepo,
+				logger:     logger,
+			}
+			mockRepo.On("GetUserPolicy", test.RepeatMockAnything(2)...).Return(c.mockPolicyResp, c.mockPolicyErr).Once()
+			got, err := svc.isAuthorizedByProject(ctx, c.userID, c.projectID, c.actionName, c.resourceName)
+			if err != nil && !c.wantErr {
+				t.Errorf("isAuthorizedByOrganizations() error = %v, wantErr %v", err, c.wantErr)
+				return
+			}
+			if got != c.want {
+				t.Errorf("isAuthorizedByOrganizations() = %v, want %v", got, c.want)
 			}
 		})
 	}

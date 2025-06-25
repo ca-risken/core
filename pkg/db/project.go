@@ -48,20 +48,21 @@ from project p left outer join project_tag pt using(project_id)
 where 1 = 1 `
 	var params []interface{}
 	if userID != 0 {
-		query += " and ("
-		query += "   exists ("
-		query += "     select * from user_role ur"
-		query += "     inner join role r using(project_id, role_id)"
-		query += "     where ur.project_id = p.project_id and user_id = ?"
-		query += "   )"
-		query += "   or exists ("
-		query += "     select * from organization_project op"
-		query += "     inner join organization o using(organization_id)"
-		query += "     inner join user_organization_role uor on (uor.user_id = ?)"
-		query += "     inner join organization_role r on (r.role_id = uor.role_id and r.organization_id = o.organization_id)"
-		query += "     where op.project_id = p.project_id"
-		query += "   )"
-		query += " )"
+		query += ` 
+		and (
+			exists (
+				select * from user_role ur
+				inner join role r using(project_id, role_id)
+				where ur.project_id = p.project_id and user_id = ?
+			)
+			or exists (
+				select * from organization_project op
+				inner join organization o using(organization_id)
+				inner join user_organization_role uor on (uor.user_id = ?)
+				inner join organization_role r on (r.role_id = uor.role_id and r.organization_id = o.organization_id)
+				where op.project_id = p.project_id
+			)
+		)`
 		params = append(params, userID, userID)
 	}
 	if projectID != 0 {
