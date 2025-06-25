@@ -13,8 +13,6 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
-	"github.com/ca-risken/core/proto/organization"
-	organizationmock "github.com/ca-risken/core/proto/organization/mocks"
 	"github.com/ca-risken/core/proto/project"
 	"gorm.io/gorm"
 
@@ -24,21 +22,15 @@ import (
 func TestListProject(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
-		name                      string
-		input                     *project.ListProjectRequest
-		want                      *project.ListProjectResponse
-		wantErr                   bool
-		mockDirectProjectsResp    *[]db.ProjectWithTag
-		mockDirectProjectsErr     error
-		mockListOrganizationResp  *organization.ListOrganizationResponse
-		mockListOrganizationErr   error
-		mockOrgProjectsResp       []*organization.ListProjectsInOrganizationResponse
-		mockOrgProjectsErr        []error
-		mockOrgProjectDetailsResp []*[]db.ProjectWithTag
-		mockOrgProjectDetailsErr  []error
+		name         string
+		input        *project.ListProjectRequest
+		want         *project.ListProjectResponse
+		wantErr      bool
+		mockResponce *[]db.ProjectWithTag
+		mockError    error
 	}{
 		{
-			name:  "OK - Direct projects only",
+			name:  "OK - User projects with tags",
 			input: &project.ListProjectRequest{UserId: 1},
 			want: &project.ListProjectResponse{
 				Project: []*project.Project{
@@ -49,135 +41,42 @@ func TestListProject(t *testing.T) {
 					{ProjectId: 2, Name: "b", Tag: []*project.ProjectTag{}, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 				},
 			},
-			mockDirectProjectsResp: &[]db.ProjectWithTag{
+			mockResponce: &[]db.ProjectWithTag{
 				{ProjectID: 1, Name: "a", Tag: &[]model.ProjectTag{
 					{ProjectID: 1, Tag: "tag1", Color: "red", CreatedAt: now, UpdatedAt: now},
 					{ProjectID: 1, Tag: "tag2", Color: "pink", CreatedAt: now, UpdatedAt: now},
 				}, CreatedAt: now, UpdatedAt: now},
 				{ProjectID: 2, Name: "b", CreatedAt: now, UpdatedAt: now},
 			},
-			mockListOrganizationResp: &organization.ListOrganizationResponse{
-				Organization: []*organization.Organization{},
-			},
 		},
 		{
-			name:  "OK - Organization projects only",
-			input: &project.ListProjectRequest{UserId: 1},
+			name:      "OK - No record",
+			input:     &project.ListProjectRequest{UserId: 1},
+			want:      &project.ListProjectResponse{},
+			mockError: gorm.ErrRecordNotFound,
+		},
+		{
+			name:  "OK - User with specific project",
+			input: &project.ListProjectRequest{UserId: 1, ProjectId: 5},
 			want: &project.ListProjectResponse{
 				Project: []*project.Project{
-					{ProjectId: 3, Name: "org-project", Tag: []*project.ProjectTag{}, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+					{ProjectId: 5, Name: "specific-project", Tag: []*project.ProjectTag{}, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 				},
 			},
-			mockDirectProjectsErr: gorm.ErrRecordNotFound,
-			mockListOrganizationResp: &organization.ListOrganizationResponse{
-				Organization: []*organization.Organization{
-					{OrganizationId: 1001, Name: "test-org"},
-				},
-			},
-			mockOrgProjectsResp: []*organization.ListProjectsInOrganizationResponse{
-				{
-					Project: []*project.Project{
-						{ProjectId: 3, Name: "org-project"},
-					},
-				},
-			},
-			mockOrgProjectDetailsResp: []*[]db.ProjectWithTag{
-				{
-					{ProjectID: 3, Name: "org-project", CreatedAt: now, UpdatedAt: now},
-				},
+			mockResponce: &[]db.ProjectWithTag{
+				{ProjectID: 5, Name: "specific-project", CreatedAt: now, UpdatedAt: now},
 			},
 		},
 		{
-			name:  "OK - Mixed direct and organization projects",
-			input: &project.ListProjectRequest{UserId: 1},
-			want: &project.ListProjectResponse{
-				Project: []*project.Project{
-					{ProjectId: 1, Name: "direct-project", Tag: []*project.ProjectTag{}, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-					{ProjectId: 3, Name: "org-project", Tag: []*project.ProjectTag{}, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-				},
-			},
-			mockDirectProjectsResp: &[]db.ProjectWithTag{
-				{ProjectID: 1, Name: "direct-project", CreatedAt: now, UpdatedAt: now},
-			},
-			mockListOrganizationResp: &organization.ListOrganizationResponse{
-				Organization: []*organization.Organization{
-					{OrganizationId: 1001, Name: "test-org"},
-				},
-			},
-			mockOrgProjectsResp: []*organization.ListProjectsInOrganizationResponse{
-				{
-					Project: []*project.Project{
-						{ProjectId: 3, Name: "org-project"},
-					},
-				},
-			},
-			mockOrgProjectDetailsResp: []*[]db.ProjectWithTag{
-				{
-					{ProjectID: 3, Name: "org-project", CreatedAt: now, UpdatedAt: now},
-				},
-			},
-		},
-		{
-			name:  "OK - Duplicate projects (organization project already in direct)",
-			input: &project.ListProjectRequest{UserId: 1},
-			want: &project.ListProjectResponse{
-				Project: []*project.Project{
-					{ProjectId: 1, Name: "shared-project", Tag: []*project.ProjectTag{}, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-				},
-			},
-			mockDirectProjectsResp: &[]db.ProjectWithTag{
-				{ProjectID: 1, Name: "shared-project", CreatedAt: now, UpdatedAt: now},
-			},
-			mockListOrganizationResp: &organization.ListOrganizationResponse{
-				Organization: []*organization.Organization{
-					{OrganizationId: 1001, Name: "test-org"},
-				},
-			},
-			mockOrgProjectsResp: []*organization.ListProjectsInOrganizationResponse{
-				{
-					Project: []*project.Project{
-						{ProjectId: 1, Name: "shared-project"},
-					},
-				},
-			},
-			mockOrgProjectDetailsResp: []*[]db.ProjectWithTag{
-				{
-					{ProjectID: 1, Name: "shared-project", CreatedAt: now, UpdatedAt: now},
-				},
-			},
-		},
-		{
-			name:                  "OK - No direct projects, no organizations",
-			input:                 &project.ListProjectRequest{UserId: 1},
-			want:                  &project.ListProjectResponse{Project: []*project.Project{}},
-			mockDirectProjectsErr: gorm.ErrRecordNotFound,
-			mockListOrganizationResp: &organization.ListOrganizationResponse{
-				Organization: []*organization.Organization{},
-			},
-		},
-		{
-			name:  "OK - Organization service error (fallback to direct projects)",
-			input: &project.ListProjectRequest{UserId: 1},
-			want: &project.ListProjectResponse{
-				Project: []*project.Project{
-					{ProjectId: 1, Name: "direct-only", Tag: []*project.ProjectTag{}, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
-				},
-			},
-			mockDirectProjectsResp: &[]db.ProjectWithTag{
-				{ProjectID: 1, Name: "direct-only", CreatedAt: now, UpdatedAt: now},
-			},
-			mockListOrganizationErr: errors.New("organization service unavailable"),
-		},
-		{
-			name:    "NG Invalid params",
+			name:    "NG - Invalid params",
 			input:   &project.ListProjectRequest{Name: "12345678901234567890123456789012345678901234567890123456789012345"},
 			wantErr: true,
 		},
 		{
-			name:                  "Invalid DB error",
-			input:                 &project.ListProjectRequest{UserId: 1, ProjectId: 1001, Name: "test"},
-			wantErr:               true,
-			mockDirectProjectsErr: gorm.ErrInvalidDB,
+			name:      "Invalid DB error",
+			input:     &project.ListProjectRequest{UserId: 1},
+			mockError: gorm.ErrInvalidDB,
+			wantErr:   true,
 		},
 	}
 
@@ -185,35 +84,12 @@ func TestListProject(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mockDB := mocks.NewProjectRepository(t)
-			mockOrgClient := organizationmock.NewOrganizationServiceClient(t)
 			svc := ProjectService{
-				repository:         mockDB,
-				organizationClient: mockOrgClient,
-				logger:             logging.NewLogger(),
+				repository: mockDB,
+				logger:     logging.NewLogger(),
 			}
-			if c.mockDirectProjectsResp != nil || c.mockDirectProjectsErr != nil {
-				mockDB.On("ListProject", test.RepeatMockAnything(4)...).Return(c.mockDirectProjectsResp, c.mockDirectProjectsErr).Once()
-			}
-			if c.mockListOrganizationResp != nil || c.mockListOrganizationErr != nil {
-				mockOrgClient.On("ListOrganization", test.RepeatMockAnything(2)...).Return(c.mockListOrganizationResp, c.mockListOrganizationErr).Once()
-			}
-			if c.mockOrgProjectsResp != nil {
-				for i, resp := range c.mockOrgProjectsResp {
-					var err error
-					if i < len(c.mockOrgProjectsErr) {
-						err = c.mockOrgProjectsErr[i]
-					}
-					mockOrgClient.On("ListProjectsInOrganization", test.RepeatMockAnything(2)...).Return(resp, err).Once()
-				}
-			}
-			if c.mockOrgProjectDetailsResp != nil {
-				for i, resp := range c.mockOrgProjectDetailsResp {
-					var err error
-					if i < len(c.mockOrgProjectDetailsErr) {
-						err = c.mockOrgProjectDetailsErr[i]
-					}
-					mockDB.On("ListProject", test.RepeatMockAnything(4)...).Return(resp, err).Once()
-				}
+			if c.mockResponce != nil || c.mockError != nil {
+				mockDB.On("ListProject", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.ListProject(ctx, c.input)
 			if !c.wantErr && err != nil {
