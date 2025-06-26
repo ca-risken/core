@@ -36,7 +36,7 @@ func (a *AIClient) responsesAPI(
 		return "", fmt.Errorf("Responses API error: err=%w", err)
 	}
 	if resp.OutputText() == "" {
-		return "", fmt.Errorf("Responses API: no response")
+		return "", fmt.Errorf("Responses API: no response (instruction=%q, model=%q)", instruction, a.chatGPTModel)
 	}
 	a.logger.Infof(ctx, "Responses API Finished: %+v", resp.Usage)
 	answer := resp.OutputText()
@@ -78,7 +78,7 @@ func responsesStreamingAPI[T any](
 			}
 			if data.JSON.Text.Valid() {
 				// finish
-				answer += data.Text
+				answer = data.Text
 				break
 			}
 		}
