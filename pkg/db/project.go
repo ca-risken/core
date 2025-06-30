@@ -56,11 +56,10 @@ where 1 = 1 `
 				where ur.project_id = p.project_id and user_id = ?
 			)
 			or exists (
-				select * from organization_project op
-				inner join organization o using(organization_id)
-				inner join user_organization_role uor on (uor.user_id = ?)
-				inner join organization_role r on (r.role_id = uor.role_id and r.organization_id = o.organization_id)
-				where op.project_id = p.project_id
+				select * from user_organization_role uor 
+				inner join organization_role r on (uor.role_id = r.role_id)
+				inner join organization_project op on (r.organization_id = op.organization_id)
+				where op.project_id = p.project_id and uor.user_id = ?
 			)
 		)`
 		params = append(params, userID, userID)
