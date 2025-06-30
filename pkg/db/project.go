@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
-	"github.com/vikyd/zero"
 	"gorm.io/gorm"
 )
 
@@ -48,15 +47,28 @@ select p.project_id, p.name, pt.tag, pt.color, p.created_at, p.updated_at
 from project p left outer join project_tag pt using(project_id) 
 where 1 = 1 `
 	var params []interface{}
-	if !zero.IsZeroVal(userID) {
-		query += " and exists (select * from user_role ur inner join role r using(project_id, role_id) where ur.project_id = p.project_id and user_id = ?)"
-		params = append(params, userID)
+	if userID != 0 {
+		query += ` 
+		and (
+			exists (
+				select * from user_role ur
+				inner join role r using(project_id, role_id)
+				where ur.project_id = p.project_id and user_id = ?
+			)
+			or exists (
+				select * from user_organization_role uor 
+				inner join organization_role r on (uor.role_id = r.role_id)
+				inner join organization_project op on (r.organization_id = op.organization_id)
+				where op.project_id = p.project_id and uor.user_id = ?
+			)
+		)`
+		params = append(params, userID, userID)
 	}
-	if !zero.IsZeroVal(projectID) {
+	if projectID != 0 {
 		query += " and project_id = ?"
 		params = append(params, projectID)
 	}
-	if !zero.IsZeroVal(name) {
+	if name != "" {
 		query += " and name = ?"
 		params = append(params, name)
 	}
