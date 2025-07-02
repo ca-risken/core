@@ -1021,37 +1021,12 @@ func TestValidate_IsAuthorizedAdminRequest(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/hoge-bucket"},
+			input:   &IsAuthorizedAdminRequest{UserId: 1},
 			wantErr: false,
 		},
 		{
 			name:    "NG Required(userID)",
-			input:   &IsAuthorizedAdminRequest{ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/hoge-bucket"},
-			wantErr: true,
-		},
-		{
-			name:    "NG Required(ActionName)",
-			input:   &IsAuthorizedAdminRequest{UserId: 1, ActionName: "", ResourceName: "aws:guardduty/hoge-bucket"},
-			wantErr: true,
-		},
-		{
-			name:    "NG Invalid format(ActionName)",
-			input:   &IsAuthorizedAdminRequest{UserId: 1, ActionName: "findingPutFinding", ResourceName: "aws:guardduty/hoge-bucket"},
-			wantErr: true,
-		},
-		{
-			name:    "NG Invalid format(ActionName)",
-			input:   &IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/", ResourceName: "aws:guardduty/hoge-bucket"},
-			wantErr: true,
-		},
-		{
-			name:    "NG Required(ResourceName)",
-			input:   &IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: ""},
-			wantErr: true,
-		},
-		{
-			name:    "NG Invalid format(ResourceName)",
-			input:   &IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "/hoge-bucket"},
+			input:   &IsAuthorizedAdminRequest{},
 			wantErr: true,
 		},
 	}
