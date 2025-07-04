@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/ca-risken/common/pkg/logging"
+	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/ai"
 	"github.com/ca-risken/core/proto/finding"
@@ -22,6 +23,7 @@ const (
 
 type AIService interface {
 	ChatAI(ctx context.Context, req *ai.ChatAIRequest) (*ai.ChatAIResponse, error)
+	GenerateReport(ctx context.Context, req *ai.GenerateReportRequest, findingRepo db.FindingRepository) (*ai.GenerateReportResponse, error)
 	AskAISummaryFromFinding(ctx context.Context, f *model.Finding, r *model.Recommend, lang string) (string, error)
 	AskAISummaryStreamFromFinding(
 		ctx context.Context,

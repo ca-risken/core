@@ -21,8 +21,6 @@ type FindingService struct {
 	excludeDeleteDataSource []string
 }
 
-var _ finding.FindingServiceServer = (*FindingService)(nil)
-
 func NewFindingService(repository db.FindingRepository, openaiToken, chatGPTModel string, excludeDeleteDataSource []string, logger logging.Logger) *FindingService {
 	return &FindingService{
 		repository:              repository,
