@@ -185,7 +185,7 @@ func getWebhookMessage(
 
 	// override message
 	if message != "" {
-		msg.Text = message // update text
+		msg.Text = getMention(alert.Severity) + message // update text with mention
 	}
 	if channel != "" {
 		msg.Channel = channel // add channel
@@ -205,7 +205,7 @@ func getApiMessage(
 	msgOptions := []slack.MsgOption{}
 	text := getSlackMessageText(locale, alert.Severity)
 	if message != "" {
-		text = message // override message
+		text = getMention(alert.Severity) + message // override message with mention
 	}
 	alertAttachment := getAlertAttachment(url, alert, project, rules, findings)
 	findingAttachments := getFindingAttachment(url, project.ProjectId, findings, locale)
