@@ -126,6 +126,18 @@ func (o *OrganizationService) PutOrganizationInvitation(ctx context.Context, req
 	if err != nil {
 		return nil, err
 	}
+	if invitation.Status != organization.OrganizationInvitationStatus_ACCEPTED.String() {
+		exists, err := o.repository.ExistsOrganizationProject(ctx, req.OrganizationId, req.ProjectId)
+		if err != nil {
+			return nil, err
+		}
+		if exists {
+			if err := o.repository.RemoveProjectsInOrganization(ctx, req.OrganizationId, req.ProjectId); err != nil {
+				return nil, err
+			}
+			o.logger.Infof(ctx, "OrganizationProject removed due to invitation status change: organization_id=%d, project_id=%d, status=%s", req.OrganizationId, req.ProjectId, invitation.Status)
+		}
+	}
 	return &organization.PutOrganizationInvitationResponse{OrganizationInvitation: convertOrganizationInvitation(invitation)}, nil
 }
 
@@ -135,6 +147,16 @@ func (o *OrganizationService) DeleteOrganizationInvitation(ctx context.Context, 
 	}
 	if err := o.repository.DeleteOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId); err != nil {
 		return nil, err
+	}
+	exists, err := o.repository.ExistsOrganizationProject(ctx, req.OrganizationId, req.ProjectId)
+	if err != nil {
+		return nil, err
+	}
+	if exists {
+		if err := o.repository.RemoveProjectsInOrganization(ctx, req.OrganizationId, req.ProjectId); err != nil {
+			return nil, err
+		}
+		o.logger.Infof(ctx, "OrganizationProject removed due to invitation deletion: organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
 	}
 	o.logger.Infof(ctx, "Organization invitation deleted: organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
 	return &empty.Empty{}, nil

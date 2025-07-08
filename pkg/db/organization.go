@@ -20,6 +20,7 @@ type OrganizationRepository interface {
 	PutOrganizationProject(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error)
 	ListProjectsInOrganization(ctx context.Context, organizationID uint32) ([]*model.Project, error)
 	RemoveProjectsInOrganization(ctx context.Context, organizationID, projectID uint32) error
+	ExistsOrganizationProject(ctx context.Context, organizationID, projectID uint32) (bool, error)
 
 	// OrganizationInvitation
 	ListOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) ([]*model.OrganizationInvitation, error)
@@ -215,4 +216,23 @@ const deleteOrganizationInvitation = `
 
 func (c *Client) DeleteOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) error {
 	return c.Master.WithContext(ctx).Exec(deleteOrganizationInvitation, organizationID, projectID).Error
+}
+
+func (c *Client) getOrganizationProject(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error) {
+	var data model.OrganizationProject
+	if err := c.Master.WithContext(ctx).Raw(selectGetOrganizationProject, organizationID, projectID).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (c *Client) ExistsOrganizationProject(ctx context.Context, organizationID, projectID uint32) (bool, error) {
+	_, err := c.getOrganizationProject(ctx, organizationID, projectID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
