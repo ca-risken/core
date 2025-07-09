@@ -122,21 +122,16 @@ func (o *OrganizationService) PutOrganizationInvitation(ctx context.Context, req
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	invitation, err := o.repository.PutOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId, req.Status.String())
+	exists, err := o.repository.ExistsOrganizationProject(ctx, req.OrganizationId, req.ProjectId)
 	if err != nil {
 		return nil, err
 	}
-	if invitation.Status != organization.OrganizationInvitationStatus_ACCEPTED.String() {
-		exists, err := o.repository.ExistsOrganizationProject(ctx, req.OrganizationId, req.ProjectId)
-		if err != nil {
-			return nil, err
-		}
-		if exists {
-			if err := o.repository.RemoveProjectsInOrganization(ctx, req.OrganizationId, req.ProjectId); err != nil {
-				return nil, err
-			}
-			o.logger.Infof(ctx, "OrganizationProject removed due to invitation status change: organization_id=%d, project_id=%d, status=%s", req.OrganizationId, req.ProjectId, invitation.Status)
-		}
+	if exists && req.Status != organization.OrganizationInvitationStatus_ACCEPTED {
+		return nil, errors.New("organization is already associated with the project")
+	}
+	invitation, err := o.repository.PutOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId, req.Status.String())
+	if err != nil {
+		return nil, err
 	}
 	return &organization.PutOrganizationInvitationResponse{OrganizationInvitation: convertOrganizationInvitation(invitation)}, nil
 }
