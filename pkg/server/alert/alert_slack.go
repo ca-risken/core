@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
@@ -182,10 +183,8 @@ func getWebhookMessage(
 		Text:        msgText,
 		Attachments: attachments,
 	}
-
-	// override message
 	if message != "" {
-		msg.Text = message // update text
+		msg.Text = overrideToCustomMessage(message, alert.Severity)
 	}
 	if channel != "" {
 		msg.Channel = channel // add channel
@@ -205,7 +204,7 @@ func getApiMessage(
 	msgOptions := []slack.MsgOption{}
 	text := getSlackMessageText(locale, alert.Severity)
 	if message != "" {
-		text = message // override message
+		text = overrideToCustomMessage(message, alert.Severity)
 	}
 	alertAttachment := getAlertAttachment(url, alert, project, rules, findings)
 	findingAttachments := getFindingAttachment(url, project.ProjectId, findings, locale)
@@ -328,6 +327,14 @@ func getMention(severity string) string {
 	default:
 		return ""
 	}
+}
+
+func overrideToCustomMessage(message, severity string) string {
+	if strings.Contains(message, "<@severity>") {
+		mention := getMention(severity)
+		return strings.ReplaceAll(message, "<@severity>", mention)
+	}
+	return message
 }
 
 const (
