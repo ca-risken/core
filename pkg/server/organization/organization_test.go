@@ -710,14 +710,17 @@ func TestDeleteOrganizationInvitation(t *testing.T) {
 func TestReplyOrganizationInvitation(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
-		name                string
-		input               *organization.ReplyOrganizationInvitationRequest
-		want                *organization.ReplyOrganizationInvitationResponse
-		wantErr             bool
-		mockResponse        *model.OrganizationInvitation
-		mockError           error
-		mockOrgProjResponse *model.OrganizationProject
-		mockOrgProjError    error
+		name                          string
+		input                         *organization.ReplyOrganizationInvitationRequest
+		want                          *organization.ReplyOrganizationInvitationResponse
+		wantErr                       bool
+		mockResponse                  *model.OrganizationInvitation
+		mockError                     error
+		mockOrgProjResponse           *model.OrganizationProject
+		mockOrgProjError              error
+		callExistsOrganizationProject bool
+		mockOrgProjectExists          bool
+		mockOrgProjectExistsError     error
 	}{
 		{
 			name: "OK ACCEPTED",
@@ -749,7 +752,7 @@ func TestReplyOrganizationInvitation(t *testing.T) {
 			},
 		},
 		{
-			name: "OK REJECTED",
+			name: "OK REJECTED - no existing project",
 			input: &organization.ReplyOrganizationInvitationRequest{
 				OrganizationId: 1,
 				ProjectId:      1,
@@ -763,6 +766,26 @@ func TestReplyOrganizationInvitation(t *testing.T) {
 				CreatedAt:      now,
 				UpdatedAt:      now,
 			},
+			callExistsOrganizationProject: true,
+			mockOrgProjectExists:          false,
+		},
+		{
+			name: "OK REJECTED - existing project",
+			input: &organization.ReplyOrganizationInvitationRequest{
+				OrganizationId: 1,
+				ProjectId:      1,
+				Status:         organization.OrganizationInvitationStatus_REJECTED,
+			},
+			want: &organization.ReplyOrganizationInvitationResponse{},
+			mockResponse: &model.OrganizationInvitation{
+				OrganizationID: 1,
+				ProjectID:      1,
+				Status:         organization.OrganizationInvitationStatus_REJECTED.String(),
+				CreatedAt:      now,
+				UpdatedAt:      now,
+			},
+			callExistsOrganizationProject: true,
+			mockOrgProjectExists:          true,
 		},
 		{
 			name: "NG Invalid params - status is invalid",
@@ -774,7 +797,16 @@ func TestReplyOrganizationInvitation(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Invalid DB error - UpdateOrganizationInvitationStatus fails",
+			name: "NG Invalid params - organization_id is zero",
+			input: &organization.ReplyOrganizationInvitationRequest{
+				OrganizationId: 0,
+				ProjectId:      1,
+				Status:         organization.OrganizationInvitationStatus_ACCEPTED,
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG PutOrganizationInvitation fails",
 			input: &organization.ReplyOrganizationInvitationRequest{
 				OrganizationId: 1,
 				ProjectId:      1,
@@ -784,7 +816,7 @@ func TestReplyOrganizationInvitation(t *testing.T) {
 			wantErr:   true,
 		},
 		{
-			name: "Invalid DB error - CreateOrganizationProject fails",
+			name: "NG PutOrganizationProject fails",
 			input: &organization.ReplyOrganizationInvitationRequest{
 				OrganizationId: 1,
 				ProjectId:      1,
@@ -800,19 +832,48 @@ func TestReplyOrganizationInvitation(t *testing.T) {
 			mockOrgProjError: gorm.ErrInvalidDB,
 			wantErr:          true,
 		},
+		{
+			name: "NG ExistsOrganizationProject error",
+			input: &organization.ReplyOrganizationInvitationRequest{
+				OrganizationId: 1,
+				ProjectId:      1,
+				Status:         organization.OrganizationInvitationStatus_REJECTED,
+			},
+			mockResponse: &model.OrganizationInvitation{
+				OrganizationID: 1,
+				ProjectID:      1,
+				Status:         organization.OrganizationInvitationStatus_REJECTED.String(),
+				CreatedAt:      now,
+				UpdatedAt:      now,
+			},
+			callExistsOrganizationProject: true,
+			mockOrgProjectExistsError:     gorm.ErrInvalidDB,
+			wantErr:                       true,
+		},
 	}
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mockDB := mocks.NewOrganizationRepository(t)
-			svc := OrganizationService{repository: mockDB}
+			svc := OrganizationService{
+				repository: mockDB,
+				logger:     logging.NewLogger(),
+			}
+
 			if c.mockResponse != nil || c.mockError != nil {
 				mockDB.On("PutOrganizationInvitation", test.RepeatMockAnything(4)...).Return(c.mockResponse, c.mockError).Once()
-				if c.mockResponse != nil && c.mockResponse.Status == organization.OrganizationInvitationStatus_ACCEPTED.String() {
+				if c.mockOrgProjResponse != nil || c.mockOrgProjError != nil {
 					mockDB.On("PutOrganizationProject", test.RepeatMockAnything(3)...).Return(c.mockOrgProjResponse, c.mockOrgProjError).Once()
 				}
+				if c.callExistsOrganizationProject {
+					mockDB.On("ExistsOrganizationProject", test.RepeatMockAnything(3)...).Return(c.mockOrgProjectExists, c.mockOrgProjectExistsError).Once()
+					if c.mockOrgProjectExists && c.mockOrgProjectExistsError == nil {
+						mockDB.On("RemoveProjectsInOrganization", test.RepeatMockAnything(3)...).Return(nil).Once()
+					}
+				}
 			}
+
 			result, err := svc.ReplyOrganizationInvitation(ctx, c.input)
 			if !c.wantErr && err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
