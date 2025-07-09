@@ -81,6 +81,34 @@ func (_m *OrganizationRepository) DeleteOrganizationInvitation(ctx context.Conte
 	return r0
 }
 
+// ExistsOrganizationProject provides a mock function with given fields: ctx, organizationID, projectID
+func (_m *OrganizationRepository) ExistsOrganizationProject(ctx context.Context, organizationID uint32, projectID uint32) (bool, error) {
+	ret := _m.Called(ctx, organizationID, projectID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ExistsOrganizationProject")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) (bool, error)); ok {
+		return rf(ctx, organizationID, projectID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) bool); ok {
+		r0 = rf(ctx, organizationID, projectID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
+		r1 = rf(ctx, organizationID, projectID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListOrganization provides a mock function with given fields: ctx, organizationID, name, userID, projectID
 func (_m *OrganizationRepository) ListOrganization(ctx context.Context, organizationID uint32, name string, userID uint32, projectID uint32) ([]*model.Organization, error) {
 	ret := _m.Called(ctx, organizationID, name, userID, projectID)
