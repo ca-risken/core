@@ -12,7 +12,7 @@ import (
 )
 
 type ProjectRepository interface {
-	ListProject(ctx context.Context, userID, projectID uint32, name string) (*[]ProjectWithTag, error)
+	ListProject(ctx context.Context, userID, projectID, organizationID uint32, name string) (*[]ProjectWithTag, error)
 	CreateProject(ctx context.Context, name string) (*model.Project, error)
 	UpdateProject(ctx context.Context, projectID uint32, name string) (*model.Project, error)
 	DeleteProject(ctx context.Context, projectID uint32) error
@@ -42,7 +42,7 @@ type projectTagDenormarize struct {
 	UpdatedAt time.Time
 }
 
-func (c *Client) ListProject(ctx context.Context, userID, projectID uint32, name string) (*[]ProjectWithTag, error) {
+func (c *Client) ListProject(ctx context.Context, userID, projectID, organizationID uint32, name string) (*[]ProjectWithTag, error) {
 	query := `
 select p.project_id, p.name, pt.tag, pt.color, p.created_at, p.updated_at 
 from project p left outer join project_tag pt using(project_id) 
@@ -59,6 +59,10 @@ where 1 = 1 `
 	if !zero.IsZeroVal(name) {
 		query += " and name = ?"
 		params = append(params, name)
+	}
+	if organizationID != 0 {
+		query += " and exists (select * from organization_project op where op.project_id = p.project_id and op.organization_id = ?)"
+		params = append(params, organizationID)
 	}
 	query += " order by p.project_id, pt.tag"
 	denormarize := []projectTagDenormarize{}
