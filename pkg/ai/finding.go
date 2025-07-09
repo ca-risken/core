@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/openai/openai-go"
+	"github.com/openai/openai-go/responses"
 )
 
 const (
@@ -86,14 +86,8 @@ func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding
 		return summaryCache, nil
 	}
 
-	promptSystem, promptSummary := getAskAISummaryPrompt(lang)
-	messages := []openai.ChatCompletionMessageParamUnion{
-		openai.SystemMessage(promptSystem),
-		openai.UserMessage(promptSummary),
-		openai.UserMessage(generateFindingDataForAI(f, r)),
-	}
-
-	answer, err := a.chatOpenAI(ctx, messages)
+	instruction, inputs := generateAskAISummaryInputs(f, r, lang)
+	answer, err := a.responsesAPI(ctx, instruction, inputs, DefaultTools)
 	if err != nil {
 		return "", fmt.Errorf("openai API error: finding_id=%d, err=%w", f.FindingID, err)
 	}
@@ -114,38 +108,22 @@ func (a *AIClient) AskAISummaryStreamFromFinding(
 		return nil
 	}
 
-	promptSystem, promptSummary := getAskAISummaryPrompt(lang)
-	streamResp := a.openaiClient.Chat.Completions.NewStreaming(
+	instruction, inputs := generateAskAISummaryInputs(f, r, lang)
+	answer, err := responsesStreamingAPI(
 		ctx,
-		openai.ChatCompletionNewParams{
-			Model: a.chatGPTModel,
-			Messages: []openai.ChatCompletionMessageParamUnion{
-				openai.SystemMessage(promptSystem),
-				openai.AssistantMessage(promptSummary),
-				openai.UserMessage(generateFindingDataForAI(f, r)),
-			},
-			Seed: openai.Int(1),
-		},
+		a.openaiClient,
+		a.chatGPTModel,
+		instruction,
+		inputs,
+		DefaultTools,
+		stream,
+		func(s string) *finding.GetAISummaryResponse { return &finding.GetAISummaryResponse{Answer: s} },
+		a.logger,
 	)
-	defer streamResp.Close()
-
-	var usageTokens int64
-	var answer string
-	for streamResp.Next() {
-		event := streamResp.Current()
-		if len(event.Choices) > 0 {
-			if sendErr := stream.Send(&finding.GetAISummaryResponse{Answer: event.Choices[0].Delta.Content}); sendErr != nil {
-				return sendErr
-			}
-			usageTokens += event.Usage.TotalTokens
-			answer += event.Choices[0].Delta.Content
-		}
+	if err != nil {
+		return fmt.Errorf("openai API error: finding_id=%d, err=%w", f.FindingID, err)
 	}
 
-	fields := map[string]any{
-		"openai_token": usageTokens,
-	}
-	a.logger.WithItemsf(ctx, logging.InfoLevel, fields, "OpenAI usage tokens: %d", usageTokens)
 	if err := a.setAICache(generateCacheKeyForFinding(f.FindingID, lang), answer); err != nil {
 		return fmt.Errorf("cache set error: err=%w", err)
 	}
@@ -172,4 +150,27 @@ func getAskAISummaryPrompt(lang string) (promptSystem, promptSummary string) {
 		promptSummary = PROMPT_SUMMARY_JP
 	}
 	return
+}
+
+func generateAskAISummaryInputs(f *model.Finding, r *model.Recommend, lang string) (string, responses.ResponseNewParamsInputUnion) {
+	promptSystem, promptSummary := getAskAISummaryPrompt(lang)
+	inputParam := responses.ResponseInputParam{
+		responses.ResponseInputItemUnionParam{
+			OfMessage: &responses.EasyInputMessageParam{
+				Role: responses.EasyInputMessageRoleAssistant,
+				Content: responses.EasyInputMessageContentUnionParam{
+					OfString: openai.String(promptSummary),
+				},
+			},
+		},
+		responses.ResponseInputItemUnionParam{
+			OfMessage: &responses.EasyInputMessageParam{
+				Role: responses.EasyInputMessageRoleUser,
+				Content: responses.EasyInputMessageContentUnionParam{
+					OfString: openai.String(generateFindingDataForAI(f, r)),
+				},
+			},
+		},
+	}
+	return promptSystem, responses.ResponseNewParamsInputUnion{OfInputItemList: inputParam}
 }

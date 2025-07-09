@@ -453,15 +453,17 @@ func TestListOrganizationInvitation(t *testing.T) {
 func TestPutOrganizationInvitation(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
-		name         string
-		input        *organization.PutOrganizationInvitationRequest
-		want         *organization.PutOrganizationInvitationResponse
-		wantErr      bool
-		mockResponse *model.OrganizationInvitation
-		mockError    error
+		name                      string
+		input                     *organization.PutOrganizationInvitationRequest
+		want                      *organization.PutOrganizationInvitationResponse
+		wantErr                   bool
+		mockResponse              *model.OrganizationInvitation
+		mockError                 error
+		mockOrgProjectExists      bool
+		mockOrgProjectExistsError error
 	}{
 		{
-			name: "OK",
+			name: "OK PENDING - no existing project",
 			input: &organization.PutOrganizationInvitationRequest{
 				OrganizationId: 1,
 				ProjectId:      1,
@@ -479,13 +481,14 @@ func TestPutOrganizationInvitation(t *testing.T) {
 			mockResponse: &model.OrganizationInvitation{
 				OrganizationID: 1,
 				ProjectID:      1,
-				Status:         "PENDING",
+				Status:         organization.OrganizationInvitationStatus_PENDING.String(),
 				CreatedAt:      now,
 				UpdatedAt:      now,
 			},
+			mockOrgProjectExists: false,
 		},
 		{
-			name: "OK Update Status",
+			name: "OK ACCEPTED - no existing project",
 			input: &organization.PutOrganizationInvitationRequest{
 				OrganizationId: 1,
 				ProjectId:      1,
@@ -503,20 +506,58 @@ func TestPutOrganizationInvitation(t *testing.T) {
 			mockResponse: &model.OrganizationInvitation{
 				OrganizationID: 1,
 				ProjectID:      1,
-				Status:         "ACCEPTED",
+				Status:         organization.OrganizationInvitationStatus_ACCEPTED.String(),
 				CreatedAt:      now,
 				UpdatedAt:      now,
 			},
+			mockOrgProjectExists: false,
 		},
 		{
-			name: "NG Invalid params - status is invalid",
+			name: "OK ACCEPTED - with existing project",
 			input: &organization.PutOrganizationInvitationRequest{
 				OrganizationId: 1,
 				ProjectId:      1,
-				Status:         organization.OrganizationInvitationStatus_UNKNOWN,
+				Status:         organization.OrganizationInvitationStatus_ACCEPTED,
 			},
-			wantErr: true,
+			want: &organization.PutOrganizationInvitationResponse{
+				OrganizationInvitation: &organization.OrganizationInvitation{
+					OrganizationId: 1,
+					ProjectId:      1,
+					Status:         organization.OrganizationInvitationStatus_ACCEPTED,
+					CreatedAt:      now.Unix(),
+					UpdatedAt:      now.Unix(),
+				},
+			},
+			mockResponse: &model.OrganizationInvitation{
+				OrganizationID: 1,
+				ProjectID:      1,
+				Status:         organization.OrganizationInvitationStatus_ACCEPTED.String(),
+				CreatedAt:      now,
+				UpdatedAt:      now,
+			},
+			mockOrgProjectExists: true,
 		},
+		{
+			name: "NG PENDING - existing project",
+			input: &organization.PutOrganizationInvitationRequest{
+				OrganizationId: 1,
+				ProjectId:      1,
+				Status:         organization.OrganizationInvitationStatus_PENDING,
+			},
+			mockOrgProjectExists: true,
+			wantErr:              true,
+		},
+		{
+			name: "NG REJECTED - existing project",
+			input: &organization.PutOrganizationInvitationRequest{
+				OrganizationId: 1,
+				ProjectId:      1,
+				Status:         organization.OrganizationInvitationStatus_REJECTED,
+			},
+			mockOrgProjectExists: true,
+			wantErr:              true,
+		},
+
 		{
 			name: "NG Invalid params - organization_id is zero",
 			input: &organization.PutOrganizationInvitationRequest{
@@ -527,14 +568,25 @@ func TestPutOrganizationInvitation(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Invalid DB error",
+			name: "NG ExistsOrganizationProject error",
 			input: &organization.PutOrganizationInvitationRequest{
 				OrganizationId: 1,
 				ProjectId:      1,
 				Status:         organization.OrganizationInvitationStatus_PENDING,
 			},
-			mockError: gorm.ErrInvalidDB,
-			wantErr:   true,
+			mockOrgProjectExistsError: gorm.ErrInvalidDB,
+			wantErr:                   true,
+		},
+		{
+			name: "NG PutOrganizationInvitation DB error",
+			input: &organization.PutOrganizationInvitationRequest{
+				OrganizationId: 1,
+				ProjectId:      1,
+				Status:         organization.OrganizationInvitationStatus_PENDING,
+			},
+			mockOrgProjectExists: false,
+			mockError:            gorm.ErrInvalidDB,
+			wantErr:              true,
 		},
 	}
 
@@ -542,10 +594,19 @@ func TestPutOrganizationInvitation(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mockDB := mocks.NewOrganizationRepository(t)
-			svc := OrganizationService{repository: mockDB}
-			if c.mockResponse != nil || c.mockError != nil {
-				mockDB.On("PutOrganizationInvitation", test.RepeatMockAnything(4)...).Return(c.mockResponse, c.mockError).Once()
+			svc := OrganizationService{
+				repository: mockDB,
+				logger:     logging.NewLogger(),
 			}
+			if c.input.OrganizationId != 0 && c.input.ProjectId != 0 {
+				mockDB.On("ExistsOrganizationProject", test.RepeatMockAnything(3)...).Return(c.mockOrgProjectExists, c.mockOrgProjectExistsError).Once()
+				if c.mockOrgProjectExistsError == nil && (!c.mockOrgProjectExists || c.input.Status == organization.OrganizationInvitationStatus_ACCEPTED) {
+					if c.mockResponse != nil || c.mockError != nil {
+						mockDB.On("PutOrganizationInvitation", test.RepeatMockAnything(4)...).Return(c.mockResponse, c.mockError).Once()
+					}
+				}
+			}
+
 			result, err := svc.PutOrganizationInvitation(ctx, c.input)
 			if !c.wantErr && err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
@@ -564,14 +625,27 @@ func TestDeleteOrganizationInvitation(t *testing.T) {
 		wantErr                          bool
 		mockError                        error
 		callDeleteOrganizationInvitation bool
+		mockOrgProjectExists             bool
+		mockOrgProjectExistsError        error
+		mockRemoveProjectsError          error
 	}{
 		{
-			name: "OK",
+			name: "OK - no existing project",
 			input: &organization.DeleteOrganizationInvitationRequest{
 				OrganizationId: 1,
 				ProjectId:      1,
 			},
 			callDeleteOrganizationInvitation: true,
+			mockOrgProjectExists:             false,
+		},
+		{
+			name: "OK - removes existing project",
+			input: &organization.DeleteOrganizationInvitationRequest{
+				OrganizationId: 1,
+				ProjectId:      1,
+			},
+			callDeleteOrganizationInvitation: true,
+			mockOrgProjectExists:             true,
 		},
 		{
 			name:    "NG Invalid params - organization_id is zero",
@@ -579,11 +653,32 @@ func TestDeleteOrganizationInvitation(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:                             "Invalid DB error",
+			name:                             "NG DeleteOrganizationInvitation DB error",
 			input:                            &organization.DeleteOrganizationInvitationRequest{OrganizationId: 1, ProjectId: 1},
 			mockError:                        gorm.ErrInvalidDB,
 			wantErr:                          true,
 			callDeleteOrganizationInvitation: true,
+		},
+		{
+			name: "NG ExistsOrganizationProject error",
+			input: &organization.DeleteOrganizationInvitationRequest{
+				OrganizationId: 1,
+				ProjectId:      1,
+			},
+			callDeleteOrganizationInvitation: true,
+			mockOrgProjectExistsError:        gorm.ErrInvalidDB,
+			wantErr:                          true,
+		},
+		{
+			name: "NG RemoveProjectsInOrganization error",
+			input: &organization.DeleteOrganizationInvitationRequest{
+				OrganizationId: 1,
+				ProjectId:      1,
+			},
+			callDeleteOrganizationInvitation: true,
+			mockOrgProjectExists:             true,
+			mockRemoveProjectsError:          gorm.ErrInvalidDB,
+			wantErr:                          true,
 		},
 	}
 
@@ -597,6 +692,12 @@ func TestDeleteOrganizationInvitation(t *testing.T) {
 			}
 			if c.callDeleteOrganizationInvitation {
 				mockDB.On("DeleteOrganizationInvitation", test.RepeatMockAnything(3)...).Return(c.mockError).Once()
+				if c.mockError == nil {
+					mockDB.On("ExistsOrganizationProject", test.RepeatMockAnything(3)...).Return(c.mockOrgProjectExists, c.mockOrgProjectExistsError).Once()
+					if c.mockOrgProjectExists {
+						mockDB.On("RemoveProjectsInOrganization", test.RepeatMockAnything(3)...).Return(c.mockRemoveProjectsError).Once()
+					}
+				}
 			}
 			_, err := svc.DeleteOrganizationInvitation(ctx, c.input)
 			if !c.wantErr && err != nil {
