@@ -122,7 +122,7 @@ list-project-service:
 list-project:
 	$(GRPCURL) \
 		-plaintext \
-		-d '{"user_id":1002, "project_id":1001, "name":"project-a"}' \
+		-d '{"user_id":1002, "project_id":1001, "name":"project-a", "organization_id":100}' \
 		$(CORE_API_ADDR) core.project.ProjectService.ListProject
 
 .PHONY: create-project
