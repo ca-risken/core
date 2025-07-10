@@ -91,10 +91,10 @@ func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding
 	if err != nil {
 		return "", fmt.Errorf("openai API error: finding_id=%d, err=%w", f.FindingID, err)
 	}
-	if err := a.setAICache(generateCacheKeyForFinding(f.FindingID, lang), answer); err != nil {
+	if err := a.setAICache(generateCacheKeyForFinding(f.FindingID, lang), answer.OutputText()); err != nil {
 		return "", fmt.Errorf("cache set error: err=%w", err)
 	}
-	return answer, nil
+	return answer.OutputText(), nil
 }
 
 func (a *AIClient) AskAISummaryStreamFromFinding(

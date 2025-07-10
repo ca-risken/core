@@ -9,21 +9,40 @@ import (
 	"github.com/openai/openai-go/responses"
 )
 
-var DefaultTools = []responses.ToolUnionParam{
-	{
-		OfWebSearchPreview: &responses.WebSearchToolParam{
-			Type:              responses.WebSearchToolTypeWebSearchPreview,
-			SearchContextSize: responses.WebSearchToolSearchContextSizeMedium,
-		},
-	},
-}
+const MAX_TOOL_USE_COUNT = 100
 
 func (a *AIClient) responsesAPI(
 	ctx context.Context,
 	instruction string,
 	inputs responses.ResponseNewParamsInputUnion,
 	tools []responses.ToolUnionParam,
-) (string, error) {
+) (*responses.Response, error) {
+	currentInputs := inputs
+	for range MAX_TOOL_USE_COUNT {
+		resp, err := a.callResponsesAPI(ctx, instruction, currentInputs, tools)
+		if err != nil {
+			return nil, err
+		}
+		functionCalls := extractFunctionCalls(resp.Output)
+		if len(functionCalls) == 0 {
+			// No function calls found, return the final response
+			a.logger.Infof(ctx, "Responses API Finished: %+v", resp.Usage)
+			return resp, nil
+		}
+		currentInputs, err = a.handleFunctionCalls(ctx, currentInputs, functionCalls)
+		if err != nil {
+			return nil, fmt.Errorf("function call handling error: %w", err)
+		}
+	}
+	return nil, fmt.Errorf("maximum function call iterations (%d) exceeded", MAX_TOOL_USE_COUNT)
+}
+
+func (a *AIClient) callResponsesAPI(
+	ctx context.Context,
+	instruction string,
+	inputs responses.ResponseNewParamsInputUnion,
+	tools []responses.ToolUnionParam,
+) (*responses.Response, error) {
 	resp, err := a.openaiClient.Responses.New(ctx,
 		responses.ResponseNewParams{
 			Model:        a.chatGPTModel,
@@ -33,14 +52,9 @@ func (a *AIClient) responsesAPI(
 		},
 	)
 	if err != nil {
-		return "", fmt.Errorf("Responses API error: err=%w", err)
+		return nil, fmt.Errorf("Responses API error: err=%w", err)
 	}
-	if resp.OutputText() == "" {
-		return "", fmt.Errorf("Responses API: no response (instruction=%q, model=%q)", instruction, a.chatGPTModel)
-	}
-	a.logger.Infof(ctx, "Responses API Finished: %+v", resp.Usage)
-	answer := resp.OutputText()
-	return answer, nil
+	return resp, nil
 }
 
 // StreamSender is a generic interface for sending data in a stream

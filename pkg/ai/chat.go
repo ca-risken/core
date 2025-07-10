@@ -40,5 +40,5 @@ func (a *AIClient) ChatAI(ctx context.Context, req *ai.ChatAIRequest) (*ai.ChatA
 	if err != nil {
 		return nil, fmt.Errorf("ChatAI API error: err=%w", err)
 	}
-	return &ai.ChatAIResponse{Answer: answer}, nil
+	return &ai.ChatAIResponse{Answer: answer.OutputText()}, nil
 }
