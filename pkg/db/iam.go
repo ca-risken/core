@@ -12,7 +12,7 @@ import (
 
 type IAMRepository interface {
 	// User
-	ListUser(ctx context.Context, activated bool, projectID uint32, name string, userID uint32, admin bool, userIdpKey string) (*[]model.User, error)
+	ListUser(ctx context.Context, activated bool, projectID uint32, organizationID uint32, name string, userID uint32, admin bool, userIdpKey string) (*[]model.User, error)
 	GetUser(ctx context.Context, userID uint32, sub, userIdpKey string) (*model.User, error)
 	GetUserBySub(ctx context.Context, sub string) (*model.User, error)
 	CreateUser(ctx context.Context, u *model.User) (*model.User, error)
@@ -61,7 +61,7 @@ type IAMRepository interface {
 
 var _ IAMRepository = (*Client)(nil)
 
-func (c *Client) ListUser(ctx context.Context, activated bool, projectID uint32, name string, userID uint32, admin bool, userIdpKey string) (*[]model.User, error) {
+func (c *Client) ListUser(ctx context.Context, activated bool, projectID uint32, organizationID uint32, name string, userID uint32, admin bool, userIdpKey string) (*[]model.User, error) {
 	query := `
 select
   u.*
@@ -75,6 +75,10 @@ where
 	if !zero.IsZeroVal(projectID) {
 		query += " and exists (select * from user_role ur inner join role r using(role_id, project_id) where ur.user_id = u.user_id and ur.project_id = ?)"
 		params = append(params, projectID)
+	}
+	if organizationID != 0 {
+		query += " and exists (select * from user_organization_role uor inner join organization_role r using(role_id) where uor.user_id = u.user_id and r.organization_id = ?)"
+		params = append(params, organizationID)
 	}
 	if !zero.IsZeroVal(name) {
 		escapedName := escapeLikeParam(name)

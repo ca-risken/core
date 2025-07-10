@@ -770,9 +770,9 @@ func (_m *IAMRepository) ListRole(ctx context.Context, projectID uint32, name st
 	return r0, r1
 }
 
-// ListUser provides a mock function with given fields: ctx, activated, projectID, name, userID, admin, userIdpKey
-func (_m *IAMRepository) ListUser(ctx context.Context, activated bool, projectID uint32, name string, userID uint32, admin bool, userIdpKey string) (*[]model.User, error) {
-	ret := _m.Called(ctx, activated, projectID, name, userID, admin, userIdpKey)
+// ListUser provides a mock function with given fields: ctx, activated, projectID, organizationID, name, userID, admin, userIdpKey
+func (_m *IAMRepository) ListUser(ctx context.Context, activated bool, projectID uint32, organizationID uint32, name string, userID uint32, admin bool, userIdpKey string) (*[]model.User, error) {
+	ret := _m.Called(ctx, activated, projectID, organizationID, name, userID, admin, userIdpKey)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListUser")
@@ -780,19 +780,19 @@ func (_m *IAMRepository) ListUser(ctx context.Context, activated bool, projectID
 
 	var r0 *[]model.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, bool, uint32, string, uint32, bool, string) (*[]model.User, error)); ok {
-		return rf(ctx, activated, projectID, name, userID, admin, userIdpKey)
+	if rf, ok := ret.Get(0).(func(context.Context, bool, uint32, uint32, string, uint32, bool, string) (*[]model.User, error)); ok {
+		return rf(ctx, activated, projectID, organizationID, name, userID, admin, userIdpKey)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, bool, uint32, string, uint32, bool, string) *[]model.User); ok {
-		r0 = rf(ctx, activated, projectID, name, userID, admin, userIdpKey)
+	if rf, ok := ret.Get(0).(func(context.Context, bool, uint32, uint32, string, uint32, bool, string) *[]model.User); ok {
+		r0 = rf(ctx, activated, projectID, organizationID, name, userID, admin, userIdpKey)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*[]model.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, bool, uint32, string, uint32, bool, string) error); ok {
-		r1 = rf(ctx, activated, projectID, name, userID, admin, userIdpKey)
+	if rf, ok := ret.Get(1).(func(context.Context, bool, uint32, uint32, string, uint32, bool, string) error); ok {
+		r1 = rf(ctx, activated, projectID, organizationID, name, userID, admin, userIdpKey)
 	} else {
 		r1 = ret.Error(1)
 	}

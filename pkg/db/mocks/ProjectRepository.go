@@ -82,9 +82,9 @@ func (_m *ProjectRepository) DeleteProject(ctx context.Context, projectID uint32
 	return r0
 }
 
-// ListProject provides a mock function with given fields: ctx, userID, projectID, name
-func (_m *ProjectRepository) ListProject(ctx context.Context, userID uint32, projectID uint32, name string) (*[]db.ProjectWithTag, error) {
-	ret := _m.Called(ctx, userID, projectID, name)
+// ListProject provides a mock function with given fields: ctx, userID, projectID, organizationID, name
+func (_m *ProjectRepository) ListProject(ctx context.Context, userID uint32, projectID uint32, organizationID uint32, name string) (*[]db.ProjectWithTag, error) {
+	ret := _m.Called(ctx, userID, projectID, organizationID, name)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListProject")
@@ -92,19 +92,19 @@ func (_m *ProjectRepository) ListProject(ctx context.Context, userID uint32, pro
 
 	var r0 *[]db.ProjectWithTag
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, string) (*[]db.ProjectWithTag, error)); ok {
-		return rf(ctx, userID, projectID, name)
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, string) (*[]db.ProjectWithTag, error)); ok {
+		return rf(ctx, userID, projectID, organizationID, name)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, string) *[]db.ProjectWithTag); ok {
-		r0 = rf(ctx, userID, projectID, name)
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, string) *[]db.ProjectWithTag); ok {
+		r0 = rf(ctx, userID, projectID, organizationID, name)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*[]db.ProjectWithTag)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, string) error); ok {
-		r1 = rf(ctx, userID, projectID, name)
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint32, string) error); ok {
+		r1 = rf(ctx, userID, projectID, organizationID, name)
 	} else {
 		r1 = ret.Error(1)
 	}

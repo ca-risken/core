@@ -491,3 +491,123 @@ func TestUpdateUserAdmin(t *testing.T) {
 		})
 	}
 }
+
+func TestListUser(t *testing.T) {
+	now := time.Now()
+	type args struct {
+		activated      bool
+		projectID      uint32
+		organizationID uint32
+		name           string
+		userID         uint32
+		admin          bool
+		userIdpKey     string
+	}
+
+	cases := []struct {
+		name        string
+		args        args
+		want        *[]model.User
+		wantErr     bool
+		mockClosure func(mock sqlmock.Sqlmock)
+	}{
+		{
+			name: "OK - basic filter",
+			args: args{activated: true, projectID: 1, organizationID: 0, name: "", userID: 0, admin: false, userIdpKey: ""},
+			want: &[]model.User{
+				{UserID: 1, Sub: "sub1", Name: "user1", Activated: true, IsAdmin: false, CreatedAt: now, UpdatedAt: now},
+				{UserID: 2, Sub: "sub2", Name: "user2", Activated: true, IsAdmin: false, CreatedAt: now, UpdatedAt: now},
+			},
+			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				expectedQuery := `
+select
+  u.*
+from
+  user u
+where
+  activated = ? and exists (select * from user_role ur inner join role r using(role_id, project_id) where ur.user_id = u.user_id and ur.project_id = ?)`
+				mock.ExpectQuery(regexp.QuoteMeta(expectedQuery)).WillReturnRows(sqlmock.NewRows([]string{
+					"user_id", "sub", "name", "user_idp_key", "activated", "is_admin", "created_at", "updated_at"}).
+					AddRow(uint32(1), "sub1", "user1", "", true, false, now, now).
+					AddRow(uint32(2), "sub2", "user2", "", true, false, now, now))
+			},
+		},
+		{
+			name: "OK - with organization filter",
+			args: args{activated: true, projectID: 0, organizationID: 1, name: "", userID: 0, admin: false, userIdpKey: ""},
+			want: &[]model.User{
+				{UserID: 1, Sub: "sub1", Name: "user1", Activated: true, IsAdmin: false, CreatedAt: now, UpdatedAt: now},
+			},
+			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				expectedQuery := `
+select
+  u.*
+from
+  user u
+where
+  activated = ? and exists (select * from user_organization_role uor inner join organization_role r using(role_id) where uor.user_id = u.user_id and r.organization_id = ?)`
+				mock.ExpectQuery(regexp.QuoteMeta(expectedQuery)).WillReturnRows(sqlmock.NewRows([]string{
+					"user_id", "sub", "name", "user_idp_key", "activated", "is_admin", "created_at", "updated_at"}).
+					AddRow(uint32(1), "sub1", "user1", "", true, false, now, now))
+			},
+		},
+		{
+			name: "OK - with name filter",
+			args: args{activated: true, projectID: 0, organizationID: 0, name: "test", userID: 0, admin: false, userIdpKey: ""},
+			want: &[]model.User{
+				{UserID: 1, Sub: "sub1", Name: "testuser", Activated: true, IsAdmin: false, CreatedAt: now, UpdatedAt: now},
+			},
+			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				expectedQuery := `
+select
+  u.*
+from
+  user u
+where
+  activated = ? and (u.name like ? escape '*' or u.user_idp_key like ? escape '*' )`
+				mock.ExpectQuery(regexp.QuoteMeta(expectedQuery)).WillReturnRows(sqlmock.NewRows([]string{
+					"user_id", "sub", "name", "user_idp_key", "activated", "is_admin", "created_at", "updated_at"}).
+					AddRow(uint32(1), "sub1", "testuser", "", true, false, now, now))
+			},
+		},
+		{
+			name:    "NG DB error",
+			args:    args{activated: true, projectID: 1, organizationID: 0, name: "", userID: 0, admin: false, userIdpKey: ""},
+			want:    nil,
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				expectedQuery := `
+select
+  u.*
+from
+  user u
+where
+  activated = ? and exists (select * from user_role ur inner join role r using(role_id, project_id) where ur.user_id = u.user_id and ur.project_id = ?)`
+				mock.ExpectQuery(regexp.QuoteMeta(expectedQuery)).WillReturnError(errors.New("DB error"))
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			db, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+			}
+			c.mockClosure(mock)
+			got, err := db.ListUser(ctx, c.args.activated, c.args.projectID, c.args.organizationID, c.args.name, c.args.userID, c.args.admin, c.args.userIdpKey)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}

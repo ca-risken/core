@@ -26,6 +26,11 @@ func TestValidate_ListUserRequest(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:    "OK single(organization_id)",
+			input:   &ListUserRequest{OrganizationId: 111},
+			wantErr: false,
+		},
+		{
 			name:    "NG length",
 			input:   &ListUserRequest{ProjectId: 111, Name: "12345678901234567890123456789012345678901234567890123456789012345"},
 			wantErr: true,

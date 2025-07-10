@@ -72,6 +72,8 @@ func (m *ListProjectRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	// no validation rules for OrganizationId
+
 	if len(errors) > 0 {
 		return ListProjectRequestMultiError(errors)
 	}

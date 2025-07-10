@@ -50,6 +50,22 @@ func TestListProject(t *testing.T) {
 			},
 		},
 		{
+			name:  "OK with organization_id",
+			input: &project.ListProjectRequest{UserId: 1, OrganizationId: 100},
+			want: &project.ListProjectResponse{
+				Project: []*project.Project{
+					{ProjectId: 1, Name: "a", Tag: []*project.ProjectTag{
+						{ProjectId: 1, Tag: "tag1", Color: "red"},
+					}, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+				},
+			},
+			mockResponce: &[]db.ProjectWithTag{
+				{ProjectID: 1, Name: "a", Tag: &[]model.ProjectTag{
+					{ProjectID: 1, Tag: "tag1", Color: "red", CreatedAt: now, UpdatedAt: now},
+				}, CreatedAt: now, UpdatedAt: now},
+			},
+		},
+		{
 			name:      "OK No record",
 			input:     &project.ListProjectRequest{UserId: 1},
 			want:      &project.ListProjectResponse{},
@@ -73,7 +89,7 @@ func TestListProject(t *testing.T) {
 			mockDB := mocks.NewProjectRepository(t)
 			svc := ProjectService{repository: mockDB}
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("ListProject", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("ListProject", test.RepeatMockAnything(5)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			result, err := svc.ListProject(ctx, c.input)
 			if !c.wantErr && err != nil {
@@ -319,7 +335,7 @@ func TestIsActive(t *testing.T) {
 				repository: mockRepository,
 			}
 			if c.listProjectResults != nil {
-				mockRepository.On("ListProject", test.RepeatMockAnything(4)...).Return(c.listProjectResults, c.listProjectError).Once()
+				mockRepository.On("ListProject", test.RepeatMockAnything(5)...).Return(c.listProjectResults, c.listProjectError).Once()
 			}
 			if c.listUserResponse != nil {
 				mockIAM.On("ListUser", test.RepeatMockAnything(2)...).Return(c.listUserResponse, c.mockError).Once()
