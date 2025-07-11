@@ -6,7 +6,10 @@ option go_package = "github.com/ca-risken/core/proto/ai";
 import "ai/entity.proto";
 import "validate/validate.proto";
 
-service AIService { rpc ChatAI(ChatAIRequest) returns (ChatAIResponse); }
+service AIService {
+  rpc ChatAI(ChatAIRequest) returns (ChatAIResponse);
+  rpc GenerateReport(GenerateReportRequest) returns (GenerateReportResponse);
+}
 
 message ChatAIRequest {
   string question = 1 [ (validate.rules).string.min_len = 1 ]; // Required
@@ -14,3 +17,10 @@ message ChatAIRequest {
 }
 
 message ChatAIResponse { string answer = 1; }
+
+message GenerateReportRequest {
+  string prompt = 1 [ (validate.rules).string.min_len = 1 ]; // Required
+  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];  // Required
+}
+
+message GenerateReportResponse { string report = 1; }

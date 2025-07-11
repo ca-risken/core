@@ -9,18 +9,15 @@ GRPCURL=kubectl run grpcurl --image=fullstorydev/grpcurl -n core --restart=Never
 CORE_API_ADDR=core.core.svc.cluster.local:8080
 
 .PHONY: all
-all: run
+all: build
 
 .PHONY: install
 install:
-	go install \
-		google.golang.org/grpc
-	go install \
-		github.com/golang/protobuf/protoc-gen-go
-	go install \
-		github.com/envoyproxy/protoc-gen-validate@v0.6.7
-	go install \
-		github.com/grpc-ecosystem/go-grpc-middleware
+	go install google.golang.org/grpc
+	go install github.com/golang/protobuf/protoc-gen-go@v1.5.4
+	go install github.com/envoyproxy/protoc-gen-validate@v0.6.7
+	go install github.com/grpc-ecosystem/go-grpc-middleware
+	go install github.com/vektra/mockery/v2@v2.53.3
 
 .PHONY: clean
 clean:
@@ -49,7 +46,7 @@ proto-validate: fmt
 		protoc \
 			--proto_path=proto \
 			--error_format=gcc \
-			-I $(GOPATH)/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v0.6.7 \
+			-I $(GOPATH)/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v1.0.4 \
 			--go_out=plugins=grpc,paths=source_relative:proto \
 			--validate_out="lang=go,paths=source_relative:proto" \
 			proto/$$svc/*.proto; \

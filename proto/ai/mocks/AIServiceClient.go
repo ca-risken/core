@@ -54,6 +54,43 @@ func (_m *AIServiceClient) ChatAI(ctx context.Context, in *ai.ChatAIRequest, opt
 	return r0, r1
 }
 
+// GenerateReport provides a mock function with given fields: ctx, in, opts
+func (_m *AIServiceClient) GenerateReport(ctx context.Context, in *ai.GenerateReportRequest, opts ...grpc.CallOption) (*ai.GenerateReportResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GenerateReport")
+	}
+
+	var r0 *ai.GenerateReportResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.GenerateReportRequest, ...grpc.CallOption) (*ai.GenerateReportResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.GenerateReportRequest, ...grpc.CallOption) *ai.GenerateReportResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ai.GenerateReportResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *ai.GenerateReportRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewAIServiceClient creates a new instance of AIServiceClient. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewAIServiceClient(t interface {

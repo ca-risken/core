@@ -5,7 +5,9 @@ package mocks
 import (
 	context "context"
 
+	db "github.com/ca-risken/core/pkg/db"
 	finding "github.com/ca-risken/core/proto/finding"
+
 	mock "github.com/stretchr/testify/mock"
 
 	model "github.com/ca-risken/core/pkg/model"
@@ -87,6 +89,36 @@ func (_m *AIService) ChatAI(ctx context.Context, req *protoai.ChatAIRequest) (*p
 
 	if rf, ok := ret.Get(1).(func(context.Context, *protoai.ChatAIRequest) error); ok {
 		r1 = rf(ctx, req)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GenerateReport provides a mock function with given fields: ctx, req, findingRepo
+func (_m *AIService) GenerateReport(ctx context.Context, req *protoai.GenerateReportRequest, findingRepo db.FindingRepository) (*protoai.GenerateReportResponse, error) {
+	ret := _m.Called(ctx, req, findingRepo)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GenerateReport")
+	}
+
+	var r0 *protoai.GenerateReportResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *protoai.GenerateReportRequest, db.FindingRepository) (*protoai.GenerateReportResponse, error)); ok {
+		return rf(ctx, req, findingRepo)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *protoai.GenerateReportRequest, db.FindingRepository) *protoai.GenerateReportResponse); ok {
+		r0 = rf(ctx, req, findingRepo)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*protoai.GenerateReportResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *protoai.GenerateReportRequest, db.FindingRepository) error); ok {
+		r1 = rf(ctx, req, findingRepo)
 	} else {
 		r1 = ret.Error(1)
 	}
