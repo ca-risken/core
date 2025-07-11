@@ -63,7 +63,7 @@ func (a *AIClient) handleFunctionCalls(
 		a.logger.Infof(ctx, "Executing function: call_id=%s, name=%s, args=%s", funcCall.CallID, funcCall.Name, funcCall.Arguments)
 
 		// Execute the function
-		result, err := executeFunctionCall(funcCall.Name, funcCall.Arguments)
+		result, err := a.executeFunctionCall(ctx, funcCall.Name, funcCall.Arguments)
 		if err != nil {
 			return responses.ResponseNewParamsInputUnion{}, fmt.Errorf("function call execution failed: %w", err)
 		}
@@ -79,20 +79,20 @@ func (a *AIClient) handleFunctionCalls(
 }
 
 // executeFunctionCall executes the specified function call
-func executeFunctionCall(functionName string, arguments string) (string, error) {
+func (a *AIClient) executeFunctionCall(ctx context.Context, functionName string, arguments string) (string, error) {
 	switch functionName {
-	case "get_findings":
-		var params GetFindingsParams
+	case "get_finding_data":
+		var params GetFindingDataParams
 		if err := json.Unmarshal([]byte(arguments), &params); err != nil {
-			return "", fmt.Errorf("failed to parse get_findings parameters: %w", err)
+			return "", fmt.Errorf("failed to parse get_finding_data parameters: %w", err)
 		}
 
-		findings, err := GetFindingsFunction(params)
+		data, err := a.GetFindingDataFunction(ctx, params)
 		if err != nil {
 			return "", fmt.Errorf("failed to get findings: %w", err)
 		}
 
-		result, err := json.Marshal(findings)
+		result, err := json.Marshal(data)
 		if err != nil {
 			return "", fmt.Errorf("failed to marshal findings result: %w", err)
 		}

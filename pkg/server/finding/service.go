@@ -27,7 +27,7 @@ func NewFindingService(repository db.FindingRepository, openaiToken, chatGPTMode
 	return &FindingService{
 		repository:              repository,
 		logger:                  logger,
-		ai:                      ai.NewAIClient(openaiToken, chatGPTModel, logger),
+		ai:                      ai.NewAIClient(repository, openaiToken, chatGPTModel, logger),
 		excludeDeleteDataSource: excludeDeleteDataSource,
 	}
 }

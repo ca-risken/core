@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/ca-risken/common/pkg/logging"
+	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/ai"
 	"github.com/ca-risken/core/proto/finding"
@@ -36,12 +37,13 @@ type AIClient struct {
 	openaiClient *openai.Client
 	cache        *freecache.Cache
 	chatGPTModel string // https://platform.openai.com/docs/models/overview
+	findingRepo  db.FindingRepository
 	logger       logging.Logger
 }
 
 var _ AIService = (*AIClient)(nil)
 
-func NewAIClient(token, model string, logger logging.Logger) AIService {
+func NewAIClient(repository db.FindingRepository, token, model string, logger logging.Logger) AIService {
 	if token == "" {
 		return nil
 	}
@@ -55,6 +57,7 @@ func NewAIClient(token, model string, logger logging.Logger) AIService {
 		openaiClient: &openaiClient,
 		logger:       logger,
 		chatGPTModel: model,
+		findingRepo:  repository,
 		cache:        freecache.NewCache(CACHE_SIZE),
 	}
 	return &client
