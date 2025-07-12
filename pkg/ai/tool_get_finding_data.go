@@ -236,9 +236,9 @@ func validateSQL(sql string) error {
 
 	// Dangerous keywords check (case-insensitive)
 	dangerousKeywords := []string{
-		"INSERT", "UPDATE", "DELETE", "DROP", "CREATE", "ALTER",
-		"TRUNCATE", "EXEC", "EXECUTE", "UNION", "INTO OUTFILE",
-		"LOAD_FILE", "SYSTEM", "SHUTDOWN",
+		"INSERT ", "UPDATE ", "DELETE ", "DROP TABLE ", "CREATE TABLE ", "ALTER TABLE ",
+		"TRUNCATE ", "EXEC ", "EXECUTE ", "INTO OUTFILE ",
+		"LOAD_FILE ", "SYSTEM ", "SHUTDOWN ",
 	}
 	for _, keyword := range dangerousKeywords {
 		if strings.Contains(sqlUpper, keyword) {
