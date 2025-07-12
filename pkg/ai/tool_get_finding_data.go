@@ -42,7 +42,7 @@ func GetFindingDataTool() responses.ToolUnionParam {
 						"description": "Offset of the results to return. (default: 0)",
 					},
 				},
-				"required": []string{"query"},
+				"required": []string{"project_id", "prompt"},
 			},
 		},
 	}
@@ -92,7 +92,7 @@ func (a *AIClient) getFindingDataFunction(ctx context.Context, params GetFinding
 	if err != nil {
 		return nil, err
 	}
-	a.logger.Debugf(ctx, "Generated SQL: sql=%s, params=%v", sql, sqlParams)
+	a.logger.Infof(ctx, "Generated SQL: sql=%s, params=%v", sql, sqlParams)
 
 	if err := validateSQL(sql); err != nil {
 		return nil, err
@@ -102,7 +102,7 @@ func (a *AIClient) getFindingDataFunction(ctx context.Context, params GetFinding
 	if err != nil {
 		return nil, err
 	}
-	a.logger.Debugf(ctx, "Successfully executed SQL: len(data)=%d", len(data))
+	a.logger.Infof(ctx, "Successfully executed SQL: len(data)=%d", len(data))
 	return data, nil
 }
 
