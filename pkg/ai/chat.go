@@ -36,7 +36,7 @@ func (a *AIClient) ChatAI(ctx context.Context, req *ai.ChatAIRequest) (*ai.ChatA
 		},
 	})
 	inputs := responses.ResponseNewParamsInputUnion{OfInputItemList: inputParam}
-	answer, err := a.responsesAPI(ctx, instruction, inputs, DefaultTools)
+	answer, err := a.responsesAPI(ctx, a.chatGPTModel, instruction, inputs, DefaultTools)
 	if err != nil {
 		return nil, fmt.Errorf("ChatAI API error: err=%w", err)
 	}

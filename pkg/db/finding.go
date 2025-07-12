@@ -90,7 +90,7 @@ type FindingRepository interface {
 	DeleteNoFindingIdTag(ctx context.Context) error
 
 	// ExecSQL
-	ExecSQL(ctx context.Context, sql string, params []any) ([]any, error)
+	ExecSQL(ctx context.Context, sql string, params []any) ([]map[string]any, error)
 }
 
 var _ FindingRepository = (*Client)(nil)
@@ -1183,8 +1183,8 @@ func (c *Client) DeleteNoFindingIdTag(ctx context.Context) error {
 	return nil
 }
 
-func (c *Client) ExecSQL(ctx context.Context, sql string, params []any) ([]any, error) {
-	var data []any
+func (c *Client) ExecSQL(ctx context.Context, sql string, params []any) ([]map[string]any, error) {
+	var data []map[string]any
 	// Important: Use Slave for executing dynamic SQL queries
 	if err := c.Slave.WithContext(ctx).Raw(sql, params...).Scan(&data).Error; err != nil {
 		return nil, err

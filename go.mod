@@ -4,7 +4,6 @@ go 1.23.3
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/blastrain/vitess-sqlparser v0.0.0-20201030050434-a139afbb1aba
 	github.com/ca-risken/common/pkg/database v0.0.0-20230719091915-496f0dc45899
 	github.com/ca-risken/common/pkg/logging v0.0.0-20220518032134-ad443b601efd
 	github.com/ca-risken/common/pkg/profiler v0.0.0-20220426050416-a654045b9fa5
@@ -51,7 +50,6 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/juju/errors v0.0.0-20170703010042-c7d06af17c68 // indirect
 	github.com/outcaste-io/ristretto v0.2.1 // indirect
 	github.com/philhofer/fwd v1.1.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

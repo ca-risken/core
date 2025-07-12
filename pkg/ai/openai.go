@@ -23,6 +23,7 @@ const (
 
 type AIService interface {
 	ChatAI(ctx context.Context, req *ai.ChatAIRequest) (*ai.ChatAIResponse, error)
+	GenerateReport(ctx context.Context, req *ai.GenerateReportRequest) (*ai.GenerateReportResponse, error)
 	AskAISummaryFromFinding(ctx context.Context, f *model.Finding, r *model.Recommend, lang string) (string, error)
 	AskAISummaryStreamFromFinding(
 		ctx context.Context,
@@ -34,16 +35,17 @@ type AIService interface {
 }
 
 type AIClient struct {
-	openaiClient *openai.Client
-	cache        *freecache.Cache
-	chatGPTModel string // https://platform.openai.com/docs/models/overview
-	findingRepo  db.FindingRepository
-	logger       logging.Logger
+	openaiClient   *openai.Client
+	cache          *freecache.Cache
+	chatGPTModel   string // https://platform.openai.com/docs/models/overview
+	reasoningModel string
+	findingRepo    db.FindingRepository
+	logger         logging.Logger
 }
 
 var _ AIService = (*AIClient)(nil)
 
-func NewAIClient(repository db.FindingRepository, token, model string, logger logging.Logger) AIService {
+func NewAIClient(repository db.FindingRepository, token, model, reasoningModel string, logger logging.Logger) AIService {
 	if token == "" {
 		return nil
 	}
@@ -54,11 +56,12 @@ func NewAIClient(repository db.FindingRepository, token, model string, logger lo
 		option.WithAPIKey(token),
 	)
 	client := AIClient{
-		openaiClient: &openaiClient,
-		logger:       logger,
-		chatGPTModel: model,
-		findingRepo:  repository,
-		cache:        freecache.NewCache(CACHE_SIZE),
+		openaiClient:   &openaiClient,
+		logger:         logger,
+		chatGPTModel:   model,
+		reasoningModel: reasoningModel,
+		findingRepo:    repository,
+		cache:          freecache.NewCache(CACHE_SIZE),
 	}
 	return &client
 }

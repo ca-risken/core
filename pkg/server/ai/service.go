@@ -18,10 +18,11 @@ func NewAIService(
 	repository db.FindingRepository,
 	openaiToken string,
 	chatGPTModel string,
+	reasoningModel string,
 	logger logging.Logger,
 ) *AIService {
 	return &AIService{
-		aiClient: aiservice.NewAIClient(repository, openaiToken, chatGPTModel, logger),
+		aiClient: aiservice.NewAIClient(repository, openaiToken, chatGPTModel, reasoningModel, logger),
 		logger:   logger,
 	}
 }

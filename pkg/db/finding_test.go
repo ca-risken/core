@@ -1078,7 +1078,7 @@ func TestExecSQL(t *testing.T) {
 	cases := []struct {
 		name        string
 		input       args
-		want        []any
+		want        []map[string]any
 		wantErr     bool
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
@@ -1088,7 +1088,7 @@ func TestExecSQL(t *testing.T) {
 				sql:    "SELECT finding_id FROM finding WHERE project_id = ?",
 				params: []any{uint32(1)},
 			},
-			want:    []any{int64(1), int64(2)},
+			want:    []map[string]any{{"finding_id": int64(1)}, {"finding_id": int64(2)}},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta("SELECT finding_id FROM finding WHERE project_id = ?")).
@@ -1104,7 +1104,7 @@ func TestExecSQL(t *testing.T) {
 				sql:    "SELECT COUNT(*) FROM findings",
 				params: []any{},
 			},
-			want:    []any{int64(5)},
+			want:    []map[string]any{{"count(*)": int64(5)}},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta("SELECT COUNT(*) FROM findings")).

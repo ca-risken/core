@@ -2,11 +2,12 @@ package ai
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
+	"time"
 
-	"github.com/blastrain/vitess-sqlparser/sqlparser"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/responses"
 )
@@ -18,7 +19,9 @@ func GetFindingDataTool() responses.ToolUnionParam {
 			Name: "get_finding_data",
 			Description: openai.String(
 				"Get RISKEN findings in a project. " +
-					"Use this when a request include \"finding\", \"issue\", \"ファインディング\", \"問題\"..."),
+					"Use this when a request include \"finding\", \"issue\", \"ファインディング\", \"問題\"..." +
+					"Only data that can be retrieved with a single SQL query per execution will be returned.",
+			),
 			Parameters: map[string]any{
 				"type": "object",
 				"properties": map[string]any{
@@ -54,24 +57,52 @@ type GetFindingDataParams struct {
 }
 
 // GetFindingDataFunction handles the get_finding_data function call
-func (a *AIClient) GetFindingDataFunction(ctx context.Context, params GetFindingDataParams) ([]any, error) {
-	// Generate SQL
+func (a *AIClient) GetFindingDataFunction(ctx context.Context, params GetFindingDataParams) ([]map[string]any, error) {
+	// Default params
+	if params.Limit == 0 {
+		params.Limit = 100
+	}
+
+	// Retry conf
+	retryer := backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 3) // Max 3 retries
+	retryLogger := func(err error, t time.Duration) {
+		a.logger.Warnf(ctx, "[RetryLogger] GetFindingDataFunction error: duration=%+v, err=%+v", t, err)
+	}
+
+	// Operation
+	var results []map[string]any
+	var err error
+	operation := func() error {
+		results, err = a.getFindingDataFunction(ctx, params)
+		if err != nil {
+			a.logger.Warnf(ctx, "[RetryLogger] GetFindingDataFunction error: err=%+v", err)
+		}
+		return err
+	}
+
+	// Exec with retry
+	if err := backoff.RetryNotify(operation, retryer, retryLogger); err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+func (a *AIClient) getFindingDataFunction(ctx context.Context, params GetFindingDataParams) ([]map[string]any, error) {
 	sql, sqlParams, err := a.generateSQL(ctx, params.Prompt, params.ProjectID, params.Limit, params.Offset)
 	if err != nil {
 		return nil, err
 	}
+	a.logger.Debugf(ctx, "Generated SQL: sql=%s, params=%v", sql, sqlParams)
 
-	// Validate SQL
 	if err := validateSQL(sql); err != nil {
 		return nil, err
 	}
 
-	// Execute SQL
 	data, err := a.executeSQL(ctx, sql, sqlParams)
 	if err != nil {
 		return nil, err
 	}
-
+	a.logger.Debugf(ctx, "Successfully executed SQL: len(data)=%d", len(data))
 	return data, nil
 }
 
@@ -106,12 +137,16 @@ CREATE TABLE finding (
 	- 0.7 ~ 0.4: Medium risk
 	- 0.3 ~ 0.0: Low risk
 - data: This is a JSON object that contains the full data of the finding.
+  - **IMPORTANT**: The data structure varies depending on the data_source or finding types.
 
 ## Strict Rules
 - Must return a valid JSON object. No other text.
 - Must return a valid SQL string.
-- Must include "SELECT" and "WHERE" keywords.
-- Do not include "INSERT", "UPDATE", "DELETE" keywords.
+- Do NOT include project_id condition in the WHERE clause(it will be automatically inserted when retrieving data).
+- Must has prefix "SELECT" and include "WHERE" keywords.
+- Do not use dangerous keywords like "INSERT", "UPDATE", "DELETE" etc.
+- Do NOT include semicolons (;) in the SQL(multiple statements are not allowed).
+- Generate only ONE SELECT statement per request.
 
 ## Output Schema
 {
@@ -128,6 +163,7 @@ type GenerateSQLOutput struct {
 
 func (a *AIClient) generateSQL(ctx context.Context, prompt string, projectID, limit, offset uint32) (string, []any, error) {
 	resp, err := a.callResponsesAPI(ctx,
+		a.chatGPTModel,
 		TOOL_GENERATE_SQL_INSTRUCTION,
 		responses.ResponseNewParamsInputUnion{
 			OfInputItemList: []responses.ResponseInputItemUnionParam{
@@ -144,8 +180,12 @@ func (a *AIClient) generateSQL(ctx context.Context, prompt string, projectID, li
 	if err != nil {
 		return "", nil, err
 	}
-	var output GenerateSQLOutput
-	if err := json.Unmarshal([]byte(resp.OutputText()), &output); err != nil {
+	jsonOutput, err := ExtractJSONString(resp.OutputText())
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to extract JSON string: err=%w, output=%s", err, resp.OutputText())
+	}
+	output, err := ConvertSchema(jsonOutput, GenerateSQLOutput{})
+	if err != nil {
 		return "", nil, err
 	}
 
@@ -158,6 +198,11 @@ func (a *AIClient) generateSQL(ctx context.Context, prompt string, projectID, li
 
 func formatSQL(sql string, projectID, limit, offset uint32) (string, []any) {
 	params := []any{}
+
+	// Trim SQL after semicolon if exists (defensive programming)
+	if idx := strings.Index(sql, ";"); idx != -1 {
+		sql = strings.TrimSpace(sql[:idx])
+	}
 
 	// strict project_id filter & ignore pend_findings
 	sql = strings.ReplaceAll(sql, "WHERE", `WHERE
@@ -173,25 +218,36 @@ func formatSQL(sql string, projectID, limit, offset uint32) (string, []any) {
 	params = append(params, projectID)
 
 	// add limit and offset
-	sql = fmt.Sprintf(`SELECT * FROM (%s) LIMIT ? OFFSET ?`, sql)
+	sql = fmt.Sprintf(`SELECT * FROM (%s) as t LIMIT ? OFFSET ?`, sql)
 	params = append(params, limit, offset)
 	return sql, params
 }
 
 func validateSQL(sql string) error {
 	// keyword check
-	if !strings.Contains(sql, "SELECT") || !strings.Contains(sql, "WHERE") {
+	sqlUpper := strings.ToUpper(sql)
+	if !strings.HasPrefix(sqlUpper, "SELECT") || !strings.Contains(sqlUpper, "WHERE") || !strings.Contains(sqlUpper, "FINDING") {
 		return fmt.Errorf("sql must contain SELECT and WHERE keywords, sql=%s", sql)
 	}
 
-	// parse check
-	if _, err := sqlparser.Parse(sql); err != nil {
-		return fmt.Errorf("failed to parse sql: %w", err)
+	// Check for semicolons (multiple SQL statements)
+	if strings.Contains(sql, ";") {
+		return fmt.Errorf("sql must not contain semicolons (multiple statements not allowed), sql=%s", sql)
+	}
+
+	// Dangerous keywords check (case-insensitive)
+	dangerousKeywords := []string{
+		"INSERT", "UPDATE", "DELETE", "DROP", "CREATE", "ALTER",
+		"TRUNCATE", "EXEC", "EXECUTE", "UNION", "INTO OUTFILE",
+		"LOAD_FILE", "SYSTEM", "SHUTDOWN",
+	}
+	if slices.Contains(dangerousKeywords, sqlUpper) {
+		return fmt.Errorf("sql must not contain dangerous keywords, sql=%s", sql)
 	}
 	return nil
 }
 
-func (a *AIClient) executeSQL(ctx context.Context, sql string, params []any) ([]any, error) {
+func (a *AIClient) executeSQL(ctx context.Context, sql string, params []any) ([]map[string]any, error) {
 	findings, err := a.findingRepo.ExecSQL(ctx, sql, params)
 	if err != nil {
 		return nil, err

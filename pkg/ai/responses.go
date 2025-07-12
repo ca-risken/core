@@ -9,17 +9,18 @@ import (
 	"github.com/openai/openai-go/responses"
 )
 
-const MAX_TOOL_USE_COUNT = 100
+const MAX_TOOL_USE_COUNT = 30
 
 func (a *AIClient) responsesAPI(
 	ctx context.Context,
+	model string,
 	instruction string,
 	inputs responses.ResponseNewParamsInputUnion,
 	tools []responses.ToolUnionParam,
 ) (*responses.Response, error) {
 	currentInputs := inputs
 	for range MAX_TOOL_USE_COUNT {
-		resp, err := a.callResponsesAPI(ctx, instruction, currentInputs, tools)
+		resp, err := a.callResponsesAPI(ctx, model, instruction, currentInputs, tools)
 		if err != nil {
 			return nil, err
 		}
@@ -39,16 +40,18 @@ func (a *AIClient) responsesAPI(
 
 func (a *AIClient) callResponsesAPI(
 	ctx context.Context,
+	model string,
 	instruction string,
 	inputs responses.ResponseNewParamsInputUnion,
 	tools []responses.ToolUnionParam,
 ) (*responses.Response, error) {
 	resp, err := a.openaiClient.Responses.New(ctx,
 		responses.ResponseNewParams{
-			Model:        a.chatGPTModel,
+			Model:        model,
 			Instructions: openai.String(instruction),
 			Input:        inputs,
 			Tools:        tools,
+			MaxToolCalls: openai.Int(MAX_TOOL_USE_COUNT),
 		},
 	)
 	if err != nil {

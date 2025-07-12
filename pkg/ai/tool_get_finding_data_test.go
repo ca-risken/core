@@ -36,7 +36,7 @@ func TestFormatSQL(t *testing.T) {
 		  pend_finding.finding_id = finding.finding_id
 			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
 	)
-	AND score > 0.5) LIMIT ? OFFSET ?`,
+	AND score > 0.5) as t LIMIT ? OFFSET ?`,
 			wantParams: []any{uint32(1001), uint32(100), uint32(0)},
 		},
 		{
@@ -56,7 +56,7 @@ func TestFormatSQL(t *testing.T) {
 		  pend_finding.finding_id = finding.finding_id
 			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
 	)
-	AND data_source LIKE 'aws%' GROUP BY data_source ORDER BY count DESC) LIMIT ? OFFSET ?`,
+	AND data_source LIKE 'aws%' GROUP BY data_source ORDER BY count DESC) as t LIMIT ? OFFSET ?`,
 			wantParams: []any{uint32(2002), uint32(50), uint32(10)},
 		},
 		{
@@ -76,7 +76,7 @@ func TestFormatSQL(t *testing.T) {
 		  pend_finding.finding_id = finding.finding_id
 			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
 	)
-	AND score >= 0.8 AND data_source = 'aws:guardduty') LIMIT ? OFFSET ?`,
+	AND score >= 0.8 AND data_source = 'aws:guardduty') as t LIMIT ? OFFSET ?`,
 			wantParams: []any{uint32(3003), uint32(200), uint32(5)},
 		},
 		{
@@ -96,7 +96,7 @@ func TestFormatSQL(t *testing.T) {
 		  pend_finding.finding_id = finding.finding_id
 			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
 	)
-	AND updated_at > '2024-01-01') LIMIT ? OFFSET ?`,
+	AND updated_at > '2024-01-01') as t LIMIT ? OFFSET ?`,
 			wantParams: []any{uint32(4004), uint32(10), uint32(0)},
 		},
 		{
@@ -116,8 +116,28 @@ func TestFormatSQL(t *testing.T) {
 		  pend_finding.finding_id = finding.finding_id
 			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
 	)
-	AND resource_name LIKE '%bucket%' GROUP BY data_source) LIMIT ? OFFSET ?`,
+	AND resource_name LIKE '%bucket%' GROUP BY data_source) as t LIMIT ? OFFSET ?`,
 			wantParams: []any{uint32(5005), uint32(25), uint32(3)},
+		},
+		{
+			name: "SQL with semicolon - should trim after semicolon",
+			args: args{
+				sql:       "SELECT * FROM finding WHERE score > 0.5; SELECT * FROM finding WHERE score < 0.5",
+				projectID: 6006,
+				limit:     10,
+				offset:    0,
+			},
+			wantSQL: `SELECT * FROM (SELECT * FROM finding WHERE
+	project_id = ? 
+	AND not exists (
+		SELECT 1 
+		FROM pend_finding
+		WHERE 
+		  pend_finding.finding_id = finding.finding_id
+			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
+	)
+	AND score > 0.5) as t LIMIT ? OFFSET ?`,
+			wantParams: []any{uint32(6006), uint32(10), uint32(0)},
 		},
 	}
 
@@ -201,32 +221,18 @@ func TestValidateSQL(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Invalid SQL syntax - unclosed parenthesis",
-			args: args{
-				sql: "SELECT * FROM finding WHERE score IN (0.5, 0.6",
-			},
-			wantErr: true,
-		},
-		{
-			name: "Invalid SQL syntax - invalid operator",
-			args: args{
-				sql: "SELECT * FROM finding WHERE score >>> 0.5",
-			},
-			wantErr: true,
-		},
-		{
 			name: "Case insensitive SELECT",
 			args: args{
 				sql: "select * from finding where score > 0.5",
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name: "Case insensitive WHERE",
 			args: args{
 				sql: "SELECT * FROM finding Where score > 0.5",
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name: "Empty SQL string",
@@ -260,6 +266,27 @@ func TestValidateSQL(t *testing.T) {
 			name: "Non-SELECT statement (DELETE)",
 			args: args{
 				sql: "DELETE FROM finding WHERE project_id = 1",
+			},
+			wantErr: true,
+		},
+		{
+			name: "SQL with semicolon - multiple statements",
+			args: args{
+				sql: "SELECT * FROM finding WHERE score > 0.5; SELECT * FROM finding WHERE score < 0.5",
+			},
+			wantErr: true,
+		},
+		{
+			name: "SQL with semicolon at end",
+			args: args{
+				sql: "SELECT * FROM finding WHERE score > 0.5;",
+			},
+			wantErr: true,
+		},
+		{
+			name: "SQL with semicolon in string literal should still fail",
+			args: args{
+				sql: "SELECT * FROM finding WHERE description = 'test; value' AND score > 0.5",
 			},
 			wantErr: true,
 		},

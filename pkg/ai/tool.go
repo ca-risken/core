@@ -15,6 +15,7 @@ var DefaultTools = []responses.ToolUnionParam{
 			SearchContextSize: responses.WebSearchToolSearchContextSizeMedium,
 		},
 	},
+	GetFindingDataTool(),
 }
 
 // FunctionCallInfo represents a function call extracted from response
