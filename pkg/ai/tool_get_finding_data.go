@@ -143,7 +143,7 @@ CREATE TABLE finding (
 - Must return a valid SQL string.
 - Do NOT include project_id condition in the WHERE clause(it will be automatically inserted when retrieving data).
 - Must has prefix "SELECT" and include "WHERE" keywords.
-- Do not use dangerous keywords like "INSERT", "UPDATE", "DELETE" etc.
+- Do NOT use dangerous keywords like "INSERT", "UPDATE", "DELETE" etc.
 - Do NOT include semicolons (;) in the SQL(multiple statements are not allowed).
 - Generate only ONE SELECT statement per request.
 

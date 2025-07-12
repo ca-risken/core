@@ -42,6 +42,10 @@ The report language should match the user's language preference.
 - User Request: %s
 - Min score: 0.4
 
+## Strict Rules
+- NO HALLUCINATION: All content MUST be based on actual data and facts only
+- DATA VALIDATION: Every insight MUST be backed by concrete evidence and verifiable data sources
+
 ## RISKEN Scoring System Reference
 RISKEN implements a scoring system where severity levels are determined by the following score ranges:
 - HIGH: 1.0 ~ 0.8 (Requires immediate review and response)
