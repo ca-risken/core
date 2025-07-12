@@ -3,7 +3,6 @@ package ai
 import (
 	"context"
 	"fmt"
-	"slices"
 	"strings"
 	"time"
 
@@ -241,8 +240,10 @@ func validateSQL(sql string) error {
 		"TRUNCATE", "EXEC", "EXECUTE", "UNION", "INTO OUTFILE",
 		"LOAD_FILE", "SYSTEM", "SHUTDOWN",
 	}
-	if slices.Contains(dangerousKeywords, sqlUpper) {
-		return fmt.Errorf("sql must not contain dangerous keywords, sql=%s", sql)
+	for _, keyword := range dangerousKeywords {
+		if strings.Contains(sqlUpper, keyword) {
+			return fmt.Errorf("sql must not contain dangerous keywords, sql=%s", sql)
+		}
 	}
 	return nil
 }
