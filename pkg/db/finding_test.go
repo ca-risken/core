@@ -10,6 +10,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestListFindingTagByFindingID(t *testing.T) {
@@ -1059,6 +1060,102 @@ func TestDeleteNoFindingIdTag(t *testing.T) {
 			}
 			if err == nil && c.wantErr {
 				t.Fatal("No error")
+			}
+		})
+	}
+}
+
+func TestExecSQL(t *testing.T) {
+	client, mock, err := newMockClient()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+
+	type args struct {
+		sql    string
+		params []any
+	}
+	cases := []struct {
+		name        string
+		input       args
+		want        []map[string]any
+		wantErr     bool
+		mockClosure func(mock sqlmock.Sqlmock)
+	}{
+		{
+			name: "OK with single column",
+			input: args{
+				sql:    "SELECT finding_id FROM finding WHERE project_id = ?",
+				params: []any{uint32(1)},
+			},
+			want:    []map[string]any{{"finding_id": int64(1)}, {"finding_id": int64(2)}},
+			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta("SELECT finding_id FROM finding WHERE project_id = ?")).
+					WithArgs(uint32(1)).
+					WillReturnRows(sqlmock.NewRows([]string{"finding_id"}).
+						AddRow(int64(1)).
+						AddRow(int64(2)))
+			},
+		},
+		{
+			name: "OK with count query",
+			input: args{
+				sql:    "SELECT COUNT(*) FROM findings",
+				params: []any{},
+			},
+			want:    []map[string]any{{"count(*)": int64(5)}},
+			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta("SELECT COUNT(*) FROM findings")).
+					WillReturnRows(sqlmock.NewRows([]string{"count(*)"}).
+						AddRow(int64(5)))
+			},
+		},
+		{
+			name: "OK empty result",
+			input: args{
+				sql:    "SELECT id FROM empty_table WHERE id = ?",
+				params: []any{uint64(999)},
+			},
+			want:    nil,
+			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta("SELECT id FROM empty_table WHERE id = ?")).
+					WithArgs(int64(999)).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}))
+			},
+		},
+		{
+			name: "NG DB error",
+			input: args{
+				sql:    "SELECT * FROM invalid_table",
+				params: []any{},
+			},
+			want:    nil,
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM invalid_table")).
+					WillReturnError(errors.New("table not found"))
+			},
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			c.mockClosure(mock)
+			got, err := client.ExecSQL(ctx, c.input.sql, c.input.params)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatal("Expected error but got none")
+			}
+			if !c.wantErr {
+				if diff := cmp.Diff(got, c.want); diff != "" {
+					t.Errorf("Unexpected result, diff=%s", diff)
+				}
 			}
 		})
 	}

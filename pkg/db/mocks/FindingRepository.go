@@ -318,6 +318,36 @@ func (_m *FindingRepository) DeleteResource(_a0 context.Context, _a1 uint32, _a2
 	return r0
 }
 
+// ExecSQL provides a mock function with given fields: ctx, sql, params
+func (_m *FindingRepository) ExecSQL(ctx context.Context, sql string, params []interface{}) ([]map[string]interface{}, error) {
+	ret := _m.Called(ctx, sql, params)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ExecSQL")
+	}
+
+	var r0 []map[string]interface{}
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, []interface{}) ([]map[string]interface{}, error)); ok {
+		return rf(ctx, sql, params)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, []interface{}) []map[string]interface{}); ok {
+		r0 = rf(ctx, sql, params)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]map[string]interface{})
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, []interface{}) error); ok {
+		r1 = rf(ctx, sql, params)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetFinding provides a mock function with given fields: _a0, _a1, _a2, _a3
 func (_m *FindingRepository) GetFinding(_a0 context.Context, _a1 uint32, _a2 uint64, _a3 bool) (*model.Finding, error) {
 	ret := _m.Called(_a0, _a1, _a2, _a3)
