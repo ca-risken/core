@@ -68,6 +68,8 @@ Also, please include the following sections:
 
 ### Graph examples
 
+When inserting mermaid graphs, you MUST specify mermaid in the code block.
+
 #### Example) table (not mermaid)
 
 | Category | Score | Count |

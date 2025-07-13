@@ -930,4 +930,11 @@ generate-report:
 		-d '{"prompt":"AWSのFindingレポートを作成してください", "project_id":1001}' \
 		$(CORE_API_ADDR) core.ai.AIService.GenerateReport
 
+.PHONY: generate-report2
+generate-report2:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"prompt":"google:sccのFindingを分析して", "project_id":1001}' \
+		$(CORE_API_ADDR) core.ai.AIService.GenerateReport
+
 FAKE:

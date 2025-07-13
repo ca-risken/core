@@ -34,7 +34,7 @@ func GetFindingDataTool() responses.ToolUnionParam {
 					},
 					"limit": map[string]any{
 						"type":        "integer",
-						"description": "Maximum number of results to return. (default: 100)",
+						"description": "Maximum number of results to return. (default: 20, max: 50)",
 					},
 					"offset": map[string]any{
 						"type":        "integer",
@@ -59,7 +59,9 @@ type GetFindingDataParams struct {
 func (a *AIClient) GetFindingDataFunction(ctx context.Context, params GetFindingDataParams) ([]map[string]any, error) {
 	// Default params
 	if params.Limit == 0 {
-		params.Limit = 100
+		params.Limit = 20
+	} else if params.Limit > 50 {
+		params.Limit = 50
 	}
 
 	// Retry conf

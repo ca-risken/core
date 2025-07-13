@@ -47,11 +47,12 @@ func (a *AIClient) callResponsesAPI(
 ) (*responses.Response, error) {
 	resp, err := a.openaiClient.Responses.New(ctx,
 		responses.ResponseNewParams{
-			Model:        model,
-			Instructions: openai.String(instruction),
-			Input:        inputs,
-			Tools:        tools,
-			MaxToolCalls: openai.Int(MAX_TOOL_USE_COUNT),
+			Model:           model,
+			Instructions:    openai.String(instruction),
+			Input:           inputs,
+			Tools:           tools,
+			MaxToolCalls:    openai.Int(MAX_TOOL_USE_COUNT),
+			MaxOutputTokens: openai.Int(25000),
 		},
 	)
 	if err != nil {
