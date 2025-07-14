@@ -181,11 +181,7 @@ func (a *AIClient) generateSQL(ctx context.Context, prompt string, projectID, li
 	if err != nil {
 		return "", nil, err
 	}
-	jsonOutput, err := ExtractJSONString(resp.OutputText())
-	if err != nil {
-		return "", nil, fmt.Errorf("failed to extract JSON string: err=%w, output=%s", err, resp.OutputText())
-	}
-	output, err := ConvertSchema(jsonOutput, GenerateSQLOutput{})
+	output, err := ConvertSchema(resp.OutputText(), GenerateSQLOutput{})
 	if err != nil {
 		return "", nil, err
 	}

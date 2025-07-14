@@ -6,7 +6,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestExtractJSONString(t *testing.T) {
+func TestExtractSingleJSONObject(t *testing.T) {
 	tests := []struct {
 		name    string
 		input   string
@@ -52,8 +52,8 @@ func TestExtractJSONString(t *testing.T) {
 		{
 			name:    "Multiple JSON objects - returns outermost",
 			input:   `{"first": {"nested": "value"}} {"second": "object"}`,
-			want:    `{"first": {"nested": "value"}} {"second": "object"}`,
-			wantErr: false,
+			want:    ``,
+			wantErr: true,
 		},
 		{
 			name:    "Empty JSON object",
@@ -64,8 +64,8 @@ func TestExtractJSONString(t *testing.T) {
 		{
 			name:    "JSON array",
 			input:   `[{"key": "value"}, {"key": "value2"}]`,
-			want:    `{"key": "value"}, {"key": "value2"}`,
-			wantErr: false,
+			want:    ``,
+			wantErr: true,
 		},
 		{
 			name:    "No opening brace",
@@ -113,13 +113,13 @@ func TestExtractJSONString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ExtractJSONString(tt.input)
+			got, err := extractSingleJSONObject(tt.input)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ExtractJSONString() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("extractSingleJSONObject() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("ExtractJSONString() = %v, want %v", got, tt.want)
+				t.Errorf("extractSingleJSONObject() = %v, want %v", got, tt.want)
 			}
 		})
 	}
