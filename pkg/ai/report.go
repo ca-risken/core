@@ -10,7 +10,7 @@ import (
 )
 
 func (a *AIClient) GenerateReport(ctx context.Context, req *ai.GenerateReportRequest) (*ai.GenerateReportResponse, error) {
-	instruction := generatePrompt(req.ProjectId, req.Prompt)
+	instruction := generatePrompt(req.ProjectId)
 	tools := DefaultTools
 	tools = append(tools, GetFindingDataTool())
 
@@ -39,7 +39,6 @@ The report language should match the user's language preference.
 
 ## Report details
 - Project ID: %d
-- User Request: %s
 - Min score: 0.4
 
 ## Strict Rules
@@ -129,6 +128,6 @@ mindmap
 `
 )
 
-func generatePrompt(projectID uint32, prompt string) string {
-	return fmt.Sprintf(REPORT_PROMPT, projectID, prompt)
+func generatePrompt(projectID uint32) string {
+	return fmt.Sprintf(REPORT_PROMPT, projectID)
 }
