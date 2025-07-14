@@ -12,7 +12,7 @@ import (
 func (a *AIClient) GenerateReport(ctx context.Context, req *ai.GenerateReportRequest) (*ai.GenerateReportResponse, error) {
 	instruction := generatePrompt(req.ProjectId, req.Prompt)
 	tools := DefaultTools
-	// tools = append(tools, GetFindingDataTool())
+	tools = append(tools, GetFindingDataTool())
 
 	resp, err := a.responsesAPI(ctx, a.reasoningModel, instruction, responses.ResponseNewParamsInputUnion{
 		OfInputItemList: []responses.ResponseInputItemUnionParam{
