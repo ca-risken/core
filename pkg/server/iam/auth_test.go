@@ -144,7 +144,7 @@ func TestIsAuthorizedAdmin(t *testing.T) {
 	}{
 		{
 			name:  "OK Admin user",
-			input: &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
+			input: &iam.IsAuthorizedAdminRequest{UserId: 1},
 			want:  &iam.IsAuthorizedAdminResponse{Ok: true},
 			mockUser: &model.User{
 				UserID: 1, Sub: "admin", Name: "Admin User", Activated: true, IsAdmin: true,
@@ -152,7 +152,7 @@ func TestIsAuthorizedAdmin(t *testing.T) {
 		},
 		{
 			name:  "OK Non-admin user",
-			input: &iam.IsAuthorizedAdminRequest{UserId: 2, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
+			input: &iam.IsAuthorizedAdminRequest{UserId: 2},
 			want:  &iam.IsAuthorizedAdminResponse{Ok: false},
 			mockUser: &model.User{
 				UserID: 2, Sub: "user", Name: "Regular User", Activated: true, IsAdmin: false,
@@ -160,18 +160,13 @@ func TestIsAuthorizedAdmin(t *testing.T) {
 		},
 		{
 			name:        "OK User not found",
-			input:       &iam.IsAuthorizedAdminRequest{UserId: 999, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
+			input:       &iam.IsAuthorizedAdminRequest{UserId: 999},
 			want:        &iam.IsAuthorizedAdminResponse{Ok: false},
 			mockUserErr: gorm.ErrRecordNotFound,
 		},
 		{
-			name:    "NG Invalid parameter (invalid actionName format)",
-			input:   &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding----PutFinding", ResourceName: "github:code-scan/repository-name"},
-			wantErr: true,
-		},
-		{
 			name:        "NG Invalid DB error",
-			input:       &iam.IsAuthorizedAdminRequest{UserId: 1, ActionName: "finding/PutFinding", ResourceName: "github:code-scan/repository-name"},
+			input:       &iam.IsAuthorizedAdminRequest{UserId: 1},
 			wantErr:     true,
 			mockUserErr: gorm.ErrInvalidDB,
 		},
