@@ -40,7 +40,7 @@ func (p *ProjectService) ListProject(ctx context.Context, req *project.ListProje
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := p.repository.ListProject(ctx, req.UserId, req.ProjectId, req.Name)
+	list, err := p.repository.ListProject(ctx, req.UserId, req.ProjectId, req.OrganizationId, req.Name)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &project.ListProjectResponse{}, nil
@@ -167,7 +167,7 @@ func (p *ProjectService) createDefaultRole(ctx context.Context, ownerUserID, pro
 }
 
 func (p *ProjectService) isActiveProject(ctx context.Context, projectID uint32) (bool, error) {
-	projects, err := p.repository.ListProject(ctx, 0, projectID, "")
+	projects, err := p.repository.ListProject(ctx, 0, projectID, 0, "")
 	if err != nil {
 		return false, err
 	}
