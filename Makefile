@@ -1,4 +1,4 @@
-TARGETS = ai alert finding iam project report organization_iam
+TARGETS = ai alert finding iam project report organization_iam organization
 MOCK_TARGETS = $(TARGETS:=.mock)
 BUILD_OPT=""
 IMAGE_TAG=latest
@@ -122,7 +122,7 @@ list-project-service:
 list-project:
 	$(GRPCURL) \
 		-plaintext \
-		-d '{"user_id":1002, "project_id":1001, "name":"project-a"}' \
+		-d '{"user_id":1002, "project_id":1001, "name":"project-a", "organization_id":100}' \
 		$(CORE_API_ADDR) core.project.ProjectService.ListProject
 
 .PHONY: create-project
@@ -922,5 +922,19 @@ chat-ai:
 		-plaintext \
 		-d '{"question":"What mountain is the highest in the world?", "chat_history": [{"role":1, "content":"hello!"}, {"role":2, "content":"Hi, I am a chatbot."}]}' \
 		$(CORE_API_ADDR) core.ai.AIService.ChatAI
+
+.PHONY: generate-report
+generate-report:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"prompt":"AWSのFindingレポートを作成してください", "project_id":1001}' \
+		$(CORE_API_ADDR) core.ai.AIService.GenerateReport
+
+.PHONY: generate-report2
+generate-report2:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"prompt":"google:sccのFindingを分析して", "project_id":1001}' \
+		$(CORE_API_ADDR) core.ai.AIService.GenerateReport
 
 FAKE:

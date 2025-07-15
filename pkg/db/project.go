@@ -7,12 +7,11 @@ import (
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
-	"github.com/vikyd/zero"
 	"gorm.io/gorm"
 )
 
 type ProjectRepository interface {
-	ListProject(ctx context.Context, userID, projectID uint32, name string) (*[]ProjectWithTag, error)
+	ListProject(ctx context.Context, userID, projectID, organizationID uint32, name string) (*[]ProjectWithTag, error)
 	CreateProject(ctx context.Context, name string) (*model.Project, error)
 	UpdateProject(ctx context.Context, projectID uint32, name string) (*model.Project, error)
 	DeleteProject(ctx context.Context, projectID uint32) error
@@ -42,23 +41,40 @@ type projectTagDenormarize struct {
 	UpdatedAt time.Time
 }
 
-func (c *Client) ListProject(ctx context.Context, userID, projectID uint32, name string) (*[]ProjectWithTag, error) {
+func (c *Client) ListProject(ctx context.Context, userID, projectID, organizationID uint32, name string) (*[]ProjectWithTag, error) {
 	query := `
 select p.project_id, p.name, pt.tag, pt.color, p.created_at, p.updated_at 
 from project p left outer join project_tag pt using(project_id) 
 where 1 = 1 `
 	var params []interface{}
-	if !zero.IsZeroVal(userID) {
-		query += " and exists (select * from user_role ur inner join role r using(project_id, role_id) where ur.project_id = p.project_id and user_id = ?)"
-		params = append(params, userID)
+	if userID != 0 {
+		query += ` 
+		and (
+			exists (
+				select * from user_role ur
+				inner join role r using(project_id, role_id)
+				where ur.project_id = p.project_id and user_id = ?
+			)
+			or exists (
+				select * from user_organization_role uor 
+				inner join organization_role r on (uor.role_id = r.role_id)
+				inner join organization_project op on (r.organization_id = op.organization_id)
+				where op.project_id = p.project_id and uor.user_id = ?
+			)
+		)`
+		params = append(params, userID, userID)
 	}
-	if !zero.IsZeroVal(projectID) {
+	if projectID != 0 {
 		query += " and project_id = ?"
 		params = append(params, projectID)
 	}
-	if !zero.IsZeroVal(name) {
+	if name != "" {
 		query += " and name = ?"
 		params = append(params, name)
+	}
+	if organizationID != 0 {
+		query += " and exists (select * from organization_project op where op.project_id = p.project_id and op.organization_id = ?)"
+		params = append(params, organizationID)
 	}
 	query += " order by p.project_id, pt.tag"
 	denormarize := []projectTagDenormarize{}

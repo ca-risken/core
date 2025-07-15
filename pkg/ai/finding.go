@@ -87,14 +87,14 @@ func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding
 	}
 
 	instruction, inputs := generateAskAISummaryInputs(f, r, lang)
-	answer, err := a.responsesAPI(ctx, instruction, inputs, DefaultTools)
+	answer, err := a.responsesAPI(ctx, a.chatGPTModel, instruction, inputs, DefaultTools)
 	if err != nil {
 		return "", fmt.Errorf("openai API error: finding_id=%d, err=%w", f.FindingID, err)
 	}
-	if err := a.setAICache(generateCacheKeyForFinding(f.FindingID, lang), answer); err != nil {
+	if err := a.setAICache(generateCacheKeyForFinding(f.FindingID, lang), answer.OutputText()); err != nil {
 		return "", fmt.Errorf("cache set error: err=%w", err)
 	}
-	return answer, nil
+	return answer.OutputText(), nil
 }
 
 func (a *AIClient) AskAISummaryStreamFromFinding(
