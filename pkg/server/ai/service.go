@@ -3,6 +3,7 @@ package ai
 import (
 	"github.com/ca-risken/common/pkg/logging"
 	aiservice "github.com/ca-risken/core/pkg/ai"
+	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/proto/ai"
 )
 
@@ -14,11 +15,14 @@ type AIService struct {
 }
 
 func NewAIService(
-	openaiToken, chatGPTModel string,
+	repository db.FindingRepository,
+	openaiToken string,
+	chatGPTModel string,
+	reasoningModel string,
 	logger logging.Logger,
 ) *AIService {
 	return &AIService{
-		aiClient: aiservice.NewAIClient(openaiToken, chatGPTModel, logger),
+		aiClient: aiservice.NewAIClient(repository, openaiToken, chatGPTModel, reasoningModel, logger),
 		logger:   logger,
 	}
 }

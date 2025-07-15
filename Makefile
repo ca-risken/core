@@ -923,4 +923,18 @@ chat-ai:
 		-d '{"question":"What mountain is the highest in the world?", "chat_history": [{"role":1, "content":"hello!"}, {"role":2, "content":"Hi, I am a chatbot."}]}' \
 		$(CORE_API_ADDR) core.ai.AIService.ChatAI
 
+.PHONY: generate-report
+generate-report:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"prompt":"AWSのFindingレポートを作成してください", "project_id":1001}' \
+		$(CORE_API_ADDR) core.ai.AIService.GenerateReport
+
+.PHONY: generate-report2
+generate-report2:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"prompt":"google:sccのFindingを分析して", "project_id":1001}' \
+		$(CORE_API_ADDR) core.ai.AIService.GenerateReport
+
 FAKE:
