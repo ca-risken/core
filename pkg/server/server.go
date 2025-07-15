@@ -60,17 +60,19 @@ type Config struct {
 	BaseURL                 string
 	OpenAIToken             string
 	ChatGPTModel            string
+	ReasoningModel          string
 	defaultLocale           string
 	excludeDeleteDataSource []string
 	SlackAPIToken           string
 }
 
-func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, defaultLocale, SlackAPIToken string, excludeDeleteDataSource []string) Config {
+func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, reasoningModel, defaultLocale, SlackAPIToken string, excludeDeleteDataSource []string) Config {
 	return Config{
 		MaxAnalyzeAPICall:       maxAnalyzeAPICall,
 		BaseURL:                 baseURL,
 		OpenAIToken:             openaiToken,
 		ChatGPTModel:            chatGPTModel,
+		ReasoningModel:          reasoningModel,
 		defaultLocale:           defaultLocale,
 		SlackAPIToken:           SlackAPIToken,
 		excludeDeleteDataSource: excludeDeleteDataSource,
@@ -112,10 +114,10 @@ func (s *Server) Run(ctx context.Context) error {
 		s.config.SlackAPIToken,
 	)
 	oisvc := organization_iamserver.NewOrganizationIAMService(s.db, iamc, s.logger)
-	fsvc := findingserver.NewFindingService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.excludeDeleteDataSource, s.logger)
-	psvc := projectserver.NewProjectService(s.db, iamc, oc, s.logger)
+	fsvc := findingserver.NewFindingService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, s.config.excludeDeleteDataSource, s.logger)
+	psvc := projectserver.NewProjectService(s.db, iamc, s.logger)
 	rsvc := reportserver.NewReportService(s.db, s.logger)
-	aisvc := aiserver.NewAIService(s.config.OpenAIToken, s.config.ChatGPTModel, s.logger)
+	aisvc := aiserver.NewAIService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, s.logger)
 	osvc := organizationserver.NewOrganizationService(s.db, oimac, s.logger)
 	hsvc := health.NewServer()
 

@@ -143,15 +143,8 @@ func (o *OrganizationService) DeleteOrganizationInvitation(ctx context.Context, 
 	if err := o.repository.DeleteOrganizationInvitation(ctx, req.OrganizationId, req.ProjectId); err != nil {
 		return nil, err
 	}
-	exists, err := o.repository.ExistsOrganizationProject(ctx, req.OrganizationId, req.ProjectId)
-	if err != nil {
+	if err := o.removeOrganizationProject(ctx, req.OrganizationId, req.ProjectId); err != nil {
 		return nil, err
-	}
-	if exists {
-		if err := o.repository.RemoveProjectsInOrganization(ctx, req.OrganizationId, req.ProjectId); err != nil {
-			return nil, err
-		}
-		o.logger.Infof(ctx, "OrganizationProject removed due to invitation deletion: organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
 	}
 	o.logger.Infof(ctx, "Organization invitation deleted: organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
 	return &empty.Empty{}, nil
@@ -173,7 +166,26 @@ func (o *OrganizationService) ReplyOrganizationInvitation(ctx context.Context, r
 		}
 		return &organization.ReplyOrganizationInvitationResponse{OrganizationProject: convertOrganizationProject(orgProject)}, nil
 	}
+	if invitation.Status == organization.OrganizationInvitationStatus_REJECTED.String() {
+		if err := o.removeOrganizationProject(ctx, req.OrganizationId, req.ProjectId); err != nil {
+			return nil, err
+		}
+	}
 	return &organization.ReplyOrganizationInvitationResponse{}, nil
+}
+
+func (o *OrganizationService) removeOrganizationProject(ctx context.Context, organizationID, projectID uint32) error {
+	exists, err := o.repository.ExistsOrganizationProject(ctx, organizationID, projectID)
+	if err != nil {
+		return err
+	}
+	if exists {
+		if err := o.repository.RemoveProjectsInOrganization(ctx, organizationID, projectID); err != nil {
+			return err
+		}
+		o.logger.Infof(ctx, "OrganizationProject removed due to invitation deletion: organization_id=%d, project_id=%d", organizationID, projectID)
+	}
+	return nil
 }
 
 func (o *OrganizationService) createDefaultRole(ctx context.Context, ownerUserID, organizationID uint32) error {
