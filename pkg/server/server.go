@@ -111,7 +111,7 @@ func (s *Server) Run(ctx context.Context) error {
 	)
 	oisvc := organization_iamserver.NewOrganizationIAMService(s.db, iamc, s.logger)
 	fsvc := findingserver.NewFindingService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, s.config.excludeDeleteDataSource, s.logger)
-	psvc := projectserver.NewProjectService(s.db, iamc, s.logger)
+	psvc := projectserver.NewProjectService(s.db, iamc, oc, s.logger)
 	rsvc := reportserver.NewReportService(s.db, s.logger)
 	aisvc := aiserver.NewAIService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, s.logger)
 	osvc := organizationserver.NewOrganizationService(s.db, oimac, s.logger)
