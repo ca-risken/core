@@ -12,6 +12,7 @@ message ListUserRequest {
   uint32 user_id = 4;
   bool admin = 5;
   string user_idp_key = 6;
+  uint32 organization_id = 7;
 }
 
 message ListUserResponse { repeated uint32 user_id = 1; }

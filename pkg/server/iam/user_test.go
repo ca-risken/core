@@ -35,6 +35,15 @@ func TestListUser(t *testing.T) {
 			},
 		},
 		{
+			name:  "OK with organization filter",
+			input: &iam.ListUserRequest{OrganizationId: 1, Activated: true, Name: "nm"},
+			want:  &iam.ListUserResponse{UserId: []uint32{1, 2}},
+			mockResponce: &[]model.User{
+				{UserID: 1, Sub: "sub", Name: "nm", Activated: true},
+				{UserID: 2, Sub: "sub", Name: "nm", Activated: true},
+			},
+		},
+		{
 			name:      "OK empty reponse",
 			input:     &iam.ListUserRequest{ProjectId: 1, Activated: true, Name: "nm"},
 			want:      &iam.ListUserResponse{},
@@ -59,7 +68,7 @@ func TestListUser(t *testing.T) {
 			svc := IAMService{repository: mock}
 
 			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("ListUser", test.RepeatMockAnything(7)...).Return(c.mockResponce, c.mockError).Once()
+				mock.On("ListUser", test.RepeatMockAnything(8)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.ListUser(ctx, c.input)
 			if err != nil && !c.wantErr {
