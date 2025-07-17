@@ -67,7 +67,7 @@ func (c *Client) GetOrganizationRole(ctx context.Context, organizationID, roleID
 		params = append(params, organizationID)
 	}
 	var data model.OrganizationRole
-	if err := c.Slave.WithContext(ctx).Raw(query, params...).First(&data).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Raw(query, params...).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -152,7 +152,7 @@ func (c *Client) GetOrganizationPolicy(ctx context.Context, organizationID, poli
 		params = append(params, organizationID)
 	}
 	var data model.OrganizationPolicy
-	if err := c.Slave.WithContext(ctx).Raw(query, params...).First(&data).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Raw(query, params...).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
