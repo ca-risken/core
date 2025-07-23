@@ -136,6 +136,36 @@ func (_m *OrganizationIAMServiceServer) DeleteOrganizationRole(_a0 context.Conte
 	return r0, r1
 }
 
+// DeleteOrganizationUserReserved provides a mock function with given fields: _a0, _a1
+func (_m *OrganizationIAMServiceServer) DeleteOrganizationUserReserved(_a0 context.Context, _a1 *organization_iam.DeleteOrganizationUserReservedRequest) (*emptypb.Empty, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteOrganizationUserReserved")
+	}
+
+	var r0 *emptypb.Empty
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.DeleteOrganizationUserReservedRequest) (*emptypb.Empty, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.DeleteOrganizationUserReservedRequest) *emptypb.Empty); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*emptypb.Empty)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.DeleteOrganizationUserReservedRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DetachOrganizationPolicy provides a mock function with given fields: _a0, _a1
 func (_m *OrganizationIAMServiceServer) DetachOrganizationPolicy(_a0 context.Context, _a1 *organization_iam.DetachOrganizationPolicyRequest) (*emptypb.Empty, error) {
 	ret := _m.Called(_a0, _a1)
@@ -346,6 +376,36 @@ func (_m *OrganizationIAMServiceServer) ListOrganizationRole(_a0 context.Context
 	return r0, r1
 }
 
+// ListOrganizationUserReserved provides a mock function with given fields: _a0, _a1
+func (_m *OrganizationIAMServiceServer) ListOrganizationUserReserved(_a0 context.Context, _a1 *organization_iam.ListOrganizationUserReservedRequest) (*organization_iam.ListOrganizationUserReservedResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListOrganizationUserReserved")
+	}
+
+	var r0 *organization_iam.ListOrganizationUserReservedResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.ListOrganizationUserReservedRequest) (*organization_iam.ListOrganizationUserReservedResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.ListOrganizationUserReservedRequest) *organization_iam.ListOrganizationUserReservedResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization_iam.ListOrganizationUserReservedResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.ListOrganizationUserReservedRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PutOrganizationPolicy provides a mock function with given fields: _a0, _a1
 func (_m *OrganizationIAMServiceServer) PutOrganizationPolicy(_a0 context.Context, _a1 *organization_iam.PutOrganizationPolicyRequest) (*organization_iam.PutOrganizationPolicyResponse, error) {
 	ret := _m.Called(_a0, _a1)
@@ -398,6 +458,36 @@ func (_m *OrganizationIAMServiceServer) PutOrganizationRole(_a0 context.Context,
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.PutOrganizationRoleRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PutOrganizationUserReserved provides a mock function with given fields: _a0, _a1
+func (_m *OrganizationIAMServiceServer) PutOrganizationUserReserved(_a0 context.Context, _a1 *organization_iam.PutOrganizationUserReservedRequest) (*organization_iam.PutOrganizationUserReservedResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PutOrganizationUserReserved")
+	}
+
+	var r0 *organization_iam.PutOrganizationUserReservedResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.PutOrganizationUserReservedRequest) (*organization_iam.PutOrganizationUserReservedResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.PutOrganizationUserReservedRequest) *organization_iam.PutOrganizationUserReservedResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization_iam.PutOrganizationUserReservedResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.PutOrganizationUserReservedRequest) error); ok {
 		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)

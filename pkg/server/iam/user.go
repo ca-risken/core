@@ -99,6 +99,11 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 		if err := i.AttachRoleByUserReserved(ctx, registerdData.UserID, registerdData.UserIdpKey); err != nil {
 			return nil, err
 		}
+		/*
+			if err := i.organizationIamClient.AttachOrganizationRoleByOrganizationUserReserved(ctx, registerdData.UserID, registerdData.UserIdpKey); err != nil {
+				return nil, err
+			}
+		*/
 	}
 
 	return &iam.PutUserResponse{User: convertUser(registerdData)}, nil

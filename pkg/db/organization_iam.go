@@ -28,6 +28,12 @@ type OrganizationIAMRepository interface {
 	DeleteOrganizationPolicy(ctx context.Context, organizationID, policyID uint32) error
 	AttachOrganizationPolicy(ctx context.Context, organizationID, policyID, roleID uint32) (*model.OrganizationPolicy, error)
 	DetachOrganizationPolicy(ctx context.Context, organizationID, policyID, roleID uint32) error
+
+	// OrganizationUserReserved
+	ListOrganizationUserReserved(ctx context.Context, organizationID uint32, userIDPKey string) ([]*model.OrganizationUserReserved, error)
+	PutOrganizationUserReserved(ctx context.Context, r *model.OrganizationUserReserved) (*model.OrganizationUserReserved, error)
+	DeleteOrganizationUserReserved(ctx context.Context, organizationID, reservedID uint32) error
+	ListOrganizationUserReservedWithOrganizationID(ctx context.Context, userIdpKey string) (*[]UserReservedWithOrganizationID, error)
 }
 
 var _ OrganizationIAMRepository = (*Client)(nil)
@@ -370,4 +376,90 @@ func (c *Client) organizationUserExists(ctx context.Context, userID uint32) (boo
 		return false, fmt.Errorf("failed to get user. user_id=%d, error: %w", userID, err)
 	}
 	return true, nil
+}
+
+const listOrganizationUserReserved = `
+select ur.*
+from organization_user_reserved ur inner join organization_role r using(role_id)
+where r.organization_id = ?
+`
+
+func (c *Client) ListOrganizationUserReserved(ctx context.Context, organizationID uint32, userIDPKey string) ([]*model.OrganizationUserReserved, error) {
+	query := listOrganizationUserReserved
+	params := []interface{}{organizationID}
+	if userIDPKey != "" {
+		query += " and ur.user_idp_key = ?"
+		params = append(params, userIDPKey)
+	}
+	var data []*model.OrganizationUserReserved
+	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+// For ListUserReservedWithOrganizationID
+type UserReservedWithOrganizationID struct {
+	OrganizationID uint32
+	ReservedID     uint32
+	RoleID         uint32
+}
+
+const listUserReservedWithOrganizationID = `
+select ur.reserved_id,ur.role_id,r.organization_id 
+from organization_user_reserved ur inner join organization_role r using(role_id)
+where  ur.user_idp_key = ?
+`
+
+func (c *Client) ListOrganizationUserReservedWithOrganizationID(ctx context.Context, userIdpKey string) (*[]UserReservedWithOrganizationID, error) {
+	var data []UserReservedWithOrganizationID
+	if err := c.Slave.WithContext(ctx).Raw(listUserReservedWithOrganizationID, userIdpKey).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const putOrganizationUserReserved = `
+	INSERT INTO organization_user_reserved (
+		reserved_id,
+		user_idp_key,
+		role_id
+	) VALUES (
+		?,
+		?,
+		?
+	) ON DUPLICATE KEY UPDATE
+		user_idp_key = VALUES(user_idp_key),
+		role_id = VALUES(role_id)
+`
+
+const getOrganizationUserReserved = `
+	SELECT ur.*
+	FROM organization_user_reserved ur 
+	INNER JOIN organization_role r USING(role_id)
+	WHERE ur.reserved_id = ?
+`
+
+func (c *Client) PutOrganizationUserReserved(ctx context.Context, data *model.OrganizationUserReserved) (*model.OrganizationUserReserved, error) {
+	if err := c.Master.WithContext(ctx).Exec(putOrganizationUserReserved, data.ReservedID, data.UserIdpKey, data.RoleID).Error; err != nil {
+		return nil, err
+	}
+	var ret model.OrganizationUserReserved
+	if err := c.Master.WithContext(ctx).Raw(getOrganizationUserReserved, data.ReservedID).First(&ret).Error; err != nil {
+		return nil, err
+	}
+	return &ret, nil
+}
+
+const deleteOrganizationUserReserved = `
+delete from organization_user_reserved
+where exists (select * from organization_role r where role_id = r.role_id and r.organization_id = ?)
+	and reserved_id = ?
+`
+
+func (c *Client) DeleteOrganizationUserReserved(ctx context.Context, organizationID, reservedID uint32) error {
+	if err := c.Master.WithContext(ctx).Exec(deleteOrganizationUserReserved, organizationID, reservedID).Error; err != nil {
+		return err
+	}
+	return nil
 }
