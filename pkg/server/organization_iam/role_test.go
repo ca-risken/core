@@ -2,14 +2,17 @@ package organization_iam
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/organization_iam"
+	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 )
 
@@ -363,6 +366,77 @@ func TestDetachOrganizationRole(t *testing.T) {
 			_, err := svc.DetachOrganizationRole(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v, wantErr: %+v", err, c.wantErr)
+			}
+		})
+	}
+}
+
+func TestAttachOrganizationRoleByOrganizationUserReserved(t *testing.T) {
+	testUserIdpKey := "uik"
+	userID := uint32(100)
+
+	cases := []struct {
+		name               string
+		mockListResp       *[]db.UserReservedWithOrganizationID
+		mockListErr        error
+		mockAttachErrIndex int // -1なら全て成功
+		wantErr            bool
+	}{
+		{
+			name: "OK",
+			mockListResp: &[]db.UserReservedWithOrganizationID{
+				{OrganizationID: 1, ReservedID: 1, RoleID: 10},
+				{OrganizationID: 2, ReservedID: 2, RoleID: 20},
+			},
+			mockListErr:        nil,
+			mockAttachErrIndex: -1,
+			wantErr:            false,
+		},
+		{
+			name:         "ListOrganizationUserReservedWithOrganizationID error",
+			mockListResp: nil,
+			mockListErr:  errors.New("list error"),
+			wantErr:      true,
+		},
+		{
+			name: "AttachOrganizationRole error",
+			mockListResp: &[]db.UserReservedWithOrganizationID{
+				{OrganizationID: 1, ReservedID: 1, RoleID: 10},
+				{OrganizationID: 2, ReservedID: 2, RoleID: 20},
+			},
+			mockListErr:        nil,
+			mockAttachErrIndex: 1,
+			wantErr:            true,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			repoMock := mocks.NewOrganizationIAMRepository(t)
+			svc := OrganizationIAMService{repository: repoMock}
+
+			repoMock.On("ListOrganizationUserReservedWithOrganizationID", mock.Anything, testUserIdpKey).Return(c.mockListResp, c.mockListErr).Once()
+
+			if c.mockListErr == nil && c.mockListResp != nil {
+				for i, u := range *c.mockListResp {
+					if c.mockAttachErrIndex == i {
+						repoMock.On("AttachOrganizationRole", mock.Anything, u.OrganizationID, u.RoleID, userID).Return(nil, gorm.ErrInvalidDB).Once()
+					} else {
+						repoMock.On("AttachOrganizationRole", mock.Anything, u.OrganizationID, u.RoleID, userID).Return(&model.OrganizationRole{}, nil).Once()
+					}
+				}
+			}
+
+			req := &organization_iam.AttachOrganizationRoleByOrganizationUserReservedRequest{
+				UserId:     userID,
+				UserIdpKey: testUserIdpKey,
+			}
+			_, err := svc.AttachOrganizationRoleByOrganizationUserReserved(context.Background(), req)
+			if c.wantErr && err == nil {
+				t.Fatalf("want error but got nil")
+			}
+			if !c.wantErr && err != nil {
+				t.Fatalf("unexpected error: %v", err)
 			}
 		})
 	}

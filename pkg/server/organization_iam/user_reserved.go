@@ -64,20 +64,6 @@ func (i *OrganizationIAMService) DeleteOrganizationUserReserved(ctx context.Cont
 	return &emptypb.Empty{}, nil
 }
 
-func (i *OrganizationIAMService) AttachOrganizationRoleByOrganizationUserReserved(ctx context.Context, userID uint32, userIdpKey string) error {
-	userReserved, err := i.repository.ListOrganizationUserReservedWithOrganizationID(ctx, userIdpKey)
-	if err != nil {
-		return err
-	}
-	for _, u := range *userReserved {
-		_, err := i.repository.AttachOrganizationRole(ctx, u.OrganizationID, u.RoleID, userID)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func convertOrganizationUserReserved(u *model.OrganizationUserReserved) *organization_iam.OrganizationUserReserved {
 	return &organization_iam.OrganizationUserReserved{
 		ReservedId: u.ReservedID,

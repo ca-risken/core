@@ -23,6 +23,9 @@ service OrganizationIAMService {
       returns (AttachOrganizationRoleResponse);
   rpc DetachOrganizationRole(DetachOrganizationRoleRequest)
       returns (google.protobuf.Empty);
+  rpc AttachOrganizationRoleByOrganizationUserReserved(
+      AttachOrganizationRoleByOrganizationUserReservedRequest)
+      returns (AttachOrganizationRoleByOrganizationUserReservedResponse);
 
   // Policy
   rpc ListOrganizationPolicy(ListOrganizationPolicyRequest)
