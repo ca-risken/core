@@ -174,56 +174,56 @@ func TestPutFinding(t *testing.T) {
 		mockUpResp  *model.Finding
 		mockUpErr   error
 
-		callGetFindingSettingByResource bool
-		callGetResourceByName           bool
-		callUpsertResource              bool
+		callListFindingSetting bool
+		callGetResourceByName  bool
+		callUpsertResource     bool
 	}{
 		{
-			name:                            "OK Insert",
-			input:                           &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
-			want:                            &finding.PutFindingResponse{Finding: &finding.Finding{FindingId: 1001, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, Score: 1.0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockGetErr:                      gorm.ErrRecordNotFound,
-			mockUpResp:                      &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 100.00, Score: 1.0, CreatedAt: now, UpdatedAt: now},
-			callGetFindingSettingByResource: true,
-			callGetResourceByName:           true,
-			callUpsertResource:              true,
+			name:                   "OK Insert",
+			input:                  &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
+			want:                   &finding.PutFindingResponse{Finding: &finding.Finding{FindingId: 1001, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, Score: 1.0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetErr:             gorm.ErrRecordNotFound,
+			mockUpResp:             &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 100.00, Score: 1.0, CreatedAt: now, UpdatedAt: now},
+			callListFindingSetting: true,
+			callGetResourceByName:  true,
+			callUpsertResource:     true,
 		},
 		{
-			name:                            "OK Update",
-			input:                           &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 20.00, OriginalMaxScore: 100.00}},
-			want:                            &finding.PutFindingResponse{Finding: &finding.Finding{FindingId: 1001, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 20.00, Score: 0.2, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockGetResp:                     &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 10.00, Score: 0.1, CreatedAt: now, UpdatedAt: now},
-			mockUpResp:                      &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 20.00, Score: 0.2, CreatedAt: now, UpdatedAt: now},
-			callGetFindingSettingByResource: true,
-			callGetResourceByName:           true,
-			callUpsertResource:              true,
+			name:                   "OK Update",
+			input:                  &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 20.00, OriginalMaxScore: 100.00}},
+			want:                   &finding.PutFindingResponse{Finding: &finding.Finding{FindingId: 1001, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 20.00, Score: 0.2, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp:            &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 10.00, Score: 0.1, CreatedAt: now, UpdatedAt: now},
+			mockUpResp:             &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 20.00, Score: 0.2, CreatedAt: now, UpdatedAt: now},
+			callListFindingSetting: true,
+			callGetResourceByName:  true,
+			callUpsertResource:     true,
 		},
 		{
-			name:                            "NG Invalid request(no data_source)",
-			input:                           &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
-			wantErr:                         true,
-			callGetFindingSettingByResource: false,
-			callGetResourceByName:           false,
-			callUpsertResource:              false,
+			name:                   "NG Invalid request(no data_source)",
+			input:                  &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
+			wantErr:                true,
+			callListFindingSetting: false,
+			callGetResourceByName:  false,
+			callUpsertResource:     false,
 		},
 		{
-			name:                            "NG GetFindingByDataSource error",
-			input:                           &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
-			wantErr:                         true,
-			mockGetErr:                      gorm.ErrInvalidDB,
-			callGetFindingSettingByResource: false,
-			callGetResourceByName:           false,
-			callUpsertResource:              false,
+			name:                   "NG GetFindingByDataSource error",
+			input:                  &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
+			wantErr:                true,
+			mockGetErr:             gorm.ErrInvalidDB,
+			callListFindingSetting: false,
+			callGetResourceByName:  false,
+			callUpsertResource:     false,
 		},
 		{
-			name:                            "NG UpsertFinding error",
-			input:                           &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
-			wantErr:                         true,
-			mockGetResp:                     &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 10.00, Score: 0.1, CreatedAt: now, UpdatedAt: now},
-			mockUpErr:                       gorm.ErrInvalidDB,
-			callGetFindingSettingByResource: true,
-			callGetResourceByName:           false,
-			callUpsertResource:              false,
+			name:                   "NG UpsertFinding error",
+			input:                  &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
+			wantErr:                true,
+			mockGetResp:            &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 10.00, Score: 0.1, CreatedAt: now, UpdatedAt: now},
+			mockUpErr:              gorm.ErrInvalidDB,
+			callListFindingSetting: true,
+			callGetResourceByName:  false,
+			callUpsertResource:     false,
 		},
 	}
 	for _, c := range cases {
@@ -237,8 +237,8 @@ func TestPutFinding(t *testing.T) {
 			if c.mockUpResp != nil || c.mockUpErr != nil {
 				mockDB.On("UpsertFinding", test.RepeatMockAnything(2)...).Return(c.mockUpResp, c.mockUpErr).Once()
 			}
-			if c.callGetFindingSettingByResource {
-				mockDB.On("GetFindingSettingByResource", test.RepeatMockAnything(3)...).Return(&model.FindingSetting{}, nil) // fixed response
+			if c.callListFindingSetting {
+				mockDB.On("ListFindingSetting", test.RepeatMockAnything(3)...).Return(&[]model.FindingSetting{{ResourceName: "rn", Setting: `{"score_coefficient": 0.1}`}}, nil) // fixed response
 			}
 			if c.callGetResourceByName {
 				mockDB.On("GetResourceByName", test.RepeatMockAnything(3)...).Return(&model.Resource{}, nil) // fixed response
