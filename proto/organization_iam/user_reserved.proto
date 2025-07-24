@@ -16,7 +16,7 @@ message ListOrganizationUserReservedResponse {
 }
 
 message PutOrganizationUserReservedRequest {
-  uint32 organization_id = 1;
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
   uint32 reserved_id = 2;
   string user_idp_key = 3 [ (validate.rules).string = {max_len : 255} ];
   uint32 role_id = 4 [ (validate.rules).uint32.gt = 0 ]; // Required

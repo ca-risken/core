@@ -451,9 +451,9 @@ func (c *Client) PutOrganizationUserReserved(ctx context.Context, data *model.Or
 }
 
 const deleteOrganizationUserReserved = `
-delete from organization_user_reserved
-where exists (select * from organization_role r where role_id = r.role_id and r.organization_id = ?)
-	and reserved_id = ?
+delete from organization_user_reserved ur
+where exists (select * from organization_role r where ur.role_id = r.role_id and r.organization_id = ?)
+	and ur.reserved_id = ?
 `
 
 func (c *Client) DeleteOrganizationUserReserved(ctx context.Context, organizationID, reservedID uint32) error {
