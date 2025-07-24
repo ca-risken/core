@@ -436,8 +436,7 @@ const putOrganizationUserReserved = `
 const getOrganizationUserReserved = `
 	SELECT ur.*
 	FROM organization_user_reserved ur 
-	INNER JOIN organization_role r USING(role_id)
-	WHERE ur.reserved_id = ?
+	WHERE ur.role_id = ? and ur.user_idp_key = ?
 `
 
 func (c *Client) PutOrganizationUserReserved(ctx context.Context, data *model.OrganizationUserReserved) (*model.OrganizationUserReserved, error) {
@@ -445,7 +444,7 @@ func (c *Client) PutOrganizationUserReserved(ctx context.Context, data *model.Or
 		return nil, err
 	}
 	var ret model.OrganizationUserReserved
-	if err := c.Master.WithContext(ctx).Raw(getOrganizationUserReserved, data.ReservedID).First(&ret).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Raw(getOrganizationUserReserved, data.RoleID, data.UserIdpKey).First(&ret).Error; err != nil {
 		return nil, err
 	}
 	return &ret, nil

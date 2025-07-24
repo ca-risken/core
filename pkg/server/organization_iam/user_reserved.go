@@ -35,7 +35,7 @@ func (i *OrganizationIAMService) PutOrganizationUserReserved(ctx context.Context
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
-	if user != nil && user.User.UserId != 0 {
+	if user.User != nil && user.User.UserId != 0 {
 		return nil, errors.New("user already exists")
 	}
 	_, err = i.repository.GetOrganizationRole(ctx, req.OrganizationId, req.RoleId)
