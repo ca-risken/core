@@ -40,7 +40,7 @@ func (i *OrganizationIAMService) PutOrganizationUserReserved(ctx context.Context
 	}
 	_, err = i.repository.GetOrganizationRole(ctx, req.OrganizationId, req.RoleId)
 	if err != nil {
-		return nil, fmt.Errorf("role dose not exist in the organization, roleID: %v, organizationID: %v", req.RoleId, req.OrganizationId)
+		return nil, fmt.Errorf("role does not exist in the organization, roleID: %v, organizationID: %v", req.RoleId, req.OrganizationId)
 	}
 	putData := &model.OrganizationUserReserved{
 		ReservedID: req.ReservedId,
