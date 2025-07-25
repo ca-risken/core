@@ -1038,3 +1038,183 @@ func TestDetachOrganizationPolicy(t *testing.T) {
 		})
 	}
 }
+
+func TestListOrganizationUserReserved(t *testing.T) {
+	now := time.Now()
+	type args struct {
+		organizationID uint32
+		userIdpKey     string
+	}
+	cases := []struct {
+		name        string
+		args        args
+		want        []*model.OrganizationUserReserved
+		wantErr     bool
+		mockClosure func(mock sqlmock.Sqlmock)
+	}{
+		{
+			name: "OK - no filter",
+			args: args{organizationID: 1, userIdpKey: ""},
+			want: []*model.OrganizationUserReserved{
+				{ReservedID: 1, UserIdpKey: "key1", RoleID: 10, CreatedAt: now, UpdatedAt: now},
+				{ReservedID: 2, UserIdpKey: "key2", RoleID: 11, CreatedAt: now, UpdatedAt: now},
+			},
+			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(listOrganizationUserReserved)).WillReturnRows(sqlmock.NewRows([]string{
+					"reserved_id", "user_idp_key", "role_id", "created_at", "updated_at"}).
+					AddRow(uint32(1), "key1", uint32(10), now, now).
+					AddRow(uint32(2), "key2", uint32(11), now, now))
+			},
+		},
+		{
+			name: "OK - with userIDPKey",
+			args: args{organizationID: 1, userIdpKey: "key1"},
+			want: []*model.OrganizationUserReserved{
+				{ReservedID: 1, UserIdpKey: "key1", RoleID: 10, CreatedAt: now, UpdatedAt: now},
+			},
+			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(listOrganizationUserReserved + " and ur.user_idp_key = ?")).WillReturnRows(sqlmock.NewRows([]string{
+					"reserved_id", "user_idp_key", "role_id", "created_at", "updated_at"}).
+					AddRow(uint32(1), "key1", uint32(10), now, now))
+			},
+		},
+		{
+			name:    "NG DB error",
+			args:    args{organizationID: 1, userIdpKey: "key1"},
+			want:    nil,
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(listOrganizationUserReserved + " and ur.user_idp_key = ?")).WillReturnError(errors.New("DB error"))
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			db, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+			}
+			c.mockClosure(mock)
+			got, err := db.ListOrganizationUserReserved(ctx, c.args.organizationID, c.args.userIdpKey)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestPutOrganizationUserReserved(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name        string
+		input       *model.OrganizationUserReserved
+		want        *model.OrganizationUserReserved
+		wantErr     bool
+		mockClosure func(mock sqlmock.Sqlmock)
+	}{
+		{
+			name:    "OK",
+			input:   &model.OrganizationUserReserved{ReservedID: 1, UserIdpKey: "key1", RoleID: 10, CreatedAt: now, UpdatedAt: now},
+			want:    &model.OrganizationUserReserved{ReservedID: 1, UserIdpKey: "key1", RoleID: 10, CreatedAt: now, UpdatedAt: now},
+			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(regexp.QuoteMeta(putOrganizationUserReserved)).WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationUserReserved)).WillReturnRows(sqlmock.NewRows([]string{"reserved_id", "user_idp_key", "role_id", "created_at", "updated_at"}).AddRow(uint32(1), "key1", uint32(10), now, now))
+			},
+		},
+		{
+			name:    "NG failed to put organization user reserved",
+			input:   &model.OrganizationUserReserved{ReservedID: 1, UserIdpKey: "key1", RoleID: 10, CreatedAt: now, UpdatedAt: now},
+			want:    nil,
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(regexp.QuoteMeta(putOrganizationUserReserved)).WillReturnError(errors.New("DB error"))
+			},
+		},
+		{
+			name:    "NG failed to get organization user reserved",
+			input:   &model.OrganizationUserReserved{ReservedID: 1, UserIdpKey: "key1", RoleID: 10, CreatedAt: now, UpdatedAt: now},
+			want:    nil,
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(regexp.QuoteMeta(putOrganizationUserReserved)).WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectQuery(regexp.QuoteMeta(getOrganizationUserReserved)).WillReturnError(errors.New("DB error"))
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			db, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+			}
+			c.mockClosure(mock)
+			got, err := db.PutOrganizationUserReserved(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestDeleteOrganizationUserReserved(t *testing.T) {
+	cases := []struct {
+		name           string
+		organizationID uint32
+		reservedID     uint32
+		wantErr        bool
+		mockClosure    func(mock sqlmock.Sqlmock)
+	}{
+		{
+			name:           "OK",
+			organizationID: 1,
+			reservedID:     1,
+			wantErr:        false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(regexp.QuoteMeta(deleteOrganizationUserReserved)).WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+		},
+		{
+			name:           "NG DB error",
+			organizationID: 1,
+			reservedID:     1,
+			wantErr:        true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(regexp.QuoteMeta(deleteOrganizationUserReserved)).WillReturnError(errors.New("DB error"))
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			db, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+			}
+			c.mockClosure(mock)
+			err = db.DeleteOrganizationUserReserved(ctx, c.organizationID, c.reservedID)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
