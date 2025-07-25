@@ -386,7 +386,7 @@ where r.organization_id = ?
 
 func (c *Client) ListOrganizationUserReserved(ctx context.Context, organizationID uint32, userIDPKey string) ([]*model.OrganizationUserReserved, error) {
 	query := listOrganizationUserReserved
-	params := []interface{}{organizationID}
+	params := []any{organizationID}
 	if userIDPKey != "" {
 		query += " and ur.user_idp_key = ?"
 		params = append(params, userIDPKey)
