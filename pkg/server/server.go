@@ -101,6 +101,10 @@ func (s *Server) Run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	rc, err := s.newReportClient(clientAddr)
+	if err != nil {
+		return err
+	}
 	isvc := iamserver.NewIAMService(s.db, fc, oc, oimac, s.logger)
 	asvc := alertserver.NewAlertService(
 		s.config.MaxAnalyzeAPICall,
@@ -117,7 +121,7 @@ func (s *Server) Run(ctx context.Context) error {
 	fsvc := findingserver.NewFindingService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, s.config.excludeDeleteDataSource, s.logger)
 	psvc := projectserver.NewProjectService(s.db, iamc, oc, s.logger)
 	rsvc := reportserver.NewReportService(s.db, s.logger)
-	aisvc := aiserver.NewAIService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, s.logger)
+	aisvc := aiserver.NewAIService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, rc, s.logger)
 	osvc := organizationserver.NewOrganizationService(s.db, oimac, s.logger)
 	hsvc := health.NewServer()
 
@@ -209,6 +213,15 @@ func (s *Server) newOrganizationClient(svcAddr string) (organization.Organizatio
 		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
 	}
 	return organization.NewOrganizationServiceClient(conn), nil
+}
+
+func (s *Server) newReportClient(svcAddr string) (report.ReportServiceClient, error) {
+	ctx := context.Background()
+	conn, err := getGRPCConn(ctx, svcAddr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
+	}
+	return report.NewReportServiceClient(conn), nil
 }
 
 func getGRPCConn(ctx context.Context, addr string) (*grpc.ClientConn, error) {

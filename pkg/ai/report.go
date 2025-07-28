@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ca-risken/core/proto/ai"
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/responses"
 )
 
-func (a *AIClient) GenerateReport(ctx context.Context, req *ai.GenerateReportRequest) (*ai.GenerateReportResponse, error) {
-	instruction := generatePrompt(req.ProjectId)
+func (a *AIClient) GenerateReport(ctx context.Context, projectID uint32, prompt string) (string, error) {
+	instruction := generatePrompt(projectID)
 	tools := DefaultTools
 	tools = append(tools, GetFindingDataTool())
 
@@ -20,16 +19,16 @@ func (a *AIClient) GenerateReport(ctx context.Context, req *ai.GenerateReportReq
 				OfMessage: &responses.EasyInputMessageParam{
 					Role: responses.EasyInputMessageRoleUser,
 					Content: responses.EasyInputMessageContentUnionParam{
-						OfString: openai.String(req.Prompt),
+						OfString: openai.String(prompt),
 					},
 				},
 			},
 		},
 	}, tools)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return &ai.GenerateReportResponse{Report: resp.OutputText()}, nil
+	return resp.OutputText(), nil
 }
 
 const (

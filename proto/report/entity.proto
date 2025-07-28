@@ -3,7 +3,7 @@ syntax = "proto3";
 package core.report;
 option go_package = "github.com/ca-risken/core/proto/report";
 
-// Report
+// Report Finding
 message ReportFinding {
   uint32 report_finding_id = 1;
   string report_date = 2;
@@ -13,4 +13,16 @@ message ReportFinding {
   string data_source = 6;
   float score = 7;
   uint32 count = 8;
+}
+
+// Report
+message Report {
+  uint32 report_id = 1;
+  uint32 project_id = 2;
+  string name = 3;
+  string type = 4;
+  string status = 5;
+  string content = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
 }

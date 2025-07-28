@@ -46,6 +46,36 @@ func (_m *ReportServiceServer) CollectReportFinding(_a0 context.Context, _a1 *em
 	return r0, r1
 }
 
+// GetReport provides a mock function with given fields: _a0, _a1
+func (_m *ReportServiceServer) GetReport(_a0 context.Context, _a1 *report.GetReportRequest) (*report.GetReportResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetReport")
+	}
+
+	var r0 *report.GetReportResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *report.GetReportRequest) (*report.GetReportResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *report.GetReportRequest) *report.GetReportResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*report.GetReportResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *report.GetReportRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetReportFinding provides a mock function with given fields: _a0, _a1
 func (_m *ReportServiceServer) GetReportFinding(_a0 context.Context, _a1 *report.GetReportFindingRequest) (*report.GetReportFindingResponse, error) {
 	ret := _m.Called(_a0, _a1)
@@ -106,6 +136,36 @@ func (_m *ReportServiceServer) GetReportFindingAll(_a0 context.Context, _a1 *rep
 	return r0, r1
 }
 
+// ListReport provides a mock function with given fields: _a0, _a1
+func (_m *ReportServiceServer) ListReport(_a0 context.Context, _a1 *report.ListReportRequest) (*report.ListReportResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListReport")
+	}
+
+	var r0 *report.ListReportResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *report.ListReportRequest) (*report.ListReportResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *report.ListReportRequest) *report.ListReportResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*report.ListReportResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *report.ListReportRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PurgeReportFinding provides a mock function with given fields: _a0, _a1
 func (_m *ReportServiceServer) PurgeReportFinding(_a0 context.Context, _a1 *emptypb.Empty) (*emptypb.Empty, error) {
 	ret := _m.Called(_a0, _a1)
@@ -128,6 +188,36 @@ func (_m *ReportServiceServer) PurgeReportFinding(_a0 context.Context, _a1 *empt
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *emptypb.Empty) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PutReport provides a mock function with given fields: _a0, _a1
+func (_m *ReportServiceServer) PutReport(_a0 context.Context, _a1 *report.PutReportRequest) (*report.PutReportResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PutReport")
+	}
+
+	var r0 *report.PutReportResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *report.PutReportRequest) (*report.PutReportResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *report.PutReportRequest) *report.PutReportResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*report.PutReportResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *report.PutReportRequest) error); ok {
 		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)

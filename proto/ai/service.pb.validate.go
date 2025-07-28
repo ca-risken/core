@@ -326,6 +326,17 @@ func (m *GenerateReportRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	if utf8.RuneCountInString(m.GetName()) < 1 {
+		err := GenerateReportRequestValidationError{
+			field:  "Name",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
 	if len(errors) > 0 {
 		return GenerateReportRequestMultiError(errors)
 	}
@@ -428,7 +439,9 @@ func (m *GenerateReportResponse) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Report
+	// no validation rules for ReportId
+
+	// no validation rules for Status
 
 	if len(errors) > 0 {
 		return GenerateReportResponseMultiError(errors)

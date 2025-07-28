@@ -16,6 +16,9 @@ service ReportService {
   rpc CollectReportFinding(google.protobuf.Empty)
       returns (google.protobuf.Empty);
   rpc PurgeReportFinding(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc GetReport(GetReportRequest) returns (GetReportResponse);
+  rpc ListReport(ListReportRequest) returns (ListReportResponse);
+  rpc PutReport(PutReportRequest) returns (PutReportResponse);
 }
 
 message GetReportFindingRequest {
@@ -43,3 +46,29 @@ message GetReportFindingAllRequest {
 message GetReportFindingAllResponse {
   repeated ReportFinding report_finding = 1;
 }
+
+message GetReportRequest {
+  uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ]; // required
+  uint32 report_id = 2 [ (validate.rules).uint32.gt = 0 ];  // required
+}
+
+message GetReportResponse { Report report = 1; }
+
+message ListReportRequest {
+  uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ];
+} // required
+
+message ListReportResponse { repeated Report report = 1; }
+
+message PutReportRequest {
+  uint32 report_id = 1;
+  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
+  string name = 3
+      [ (validate.rules).string = {min_len : 0, max_len : 200} ]; // required
+  string type = 4 [ (validate.rules).string = {in : [ "Markdown", "HTML" ]} ];
+  string status = 5
+      [ (validate.rules).string = {in : [ "OK", "IN_PROGRESS", "ERROR" ]} ];
+  string content = 6;
+}
+
+message PutReportResponse { Report report = 1; }

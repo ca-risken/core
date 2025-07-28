@@ -14,3 +14,15 @@ type ReportFinding struct {
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 }
+
+// Report entity model
+type Report struct {
+	ReportID  uint32 `gorm:"primary_key"`
+	ProjectID uint32
+	Name      string
+	Type      string
+	Status    string
+	Content   string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}

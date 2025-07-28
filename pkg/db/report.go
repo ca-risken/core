@@ -13,6 +13,9 @@ type ReportRepository interface {
 	GetReportFindingAll(context.Context, []string, string, string, float32) (*[]model.ReportFinding, error)
 	CollectReportFinding(ctx context.Context) error
 	PurgeReportFinding(ctx context.Context) error
+	ListReport(ctx context.Context, projectID uint32) (*[]model.Report, error)
+	GetReport(ctx context.Context, projectID uint32, reportID uint32) (*model.Report, error)
+	PutReport(ctx context.Context, report *model.Report) (*model.Report, error)
 }
 
 var _ ReportRepository = (*Client)(nil)
@@ -83,4 +86,61 @@ func (c *Client) PurgeReportFinding(ctx context.Context) error {
 		return err
 	}
 	return nil
+}
+
+const selectListReport = `select * from report where project_id = ?`
+
+func (c *Client) ListReport(ctx context.Context, projectID uint32) (*[]model.Report, error) {
+	var data []model.Report
+	if err := c.Slave.WithContext(ctx).Raw(selectListReport, projectID).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const selectGetReport = `select * from report where project_id = ? and report_id = ?`
+
+func (c *Client) GetReport(ctx context.Context, projectID uint32, reportID uint32) (*model.Report, error) {
+	var data model.Report
+	if err := c.Slave.WithContext(ctx).Raw(selectGetReport, projectID, reportID).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const insertPutReport = `
+INSERT INTO report
+  (report_id, project_id, name, type, status, content)
+VALUES
+  (?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+  name=VALUES(name),
+  type=VALUES(type),
+  status=VALUES(status),
+  content=VALUES(content)
+`
+
+func (c *Client) PutReport(ctx context.Context, report *model.Report) (*model.Report, error) {
+	if err := c.Master.WithContext(ctx).Exec(insertPutReport,
+		report.ReportID,
+		report.ProjectID,
+		report.Name,
+		report.Type,
+		report.Status,
+		report.Content,
+	).Error; err != nil {
+		return nil, err
+	}
+	return c.getReportByName(ctx, report.ProjectID, report.Name) // if insert, return new report(new report_id)
+}
+
+// selectGetReportByName: Unique Key(project_id, name)
+const selectGetReportByName = `select * from report where project_id = ? and name = ?`
+
+func (c *Client) getReportByName(ctx context.Context, projectID uint32, name string) (*model.Report, error) {
+	var data model.Report
+	if err := c.Master.WithContext(ctx).Raw(selectGetReportByName, projectID, name).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
 }
