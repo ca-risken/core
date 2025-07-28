@@ -115,18 +115,24 @@ type findingSetting struct {
 }
 
 func (f *FindingService) getFindingSettingByResource(ctx context.Context, projectID uint32, resourceName string) (*findingSetting, error) {
-	fs, err := f.repository.GetFindingSettingByResource(ctx, projectID, resourceName)
+	settings, err := f.repository.ListFindingSetting(ctx, &finding.ListFindingSettingRequest{
+		ProjectId: projectID,
+		Status:    finding.FindingSettingStatus_SETTING_ACTIVE,
+	})
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return &findingSetting{}, nil
 	} else if err != nil {
 		return nil, err
 	}
-	if fs.Status != "ACTIVE" {
-		return &findingSetting{}, nil
+
+	for _, s := range *settings {
+		if strings.HasPrefix(resourceName, s.ResourceName) {
+			var data findingSetting
+			if err := json.Unmarshal([]byte(s.Setting), &data); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal finding setting JSON, projectID=%d, resourceName=%s, err=%w", projectID, resourceName, err)
+			}
+			return &data, nil
+		}
 	}
-	var setting findingSetting
-	if err := json.Unmarshal([]byte(fs.Setting), &setting); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal finding setting JSON, projectID=%d, resourceName=%s, err=%w", projectID, resourceName, err)
-	}
-	return &setting, nil
+	return &findingSetting{}, nil
 }

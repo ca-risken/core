@@ -19,9 +19,9 @@ func TestPutFindingBatch(t *testing.T) {
 		GetFindingByDataSourceResp *model.Finding
 		GetFindingByDataSourceErr  error
 
-		GetFindingSettingByResourceCall bool
-		GetFindingSettingByResourceResp *model.FindingSetting
-		GetFindingSettingByResourceErr  error
+		GetListFindingSettingCall bool
+		GetListFindingSettingResp *[]model.FindingSetting
+		GetListFindingSettingErr  error
 
 		GetResourceByNameCall bool
 		GetResourceByNameResp *model.Resource
@@ -76,8 +76,8 @@ func TestPutFindingBatch(t *testing.T) {
 			mock: &mockResp{
 				GetFindingByDataSourceCall:       true,
 				GetFindingByDataSourceResp:       &model.Finding{FindingID: 1},
-				GetFindingSettingByResourceCall:  true,
-				GetFindingSettingByResourceResp:  &model.FindingSetting{},
+				GetListFindingSettingCall:        true,
+				GetListFindingSettingResp:        &[]model.FindingSetting{},
 				GetResourceByNameCall:            true,
 				GetResourceByNameResp:            &model.Resource{ResourceID: 1},
 				GetRecommendByDataSourceTypeCall: true,
@@ -106,12 +106,12 @@ func TestPutFindingBatch(t *testing.T) {
 			}},
 			wantErr: false,
 			mock: &mockResp{
-				GetFindingByDataSourceCall:      true,
-				GetFindingByDataSourceResp:      &model.Finding{FindingID: 1},
-				GetFindingSettingByResourceCall: true,
-				GetFindingSettingByResourceResp: &model.FindingSetting{},
-				GetResourceByNameCall:           true,
-				GetResourceByNameResp:           &model.Resource{ResourceID: 1},
+				GetFindingByDataSourceCall: true,
+				GetFindingByDataSourceResp: &model.Finding{FindingID: 1},
+				GetListFindingSettingCall:  true,
+				GetListFindingSettingResp:  &[]model.FindingSetting{},
+				GetResourceByNameCall:      true,
+				GetResourceByNameResp:      &model.Resource{ResourceID: 1},
 
 				BulkUpsertFindingCall:          true,
 				BulkUpsertResourceCall:         true,
@@ -158,8 +158,8 @@ func TestPutFindingBatch(t *testing.T) {
 			if c.mock.GetFindingByDataSourceCall {
 				mockDB.On("GetFindingByDataSource", test.RepeatMockAnything(4)...).Return(c.mock.GetFindingByDataSourceResp, c.mock.GetFindingByDataSourceErr).Once()
 			}
-			if c.mock.GetFindingSettingByResourceCall {
-				mockDB.On("GetFindingSettingByResource", test.RepeatMockAnything(3)...).Return(c.mock.GetFindingSettingByResourceResp, c.mock.GetFindingSettingByResourceErr).Once()
+			if c.mock.GetListFindingSettingCall {
+				mockDB.On("ListFindingSetting", test.RepeatMockAnything(3)...).Return(c.mock.GetListFindingSettingResp, c.mock.GetListFindingSettingErr).Once()
 			}
 			if c.mock.GetResourceByNameCall {
 				mockDB.On("GetResourceByName", test.RepeatMockAnything(3)...).Return(c.mock.GetResourceByNameResp, c.mock.GetResourceByNameErr).Once()
