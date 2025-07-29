@@ -71,7 +71,6 @@ type FindingRepository interface {
 	// FindingSetting
 	ListFindingSetting(ctx context.Context, req *finding.ListFindingSettingRequest) (*[]model.FindingSetting, error)
 	GetFindingSetting(ctx context.Context, projectID uint32, findingSettingID uint32) (*model.FindingSetting, error)
-	GetFindingSettingByResource(ctx context.Context, projectID uint32, resourceName string) (*model.FindingSetting, error)
 	UpsertFindingSetting(ctx context.Context, data *model.FindingSetting) (*model.FindingSetting, error)
 	DeleteFindingSetting(ctx context.Context, projectID uint32, findingSettingID uint32) error
 
@@ -518,6 +517,7 @@ func (c *Client) ListFindingSetting(ctx context.Context, req *finding.ListFindin
 		query += " and status=?"
 		param = append(param, getStatusString(req.Status))
 	}
+	query += " order by finding_setting_id"
 	var data []model.FindingSetting
 	if err := c.Slave.WithContext(ctx).Raw(query, param...).Scan(&data).Error; err != nil {
 		return nil, err
@@ -541,16 +541,6 @@ const selectGetFindingSetting = `select * from finding_setting where project_id=
 func (c *Client) GetFindingSetting(ctx context.Context, projectID uint32, findingSettingID uint32) (*model.FindingSetting, error) {
 	var data model.FindingSetting
 	if err := c.Slave.WithContext(ctx).Raw(selectGetFindingSetting, projectID, findingSettingID).First(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
-const selectGetFindingSettingByResource = `select * from finding_setting where project_id=? and resource_name=?`
-
-func (c *Client) GetFindingSettingByResource(ctx context.Context, projectID uint32, resourceName string) (*model.FindingSetting, error) {
-	var data model.FindingSetting
-	if err := c.Master.WithContext(ctx).Raw(selectGetFindingSettingByResource, projectID, resourceName).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

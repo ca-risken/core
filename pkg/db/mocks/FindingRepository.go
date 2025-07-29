@@ -438,36 +438,6 @@ func (_m *FindingRepository) GetFindingSetting(ctx context.Context, projectID ui
 	return r0, r1
 }
 
-// GetFindingSettingByResource provides a mock function with given fields: ctx, projectID, resourceName
-func (_m *FindingRepository) GetFindingSettingByResource(ctx context.Context, projectID uint32, resourceName string) (*model.FindingSetting, error) {
-	ret := _m.Called(ctx, projectID, resourceName)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetFindingSettingByResource")
-	}
-
-	var r0 *model.FindingSetting
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) (*model.FindingSetting, error)); ok {
-		return rf(ctx, projectID, resourceName)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) *model.FindingSetting); ok {
-		r0 = rf(ctx, projectID, resourceName)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.FindingSetting)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, string) error); ok {
-		r1 = rf(ctx, projectID, resourceName)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetFindingTagByKey provides a mock function with given fields: _a0, _a1, _a2, _a3
 func (_m *FindingRepository) GetFindingTagByKey(_a0 context.Context, _a1 uint32, _a2 uint64, _a3 string) (*model.FindingTag, error) {
 	ret := _m.Called(_a0, _a1, _a2, _a3)
