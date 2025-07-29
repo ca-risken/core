@@ -324,7 +324,16 @@ func (m *PutOrganizationUserReservedRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for OrganizationId
+	if m.GetOrganizationId() <= 0 {
+		err := PutOrganizationUserReservedRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	// no validation rules for ReservedId
 
