@@ -120,6 +120,9 @@ func (i *OrganizationIAMService) AttachOrganizationRoleByOrganizationUserReserve
 		if err != nil {
 			return nil, err
 		}
+		if err := i.repository.DeleteOrganizationUserReserved(ctx, u.OrganizationID, u.ReservedID); err != nil {
+			return nil, err
+		}
 	}
 	return &organization_iam.AttachOrganizationRoleByOrganizationUserReservedResponse{}, nil
 }

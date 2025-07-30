@@ -380,6 +380,7 @@ func TestAttachOrganizationRoleByOrganizationUserReserved(t *testing.T) {
 		mockListResp       *[]db.UserReservedWithOrganizationID
 		mockListErr        error
 		mockAttachErrIndex int // -1なら全て成功
+		mockDeleteErrIndex int // -1なら全て成功
 		wantErr            bool
 	}{
 		{
@@ -390,6 +391,7 @@ func TestAttachOrganizationRoleByOrganizationUserReserved(t *testing.T) {
 			},
 			mockListErr:        nil,
 			mockAttachErrIndex: -1,
+			mockDeleteErrIndex: -1,
 			wantErr:            false,
 		},
 		{
@@ -406,6 +408,17 @@ func TestAttachOrganizationRoleByOrganizationUserReserved(t *testing.T) {
 			},
 			mockListErr:        nil,
 			mockAttachErrIndex: 1,
+			mockDeleteErrIndex: -1,
+			wantErr:            true,
+		},
+		{
+			name: "DeleteOrganizationUserReserved error",
+			mockListResp: &[]db.UserReservedWithOrganizationID{
+				{OrganizationID: 1, ReservedID: 1, RoleID: 10},
+			},
+			mockListErr:        nil,
+			mockAttachErrIndex: -1,
+			mockDeleteErrIndex: 0,
 			wantErr:            true,
 		},
 	}
@@ -423,6 +436,14 @@ func TestAttachOrganizationRoleByOrganizationUserReserved(t *testing.T) {
 						repoMock.On("AttachOrganizationRole", mock.Anything, u.OrganizationID, u.RoleID, userID).Return(nil, gorm.ErrInvalidDB).Once()
 					} else {
 						repoMock.On("AttachOrganizationRole", mock.Anything, u.OrganizationID, u.RoleID, userID).Return(&model.OrganizationRole{}, nil).Once()
+					}
+
+					if c.mockAttachErrIndex != i {
+						if c.mockDeleteErrIndex == i {
+							repoMock.On("DeleteOrganizationUserReserved", mock.Anything, u.OrganizationID, u.ReservedID).Return(errors.New("delete error")).Once()
+						} else {
+							repoMock.On("DeleteOrganizationUserReserved", mock.Anything, u.OrganizationID, u.ReservedID).Return(nil).Once()
+						}
 					}
 				}
 			}
