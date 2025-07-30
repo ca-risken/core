@@ -107,3 +107,22 @@ func (s *OrganizationIAMService) DetachOrganizationRole(ctx context.Context, req
 	}
 	return &empty.Empty{}, nil
 }
+func (i *OrganizationIAMService) AttachOrganizationRoleByOrganizationUserReserved(ctx context.Context, req *organization_iam.AttachOrganizationRoleByOrganizationUserReservedRequest) (*organization_iam.AttachOrganizationRoleByOrganizationUserReservedResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	userReserved, err := i.repository.ListOrganizationUserReservedWithOrganizationID(ctx, req.UserIdpKey)
+	if err != nil {
+		return nil, err
+	}
+	for _, u := range *userReserved {
+		_, err := i.repository.AttachOrganizationRole(ctx, u.OrganizationID, u.RoleID, req.UserId)
+		if err != nil {
+			return nil, err
+		}
+		if err := i.repository.DeleteOrganizationUserReserved(ctx, u.OrganizationID, u.ReservedID); err != nil {
+			return nil, err
+		}
+	}
+	return &organization_iam.AttachOrganizationRoleByOrganizationUserReservedResponse{}, nil
+}

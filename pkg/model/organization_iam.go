@@ -34,3 +34,11 @@ type OrganizationRolePolicy struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type OrganizationUserReserved struct {
+	ReservedID uint32 `gorm:"primary_key"`
+	UserIdpKey string
+	RoleID     uint32
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}

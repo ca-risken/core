@@ -6,6 +6,7 @@ import (
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/iam"
+	"github.com/ca-risken/core/proto/organization_iam"
 	"gorm.io/gorm"
 )
 
@@ -97,6 +98,13 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 	// 新規ユーザーの場合、user_reservedからロールの追加
 	if userID == 0 {
 		if err := i.AttachRoleByUserReserved(ctx, registerdData.UserID, registerdData.UserIdpKey); err != nil {
+			return nil, err
+		}
+		req := &organization_iam.AttachOrganizationRoleByOrganizationUserReservedRequest{
+			UserId:     registerdData.UserID,
+			UserIdpKey: registerdData.UserIdpKey,
+		}
+		if _, err := i.organizationIamClient.AttachOrganizationRoleByOrganizationUserReserved(ctx, req); err != nil {
 			return nil, err
 		}
 	}

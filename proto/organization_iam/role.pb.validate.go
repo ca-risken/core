@@ -1298,3 +1298,290 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DetachOrganizationRoleRequestValidationError{}
+
+// Validate checks the field values on
+// AttachOrganizationRoleByOrganizationUserReservedRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *AttachOrganizationRoleByOrganizationUserReservedRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// AttachOrganizationRoleByOrganizationUserReservedRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// AttachOrganizationRoleByOrganizationUserReservedRequestMultiError, or nil
+// if none found.
+func (m *AttachOrganizationRoleByOrganizationUserReservedRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AttachOrganizationRoleByOrganizationUserReservedRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetUserId() <= 0 {
+		err := AttachOrganizationRoleByOrganizationUserReservedRequestValidationError{
+			field:  "UserId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if utf8.RuneCountInString(m.GetUserIdpKey()) > 255 {
+		err := AttachOrganizationRoleByOrganizationUserReservedRequestValidationError{
+			field:  "UserIdpKey",
+			reason: "value length must be at most 255 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return AttachOrganizationRoleByOrganizationUserReservedRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// AttachOrganizationRoleByOrganizationUserReservedRequestMultiError is an
+// error wrapping multiple validation errors returned by
+// AttachOrganizationRoleByOrganizationUserReservedRequest.ValidateAll() if
+// the designated constraints aren't met.
+type AttachOrganizationRoleByOrganizationUserReservedRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AttachOrganizationRoleByOrganizationUserReservedRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AttachOrganizationRoleByOrganizationUserReservedRequestMultiError) AllErrors() []error {
+	return m
+}
+
+// AttachOrganizationRoleByOrganizationUserReservedRequestValidationError is
+// the validation error returned by
+// AttachOrganizationRoleByOrganizationUserReservedRequest.Validate if the
+// designated constraints aren't met.
+type AttachOrganizationRoleByOrganizationUserReservedRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AttachOrganizationRoleByOrganizationUserReservedRequestValidationError) Field() string {
+	return e.field
+}
+
+// Reason function returns reason value.
+func (e AttachOrganizationRoleByOrganizationUserReservedRequestValidationError) Reason() string {
+	return e.reason
+}
+
+// Cause function returns cause value.
+func (e AttachOrganizationRoleByOrganizationUserReservedRequestValidationError) Cause() error {
+	return e.cause
+}
+
+// Key function returns key value.
+func (e AttachOrganizationRoleByOrganizationUserReservedRequestValidationError) Key() bool {
+	return e.key
+}
+
+// ErrorName returns error name.
+func (e AttachOrganizationRoleByOrganizationUserReservedRequestValidationError) ErrorName() string {
+	return "AttachOrganizationRoleByOrganizationUserReservedRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AttachOrganizationRoleByOrganizationUserReservedRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAttachOrganizationRoleByOrganizationUserReservedRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AttachOrganizationRoleByOrganizationUserReservedRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AttachOrganizationRoleByOrganizationUserReservedRequestValidationError{}
+
+// Validate checks the field values on
+// AttachOrganizationRoleByOrganizationUserReservedResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *AttachOrganizationRoleByOrganizationUserReservedResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// AttachOrganizationRoleByOrganizationUserReservedResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// AttachOrganizationRoleByOrganizationUserReservedResponseMultiError, or nil
+// if none found.
+func (m *AttachOrganizationRoleByOrganizationUserReservedResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AttachOrganizationRoleByOrganizationUserReservedResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetRole()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, AttachOrganizationRoleByOrganizationUserReservedResponseValidationError{
+					field:  "Role",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, AttachOrganizationRoleByOrganizationUserReservedResponseValidationError{
+					field:  "Role",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetRole()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return AttachOrganizationRoleByOrganizationUserReservedResponseValidationError{
+				field:  "Role",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return AttachOrganizationRoleByOrganizationUserReservedResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// AttachOrganizationRoleByOrganizationUserReservedResponseMultiError is an
+// error wrapping multiple validation errors returned by
+// AttachOrganizationRoleByOrganizationUserReservedResponse.ValidateAll() if
+// the designated constraints aren't met.
+type AttachOrganizationRoleByOrganizationUserReservedResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AttachOrganizationRoleByOrganizationUserReservedResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AttachOrganizationRoleByOrganizationUserReservedResponseMultiError) AllErrors() []error {
+	return m
+}
+
+// AttachOrganizationRoleByOrganizationUserReservedResponseValidationError is
+// the validation error returned by
+// AttachOrganizationRoleByOrganizationUserReservedResponse.Validate if the
+// designated constraints aren't met.
+type AttachOrganizationRoleByOrganizationUserReservedResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AttachOrganizationRoleByOrganizationUserReservedResponseValidationError) Field() string {
+	return e.field
+}
+
+// Reason function returns reason value.
+func (e AttachOrganizationRoleByOrganizationUserReservedResponseValidationError) Reason() string {
+	return e.reason
+}
+
+// Cause function returns cause value.
+func (e AttachOrganizationRoleByOrganizationUserReservedResponseValidationError) Cause() error {
+	return e.cause
+}
+
+// Key function returns key value.
+func (e AttachOrganizationRoleByOrganizationUserReservedResponseValidationError) Key() bool {
+	return e.key
+}
+
+// ErrorName returns error name.
+func (e AttachOrganizationRoleByOrganizationUserReservedResponseValidationError) ErrorName() string {
+	return "AttachOrganizationRoleByOrganizationUserReservedResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AttachOrganizationRoleByOrganizationUserReservedResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAttachOrganizationRoleByOrganizationUserReservedResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AttachOrganizationRoleByOrganizationUserReservedResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AttachOrganizationRoleByOrganizationUserReservedResponseValidationError{}
