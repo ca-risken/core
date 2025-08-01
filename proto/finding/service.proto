@@ -79,6 +79,7 @@ message ListFindingRequest {
   FindingStatus status = 13;
   uint64 finding_id = 14;
   uint32 alert_id = 15;
+  uint32 organization_id = 16;
 }
 
 message ListFindingResponse {
