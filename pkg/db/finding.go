@@ -108,7 +108,6 @@ func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingReques
 	return &data, nil
 }
 
-
 func (c *Client) BatchListFinding(ctx context.Context, req *finding.BatchListFindingRequest) (*[]model.Finding, error) {
 	query := "select finding.* from finding "
 	cond, params := generateListFindingCondition(
@@ -150,21 +149,16 @@ func generateListFindingCondition(
 	join := ""
 	var query string
 	var params []interface{}
-	
+
+	query = "where finding.score between ? and ?"
+	params = append(params, fromScore, toScore)
+
 	if organizationID != 0 {
-		query = `
-where
-  op.organization_id = ?
-  and finding.score between ? and ?
-`
-		params = append(params, organizationID, fromScore, toScore)
+		query += " and op.organization_id = ?"
+		params = append(params, organizationID)
 	} else {
-		query = `
-where
-  finding.project_id = ?
-  and finding.score between ? and ?
-`
-		params = append(params, projectID, fromScore, toScore)
+		query += " and finding.project_id = ?"
+		params = append(params, projectID)
 	}
 	if findingID != 0 {
 		query += " and finding.finding_id = ?"
@@ -211,19 +205,17 @@ func generateListFindingQuery(
 	findingID uint64,
 	dataSources, resourceNames, tags []string,
 	status finding.FindingStatus) (string, []interface{}) {
-	
-	var baseQuery string
+
+	baseQuery := "select finding.* from finding inner join finding f_alias using(finding_id)"
 	if organizationID != 0 {
-		baseQuery = "select finding.* from finding inner join finding f_alias using(finding_id) inner join organization_project op on finding.project_id = op.project_id"
-	} else {
-		baseQuery = "select finding.* from finding inner join finding f_alias using(finding_id)"
+		baseQuery += " inner join organization_project op on finding.project_id = op.project_id"
 	}
-	
+
 	cond, params := generateListFindingCondition(
 		projectID, organizationID, alertID,
 		fromScore, toScore,
 		findingID, dataSources, resourceNames, tags, status)
-	
+
 	return baseQuery + cond, params
 }
 
@@ -233,19 +225,17 @@ func generateListFindingCountQuery(
 	findingID uint64,
 	dataSources, resourceNames, tags []string,
 	status finding.FindingStatus) (string, []interface{}) {
-	
-	var baseQuery string
+
+	baseQuery := "select count(*) from finding"
 	if organizationID != 0 {
-		baseQuery = "select count(*) from finding inner join organization_project op on finding.project_id = op.project_id"
-	} else {
-		baseQuery = "select count(*) from finding"
+		baseQuery += " inner join organization_project op on finding.project_id = op.project_id"
 	}
-	
+
 	cond, params := generateListFindingCondition(
 		projectID, organizationID, alertID,
 		fromScore, toScore,
 		findingID, dataSources, resourceNames, tags, status)
-	
+
 	return baseQuery + cond, params
 }
 
