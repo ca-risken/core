@@ -20,11 +20,15 @@ func TestValidate_ListFindingRequest(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:  "OK",
+			name:  "OK with project_id",
 			input: &ListFindingRequest{ProjectId: 1, DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0, Sort: "finding_id", Direction: "asc", Offset: 0, Limit: maxLimit},
 		},
 		{
-			name:    "NG Required(project_id)",
+			name:  "OK with organization_id",
+			input: &ListFindingRequest{OrganizationId: 1, DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0, Sort: "finding_id", Direction: "asc", Offset: 0, Limit: maxLimit},
+		},
+		{
+			name:    "NG Required(project_id or organization_id)",
 			input:   &ListFindingRequest{DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0},
 			wantErr: true,
 		},
@@ -100,6 +104,7 @@ func TestValidate_ListFindingRequest(t *testing.T) {
 		})
 	}
 }
+
 
 func TestValidate_BatchListFindingRequest(t *testing.T) {
 	cases := []struct {

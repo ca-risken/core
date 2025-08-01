@@ -20,7 +20,7 @@ func (f *FindingService) ListFinding(ctx context.Context, req *finding.ListFindi
 	param := convertListFindingRequest(req)
 	total, err := f.repository.ListFindingCount(
 		ctx,
-		param.ProjectId, param.AlertId,
+		param.ProjectId, param.OrganizationId, param.AlertId,
 		param.FromScore, param.ToScore,
 		param.FindingId,
 		param.DataSource, param.ResourceName, param.Tag,
@@ -42,6 +42,7 @@ func (f *FindingService) ListFinding(ctx context.Context, req *finding.ListFindi
 	}
 	return &finding.ListFindingResponse{FindingId: ids, Count: uint32(len(ids)), Total: convertToUint32(total)}, nil
 }
+
 
 func convertListFindingRequest(req *finding.ListFindingRequest) *finding.ListFindingRequest {
 	converted := req
@@ -67,7 +68,7 @@ func (f *FindingService) BatchListFinding(ctx context.Context, req *finding.Batc
 	param := convertBatchListFindingRequest(req)
 	total, err := f.repository.ListFindingCount(
 		ctx,
-		param.ProjectId, param.AlertId,
+		param.ProjectId, 0, param.AlertId,
 		param.FromScore, param.ToScore,
 		param.FindingId,
 		param.DataSource, param.ResourceName, param.Tag,
