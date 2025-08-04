@@ -160,6 +160,45 @@ func TestValidate_UserForUpsert(t *testing.T) {
 	}
 }
 
+func TestValidate_GetUserByUserIdpKeyRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *GetUserByUserIdpKeyRequest
+		wantErr bool
+	}{
+		{
+			name:    "OK",
+			input:   &GetUserByUserIdpKeyRequest{UserIdpKey: "user-idp-key"},
+			wantErr: false,
+		},
+		{
+			name:    "NG Required",
+			input:   &GetUserByUserIdpKeyRequest{},
+			wantErr: true,
+		},
+		{
+			name:    "NG Empty",
+			input:   &GetUserByUserIdpKeyRequest{UserIdpKey: ""},
+			wantErr: true,
+		},
+		{
+			name:    "NG Too long",
+			input:   &GetUserByUserIdpKeyRequest{UserIdpKey: length256string},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
 func TestValidate_ListRoleRequest(t *testing.T) {
 	cases := []struct {
 		name    string

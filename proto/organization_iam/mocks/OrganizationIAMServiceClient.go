@@ -92,6 +92,43 @@ func (_m *OrganizationIAMServiceClient) AttachOrganizationRole(ctx context.Conte
 	return r0, r1
 }
 
+// AttachOrganizationRoleByOrganizationUserReserved provides a mock function with given fields: ctx, in, opts
+func (_m *OrganizationIAMServiceClient) AttachOrganizationRoleByOrganizationUserReserved(ctx context.Context, in *organization_iam.AttachOrganizationRoleByOrganizationUserReservedRequest, opts ...grpc.CallOption) (*organization_iam.AttachOrganizationRoleByOrganizationUserReservedResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AttachOrganizationRoleByOrganizationUserReserved")
+	}
+
+	var r0 *organization_iam.AttachOrganizationRoleByOrganizationUserReservedResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.AttachOrganizationRoleByOrganizationUserReservedRequest, ...grpc.CallOption) (*organization_iam.AttachOrganizationRoleByOrganizationUserReservedResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.AttachOrganizationRoleByOrganizationUserReservedRequest, ...grpc.CallOption) *organization_iam.AttachOrganizationRoleByOrganizationUserReservedResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization_iam.AttachOrganizationRoleByOrganizationUserReservedResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.AttachOrganizationRoleByOrganizationUserReservedRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteOrganizationPolicy provides a mock function with given fields: ctx, in, opts
 func (_m *OrganizationIAMServiceClient) DeleteOrganizationPolicy(ctx context.Context, in *organization_iam.DeleteOrganizationPolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	_va := make([]interface{}, len(opts))
@@ -158,6 +195,43 @@ func (_m *OrganizationIAMServiceClient) DeleteOrganizationRole(ctx context.Conte
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.DeleteOrganizationRoleRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteOrganizationUserReserved provides a mock function with given fields: ctx, in, opts
+func (_m *OrganizationIAMServiceClient) DeleteOrganizationUserReserved(ctx context.Context, in *organization_iam.DeleteOrganizationUserReservedRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteOrganizationUserReserved")
+	}
+
+	var r0 *emptypb.Empty
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.DeleteOrganizationUserReservedRequest, ...grpc.CallOption) (*emptypb.Empty, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.DeleteOrganizationUserReservedRequest, ...grpc.CallOption) *emptypb.Empty); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*emptypb.Empty)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.DeleteOrganizationUserReservedRequest, ...grpc.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -425,6 +499,43 @@ func (_m *OrganizationIAMServiceClient) ListOrganizationRole(ctx context.Context
 	return r0, r1
 }
 
+// ListOrganizationUserReserved provides a mock function with given fields: ctx, in, opts
+func (_m *OrganizationIAMServiceClient) ListOrganizationUserReserved(ctx context.Context, in *organization_iam.ListOrganizationUserReservedRequest, opts ...grpc.CallOption) (*organization_iam.ListOrganizationUserReservedResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListOrganizationUserReserved")
+	}
+
+	var r0 *organization_iam.ListOrganizationUserReservedResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.ListOrganizationUserReservedRequest, ...grpc.CallOption) (*organization_iam.ListOrganizationUserReservedResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.ListOrganizationUserReservedRequest, ...grpc.CallOption) *organization_iam.ListOrganizationUserReservedResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization_iam.ListOrganizationUserReservedResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.ListOrganizationUserReservedRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PutOrganizationPolicy provides a mock function with given fields: ctx, in, opts
 func (_m *OrganizationIAMServiceClient) PutOrganizationPolicy(ctx context.Context, in *organization_iam.PutOrganizationPolicyRequest, opts ...grpc.CallOption) (*organization_iam.PutOrganizationPolicyResponse, error) {
 	_va := make([]interface{}, len(opts))
@@ -491,6 +602,43 @@ func (_m *OrganizationIAMServiceClient) PutOrganizationRole(ctx context.Context,
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.PutOrganizationRoleRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PutOrganizationUserReserved provides a mock function with given fields: ctx, in, opts
+func (_m *OrganizationIAMServiceClient) PutOrganizationUserReserved(ctx context.Context, in *organization_iam.PutOrganizationUserReservedRequest, opts ...grpc.CallOption) (*organization_iam.PutOrganizationUserReservedResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PutOrganizationUserReserved")
+	}
+
+	var r0 *organization_iam.PutOrganizationUserReservedResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.PutOrganizationUserReservedRequest, ...grpc.CallOption) (*organization_iam.PutOrganizationUserReservedResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.PutOrganizationUserReservedRequest, ...grpc.CallOption) *organization_iam.PutOrganizationUserReservedResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization_iam.PutOrganizationUserReservedResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.PutOrganizationUserReservedRequest, ...grpc.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)

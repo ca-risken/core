@@ -5,6 +5,7 @@ package mocks
 import (
 	context "context"
 
+	db "github.com/ca-risken/core/pkg/db"
 	mock "github.com/stretchr/testify/mock"
 
 	model "github.com/ca-risken/core/pkg/model"
@@ -104,6 +105,24 @@ func (_m *OrganizationIAMRepository) DeleteOrganizationRole(ctx context.Context,
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) error); ok {
 		r0 = rf(ctx, organizationID, roleID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteOrganizationUserReserved provides a mock function with given fields: ctx, organizationID, reservedID
+func (_m *OrganizationIAMRepository) DeleteOrganizationUserReserved(ctx context.Context, organizationID uint32, reservedID uint32) error {
+	ret := _m.Called(ctx, organizationID, reservedID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteOrganizationUserReserved")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) error); ok {
+		r0 = rf(ctx, organizationID, reservedID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -357,6 +376,66 @@ func (_m *OrganizationIAMRepository) ListOrganizationRole(ctx context.Context, o
 	return r0, r1
 }
 
+// ListOrganizationUserReserved provides a mock function with given fields: ctx, organizationID, userIDPKey
+func (_m *OrganizationIAMRepository) ListOrganizationUserReserved(ctx context.Context, organizationID uint32, userIDPKey string) ([]*model.OrganizationUserReserved, error) {
+	ret := _m.Called(ctx, organizationID, userIDPKey)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListOrganizationUserReserved")
+	}
+
+	var r0 []*model.OrganizationUserReserved
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) ([]*model.OrganizationUserReserved, error)); ok {
+		return rf(ctx, organizationID, userIDPKey)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) []*model.OrganizationUserReserved); ok {
+		r0 = rf(ctx, organizationID, userIDPKey)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.OrganizationUserReserved)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, string) error); ok {
+		r1 = rf(ctx, organizationID, userIDPKey)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListOrganizationUserReservedWithOrganizationID provides a mock function with given fields: ctx, userIdpKey
+func (_m *OrganizationIAMRepository) ListOrganizationUserReservedWithOrganizationID(ctx context.Context, userIdpKey string) (*[]db.UserReservedWithOrganizationID, error) {
+	ret := _m.Called(ctx, userIdpKey)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListOrganizationUserReservedWithOrganizationID")
+	}
+
+	var r0 *[]db.UserReservedWithOrganizationID
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*[]db.UserReservedWithOrganizationID, error)); ok {
+		return rf(ctx, userIdpKey)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *[]db.UserReservedWithOrganizationID); ok {
+		r0 = rf(ctx, userIdpKey)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*[]db.UserReservedWithOrganizationID)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, userIdpKey)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PutOrganizationPolicy provides a mock function with given fields: ctx, p
 func (_m *OrganizationIAMRepository) PutOrganizationPolicy(ctx context.Context, p *model.OrganizationPolicy) (*model.OrganizationPolicy, error) {
 	ret := _m.Called(ctx, p)
@@ -409,6 +488,36 @@ func (_m *OrganizationIAMRepository) PutOrganizationRole(ctx context.Context, r 
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *model.OrganizationRole) error); ok {
+		r1 = rf(ctx, r)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PutOrganizationUserReserved provides a mock function with given fields: ctx, r
+func (_m *OrganizationIAMRepository) PutOrganizationUserReserved(ctx context.Context, r *model.OrganizationUserReserved) (*model.OrganizationUserReserved, error) {
+	ret := _m.Called(ctx, r)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PutOrganizationUserReserved")
+	}
+
+	var r0 *model.OrganizationUserReserved
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *model.OrganizationUserReserved) (*model.OrganizationUserReserved, error)); ok {
+		return rf(ctx, r)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *model.OrganizationUserReserved) *model.OrganizationUserReserved); ok {
+		r0 = rf(ctx, r)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.OrganizationUserReserved)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *model.OrganizationUserReserved) error); ok {
 		r1 = rf(ctx, r)
 	} else {
 		r1 = ret.Error(1)

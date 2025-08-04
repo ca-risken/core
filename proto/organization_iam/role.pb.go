@@ -571,6 +571,108 @@ func (x *DetachOrganizationRoleRequest) GetOrganizationId() uint32 {
 	return 0
 }
 
+type AttachOrganizationRoleByOrganizationUserReservedRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId     uint32 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`              // Required
+	UserIdpKey string `protobuf:"bytes,2,opt,name=user_idp_key,json=userIdpKey,proto3" json:"user_idp_key,omitempty"` // Required
+}
+
+func (x *AttachOrganizationRoleByOrganizationUserReservedRequest) Reset() {
+	*x = AttachOrganizationRoleByOrganizationUserReservedRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_iam_role_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AttachOrganizationRoleByOrganizationUserReservedRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AttachOrganizationRoleByOrganizationUserReservedRequest) ProtoMessage() {}
+
+func (x *AttachOrganizationRoleByOrganizationUserReservedRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_iam_role_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AttachOrganizationRoleByOrganizationUserReservedRequest.ProtoReflect.Descriptor instead.
+func (*AttachOrganizationRoleByOrganizationUserReservedRequest) Descriptor() ([]byte, []int) {
+	return file_organization_iam_role_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *AttachOrganizationRoleByOrganizationUserReservedRequest) GetUserId() uint32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *AttachOrganizationRoleByOrganizationUserReservedRequest) GetUserIdpKey() string {
+	if x != nil {
+		return x.UserIdpKey
+	}
+	return ""
+}
+
+type AttachOrganizationRoleByOrganizationUserReservedResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Role *OrganizationRole `protobuf:"bytes,1,opt,name=role,proto3" json:"role,omitempty"`
+}
+
+func (x *AttachOrganizationRoleByOrganizationUserReservedResponse) Reset() {
+	*x = AttachOrganizationRoleByOrganizationUserReservedResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_iam_role_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AttachOrganizationRoleByOrganizationUserReservedResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AttachOrganizationRoleByOrganizationUserReservedResponse) ProtoMessage() {}
+
+func (x *AttachOrganizationRoleByOrganizationUserReservedResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_iam_role_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AttachOrganizationRoleByOrganizationUserReservedResponse.ProtoReflect.Descriptor instead.
+func (*AttachOrganizationRoleByOrganizationUserReservedResponse) Descriptor() ([]byte, []int) {
+	return file_organization_iam_role_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *AttachOrganizationRoleByOrganizationUserReservedResponse) GetRole() *OrganizationRole {
+	if x != nil {
+		return x.Role
+	}
+	return nil
+}
+
 var File_organization_iam_role_proto protoreflect.FileDescriptor
 
 var file_organization_iam_role_proto_rawDesc = []byte{
@@ -652,11 +754,27 @@ var file_organization_iam_role_proto_rawDesc = []byte{
 	0x06, 0x72, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x12, 0x30, 0x0a, 0x0f, 0x6f, 0x72, 0x67, 0x61, 0x6e,
 	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d,
 	0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x0e, 0x6f, 0x72, 0x67, 0x61, 0x6e,
-	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x42, 0x32, 0x5a, 0x30, 0x67, 0x69, 0x74,
-	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69, 0x73, 0x6b, 0x65,
-	0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x6f, 0x72, 0x67,
-	0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x22, 0x87, 0x01, 0x0a, 0x37, 0x41, 0x74,
+	0x74, 0x61, 0x63, 0x68, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x52, 0x6f, 0x6c, 0x65, 0x42, 0x79, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x73, 0x65, 0x72, 0x76, 0x65, 0x64, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x20, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52,
+	0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x2a, 0x0a, 0x0c, 0x75, 0x73, 0x65, 0x72, 0x5f,
+	0x69, 0x64, 0x70, 0x5f, 0x6b, 0x65, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x08, 0xfa,
+	0x42, 0x05, 0x72, 0x03, 0x18, 0xff, 0x01, 0x52, 0x0a, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x70,
+	0x4b, 0x65, 0x79, 0x22, 0x77, 0x0a, 0x38, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x4f, 0x72, 0x67,
+	0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x42, 0x79, 0x4f,
+	0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x55, 0x73, 0x65, 0x72, 0x52,
+	0x65, 0x73, 0x65, 0x72, 0x76, 0x65, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
+	0x3b, 0x0a, 0x04, 0x72, 0x6f, 0x6c, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e,
+	0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x2e, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x04, 0x72, 0x6f, 0x6c, 0x65, 0x42, 0x32, 0x5a, 0x30,
+	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69,
+	0x73, 0x6b, 0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f,
+	0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d,
+	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -671,29 +789,32 @@ func file_organization_iam_role_proto_rawDescGZIP() []byte {
 	return file_organization_iam_role_proto_rawDescData
 }
 
-var file_organization_iam_role_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_organization_iam_role_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_organization_iam_role_proto_goTypes = []interface{}{
-	(*ListOrganizationRoleRequest)(nil),    // 0: core.organization_iam.ListOrganizationRoleRequest
-	(*ListOrganizationRoleResponse)(nil),   // 1: core.organization_iam.ListOrganizationRoleResponse
-	(*GetOrganizationRoleRequest)(nil),     // 2: core.organization_iam.GetOrganizationRoleRequest
-	(*GetOrganizationRoleResponse)(nil),    // 3: core.organization_iam.GetOrganizationRoleResponse
-	(*PutOrganizationRoleRequest)(nil),     // 4: core.organization_iam.PutOrganizationRoleRequest
-	(*PutOrganizationRoleResponse)(nil),    // 5: core.organization_iam.PutOrganizationRoleResponse
-	(*DeleteOrganizationRoleRequest)(nil),  // 6: core.organization_iam.DeleteOrganizationRoleRequest
-	(*AttachOrganizationRoleRequest)(nil),  // 7: core.organization_iam.AttachOrganizationRoleRequest
-	(*AttachOrganizationRoleResponse)(nil), // 8: core.organization_iam.AttachOrganizationRoleResponse
-	(*DetachOrganizationRoleRequest)(nil),  // 9: core.organization_iam.DetachOrganizationRoleRequest
-	(*OrganizationRole)(nil),               // 10: core.organization_iam.OrganizationRole
+	(*ListOrganizationRoleRequest)(nil),                              // 0: core.organization_iam.ListOrganizationRoleRequest
+	(*ListOrganizationRoleResponse)(nil),                             // 1: core.organization_iam.ListOrganizationRoleResponse
+	(*GetOrganizationRoleRequest)(nil),                               // 2: core.organization_iam.GetOrganizationRoleRequest
+	(*GetOrganizationRoleResponse)(nil),                              // 3: core.organization_iam.GetOrganizationRoleResponse
+	(*PutOrganizationRoleRequest)(nil),                               // 4: core.organization_iam.PutOrganizationRoleRequest
+	(*PutOrganizationRoleResponse)(nil),                              // 5: core.organization_iam.PutOrganizationRoleResponse
+	(*DeleteOrganizationRoleRequest)(nil),                            // 6: core.organization_iam.DeleteOrganizationRoleRequest
+	(*AttachOrganizationRoleRequest)(nil),                            // 7: core.organization_iam.AttachOrganizationRoleRequest
+	(*AttachOrganizationRoleResponse)(nil),                           // 8: core.organization_iam.AttachOrganizationRoleResponse
+	(*DetachOrganizationRoleRequest)(nil),                            // 9: core.organization_iam.DetachOrganizationRoleRequest
+	(*AttachOrganizationRoleByOrganizationUserReservedRequest)(nil),  // 10: core.organization_iam.AttachOrganizationRoleByOrganizationUserReservedRequest
+	(*AttachOrganizationRoleByOrganizationUserReservedResponse)(nil), // 11: core.organization_iam.AttachOrganizationRoleByOrganizationUserReservedResponse
+	(*OrganizationRole)(nil),                                         // 12: core.organization_iam.OrganizationRole
 }
 var file_organization_iam_role_proto_depIdxs = []int32{
-	10, // 0: core.organization_iam.GetOrganizationRoleResponse.role:type_name -> core.organization_iam.OrganizationRole
-	10, // 1: core.organization_iam.PutOrganizationRoleResponse.role:type_name -> core.organization_iam.OrganizationRole
-	10, // 2: core.organization_iam.AttachOrganizationRoleResponse.role:type_name -> core.organization_iam.OrganizationRole
-	3,  // [3:3] is the sub-list for method output_type
-	3,  // [3:3] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	12, // 0: core.organization_iam.GetOrganizationRoleResponse.role:type_name -> core.organization_iam.OrganizationRole
+	12, // 1: core.organization_iam.PutOrganizationRoleResponse.role:type_name -> core.organization_iam.OrganizationRole
+	12, // 2: core.organization_iam.AttachOrganizationRoleResponse.role:type_name -> core.organization_iam.OrganizationRole
+	12, // 3: core.organization_iam.AttachOrganizationRoleByOrganizationUserReservedResponse.role:type_name -> core.organization_iam.OrganizationRole
+	4,  // [4:4] is the sub-list for method output_type
+	4,  // [4:4] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_organization_iam_role_proto_init() }
@@ -823,6 +944,30 @@ func file_organization_iam_role_proto_init() {
 				return nil
 			}
 		}
+		file_organization_iam_role_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AttachOrganizationRoleByOrganizationUserReservedRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_organization_iam_role_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AttachOrganizationRoleByOrganizationUserReservedResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -830,7 +975,7 @@ func file_organization_iam_role_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_organization_iam_role_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
