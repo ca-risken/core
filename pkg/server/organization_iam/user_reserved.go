@@ -31,7 +31,7 @@ func (i *OrganizationIAMService) PutOrganizationUserReserved(ctx context.Context
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	user, err := i.iamClient.GetUser(ctx, &iam.GetUserRequest{UserIdpKey: req.UserIdpKey})
+	user, err := i.iamClient.GetUserByUserIdpKey(ctx, &iam.GetUserByUserIdpKeyRequest{UserIdpKey: req.UserIdpKey})
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}

@@ -43,6 +43,21 @@ func (i *IAMService) GetUser(ctx context.Context, req *iam.GetUserRequest) (*iam
 	return &iam.GetUserResponse{User: convertUser(user)}, nil
 }
 
+func (i *IAMService) GetUserByUserIdpKey(ctx context.Context, req *iam.GetUserByUserIdpKeyRequest) (*iam.GetUserByUserIdpKeyResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	user, err := i.repository.GetUserByUserIdpKey(ctx, req.UserIdpKey)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			i.logger.Infof(ctx, "[GetUserByUserIdpKey]User not found: GetUserByUserIdpKeyRequest=%+v", req)
+			return &iam.GetUserByUserIdpKeyResponse{}, nil
+		}
+		return nil, err
+	}
+	return &iam.GetUserByUserIdpKeyResponse{User: convertUser(user)}, nil
+}
+
 func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam.PutUserResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err

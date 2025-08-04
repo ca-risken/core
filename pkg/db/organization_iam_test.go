@@ -1068,16 +1068,18 @@ func TestListOrganizationUserReserved(t *testing.T) {
 			},
 		},
 		{
-			name: "OK - with userIDPKey",
-			args: args{organizationID: 1, userIdpKey: "key1"},
+			name: "OK - with userIDPKey partial match",
+			args: args{organizationID: 1, userIdpKey: "key"},
 			want: []*model.OrganizationUserReserved{
 				{ReservedID: 1, UserIdpKey: "key1", RoleID: 10, CreatedAt: now, UpdatedAt: now},
+				{ReservedID: 2, UserIdpKey: "key2", RoleID: 11, CreatedAt: now, UpdatedAt: now},
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(listOrganizationUserReserved + " and ur.user_idp_key = ?")).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(listOrganizationUserReserved + " and ur.user_idp_key like ? escape '*' ")).WillReturnRows(sqlmock.NewRows([]string{
 					"reserved_id", "user_idp_key", "role_id", "created_at", "updated_at"}).
-					AddRow(uint32(1), "key1", uint32(10), now, now))
+					AddRow(uint32(1), "key1", uint32(10), now, now).
+					AddRow(uint32(2), "key2", uint32(11), now, now))
 			},
 		},
 		{
@@ -1086,7 +1088,7 @@ func TestListOrganizationUserReserved(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(listOrganizationUserReserved + " and ur.user_idp_key = ?")).WillReturnError(errors.New("DB error"))
+				mock.ExpectQuery(regexp.QuoteMeta(listOrganizationUserReserved + " and ur.user_idp_key like ? escape '*' ")).WillReturnError(errors.New("DB error"))
 			},
 		},
 	}

@@ -135,7 +135,7 @@ func TestPutOrganizationUserReserved(t *testing.T) {
 				iamClient:  iamMock,
 			}
 			if c.mockGetResp != nil || c.mockGetErr != nil {
-				iamMock.On("GetUser", mock.Anything, &iam.GetUserRequest{UserIdpKey: c.input.UserIdpKey}).Return(c.mockGetResp, c.mockGetErr).Once()
+				iamMock.On("GetUserByUserIdpKey", mock.Anything, &iam.GetUserByUserIdpKeyRequest{UserIdpKey: c.input.UserIdpKey}).Return(&iam.GetUserByUserIdpKeyResponse{User: c.mockGetResp.User}, c.mockGetErr).Once()
 			}
 			if c.mockGetRoleResp != nil || c.mockGetRoleErr != nil {
 				repoMock.On("GetOrganizationRole", mock.Anything, c.input.OrganizationId, c.input.RoleId).Return(c.mockGetRoleResp, c.mockGetRoleErr).Once()

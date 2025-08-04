@@ -388,8 +388,9 @@ func (c *Client) ListOrganizationUserReserved(ctx context.Context, organizationI
 	query := listOrganizationUserReserved
 	params := []any{organizationID}
 	if userIDPKey != "" {
-		query += " and ur.user_idp_key = ?"
-		params = append(params, userIDPKey)
+		escapedUserIdpKey := escapeLikeParam(userIDPKey)
+		query += fmt.Sprintf(" and ur.user_idp_key like ? escape '%s' ", escapeString)
+		params = append(params, "%"+escapedUserIdpKey+"%")
 	}
 	var data []*model.OrganizationUserReserved
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
