@@ -23,7 +23,7 @@ const (
 
 type AIService interface {
 	ChatAI(ctx context.Context, req *ai.ChatAIRequest) (*ai.ChatAIResponse, error)
-	GenerateReport(ctx context.Context, req *ai.GenerateReportRequest) (*ai.GenerateReportResponse, error)
+	GenerateReport(ctx context.Context, projectID uint32, prompt string) (string, error)
 	AskAISummaryFromFinding(ctx context.Context, f *model.Finding, r *model.Recommend, lang string) (string, error)
 	AskAISummaryStreamFromFinding(
 		ctx context.Context,
