@@ -24,7 +24,7 @@ func (a *AIClient) GenerateReport(ctx context.Context, projectID uint32, prompt 
 				},
 			},
 		},
-	}, tools)
+	}, tools, openai.ReasoningEffortHigh)
 	if err != nil {
 		return "", err
 	}

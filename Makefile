@@ -948,7 +948,7 @@ chat-ai:
 generate-report:
 	$(GRPCURL) \
 		-plaintext \
-		-d '{"prompt":"AWSのFindingレポートを作成してください", "project_id":1001, "name":"report-name"}' \
+		-d '{"prompt":"AWSのFindingレポートを作成してください。データソースごとの解析もお願いします。", "project_id":1001, "name":"report-name"}' \
 		$(CORE_API_ADDR) core.ai.AIService.GenerateReport
 
 .PHONY: generate-report2
