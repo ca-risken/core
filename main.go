@@ -34,7 +34,7 @@ type AppConf struct {
 	BaseURL                 string   `split_words:"true" default:"http://localhost"`
 	OpenAIToken             string   `split_words:"true"`
 	ChatGPTModel            string   `split_words:"true" default:"gpt-4.1"`
-	ReasoningModel          string   `split_words:"true" default:"o3"` // o4-mini
+	ReasoningModel          string   `split_words:"true" default:"gpt-5"`
 	DefaultLocale           string   `split_words:"true" default:"en"`
 	SlackAPIToken           string   `split_words:"true"`
 	ExcludeDeleteDataSource []string `split_words:"true" default:"code:gitleaks"`

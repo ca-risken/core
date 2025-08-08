@@ -87,7 +87,7 @@ func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding
 	}
 
 	instruction, inputs := generateAskAISummaryInputs(f, r, lang)
-	answer, err := a.responsesAPI(ctx, a.chatGPTModel, instruction, inputs, DefaultTools)
+	answer, err := a.responsesAPI(ctx, a.chatGPTModel, instruction, inputs, DefaultTools, "")
 	if err != nil {
 		return "", fmt.Errorf("openai API error: finding_id=%d, err=%w", f.FindingID, err)
 	}
