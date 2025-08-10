@@ -78,8 +78,15 @@ When inserting mermaid graphs, you MUST specify mermaid in the code block.
 | Other    | 0.2   | 2     |
 
 #### Example) xychart-beta
-If you use xychart-beta in Japanese, you MUST use double quotes for the title.
+When using xychart-beta with Japanese text, you MUST use double quotes for the title.
+You SHOULD customize the chart colors using the config block with header configuration, as the default colors may not provide sufficient contrast or visual appeal.
 
+---
+config:
+    themeVariables:
+        xyChart:
+            plotColorPalette: "teal, pink, cyan"
+---
 xychart-beta
     title "日本の年間出生数の推移"
     x-axis ["1950年", "1980年", "2000年", "2020年", "2022年"]
@@ -87,16 +94,23 @@ xychart-beta
     bar [233.7, 157.7, 119.9, 84.0, 77.0]
     line [233.7, 157.7, 119.9, 84.0, 77.0]
 
+---
+config:
+    themeVariables:
+        xyChart:
+            plotColorPalette: "grey, indigo, pink, purple, cyan, teal, green"
+---
 xychart-beta
-    title "AWS Findings count by month"
-    x-axis ["Jan", "Feb", "Mar", "Apr", "May"]
-    y-axis "Finding count" 0 --> 50
-    bar [10, 20, 30, 40, 50]
-    line [10, 20, 30, 40, 50]
-
+    title "Different colors in xyChart"
+    x-axis "numbersX" ["Group A", "Group B", "Group C", "Group D"]
+    y-axis "numbersY" 0 --> 40
+    bar [20,30,25,30]
+    bar [10,20,20,20]
+    bar [5,10,5,5]
+    line [0,5,40,2]
 
 #### quadrantChart
-If you use quadrantChart in Japanese, you MUST use double quotes for the title and x-axis.
+When using quadrantChart with Japanese text, you MUST use double quotes for the title and x-axis.
 
 quadrantChart
     title 製品評価マトリクス
@@ -113,7 +127,7 @@ quadrantChart
     "製品E": [0.40, 0.34]
 
 #### Example) flowchart
-If you use flowchart in Japanese, you MUST NOT use double quotes for the label.
+When using flowchart with Japanese text, you MUST NOT use double quotes for the label.
 But **don't use <br />** in the label.(Use <br> instead.)
 
 flowchart LR
@@ -148,7 +162,7 @@ flowchart LR
     style D fill:#bfb,stroke:#333
 
 #### Example) pie
-If you use pie in Japanese, you MUST use double quotes for the title and the label.
+When using pie with Japanese text, you MUST use double quotes for the title and the label.
 
 pie
     title 2023年度 部門別売上構成比
@@ -166,7 +180,7 @@ pie
     "Other" : 40
 
 #### Example) mindmap
-If you use mindmap in Japanese, you MUST NOT use double quotes for the label.
+When using mindmap with Japanese text, you MUST NOT use double quotes for the label.
 But if you use parentheses, you MUST use full-width parentheses.
 
 mindmap
