@@ -162,7 +162,7 @@ flowchart LR
     style D fill:#bfb,stroke:#333
 
 #### Example) pie
-When using pie with Japanese text, you MUST use double quotes for the title and the label.
+When using pie with Japanese text, you MUST use double quotes for the labels (But **not for the title**).
 
 pie
     title 2023年度 部門別売上構成比
@@ -173,7 +173,7 @@ pie
     "その他" : 4.3
 
 pie
-    title "Finding category"
+    title Finding category
     "AWS" : 35
     "Google Cloud" : 15
     "Code" : 10
