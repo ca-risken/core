@@ -109,7 +109,7 @@ xychart-beta
     line [0,5,40,2]
 
 #### quadrantChart
-When using quadrantChart with Japanese text, you MUST use double quotes for the title and x-axis.
+When using quadrantChart with Japanese text, you MUST use double quotes for the x-axis. (But **not for the title**)
 
 quadrantChart
     title 製品評価マトリクス
