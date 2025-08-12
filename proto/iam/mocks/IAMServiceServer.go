@@ -466,6 +466,36 @@ func (_m *IAMServiceServer) GetUser(_a0 context.Context, _a1 *iam.GetUserRequest
 	return r0, r1
 }
 
+// GetUserByUserIdpKey provides a mock function with given fields: _a0, _a1
+func (_m *IAMServiceServer) GetUserByUserIdpKey(_a0 context.Context, _a1 *iam.GetUserByUserIdpKeyRequest) (*iam.GetUserByUserIdpKeyResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserByUserIdpKey")
+	}
+
+	var r0 *iam.GetUserByUserIdpKeyResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *iam.GetUserByUserIdpKeyRequest) (*iam.GetUserByUserIdpKeyResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *iam.GetUserByUserIdpKeyRequest) *iam.GetUserByUserIdpKeyResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*iam.GetUserByUserIdpKeyResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *iam.GetUserByUserIdpKeyRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // IsAdmin provides a mock function with given fields: _a0, _a1
 func (_m *IAMServiceServer) IsAdmin(_a0 context.Context, _a1 *iam.IsAdminRequest) (*iam.IsAdminResponse, error) {
 	ret := _m.Called(_a0, _a1)

@@ -48,3 +48,13 @@ message DetachOrganizationRoleRequest {
   uint32 role_id = 2 [ (validate.rules).uint32.gt = 0 ];         // Required
   uint32 organization_id = 3 [ (validate.rules).uint32.gt = 0 ]; // Required
 }
+
+message AttachOrganizationRoleByOrganizationUserReservedRequest {
+  uint32 user_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  string user_idp_key = 2
+      [ (validate.rules).string = {max_len : 255} ]; // Required
+}
+
+message AttachOrganizationRoleByOrganizationUserReservedResponse {
+  OrganizationRole role = 1;
+}
