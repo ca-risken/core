@@ -36,9 +36,8 @@ const (
 Please generate RISKEN Finding report for the project.
 The report language should match the user's language preference.
 
-## Report details
+## Scope
 - Project ID: %d
-- Min score: 0.4
 
 ## Strict Rules
 - NO HALLUCINATION: All content MUST be based on actual data and facts only
