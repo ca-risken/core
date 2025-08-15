@@ -221,6 +221,6 @@ func getGRPCConn(ctx context.Context, addr string) (*grpc.ClientConn, error) {
 		return nil, err
 	}
 
-	// test test test
+	// test test test test
 	return conn, nil
 }
