@@ -54,7 +54,7 @@ func TestListFinding(t *testing.T) {
 
 			mockDB.On("ListFindingCount", test.RepeatMockAnything(12)...).Return(c.totalCount, nil).Once()
 			if c.mockResponce != nil || c.mockError != nil {
-				mockDB.On("ListFinding", test.RepeatMockAnything(12)...).Return(c.mockResponce, c.mockError).Once()
+				mockDB.On("ListFinding", test.RepeatMockAnything(15)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.ListFinding(ctx, c.input)
 			if err != nil && !c.wantErr {

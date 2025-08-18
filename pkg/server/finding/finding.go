@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
+	"github.com/ca-risken/core/proto/iam"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
 	"gorm.io/gorm"
@@ -20,7 +22,7 @@ func (f *FindingService) ListFinding(ctx context.Context, req *finding.ListFindi
 	param := convertListFindingRequest(req)
 	total, err := f.repository.ListFindingCount(
 		ctx,
-		param.ProjectId, param.OrganizationId, param.AlertId,
+		param.ProjectId, 0, param.AlertId,
 		param.FromScore, param.ToScore,
 		param.FindingId,
 		param.DataSource, param.ResourceName, param.Tag,
@@ -32,7 +34,15 @@ func (f *FindingService) ListFinding(ctx context.Context, req *finding.ListFindi
 	if total == 0 {
 		return &finding.ListFindingResponse{FindingId: []uint64{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
-	list, err := f.repository.ListFinding(ctx, param)
+	list, err := f.repository.ListFinding(
+		ctx,
+		param.ProjectId, 0, param.AlertId,
+		param.FromScore, param.ToScore,
+		param.FindingId,
+		param.DataSource, param.ResourceName, param.Tag,
+		param.Status,
+		param.Sort, param.Direction,
+		uint32(param.Offset), uint32(param.Limit))
 	if err != nil {
 		return nil, err
 	}
@@ -43,6 +53,84 @@ func (f *FindingService) ListFinding(ctx context.Context, req *finding.ListFindi
 	return &finding.ListFindingResponse{FindingId: ids, Count: uint32(len(ids)), Total: convertToUint32(total)}, nil
 }
 
+func (f *FindingService) ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*finding.ListFindingForOrgResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	param := convertListFindingForOrgRequest(req)
+	total, err := f.repository.ListFindingCount(
+		ctx,
+		0, param.OrganizationId, 0,
+		param.FromScore, param.ToScore,
+		param.FindingId,
+		param.DataSource, param.ResourceName, param.Tag,
+		param.Status,
+	)
+	if err != nil {
+		return nil, err
+	}
+	if total == 0 {
+		return &finding.ListFindingForOrgResponse{Findings: []*finding.FindingDetail{}, Count: 0, Total: convertToUint32(total)}, nil
+	}
+	list, err := f.repository.ListFinding(
+		ctx,
+		0, param.OrganizationId, 0,
+		param.FromScore, param.ToScore,
+		param.FindingId,
+		param.DataSource, param.ResourceName, param.Tag,
+		param.Status,
+		param.Sort, param.Direction,
+		uint32(param.Offset), uint32(param.Limit))
+	if err != nil {
+		return nil, err
+	}
+
+	var findingDetails []*finding.FindingDetail
+	for _, data := range *list {
+		var pendUserName string
+		var status string
+		var pendNote string
+		var expiredAt int64
+
+		pf, err := f.repository.GetPendFinding(ctx, data.ProjectID, data.FindingID)
+		if err == nil && pf != nil {
+			pendNote = pf.Note
+			expiredAt = pf.ExpiredAt.Unix()
+			if pf.PendUserID > 0 {
+				if resp, err := f.iamClient.GetUser(ctx, &iam.GetUserRequest{UserId: pf.PendUserID}); err == nil {
+					pendUserName = resp.User.Name
+				}
+			}
+			if pf.ExpiredAt.Unix() > 0 && pf.ExpiredAt.Unix() < time.Now().Unix() {
+				status = "ACTIVE"
+			} else {
+				status = "ARCHIVE"
+			}
+		} else {
+			status = "ACTIVE"
+		}
+
+		tags, err := f.repository.ListFindingTagByFindingID(ctx, data.ProjectID, data.FindingID)
+		var findingTags []*finding.FindingTag
+		if err == nil && tags != nil {
+			for _, tag := range *tags {
+				findingTags = append(findingTags, convertFindingTag(&tag))
+			}
+		}
+
+		findingDetails = append(findingDetails, &finding.FindingDetail{
+			Finding: convertFinding(&data),
+			PendInfo: &finding.PendInfo{
+				Note:      pendNote,
+				UserName:  pendUserName,
+				Status:    status,
+				ExpiredAt: expiredAt,
+			},
+			FindingTags: findingTags,
+		})
+	}
+	return &finding.ListFindingForOrgResponse{Findings: findingDetails, Count: uint32(len(findingDetails)), Total: convertToUint32(total)}, nil
+}
 
 func convertListFindingRequest(req *finding.ListFindingRequest) *finding.ListFindingRequest {
 	converted := req
@@ -56,6 +144,23 @@ func convertListFindingRequest(req *finding.ListFindingRequest) *finding.ListFin
 		converted.Direction = defaultSortDirection
 	}
 	if zero.IsZeroVal(converted.Limit) {
+		converted.Limit = defaultLimit
+	}
+	return converted
+}
+
+func convertListFindingForOrgRequest(req *finding.ListFindingForOrgRequest) *finding.ListFindingForOrgRequest {
+	converted := req
+	if converted.ToScore == 0 {
+		converted.ToScore = 1.0
+	}
+	if converted.Sort == "" {
+		converted.Sort = "finding_id"
+	}
+	if converted.Direction == "" {
+		converted.Direction = defaultSortDirection
+	}
+	if converted.Limit == 0 {
 		converted.Limit = defaultLimit
 	}
 	return converted
@@ -319,7 +424,7 @@ func convertFindingTag(f *model.FindingTag) *finding.FindingTag {
 
 func calculateScore(score, maxScore float32, setting *findingSetting) float32 {
 	baseScore := float32(math.Round(float64(score/maxScore*100)) / 100)
-	if setting == nil || zero.IsZeroVal(setting.ScoreCoefficient) {
+	if setting == nil || setting.ScoreCoefficient == 0 {
 		return baseScore
 	}
 	calculated := baseScore * setting.ScoreCoefficient

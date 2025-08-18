@@ -9,6 +9,8 @@ import "finding/entity.proto";
 service FindingService {
   // fiding
   rpc ListFinding(ListFindingRequest) returns (ListFindingResponse);
+  rpc ListFindingForOrg(ListFindingForOrgRequest)
+      returns (ListFindingForOrgResponse);
   rpc BatchListFinding(BatchListFindingRequest)
       returns (BatchListFindingResponse);
   rpc GetFinding(GetFindingRequest) returns (GetFindingResponse);
@@ -79,11 +81,49 @@ message ListFindingRequest {
   FindingStatus status = 13;
   uint64 finding_id = 14;
   uint32 alert_id = 15;
-  uint32 organization_id = 16;
 }
 
 message ListFindingResponse {
   repeated uint64 finding_id = 1;
+  uint32 count = 2;
+  uint32 total = 3;
+}
+
+message ListFindingForOrgRequest {
+  uint32 organization_id = 1;
+  repeated string data_source = 2;
+  repeated string resource_name = 3;
+  float from_score = 4;
+  float to_score = 5;
+  repeated string tag = 8;
+  string sort = 9;
+  string direction = 10;
+  int32 offset = 11;
+  int32 limit = 12;
+  FindingStatus status = 13;
+  uint64 finding_id = 14;
+}
+
+message ProjectFinding {
+  uint32 project_id = 1;
+  uint64 finding_id = 2;
+}
+
+message PendInfo {
+  string note = 1;
+  string user_name = 2;
+  string status = 3;
+  int64 expired_at = 4;
+}
+
+message FindingDetail {
+  Finding finding = 1;
+  PendInfo pend_info = 2;
+  repeated FindingTag finding_tags = 3;
+}
+
+message ListFindingForOrgResponse {
+  repeated FindingDetail findings = 1;
   uint32 count = 2;
   uint32 total = 3;
 }

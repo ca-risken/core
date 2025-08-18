@@ -175,7 +175,7 @@ func TestUntagByResourceName(t *testing.T) {
 
 			if c.mockListFinding != nil {
 				mockDB.
-					On("ListFinding", test.RepeatMockAnything(3)...).
+					On("ListFinding", test.RepeatMockAnything(15)...).
 					Return(c.mockListFinding.Resp, c.mockListFinding.Err).
 					Once()
 			}

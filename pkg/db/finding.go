@@ -19,7 +19,16 @@ const (
 
 type FindingRepository interface {
 	// Finding
-	ListFinding(context.Context, *finding.ListFindingRequest) (*[]model.Finding, error)
+	ListFinding(
+		ctx context.Context,
+		projectID, organizationID, alertID uint32,
+		fromScore, toScore float32,
+		findingID uint64,
+		dataSources, resourceNames, tags []string,
+		status finding.FindingStatus,
+		sort, direction string,
+		offset, limit uint32,
+	) (*[]model.Finding, error)
 	BatchListFinding(context.Context, *finding.BatchListFindingRequest) (*[]model.Finding, error)
 	ListFindingCount(
 		ctx context.Context,
@@ -94,13 +103,22 @@ type FindingRepository interface {
 
 var _ FindingRepository = (*Client)(nil)
 
-func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*[]model.Finding, error) {
+func (c *Client) ListFinding(
+	ctx context.Context,
+	projectID, organizationID, alertID uint32,
+	fromScore, toScore float32,
+	findingID uint64,
+	dataSources, resourceNames, tags []string,
+	status finding.FindingStatus,
+	sort, direction string,
+	offset, limit uint32) (*[]model.Finding, error) {
+
 	query, params := generateListFindingQuery(
-		req.ProjectId, req.OrganizationId, req.AlertId,
-		req.FromScore, req.ToScore,
-		req.FindingId, req.DataSource, req.ResourceName, req.Tag, req.Status)
-	query += fmt.Sprintf(" order by f_alias.%s %s", req.Sort, req.Direction)
-	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
+		projectID, organizationID, alertID,
+		fromScore, toScore,
+		findingID, dataSources, resourceNames, tags, status)
+	query += fmt.Sprintf(" order by f_alias.%s %s", sort, direction)
+	query += fmt.Sprintf(" limit %d, %d", offset, limit)
 	var data []model.Finding
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
@@ -150,7 +168,7 @@ func generateListFindingCondition(
 	var query string
 	var params []interface{}
 
-	query = "where finding.score between ? and ?"
+	query = " where finding.score between ? and ?"
 	params = append(params, fromScore, toScore)
 
 	if organizationID != 0 {
