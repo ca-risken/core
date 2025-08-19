@@ -104,11 +104,6 @@ message ListFindingForOrgRequest {
   uint64 finding_id = 14;
 }
 
-message ProjectFinding {
-  uint32 project_id = 1;
-  uint64 finding_id = 2;
-}
-
 message PendInfo {
   string note = 1;
   string user_name = 2;

@@ -366,61 +366,6 @@ func (x *ListFindingForOrgRequest) GetFindingId() uint64 {
 	return 0
 }
 
-type ProjectFinding struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	ProjectId uint32 `protobuf:"varint,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	FindingId uint64 `protobuf:"varint,2,opt,name=finding_id,json=findingId,proto3" json:"finding_id,omitempty"`
-}
-
-func (x *ProjectFinding) Reset() {
-	*x = ProjectFinding{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[3]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *ProjectFinding) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ProjectFinding) ProtoMessage() {}
-
-func (x *ProjectFinding) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[3]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ProjectFinding.ProtoReflect.Descriptor instead.
-func (*ProjectFinding) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *ProjectFinding) GetProjectId() uint32 {
-	if x != nil {
-		return x.ProjectId
-	}
-	return 0
-}
-
-func (x *ProjectFinding) GetFindingId() uint64 {
-	if x != nil {
-		return x.FindingId
-	}
-	return 0
-}
-
 type PendInfo struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -435,7 +380,7 @@ type PendInfo struct {
 func (x *PendInfo) Reset() {
 	*x = PendInfo{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[4]
+		mi := &file_finding_service_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -448,7 +393,7 @@ func (x *PendInfo) String() string {
 func (*PendInfo) ProtoMessage() {}
 
 func (x *PendInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[4]
+	mi := &file_finding_service_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -461,7 +406,7 @@ func (x *PendInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PendInfo.ProtoReflect.Descriptor instead.
 func (*PendInfo) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{4}
+	return file_finding_service_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *PendInfo) GetNote() string {
@@ -505,7 +450,7 @@ type FindingDetail struct {
 func (x *FindingDetail) Reset() {
 	*x = FindingDetail{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[5]
+		mi := &file_finding_service_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -518,7 +463,7 @@ func (x *FindingDetail) String() string {
 func (*FindingDetail) ProtoMessage() {}
 
 func (x *FindingDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[5]
+	mi := &file_finding_service_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -531,7 +476,7 @@ func (x *FindingDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FindingDetail.ProtoReflect.Descriptor instead.
 func (*FindingDetail) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{5}
+	return file_finding_service_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *FindingDetail) GetFinding() *Finding {
@@ -568,7 +513,7 @@ type ListFindingForOrgResponse struct {
 func (x *ListFindingForOrgResponse) Reset() {
 	*x = ListFindingForOrgResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[6]
+		mi := &file_finding_service_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -581,7 +526,7 @@ func (x *ListFindingForOrgResponse) String() string {
 func (*ListFindingForOrgResponse) ProtoMessage() {}
 
 func (x *ListFindingForOrgResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[6]
+	mi := &file_finding_service_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -594,7 +539,7 @@ func (x *ListFindingForOrgResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFindingForOrgResponse.ProtoReflect.Descriptor instead.
 func (*ListFindingForOrgResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{6}
+	return file_finding_service_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ListFindingForOrgResponse) GetFindings() []*FindingDetail {
@@ -637,7 +582,7 @@ type BatchListFindingRequest struct {
 func (x *BatchListFindingRequest) Reset() {
 	*x = BatchListFindingRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[7]
+		mi := &file_finding_service_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -650,7 +595,7 @@ func (x *BatchListFindingRequest) String() string {
 func (*BatchListFindingRequest) ProtoMessage() {}
 
 func (x *BatchListFindingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[7]
+	mi := &file_finding_service_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -663,7 +608,7 @@ func (x *BatchListFindingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchListFindingRequest.ProtoReflect.Descriptor instead.
 func (*BatchListFindingRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{7}
+	return file_finding_service_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *BatchListFindingRequest) GetProjectId() uint32 {
@@ -742,7 +687,7 @@ type BatchListFindingResponse struct {
 func (x *BatchListFindingResponse) Reset() {
 	*x = BatchListFindingResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[8]
+		mi := &file_finding_service_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -755,7 +700,7 @@ func (x *BatchListFindingResponse) String() string {
 func (*BatchListFindingResponse) ProtoMessage() {}
 
 func (x *BatchListFindingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[8]
+	mi := &file_finding_service_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -768,7 +713,7 @@ func (x *BatchListFindingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchListFindingResponse.ProtoReflect.Descriptor instead.
 func (*BatchListFindingResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{8}
+	return file_finding_service_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *BatchListFindingResponse) GetFindingId() []uint64 {
@@ -804,7 +749,7 @@ type GetFindingRequest struct {
 func (x *GetFindingRequest) Reset() {
 	*x = GetFindingRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[9]
+		mi := &file_finding_service_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -817,7 +762,7 @@ func (x *GetFindingRequest) String() string {
 func (*GetFindingRequest) ProtoMessage() {}
 
 func (x *GetFindingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[9]
+	mi := &file_finding_service_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -830,7 +775,7 @@ func (x *GetFindingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFindingRequest.ProtoReflect.Descriptor instead.
 func (*GetFindingRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{9}
+	return file_finding_service_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetFindingRequest) GetProjectId() uint32 {
@@ -858,7 +803,7 @@ type GetFindingResponse struct {
 func (x *GetFindingResponse) Reset() {
 	*x = GetFindingResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[10]
+		mi := &file_finding_service_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -871,7 +816,7 @@ func (x *GetFindingResponse) String() string {
 func (*GetFindingResponse) ProtoMessage() {}
 
 func (x *GetFindingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[10]
+	mi := &file_finding_service_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -884,7 +829,7 @@ func (x *GetFindingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFindingResponse.ProtoReflect.Descriptor instead.
 func (*GetFindingResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{10}
+	return file_finding_service_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *GetFindingResponse) GetFinding() *Finding {
@@ -906,7 +851,7 @@ type PutFindingRequest struct {
 func (x *PutFindingRequest) Reset() {
 	*x = PutFindingRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[11]
+		mi := &file_finding_service_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -919,7 +864,7 @@ func (x *PutFindingRequest) String() string {
 func (*PutFindingRequest) ProtoMessage() {}
 
 func (x *PutFindingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[11]
+	mi := &file_finding_service_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -932,7 +877,7 @@ func (x *PutFindingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutFindingRequest.ProtoReflect.Descriptor instead.
 func (*PutFindingRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{11}
+	return file_finding_service_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *PutFindingRequest) GetProjectId() uint32 {
@@ -960,7 +905,7 @@ type PutFindingResponse struct {
 func (x *PutFindingResponse) Reset() {
 	*x = PutFindingResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[12]
+		mi := &file_finding_service_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -973,7 +918,7 @@ func (x *PutFindingResponse) String() string {
 func (*PutFindingResponse) ProtoMessage() {}
 
 func (x *PutFindingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[12]
+	mi := &file_finding_service_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -986,7 +931,7 @@ func (x *PutFindingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutFindingResponse.ProtoReflect.Descriptor instead.
 func (*PutFindingResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{12}
+	return file_finding_service_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *PutFindingResponse) GetFinding() *Finding {
@@ -1008,7 +953,7 @@ type PutFindingBatchRequest struct {
 func (x *PutFindingBatchRequest) Reset() {
 	*x = PutFindingBatchRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[13]
+		mi := &file_finding_service_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1021,7 +966,7 @@ func (x *PutFindingBatchRequest) String() string {
 func (*PutFindingBatchRequest) ProtoMessage() {}
 
 func (x *PutFindingBatchRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[13]
+	mi := &file_finding_service_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1034,7 +979,7 @@ func (x *PutFindingBatchRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutFindingBatchRequest.ProtoReflect.Descriptor instead.
 func (*PutFindingBatchRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{13}
+	return file_finding_service_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *PutFindingBatchRequest) GetProjectId() uint32 {
@@ -1063,7 +1008,7 @@ type DeleteFindingRequest struct {
 func (x *DeleteFindingRequest) Reset() {
 	*x = DeleteFindingRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[14]
+		mi := &file_finding_service_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1076,7 +1021,7 @@ func (x *DeleteFindingRequest) String() string {
 func (*DeleteFindingRequest) ProtoMessage() {}
 
 func (x *DeleteFindingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[14]
+	mi := &file_finding_service_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1089,7 +1034,7 @@ func (x *DeleteFindingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteFindingRequest.ProtoReflect.Descriptor instead.
 func (*DeleteFindingRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{14}
+	return file_finding_service_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *DeleteFindingRequest) GetProjectId() uint32 {
@@ -1122,7 +1067,7 @@ type ListFindingTagRequest struct {
 func (x *ListFindingTagRequest) Reset() {
 	*x = ListFindingTagRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[15]
+		mi := &file_finding_service_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1135,7 +1080,7 @@ func (x *ListFindingTagRequest) String() string {
 func (*ListFindingTagRequest) ProtoMessage() {}
 
 func (x *ListFindingTagRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[15]
+	mi := &file_finding_service_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1148,7 +1093,7 @@ func (x *ListFindingTagRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFindingTagRequest.ProtoReflect.Descriptor instead.
 func (*ListFindingTagRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{15}
+	return file_finding_service_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ListFindingTagRequest) GetProjectId() uint32 {
@@ -1206,7 +1151,7 @@ type ListFindingTagResponse struct {
 func (x *ListFindingTagResponse) Reset() {
 	*x = ListFindingTagResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[16]
+		mi := &file_finding_service_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1219,7 +1164,7 @@ func (x *ListFindingTagResponse) String() string {
 func (*ListFindingTagResponse) ProtoMessage() {}
 
 func (x *ListFindingTagResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[16]
+	mi := &file_finding_service_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1232,7 +1177,7 @@ func (x *ListFindingTagResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFindingTagResponse.ProtoReflect.Descriptor instead.
 func (*ListFindingTagResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{16}
+	return file_finding_service_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ListFindingTagResponse) GetTag() []*FindingTag {
@@ -1271,7 +1216,7 @@ type ListFindingTagNameRequest struct {
 func (x *ListFindingTagNameRequest) Reset() {
 	*x = ListFindingTagNameRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[17]
+		mi := &file_finding_service_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1284,7 +1229,7 @@ func (x *ListFindingTagNameRequest) String() string {
 func (*ListFindingTagNameRequest) ProtoMessage() {}
 
 func (x *ListFindingTagNameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[17]
+	mi := &file_finding_service_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1297,7 +1242,7 @@ func (x *ListFindingTagNameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFindingTagNameRequest.ProtoReflect.Descriptor instead.
 func (*ListFindingTagNameRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{17}
+	return file_finding_service_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ListFindingTagNameRequest) GetProjectId() uint32 {
@@ -1348,7 +1293,7 @@ type ListFindingTagNameResponse struct {
 func (x *ListFindingTagNameResponse) Reset() {
 	*x = ListFindingTagNameResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[18]
+		mi := &file_finding_service_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1361,7 +1306,7 @@ func (x *ListFindingTagNameResponse) String() string {
 func (*ListFindingTagNameResponse) ProtoMessage() {}
 
 func (x *ListFindingTagNameResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[18]
+	mi := &file_finding_service_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1374,7 +1319,7 @@ func (x *ListFindingTagNameResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFindingTagNameResponse.ProtoReflect.Descriptor instead.
 func (*ListFindingTagNameResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{18}
+	return file_finding_service_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ListFindingTagNameResponse) GetTag() []string {
@@ -1410,7 +1355,7 @@ type TagFindingRequest struct {
 func (x *TagFindingRequest) Reset() {
 	*x = TagFindingRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[19]
+		mi := &file_finding_service_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1423,7 +1368,7 @@ func (x *TagFindingRequest) String() string {
 func (*TagFindingRequest) ProtoMessage() {}
 
 func (x *TagFindingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[19]
+	mi := &file_finding_service_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1436,7 +1381,7 @@ func (x *TagFindingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TagFindingRequest.ProtoReflect.Descriptor instead.
 func (*TagFindingRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{19}
+	return file_finding_service_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *TagFindingRequest) GetProjectId() uint32 {
@@ -1464,7 +1409,7 @@ type TagFindingResponse struct {
 func (x *TagFindingResponse) Reset() {
 	*x = TagFindingResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[20]
+		mi := &file_finding_service_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1477,7 +1422,7 @@ func (x *TagFindingResponse) String() string {
 func (*TagFindingResponse) ProtoMessage() {}
 
 func (x *TagFindingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[20]
+	mi := &file_finding_service_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1490,7 +1435,7 @@ func (x *TagFindingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TagFindingResponse.ProtoReflect.Descriptor instead.
 func (*TagFindingResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{20}
+	return file_finding_service_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *TagFindingResponse) GetTag() *FindingTag {
@@ -1512,7 +1457,7 @@ type UntagFindingRequest struct {
 func (x *UntagFindingRequest) Reset() {
 	*x = UntagFindingRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[21]
+		mi := &file_finding_service_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1525,7 +1470,7 @@ func (x *UntagFindingRequest) String() string {
 func (*UntagFindingRequest) ProtoMessage() {}
 
 func (x *UntagFindingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[21]
+	mi := &file_finding_service_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1538,7 +1483,7 @@ func (x *UntagFindingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UntagFindingRequest.ProtoReflect.Descriptor instead.
 func (*UntagFindingRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{21}
+	return file_finding_service_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *UntagFindingRequest) GetProjectId() uint32 {
@@ -1570,7 +1515,7 @@ type ClearScoreRequest struct {
 func (x *ClearScoreRequest) Reset() {
 	*x = ClearScoreRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[22]
+		mi := &file_finding_service_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1583,7 +1528,7 @@ func (x *ClearScoreRequest) String() string {
 func (*ClearScoreRequest) ProtoMessage() {}
 
 func (x *ClearScoreRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[22]
+	mi := &file_finding_service_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1596,7 +1541,7 @@ func (x *ClearScoreRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClearScoreRequest.ProtoReflect.Descriptor instead.
 func (*ClearScoreRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{22}
+	return file_finding_service_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ClearScoreRequest) GetDataSource() string {
@@ -1654,7 +1599,7 @@ type ListResourceRequest struct {
 func (x *ListResourceRequest) Reset() {
 	*x = ListResourceRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[23]
+		mi := &file_finding_service_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1667,7 +1612,7 @@ func (x *ListResourceRequest) String() string {
 func (*ListResourceRequest) ProtoMessage() {}
 
 func (x *ListResourceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[23]
+	mi := &file_finding_service_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1680,7 +1625,7 @@ func (x *ListResourceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListResourceRequest.ProtoReflect.Descriptor instead.
 func (*ListResourceRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{23}
+	return file_finding_service_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *ListResourceRequest) GetProjectId() uint32 {
@@ -1766,7 +1711,7 @@ type ListResourceResponse struct {
 func (x *ListResourceResponse) Reset() {
 	*x = ListResourceResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[24]
+		mi := &file_finding_service_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1779,7 +1724,7 @@ func (x *ListResourceResponse) String() string {
 func (*ListResourceResponse) ProtoMessage() {}
 
 func (x *ListResourceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[24]
+	mi := &file_finding_service_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1792,7 +1737,7 @@ func (x *ListResourceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListResourceResponse.ProtoReflect.Descriptor instead.
 func (*ListResourceResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{24}
+	return file_finding_service_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *ListResourceResponse) GetResourceId() []uint64 {
@@ -1828,7 +1773,7 @@ type GetResourceRequest struct {
 func (x *GetResourceRequest) Reset() {
 	*x = GetResourceRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[25]
+		mi := &file_finding_service_proto_msgTypes[24]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1841,7 +1786,7 @@ func (x *GetResourceRequest) String() string {
 func (*GetResourceRequest) ProtoMessage() {}
 
 func (x *GetResourceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[25]
+	mi := &file_finding_service_proto_msgTypes[24]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1854,7 +1799,7 @@ func (x *GetResourceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetResourceRequest.ProtoReflect.Descriptor instead.
 func (*GetResourceRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{25}
+	return file_finding_service_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *GetResourceRequest) GetProjectId() uint32 {
@@ -1882,7 +1827,7 @@ type GetResourceResponse struct {
 func (x *GetResourceResponse) Reset() {
 	*x = GetResourceResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[26]
+		mi := &file_finding_service_proto_msgTypes[25]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1895,7 +1840,7 @@ func (x *GetResourceResponse) String() string {
 func (*GetResourceResponse) ProtoMessage() {}
 
 func (x *GetResourceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[26]
+	mi := &file_finding_service_proto_msgTypes[25]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1908,7 +1853,7 @@ func (x *GetResourceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetResourceResponse.ProtoReflect.Descriptor instead.
 func (*GetResourceResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{26}
+	return file_finding_service_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *GetResourceResponse) GetResource() *Resource {
@@ -1930,7 +1875,7 @@ type PutResourceRequest struct {
 func (x *PutResourceRequest) Reset() {
 	*x = PutResourceRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[27]
+		mi := &file_finding_service_proto_msgTypes[26]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1943,7 +1888,7 @@ func (x *PutResourceRequest) String() string {
 func (*PutResourceRequest) ProtoMessage() {}
 
 func (x *PutResourceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[27]
+	mi := &file_finding_service_proto_msgTypes[26]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1956,7 +1901,7 @@ func (x *PutResourceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutResourceRequest.ProtoReflect.Descriptor instead.
 func (*PutResourceRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{27}
+	return file_finding_service_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *PutResourceRequest) GetProjectId() uint32 {
@@ -1984,7 +1929,7 @@ type PutResourceResponse struct {
 func (x *PutResourceResponse) Reset() {
 	*x = PutResourceResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[28]
+		mi := &file_finding_service_proto_msgTypes[27]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1997,7 +1942,7 @@ func (x *PutResourceResponse) String() string {
 func (*PutResourceResponse) ProtoMessage() {}
 
 func (x *PutResourceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[28]
+	mi := &file_finding_service_proto_msgTypes[27]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2010,7 +1955,7 @@ func (x *PutResourceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutResourceResponse.ProtoReflect.Descriptor instead.
 func (*PutResourceResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{28}
+	return file_finding_service_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *PutResourceResponse) GetResource() *Resource {
@@ -2032,7 +1977,7 @@ type PutResourceBatchRequest struct {
 func (x *PutResourceBatchRequest) Reset() {
 	*x = PutResourceBatchRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[29]
+		mi := &file_finding_service_proto_msgTypes[28]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2045,7 +1990,7 @@ func (x *PutResourceBatchRequest) String() string {
 func (*PutResourceBatchRequest) ProtoMessage() {}
 
 func (x *PutResourceBatchRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[29]
+	mi := &file_finding_service_proto_msgTypes[28]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2058,7 +2003,7 @@ func (x *PutResourceBatchRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutResourceBatchRequest.ProtoReflect.Descriptor instead.
 func (*PutResourceBatchRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{29}
+	return file_finding_service_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *PutResourceBatchRequest) GetProjectId() uint32 {
@@ -2087,7 +2032,7 @@ type DeleteResourceRequest struct {
 func (x *DeleteResourceRequest) Reset() {
 	*x = DeleteResourceRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[30]
+		mi := &file_finding_service_proto_msgTypes[29]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2100,7 +2045,7 @@ func (x *DeleteResourceRequest) String() string {
 func (*DeleteResourceRequest) ProtoMessage() {}
 
 func (x *DeleteResourceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[30]
+	mi := &file_finding_service_proto_msgTypes[29]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2113,7 +2058,7 @@ func (x *DeleteResourceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteResourceRequest.ProtoReflect.Descriptor instead.
 func (*DeleteResourceRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{30}
+	return file_finding_service_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *DeleteResourceRequest) GetProjectId() uint32 {
@@ -2146,7 +2091,7 @@ type ListResourceTagRequest struct {
 func (x *ListResourceTagRequest) Reset() {
 	*x = ListResourceTagRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[31]
+		mi := &file_finding_service_proto_msgTypes[30]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2159,7 +2104,7 @@ func (x *ListResourceTagRequest) String() string {
 func (*ListResourceTagRequest) ProtoMessage() {}
 
 func (x *ListResourceTagRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[31]
+	mi := &file_finding_service_proto_msgTypes[30]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2172,7 +2117,7 @@ func (x *ListResourceTagRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListResourceTagRequest.ProtoReflect.Descriptor instead.
 func (*ListResourceTagRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{31}
+	return file_finding_service_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ListResourceTagRequest) GetProjectId() uint32 {
@@ -2230,7 +2175,7 @@ type ListResourceTagResponse struct {
 func (x *ListResourceTagResponse) Reset() {
 	*x = ListResourceTagResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[32]
+		mi := &file_finding_service_proto_msgTypes[31]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2243,7 +2188,7 @@ func (x *ListResourceTagResponse) String() string {
 func (*ListResourceTagResponse) ProtoMessage() {}
 
 func (x *ListResourceTagResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[32]
+	mi := &file_finding_service_proto_msgTypes[31]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2256,7 +2201,7 @@ func (x *ListResourceTagResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListResourceTagResponse.ProtoReflect.Descriptor instead.
 func (*ListResourceTagResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{32}
+	return file_finding_service_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *ListResourceTagResponse) GetTag() []*ResourceTag {
@@ -2295,7 +2240,7 @@ type ListResourceTagNameRequest struct {
 func (x *ListResourceTagNameRequest) Reset() {
 	*x = ListResourceTagNameRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[33]
+		mi := &file_finding_service_proto_msgTypes[32]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2308,7 +2253,7 @@ func (x *ListResourceTagNameRequest) String() string {
 func (*ListResourceTagNameRequest) ProtoMessage() {}
 
 func (x *ListResourceTagNameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[33]
+	mi := &file_finding_service_proto_msgTypes[32]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2321,7 +2266,7 @@ func (x *ListResourceTagNameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListResourceTagNameRequest.ProtoReflect.Descriptor instead.
 func (*ListResourceTagNameRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{33}
+	return file_finding_service_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *ListResourceTagNameRequest) GetProjectId() uint32 {
@@ -2372,7 +2317,7 @@ type ListResourceTagNameResponse struct {
 func (x *ListResourceTagNameResponse) Reset() {
 	*x = ListResourceTagNameResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[34]
+		mi := &file_finding_service_proto_msgTypes[33]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2385,7 +2330,7 @@ func (x *ListResourceTagNameResponse) String() string {
 func (*ListResourceTagNameResponse) ProtoMessage() {}
 
 func (x *ListResourceTagNameResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[34]
+	mi := &file_finding_service_proto_msgTypes[33]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2398,7 +2343,7 @@ func (x *ListResourceTagNameResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListResourceTagNameResponse.ProtoReflect.Descriptor instead.
 func (*ListResourceTagNameResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{34}
+	return file_finding_service_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *ListResourceTagNameResponse) GetTag() []string {
@@ -2434,7 +2379,7 @@ type TagResourceRequest struct {
 func (x *TagResourceRequest) Reset() {
 	*x = TagResourceRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[35]
+		mi := &file_finding_service_proto_msgTypes[34]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2447,7 +2392,7 @@ func (x *TagResourceRequest) String() string {
 func (*TagResourceRequest) ProtoMessage() {}
 
 func (x *TagResourceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[35]
+	mi := &file_finding_service_proto_msgTypes[34]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2460,7 +2405,7 @@ func (x *TagResourceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TagResourceRequest.ProtoReflect.Descriptor instead.
 func (*TagResourceRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{35}
+	return file_finding_service_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *TagResourceRequest) GetProjectId() uint32 {
@@ -2488,7 +2433,7 @@ type TagResourceResponse struct {
 func (x *TagResourceResponse) Reset() {
 	*x = TagResourceResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[36]
+		mi := &file_finding_service_proto_msgTypes[35]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2501,7 +2446,7 @@ func (x *TagResourceResponse) String() string {
 func (*TagResourceResponse) ProtoMessage() {}
 
 func (x *TagResourceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[36]
+	mi := &file_finding_service_proto_msgTypes[35]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2514,7 +2459,7 @@ func (x *TagResourceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TagResourceResponse.ProtoReflect.Descriptor instead.
 func (*TagResourceResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{36}
+	return file_finding_service_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *TagResourceResponse) GetTag() *ResourceTag {
@@ -2536,7 +2481,7 @@ type UntagResourceRequest struct {
 func (x *UntagResourceRequest) Reset() {
 	*x = UntagResourceRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[37]
+		mi := &file_finding_service_proto_msgTypes[36]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2549,7 +2494,7 @@ func (x *UntagResourceRequest) String() string {
 func (*UntagResourceRequest) ProtoMessage() {}
 
 func (x *UntagResourceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[37]
+	mi := &file_finding_service_proto_msgTypes[36]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2562,7 +2507,7 @@ func (x *UntagResourceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UntagResourceRequest.ProtoReflect.Descriptor instead.
 func (*UntagResourceRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{37}
+	return file_finding_service_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *UntagResourceRequest) GetProjectId() uint32 {
@@ -2591,7 +2536,7 @@ type GetPendFindingRequest struct {
 func (x *GetPendFindingRequest) Reset() {
 	*x = GetPendFindingRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[38]
+		mi := &file_finding_service_proto_msgTypes[37]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2604,7 +2549,7 @@ func (x *GetPendFindingRequest) String() string {
 func (*GetPendFindingRequest) ProtoMessage() {}
 
 func (x *GetPendFindingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[38]
+	mi := &file_finding_service_proto_msgTypes[37]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2617,7 +2562,7 @@ func (x *GetPendFindingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPendFindingRequest.ProtoReflect.Descriptor instead.
 func (*GetPendFindingRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{38}
+	return file_finding_service_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *GetPendFindingRequest) GetProjectId() uint32 {
@@ -2645,7 +2590,7 @@ type GetPendFindingResponse struct {
 func (x *GetPendFindingResponse) Reset() {
 	*x = GetPendFindingResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[39]
+		mi := &file_finding_service_proto_msgTypes[38]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2658,7 +2603,7 @@ func (x *GetPendFindingResponse) String() string {
 func (*GetPendFindingResponse) ProtoMessage() {}
 
 func (x *GetPendFindingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[39]
+	mi := &file_finding_service_proto_msgTypes[38]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2671,7 +2616,7 @@ func (x *GetPendFindingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPendFindingResponse.ProtoReflect.Descriptor instead.
 func (*GetPendFindingResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{39}
+	return file_finding_service_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *GetPendFindingResponse) GetPendFinding() *PendFinding {
@@ -2693,7 +2638,7 @@ type PutPendFindingRequest struct {
 func (x *PutPendFindingRequest) Reset() {
 	*x = PutPendFindingRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[40]
+		mi := &file_finding_service_proto_msgTypes[39]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2706,7 +2651,7 @@ func (x *PutPendFindingRequest) String() string {
 func (*PutPendFindingRequest) ProtoMessage() {}
 
 func (x *PutPendFindingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[40]
+	mi := &file_finding_service_proto_msgTypes[39]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2719,7 +2664,7 @@ func (x *PutPendFindingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutPendFindingRequest.ProtoReflect.Descriptor instead.
 func (*PutPendFindingRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{40}
+	return file_finding_service_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *PutPendFindingRequest) GetProjectId() uint32 {
@@ -2747,7 +2692,7 @@ type PutPendFindingResponse struct {
 func (x *PutPendFindingResponse) Reset() {
 	*x = PutPendFindingResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[41]
+		mi := &file_finding_service_proto_msgTypes[40]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2760,7 +2705,7 @@ func (x *PutPendFindingResponse) String() string {
 func (*PutPendFindingResponse) ProtoMessage() {}
 
 func (x *PutPendFindingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[41]
+	mi := &file_finding_service_proto_msgTypes[40]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2773,7 +2718,7 @@ func (x *PutPendFindingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutPendFindingResponse.ProtoReflect.Descriptor instead.
 func (*PutPendFindingResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{41}
+	return file_finding_service_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *PutPendFindingResponse) GetPendFinding() *PendFinding {
@@ -2795,7 +2740,7 @@ type DeletePendFindingRequest struct {
 func (x *DeletePendFindingRequest) Reset() {
 	*x = DeletePendFindingRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[42]
+		mi := &file_finding_service_proto_msgTypes[41]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2808,7 +2753,7 @@ func (x *DeletePendFindingRequest) String() string {
 func (*DeletePendFindingRequest) ProtoMessage() {}
 
 func (x *DeletePendFindingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[42]
+	mi := &file_finding_service_proto_msgTypes[41]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2821,7 +2766,7 @@ func (x *DeletePendFindingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeletePendFindingRequest.ProtoReflect.Descriptor instead.
 func (*DeletePendFindingRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{42}
+	return file_finding_service_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *DeletePendFindingRequest) GetProjectId() uint32 {
@@ -2850,7 +2795,7 @@ type ListFindingSettingRequest struct {
 func (x *ListFindingSettingRequest) Reset() {
 	*x = ListFindingSettingRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[43]
+		mi := &file_finding_service_proto_msgTypes[42]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2863,7 +2808,7 @@ func (x *ListFindingSettingRequest) String() string {
 func (*ListFindingSettingRequest) ProtoMessage() {}
 
 func (x *ListFindingSettingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[43]
+	mi := &file_finding_service_proto_msgTypes[42]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2876,7 +2821,7 @@ func (x *ListFindingSettingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFindingSettingRequest.ProtoReflect.Descriptor instead.
 func (*ListFindingSettingRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{43}
+	return file_finding_service_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *ListFindingSettingRequest) GetProjectId() uint32 {
@@ -2904,7 +2849,7 @@ type ListFindingSettingResponse struct {
 func (x *ListFindingSettingResponse) Reset() {
 	*x = ListFindingSettingResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[44]
+		mi := &file_finding_service_proto_msgTypes[43]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2917,7 +2862,7 @@ func (x *ListFindingSettingResponse) String() string {
 func (*ListFindingSettingResponse) ProtoMessage() {}
 
 func (x *ListFindingSettingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[44]
+	mi := &file_finding_service_proto_msgTypes[43]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2930,7 +2875,7 @@ func (x *ListFindingSettingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFindingSettingResponse.ProtoReflect.Descriptor instead.
 func (*ListFindingSettingResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{44}
+	return file_finding_service_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *ListFindingSettingResponse) GetFindingSetting() []*FindingSetting {
@@ -2953,7 +2898,7 @@ type GetFindingSettingRequest struct {
 func (x *GetFindingSettingRequest) Reset() {
 	*x = GetFindingSettingRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[45]
+		mi := &file_finding_service_proto_msgTypes[44]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2966,7 +2911,7 @@ func (x *GetFindingSettingRequest) String() string {
 func (*GetFindingSettingRequest) ProtoMessage() {}
 
 func (x *GetFindingSettingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[45]
+	mi := &file_finding_service_proto_msgTypes[44]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2979,7 +2924,7 @@ func (x *GetFindingSettingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFindingSettingRequest.ProtoReflect.Descriptor instead.
 func (*GetFindingSettingRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{45}
+	return file_finding_service_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *GetFindingSettingRequest) GetProjectId() uint32 {
@@ -3014,7 +2959,7 @@ type GetFindingSettingResponse struct {
 func (x *GetFindingSettingResponse) Reset() {
 	*x = GetFindingSettingResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[46]
+		mi := &file_finding_service_proto_msgTypes[45]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3027,7 +2972,7 @@ func (x *GetFindingSettingResponse) String() string {
 func (*GetFindingSettingResponse) ProtoMessage() {}
 
 func (x *GetFindingSettingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[46]
+	mi := &file_finding_service_proto_msgTypes[45]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3040,7 +2985,7 @@ func (x *GetFindingSettingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFindingSettingResponse.ProtoReflect.Descriptor instead.
 func (*GetFindingSettingResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{46}
+	return file_finding_service_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *GetFindingSettingResponse) GetFindingSetting() *FindingSetting {
@@ -3062,7 +3007,7 @@ type PutFindingSettingRequest struct {
 func (x *PutFindingSettingRequest) Reset() {
 	*x = PutFindingSettingRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[47]
+		mi := &file_finding_service_proto_msgTypes[46]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3075,7 +3020,7 @@ func (x *PutFindingSettingRequest) String() string {
 func (*PutFindingSettingRequest) ProtoMessage() {}
 
 func (x *PutFindingSettingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[47]
+	mi := &file_finding_service_proto_msgTypes[46]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3088,7 +3033,7 @@ func (x *PutFindingSettingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutFindingSettingRequest.ProtoReflect.Descriptor instead.
 func (*PutFindingSettingRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{47}
+	return file_finding_service_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *PutFindingSettingRequest) GetProjectId() uint32 {
@@ -3116,7 +3061,7 @@ type PutFindingSettingResponse struct {
 func (x *PutFindingSettingResponse) Reset() {
 	*x = PutFindingSettingResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[48]
+		mi := &file_finding_service_proto_msgTypes[47]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3129,7 +3074,7 @@ func (x *PutFindingSettingResponse) String() string {
 func (*PutFindingSettingResponse) ProtoMessage() {}
 
 func (x *PutFindingSettingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[48]
+	mi := &file_finding_service_proto_msgTypes[47]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3142,7 +3087,7 @@ func (x *PutFindingSettingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutFindingSettingResponse.ProtoReflect.Descriptor instead.
 func (*PutFindingSettingResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{48}
+	return file_finding_service_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *PutFindingSettingResponse) GetFindingSetting() *FindingSetting {
@@ -3164,7 +3109,7 @@ type DeleteFindingSettingRequest struct {
 func (x *DeleteFindingSettingRequest) Reset() {
 	*x = DeleteFindingSettingRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[49]
+		mi := &file_finding_service_proto_msgTypes[48]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3177,7 +3122,7 @@ func (x *DeleteFindingSettingRequest) String() string {
 func (*DeleteFindingSettingRequest) ProtoMessage() {}
 
 func (x *DeleteFindingSettingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[49]
+	mi := &file_finding_service_proto_msgTypes[48]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3190,7 +3135,7 @@ func (x *DeleteFindingSettingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteFindingSettingRequest.ProtoReflect.Descriptor instead.
 func (*DeleteFindingSettingRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{49}
+	return file_finding_service_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *DeleteFindingSettingRequest) GetProjectId() uint32 {
@@ -3219,7 +3164,7 @@ type GetRecommendRequest struct {
 func (x *GetRecommendRequest) Reset() {
 	*x = GetRecommendRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[50]
+		mi := &file_finding_service_proto_msgTypes[49]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3232,7 +3177,7 @@ func (x *GetRecommendRequest) String() string {
 func (*GetRecommendRequest) ProtoMessage() {}
 
 func (x *GetRecommendRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[50]
+	mi := &file_finding_service_proto_msgTypes[49]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3245,7 +3190,7 @@ func (x *GetRecommendRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRecommendRequest.ProtoReflect.Descriptor instead.
 func (*GetRecommendRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{50}
+	return file_finding_service_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *GetRecommendRequest) GetProjectId() uint32 {
@@ -3273,7 +3218,7 @@ type GetRecommendResponse struct {
 func (x *GetRecommendResponse) Reset() {
 	*x = GetRecommendResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[51]
+		mi := &file_finding_service_proto_msgTypes[50]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3286,7 +3231,7 @@ func (x *GetRecommendResponse) String() string {
 func (*GetRecommendResponse) ProtoMessage() {}
 
 func (x *GetRecommendResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[51]
+	mi := &file_finding_service_proto_msgTypes[50]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3299,7 +3244,7 @@ func (x *GetRecommendResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRecommendResponse.ProtoReflect.Descriptor instead.
 func (*GetRecommendResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{51}
+	return file_finding_service_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *GetRecommendResponse) GetRecommend() *Recommend {
@@ -3325,7 +3270,7 @@ type PutRecommendRequest struct {
 func (x *PutRecommendRequest) Reset() {
 	*x = PutRecommendRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[52]
+		mi := &file_finding_service_proto_msgTypes[51]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3338,7 +3283,7 @@ func (x *PutRecommendRequest) String() string {
 func (*PutRecommendRequest) ProtoMessage() {}
 
 func (x *PutRecommendRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[52]
+	mi := &file_finding_service_proto_msgTypes[51]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3351,7 +3296,7 @@ func (x *PutRecommendRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutRecommendRequest.ProtoReflect.Descriptor instead.
 func (*PutRecommendRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{52}
+	return file_finding_service_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *PutRecommendRequest) GetProjectId() uint32 {
@@ -3407,7 +3352,7 @@ type PutRecommendResponse struct {
 func (x *PutRecommendResponse) Reset() {
 	*x = PutRecommendResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[53]
+		mi := &file_finding_service_proto_msgTypes[52]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3420,7 +3365,7 @@ func (x *PutRecommendResponse) String() string {
 func (*PutRecommendResponse) ProtoMessage() {}
 
 func (x *PutRecommendResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[53]
+	mi := &file_finding_service_proto_msgTypes[52]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3433,7 +3378,7 @@ func (x *PutRecommendResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutRecommendResponse.ProtoReflect.Descriptor instead.
 func (*PutRecommendResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{53}
+	return file_finding_service_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *PutRecommendResponse) GetRecommend() *Recommend {
@@ -3456,7 +3401,7 @@ type GetAISummaryRequest struct {
 func (x *GetAISummaryRequest) Reset() {
 	*x = GetAISummaryRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[54]
+		mi := &file_finding_service_proto_msgTypes[53]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3469,7 +3414,7 @@ func (x *GetAISummaryRequest) String() string {
 func (*GetAISummaryRequest) ProtoMessage() {}
 
 func (x *GetAISummaryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[54]
+	mi := &file_finding_service_proto_msgTypes[53]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3482,7 +3427,7 @@ func (x *GetAISummaryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAISummaryRequest.ProtoReflect.Descriptor instead.
 func (*GetAISummaryRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{54}
+	return file_finding_service_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *GetAISummaryRequest) GetProjectId() uint32 {
@@ -3517,7 +3462,7 @@ type GetAISummaryResponse struct {
 func (x *GetAISummaryResponse) Reset() {
 	*x = GetAISummaryResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[55]
+		mi := &file_finding_service_proto_msgTypes[54]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3530,7 +3475,7 @@ func (x *GetAISummaryResponse) String() string {
 func (*GetAISummaryResponse) ProtoMessage() {}
 
 func (x *GetAISummaryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[55]
+	mi := &file_finding_service_proto_msgTypes[54]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3543,7 +3488,7 @@ func (x *GetAISummaryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAISummaryResponse.ProtoReflect.Descriptor instead.
 func (*GetAISummaryResponse) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{55}
+	return file_finding_service_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *GetAISummaryResponse) GetAnswer() string {
@@ -3566,7 +3511,7 @@ type UntagByResourceNameRequest struct {
 func (x *UntagByResourceNameRequest) Reset() {
 	*x = UntagByResourceNameRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_finding_service_proto_msgTypes[56]
+		mi := &file_finding_service_proto_msgTypes[55]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3579,7 +3524,7 @@ func (x *UntagByResourceNameRequest) String() string {
 func (*UntagByResourceNameRequest) ProtoMessage() {}
 
 func (x *UntagByResourceNameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finding_service_proto_msgTypes[56]
+	mi := &file_finding_service_proto_msgTypes[55]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3592,7 +3537,7 @@ func (x *UntagByResourceNameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UntagByResourceNameRequest.ProtoReflect.Descriptor instead.
 func (*UntagByResourceNameRequest) Descriptor() ([]byte, []int) {
-	return file_finding_service_proto_rawDescGZIP(), []int{56}
+	return file_finding_service_proto_rawDescGZIP(), []int{55}
 }
 
 func (x *UntagByResourceNameRequest) GetProjectId() uint32 {
@@ -3680,11 +3625,6 @@ var file_finding_service_proto_rawDesc = []byte{
 	0x2e, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67,
 	0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x1d,
 	0x0a, 0x0a, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x69, 0x64, 0x18, 0x0e, 0x20, 0x01,
-	0x28, 0x04, 0x52, 0x09, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x49, 0x64, 0x22, 0x4e, 0x0a,
-	0x0e, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x46, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x12,
-	0x1d, 0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x0d, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x1d,
-	0x0a, 0x0a, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01,
 	0x28, 0x04, 0x52, 0x09, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x49, 0x64, 0x22, 0x72, 0x0a,
 	0x08, 0x50, 0x65, 0x6e, 0x64, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x6f, 0x74,
 	0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x6f, 0x74, 0x65, 0x12, 0x1b, 0x0a,
@@ -4278,185 +4218,184 @@ func file_finding_service_proto_rawDescGZIP() []byte {
 	return file_finding_service_proto_rawDescData
 }
 
-var file_finding_service_proto_msgTypes = make([]protoimpl.MessageInfo, 57)
+var file_finding_service_proto_msgTypes = make([]protoimpl.MessageInfo, 56)
 var file_finding_service_proto_goTypes = []interface{}{
 	(*ListFindingRequest)(nil),          // 0: core.finding.ListFindingRequest
 	(*ListFindingResponse)(nil),         // 1: core.finding.ListFindingResponse
 	(*ListFindingForOrgRequest)(nil),    // 2: core.finding.ListFindingForOrgRequest
-	(*ProjectFinding)(nil),              // 3: core.finding.ProjectFinding
-	(*PendInfo)(nil),                    // 4: core.finding.PendInfo
-	(*FindingDetail)(nil),               // 5: core.finding.FindingDetail
-	(*ListFindingForOrgResponse)(nil),   // 6: core.finding.ListFindingForOrgResponse
-	(*BatchListFindingRequest)(nil),     // 7: core.finding.BatchListFindingRequest
-	(*BatchListFindingResponse)(nil),    // 8: core.finding.BatchListFindingResponse
-	(*GetFindingRequest)(nil),           // 9: core.finding.GetFindingRequest
-	(*GetFindingResponse)(nil),          // 10: core.finding.GetFindingResponse
-	(*PutFindingRequest)(nil),           // 11: core.finding.PutFindingRequest
-	(*PutFindingResponse)(nil),          // 12: core.finding.PutFindingResponse
-	(*PutFindingBatchRequest)(nil),      // 13: core.finding.PutFindingBatchRequest
-	(*DeleteFindingRequest)(nil),        // 14: core.finding.DeleteFindingRequest
-	(*ListFindingTagRequest)(nil),       // 15: core.finding.ListFindingTagRequest
-	(*ListFindingTagResponse)(nil),      // 16: core.finding.ListFindingTagResponse
-	(*ListFindingTagNameRequest)(nil),   // 17: core.finding.ListFindingTagNameRequest
-	(*ListFindingTagNameResponse)(nil),  // 18: core.finding.ListFindingTagNameResponse
-	(*TagFindingRequest)(nil),           // 19: core.finding.TagFindingRequest
-	(*TagFindingResponse)(nil),          // 20: core.finding.TagFindingResponse
-	(*UntagFindingRequest)(nil),         // 21: core.finding.UntagFindingRequest
-	(*ClearScoreRequest)(nil),           // 22: core.finding.ClearScoreRequest
-	(*ListResourceRequest)(nil),         // 23: core.finding.ListResourceRequest
-	(*ListResourceResponse)(nil),        // 24: core.finding.ListResourceResponse
-	(*GetResourceRequest)(nil),          // 25: core.finding.GetResourceRequest
-	(*GetResourceResponse)(nil),         // 26: core.finding.GetResourceResponse
-	(*PutResourceRequest)(nil),          // 27: core.finding.PutResourceRequest
-	(*PutResourceResponse)(nil),         // 28: core.finding.PutResourceResponse
-	(*PutResourceBatchRequest)(nil),     // 29: core.finding.PutResourceBatchRequest
-	(*DeleteResourceRequest)(nil),       // 30: core.finding.DeleteResourceRequest
-	(*ListResourceTagRequest)(nil),      // 31: core.finding.ListResourceTagRequest
-	(*ListResourceTagResponse)(nil),     // 32: core.finding.ListResourceTagResponse
-	(*ListResourceTagNameRequest)(nil),  // 33: core.finding.ListResourceTagNameRequest
-	(*ListResourceTagNameResponse)(nil), // 34: core.finding.ListResourceTagNameResponse
-	(*TagResourceRequest)(nil),          // 35: core.finding.TagResourceRequest
-	(*TagResourceResponse)(nil),         // 36: core.finding.TagResourceResponse
-	(*UntagResourceRequest)(nil),        // 37: core.finding.UntagResourceRequest
-	(*GetPendFindingRequest)(nil),       // 38: core.finding.GetPendFindingRequest
-	(*GetPendFindingResponse)(nil),      // 39: core.finding.GetPendFindingResponse
-	(*PutPendFindingRequest)(nil),       // 40: core.finding.PutPendFindingRequest
-	(*PutPendFindingResponse)(nil),      // 41: core.finding.PutPendFindingResponse
-	(*DeletePendFindingRequest)(nil),    // 42: core.finding.DeletePendFindingRequest
-	(*ListFindingSettingRequest)(nil),   // 43: core.finding.ListFindingSettingRequest
-	(*ListFindingSettingResponse)(nil),  // 44: core.finding.ListFindingSettingResponse
-	(*GetFindingSettingRequest)(nil),    // 45: core.finding.GetFindingSettingRequest
-	(*GetFindingSettingResponse)(nil),   // 46: core.finding.GetFindingSettingResponse
-	(*PutFindingSettingRequest)(nil),    // 47: core.finding.PutFindingSettingRequest
-	(*PutFindingSettingResponse)(nil),   // 48: core.finding.PutFindingSettingResponse
-	(*DeleteFindingSettingRequest)(nil), // 49: core.finding.DeleteFindingSettingRequest
-	(*GetRecommendRequest)(nil),         // 50: core.finding.GetRecommendRequest
-	(*GetRecommendResponse)(nil),        // 51: core.finding.GetRecommendResponse
-	(*PutRecommendRequest)(nil),         // 52: core.finding.PutRecommendRequest
-	(*PutRecommendResponse)(nil),        // 53: core.finding.PutRecommendResponse
-	(*GetAISummaryRequest)(nil),         // 54: core.finding.GetAISummaryRequest
-	(*GetAISummaryResponse)(nil),        // 55: core.finding.GetAISummaryResponse
-	(*UntagByResourceNameRequest)(nil),  // 56: core.finding.UntagByResourceNameRequest
-	(FindingStatus)(0),                  // 57: core.finding.FindingStatus
-	(*Finding)(nil),                     // 58: core.finding.Finding
-	(*FindingTag)(nil),                  // 59: core.finding.FindingTag
-	(*FindingForUpsert)(nil),            // 60: core.finding.FindingForUpsert
-	(*FindingBatchForUpsert)(nil),       // 61: core.finding.FindingBatchForUpsert
-	(*FindingTagForUpsert)(nil),         // 62: core.finding.FindingTagForUpsert
-	(*Resource)(nil),                    // 63: core.finding.Resource
-	(*ResourceForUpsert)(nil),           // 64: core.finding.ResourceForUpsert
-	(*ResourceBatchForUpsert)(nil),      // 65: core.finding.ResourceBatchForUpsert
-	(*ResourceTag)(nil),                 // 66: core.finding.ResourceTag
-	(*ResourceTagForUpsert)(nil),        // 67: core.finding.ResourceTagForUpsert
-	(*PendFinding)(nil),                 // 68: core.finding.PendFinding
-	(*PendFindingForUpsert)(nil),        // 69: core.finding.PendFindingForUpsert
-	(FindingSettingStatus)(0),           // 70: core.finding.FindingSettingStatus
-	(*FindingSetting)(nil),              // 71: core.finding.FindingSetting
-	(*FindingSettingForUpsert)(nil),     // 72: core.finding.FindingSettingForUpsert
-	(*Recommend)(nil),                   // 73: core.finding.Recommend
-	(*emptypb.Empty)(nil),               // 74: google.protobuf.Empty
+	(*PendInfo)(nil),                    // 3: core.finding.PendInfo
+	(*FindingDetail)(nil),               // 4: core.finding.FindingDetail
+	(*ListFindingForOrgResponse)(nil),   // 5: core.finding.ListFindingForOrgResponse
+	(*BatchListFindingRequest)(nil),     // 6: core.finding.BatchListFindingRequest
+	(*BatchListFindingResponse)(nil),    // 7: core.finding.BatchListFindingResponse
+	(*GetFindingRequest)(nil),           // 8: core.finding.GetFindingRequest
+	(*GetFindingResponse)(nil),          // 9: core.finding.GetFindingResponse
+	(*PutFindingRequest)(nil),           // 10: core.finding.PutFindingRequest
+	(*PutFindingResponse)(nil),          // 11: core.finding.PutFindingResponse
+	(*PutFindingBatchRequest)(nil),      // 12: core.finding.PutFindingBatchRequest
+	(*DeleteFindingRequest)(nil),        // 13: core.finding.DeleteFindingRequest
+	(*ListFindingTagRequest)(nil),       // 14: core.finding.ListFindingTagRequest
+	(*ListFindingTagResponse)(nil),      // 15: core.finding.ListFindingTagResponse
+	(*ListFindingTagNameRequest)(nil),   // 16: core.finding.ListFindingTagNameRequest
+	(*ListFindingTagNameResponse)(nil),  // 17: core.finding.ListFindingTagNameResponse
+	(*TagFindingRequest)(nil),           // 18: core.finding.TagFindingRequest
+	(*TagFindingResponse)(nil),          // 19: core.finding.TagFindingResponse
+	(*UntagFindingRequest)(nil),         // 20: core.finding.UntagFindingRequest
+	(*ClearScoreRequest)(nil),           // 21: core.finding.ClearScoreRequest
+	(*ListResourceRequest)(nil),         // 22: core.finding.ListResourceRequest
+	(*ListResourceResponse)(nil),        // 23: core.finding.ListResourceResponse
+	(*GetResourceRequest)(nil),          // 24: core.finding.GetResourceRequest
+	(*GetResourceResponse)(nil),         // 25: core.finding.GetResourceResponse
+	(*PutResourceRequest)(nil),          // 26: core.finding.PutResourceRequest
+	(*PutResourceResponse)(nil),         // 27: core.finding.PutResourceResponse
+	(*PutResourceBatchRequest)(nil),     // 28: core.finding.PutResourceBatchRequest
+	(*DeleteResourceRequest)(nil),       // 29: core.finding.DeleteResourceRequest
+	(*ListResourceTagRequest)(nil),      // 30: core.finding.ListResourceTagRequest
+	(*ListResourceTagResponse)(nil),     // 31: core.finding.ListResourceTagResponse
+	(*ListResourceTagNameRequest)(nil),  // 32: core.finding.ListResourceTagNameRequest
+	(*ListResourceTagNameResponse)(nil), // 33: core.finding.ListResourceTagNameResponse
+	(*TagResourceRequest)(nil),          // 34: core.finding.TagResourceRequest
+	(*TagResourceResponse)(nil),         // 35: core.finding.TagResourceResponse
+	(*UntagResourceRequest)(nil),        // 36: core.finding.UntagResourceRequest
+	(*GetPendFindingRequest)(nil),       // 37: core.finding.GetPendFindingRequest
+	(*GetPendFindingResponse)(nil),      // 38: core.finding.GetPendFindingResponse
+	(*PutPendFindingRequest)(nil),       // 39: core.finding.PutPendFindingRequest
+	(*PutPendFindingResponse)(nil),      // 40: core.finding.PutPendFindingResponse
+	(*DeletePendFindingRequest)(nil),    // 41: core.finding.DeletePendFindingRequest
+	(*ListFindingSettingRequest)(nil),   // 42: core.finding.ListFindingSettingRequest
+	(*ListFindingSettingResponse)(nil),  // 43: core.finding.ListFindingSettingResponse
+	(*GetFindingSettingRequest)(nil),    // 44: core.finding.GetFindingSettingRequest
+	(*GetFindingSettingResponse)(nil),   // 45: core.finding.GetFindingSettingResponse
+	(*PutFindingSettingRequest)(nil),    // 46: core.finding.PutFindingSettingRequest
+	(*PutFindingSettingResponse)(nil),   // 47: core.finding.PutFindingSettingResponse
+	(*DeleteFindingSettingRequest)(nil), // 48: core.finding.DeleteFindingSettingRequest
+	(*GetRecommendRequest)(nil),         // 49: core.finding.GetRecommendRequest
+	(*GetRecommendResponse)(nil),        // 50: core.finding.GetRecommendResponse
+	(*PutRecommendRequest)(nil),         // 51: core.finding.PutRecommendRequest
+	(*PutRecommendResponse)(nil),        // 52: core.finding.PutRecommendResponse
+	(*GetAISummaryRequest)(nil),         // 53: core.finding.GetAISummaryRequest
+	(*GetAISummaryResponse)(nil),        // 54: core.finding.GetAISummaryResponse
+	(*UntagByResourceNameRequest)(nil),  // 55: core.finding.UntagByResourceNameRequest
+	(FindingStatus)(0),                  // 56: core.finding.FindingStatus
+	(*Finding)(nil),                     // 57: core.finding.Finding
+	(*FindingTag)(nil),                  // 58: core.finding.FindingTag
+	(*FindingForUpsert)(nil),            // 59: core.finding.FindingForUpsert
+	(*FindingBatchForUpsert)(nil),       // 60: core.finding.FindingBatchForUpsert
+	(*FindingTagForUpsert)(nil),         // 61: core.finding.FindingTagForUpsert
+	(*Resource)(nil),                    // 62: core.finding.Resource
+	(*ResourceForUpsert)(nil),           // 63: core.finding.ResourceForUpsert
+	(*ResourceBatchForUpsert)(nil),      // 64: core.finding.ResourceBatchForUpsert
+	(*ResourceTag)(nil),                 // 65: core.finding.ResourceTag
+	(*ResourceTagForUpsert)(nil),        // 66: core.finding.ResourceTagForUpsert
+	(*PendFinding)(nil),                 // 67: core.finding.PendFinding
+	(*PendFindingForUpsert)(nil),        // 68: core.finding.PendFindingForUpsert
+	(FindingSettingStatus)(0),           // 69: core.finding.FindingSettingStatus
+	(*FindingSetting)(nil),              // 70: core.finding.FindingSetting
+	(*FindingSettingForUpsert)(nil),     // 71: core.finding.FindingSettingForUpsert
+	(*Recommend)(nil),                   // 72: core.finding.Recommend
+	(*emptypb.Empty)(nil),               // 73: google.protobuf.Empty
 }
 var file_finding_service_proto_depIdxs = []int32{
-	57, // 0: core.finding.ListFindingRequest.status:type_name -> core.finding.FindingStatus
-	57, // 1: core.finding.ListFindingForOrgRequest.status:type_name -> core.finding.FindingStatus
-	58, // 2: core.finding.FindingDetail.finding:type_name -> core.finding.Finding
-	4,  // 3: core.finding.FindingDetail.pend_info:type_name -> core.finding.PendInfo
-	59, // 4: core.finding.FindingDetail.finding_tags:type_name -> core.finding.FindingTag
-	5,  // 5: core.finding.ListFindingForOrgResponse.findings:type_name -> core.finding.FindingDetail
-	57, // 6: core.finding.BatchListFindingRequest.status:type_name -> core.finding.FindingStatus
-	58, // 7: core.finding.GetFindingResponse.finding:type_name -> core.finding.Finding
-	60, // 8: core.finding.PutFindingRequest.finding:type_name -> core.finding.FindingForUpsert
-	58, // 9: core.finding.PutFindingResponse.finding:type_name -> core.finding.Finding
-	61, // 10: core.finding.PutFindingBatchRequest.finding:type_name -> core.finding.FindingBatchForUpsert
-	59, // 11: core.finding.ListFindingTagResponse.tag:type_name -> core.finding.FindingTag
-	62, // 12: core.finding.TagFindingRequest.tag:type_name -> core.finding.FindingTagForUpsert
-	59, // 13: core.finding.TagFindingResponse.tag:type_name -> core.finding.FindingTag
-	63, // 14: core.finding.GetResourceResponse.resource:type_name -> core.finding.Resource
-	64, // 15: core.finding.PutResourceRequest.resource:type_name -> core.finding.ResourceForUpsert
-	63, // 16: core.finding.PutResourceResponse.resource:type_name -> core.finding.Resource
-	65, // 17: core.finding.PutResourceBatchRequest.resource:type_name -> core.finding.ResourceBatchForUpsert
-	66, // 18: core.finding.ListResourceTagResponse.tag:type_name -> core.finding.ResourceTag
-	67, // 19: core.finding.TagResourceRequest.tag:type_name -> core.finding.ResourceTagForUpsert
-	66, // 20: core.finding.TagResourceResponse.tag:type_name -> core.finding.ResourceTag
-	68, // 21: core.finding.GetPendFindingResponse.pend_finding:type_name -> core.finding.PendFinding
-	69, // 22: core.finding.PutPendFindingRequest.pend_finding:type_name -> core.finding.PendFindingForUpsert
-	68, // 23: core.finding.PutPendFindingResponse.pend_finding:type_name -> core.finding.PendFinding
-	70, // 24: core.finding.ListFindingSettingRequest.status:type_name -> core.finding.FindingSettingStatus
-	71, // 25: core.finding.ListFindingSettingResponse.finding_setting:type_name -> core.finding.FindingSetting
-	70, // 26: core.finding.GetFindingSettingRequest.status:type_name -> core.finding.FindingSettingStatus
-	71, // 27: core.finding.GetFindingSettingResponse.finding_setting:type_name -> core.finding.FindingSetting
-	72, // 28: core.finding.PutFindingSettingRequest.finding_setting:type_name -> core.finding.FindingSettingForUpsert
-	71, // 29: core.finding.PutFindingSettingResponse.finding_setting:type_name -> core.finding.FindingSetting
-	73, // 30: core.finding.GetRecommendResponse.recommend:type_name -> core.finding.Recommend
-	73, // 31: core.finding.PutRecommendResponse.recommend:type_name -> core.finding.Recommend
+	56, // 0: core.finding.ListFindingRequest.status:type_name -> core.finding.FindingStatus
+	56, // 1: core.finding.ListFindingForOrgRequest.status:type_name -> core.finding.FindingStatus
+	57, // 2: core.finding.FindingDetail.finding:type_name -> core.finding.Finding
+	3,  // 3: core.finding.FindingDetail.pend_info:type_name -> core.finding.PendInfo
+	58, // 4: core.finding.FindingDetail.finding_tags:type_name -> core.finding.FindingTag
+	4,  // 5: core.finding.ListFindingForOrgResponse.findings:type_name -> core.finding.FindingDetail
+	56, // 6: core.finding.BatchListFindingRequest.status:type_name -> core.finding.FindingStatus
+	57, // 7: core.finding.GetFindingResponse.finding:type_name -> core.finding.Finding
+	59, // 8: core.finding.PutFindingRequest.finding:type_name -> core.finding.FindingForUpsert
+	57, // 9: core.finding.PutFindingResponse.finding:type_name -> core.finding.Finding
+	60, // 10: core.finding.PutFindingBatchRequest.finding:type_name -> core.finding.FindingBatchForUpsert
+	58, // 11: core.finding.ListFindingTagResponse.tag:type_name -> core.finding.FindingTag
+	61, // 12: core.finding.TagFindingRequest.tag:type_name -> core.finding.FindingTagForUpsert
+	58, // 13: core.finding.TagFindingResponse.tag:type_name -> core.finding.FindingTag
+	62, // 14: core.finding.GetResourceResponse.resource:type_name -> core.finding.Resource
+	63, // 15: core.finding.PutResourceRequest.resource:type_name -> core.finding.ResourceForUpsert
+	62, // 16: core.finding.PutResourceResponse.resource:type_name -> core.finding.Resource
+	64, // 17: core.finding.PutResourceBatchRequest.resource:type_name -> core.finding.ResourceBatchForUpsert
+	65, // 18: core.finding.ListResourceTagResponse.tag:type_name -> core.finding.ResourceTag
+	66, // 19: core.finding.TagResourceRequest.tag:type_name -> core.finding.ResourceTagForUpsert
+	65, // 20: core.finding.TagResourceResponse.tag:type_name -> core.finding.ResourceTag
+	67, // 21: core.finding.GetPendFindingResponse.pend_finding:type_name -> core.finding.PendFinding
+	68, // 22: core.finding.PutPendFindingRequest.pend_finding:type_name -> core.finding.PendFindingForUpsert
+	67, // 23: core.finding.PutPendFindingResponse.pend_finding:type_name -> core.finding.PendFinding
+	69, // 24: core.finding.ListFindingSettingRequest.status:type_name -> core.finding.FindingSettingStatus
+	70, // 25: core.finding.ListFindingSettingResponse.finding_setting:type_name -> core.finding.FindingSetting
+	69, // 26: core.finding.GetFindingSettingRequest.status:type_name -> core.finding.FindingSettingStatus
+	70, // 27: core.finding.GetFindingSettingResponse.finding_setting:type_name -> core.finding.FindingSetting
+	71, // 28: core.finding.PutFindingSettingRequest.finding_setting:type_name -> core.finding.FindingSettingForUpsert
+	70, // 29: core.finding.PutFindingSettingResponse.finding_setting:type_name -> core.finding.FindingSetting
+	72, // 30: core.finding.GetRecommendResponse.recommend:type_name -> core.finding.Recommend
+	72, // 31: core.finding.PutRecommendResponse.recommend:type_name -> core.finding.Recommend
 	0,  // 32: core.finding.FindingService.ListFinding:input_type -> core.finding.ListFindingRequest
 	2,  // 33: core.finding.FindingService.ListFindingForOrg:input_type -> core.finding.ListFindingForOrgRequest
-	7,  // 34: core.finding.FindingService.BatchListFinding:input_type -> core.finding.BatchListFindingRequest
-	9,  // 35: core.finding.FindingService.GetFinding:input_type -> core.finding.GetFindingRequest
-	11, // 36: core.finding.FindingService.PutFinding:input_type -> core.finding.PutFindingRequest
-	13, // 37: core.finding.FindingService.PutFindingBatch:input_type -> core.finding.PutFindingBatchRequest
-	14, // 38: core.finding.FindingService.DeleteFinding:input_type -> core.finding.DeleteFindingRequest
-	15, // 39: core.finding.FindingService.ListFindingTag:input_type -> core.finding.ListFindingTagRequest
-	17, // 40: core.finding.FindingService.ListFindingTagName:input_type -> core.finding.ListFindingTagNameRequest
-	19, // 41: core.finding.FindingService.TagFinding:input_type -> core.finding.TagFindingRequest
-	21, // 42: core.finding.FindingService.UntagFinding:input_type -> core.finding.UntagFindingRequest
-	22, // 43: core.finding.FindingService.ClearScore:input_type -> core.finding.ClearScoreRequest
-	23, // 44: core.finding.FindingService.ListResource:input_type -> core.finding.ListResourceRequest
-	25, // 45: core.finding.FindingService.GetResource:input_type -> core.finding.GetResourceRequest
-	27, // 46: core.finding.FindingService.PutResource:input_type -> core.finding.PutResourceRequest
-	29, // 47: core.finding.FindingService.PutResourceBatch:input_type -> core.finding.PutResourceBatchRequest
-	30, // 48: core.finding.FindingService.DeleteResource:input_type -> core.finding.DeleteResourceRequest
-	31, // 49: core.finding.FindingService.ListResourceTag:input_type -> core.finding.ListResourceTagRequest
-	33, // 50: core.finding.FindingService.ListResourceTagName:input_type -> core.finding.ListResourceTagNameRequest
-	35, // 51: core.finding.FindingService.TagResource:input_type -> core.finding.TagResourceRequest
-	37, // 52: core.finding.FindingService.UntagResource:input_type -> core.finding.UntagResourceRequest
-	38, // 53: core.finding.FindingService.GetPendFinding:input_type -> core.finding.GetPendFindingRequest
-	40, // 54: core.finding.FindingService.PutPendFinding:input_type -> core.finding.PutPendFindingRequest
-	42, // 55: core.finding.FindingService.DeletePendFinding:input_type -> core.finding.DeletePendFindingRequest
-	43, // 56: core.finding.FindingService.ListFindingSetting:input_type -> core.finding.ListFindingSettingRequest
-	45, // 57: core.finding.FindingService.GetFindingSetting:input_type -> core.finding.GetFindingSettingRequest
-	47, // 58: core.finding.FindingService.PutFindingSetting:input_type -> core.finding.PutFindingSettingRequest
-	49, // 59: core.finding.FindingService.DeleteFindingSetting:input_type -> core.finding.DeleteFindingSettingRequest
-	50, // 60: core.finding.FindingService.GetRecommend:input_type -> core.finding.GetRecommendRequest
-	52, // 61: core.finding.FindingService.PutRecommend:input_type -> core.finding.PutRecommendRequest
-	54, // 62: core.finding.FindingService.GetAISummary:input_type -> core.finding.GetAISummaryRequest
-	54, // 63: core.finding.FindingService.GetAISummaryStream:input_type -> core.finding.GetAISummaryRequest
-	56, // 64: core.finding.FindingService.UntagByResourceName:input_type -> core.finding.UntagByResourceNameRequest
-	74, // 65: core.finding.FindingService.CleanOldResource:input_type -> google.protobuf.Empty
+	6,  // 34: core.finding.FindingService.BatchListFinding:input_type -> core.finding.BatchListFindingRequest
+	8,  // 35: core.finding.FindingService.GetFinding:input_type -> core.finding.GetFindingRequest
+	10, // 36: core.finding.FindingService.PutFinding:input_type -> core.finding.PutFindingRequest
+	12, // 37: core.finding.FindingService.PutFindingBatch:input_type -> core.finding.PutFindingBatchRequest
+	13, // 38: core.finding.FindingService.DeleteFinding:input_type -> core.finding.DeleteFindingRequest
+	14, // 39: core.finding.FindingService.ListFindingTag:input_type -> core.finding.ListFindingTagRequest
+	16, // 40: core.finding.FindingService.ListFindingTagName:input_type -> core.finding.ListFindingTagNameRequest
+	18, // 41: core.finding.FindingService.TagFinding:input_type -> core.finding.TagFindingRequest
+	20, // 42: core.finding.FindingService.UntagFinding:input_type -> core.finding.UntagFindingRequest
+	21, // 43: core.finding.FindingService.ClearScore:input_type -> core.finding.ClearScoreRequest
+	22, // 44: core.finding.FindingService.ListResource:input_type -> core.finding.ListResourceRequest
+	24, // 45: core.finding.FindingService.GetResource:input_type -> core.finding.GetResourceRequest
+	26, // 46: core.finding.FindingService.PutResource:input_type -> core.finding.PutResourceRequest
+	28, // 47: core.finding.FindingService.PutResourceBatch:input_type -> core.finding.PutResourceBatchRequest
+	29, // 48: core.finding.FindingService.DeleteResource:input_type -> core.finding.DeleteResourceRequest
+	30, // 49: core.finding.FindingService.ListResourceTag:input_type -> core.finding.ListResourceTagRequest
+	32, // 50: core.finding.FindingService.ListResourceTagName:input_type -> core.finding.ListResourceTagNameRequest
+	34, // 51: core.finding.FindingService.TagResource:input_type -> core.finding.TagResourceRequest
+	36, // 52: core.finding.FindingService.UntagResource:input_type -> core.finding.UntagResourceRequest
+	37, // 53: core.finding.FindingService.GetPendFinding:input_type -> core.finding.GetPendFindingRequest
+	39, // 54: core.finding.FindingService.PutPendFinding:input_type -> core.finding.PutPendFindingRequest
+	41, // 55: core.finding.FindingService.DeletePendFinding:input_type -> core.finding.DeletePendFindingRequest
+	42, // 56: core.finding.FindingService.ListFindingSetting:input_type -> core.finding.ListFindingSettingRequest
+	44, // 57: core.finding.FindingService.GetFindingSetting:input_type -> core.finding.GetFindingSettingRequest
+	46, // 58: core.finding.FindingService.PutFindingSetting:input_type -> core.finding.PutFindingSettingRequest
+	48, // 59: core.finding.FindingService.DeleteFindingSetting:input_type -> core.finding.DeleteFindingSettingRequest
+	49, // 60: core.finding.FindingService.GetRecommend:input_type -> core.finding.GetRecommendRequest
+	51, // 61: core.finding.FindingService.PutRecommend:input_type -> core.finding.PutRecommendRequest
+	53, // 62: core.finding.FindingService.GetAISummary:input_type -> core.finding.GetAISummaryRequest
+	53, // 63: core.finding.FindingService.GetAISummaryStream:input_type -> core.finding.GetAISummaryRequest
+	55, // 64: core.finding.FindingService.UntagByResourceName:input_type -> core.finding.UntagByResourceNameRequest
+	73, // 65: core.finding.FindingService.CleanOldResource:input_type -> google.protobuf.Empty
 	1,  // 66: core.finding.FindingService.ListFinding:output_type -> core.finding.ListFindingResponse
-	6,  // 67: core.finding.FindingService.ListFindingForOrg:output_type -> core.finding.ListFindingForOrgResponse
-	8,  // 68: core.finding.FindingService.BatchListFinding:output_type -> core.finding.BatchListFindingResponse
-	10, // 69: core.finding.FindingService.GetFinding:output_type -> core.finding.GetFindingResponse
-	12, // 70: core.finding.FindingService.PutFinding:output_type -> core.finding.PutFindingResponse
-	74, // 71: core.finding.FindingService.PutFindingBatch:output_type -> google.protobuf.Empty
-	74, // 72: core.finding.FindingService.DeleteFinding:output_type -> google.protobuf.Empty
-	16, // 73: core.finding.FindingService.ListFindingTag:output_type -> core.finding.ListFindingTagResponse
-	18, // 74: core.finding.FindingService.ListFindingTagName:output_type -> core.finding.ListFindingTagNameResponse
-	20, // 75: core.finding.FindingService.TagFinding:output_type -> core.finding.TagFindingResponse
-	74, // 76: core.finding.FindingService.UntagFinding:output_type -> google.protobuf.Empty
-	74, // 77: core.finding.FindingService.ClearScore:output_type -> google.protobuf.Empty
-	24, // 78: core.finding.FindingService.ListResource:output_type -> core.finding.ListResourceResponse
-	26, // 79: core.finding.FindingService.GetResource:output_type -> core.finding.GetResourceResponse
-	28, // 80: core.finding.FindingService.PutResource:output_type -> core.finding.PutResourceResponse
-	74, // 81: core.finding.FindingService.PutResourceBatch:output_type -> google.protobuf.Empty
-	74, // 82: core.finding.FindingService.DeleteResource:output_type -> google.protobuf.Empty
-	32, // 83: core.finding.FindingService.ListResourceTag:output_type -> core.finding.ListResourceTagResponse
-	34, // 84: core.finding.FindingService.ListResourceTagName:output_type -> core.finding.ListResourceTagNameResponse
-	36, // 85: core.finding.FindingService.TagResource:output_type -> core.finding.TagResourceResponse
-	74, // 86: core.finding.FindingService.UntagResource:output_type -> google.protobuf.Empty
-	39, // 87: core.finding.FindingService.GetPendFinding:output_type -> core.finding.GetPendFindingResponse
-	41, // 88: core.finding.FindingService.PutPendFinding:output_type -> core.finding.PutPendFindingResponse
-	74, // 89: core.finding.FindingService.DeletePendFinding:output_type -> google.protobuf.Empty
-	44, // 90: core.finding.FindingService.ListFindingSetting:output_type -> core.finding.ListFindingSettingResponse
-	46, // 91: core.finding.FindingService.GetFindingSetting:output_type -> core.finding.GetFindingSettingResponse
-	48, // 92: core.finding.FindingService.PutFindingSetting:output_type -> core.finding.PutFindingSettingResponse
-	74, // 93: core.finding.FindingService.DeleteFindingSetting:output_type -> google.protobuf.Empty
-	51, // 94: core.finding.FindingService.GetRecommend:output_type -> core.finding.GetRecommendResponse
-	53, // 95: core.finding.FindingService.PutRecommend:output_type -> core.finding.PutRecommendResponse
-	55, // 96: core.finding.FindingService.GetAISummary:output_type -> core.finding.GetAISummaryResponse
-	55, // 97: core.finding.FindingService.GetAISummaryStream:output_type -> core.finding.GetAISummaryResponse
-	74, // 98: core.finding.FindingService.UntagByResourceName:output_type -> google.protobuf.Empty
-	74, // 99: core.finding.FindingService.CleanOldResource:output_type -> google.protobuf.Empty
+	5,  // 67: core.finding.FindingService.ListFindingForOrg:output_type -> core.finding.ListFindingForOrgResponse
+	7,  // 68: core.finding.FindingService.BatchListFinding:output_type -> core.finding.BatchListFindingResponse
+	9,  // 69: core.finding.FindingService.GetFinding:output_type -> core.finding.GetFindingResponse
+	11, // 70: core.finding.FindingService.PutFinding:output_type -> core.finding.PutFindingResponse
+	73, // 71: core.finding.FindingService.PutFindingBatch:output_type -> google.protobuf.Empty
+	73, // 72: core.finding.FindingService.DeleteFinding:output_type -> google.protobuf.Empty
+	15, // 73: core.finding.FindingService.ListFindingTag:output_type -> core.finding.ListFindingTagResponse
+	17, // 74: core.finding.FindingService.ListFindingTagName:output_type -> core.finding.ListFindingTagNameResponse
+	19, // 75: core.finding.FindingService.TagFinding:output_type -> core.finding.TagFindingResponse
+	73, // 76: core.finding.FindingService.UntagFinding:output_type -> google.protobuf.Empty
+	73, // 77: core.finding.FindingService.ClearScore:output_type -> google.protobuf.Empty
+	23, // 78: core.finding.FindingService.ListResource:output_type -> core.finding.ListResourceResponse
+	25, // 79: core.finding.FindingService.GetResource:output_type -> core.finding.GetResourceResponse
+	27, // 80: core.finding.FindingService.PutResource:output_type -> core.finding.PutResourceResponse
+	73, // 81: core.finding.FindingService.PutResourceBatch:output_type -> google.protobuf.Empty
+	73, // 82: core.finding.FindingService.DeleteResource:output_type -> google.protobuf.Empty
+	31, // 83: core.finding.FindingService.ListResourceTag:output_type -> core.finding.ListResourceTagResponse
+	33, // 84: core.finding.FindingService.ListResourceTagName:output_type -> core.finding.ListResourceTagNameResponse
+	35, // 85: core.finding.FindingService.TagResource:output_type -> core.finding.TagResourceResponse
+	73, // 86: core.finding.FindingService.UntagResource:output_type -> google.protobuf.Empty
+	38, // 87: core.finding.FindingService.GetPendFinding:output_type -> core.finding.GetPendFindingResponse
+	40, // 88: core.finding.FindingService.PutPendFinding:output_type -> core.finding.PutPendFindingResponse
+	73, // 89: core.finding.FindingService.DeletePendFinding:output_type -> google.protobuf.Empty
+	43, // 90: core.finding.FindingService.ListFindingSetting:output_type -> core.finding.ListFindingSettingResponse
+	45, // 91: core.finding.FindingService.GetFindingSetting:output_type -> core.finding.GetFindingSettingResponse
+	47, // 92: core.finding.FindingService.PutFindingSetting:output_type -> core.finding.PutFindingSettingResponse
+	73, // 93: core.finding.FindingService.DeleteFindingSetting:output_type -> google.protobuf.Empty
+	50, // 94: core.finding.FindingService.GetRecommend:output_type -> core.finding.GetRecommendResponse
+	52, // 95: core.finding.FindingService.PutRecommend:output_type -> core.finding.PutRecommendResponse
+	54, // 96: core.finding.FindingService.GetAISummary:output_type -> core.finding.GetAISummaryResponse
+	54, // 97: core.finding.FindingService.GetAISummaryStream:output_type -> core.finding.GetAISummaryResponse
+	73, // 98: core.finding.FindingService.UntagByResourceName:output_type -> google.protobuf.Empty
+	73, // 99: core.finding.FindingService.CleanOldResource:output_type -> google.protobuf.Empty
 	66, // [66:100] is the sub-list for method output_type
 	32, // [32:66] is the sub-list for method input_type
 	32, // [32:32] is the sub-list for extension type_name
@@ -4508,18 +4447,6 @@ func file_finding_service_proto_init() {
 			}
 		}
 		file_finding_service_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectFinding); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_finding_service_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PendInfo); i {
 			case 0:
 				return &v.state
@@ -4531,7 +4458,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*FindingDetail); i {
 			case 0:
 				return &v.state
@@ -4543,7 +4470,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListFindingForOrgResponse); i {
 			case 0:
 				return &v.state
@@ -4555,7 +4482,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*BatchListFindingRequest); i {
 			case 0:
 				return &v.state
@@ -4567,7 +4494,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*BatchListFindingResponse); i {
 			case 0:
 				return &v.state
@@ -4579,7 +4506,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetFindingRequest); i {
 			case 0:
 				return &v.state
@@ -4591,7 +4518,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetFindingResponse); i {
 			case 0:
 				return &v.state
@@ -4603,7 +4530,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PutFindingRequest); i {
 			case 0:
 				return &v.state
@@ -4615,7 +4542,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PutFindingResponse); i {
 			case 0:
 				return &v.state
@@ -4627,7 +4554,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PutFindingBatchRequest); i {
 			case 0:
 				return &v.state
@@ -4639,7 +4566,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*DeleteFindingRequest); i {
 			case 0:
 				return &v.state
@@ -4651,7 +4578,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListFindingTagRequest); i {
 			case 0:
 				return &v.state
@@ -4663,7 +4590,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListFindingTagResponse); i {
 			case 0:
 				return &v.state
@@ -4675,7 +4602,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListFindingTagNameRequest); i {
 			case 0:
 				return &v.state
@@ -4687,7 +4614,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListFindingTagNameResponse); i {
 			case 0:
 				return &v.state
@@ -4699,7 +4626,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*TagFindingRequest); i {
 			case 0:
 				return &v.state
@@ -4711,7 +4638,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*TagFindingResponse); i {
 			case 0:
 				return &v.state
@@ -4723,7 +4650,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UntagFindingRequest); i {
 			case 0:
 				return &v.state
@@ -4735,7 +4662,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ClearScoreRequest); i {
 			case 0:
 				return &v.state
@@ -4747,7 +4674,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListResourceRequest); i {
 			case 0:
 				return &v.state
@@ -4759,7 +4686,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListResourceResponse); i {
 			case 0:
 				return &v.state
@@ -4771,7 +4698,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetResourceRequest); i {
 			case 0:
 				return &v.state
@@ -4783,7 +4710,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetResourceResponse); i {
 			case 0:
 				return &v.state
@@ -4795,7 +4722,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PutResourceRequest); i {
 			case 0:
 				return &v.state
@@ -4807,7 +4734,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PutResourceResponse); i {
 			case 0:
 				return &v.state
@@ -4819,7 +4746,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PutResourceBatchRequest); i {
 			case 0:
 				return &v.state
@@ -4831,7 +4758,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*DeleteResourceRequest); i {
 			case 0:
 				return &v.state
@@ -4843,7 +4770,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListResourceTagRequest); i {
 			case 0:
 				return &v.state
@@ -4855,7 +4782,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[32].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListResourceTagResponse); i {
 			case 0:
 				return &v.state
@@ -4867,7 +4794,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[33].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[32].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListResourceTagNameRequest); i {
 			case 0:
 				return &v.state
@@ -4879,7 +4806,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[34].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[33].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListResourceTagNameResponse); i {
 			case 0:
 				return &v.state
@@ -4891,7 +4818,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[35].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[34].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*TagResourceRequest); i {
 			case 0:
 				return &v.state
@@ -4903,7 +4830,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[36].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[35].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*TagResourceResponse); i {
 			case 0:
 				return &v.state
@@ -4915,7 +4842,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[37].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[36].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UntagResourceRequest); i {
 			case 0:
 				return &v.state
@@ -4927,7 +4854,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[38].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[37].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetPendFindingRequest); i {
 			case 0:
 				return &v.state
@@ -4939,7 +4866,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[39].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[38].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetPendFindingResponse); i {
 			case 0:
 				return &v.state
@@ -4951,7 +4878,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[40].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[39].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PutPendFindingRequest); i {
 			case 0:
 				return &v.state
@@ -4963,7 +4890,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[41].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[40].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PutPendFindingResponse); i {
 			case 0:
 				return &v.state
@@ -4975,7 +4902,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[42].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[41].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*DeletePendFindingRequest); i {
 			case 0:
 				return &v.state
@@ -4987,7 +4914,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[43].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[42].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListFindingSettingRequest); i {
 			case 0:
 				return &v.state
@@ -4999,7 +4926,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[44].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[43].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListFindingSettingResponse); i {
 			case 0:
 				return &v.state
@@ -5011,7 +4938,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[45].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[44].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetFindingSettingRequest); i {
 			case 0:
 				return &v.state
@@ -5023,7 +4950,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[46].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[45].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetFindingSettingResponse); i {
 			case 0:
 				return &v.state
@@ -5035,7 +4962,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[47].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[46].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PutFindingSettingRequest); i {
 			case 0:
 				return &v.state
@@ -5047,7 +4974,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[48].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[47].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PutFindingSettingResponse); i {
 			case 0:
 				return &v.state
@@ -5059,7 +4986,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[49].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[48].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*DeleteFindingSettingRequest); i {
 			case 0:
 				return &v.state
@@ -5071,7 +4998,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[50].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[49].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetRecommendRequest); i {
 			case 0:
 				return &v.state
@@ -5083,7 +5010,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[51].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[50].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetRecommendResponse); i {
 			case 0:
 				return &v.state
@@ -5095,7 +5022,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[52].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[51].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PutRecommendRequest); i {
 			case 0:
 				return &v.state
@@ -5107,7 +5034,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[53].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[52].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PutRecommendResponse); i {
 			case 0:
 				return &v.state
@@ -5119,7 +5046,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[54].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[53].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetAISummaryRequest); i {
 			case 0:
 				return &v.state
@@ -5131,7 +5058,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[55].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[54].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetAISummaryResponse); i {
 			case 0:
 				return &v.state
@@ -5143,7 +5070,7 @@ func file_finding_service_proto_init() {
 				return nil
 			}
 		}
-		file_finding_service_proto_msgTypes[56].Exporter = func(v interface{}, i int) interface{} {
+		file_finding_service_proto_msgTypes[55].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UntagByResourceNameRequest); i {
 			case 0:
 				return &v.state
@@ -5162,7 +5089,7 @@ func file_finding_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_finding_service_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   57,
+			NumMessages:   56,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
