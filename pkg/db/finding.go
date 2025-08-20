@@ -29,16 +29,7 @@ type FindingForOrg struct {
 type FindingRepository interface {
 	// Finding
 	ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*[]model.Finding, error)
-	ListFindingForOrg(
-		ctx context.Context,
-		organizationID, alertID uint32,
-		fromScore, toScore float32,
-		findingID uint64,
-		dataSources, resourceNames, tags []string,
-		status finding.FindingStatus,
-		sort, direction string,
-		offset, limit uint32,
-	) (*[]FindingForOrg, error)
+	ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]FindingForOrg, error)
 	BatchListFinding(context.Context, *finding.BatchListFindingRequest) (*[]model.Finding, error)
 	ListFindingCount(
 		ctx context.Context,
@@ -121,11 +112,9 @@ func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingReques
 		req.FromScore, req.ToScore, req.FindingId,
 		req.DataSource, req.ResourceName, req.Tag)
 
-	// Add project-specific condition
 	cond += " and finding.project_id = ?"
 	params = append(params, req.ProjectId)
 
-	// Add pend_finding status logic
 	if req.Status == finding.FindingStatus_FINDING_ACTIVE {
 		join += " left join pend_finding pf using(finding_id)"
 		cond += " and (pf.finding_id is NULL or (pf.expired_at is not NULL and pf.expired_at <= NOW()))"
@@ -145,16 +134,7 @@ func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingReques
 	return &data, nil
 }
 
-func (c *Client) ListFindingForOrg(
-	ctx context.Context,
-	organizationID, alertID uint32,
-	fromScore, toScore float32,
-	findingID uint64,
-	dataSources, resourceNames, tags []string,
-	status finding.FindingStatus,
-	sort, direction string,
-	offset, limit uint32) (*[]FindingForOrg, error) {
-
+func (c *Client) ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]FindingForOrg, error) {
 	query := `select finding.*, 
 		pf.pend_user_id as pend_user_id,
 		pf.note as pend_note,
@@ -168,24 +148,23 @@ func (c *Client) ListFindingForOrg(
 	inner join organization_project op on finding.project_id = op.project_id`
 
 	join, cond, params := generateListFindingConditions(
-		alertID,
-		fromScore, toScore, findingID,
-		dataSources, resourceNames, tags)
+		0,
+		req.FromScore, req.ToScore, req.FindingId,
+		req.DataSource, req.ResourceName, req.Tag)
 
-	// Add organization-specific condition
 	cond += " and op.organization_id = ?"
-	params = append(params, organizationID)
+	params = append(params, req.OrganizationId)
 
-	if status == finding.FindingStatus_FINDING_ACTIVE {
+	if req.Status == finding.FindingStatus_FINDING_ACTIVE {
 		cond += " and (pf.finding_id is NULL or (pf.expired_at is not NULL and pf.expired_at <= NOW()))"
 	}
-	if status == finding.FindingStatus_FINDING_PENDING {
+	if req.Status == finding.FindingStatus_FINDING_PENDING {
 		cond += " and pf.finding_id is not NULL and (pf.expired_at is NULL or NOW() < pf.expired_at)"
 	}
 
 	query += join + cond
-	query += fmt.Sprintf(" order by f_alias.%s %s", sort, direction)
-	query += fmt.Sprintf(" limit %d, %d", offset, limit)
+	query += fmt.Sprintf(" order by f_alias.%s %s", req.Sort, req.Direction)
+	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
 	var data []FindingForOrg
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
@@ -201,11 +180,9 @@ func (c *Client) BatchListFinding(ctx context.Context, req *finding.BatchListFin
 		req.FromScore, req.ToScore,
 		req.FindingId, req.DataSource, req.ResourceName, req.Tag)
 
-	// Add project-specific condition
 	cond += " and finding.project_id = ?"
 	params = append(params, req.ProjectId)
 
-	// Add pend_finding status logic
 	if req.Status == finding.FindingStatus_FINDING_ACTIVE {
 		join += " left join pend_finding pf using(finding_id)"
 		cond += " and (pf.finding_id is NULL or (pf.expired_at is not NULL and pf.expired_at <= NOW()))"
@@ -230,7 +207,7 @@ func (c *Client) ListFindingCount(
 	findingID uint64,
 	dataSources, resourceNames, tags []string,
 	status finding.FindingStatus) (int64, error) {
-	
+
 	query := "select count(*) from finding"
 	if organizationID != 0 {
 		query += " inner join organization_project op on finding.project_id = op.project_id"
@@ -241,7 +218,6 @@ func (c *Client) ListFindingCount(
 		fromScore, toScore, findingID,
 		dataSources, resourceNames, tags)
 
-	// Add project or organization specific condition
 	if organizationID != 0 {
 		cond += " and op.organization_id = ?"
 		params = append(params, organizationID)
@@ -250,7 +226,6 @@ func (c *Client) ListFindingCount(
 		params = append(params, projectID)
 	}
 
-	// Add pend_finding status logic
 	if status == finding.FindingStatus_FINDING_ACTIVE {
 		join += " left join pend_finding pf using(finding_id)"
 		cond += " and (pf.finding_id is NULL or (pf.expired_at is not NULL and pf.expired_at <= NOW()))"

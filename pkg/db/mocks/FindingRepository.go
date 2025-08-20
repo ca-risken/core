@@ -706,9 +706,9 @@ func (_m *FindingRepository) ListFindingCount(ctx context.Context, projectID uin
 	return r0, r1
 }
 
-// ListFindingForOrg provides a mock function with given fields: ctx, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit
-func (_m *FindingRepository) ListFindingForOrg(ctx context.Context, organizationID uint32, alertID uint32, fromScore float32, toScore float32, findingID uint64, dataSources []string, resourceNames []string, tags []string, status finding.FindingStatus, sort string, direction string, offset uint32, limit uint32) (*[]db.FindingForOrg, error) {
-	ret := _m.Called(ctx, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
+// ListFindingForOrg provides a mock function with given fields: ctx, req
+func (_m *FindingRepository) ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]db.FindingForOrg, error) {
+	ret := _m.Called(ctx, req)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListFindingForOrg")
@@ -716,19 +716,19 @@ func (_m *FindingRepository) ListFindingForOrg(ctx context.Context, organization
 
 	var r0 *[]db.FindingForOrg
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus, string, string, uint32, uint32) (*[]db.FindingForOrg, error)); ok {
-		return rf(ctx, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
+	if rf, ok := ret.Get(0).(func(context.Context, *finding.ListFindingForOrgRequest) (*[]db.FindingForOrg, error)); ok {
+		return rf(ctx, req)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus, string, string, uint32, uint32) *[]db.FindingForOrg); ok {
-		r0 = rf(ctx, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
+	if rf, ok := ret.Get(0).(func(context.Context, *finding.ListFindingForOrgRequest) *[]db.FindingForOrg); ok {
+		r0 = rf(ctx, req)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*[]db.FindingForOrg)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus, string, string, uint32, uint32) error); ok {
-		r1 = rf(ctx, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
+	if rf, ok := ret.Get(1).(func(context.Context, *finding.ListFindingForOrgRequest) error); ok {
+		r1 = rf(ctx, req)
 	} else {
 		r1 = ret.Error(1)
 	}
