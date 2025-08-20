@@ -707,23 +707,23 @@ func (_m *FindingRepository) ListFindingCount(ctx context.Context, projectID uin
 }
 
 // ListFindingForOrg provides a mock function with given fields: ctx, req
-func (_m *FindingRepository) ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]db.FindingForOrg, error) {
+func (_m *FindingRepository) ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]db.FindingWithPend, error) {
 	ret := _m.Called(ctx, req)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListFindingForOrg")
 	}
 
-	var r0 *[]db.FindingForOrg
+	var r0 *[]db.FindingWithPend
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *finding.ListFindingForOrgRequest) (*[]db.FindingForOrg, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *finding.ListFindingForOrgRequest) (*[]db.FindingWithPend, error)); ok {
 		return rf(ctx, req)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *finding.ListFindingForOrgRequest) *[]db.FindingForOrg); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *finding.ListFindingForOrgRequest) *[]db.FindingWithPend); ok {
 		r0 = rf(ctx, req)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*[]db.FindingForOrg)
+			r0 = ret.Get(0).(*[]db.FindingWithPend)
 		}
 	}
 

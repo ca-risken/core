@@ -17,7 +17,7 @@ const (
 	cleanBeforeDays = 30
 )
 
-type FindingForOrg struct {
+type FindingWithPend struct {
 	model.Finding
 	PendUserID    *uint32    `gorm:"column:pend_user_id"`
 	PendNote      *string    `gorm:"column:pend_note"`
@@ -29,7 +29,7 @@ type FindingForOrg struct {
 type FindingRepository interface {
 	// Finding
 	ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*[]model.Finding, error)
-	ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]FindingForOrg, error)
+	ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]FindingWithPend, error)
 	BatchListFinding(context.Context, *finding.BatchListFindingRequest) (*[]model.Finding, error)
 	ListFindingCount(
 		ctx context.Context,
@@ -121,7 +121,7 @@ func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingReques
 	return &data, nil
 }
 
-func (c *Client) ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]FindingForOrg, error) {
+func (c *Client) ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]FindingWithPend, error) {
 	query := `select finding.*, 
 		pf.pend_user_id as pend_user_id,
 		pf.note as pend_note,
@@ -152,7 +152,7 @@ func (c *Client) ListFindingForOrg(ctx context.Context, req *finding.ListFinding
 	query += join + cond
 	query += fmt.Sprintf(" order by f_alias.%s %s", req.Sort, req.Direction)
 	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
-	var data []FindingForOrg
+	var data []FindingWithPend
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
