@@ -28,16 +28,7 @@ type FindingForOrg struct {
 
 type FindingRepository interface {
 	// Finding
-	ListFinding(
-		ctx context.Context,
-		projectID, alertID uint32,
-		fromScore, toScore float32,
-		findingID uint64,
-		dataSources, resourceNames, tags []string,
-		status finding.FindingStatus,
-		sort, direction string,
-		offset, limit uint32,
-	) (*[]model.Finding, error)
+	ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*[]model.Finding, error)
 	ListFindingForOrg(
 		ctx context.Context,
 		organizationID, alertID uint32,
@@ -122,40 +113,31 @@ type FindingRepository interface {
 
 var _ FindingRepository = (*Client)(nil)
 
-func (c *Client) ListFinding(
-	ctx context.Context,
-	projectID, alertID uint32,
-	fromScore, toScore float32,
-	findingID uint64,
-	dataSources, resourceNames, tags []string,
-	status finding.FindingStatus,
-	sort, direction string,
-	offset, limit uint32) (*[]model.Finding, error) {
-
+func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*[]model.Finding, error) {
 	query := "select finding.* from finding inner join finding f_alias using(finding_id)"
 
 	join, cond, params := generateListFindingConditions(
-		alertID,
-		fromScore, toScore, findingID,
-		dataSources, resourceNames, tags)
+		req.AlertId,
+		req.FromScore, req.ToScore, req.FindingId,
+		req.DataSource, req.ResourceName, req.Tag)
 
 	// Add project-specific condition
 	cond += " and finding.project_id = ?"
-	params = append(params, projectID)
+	params = append(params, req.ProjectId)
 
 	// Add pend_finding status logic
-	if status == finding.FindingStatus_FINDING_ACTIVE {
+	if req.Status == finding.FindingStatus_FINDING_ACTIVE {
 		join += " left join pend_finding pf using(finding_id)"
 		cond += " and (pf.finding_id is NULL or (pf.expired_at is not NULL and pf.expired_at <= NOW()))"
 	}
-	if status == finding.FindingStatus_FINDING_PENDING {
+	if req.Status == finding.FindingStatus_FINDING_PENDING {
 		join += " inner join pend_finding pf using(finding_id)"
 		cond += " and (pf.expired_at is NULL or NOW() < pf.expired_at)"
 	}
 
 	query += join + cond
-	query += fmt.Sprintf(" order by f_alias.%s %s", sort, direction)
-	query += fmt.Sprintf(" limit %d, %d", offset, limit)
+	query += fmt.Sprintf(" order by f_alias.%s %s", req.Sort, req.Direction)
+	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
 	var data []model.Finding
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err

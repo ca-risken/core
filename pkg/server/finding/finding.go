@@ -33,15 +33,7 @@ func (f *FindingService) ListFinding(ctx context.Context, req *finding.ListFindi
 	if total == 0 {
 		return &finding.ListFindingResponse{FindingId: []uint64{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
-	list, err := f.repository.ListFinding(
-		ctx,
-		param.ProjectId, param.AlertId,
-		param.FromScore, param.ToScore,
-		param.FindingId,
-		param.DataSource, param.ResourceName, param.Tag,
-		param.Status,
-		param.Sort, param.Direction,
-		uint32(param.Offset), uint32(param.Limit))
+	list, err := f.repository.ListFinding(ctx, param)
 	if err != nil {
 		return nil, err
 	}
