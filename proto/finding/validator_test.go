@@ -101,6 +101,80 @@ func TestValidate_ListFindingRequest(t *testing.T) {
 	}
 }
 
+
+func TestValidate_ListFindingForOrgRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *ListFindingForOrgRequest
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &ListFindingForOrgRequest{OrganizationId: 1, DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0, Sort: "finding_id", Direction: "asc", Offset: 0, Limit: maxLimit},
+		},
+		{
+			name:    "NG Required(organization_id)",
+			input:   &ListFindingForOrgRequest{DataSource: []string{"ds1", "ds2"}, ResourceName: []string{"rn1", "rn2"}, FromScore: 0.0, ToScore: 1.0},
+			wantErr: true,
+		},
+		{
+			name:    "NG too long resource_name",
+			input:   &ListFindingForOrgRequest{OrganizationId: 1, ResourceName: []string{len513string}},
+			wantErr: true,
+		},
+		{
+			name:    "NG too long data_source",
+			input:   &ListFindingForOrgRequest{OrganizationId: 1, DataSource: []string{len65string}},
+			wantErr: true,
+		},
+		{
+			name:    "NG small from_score",
+			input:   &ListFindingForOrgRequest{OrganizationId: 1, FromScore: -0.1},
+			wantErr: true,
+		},
+		{
+			name:    "NG big from_score",
+			input:   &ListFindingForOrgRequest{OrganizationId: 1, FromScore: 1.1},
+			wantErr: true,
+		},
+		{
+			name:    "NG small to_score",
+			input:   &ListFindingForOrgRequest{OrganizationId: 1, ToScore: -0.1},
+			wantErr: true,
+		},
+		{
+			name:    "NG big to_score",
+			input:   &ListFindingForOrgRequest{OrganizationId: 1, ToScore: 1.1},
+			wantErr: true,
+		},
+		{
+			name:    "NG too long tag",
+			input:   &ListFindingForOrgRequest{OrganizationId: 1, Tag: []string{len65string}},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid sort",
+			input:   &ListFindingForOrgRequest{OrganizationId: 1, Sort: "unknown_key"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid sort direction",
+			input:   &ListFindingForOrgRequest{OrganizationId: 1, Direction: "unknown_direction"},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
 func TestValidate_BatchListFindingRequest(t *testing.T) {
 	cases := []struct {
 		name    string

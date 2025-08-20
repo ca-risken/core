@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
@@ -20,7 +21,7 @@ func (f *FindingService) ListFinding(ctx context.Context, req *finding.ListFindi
 	param := convertListFindingRequest(req)
 	total, err := f.repository.ListFindingCount(
 		ctx,
-		param.ProjectId, param.AlertId,
+		param.ProjectId, 0, param.AlertId,
 		param.FromScore, param.ToScore,
 		param.FindingId,
 		param.DataSource, param.ResourceName, param.Tag,
@@ -43,6 +44,79 @@ func (f *FindingService) ListFinding(ctx context.Context, req *finding.ListFindi
 	return &finding.ListFindingResponse{FindingId: ids, Count: uint32(len(ids)), Total: convertToUint32(total)}, nil
 }
 
+func (f *FindingService) ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*finding.ListFindingForOrgResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	param := convertListFindingForOrgRequest(req)
+	total, err := f.repository.ListFindingCount(
+		ctx,
+		0, param.OrganizationId, 0,
+		param.FromScore, param.ToScore,
+		param.FindingId,
+		param.DataSource, param.ResourceName, param.Tag,
+		param.Status,
+	)
+	if err != nil {
+		return nil, err
+	}
+	if total == 0 {
+		return &finding.ListFindingForOrgResponse{Findings: []*finding.FindingDetail{}, Count: 0, Total: convertToUint32(total)}, nil
+	}
+	list, err := f.repository.ListFindingForOrg(ctx, param)
+	if err != nil {
+		return nil, err
+	}
+
+	var findingDetails []*finding.FindingDetail
+	for _, data := range *list {
+		var status string
+		var pendNote string
+		var pendUserName string
+		var expiredAt int64
+
+		if data.PendExpiredAt != nil {
+			expiredAt = data.PendExpiredAt.Unix()
+			if data.PendExpiredAt.Unix() > 0 && data.PendExpiredAt.Unix() < time.Now().Unix() {
+				status = "ACTIVE"
+			} else {
+				status = "ARCHIVE"
+			}
+		} else if data.PendUserID != nil {
+			status = "ARCHIVE"
+		} else {
+			status = "ACTIVE"
+		}
+
+		if data.PendNote != nil {
+			pendNote = *data.PendNote
+		}
+		if data.PendUserName != nil {
+			pendUserName = *data.PendUserName
+		}
+
+		tags, err := f.repository.ListFindingTagByFindingID(ctx, data.ProjectID, data.FindingID)
+		var findingTags []*finding.FindingTag
+		if err == nil && tags != nil {
+			for _, tag := range *tags {
+				findingTags = append(findingTags, convertFindingTag(&tag))
+			}
+		}
+
+		findingDetails = append(findingDetails, &finding.FindingDetail{
+			Finding: convertFinding(&data.Finding),
+			PendInfo: &finding.PendInfo{
+				Note:      pendNote,
+				UserName:  pendUserName,
+				Status:    status,
+				ExpiredAt: expiredAt,
+			},
+			FindingTags: findingTags,
+		})
+	}
+	return &finding.ListFindingForOrgResponse{Findings: findingDetails, Count: uint32(len(findingDetails)), Total: convertToUint32(total)}, nil
+}
+
 func convertListFindingRequest(req *finding.ListFindingRequest) *finding.ListFindingRequest {
 	converted := req
 	if zero.IsZeroVal(converted.ToScore) {
@@ -60,6 +134,23 @@ func convertListFindingRequest(req *finding.ListFindingRequest) *finding.ListFin
 	return converted
 }
 
+func convertListFindingForOrgRequest(req *finding.ListFindingForOrgRequest) *finding.ListFindingForOrgRequest {
+	converted := req
+	if converted.ToScore == 0 {
+		converted.ToScore = 1.0
+	}
+	if converted.Sort == "" {
+		converted.Sort = "finding_id"
+	}
+	if converted.Direction == "" {
+		converted.Direction = defaultSortDirection
+	}
+	if converted.Limit == 0 {
+		converted.Limit = defaultLimit
+	}
+	return converted
+}
+
 func (f *FindingService) BatchListFinding(ctx context.Context, req *finding.BatchListFindingRequest) (*finding.BatchListFindingResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
@@ -67,7 +158,7 @@ func (f *FindingService) BatchListFinding(ctx context.Context, req *finding.Batc
 	param := convertBatchListFindingRequest(req)
 	total, err := f.repository.ListFindingCount(
 		ctx,
-		param.ProjectId, param.AlertId,
+		param.ProjectId, 0, param.AlertId,
 		param.FromScore, param.ToScore,
 		param.FindingId,
 		param.DataSource, param.ResourceName, param.Tag,
