@@ -5,6 +5,7 @@ option go_package = "github.com/ca-risken/core/proto/iam";
 
 import "google/protobuf/empty.proto";
 import "iam/user.proto";
+import "iam/ext_user.proto";
 import "iam/role.proto";
 import "iam/policy.proto";
 import "iam/access_token.proto";
@@ -26,6 +27,9 @@ service IAMService {
   rpc DeleteRole(DeleteRoleRequest) returns (google.protobuf.Empty);
   rpc AttachRole(AttachRoleRequest) returns (AttachRoleResponse);
   rpc DetachRole(DetachRoleRequest) returns (google.protobuf.Empty);
+
+  // ExtUser（外部ユーザとそのユーザへのロールの紐付けを指定した状態にします）
+  rpc PutExtUser(PutExtUserRequest) returns (PutExtUserResponse)
 
   // Policy
   rpc ListPolicy(ListPolicyRequest) returns (ListPolicyResponse);
