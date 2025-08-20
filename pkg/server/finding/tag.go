@@ -32,7 +32,7 @@ func (f *FindingService) untagFinding(ctx context.Context, projectID uint32, res
 	param := convertListFindingRequest(req)
 	list, err := f.repository.ListFinding(
 		ctx,
-		param.ProjectId, 0, param.AlertId,
+		param.ProjectId, param.AlertId,
 		param.FromScore, param.ToScore,
 		param.FindingId,
 		param.DataSource, param.ResourceName, param.Tag,

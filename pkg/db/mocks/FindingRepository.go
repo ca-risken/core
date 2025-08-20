@@ -648,9 +648,9 @@ func (_m *FindingRepository) GetResourceTagByKey(_a0 context.Context, _a1 uint32
 	return r0, r1
 }
 
-// ListFinding provides a mock function with given fields: ctx, projectID, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit
-func (_m *FindingRepository) ListFinding(ctx context.Context, projectID uint32, organizationID uint32, alertID uint32, fromScore float32, toScore float32, findingID uint64, dataSources []string, resourceNames []string, tags []string, status finding.FindingStatus, sort string, direction string, offset uint32, limit uint32) (*[]model.Finding, error) {
-	ret := _m.Called(ctx, projectID, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
+// ListFinding provides a mock function with given fields: ctx, projectID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit
+func (_m *FindingRepository) ListFinding(ctx context.Context, projectID uint32, alertID uint32, fromScore float32, toScore float32, findingID uint64, dataSources []string, resourceNames []string, tags []string, status finding.FindingStatus, sort string, direction string, offset uint32, limit uint32) (*[]model.Finding, error) {
+	ret := _m.Called(ctx, projectID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListFinding")
@@ -658,19 +658,19 @@ func (_m *FindingRepository) ListFinding(ctx context.Context, projectID uint32, 
 
 	var r0 *[]model.Finding
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus, string, string, uint32, uint32) (*[]model.Finding, error)); ok {
-		return rf(ctx, projectID, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus, string, string, uint32, uint32) (*[]model.Finding, error)); ok {
+		return rf(ctx, projectID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus, string, string, uint32, uint32) *[]model.Finding); ok {
-		r0 = rf(ctx, projectID, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus, string, string, uint32, uint32) *[]model.Finding); ok {
+		r0 = rf(ctx, projectID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*[]model.Finding)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus, string, string, uint32, uint32) error); ok {
-		r1 = rf(ctx, projectID, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus, string, string, uint32, uint32) error); ok {
+		r1 = rf(ctx, projectID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -699,6 +699,36 @@ func (_m *FindingRepository) ListFindingCount(ctx context.Context, projectID uin
 
 	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus) error); ok {
 		r1 = rf(ctx, projectID, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListFindingForOrg provides a mock function with given fields: ctx, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit
+func (_m *FindingRepository) ListFindingForOrg(ctx context.Context, organizationID uint32, alertID uint32, fromScore float32, toScore float32, findingID uint64, dataSources []string, resourceNames []string, tags []string, status finding.FindingStatus, sort string, direction string, offset uint32, limit uint32) (*[]db.FindingForOrg, error) {
+	ret := _m.Called(ctx, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListFindingForOrg")
+	}
+
+	var r0 *[]db.FindingForOrg
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus, string, string, uint32, uint32) (*[]db.FindingForOrg, error)); ok {
+		return rf(ctx, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus, string, string, uint32, uint32) *[]db.FindingForOrg); ok {
+		r0 = rf(ctx, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*[]db.FindingForOrg)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus, string, string, uint32, uint32) error); ok {
+		r1 = rf(ctx, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status, sort, direction, offset, limit)
 	} else {
 		r1 = ret.Error(1)
 	}

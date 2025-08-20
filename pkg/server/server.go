@@ -114,7 +114,7 @@ func (s *Server) Run(ctx context.Context) error {
 		s.config.SlackAPIToken,
 	)
 	oisvc := organization_iamserver.NewOrganizationIAMService(s.db, iamc, s.logger)
-	fsvc := findingserver.NewFindingService(s.db, iamc, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, s.config.excludeDeleteDataSource, s.logger)
+	fsvc := findingserver.NewFindingService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, s.config.excludeDeleteDataSource, s.logger)
 	psvc := projectserver.NewProjectService(s.db, iamc, oc, s.logger)
 	rsvc := reportserver.NewReportService(s.db, s.logger)
 	aisvc := aiserver.NewAIService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, s.logger)

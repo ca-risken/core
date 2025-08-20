@@ -9,7 +9,6 @@ import (
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
-	"github.com/ca-risken/core/proto/iam"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
 	"gorm.io/gorm"
@@ -36,7 +35,7 @@ func (f *FindingService) ListFinding(ctx context.Context, req *finding.ListFindi
 	}
 	list, err := f.repository.ListFinding(
 		ctx,
-		param.ProjectId, 0, param.AlertId,
+		param.ProjectId, param.AlertId,
 		param.FromScore, param.ToScore,
 		param.FindingId,
 		param.DataSource, param.ResourceName, param.Tag,
@@ -72,9 +71,9 @@ func (f *FindingService) ListFindingForOrg(ctx context.Context, req *finding.Lis
 	if total == 0 {
 		return &finding.ListFindingForOrgResponse{Findings: []*finding.FindingDetail{}, Count: 0, Total: convertToUint32(total)}, nil
 	}
-	list, err := f.repository.ListFinding(
+	list, err := f.repository.ListFindingForOrg(
 		ctx,
-		0, param.OrganizationId, 0,
+		param.OrganizationId, 0,
 		param.FromScore, param.ToScore,
 		param.FindingId,
 		param.DataSource, param.ResourceName, param.Tag,
@@ -87,27 +86,31 @@ func (f *FindingService) ListFindingForOrg(ctx context.Context, req *finding.Lis
 
 	var findingDetails []*finding.FindingDetail
 	for _, data := range *list {
-		var pendUserName string
+		// Determine status based on pend_finding data
 		var status string
 		var pendNote string
+		var pendUserName string
 		var expiredAt int64
-
-		pf, err := f.repository.GetPendFinding(ctx, data.ProjectID, data.FindingID)
-		if err == nil && pf != nil {
-			pendNote = pf.Note
-			expiredAt = pf.ExpiredAt.Unix()
-			if pf.PendUserID > 0 {
-				if resp, err := f.iamClient.GetUser(ctx, &iam.GetUserRequest{UserId: pf.PendUserID}); err == nil {
-					pendUserName = resp.User.Name
-				}
-			}
-			if pf.ExpiredAt.Unix() > 0 && pf.ExpiredAt.Unix() < time.Now().Unix() {
+		
+		if data.PendExpiredAt != nil {
+			expiredAt = data.PendExpiredAt.Unix()
+			if data.PendExpiredAt.Unix() > 0 && data.PendExpiredAt.Unix() < time.Now().Unix() {
 				status = "ACTIVE"
 			} else {
 				status = "ARCHIVE"
 			}
+		} else if data.PendUserID != nil {
+			// Has pend_finding but no expiration
+			status = "ARCHIVE"
 		} else {
 			status = "ACTIVE"
+		}
+		
+		if data.PendNote != nil {
+			pendNote = *data.PendNote
+		}
+		if data.PendUserName != nil {
+			pendUserName = *data.PendUserName
 		}
 
 		tags, err := f.repository.ListFindingTagByFindingID(ctx, data.ProjectID, data.FindingID)
@@ -119,7 +122,7 @@ func (f *FindingService) ListFindingForOrg(ctx context.Context, req *finding.Lis
 		}
 
 		findingDetails = append(findingDetails, &finding.FindingDetail{
-			Finding: convertFinding(&data),
+			Finding: convertFinding(&data.Finding),
 			PendInfo: &finding.PendInfo{
 				Note:      pendNote,
 				UserName:  pendUserName,
