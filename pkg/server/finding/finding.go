@@ -409,7 +409,7 @@ func convertFindingTag(f *model.FindingTag) *finding.FindingTag {
 
 func calculateScore(score, maxScore float32, setting *findingSetting) float32 {
 	baseScore := float32(math.Round(float64(score/maxScore*100)) / 100)
-	if setting == nil || setting.ScoreCoefficient == 0 {
+	if setting == nil || zero.IsZeroVal(setting.ScoreCoefficient) {
 		return baseScore
 	}
 	calculated := baseScore * setting.ScoreCoefficient
