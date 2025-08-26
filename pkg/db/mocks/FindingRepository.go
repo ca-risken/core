@@ -648,9 +648,9 @@ func (_m *FindingRepository) GetResourceTagByKey(_a0 context.Context, _a1 uint32
 	return r0, r1
 }
 
-// ListFinding provides a mock function with given fields: _a0, _a1
-func (_m *FindingRepository) ListFinding(_a0 context.Context, _a1 *finding.ListFindingRequest) (*[]model.Finding, error) {
-	ret := _m.Called(_a0, _a1)
+// ListFinding provides a mock function with given fields: ctx, req
+func (_m *FindingRepository) ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*[]model.Finding, error) {
+	ret := _m.Called(ctx, req)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListFinding")
@@ -659,10 +659,10 @@ func (_m *FindingRepository) ListFinding(_a0 context.Context, _a1 *finding.ListF
 	var r0 *[]model.Finding
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, *finding.ListFindingRequest) (*[]model.Finding, error)); ok {
-		return rf(_a0, _a1)
+		return rf(ctx, req)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, *finding.ListFindingRequest) *[]model.Finding); ok {
-		r0 = rf(_a0, _a1)
+		r0 = rf(ctx, req)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*[]model.Finding)
@@ -670,7 +670,7 @@ func (_m *FindingRepository) ListFinding(_a0 context.Context, _a1 *finding.ListF
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *finding.ListFindingRequest) error); ok {
-		r1 = rf(_a0, _a1)
+		r1 = rf(ctx, req)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -678,9 +678,9 @@ func (_m *FindingRepository) ListFinding(_a0 context.Context, _a1 *finding.ListF
 	return r0, r1
 }
 
-// ListFindingCount provides a mock function with given fields: ctx, projectID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status
-func (_m *FindingRepository) ListFindingCount(ctx context.Context, projectID uint32, alertID uint32, fromScore float32, toScore float32, findingID uint64, dataSources []string, resourceNames []string, tags []string, status finding.FindingStatus) (int64, error) {
-	ret := _m.Called(ctx, projectID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status)
+// ListFindingCount provides a mock function with given fields: ctx, projectID, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status
+func (_m *FindingRepository) ListFindingCount(ctx context.Context, projectID uint32, organizationID uint32, alertID uint32, fromScore float32, toScore float32, findingID uint64, dataSources []string, resourceNames []string, tags []string, status finding.FindingStatus) (int64, error) {
+	ret := _m.Called(ctx, projectID, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListFindingCount")
@@ -688,17 +688,47 @@ func (_m *FindingRepository) ListFindingCount(ctx context.Context, projectID uin
 
 	var r0 int64
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus) (int64, error)); ok {
-		return rf(ctx, projectID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status)
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus) (int64, error)); ok {
+		return rf(ctx, projectID, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus) int64); ok {
-		r0 = rf(ctx, projectID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status)
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus) int64); ok {
+		r0 = rf(ctx, projectID, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status)
 	} else {
 		r0 = ret.Get(0).(int64)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus) error); ok {
-		r1 = rf(ctx, projectID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status)
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint32, float32, float32, uint64, []string, []string, []string, finding.FindingStatus) error); ok {
+		r1 = rf(ctx, projectID, organizationID, alertID, fromScore, toScore, findingID, dataSources, resourceNames, tags, status)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListFindingForOrg provides a mock function with given fields: ctx, req
+func (_m *FindingRepository) ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]db.FindingWithPend, error) {
+	ret := _m.Called(ctx, req)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListFindingForOrg")
+	}
+
+	var r0 *[]db.FindingWithPend
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *finding.ListFindingForOrgRequest) (*[]db.FindingWithPend, error)); ok {
+		return rf(ctx, req)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *finding.ListFindingForOrgRequest) *[]db.FindingWithPend); ok {
+		r0 = rf(ctx, req)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*[]db.FindingWithPend)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *finding.ListFindingForOrgRequest) error); ok {
+		r1 = rf(ctx, req)
 	} else {
 		r1 = ret.Error(1)
 	}
