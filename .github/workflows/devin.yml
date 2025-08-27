@@ -2,10 +2,10 @@ name: "Devin PR Review"
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [labeled]
 
 env:
-  label_name: devin/review
+  label_name: epic
 
 jobs:
   devin_pr_review:
