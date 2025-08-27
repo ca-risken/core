@@ -17,10 +17,11 @@ func (a *AIClient) responsesAPI(
 	instruction string,
 	inputs responses.ResponseNewParamsInputUnion,
 	tools []responses.ToolUnionParam,
+	reasoningEffort openai.ReasoningEffort,
 ) (*responses.Response, error) {
 	currentInputs := inputs
 	for range MAX_TOOL_USE_COUNT {
-		resp, err := a.callResponsesAPI(ctx, model, instruction, currentInputs, tools)
+		resp, err := a.callResponsesAPI(ctx, model, instruction, currentInputs, tools, reasoningEffort)
 		if err != nil {
 			return nil, err
 		}
@@ -44,17 +45,22 @@ func (a *AIClient) callResponsesAPI(
 	instruction string,
 	inputs responses.ResponseNewParamsInputUnion,
 	tools []responses.ToolUnionParam,
+	reasoningEffort openai.ReasoningEffort,
 ) (*responses.Response, error) {
-	resp, err := a.openaiClient.Responses.New(ctx,
-		responses.ResponseNewParams{
-			Model:           model,
-			Instructions:    openai.String(instruction),
-			Input:           inputs,
-			Tools:           tools,
-			MaxToolCalls:    openai.Int(MAX_TOOL_USE_COUNT),
-			MaxOutputTokens: openai.Int(25000),
-		},
-	)
+	params := responses.ResponseNewParams{
+		Model:           model,
+		Instructions:    openai.String(instruction),
+		Input:           inputs,
+		Tools:           tools,
+		MaxToolCalls:    openai.Int(MAX_TOOL_USE_COUNT),
+		MaxOutputTokens: openai.Int(25000),
+	}
+	if reasoningEffort != "" {
+		params.Reasoning = openai.ReasoningParam{
+			Effort: reasoningEffort,
+		}
+	}
+	resp, err := a.openaiClient.Responses.New(ctx, params)
 	if err != nil {
 		return nil, fmt.Errorf("Responses API error: err=%w", err)
 	}

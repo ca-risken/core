@@ -55,6 +55,43 @@ func (_m *ReportServiceClient) CollectReportFinding(ctx context.Context, in *emp
 	return r0, r1
 }
 
+// GetReport provides a mock function with given fields: ctx, in, opts
+func (_m *ReportServiceClient) GetReport(ctx context.Context, in *report.GetReportRequest, opts ...grpc.CallOption) (*report.GetReportResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetReport")
+	}
+
+	var r0 *report.GetReportResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *report.GetReportRequest, ...grpc.CallOption) (*report.GetReportResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *report.GetReportRequest, ...grpc.CallOption) *report.GetReportResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*report.GetReportResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *report.GetReportRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetReportFinding provides a mock function with given fields: ctx, in, opts
 func (_m *ReportServiceClient) GetReportFinding(ctx context.Context, in *report.GetReportFindingRequest, opts ...grpc.CallOption) (*report.GetReportFindingResponse, error) {
 	_va := make([]interface{}, len(opts))
@@ -129,6 +166,43 @@ func (_m *ReportServiceClient) GetReportFindingAll(ctx context.Context, in *repo
 	return r0, r1
 }
 
+// ListReport provides a mock function with given fields: ctx, in, opts
+func (_m *ReportServiceClient) ListReport(ctx context.Context, in *report.ListReportRequest, opts ...grpc.CallOption) (*report.ListReportResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListReport")
+	}
+
+	var r0 *report.ListReportResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *report.ListReportRequest, ...grpc.CallOption) (*report.ListReportResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *report.ListReportRequest, ...grpc.CallOption) *report.ListReportResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*report.ListReportResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *report.ListReportRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PurgeReportFinding provides a mock function with given fields: ctx, in, opts
 func (_m *ReportServiceClient) PurgeReportFinding(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	_va := make([]interface{}, len(opts))
@@ -158,6 +232,43 @@ func (_m *ReportServiceClient) PurgeReportFinding(ctx context.Context, in *empty
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *emptypb.Empty, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PutReport provides a mock function with given fields: ctx, in, opts
+func (_m *ReportServiceClient) PutReport(ctx context.Context, in *report.PutReportRequest, opts ...grpc.CallOption) (*report.PutReportResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PutReport")
+	}
+
+	var r0 *report.PutReportResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *report.PutReportRequest, ...grpc.CallOption) (*report.PutReportResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *report.PutReportRequest, ...grpc.CallOption) *report.PutReportResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*report.PutReportResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *report.PutReportRequest, ...grpc.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)

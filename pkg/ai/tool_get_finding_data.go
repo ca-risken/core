@@ -164,7 +164,7 @@ type GenerateSQLOutput struct {
 
 func (a *AIClient) generateSQL(ctx context.Context, prompt string, projectID, limit, offset uint32) (string, []any, error) {
 	resp, err := a.callResponsesAPI(ctx,
-		a.chatGPTModel,
+		a.reasoningModel,
 		TOOL_GENERATE_SQL_INSTRUCTION,
 		responses.ResponseNewParamsInputUnion{
 			OfInputItemList: []responses.ResponseInputItemUnionParam{
@@ -177,7 +177,7 @@ func (a *AIClient) generateSQL(ctx context.Context, prompt string, projectID, li
 					},
 				},
 			},
-		}, DefaultTools)
+		}, DefaultTools, openai.ReasoningEffortMedium)
 	if err != nil {
 		return "", nil, err
 	}

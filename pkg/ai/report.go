@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ca-risken/core/proto/ai"
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/responses"
 )
 
-func (a *AIClient) GenerateReport(ctx context.Context, req *ai.GenerateReportRequest) (*ai.GenerateReportResponse, error) {
-	instruction := generatePrompt(req.ProjectId)
+func (a *AIClient) GenerateReport(ctx context.Context, projectID uint32, prompt string) (string, error) {
+	instruction := generatePrompt(projectID)
 	tools := DefaultTools
 	tools = append(tools, GetFindingDataTool())
 
@@ -20,16 +19,16 @@ func (a *AIClient) GenerateReport(ctx context.Context, req *ai.GenerateReportReq
 				OfMessage: &responses.EasyInputMessageParam{
 					Role: responses.EasyInputMessageRoleUser,
 					Content: responses.EasyInputMessageContentUnionParam{
-						OfString: openai.String(req.Prompt),
+						OfString: openai.String(prompt),
 					},
 				},
 			},
 		},
-	}, tools)
+	}, tools, openai.ReasoningEffortHigh)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return &ai.GenerateReportResponse{Report: resp.OutputText()}, nil
+	return resp.OutputText(), nil
 }
 
 const (
@@ -37,9 +36,8 @@ const (
 Please generate RISKEN Finding report for the project.
 The report language should match the user's language preference.
 
-## Report details
+## Scope
 - Project ID: %d
-- Min score: 0.4
 
 ## Strict Rules
 - NO HALLUCINATION: All content MUST be based on actual data and facts only
@@ -79,16 +77,73 @@ When inserting mermaid graphs, you MUST specify mermaid in the code block.
 | Other    | 0.2   | 2     |
 
 #### Example) xychart-beta
+When using xychart-beta with Japanese text, you MUST use double quotes for the title.
+You SHOULD customize the chart colors using the config block with header configuration, as the default colors may not provide sufficient contrast or visual appeal.
 
+---
+config:
+    themeVariables:
+        xyChart:
+            plotColorPalette: "teal, pink, cyan"
+---
 xychart-beta
-    title "AWS Findings count by month"
-    x-axis ["Jan", "Feb", "Mar", "Apr", "May"]
-    y-axis "Finding count" 0 --> 50
-    bar [10, 20, 30, 40, 50]
-    line [10, 20, 30, 40, 50]
+    title "日本の年間出生数の推移"
+    x-axis ["1950年", "1980年", "2000年", "2020年", "2022年"]
+    y-axis "出生数（万人）" 0 --> 250
+    bar [233.7, 157.7, 119.9, 84.0, 77.0]
+    line [233.7, 157.7, 119.9, 84.0, 77.0]
 
+---
+config:
+    themeVariables:
+        xyChart:
+            plotColorPalette: "grey, indigo, pink, purple, cyan, teal, green"
+---
+xychart-beta
+    title "Different colors in xyChart"
+    x-axis "numbersX" ["Group A", "Group B", "Group C", "Group D"]
+    y-axis "numbersY" 0 --> 40
+    bar [20,30,25,30]
+    bar [10,20,20,20]
+    bar [5,10,5,5]
+    line [0,5,40,2]
+
+#### quadrantChart
+When using quadrantChart with Japanese text, you MUST use double quotes for the x-axis. (But **not for the title**)
+
+quadrantChart
+    title 製品評価マトリクス
+    x-axis "コスト" --> "効果"
+    y-axis "実現性（低）" --> "実現性（高）"
+    quadrant-1 "優先度高"
+    quadrant-2 "要検討"
+    quadrant-3 "保留"
+    quadrant-4 "簡単な改善"
+    "製品A": [0.3, 0.6]
+    "製品B": [0.45, 0.23]
+    "製品C": [0.57, 0.69]
+    "製品D": [0.78, 0.34]
+    "製品E": [0.40, 0.34]
 
 #### Example) flowchart
+When using flowchart with Japanese text, you MUST NOT use double quotes for the label.
+But **don't use <br />** in the label.(Use <br> instead.)
+
+flowchart LR
+    A[実装<br>オプション]
+    B[AWS<br>（Hoge Service）]
+    C[Google Cloud<br>（Fuga Service）]
+    D[Azure<br>（Piyo Service）]
+    A --> B
+    A --> C
+    A --> D
+    B -.- B1[大規模開発<br>実績多数]
+    C -.- C1[低コスト<br>先進技術]
+    D -.- D1[セキュリティ<br>]
+
+    style B fill:#f9f,stroke:#333
+    style C fill:#bbf,stroke:#333
+    style D fill:#bfb,stroke:#333
 
 flowchart LR
     A[Implementation<br>Option]
@@ -106,15 +161,26 @@ flowchart LR
     style D fill:#bfb,stroke:#333
 
 #### Example) pie
+When using pie with Japanese text, you MUST use double quotes for the labels (But **not for the title**).
 
 pie
-    title "Finding category"
+    title 2023年度 部門別売上構成比
+    "製品A部門" : 35.7
+    "製品B部門" : 24.3
+    "サービス部門" : 20.5
+    "コンサルティング" : 15.2
+    "その他" : 4.3
+
+pie
+    title Finding category
     "AWS" : 35
     "Google Cloud" : 15
     "Code" : 10
     "Other" : 40
 
 #### Example) mindmap
+When using mindmap with Japanese text, you MUST NOT use double quotes for the label.
+But if you use parentheses, you MUST use full-width parentheses.
 
 mindmap
     root("Center")

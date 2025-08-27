@@ -25,6 +25,10 @@ message GetUserRequest {
 
 message GetUserResponse { User user = 1; }
 
+message GetUserByUserIdpKeyRequest { string user_idp_key = 1; }
+
+message GetUserByUserIdpKeyResponse { User user = 1; }
+
 message PutUserRequest { UserForUpsert user = 1; }
 
 message PutUserResponse { User user = 1; }

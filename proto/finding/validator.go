@@ -31,6 +31,22 @@ func (l *ListFindingRequest) Validate() error {
 	)
 }
 
+
+// Validate ListFindingForOrgRequest
+func (l *ListFindingForOrgRequest) Validate() error {
+	return validation.ValidateStruct(l,
+		validation.Field(&l.OrganizationId, validation.Required),
+		validation.Field(&l.DataSource, validation.Each(validation.Length(0, 64))),
+		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 512))),
+		validation.Field(&l.FromScore, validation.Min(0.0), validation.Max(1.0)),
+		validation.Field(&l.ToScore, validation.Min(0.0), validation.Max(1.0)),
+		validation.Field(&l.Tag, validation.Each(validation.Length(0, 64))),
+		validation.Field(&l.Sort, validation.In(
+			"finding_id", "description", "data_source", "resource_name", "score", "updated_at")),
+		validation.Field(&l.Direction, validation.In("asc", "desc")),
+	)
+}
+
 // Validate BatchListFindingRequest
 func (b *BatchListFindingRequest) Validate() error {
 	return validation.ValidateStruct(b,
