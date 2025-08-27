@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      issues: write
     steps:
       - name: Request Devin Code Review
         if: ${{ github.event.label.name == env.label_name }}
