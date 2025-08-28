@@ -181,17 +181,9 @@ func (c *Client) UntagProject(ctx context.Context, projectID uint32, tag string)
 	return nil
 }
 
-const deleteOrganizationInvitationByProject = `delete from organization_invitation where project_id=?`
-const deleteOrganizationProject = `delete from organization_project where project_id=?`
 const deleteProject = `delete from project where project_id=?`
 
 func (c *Client) DeleteProject(ctx context.Context, projectID uint32) error {
-	if err := c.Master.WithContext(ctx).Exec(deleteOrganizationInvitationByProject, projectID).Error; err != nil {
-		return err
-	}
-	if err := c.Master.WithContext(ctx).Exec(deleteOrganizationProject, projectID).Error; err != nil {
-		return err
-	}
 	if err := c.Master.WithContext(ctx).Exec(deleteProject, projectID).Error; err != nil {
 		return err
 	}
@@ -300,5 +292,14 @@ func (c *Client) CleanWithNoProject(ctx context.Context) error {
 	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "project_tag"), projectIDs).Error; err != nil {
 		return err
 	}
+	
+	// organization
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "organization_invitation"), projectIDs).Error; err != nil {
+		return err
+	}
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "organization_project"), projectIDs).Error; err != nil {
+		return err
+	}
+	
 	return nil
 }

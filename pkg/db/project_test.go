@@ -39,10 +39,8 @@ func TestDeleteProject(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			ctx := context.Background()
 			if c.mockErr != nil {
-				mock.ExpectExec(deleteOrganizationInvitationByProject).WillReturnError(c.mockErr)
+				mock.ExpectExec(deleteProject).WillReturnError(c.mockErr)
 			} else {
-				mock.ExpectExec(deleteOrganizationInvitationByProject).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
-				mock.ExpectExec(deleteOrganizationProject).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
 				mock.ExpectExec(deleteProject).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
 			}
 
@@ -99,6 +97,8 @@ func TestCleanWithNoProject(t *testing.T) {
 				"delete from policy where project_id in",
 				"delete from role_policy where project_id in",
 				"delete from project_tag where project_id in",
+				"delete from organization_invitation where project_id in",
+				"delete from organization_project where project_id in",
 			},
 			wantErr: false,
 		},
