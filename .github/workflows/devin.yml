@@ -26,20 +26,13 @@ jobs:
           
           echo "🚀 Requesting Devin code review..."
           
-          HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api.devin.ai/v1/sessions" \
+          HTTP_STATUS=$(curl -s -w "%{http_code}\n" -o /dev/null -X POST "https://api.devin.ai/v1/sessions" \
                -H "Authorization: Bearer $DEVIN_API_KEY" \
                -H "Content-Type: application/json" \
                -d "$JSON_PAYLOAD")
           
-          RESPONSE=$(echo "$HTTP_RESPONSE" | head -n -1)
-          HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tail -n 1)
-          
-          echo "📊 HTTP Status: $HTTP_STATUS"
-          echo "📄 Response: $RESPONSE"
-          
           if [ "$HTTP_STATUS" -ne 200 ]; then
             echo "❌ API request failed with status code: $HTTP_STATUS"
-            echo "Response body: $RESPONSE"
             exit 1
           fi
           
