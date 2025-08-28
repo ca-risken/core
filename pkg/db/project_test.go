@@ -97,6 +97,8 @@ func TestCleanWithNoProject(t *testing.T) {
 				"delete from policy where project_id in",
 				"delete from role_policy where project_id in",
 				"delete from project_tag where project_id in",
+				"delete from organization_invitation where project_id in",
+				"delete from organization_project where project_id in",
 			},
 			wantErr: false,
 		},
