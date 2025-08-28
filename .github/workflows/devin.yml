@@ -26,7 +26,122 @@ jobs:
           }
           EOF
           )
-          curl -X POST "https://api.devin.ai/v1/sessions" \
+          
+          echo "🚀 Requesting Devin code review..."
+          RESPONSE=$(curl -s -X POST "https://api.devin.ai/v1/sessions" \
                -H "Authorization: Bearer $DEVIN_API_KEY" \
                -H "Content-Type: application/json" \
-               -d "$JSON_PAYLOAD"
+               -d "$JSON_PAYLOAD")
+          
+          if [ $? -ne 0 ]; then
+            echo "❌ Failed to start Devin session"
+            exit 1
+          fi
+          
+          SESSION_ID=$(echo "$RESPONSE" | jq -r '.session_id // empty')
+          if [ -z "$SESSION_ID" ]; then
+            echo "❌ No session ID returned from Devin API"
+            echo "Response: $RESPONSE"
+            exit 1
+          fi
+          
+          echo "✅ Devin session started: $SESSION_ID"
+          echo "SESSION_ID=$SESSION_ID" >> $GITHUB_ENV
+
+      - name: Monitor Devin Session
+        if: ${{ github.event.label.name == env.label_name }}
+        env:
+          DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
+        run: |
+          SESSION_ID="${{ env.SESSION_ID }}"
+          MAX_ATTEMPTS=30  # 最大30分待機
+          ATTEMPT=0
+          
+          echo "🔍 Monitoring Devin session: $SESSION_ID"
+          
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            echo "⏳ Checking session status (attempt $((ATTEMPT + 1))/$MAX_ATTEMPTS)..."
+            
+            STATUS_RESPONSE=$(curl -s -X GET "https://api.devin.ai/v1/sessions/$SESSION_ID" \
+                 -H "Authorization: Bearer $DEVIN_API_KEY")
+            
+            if [ $? -ne 0 ]; then
+              echo "⚠️ Failed to get session status"
+              ATTEMPT=$((ATTEMPT + 1))
+              sleep 60
+              continue
+            fi
+            
+            STATUS=$(echo "$STATUS_RESPONSE" | jq -r '.status // "unknown"')
+            echo "📊 Current status: $STATUS"
+            
+            case "$STATUS" in
+              "completed")
+                echo "✅ Devin session completed successfully!"
+                
+                # レビュー結果を取得
+                REVIEW_RESULT=$(echo "$STATUS_RESPONSE" | jq -r '.result // "No review result available"')
+                echo "📝 Review result:"
+                echo "$REVIEW_RESULT"
+                
+                # PRにコメントを投稿
+                gh pr comment ${{ github.event.pull_request.number }} --body "## 🤖 Devin Code Review Results
+
+$REVIEW_RESULT
+
+---
+*Automated review by Devin AI*"
+                
+                exit 0
+                ;;
+              "failed"|"error")
+                echo "❌ Devin session failed"
+                ERROR_MSG=$(echo "$STATUS_RESPONSE" | jq -r '.error_message // "Unknown error"')
+                echo "Error: $ERROR_MSG"
+                
+                gh pr comment ${{ github.event.pull_request.number }} --body "## ⚠️ Devin Code Review Failed
+
+The automated code review encountered an error: $ERROR_MSG
+
+Please try again or review manually.
+
+---
+*Automated review by Devin AI*"
+                
+                exit 1
+                ;;
+              "running"|"pending")
+                echo "🔄 Session still in progress..."
+                ;;
+              *)
+                echo "❓ Unknown status: $STATUS"
+                ;;
+            esac
+            
+            ATTEMPT=$((ATTEMPT + 1))
+            sleep 60
+          done
+          
+          echo "⏰ Timeout: Devin session took too long to complete"
+          gh pr comment ${{ github.event.pull_request.number }} --body "## ⏰ Devin Code Review Timeout
+
+The automated code review is taking longer than expected. The session may still be running in the background.
+
+Session ID: $SESSION_ID
+
+---
+*Automated review by Devin AI*"
+          
+          exit 1
+
+      - name: Cleanup on Failure
+        if: ${{ failure() && github.event.label.name == env.label_name }}
+        env:
+          DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
+        run: |
+          SESSION_ID="${{ env.SESSION_ID }}"
+          if [ -n "$SESSION_ID" ]; then
+            echo "🧹 Cleaning up failed session: $SESSION_ID"
+            curl -s -X DELETE "https://api.devin.ai/v1/sessions/$SESSION_ID" \
+                 -H "Authorization: Bearer $DEVIN_API_KEY" || true
+          fi
