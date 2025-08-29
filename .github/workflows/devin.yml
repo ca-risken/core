@@ -11,25 +11,12 @@ on:
 jobs:
   devin_pr_review:
     runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '/devin')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '/devin')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '/devin'))
     steps:
-      - name: Debug Event Data
-        run: |
-          echo "=== Debug Information ==="
-          echo "Event name: ${{ github.event_name }}"
-          echo "Comment body: '${{ github.event.comment.body }}'"
-          echo "Issue number: ${{ github.event.issue.number }}"
-          echo "Is PR: ${{ github.event.issue.pull_request }}"
-          echo "PR URL: ${{ github.event.issue.pull_request.html_url }}"
-          echo "Repository: ${{ github.repository }}"
-          echo "Event JSON:"
-          echo '${{ toJSON(github.event) }}'
-          echo "========================"
-
       - name: Request Devin Code Review
-        if: |
-          (github.event_name == 'issue_comment' && contains(github.event.comment.body, '/devin')) ||
-          (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '/devin')) ||
-          (github.event_name == 'pull_request_review' && contains(github.event.review.body, '/devin'))
         env:
           DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
         run: |
