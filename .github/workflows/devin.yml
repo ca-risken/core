@@ -16,8 +16,13 @@ jobs:
           (github.event_name == 'pull_request_review' && contains(github.event.review.body, '/devin'))
         env:
           DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
         run: |
+          if [ "${{ github.event_name }}" == "pull_request_review_comment" ]; then
+            PR_URL="${{ github.event.comment.pull_request_url }}"
+          else
+            PR_URL="${{ github.event.review.pull_request_url }}"
+          fi
+          
           JSON_PAYLOAD=$(cat <<EOF
           {
             "prompt": "Please review this pull request and look for bugs and security issues. PR: ${PR_URL} Only report on bugs and potential vulnerabilities you find. Be concise. Adapt your response language to match the language used in the PR title and description (e.g., if the PR is written in Japanese, respond in Japanese; if in English, respond in English). After completing the review, make sure to run 'gh pr review -c' to submit your feedback."
