@@ -292,5 +292,14 @@ func (c *Client) CleanWithNoProject(ctx context.Context) error {
 	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "project_tag"), projectIDs).Error; err != nil {
 		return err
 	}
+	
+	// organization
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "organization_invitation"), projectIDs).Error; err != nil {
+		return err
+	}
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "organization_project"), projectIDs).Error; err != nil {
+		return err
+	}
+	
 	return nil
 }
