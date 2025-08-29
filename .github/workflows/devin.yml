@@ -9,6 +9,9 @@ on:
 jobs:
   devin_pr_review:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - name: Request Devin Code Review
         if: |
