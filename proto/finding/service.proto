@@ -182,11 +182,11 @@ message ListFindingTagResponse {
 
 message ListFindingTagNameRequest {
   uint32 project_id = 1;
-  uint32 organization_id = 2;
   string sort = 4;
   string direction = 5;
   int32 offset = 6;
   int32 limit = 7;
+  uint32 organization_id = 8;
 }
 
 message ListFindingTagNameResponse {
@@ -218,7 +218,6 @@ message ClearScoreRequest {
 message ListResourceRequest {
   uint32 project_id = 1;
   repeated string resource_name = 2;
-  uint32 organization_id = 3;
   repeated string tag = 7;
   string sort = 8;
   string direction = 9;
@@ -227,6 +226,7 @@ message ListResourceRequest {
   uint64 resource_id = 12;
   string namespace = 13;
   string resource_type = 14;
+  uint32 organization_id = 15;
 }
 
 message ListResourceResponse {
