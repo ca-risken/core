@@ -17,7 +17,6 @@ jobs:
           echo "=== Debug Information ==="
           echo "Event name: ${{ github.event_name }}"
           echo "Comment body: '${{ github.event.comment.body }}'"
-          echo "Comment body length: ${#github.event.comment.body}"
           echo "Issue number: ${{ github.event.issue.number }}"
           echo "Is PR: ${{ github.event.issue.pull_request }}"
           echo "PR URL: ${{ github.event.issue.pull_request.html_url }}"
