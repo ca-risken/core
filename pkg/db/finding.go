@@ -877,33 +877,12 @@ order by %s %s
 limit %d, %d
 `
 
-const selectListResourceTagNameForOrg = `
-select
-  rt.tag
-from
-  resource_tag rt
-  inner join organization_project op on rt.project_id = op.project_id
-where
-  op.organization_id = ?
-group by rt.tag
-order by %s %s
-limit %d, %d
-`
-
 func (c *Client) ListResourceTagName(ctx context.Context, param *finding.ListResourceTagNameRequest) (*[]TagName, error) {
 	var data []TagName
-	if param.OrganizationId > 0 {
-		if err := c.Slave.WithContext(ctx).Raw(
-			fmt.Sprintf(selectListResourceTagNameForOrg, param.Sort, param.Direction, param.Offset, param.Limit),
-			param.OrganizationId).Scan(&data).Error; err != nil {
-			return nil, err
-		}
-	} else {
-		if err := c.Slave.WithContext(ctx).Raw(
-			fmt.Sprintf(selectListResourceTagName, param.Sort, param.Direction, param.Offset, param.Limit),
-			param.ProjectId).Scan(&data).Error; err != nil {
-			return nil, err
-		}
+	if err := c.Slave.WithContext(ctx).Raw(
+		fmt.Sprintf(selectListResourceTagName, param.Sort, param.Direction, param.Offset, param.Limit),
+		param.ProjectId).Scan(&data).Error; err != nil {
+		return nil, err
 	}
 	return &data, nil
 }
@@ -917,28 +896,11 @@ select count(*) from (
 ) tag
 `
 
-const selectListResourceTagNameCountForOrg = `
-select count(*) from (
-  select rt.tag
-  from resource_tag rt
-  inner join organization_project op on rt.project_id = op.project_id
-  where op.organization_id = ?
-  group by rt.tag
-) tag
-`
-
 func (c *Client) ListResourceTagNameCount(ctx context.Context, param *finding.ListResourceTagNameRequest) (int64, error) {
 	var count int64
-	if param.OrganizationId > 0 {
-		if err := c.Slave.WithContext(ctx).Raw(selectListResourceTagNameCountForOrg,
-			param.OrganizationId).Count(&count).Error; err != nil {
-			return count, err
-		}
-	} else {
-		if err := c.Slave.WithContext(ctx).Raw(selectListResourceTagNameCount,
-			param.ProjectId).Count(&count).Error; err != nil {
-			return count, err
-		}
+	if err := c.Slave.WithContext(ctx).Raw(selectListResourceTagNameCount,
+		param.ProjectId).Count(&count).Error; err != nil {
+		return count, err
 	}
 	return count, nil
 }
