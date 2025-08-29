@@ -1,18 +1,19 @@
 name: "Devin PR Review"
 
 on:
-  pull_request:
-    types: [labeled]
-
-env:
-  label_name: epic
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
 
 jobs:
   devin_pr_review:
     runs-on: ubuntu-latest
     steps:
       - name: Request Devin Code Review
-        if: ${{ github.event.label.name == env.label_name }}
+        if: |
+          (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '/devin')) ||
+          (github.event_name == 'pull_request_review' && contains(github.event.review.body, '/devin'))
         env:
           DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
           PR_URL: ${{ github.event.pull_request.html_url }}
