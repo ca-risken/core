@@ -11,21 +11,21 @@ on:
 jobs:
   devin_pr_review:
     runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '/devin')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '/devin')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '/devin'))
     steps:
       - name: Request Devin Code Review
-        if: |
-          (github.event_name == 'issue_comment' && contains(github.event.comment.body, '/devin')) ||
-          (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '/devin')) ||
-          (github.event_name == 'pull_request_review' && contains(github.event.review.body, '/devin'))
         env:
           DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
         run: |
           if [ "${{ github.event_name }}" == "issue_comment" ]; then
             PR_URL="${{ github.event.issue.pull_request.html_url }}"
           elif [ "${{ github.event_name }}" == "pull_request_review_comment" ]; then
-            PR_URL="${{ github.event.comment.pull_request_url }}"
+            PR_URL="${{ github.event.pull_request.html_url }}"
           else
-            PR_URL="${{ github.event.review.pull_request_url }}"
+            PR_URL="${{ github.event.pull_request.html_url }}"
           fi
           
           JSON_PAYLOAD=$(cat <<EOF
