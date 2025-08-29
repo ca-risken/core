@@ -10,13 +10,13 @@ on:
 
 jobs:
   devin_pr_review:
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '/devin')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '/devin')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '/devin'))
     runs-on: ubuntu-latest
     steps:
       - name: Request Devin Code Review
-        if: |
-          (github.event_name == 'issue_comment' && contains(github.event.comment.body, '/devin')) ||
-          (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '/devin')) ||
-          (github.event_name == 'pull_request_review' && contains(github.event.review.body, '/devin'))
         env:
           DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
         run: |
