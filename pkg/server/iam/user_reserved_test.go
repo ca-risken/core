@@ -210,22 +210,25 @@ func TestAttachRoleByUserReserved(t *testing.T) {
 		userIdpKey string
 	}
 	cases := []struct {
-		name               string
-		args               args
-		wantErr            bool
-		mockListResp       *[]db.UserReservedWithProjectID
-		mockListErr        error
-		isCalledAttachRole bool
-		mockAttachRoleErr  error
+		name                   string
+		args                   args
+		wantErr                bool
+		mockListResp           *[]db.UserReservedWithProjectID
+		mockListErr            error
+		isCalledAttachRole     bool
+		mockAttachRoleErr      error
+		isCalledDeleteReserved bool
+		mockDeleteReservedErr  error
 	}{
 		{
 			name: "OK",
 			args: args{userID: 1, userIdpKey: "uik"},
 			mockListResp: &[]db.UserReservedWithProjectID{
-				{ProjectID: 1, RoleID: 1},
+				{ProjectID: 1, RoleID: 1, ReservedID: 1},
 			},
-			isCalledAttachRole: true,
-			wantErr:            false,
+			isCalledAttachRole:     true,
+			isCalledDeleteReserved: true,
+			wantErr:                false,
 		},
 		{
 			name:         "OK No Attach Role",
@@ -243,11 +246,22 @@ func TestAttachRoleByUserReserved(t *testing.T) {
 			name: "NG Attach Role Error",
 			args: args{userID: 1, userIdpKey: "uik"},
 			mockListResp: &[]db.UserReservedWithProjectID{
-				{ProjectID: 1, RoleID: 1},
+				{ProjectID: 1, RoleID: 1, ReservedID: 1},
 			},
 			isCalledAttachRole: true,
 			mockAttachRoleErr:  errors.New("something error"),
 			wantErr:            true,
+		},
+		{
+			name: "NG Delete UserReserved Error",
+			args: args{userID: 1, userIdpKey: "uik"},
+			mockListResp: &[]db.UserReservedWithProjectID{
+				{ProjectID: 1, RoleID: 1, ReservedID: 1},
+			},
+			isCalledAttachRole:     true,
+			isCalledDeleteReserved: true,
+			mockDeleteReservedErr:  errors.New("something error"),
+			wantErr:                true,
 		},
 	}
 	for _, c := range cases {
@@ -261,7 +275,9 @@ func TestAttachRoleByUserReserved(t *testing.T) {
 			}
 			if c.isCalledAttachRole {
 				mock.On("AttachRole", test.RepeatMockAnything(4)...).Return(&model.UserRole{}, c.mockAttachRoleErr).Once()
-
+			}
+			if c.isCalledDeleteReserved {
+				mock.On("DeleteUserReserved", test.RepeatMockAnything(3)...).Return(c.mockDeleteReservedErr).Once()
 			}
 			err := svc.AttachRoleByUserReserved(ctx, c.args.userID, c.args.userIdpKey)
 			if err != nil && !c.wantErr {
