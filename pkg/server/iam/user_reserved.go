@@ -81,6 +81,9 @@ func (i *IAMService) AttachRoleByUserReserved(ctx context.Context, userID uint32
 		if err != nil {
 			return err
 		}
+		if err := i.repository.DeleteUserReserved(ctx, u.ProjectID, u.ReservedID); err != nil {
+			return err
+		}
 	}
 
 	return nil
