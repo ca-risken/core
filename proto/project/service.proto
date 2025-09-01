@@ -26,6 +26,7 @@ message ListProjectRequest {
   uint32 user_id = 1;
   uint32 project_id = 2;
   string name = 3 [ (validate.rules).string.max_len = 64 ];
+  uint32 organization_id = 4;
 }
 
 message ListProjectResponse { repeated Project project = 1; }

@@ -60,17 +60,19 @@ type Config struct {
 	BaseURL                 string
 	OpenAIToken             string
 	ChatGPTModel            string
+	ReasoningModel          string
 	defaultLocale           string
 	excludeDeleteDataSource []string
 	SlackAPIToken           string
 }
 
-func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, defaultLocale, SlackAPIToken string, excludeDeleteDataSource []string) Config {
+func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, reasoningModel, defaultLocale, SlackAPIToken string, excludeDeleteDataSource []string) Config {
 	return Config{
 		MaxAnalyzeAPICall:       maxAnalyzeAPICall,
 		BaseURL:                 baseURL,
 		OpenAIToken:             openaiToken,
 		ChatGPTModel:            chatGPTModel,
+		ReasoningModel:          reasoningModel,
 		defaultLocale:           defaultLocale,
 		SlackAPIToken:           SlackAPIToken,
 		excludeDeleteDataSource: excludeDeleteDataSource,
@@ -95,7 +97,15 @@ func (s *Server) Run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	isvc := iamserver.NewIAMService(s.db, fc, s.logger)
+	oc, err := s.newOrganizationClient(clientAddr)
+	if err != nil {
+		return err
+	}
+	rc, err := s.newReportClient(clientAddr)
+	if err != nil {
+		return err
+	}
+	isvc := iamserver.NewIAMService(s.db, fc, oc, oimac, s.logger)
 	asvc := alertserver.NewAlertService(
 		s.config.MaxAnalyzeAPICall,
 		s.config.BaseURL,
@@ -108,10 +118,10 @@ func (s *Server) Run(ctx context.Context) error {
 		s.config.SlackAPIToken,
 	)
 	oisvc := organization_iamserver.NewOrganizationIAMService(s.db, iamc, s.logger)
-	fsvc := findingserver.NewFindingService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.excludeDeleteDataSource, s.logger)
-	psvc := projectserver.NewProjectService(s.db, iamc, s.logger)
+	fsvc := findingserver.NewFindingService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, s.config.excludeDeleteDataSource, s.logger)
+	psvc := projectserver.NewProjectService(s.db, iamc, oc, s.logger)
 	rsvc := reportserver.NewReportService(s.db, s.logger)
-	aisvc := aiserver.NewAIService(s.config.OpenAIToken, s.config.ChatGPTModel, s.logger)
+	aisvc := aiserver.NewAIService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, rc, s.logger)
 	osvc := organizationserver.NewOrganizationService(s.db, oimac, s.logger)
 	hsvc := health.NewServer()
 
@@ -194,6 +204,24 @@ func (s *Server) newOrganizationIAMClient(svcAddr string) (organization_iam.Orga
 		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
 	}
 	return organization_iam.NewOrganizationIAMServiceClient(conn), nil
+}
+
+func (s *Server) newOrganizationClient(svcAddr string) (organization.OrganizationServiceClient, error) {
+	ctx := context.Background()
+	conn, err := getGRPCConn(ctx, svcAddr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
+	}
+	return organization.NewOrganizationServiceClient(conn), nil
+}
+
+func (s *Server) newReportClient(svcAddr string) (report.ReportServiceClient, error) {
+	ctx := context.Background()
+	conn, err := getGRPCConn(ctx, svcAddr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
+	}
+	return report.NewReportServiceClient(conn), nil
 }
 
 func getGRPCConn(ctx context.Context, addr string) (*grpc.ClientConn, error) {

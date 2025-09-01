@@ -1,4 +1,4 @@
-TARGETS = ai alert finding iam project report organization_iam
+TARGETS = ai alert finding iam project report organization_iam organization
 MOCK_TARGETS = $(TARGETS:=.mock)
 BUILD_OPT=""
 IMAGE_TAG=latest
@@ -122,7 +122,7 @@ list-project-service:
 list-project:
 	$(GRPCURL) \
 		-plaintext \
-		-d '{"user_id":1002, "project_id":1001, "name":"project-a"}' \
+		-d '{"user_id":1002, "project_id":1001, "name":"project-a", "organization_id":100}' \
 		$(CORE_API_ADDR) core.project.ProjectService.ListProject
 
 .PHONY: create-project
@@ -689,33 +689,54 @@ clean-old-resource:
 list-report-service:
 	$(GRPCURL) -plaintext $(CORE_API_ADDR) list core.report.ReportService
 
-.PHONY: get-report
-get-report:
+.PHONY: get-report-finding
+get-report-finding:
 	$(GRPCURL) \
 		-plaintext \
 		-d '{"project_id":1001}' \
 		$(CORE_API_ADDR) core.report.ReportService.GetReportFinding
 
-.PHONY: get-report-all
-get-report-all:
+.PHONY: get-report-finding-all
+get-report-finding-all:
 	$(GRPCURL) \
 		-plaintext \
 		-d '{}' \
 		$(CORE_API_ADDR) core.report.ReportService.GetReportFindingAll
 
-.PHONY: collect-report
-collect-report:
+.PHONY: collect-report-finding
+collect-report-finding:
 	$(GRPCURL) \
 		-plaintext \
 		-d '{}' \
 		$(CORE_API_ADDR) core.report.ReportService.CollectReportFinding
 
-.PHONY: purge-report
-purge-report:
+.PHONY: purge-report-finding
+purge-report-finding:
 	$(GRPCURL) \
 		-plaintext \
 		-d '{}' \
 		$(CORE_API_ADDR) core.report.ReportService.PurgeReportFinding
+
+.PHONY: get-report
+get-report:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001, "report_id":1001}' \
+		$(CORE_API_ADDR) core.report.ReportService.GetReport
+
+.PHONY: list-report
+list-report:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001}' \
+		$(CORE_API_ADDR) core.report.ReportService.ListReport
+
+.PHONY: put-report
+put-report:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001, "name":"report-name", "type":"Markdown", "status":"OK", "content":"# title"}' \
+		$(CORE_API_ADDR) core.report.ReportService.PutReport
 
 .PHONY: list-iam-service
 list-iam-service:
@@ -922,5 +943,19 @@ chat-ai:
 		-plaintext \
 		-d '{"question":"What mountain is the highest in the world?", "chat_history": [{"role":1, "content":"hello!"}, {"role":2, "content":"Hi, I am a chatbot."}]}' \
 		$(CORE_API_ADDR) core.ai.AIService.ChatAI
+
+.PHONY: generate-report
+generate-report:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"prompt":"AWSのFindingレポートを作成してください。データソースごとの解析もお願いします。", "project_id":1001, "name":"report-name"}' \
+		$(CORE_API_ADDR) core.ai.AIService.GenerateReport
+
+.PHONY: generate-report2
+generate-report2:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"prompt":"google:sccのFindingを分析して", "project_id":1001}' \
+		$(CORE_API_ADDR) core.ai.AIService.GenerateReport
 
 FAKE:

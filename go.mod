@@ -18,7 +18,7 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jarcoal/httpmock v1.1.0
-	github.com/openai/openai-go v1.7.0
+	github.com/openai/openai-go v1.8.3
 	github.com/slack-go/slack v0.11.4
 	github.com/stretchr/testify v1.8.3
 	github.com/vikyd/zero v0.0.0-20190921142904-0f738d0bc858

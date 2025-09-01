@@ -94,6 +94,34 @@ func (_m *AIService) ChatAI(ctx context.Context, req *protoai.ChatAIRequest) (*p
 	return r0, r1
 }
 
+// GenerateReport provides a mock function with given fields: ctx, projectID, prompt
+func (_m *AIService) GenerateReport(ctx context.Context, projectID uint32, prompt string) (string, error) {
+	ret := _m.Called(ctx, projectID, prompt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GenerateReport")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) (string, error)); ok {
+		return rf(ctx, projectID, prompt)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) string); ok {
+		r0 = rf(ctx, projectID, prompt)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, string) error); ok {
+		r1 = rf(ctx, projectID, prompt)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewAIService creates a new instance of AIService. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewAIService(t interface {

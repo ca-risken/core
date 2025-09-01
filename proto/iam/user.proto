@@ -12,6 +12,7 @@ message ListUserRequest {
   uint32 user_id = 4;
   bool admin = 5;
   string user_idp_key = 6;
+  uint32 organization_id = 7;
 }
 
 message ListUserResponse { repeated uint32 user_id = 1; }
@@ -23,6 +24,10 @@ message GetUserRequest {
 }
 
 message GetUserResponse { User user = 1; }
+
+message GetUserByUserIdpKeyRequest { string user_idp_key = 1; }
+
+message GetUserByUserIdpKeyResponse { User user = 1; }
 
 message PutUserRequest { UserForUpsert user = 1; }
 

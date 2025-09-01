@@ -12,6 +12,8 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
+	organization_iam "github.com/ca-risken/core/proto/organization_iam"
+	organization_iam_mocks "github.com/ca-risken/core/proto/organization_iam/mocks"
 	"gorm.io/gorm"
 )
 
@@ -32,6 +34,15 @@ func TestListUser(t *testing.T) {
 				{UserID: 1, Sub: "sub", Name: "nm", Activated: true},
 				{UserID: 2, Sub: "sub", Name: "nm", Activated: true},
 				{UserID: 3, Sub: "sub", Name: "nm", Activated: true},
+			},
+		},
+		{
+			name:  "OK with organization filter",
+			input: &iam.ListUserRequest{OrganizationId: 1, Activated: true, Name: "nm"},
+			want:  &iam.ListUserResponse{UserId: []uint32{1, 2}},
+			mockResponce: &[]model.User{
+				{UserID: 1, Sub: "sub", Name: "nm", Activated: true},
+				{UserID: 2, Sub: "sub", Name: "nm", Activated: true},
 			},
 		},
 		{
@@ -59,7 +70,7 @@ func TestListUser(t *testing.T) {
 			svc := IAMService{repository: mock}
 
 			if c.mockResponce != nil || c.mockError != nil {
-				mock.On("ListUser", test.RepeatMockAnything(7)...).Return(c.mockResponce, c.mockError).Once()
+				mock.On("ListUser", test.RepeatMockAnything(8)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.ListUser(ctx, c.input)
 			if err != nil && !c.wantErr {
@@ -141,6 +152,8 @@ func TestPutUser(t *testing.T) {
 		mockUpdErr               error
 		mockListUserReservedResp *[]db.UserReservedWithProjectID
 		mockListUserReservedErr  error
+		mockAttachRoleErr        error
+		mockOrgAttachRoleErr     error
 
 		callGetActiveUserCount bool
 	}{
@@ -161,6 +174,30 @@ func TestPutUser(t *testing.T) {
 			mockInsertResp:           &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, IsAdmin: true, CreatedAt: now, UpdatedAt: now},
 			mockListUserReservedResp: &[]db.UserReservedWithProjectID{},
 			callGetActiveUserCount:   true,
+		},
+		{
+			name:           "OK Insert with User Reserved Role Attachment",
+			input:          &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true}},
+			want:           &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, IsAdmin: false, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetErr:     gorm.ErrRecordNotFound,
+			mockInsertResp: &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, IsAdmin: false, CreatedAt: now, UpdatedAt: now},
+			mockListUserReservedResp: &[]db.UserReservedWithProjectID{
+				{ProjectID: 1, ReservedID: 1, RoleID: 100},
+			},
+			callGetActiveUserCount: true,
+		},
+		{
+			name:           "OK Insert with Multiple User Reserved Role Attachments",
+			input:          &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true}},
+			want:           &iam.PutUserResponse{User: &iam.User{UserId: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, IsAdmin: false, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetErr:     gorm.ErrRecordNotFound,
+			mockInsertResp: &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, IsAdmin: false, CreatedAt: now, UpdatedAt: now},
+			mockListUserReservedResp: &[]db.UserReservedWithProjectID{
+				{ProjectID: 1, ReservedID: 1, RoleID: 100},
+				{ProjectID: 2, ReservedID: 2, RoleID: 200},
+				{ProjectID: 3, ReservedID: 3, RoleID: 300},
+			},
+			callGetActiveUserCount: true,
 		},
 		{
 			name:                   "OK Update",
@@ -200,12 +237,35 @@ func TestPutUser(t *testing.T) {
 			mockListUserReservedErr: gorm.ErrInvalidTransaction,
 			callGetActiveUserCount:  true,
 		},
+		{
+			name:           "NG DB error(AttachRole)",
+			input:          &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true}},
+			wantErr:        true,
+			mockGetErr:     gorm.ErrRecordNotFound,
+			mockInsertResp: &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, IsAdmin: false, CreatedAt: now, UpdatedAt: now},
+			mockListUserReservedResp: &[]db.UserReservedWithProjectID{
+				{ProjectID: 1, ReservedID: 1, RoleID: 100},
+			},
+			mockAttachRoleErr:      gorm.ErrInvalidDB,
+			callGetActiveUserCount: true,
+		},
+		{
+			name:                     "NG error(AttachOrganizationRole)",
+			input:                    &iam.PutUserRequest{User: &iam.UserForUpsert{Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true}},
+			wantErr:                  true,
+			mockGetErr:               gorm.ErrRecordNotFound,
+			mockInsertResp:           &model.User{UserID: 1, Sub: "sub", Name: "nm", UserIdpKey: "uik", Activated: true, IsAdmin: false, CreatedAt: now, UpdatedAt: now},
+			mockListUserReservedResp: &[]db.UserReservedWithProjectID{},
+			mockOrgAttachRoleErr:     gorm.ErrInvalidDB,
+			callGetActiveUserCount:   true,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mock := mocks.NewIAMRepository(t)
-			svc := IAMService{repository: mock, logger: logging.NewLogger()}
+			orgIamMock := organization_iam_mocks.NewOrganizationIAMServiceClient(t)
+			svc := IAMService{repository: mock, organizationIamClient: orgIamMock, logger: logging.NewLogger()}
 
 			if c.callGetActiveUserCount {
 				if c.name == "OK Insert First User (Auto Admin)" {
@@ -222,9 +282,17 @@ func TestPutUser(t *testing.T) {
 			}
 			if c.mockInsertResp != nil || c.mockInsertErr != nil {
 				mock.On("CreateUser", test.RepeatMockAnything(2)...).Return(c.mockInsertResp, c.mockInsertErr).Once()
-			}
-			if c.mockListUserReservedResp != nil || c.mockListUserReservedErr != nil {
-				mock.On("ListUserReservedWithProjectID", test.RepeatMockAnything(2)...).Return(c.mockListUserReservedResp, c.mockListUserReservedErr).Once()
+				if c.mockListUserReservedResp != nil || c.mockListUserReservedErr != nil {
+					mock.On("ListUserReservedWithProjectID", test.RepeatMockAnything(2)...).Return(c.mockListUserReservedResp, c.mockListUserReservedErr).Once()
+					if c.mockListUserReservedResp != nil && len(*c.mockListUserReservedResp) > 0 {
+						for range *c.mockListUserReservedResp {
+							mock.On("AttachRole", test.RepeatMockAnything(4)...).Return(&model.UserRole{}, c.mockAttachRoleErr).Once()
+						}
+					}
+				}
+				if c.mockOrgAttachRoleErr != nil || (c.mockInsertErr == nil && c.mockListUserReservedErr == nil && c.mockAttachRoleErr == nil) {
+					orgIamMock.On("AttachOrganizationRoleByOrganizationUserReserved", test.RepeatMockAnything(3)...).Return(&organization_iam.AttachOrganizationRoleByOrganizationUserReservedResponse{}, c.mockOrgAttachRoleErr).Once()
+				}
 			}
 			got, err := svc.PutUser(ctx, c.input)
 			if err != nil && !c.wantErr {

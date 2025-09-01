@@ -775,3 +775,68 @@ func TestDeleteOrganizationInvitation(t *testing.T) {
 		})
 	}
 }
+
+func TestExistsOrganizationProject(t *testing.T) {
+	now := time.Now()
+	type args struct {
+		organizationID uint32
+		projectID      uint32
+	}
+	cases := []struct {
+		name        string
+		args        args
+		want        bool
+		wantErr     bool
+		mockClosure func(mock sqlmock.Sqlmock)
+	}{
+		{
+			name:    "OK - exists",
+			args:    args{organizationID: 1, projectID: 1},
+			want:    true,
+			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrganizationProject)).WillReturnRows(sqlmock.NewRows([]string{
+					"organization_id", "project_id", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), now, now))
+			},
+		},
+		{
+			name:    "OK - not exists",
+			args:    args{organizationID: 1, projectID: 1},
+			want:    false,
+			wantErr: false,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrganizationProject)).WillReturnError(gorm.ErrRecordNotFound)
+			},
+		},
+		{
+			name:    "NG DB error",
+			args:    args{organizationID: 1, projectID: 1},
+			want:    false,
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrganizationProject)).WillReturnError(errors.New("DB error"))
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			db, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+			}
+			c.mockClosure(mock)
+			got, err := db.ExistsOrganizationProject(ctx, c.args.organizationID, c.args.projectID)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if got != c.want {
+				t.Fatalf("Unexpected result: want=%v, got=%v", c.want, got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}

@@ -14,6 +14,8 @@ service IAMService {
   // User
   rpc ListUser(ListUserRequest) returns (ListUserResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc GetUserByUserIdpKey(GetUserByUserIdpKeyRequest)
+      returns (GetUserByUserIdpKeyResponse);
   rpc PutUser(PutUserRequest) returns (PutUserResponse);
   rpc UpdateUserAdmin(UpdateUserAdminRequest) returns (UpdateUserAdminResponse);
 

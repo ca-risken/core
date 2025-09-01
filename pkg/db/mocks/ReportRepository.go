@@ -33,6 +33,36 @@ func (_m *ReportRepository) CollectReportFinding(ctx context.Context) error {
 	return r0
 }
 
+// GetReport provides a mock function with given fields: ctx, projectID, reportID
+func (_m *ReportRepository) GetReport(ctx context.Context, projectID uint32, reportID uint32) (*model.Report, error) {
+	ret := _m.Called(ctx, projectID, reportID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetReport")
+	}
+
+	var r0 *model.Report
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) (*model.Report, error)); ok {
+		return rf(ctx, projectID, reportID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) *model.Report); ok {
+		r0 = rf(ctx, projectID, reportID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Report)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
+		r1 = rf(ctx, projectID, reportID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetReportFinding provides a mock function with given fields: _a0, _a1, _a2, _a3, _a4, _a5
 func (_m *ReportRepository) GetReportFinding(_a0 context.Context, _a1 uint32, _a2 []string, _a3 string, _a4 string, _a5 float32) (*[]model.ReportFinding, error) {
 	ret := _m.Called(_a0, _a1, _a2, _a3, _a4, _a5)
@@ -93,6 +123,36 @@ func (_m *ReportRepository) GetReportFindingAll(_a0 context.Context, _a1 []strin
 	return r0, r1
 }
 
+// ListReport provides a mock function with given fields: ctx, projectID
+func (_m *ReportRepository) ListReport(ctx context.Context, projectID uint32) (*[]model.Report, error) {
+	ret := _m.Called(ctx, projectID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListReport")
+	}
+
+	var r0 *[]model.Report
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) (*[]model.Report, error)); ok {
+		return rf(ctx, projectID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) *[]model.Report); ok {
+		r0 = rf(ctx, projectID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*[]model.Report)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32) error); ok {
+		r1 = rf(ctx, projectID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PurgeReportFinding provides a mock function with given fields: ctx
 func (_m *ReportRepository) PurgeReportFinding(ctx context.Context) error {
 	ret := _m.Called(ctx)
@@ -109,6 +169,36 @@ func (_m *ReportRepository) PurgeReportFinding(ctx context.Context) error {
 	}
 
 	return r0
+}
+
+// PutReport provides a mock function with given fields: ctx, report
+func (_m *ReportRepository) PutReport(ctx context.Context, report *model.Report) (*model.Report, error) {
+	ret := _m.Called(ctx, report)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PutReport")
+	}
+
+	var r0 *model.Report
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *model.Report) (*model.Report, error)); ok {
+		return rf(ctx, report)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *model.Report) *model.Report); ok {
+		r0 = rf(ctx, report)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Report)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *model.Report) error); ok {
+		r1 = rf(ctx, report)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // NewReportRepository creates a new instance of ReportRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

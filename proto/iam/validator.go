@@ -41,6 +41,13 @@ func (u *UserForUpsert) Validate() error {
 	)
 }
 
+// Validate GetUserByUserIdpKeyRequest
+func (g *GetUserByUserIdpKeyRequest) Validate() error {
+	return validation.ValidateStruct(g,
+		validation.Field(&g.UserIdpKey, validation.Required, validation.Length(1, 255)),
+	)
+}
+
 // Validate ListRoleRequest
 func (l *ListRoleRequest) Validate() error {
 	return validation.ValidateStruct(l,

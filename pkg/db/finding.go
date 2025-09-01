@@ -17,13 +17,23 @@ const (
 	cleanBeforeDays = 30
 )
 
+type FindingWithPend struct {
+	model.Finding
+	PendUserID    *uint32    `gorm:"column:pend_user_id"`
+	PendNote      *string    `gorm:"column:pend_note"`
+	PendReason    *string    `gorm:"column:pend_reason"`
+	PendExpiredAt *time.Time `gorm:"column:pend_expired_at"`
+	PendUserName  *string    `gorm:"column:pend_user_name"`
+}
+
 type FindingRepository interface {
 	// Finding
-	ListFinding(context.Context, *finding.ListFindingRequest) (*[]model.Finding, error)
+	ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*[]model.Finding, error)
+	ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]FindingWithPend, error)
 	BatchListFinding(context.Context, *finding.BatchListFindingRequest) (*[]model.Finding, error)
 	ListFindingCount(
 		ctx context.Context,
-		projectID, alertID uint32,
+		projectID, organizationID, alertID uint32,
 		fromScore, toScore float32,
 		findingID uint64,
 		dataSources, resourceNames, tags []string,
@@ -71,7 +81,6 @@ type FindingRepository interface {
 	// FindingSetting
 	ListFindingSetting(ctx context.Context, req *finding.ListFindingSettingRequest) (*[]model.FindingSetting, error)
 	GetFindingSetting(ctx context.Context, projectID uint32, findingSettingID uint32) (*model.FindingSetting, error)
-	GetFindingSettingByResource(ctx context.Context, projectID uint32, resourceName string) (*model.FindingSetting, error)
 	UpsertFindingSetting(ctx context.Context, data *model.FindingSetting) (*model.FindingSetting, error)
 	DeleteFindingSetting(ctx context.Context, projectID uint32, findingSettingID uint32) error
 
@@ -88,16 +97,20 @@ type FindingRepository interface {
 	DeleteNoResourceIdTag(ctx context.Context) error
 	DeleteOldFinding(ctx context.Context, excludeDataSource []string) error
 	DeleteNoFindingIdTag(ctx context.Context) error
+
+	// ExecSQL
+	ExecSQL(ctx context.Context, sql string, params []any) ([]map[string]any, error)
 }
 
 var _ FindingRepository = (*Client)(nil)
 
 func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*[]model.Finding, error) {
-	query := "select finding.* from finding inner join finding f_alias using(finding_id) "
-	cond, params := generateListFindingCondition(
+	query := "select finding.* from finding inner join finding f_alias using(finding_id)"
+	cond, params := generateProjectFindingQuery(
 		req.ProjectId, req.AlertId,
-		req.FromScore, req.ToScore,
-		req.FindingId, req.DataSource, req.ResourceName, req.Tag, req.Status)
+		req.FromScore, req.ToScore, req.FindingId,
+		req.DataSource, req.ResourceName, req.Tag,
+		req.Status)
 	query += cond
 	query += fmt.Sprintf(" order by f_alias.%s %s", req.Sort, req.Direction)
 	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
@@ -108,12 +121,51 @@ func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingReques
 	return &data, nil
 }
 
+func (c *Client) ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]FindingWithPend, error) {
+	query := `select finding.*, 
+		pf.pend_user_id as pend_user_id,
+		pf.note as pend_note,
+		pf.reason as pend_reason,
+		pf.expired_at as pend_expired_at,
+		u.name as pend_user_name
+	from finding 
+	inner join finding f_alias using(finding_id)
+	left join pend_finding pf on finding.finding_id = pf.finding_id and finding.project_id = pf.project_id
+	left join user u on pf.pend_user_id = u.user_id
+	inner join organization_project op on finding.project_id = op.project_id`
+
+	join, cond, params := generateListFindingConditions(
+		0,
+		req.FromScore, req.ToScore, req.FindingId,
+		req.DataSource, req.ResourceName, req.Tag)
+
+	cond += " and op.organization_id = ?"
+	params = append(params, req.OrganizationId)
+
+	if req.Status == finding.FindingStatus_FINDING_ACTIVE {
+		cond += " and (pf.finding_id is NULL or (pf.expired_at is not NULL and pf.expired_at <= NOW()))"
+	}
+	if req.Status == finding.FindingStatus_FINDING_PENDING {
+		cond += " and pf.finding_id is not NULL and (pf.expired_at is NULL or NOW() < pf.expired_at)"
+	}
+
+	query += join + cond
+	query += fmt.Sprintf(" order by f_alias.%s %s", req.Sort, req.Direction)
+	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
+	var data []FindingWithPend
+	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
 func (c *Client) BatchListFinding(ctx context.Context, req *finding.BatchListFindingRequest) (*[]model.Finding, error) {
-	query := "select finding.* from finding "
-	cond, params := generateListFindingCondition(
+	query := "select finding.* from finding"
+	cond, params := generateProjectFindingQuery(
 		req.ProjectId, req.AlertId,
-		req.FromScore, req.ToScore,
-		req.FindingId, req.DataSource, req.ResourceName, req.Tag, req.Status)
+		req.FromScore, req.ToScore, req.FindingId,
+		req.DataSource, req.ResourceName, req.Tag,
+		req.Status)
 	query += cond
 	var data []model.Finding
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
@@ -124,16 +176,30 @@ func (c *Client) BatchListFinding(ctx context.Context, req *finding.BatchListFin
 
 func (c *Client) ListFindingCount(
 	ctx context.Context,
-	projectID, alertID uint32,
+	projectID, organizationID, alertID uint32,
 	fromScore, toScore float32,
 	findingID uint64,
 	dataSources, resourceNames, tags []string,
 	status finding.FindingStatus) (int64, error) {
-	query := "select count(*) from finding "
-	cond, params := generateListFindingCondition(
-		projectID, alertID,
-		fromScore, toScore,
-		findingID, dataSources, resourceNames, tags, status)
+
+	query := "select count(*) from finding"
+	var cond string
+	var params []interface{}
+
+	if organizationID != 0 {
+		cond, params = generateOrganizationFindingQuery(
+			organizationID, alertID,
+			fromScore, toScore, findingID,
+			dataSources, resourceNames, tags,
+			status)
+	} else {
+		cond, params = generateProjectFindingQuery(
+			projectID, alertID,
+			fromScore, toScore, findingID,
+			dataSources, resourceNames, tags,
+			status)
+	}
+
 	query += cond
 	var count int64
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Count(&count).Error; err != nil {
@@ -142,20 +208,73 @@ func (c *Client) ListFindingCount(
 	return count, nil
 }
 
-func generateListFindingCondition(
+func generateProjectFindingQuery(
 	projectID, alertID uint32,
 	fromScore, toScore float32,
 	findingID uint64,
 	dataSources, resourceNames, tags []string,
 	status finding.FindingStatus) (string, []interface{}) {
+
+	join, query, params := generateListFindingConditions(
+		alertID,
+		fromScore, toScore, findingID,
+		dataSources, resourceNames, tags)
+
+	query += " and finding.project_id = ?"
+	params = append(params, projectID)
+
+	if status == finding.FindingStatus_FINDING_ACTIVE {
+		join += " left join pend_finding pf using(finding_id)"
+		query += " and (pf.finding_id is NULL or (pf.expired_at is not NULL and pf.expired_at <= NOW()))"
+	}
+	if status == finding.FindingStatus_FINDING_PENDING {
+		join += " inner join pend_finding pf using(finding_id)"
+		query += " and (pf.expired_at is NULL or NOW() < pf.expired_at)"
+	}
+
+	return join + query, params
+}
+
+func generateOrganizationFindingQuery(
+	organizationID, alertID uint32,
+	fromScore, toScore float32,
+	findingID uint64,
+	dataSources, resourceNames, tags []string,
+	status finding.FindingStatus) (string, []interface{}) {
+
+	join, query, params := generateListFindingConditions(
+		alertID,
+		fromScore, toScore, findingID,
+		dataSources, resourceNames, tags)
+
+	join += " inner join organization_project op on finding.project_id = op.project_id"
+	query += " and op.organization_id = ?"
+	params = append(params, organizationID)
+
+	if status == finding.FindingStatus_FINDING_ACTIVE {
+		join += " left join pend_finding pf using(finding_id)"
+		query += " and (pf.finding_id is NULL or (pf.expired_at is not NULL and pf.expired_at <= NOW()))"
+	}
+	if status == finding.FindingStatus_FINDING_PENDING {
+		join += " inner join pend_finding pf using(finding_id)"
+		query += " and (pf.expired_at is NULL or NOW() < pf.expired_at)"
+	}
+
+	return join + query, params
+}
+
+func generateListFindingConditions(
+	alertID uint32,
+	fromScore, toScore float32,
+	findingID uint64,
+	dataSources, resourceNames, tags []string) (string, string, []interface{}) {
 	join := ""
-	query := `
-where
-  finding.project_id = ?
-  and finding.score between ? and ?
-`
+	var query string
 	var params []interface{}
-	params = append(params, projectID, fromScore, toScore)
+
+	query = " where finding.score between ? and ?"
+	params = append(params, fromScore, toScore)
+
 	if findingID != 0 {
 		query += " and finding.finding_id = ?"
 		params = append(params, findingID)
@@ -184,15 +303,8 @@ where
 		query += " and ft.tag in (?)"
 		params = append(params, tags)
 	}
-	if status == finding.FindingStatus_FINDING_ACTIVE {
-		join += " left join pend_finding pf using(finding_id)"
-		query += " and (pf.finding_id is NULL or (pf.expired_at is not NULL and pf.expired_at <= NOW()))"
-	}
-	if status == finding.FindingStatus_FINDING_PENDING {
-		join += " inner join pend_finding pf using(finding_id)"
-		query += " and (pf.expired_at is NULL or NOW() < pf.expired_at)"
-	}
-	return join + query, params
+
+	return join, query, params
 }
 
 func escapeLikeParam(s string) string {
@@ -515,6 +627,7 @@ func (c *Client) ListFindingSetting(ctx context.Context, req *finding.ListFindin
 		query += " and status=?"
 		param = append(param, getStatusString(req.Status))
 	}
+	query += " order by finding_setting_id"
 	var data []model.FindingSetting
 	if err := c.Slave.WithContext(ctx).Raw(query, param...).Scan(&data).Error; err != nil {
 		return nil, err
@@ -538,16 +651,6 @@ const selectGetFindingSetting = `select * from finding_setting where project_id=
 func (c *Client) GetFindingSetting(ctx context.Context, projectID uint32, findingSettingID uint32) (*model.FindingSetting, error) {
 	var data model.FindingSetting
 	if err := c.Slave.WithContext(ctx).Raw(selectGetFindingSetting, projectID, findingSettingID).First(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
-const selectGetFindingSettingByResource = `select * from finding_setting where project_id=? and resource_name=?`
-
-func (c *Client) GetFindingSettingByResource(ctx context.Context, projectID uint32, resourceName string) (*model.FindingSetting, error) {
-	var data model.FindingSetting
-	if err := c.Master.WithContext(ctx).Raw(selectGetFindingSettingByResource, projectID, resourceName).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -1178,4 +1281,13 @@ func (c *Client) DeleteNoFindingIdTag(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+func (c *Client) ExecSQL(ctx context.Context, sql string, params []any) ([]map[string]any, error) {
+	var data []map[string]any
+	// Important: Use Slave for executing dynamic SQL queries
+	if err := c.Slave.WithContext(ctx).Raw(sql, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return data, nil
 }
