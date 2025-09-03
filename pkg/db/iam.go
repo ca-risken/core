@@ -170,7 +170,7 @@ func (c *Client) PutUser(ctx context.Context, u *model.User) (*model.User, error
 	if err := c.Master.WithContext(ctx).Exec(updateUser, u.Name, convertZeroValueToNull(u.UserIdpKey), fmt.Sprintf("%t", u.Activated), u.IsAdmin, u.UserID).Error; err != nil {
 		return nil, err
 	}
-	// test test
+	// test test test
 	return c.GetUserBySub(ctx, u.Sub)
 }
 
