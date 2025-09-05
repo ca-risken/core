@@ -13,14 +13,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Setup environment and credentials
+      - name: Install Go and tools
         run: |
-          goenv install ${INSTALL_GO_VERSION}
-          goenv global ${INSTALL_GO_VERSION}
+          cd /root/.goenv/plugins/go-build/../.. && git pull && cd -
+          goenv install ${{ env.INSTALL_GO_VERSION }}
+          goenv global ${{ env.INSTALL_GO_VERSION }}
           go version
+          
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin ${{ env.GOLANGCI_LINT_VERSION }}
+          mv $(go env GOPATH)/bin/golangci-lint /usr/local/bin/
+          golangci-lint --version
 
-          # Get parameters from Parameter Store
-          export GITHUB_USER=$(aws ssm get-parameter --name "/build/GITHUB_USER" --with-decryption --query 'Parameter.Value' --output text)
-          export GITHUB_TOKEN=$(aws ssm get-parameter --name "/build/GITHUB_TOKEN" --with-decryption --query 'Parameter.Value' --output text)
-          export DOCKER_USER=$(aws ssm get-parameter --name "/build/DOCKER_USER" --with-decryption --query 'Parameter.Value' --output text)
-          export DOCKER_TOKEN=$(aws ssm get-parameter --name "/build/DOCKER_TOKEN" --with-decryption --query 'Parameter.Value' --output text)
+
+      - name: Lint and test
+        run: |
+          make lint -k
+          make test -j
