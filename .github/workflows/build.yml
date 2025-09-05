@@ -1,0 +1,8 @@
+name: Build
+on: [push]
+jobs:
+  - Build-Job:
+    runs-on:
+      - codebuild-risken-core-pr-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - run: echo "Hello World!"
