@@ -3,6 +3,6 @@ on: [push]
 jobs:
   - Build-Job:
     runs-on:
-      - codebuild-risken-core-pr-runner-${{ github.run_id }}-${{ github.run_attempt }}
+      - codebuild-mimosa-core-pr-runner-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - run: echo "Hello World!"
