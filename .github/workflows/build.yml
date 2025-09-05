@@ -1,8 +1,26 @@
-name: Build
+name: RISKEN Core Build 
+env:
+  IMAGE_PREFIX: "risken-core"
+  INSTALL_GO_VERSION: "1.23.3"
+  GOLANGCI_LINT_VERSION: v1.62.0
+  AWS_XRAY_SDK_DISABLED: TRUE
 on: [push]
 jobs:
   Build-Job:
     runs-on:
       - codebuild-mimosa-core-pr-runner-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
-      - run: echo "Hello World!"
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup environment and credentials
+        run: |
+          goenv install ${INSTALL_GO_VERSION}
+          goenv global ${INSTALL_GO_VERSION}
+          go version
+
+          # Get parameters from Parameter Store
+          export GITHUB_USER=$(aws ssm get-parameter --name "/build/GITHUB_USER" --with-decryption --query 'Parameter.Value' --output text)
+          export GITHUB_TOKEN=$(aws ssm get-parameter --name "/build/GITHUB_TOKEN" --with-decryption --query 'Parameter.Value' --output text)
+          export DOCKER_USER=$(aws ssm get-parameter --name "/build/DOCKER_USER" --with-decryption --query 'Parameter.Value' --output text)
+          export DOCKER_TOKEN=$(aws ssm get-parameter --name "/build/DOCKER_TOKEN" --with-decryption --query 'Parameter.Value' --output text)
