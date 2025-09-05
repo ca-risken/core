@@ -13,6 +13,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Check
+        run: |
+          echo "$AWS_DEFAULT_REGION"
+          echo "$GITHUB_WORKSPACE"
+
       - name: Setup environment and credentials
         run: |
           export DOCKER_USER=$(aws ssm get-parameter --name "/build/DOCKER_USER" --with-decryption --query 'Parameter.Value' --output text)
@@ -40,5 +45,21 @@ jobs:
 
       - name: Lint and test
         run: |
+          echo "Lint the sources..."
           make lint -k
+          echo "Testing the sources..."
           make test -j
+
+      - name: Docker login and build
+        if: github.event_name == 'push'
+        run: |
+          echo "Logging in to Amazon ECR..."
+          $(aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION})
+          
+          if [[ -n "${{ DOCKER_USER }}" ]] && [[ -n "${{ DOCKER_TOKEN }}" ]]; then
+            echo 'Logging in to Docker Hub...'
+            echo "${{ DOCKER_TOKEN }}" | docker login -u ${{ DOCKER_USER }} --password-stdin
+          fi
+          
+          echo "Build gateway started on $(date)"
+          make build-ci -j BUILD_OPT="${{ BUILD_OPT }}" IMAGE_PREFIX=${{ IMAGE_PREFIX }} IMAGE_TAG=${{ TAG }} IMAGE_REGISTRY=${{ REGISTRY }}
