@@ -56,10 +56,10 @@ jobs:
           echo "Logging in to Amazon ECR..."
           $(aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION})
           
-          if [[ -n "${{ DOCKER_USER }}" ]] && [[ -n "${{ DOCKER_TOKEN }}" ]]; then
+          if [[ -n "${ DOCKER_USER }" ]] && [[ -n "${ DOCKER_TOKEN }" ]]; then
             echo 'Logging in to Docker Hub...'
-            echo "${{ DOCKER_TOKEN }}" | docker login -u ${{ DOCKER_USER }} --password-stdin
+            echo "${ DOCKER_TOKEN }" | docker login -u ${ DOCKER_USER } --password-stdin
           fi
           
           echo "Build gateway started on $(date)"
-          make build-ci -j BUILD_OPT="${{ BUILD_OPT }}" IMAGE_PREFIX=${{ IMAGE_PREFIX }} IMAGE_TAG=${{ TAG }} IMAGE_REGISTRY=${{ REGISTRY }}
+          make build-ci -j BUILD_OPT="${ BUILD_OPT }" IMAGE_PREFIX=${{ IMAGE_PREFIX }} IMAGE_TAG=${ TAG } IMAGE_REGISTRY=${ REGISTRY }
