@@ -1,7 +1,7 @@
 name: Build
 on: [push]
 jobs:
-  - Build-Job:
+  Build-Job:
     runs-on:
       - codebuild-mimosa-core-pr-runner-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
