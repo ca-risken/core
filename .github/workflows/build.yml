@@ -62,4 +62,4 @@ jobs:
           fi
           
           echo "Build gateway started on $(date)"
-          make build-ci -j BUILD_OPT="${ BUILD_OPT }" IMAGE_PREFIX=${{ IMAGE_PREFIX }} IMAGE_TAG=${ TAG } IMAGE_REGISTRY=${ REGISTRY }
+          make build-ci -j BUILD_OPT="${ BUILD_OPT }" IMAGE_PREFIX=${{ env.IMAGE_PREFIX }} IMAGE_TAG=${ TAG } IMAGE_REGISTRY=${ REGISTRY }
