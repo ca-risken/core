@@ -13,24 +13,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Check
-        run: |
-          echo "$AWS_DEFAULT_REGION"
-          echo "$GITHUB_WORKSPACE"
-
       - name: Setup environment and credentials
         run: |
-          export DOCKER_USER=$(aws ssm get-parameter --name "/build/DOCKER_USER" --with-decryption --query 'Parameter.Value' --output text)
-          export DOCKER_TOKEN=$(aws ssm get-parameter --name "/build/DOCKER_TOKEN" --with-decryption --query 'Parameter.Value' --output text)
-          AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
-
-          echo "DOCKER_USER=${DOCKER_USER}" >> $GITHUB_ENV
-          echo "DOCKER_TOKEN=${DOCKER_TOKEN}" >> $GITHUB_ENV
-          echo "AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID}" >> $GITHUB_ENV
+          SRC=${GITHUB_WORKSPACE}/src
+          echo "::add-mask::$SRC" 
           echo "SRC=${GITHUB_WORKSPACE}/src" >> $GITHUB_ENV
           echo "BUILD_OPT=--no-cache --pull" >> $GITHUB_ENV
           echo "TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-          echo "REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com" >> $GITHUB_ENV
           
       - name: Install Go and tools
         run: |
