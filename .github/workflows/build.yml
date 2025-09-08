@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup environment and credentials
+      - name: Setup environment
         run: |
           echo "SRC=${GITHUB_WORKSPACE}/src" >> $GITHUB_ENV
           echo "BUILD_OPT=--no-cache --pull" >> $GITHUB_ENV
@@ -47,10 +47,10 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Docker login and build
+      - name: Docker build and tag
         if: github.event_name == 'push'
         run: |
           echo "Build gateway started on $(date)"
-          make build-ci -j BUILD_OPT=${ BUILD_OPT } IMAGE_TAG=${ TAG } IMAGE_PREFIX=${{ env.IMAGE_PREFIX }} IMAGE_REGISTRY=${{ secrets.DOCKER_REGISTRY }}
+          make build-ci -j BUILD_OPT=${BUILD_OPT} IMAGE_TAG=${TAG} IMAGE_PREFIX=${{ env.IMAGE_PREFIX }} IMAGE_REGISTRY=${{ secrets.DOCKER_REGISTRY }}
 
 
