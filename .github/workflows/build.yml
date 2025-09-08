@@ -15,8 +15,6 @@ jobs:
 
       - name: Setup environment and credentials
         run: |
-          SRC=${GITHUB_WORKSPACE}/src
-          echo "::add-mask::$SRC" 
           echo "SRC=${GITHUB_WORKSPACE}/src" >> $GITHUB_ENV
           echo "BUILD_OPT=--no-cache --pull" >> $GITHUB_ENV
           echo "TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
@@ -45,10 +43,9 @@ jobs:
           echo "Logging in to Amazon ECR..."
           $(aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION})
           
-          if [[ -n "${ DOCKER_USER }" ]] && [[ -n "${ DOCKER_TOKEN }" ]]; then
-            echo 'Logging in to Docker Hub...'
-            echo "${ DOCKER_TOKEN }" | docker login -u ${ DOCKER_USER } --password-stdin
-          fi
+          echo 'Logging in to Docker Hub...'
+          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
           
           echo "Build gateway started on $(date)"
-          make build-ci -j BUILD_OPT="${ BUILD_OPT }" IMAGE_PREFIX=${{ env.IMAGE_PREFIX }} IMAGE_TAG=${ TAG } IMAGE_REGISTRY=${ REGISTRY }
+          make build-ci -j BUILD_OPT="${ BUILD_OPT }" IMAGE_TAG=${ TAG } IMAGE_PREFIX=${{ env.IMAGE_PREFIX }} IMAGE_REGISTRY=${{ secrets.DOCKER_REGISTRY }}
+
