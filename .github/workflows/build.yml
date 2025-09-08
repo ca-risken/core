@@ -41,11 +41,10 @@ jobs:
         if: github.event_name == 'push'
         run: |
           echo "Logging in to Amazon ECR..."
-          $(aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION})
+          aws ecr get-login-password | docker login --username AWS --password-stdin ${{ secrets.DOCKER_REGISTRY }}
           
           echo 'Logging in to Docker Hub...'
           echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
           
           echo "Build gateway started on $(date)"
           make build-ci -j BUILD_OPT="${ BUILD_OPT }" IMAGE_TAG=${ TAG } IMAGE_PREFIX=${{ env.IMAGE_PREFIX }} IMAGE_REGISTRY=${{ secrets.DOCKER_REGISTRY }}
-
