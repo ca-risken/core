@@ -1,10 +1,12 @@
-name: RISKEN Core Build 
+name: RISKEN Core Build Test PR
 env:
   IMAGE_PREFIX: "risken-core"
   INSTALL_GO_VERSION: "1.23.3"
   GOLANGCI_LINT_VERSION: v1.62.0
   AWS_XRAY_SDK_DISABLED: TRUE
-on: [push]
+on: 
+  pull_request:
+    types: [opened, synchronize]
 jobs:
   Build-Job:
     runs-on:
@@ -48,9 +50,6 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Docker build and tag
-        if: github.event_name == 'push'
         run: |
           echo "Build gateway started on $(date)"
           make build-ci -j BUILD_OPT="${BUILD_OPT}" IMAGE_TAG=${TAG} IMAGE_PREFIX=${{ env.IMAGE_PREFIX }} IMAGE_REGISTRY=${{ secrets.DOCKER_REGISTRY }}
-
-
