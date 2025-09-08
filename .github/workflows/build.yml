@@ -51,6 +51,6 @@ jobs:
         if: github.event_name == 'push'
         run: |
           echo "Build gateway started on $(date)"
-          make build-ci -j BUILD_OPT=${BUILD_OPT} IMAGE_TAG=${TAG} IMAGE_PREFIX=${{ env.IMAGE_PREFIX }} IMAGE_REGISTRY=${{ secrets.DOCKER_REGISTRY }}
+          make build-ci -j BUILD_OPT="${BUILD_OPT}" IMAGE_TAG=${TAG} IMAGE_PREFIX=${{ env.IMAGE_PREFIX }} IMAGE_REGISTRY=${{ secrets.DOCKER_REGISTRY }}
 
 
