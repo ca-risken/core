@@ -1,4 +1,4 @@
-name: RISKEN Core Build Test PR
+name: RISKEN Core Build PR
 env:
   IMAGE_PREFIX: "risken-core"
   INSTALL_GO_VERSION: "1.23.3"
@@ -7,8 +7,9 @@ env:
 on: 
   pull_request:
     types: [opened, synchronize]
+  workflow_dispatch:
 jobs:
-  Build-Job:
+  build_pr:
     runs-on:
       - codebuild-mimosa-core-pr-runner-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
