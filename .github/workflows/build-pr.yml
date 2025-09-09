@@ -1,9 +1,11 @@
 name: RISKEN Core Build PR
+
 env:
   IMAGE_PREFIX: "risken-core"
   INSTALL_GO_VERSION: "1.23.3"
   GOLANGCI_LINT_VERSION: v1.62.0
   AWS_XRAY_SDK_DISABLED: TRUE
+
 on: 
   pull_request:
     types: [opened, synchronize]
