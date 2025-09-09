@@ -1,5 +1,10 @@
 name: RISKEN Core Build PR
 
+permissions:
+  contents: read
+  checks: write
+  statuses: write
+
 env:
   IMAGE_PREFIX: "risken-core"
   INSTALL_GO_VERSION: "1.23.3"
