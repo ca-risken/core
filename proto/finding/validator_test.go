@@ -406,12 +406,21 @@ func TestValidate_ListFindingTagNameRequest(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:  "OK",
+			name:  "OK with ProjectId",
 			input: &ListFindingTagNameRequest{ProjectId: 1, Sort: "finding_tag_id", Direction: "desc", Offset: 0, Limit: maxLimit},
 		},
 		{
-			name:    "NG Required(project_id)",
+			name:  "OK with OrganizationId",
+			input: &ListFindingTagNameRequest{OrganizationId: 1, Sort: "finding_tag_id", Direction: "desc", Offset: 0, Limit: maxLimit},
+		},
+		{
+			name:    "NG Neither project_id nor organization_id",
 			input:   &ListFindingTagNameRequest{},
+			wantErr: true,
+		},
+		{
+			name:    "NG Both project_id and organization_id",
+			input:   &ListFindingTagNameRequest{ProjectId: 1, OrganizationId: 1},
 			wantErr: true,
 		},
 		{
@@ -581,13 +590,23 @@ func TestValidate_ListResourceRequest(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "OK",
+			name:    "OK with ProjectId",
 			input:   &ListResourceRequest{ProjectId: 1, Sort: "resource_id", Direction: "desc", Offset: 0, Limit: maxLimit},
 			wantErr: false,
 		},
 		{
-			name:    "NG Required(project_id)",
+			name:    "OK with OrganizationId",
+			input:   &ListResourceRequest{OrganizationId: 1, Sort: "resource_id", Direction: "desc", Offset: 0, Limit: maxLimit},
+			wantErr: false,
+		},
+		{
+			name:    "NG Neither project_id nor organization_id",
 			input:   &ListResourceRequest{},
+			wantErr: true,
+		},
+		{
+			name:    "NG Both project_id and organization_id",
+			input:   &ListResourceRequest{ProjectId: 1, OrganizationId: 1},
 			wantErr: true,
 		},
 		{

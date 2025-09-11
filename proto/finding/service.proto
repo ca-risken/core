@@ -186,6 +186,7 @@ message ListFindingTagNameRequest {
   string direction = 5;
   int32 offset = 6;
   int32 limit = 7;
+  uint32 organization_id = 8;
 }
 
 message ListFindingTagNameResponse {
@@ -225,6 +226,7 @@ message ListResourceRequest {
   uint64 resource_id = 12;
   string namespace = 13;
   string resource_type = 14;
+  uint32 organization_id = 15;
 }
 
 message ListResourceResponse {
