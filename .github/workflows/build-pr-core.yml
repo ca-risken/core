@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-pr-core:
     uses: ca-risken/.github/.github/workflows/build-pr.yml@feature/add_reusable_workflow
     with:
       runs_on: codebuild-mimosa-core-pr-runner-${{ github.run_id }}-${{ github.run_attempt }}
