@@ -1,0 +1,22 @@
+name: Build and Tag Container for PR Core
+
+on: 
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ca-risken/.github/.github/workflows/build-pr.yml@feature/add_reusable_workflow
+    with:
+      runs_on: codebuild-mimosa-core-pr-runner-${{ github.run_id }}-${{ github.run_attempt }}
+      install_go_version: "1.23.3"
+      golangci_lint_version: "v1.62.0"
+      image_prefix: "risken-core"
+      build_opt: "--no-cache --pull"
+      test_command: "test"
+      aws_xray_sdk_disabled: "true"
+    secrets:
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
