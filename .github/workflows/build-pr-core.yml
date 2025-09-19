@@ -13,8 +13,6 @@ jobs:
       install_go_version: "1.23.3"
       golangci_lint_version: "v1.62.0"
       image_prefix: "risken-core"
-      build_opt: "--no-cache --pull"
-      test_command: "test"
       aws_xray_sdk_disabled: "true"
     secrets:
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
