@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-pr-core:
-    uses: ca-risken/.github/.github/workflows/build-pr.yml@feature/improve_devin
+    uses: ca-risken/.github/.github/workflows/build-pr.yml@feature/use_go_action
     with:
       runs_on: codebuild-mimosa-core-pr-runner-${{ github.run_id }}-${{ github.run_attempt }}
       install_go_version: "1.23.3"
