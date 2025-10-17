@@ -287,6 +287,9 @@ func TestPutUser(t *testing.T) {
 					if c.mockListUserReservedResp != nil && len(*c.mockListUserReservedResp) > 0 {
 						for range *c.mockListUserReservedResp {
 							mock.On("AttachRole", test.RepeatMockAnything(4)...).Return(&model.UserRole{}, c.mockAttachRoleErr).Once()
+							if c.mockAttachRoleErr == nil {
+								mock.On("DeleteUserReserved", test.RepeatMockAnything(3)...).Return(nil).Once()
+							}
 						}
 					}
 				}

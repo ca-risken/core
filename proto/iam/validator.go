@@ -291,10 +291,6 @@ func (i *IsAuthorizedRequest) Validate() error {
 func (i *IsAuthorizedAdminRequest) Validate() error {
 	return validation.ValidateStruct(i,
 		validation.Field(&i.UserId, validation.Required),
-		// must format: "<service-name>/<action-name>"
-		validation.Field(&i.ActionName, validation.Required, validation.Match(regexp.MustCompile(`^(\w|-)+/(\w|-)+$`))),
-		// must format: "<prefix>/<prefix>/.../<resource-name>"
-		validation.Field(&i.ResourceName, validation.Required, validation.Match(regexp.MustCompile(`^(\w|-|:|/)+/.+$`))),
 	)
 }
 

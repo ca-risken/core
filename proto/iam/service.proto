@@ -85,10 +85,7 @@ message IsAuthorizedResponse { bool ok = 1; }
 // 管理者ユーザからのリクエストに対してアクションやリソースへの認可を行います
 message IsAuthorizedAdminRequest {
   uint32 user_id = 1; // UserID,(e.g.)111
-  string action_name =
-      2; // Service&API_name(<service_name>/<API>format),(e.g.)`finding/get-finding`
-  string resource_name =
-      3; // System_resource_name(<prefix>/<resouorce_name>format)
+  reserved 2, 3;      // deprecate action_name and resouorce_name
 }
 
 message IsAuthorizedAdminResponse { bool ok = 1; }
