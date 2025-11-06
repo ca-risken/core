@@ -8,6 +8,7 @@ import "organization_iam/role.proto";
 import "organization_iam/policy.proto";
 import "organization_iam/auth.proto";
 import "organization_iam/user_reserved.proto";
+import "organization_iam/access_token.proto";
 
 service OrganizationIAMService {
   // Role
@@ -52,4 +53,20 @@ service OrganizationIAMService {
       returns (PutOrganizationUserReservedResponse);
   rpc DeleteOrganizationUserReserved(DeleteOrganizationUserReservedRequest)
       returns (google.protobuf.Empty);
+
+  // AccessToken
+  rpc ListOrganizationAccessToken(ListOrganizationAccessTokenRequest)
+      returns (ListOrganizationAccessTokenResponse);
+  rpc AuthenticateOrganizationAccessToken(
+      AuthenticateOrganizationAccessTokenRequest)
+      returns (AuthenticateOrganizationAccessTokenResponse);
+  rpc PutOrganizationAccessToken(PutOrganizationAccessTokenRequest)
+      returns (PutOrganizationAccessTokenResponse);
+  rpc DeleteOrganizationAccessToken(DeleteOrganizationAccessTokenRequest)
+      returns (google.protobuf.Empty);
+  rpc AttachOrganizationAccessTokenRole(
+      AttachOrganizationAccessTokenRoleRequest)
+      returns (AttachOrganizationAccessTokenRoleResponse);
+  rpc DetachOrganizationAccessTokenRole(
+      DetachOrganizationAccessTokenRoleRequest) returns (google.protobuf.Empty);
 }

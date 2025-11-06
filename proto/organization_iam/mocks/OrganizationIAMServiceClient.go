@@ -18,6 +18,43 @@ type OrganizationIAMServiceClient struct {
 	mock.Mock
 }
 
+// AttachOrganizationAccessTokenRole provides a mock function with given fields: ctx, in, opts
+func (_m *OrganizationIAMServiceClient) AttachOrganizationAccessTokenRole(ctx context.Context, in *organization_iam.AttachOrganizationAccessTokenRoleRequest, opts ...grpc.CallOption) (*organization_iam.AttachOrganizationAccessTokenRoleResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AttachOrganizationAccessTokenRole")
+	}
+
+	var r0 *organization_iam.AttachOrganizationAccessTokenRoleResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.AttachOrganizationAccessTokenRoleRequest, ...grpc.CallOption) (*organization_iam.AttachOrganizationAccessTokenRoleResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.AttachOrganizationAccessTokenRoleRequest, ...grpc.CallOption) *organization_iam.AttachOrganizationAccessTokenRoleResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization_iam.AttachOrganizationAccessTokenRoleResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.AttachOrganizationAccessTokenRoleRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // AttachOrganizationPolicy provides a mock function with given fields: ctx, in, opts
 func (_m *OrganizationIAMServiceClient) AttachOrganizationPolicy(ctx context.Context, in *organization_iam.AttachOrganizationPolicyRequest, opts ...grpc.CallOption) (*organization_iam.AttachOrganizationPolicyResponse, error) {
 	_va := make([]interface{}, len(opts))
@@ -129,6 +166,80 @@ func (_m *OrganizationIAMServiceClient) AttachOrganizationRoleByOrganizationUser
 	return r0, r1
 }
 
+// AuthenticateOrganizationAccessToken provides a mock function with given fields: ctx, in, opts
+func (_m *OrganizationIAMServiceClient) AuthenticateOrganizationAccessToken(ctx context.Context, in *organization_iam.AuthenticateOrganizationAccessTokenRequest, opts ...grpc.CallOption) (*organization_iam.AuthenticateOrganizationAccessTokenResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AuthenticateOrganizationAccessToken")
+	}
+
+	var r0 *organization_iam.AuthenticateOrganizationAccessTokenResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.AuthenticateOrganizationAccessTokenRequest, ...grpc.CallOption) (*organization_iam.AuthenticateOrganizationAccessTokenResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.AuthenticateOrganizationAccessTokenRequest, ...grpc.CallOption) *organization_iam.AuthenticateOrganizationAccessTokenResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization_iam.AuthenticateOrganizationAccessTokenResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.AuthenticateOrganizationAccessTokenRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteOrganizationAccessToken provides a mock function with given fields: ctx, in, opts
+func (_m *OrganizationIAMServiceClient) DeleteOrganizationAccessToken(ctx context.Context, in *organization_iam.DeleteOrganizationAccessTokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteOrganizationAccessToken")
+	}
+
+	var r0 *emptypb.Empty
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.DeleteOrganizationAccessTokenRequest, ...grpc.CallOption) (*emptypb.Empty, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.DeleteOrganizationAccessTokenRequest, ...grpc.CallOption) *emptypb.Empty); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*emptypb.Empty)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.DeleteOrganizationAccessTokenRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteOrganizationPolicy provides a mock function with given fields: ctx, in, opts
 func (_m *OrganizationIAMServiceClient) DeleteOrganizationPolicy(ctx context.Context, in *organization_iam.DeleteOrganizationPolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	_va := make([]interface{}, len(opts))
@@ -232,6 +343,43 @@ func (_m *OrganizationIAMServiceClient) DeleteOrganizationUserReserved(ctx conte
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.DeleteOrganizationUserReservedRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DetachOrganizationAccessTokenRole provides a mock function with given fields: ctx, in, opts
+func (_m *OrganizationIAMServiceClient) DetachOrganizationAccessTokenRole(ctx context.Context, in *organization_iam.DetachOrganizationAccessTokenRoleRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DetachOrganizationAccessTokenRole")
+	}
+
+	var r0 *emptypb.Empty
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.DetachOrganizationAccessTokenRoleRequest, ...grpc.CallOption) (*emptypb.Empty, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.DetachOrganizationAccessTokenRoleRequest, ...grpc.CallOption) *emptypb.Empty); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*emptypb.Empty)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.DetachOrganizationAccessTokenRoleRequest, ...grpc.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -425,6 +573,43 @@ func (_m *OrganizationIAMServiceClient) IsAuthorizedOrganization(ctx context.Con
 	return r0, r1
 }
 
+// ListOrganizationAccessToken provides a mock function with given fields: ctx, in, opts
+func (_m *OrganizationIAMServiceClient) ListOrganizationAccessToken(ctx context.Context, in *organization_iam.ListOrganizationAccessTokenRequest, opts ...grpc.CallOption) (*organization_iam.ListOrganizationAccessTokenResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListOrganizationAccessToken")
+	}
+
+	var r0 *organization_iam.ListOrganizationAccessTokenResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.ListOrganizationAccessTokenRequest, ...grpc.CallOption) (*organization_iam.ListOrganizationAccessTokenResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.ListOrganizationAccessTokenRequest, ...grpc.CallOption) *organization_iam.ListOrganizationAccessTokenResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization_iam.ListOrganizationAccessTokenResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.ListOrganizationAccessTokenRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListOrganizationPolicy provides a mock function with given fields: ctx, in, opts
 func (_m *OrganizationIAMServiceClient) ListOrganizationPolicy(ctx context.Context, in *organization_iam.ListOrganizationPolicyRequest, opts ...grpc.CallOption) (*organization_iam.ListOrganizationPolicyResponse, error) {
 	_va := make([]interface{}, len(opts))
@@ -528,6 +713,43 @@ func (_m *OrganizationIAMServiceClient) ListOrganizationUserReserved(ctx context
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.ListOrganizationUserReservedRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PutOrganizationAccessToken provides a mock function with given fields: ctx, in, opts
+func (_m *OrganizationIAMServiceClient) PutOrganizationAccessToken(ctx context.Context, in *organization_iam.PutOrganizationAccessTokenRequest, opts ...grpc.CallOption) (*organization_iam.PutOrganizationAccessTokenResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PutOrganizationAccessToken")
+	}
+
+	var r0 *organization_iam.PutOrganizationAccessTokenResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.PutOrganizationAccessTokenRequest, ...grpc.CallOption) (*organization_iam.PutOrganizationAccessTokenResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.PutOrganizationAccessTokenRequest, ...grpc.CallOption) *organization_iam.PutOrganizationAccessTokenResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization_iam.PutOrganizationAccessTokenResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.PutOrganizationAccessTokenRequest, ...grpc.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
