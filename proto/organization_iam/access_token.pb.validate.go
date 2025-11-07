@@ -337,17 +337,62 @@ func (m *PutOrganizationAccessTokenRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	// no validation rules for AccessTokenId
+	if m.GetAccessTokenId() <= 0 {
+		err := PutOrganizationAccessTokenRequestValidationError{
+			field:  "AccessTokenId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	// no validation rules for PlainTextToken
 
-	// no validation rules for Name
+	if utf8.RuneCountInString(m.GetName()) > 64 {
+		err := PutOrganizationAccessTokenRequestValidationError{
+			field:  "Name",
+			reason: "value length must be at most 64 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for Description
+	if utf8.RuneCountInString(m.GetDescription()) > 255 {
+		err := PutOrganizationAccessTokenRequestValidationError{
+			field:  "Description",
+			reason: "value length must be at most 255 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for ExpiredAt
+	if val := m.GetExpiredAt(); val < 0 || val > 253402268399 {
+		err := PutOrganizationAccessTokenRequestValidationError{
+			field:  "ExpiredAt",
+			reason: "value must be inside range [0, 253402268399]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for LastUpdatedUserId
+	if m.GetLastUpdatedUserId() <= 0 {
+		err := PutOrganizationAccessTokenRequestValidationError{
+			field:  "LastUpdatedUserId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return PutOrganizationAccessTokenRequestMultiError(errors)
