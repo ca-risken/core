@@ -18,7 +18,12 @@ message ListOrganizationAccessTokenResponse {
 
 message PutOrganizationAccessTokenRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
-  OrganizationAccessTokenForUpsert access_token = 2;
+  uint32 access_token_id = 2;
+  string plain_text_token = 3;
+  string name = 4;
+  string description = 5;
+  int64 expired_at = 6;
+  uint32 last_updated_user_id = 7;
 }
 
 message PutOrganizationAccessTokenResponse {

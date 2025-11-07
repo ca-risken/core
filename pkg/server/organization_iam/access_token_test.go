@@ -29,8 +29,8 @@ func TestListOrganizationAccessToken(t *testing.T) {
 			want: &organization_iam.ListOrganizationAccessTokenResponse{AccessToken: []*organization_iam.OrganizationAccessToken{
 				{AccessTokenId: 10, Name: "token", Description: "desc", OrganizationId: 1, ExpiredAt: now.Unix(), LastUpdatedUserId: 100, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 			}},
-				mockResponse: &[]model.OrgAccessToken{
-					{AccessTokenID: 10, TokenHash: "hash", Name: "token", Description: "desc", OrgID: 1, ExpiredAt: now, LastUpdatedUserID: 100, CreatedAt: now, UpdatedAt: now},
+			mockResponse: &[]model.OrgAccessToken{
+				{AccessTokenID: 10, TokenHash: "hash", Name: "token", Description: "desc", OrgID: 1, ExpiredAt: now, LastUpdatedUserID: 100, CreatedAt: now, UpdatedAt: now},
 			},
 		},
 		{
@@ -86,14 +86,11 @@ func TestPutOrganizationAccessToken(t *testing.T) {
 		{
 			name: "OK insert",
 			input: &organization_iam.PutOrganizationAccessTokenRequest{
-				OrganizationId: 1,
-				AccessToken: &organization_iam.OrganizationAccessTokenForUpsert{
-					PlainTextToken:    "plain",
-					Name:              "token",
-					Description:       "desc",
-					OrganizationId:    1,
-					LastUpdatedUserId: 200,
-				},
+				OrganizationId:    1,
+				PlainTextToken:    "plain",
+				Name:              "token",
+				Description:       "desc",
+				LastUpdatedUserId: 200,
 			},
 			want: &organization_iam.PutOrganizationAccessTokenResponse{
 				AccessToken: &organization_iam.OrganizationAccessToken{
@@ -123,15 +120,11 @@ func TestPutOrganizationAccessToken(t *testing.T) {
 		{
 			name: "OK update",
 			input: &organization_iam.PutOrganizationAccessTokenRequest{
-				OrganizationId: 1,
-				AccessToken: &organization_iam.OrganizationAccessTokenForUpsert{
-					AccessTokenId:     2,
-					PlainTextToken:    "plain",
-					Name:              "token",
-					Description:       "desc",
-					OrganizationId:    1,
-					LastUpdatedUserId: 200,
-				},
+				OrganizationId:    1,
+				AccessTokenId:     2,
+				Name:              "token",
+				Description:       "desc",
+				LastUpdatedUserId: 200,
 			},
 			want: &organization_iam.PutOrganizationAccessTokenResponse{
 				AccessToken: &organization_iam.OrganizationAccessToken{
@@ -178,14 +171,11 @@ func TestPutOrganizationAccessToken(t *testing.T) {
 		{
 			name: "NG get error",
 			input: &organization_iam.PutOrganizationAccessTokenRequest{
-				OrganizationId: 1,
-				AccessToken: &organization_iam.OrganizationAccessTokenForUpsert{
-					PlainTextToken:    "plain",
-					Name:              "token",
-					Description:       "desc",
-					OrganizationId:    1,
-					LastUpdatedUserId: 200,
-				},
+				OrganizationId:    1,
+				PlainTextToken:    "plain",
+				Name:              "token",
+				Description:       "desc",
+				LastUpdatedUserId: 200,
 			},
 			wantErr:    true,
 			mockGetErr: gorm.ErrInvalidDB,
@@ -193,14 +183,11 @@ func TestPutOrganizationAccessToken(t *testing.T) {
 		{
 			name: "NG put error",
 			input: &organization_iam.PutOrganizationAccessTokenRequest{
-				OrganizationId: 1,
-				AccessToken: &organization_iam.OrganizationAccessTokenForUpsert{
-					PlainTextToken:    "plain",
-					Name:              "token",
-					Description:       "desc",
-					OrganizationId:    1,
-					LastUpdatedUserId: 200,
-				},
+				OrganizationId:    1,
+				PlainTextToken:    "plain",
+				Name:              "token",
+				Description:       "desc",
+				LastUpdatedUserId: 200,
 			},
 			wantErr:    true,
 			mockGetErr: gorm.ErrRecordNotFound,

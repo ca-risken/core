@@ -54,10 +54,10 @@ func (s *OrganizationIAMService) PutOrganizationAccessToken(ctx context.Context,
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if req.AccessToken == nil {
-		return nil, status.Error(codes.InvalidArgument, "access_token is required")
+	if req.Name == "" {
+		return nil, status.Error(codes.InvalidArgument, "name is required")
 	}
-	saved, err := s.repository.GetOrgAccessTokenByUniqueKey(ctx, req.OrganizationId, req.AccessToken.Name)
+	saved, err := s.repository.GetOrgAccessTokenByUniqueKey(ctx, req.OrganizationId, req.Name)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
 	if err != nil && !noRecord {
 		return nil, err
@@ -69,24 +69,24 @@ func (s *OrganizationIAMService) PutOrganizationAccessToken(ctx context.Context,
 		accessTokenID = saved.AccessTokenID
 		tokenHash = saved.TokenHash
 	} else {
-		tokenHash = hashOrgToken(req.AccessToken.PlainTextToken)
+		tokenHash = hashOrgToken(req.PlainTextToken)
 	}
 
 	var expiredAt time.Time
-	if req.AccessToken.ExpiredAt == 0 {
+	if req.ExpiredAt == 0 {
 		expiredAt = time.Unix(maxOrgTokenExpiredAtUnix, 0)
 	} else {
-		expiredAt = time.Unix(req.AccessToken.ExpiredAt, 0)
+		expiredAt = time.Unix(req.ExpiredAt, 0)
 	}
 
 	token := &model.OrgAccessToken{
 		AccessTokenID:     accessTokenID,
 		TokenHash:         tokenHash,
-		Name:              req.AccessToken.Name,
-		Description:       req.AccessToken.Description,
-		OrgID:             req.AccessToken.OrganizationId,
+		Name:              req.Name,
+		Description:       req.Description,
+		OrgID:             req.OrganizationId,
 		ExpiredAt:         expiredAt,
-		LastUpdatedUserID: req.AccessToken.LastUpdatedUserId,
+		LastUpdatedUserID: req.LastUpdatedUserId,
 	}
 
 	registered, err := s.repository.PutOrgAccessToken(ctx, token)

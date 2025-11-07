@@ -337,34 +337,17 @@ func (m *PutOrganizationAccessTokenRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if all {
-		switch v := interface{}(m.GetAccessToken()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, PutOrganizationAccessTokenRequestValidationError{
-					field:  "AccessToken",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, PutOrganizationAccessTokenRequestValidationError{
-					field:  "AccessToken",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetAccessToken()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return PutOrganizationAccessTokenRequestValidationError{
-				field:  "AccessToken",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for AccessTokenId
+
+	// no validation rules for PlainTextToken
+
+	// no validation rules for Name
+
+	// no validation rules for Description
+
+	// no validation rules for ExpiredAt
+
+	// no validation rules for LastUpdatedUserId
 
 	if len(errors) > 0 {
 		return PutOrganizationAccessTokenRequestMultiError(errors)
