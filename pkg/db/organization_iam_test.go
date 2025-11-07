@@ -1220,3 +1220,69 @@ func TestDeleteOrganizationUserReserved(t *testing.T) {
 		})
 	}
 }
+
+func TestListOrgAccessToken(t *testing.T) {
+	ctx := context.Background()
+	now := time.Now()
+	client, mock, err := newMockClient()
+	if err != nil {
+		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+	}
+	expected := sqlmock.NewRows([]string{
+		"access_token_id", "token_hash", "name", "description", "organization_id", "expired_at", "last_updated_user_id", "created_at", "updated_at",
+	}).AddRow(uint32(1), "hash", "token", "desc", uint32(1), now, uint32(2), now, now)
+	mock.ExpectQuery(regexp.QuoteMeta("select * from organization_access_token a where a.organization_id = ?")).
+		WithArgs(uint32(1)).
+		WillReturnRows(expected)
+
+	got, err := client.ListOrgAccessToken(ctx, 1, "", 0)
+	if err != nil {
+		t.Fatalf("Unexpected error: %+v", err)
+	}
+	if len(*got) != 1 {
+		t.Fatalf("Unexpected result length: %d", len(*got))
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
+
+func TestPutOrgAccessToken(t *testing.T) {
+	ctx := context.Background()
+	now := time.Now()
+	client, mock, err := newMockClient()
+	if err != nil {
+		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	token := &model.OrgAccessToken{
+		TokenHash:         "hash",
+		Name:              "token",
+		Description:       "desc",
+		OrgID:             1,
+		ExpiredAt:         now,
+		LastUpdatedUserID: 2,
+	}
+
+	mock.ExpectExec(regexp.QuoteMeta(insertPutOrgAccessToken)).
+		WithArgs(token.AccessTokenID, token.TokenHash, token.Name, token.Description, token.OrgID, sqlmock.AnyArg(), token.LastUpdatedUserID).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	rows := sqlmock.NewRows([]string{
+		"access_token_id", "token_hash", "name", "description", "organization_id", "expired_at", "last_updated_user_id", "created_at", "updated_at",
+	}).AddRow(uint32(1), "hash", "token", "desc", uint32(1), now, uint32(2), now, now)
+	mock.ExpectQuery(regexp.QuoteMeta(selectGetOrgAccessTokenByUniqueKey)).
+		WithArgs(uint32(1), "token").
+		WillReturnRows(rows)
+
+	got, err := client.PutOrgAccessToken(ctx, token)
+	if err != nil {
+		t.Fatalf("Unexpected error: %+v", err)
+	}
+	if got.AccessTokenID != 1 {
+		t.Fatalf("Unexpected access token id: %d", got.AccessTokenID)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}

@@ -34,6 +34,12 @@ type OrganizationIAMRepository interface {
 	PutOrganizationUserReserved(ctx context.Context, r *model.OrganizationUserReserved) (*model.OrganizationUserReserved, error)
 	DeleteOrganizationUserReserved(ctx context.Context, organizationID, reservedID uint32) error
 	ListOrganizationUserReservedWithOrganizationID(ctx context.Context, userIdpKey string) (*[]UserReservedWithOrganizationID, error)
+
+	// OrganizationAccessToken
+	ListOrgAccessToken(ctx context.Context, orgID uint32, name string, accessTokenID uint32) (*[]model.OrgAccessToken, error)
+	GetOrgAccessTokenByUniqueKey(ctx context.Context, orgID uint32, name string) (*model.OrgAccessToken, error)
+	PutOrgAccessToken(ctx context.Context, token *model.OrgAccessToken) (*model.OrgAccessToken, error)
+	DeleteOrgAccessToken(ctx context.Context, orgID, accessTokenID uint32) error
 }
 
 var _ OrganizationIAMRepository = (*Client)(nil)
@@ -462,4 +468,67 @@ func (c *Client) DeleteOrganizationUserReserved(ctx context.Context, organizatio
 		return err
 	}
 	return nil
+}
+
+func (c *Client) ListOrgAccessToken(ctx context.Context, orgID uint32, name string, accessTokenID uint32) (*[]model.OrgAccessToken, error) {
+	query := `select * from organization_access_token a where a.organization_id = ?`
+	params := []interface{}{orgID}
+	if name != "" {
+		query += " and a.name = ?"
+		params = append(params, name)
+	}
+	if accessTokenID != 0 {
+		query += " and a.access_token_id = ?"
+		params = append(params, accessTokenID)
+	}
+	var data []model.OrgAccessToken
+	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const selectGetOrgAccessTokenByUniqueKey = `select * from organization_access_token where organization_id = ? and name = ?`
+
+func (c *Client) GetOrgAccessTokenByUniqueKey(ctx context.Context, orgID uint32, name string) (*model.OrgAccessToken, error) {
+	var data model.OrgAccessToken
+	if err := c.Master.WithContext(ctx).Raw(selectGetOrgAccessTokenByUniqueKey, orgID, name).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const insertPutOrgAccessToken = `
+INSERT INTO organization_access_token
+  (access_token_id, token_hash, name, description, organization_id, expired_at, last_updated_user_id)
+VALUES
+  (?, ?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+  token_hash=VALUES(token_hash),
+  name=VALUES(name),
+  description=VALUES(description),
+  organization_id=VALUES(organization_id),
+  expired_at=VALUES(expired_at),
+  last_updated_user_id=VALUES(last_updated_user_id)
+`
+
+func (c *Client) PutOrgAccessToken(ctx context.Context, token *model.OrgAccessToken) (*model.OrgAccessToken, error) {
+	if err := c.Master.WithContext(ctx).Exec(insertPutOrgAccessToken,
+		token.AccessTokenID,
+		token.TokenHash,
+		token.Name,
+		convertZeroValueToNull(token.Description),
+		token.OrgID,
+		token.ExpiredAt,
+		token.LastUpdatedUserID,
+	).Error; err != nil {
+		return nil, err
+	}
+	return c.GetOrgAccessTokenByUniqueKey(ctx, token.OrgID, token.Name)
+}
+
+const deleteOrgAccessToken = `delete from organization_access_token where organization_id = ? and access_token_id = ?`
+
+func (c *Client) DeleteOrgAccessToken(ctx context.Context, orgID, accessTokenID uint32) error {
+	return c.Master.WithContext(ctx).Exec(deleteOrgAccessToken, orgID, accessTokenID).Error
 }

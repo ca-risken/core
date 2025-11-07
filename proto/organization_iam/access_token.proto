@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package core.organization_iam;
+option go_package = "github.com/ca-risken/core/proto/organization_iam";
+
+import "organization_iam/entity.proto";
+import "validate/validate.proto";
+
+message ListOrganizationAccessTokenRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  string name = 2 [ (validate.rules).string.max_len = 64 ];
+  uint32 access_token_id = 3;
+}
+
+message ListOrganizationAccessTokenResponse {
+  repeated OrganizationAccessToken access_token = 1;
+}
+
+message PutOrganizationAccessTokenRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  OrganizationAccessTokenForUpsert access_token = 2;
+}
+
+message PutOrganizationAccessTokenResponse {
+  OrganizationAccessToken access_token = 1;
+}
+
+message DeleteOrganizationAccessTokenRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 access_token_id = 2 [ (validate.rules).uint32.gt = 0 ]; // Required
+}
