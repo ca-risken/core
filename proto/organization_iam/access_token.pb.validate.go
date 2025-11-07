@@ -337,23 +337,14 @@ func (m *PutOrganizationAccessTokenRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if m.GetAccessTokenId() <= 0 {
-		err := PutOrganizationAccessTokenRequestValidationError{
-			field:  "AccessTokenId",
-			reason: "value must be greater than 0",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for AccessTokenId
 
 	// no validation rules for PlainTextToken
 
-	if utf8.RuneCountInString(m.GetName()) > 64 {
+	if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 64 {
 		err := PutOrganizationAccessTokenRequestValidationError{
 			field:  "Name",
-			reason: "value length must be at most 64 runes",
+			reason: "value length must be between 1 and 64 runes, inclusive",
 		}
 		if !all {
 			return err

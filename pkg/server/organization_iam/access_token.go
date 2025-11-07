@@ -10,8 +10,6 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/organization_iam"
 	"github.com/golang/protobuf/ptypes/empty"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
 
@@ -53,9 +51,6 @@ func convertOrgAccessToken(token *model.OrgAccessToken) *organization_iam.Organi
 func (s *OrganizationIAMService) PutOrganizationAccessToken(ctx context.Context, req *organization_iam.PutOrganizationAccessTokenRequest) (*organization_iam.PutOrganizationAccessTokenResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
-	}
-	if req.Name == "" {
-		return nil, status.Error(codes.InvalidArgument, "name is required")
 	}
 	saved, err := s.repository.GetOrgAccessTokenByUniqueKey(ctx, req.OrganizationId, req.Name)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)

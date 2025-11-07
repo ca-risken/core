@@ -18,9 +18,9 @@ message ListOrganizationAccessTokenResponse {
 
 message PutOrganizationAccessTokenRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
-  uint32 access_token_id = 2 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 access_token_id = 2;
   string plain_text_token = 3;
-  string name = 4 [ (validate.rules).string.max_len = 64 ];
+  string name = 4 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
   string description = 5 [ (validate.rules).string.max_len = 255 ];
   int64 expired_at = 6
       [ (validate.rules).int64 = {gte : 0, lte : 253402268399} ];
