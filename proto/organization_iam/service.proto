@@ -61,4 +61,12 @@ service OrganizationIAMService {
       returns (PutOrganizationAccessTokenResponse);
   rpc DeleteOrganizationAccessToken(DeleteOrganizationAccessTokenRequest)
       returns (google.protobuf.Empty);
+  rpc AuthenticateOrganizationAccessToken(
+      AuthenticateOrganizationAccessTokenRequest)
+      returns (AuthenticateOrganizationAccessTokenResponse);
+  rpc AttachOrganizationAccessTokenRole(
+      AttachOrganizationAccessTokenRoleRequest)
+      returns (AttachOrganizationAccessTokenRoleResponse);
+  rpc DetachOrganizationAccessTokenRole(
+      DetachOrganizationAccessTokenRoleRequest) returns (google.protobuf.Empty);
 }

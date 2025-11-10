@@ -48,6 +48,15 @@ func convertOrgAccessToken(token *model.OrgAccessToken) *organization_iam.Organi
 	}
 }
 
+func convertOrgAccessTokenRole(role *model.OrgAccessTokenRole) *organization_iam.OrganizationAccessTokenRole {
+	return &organization_iam.OrganizationAccessTokenRole{
+		AccessTokenId: role.AccessTokenID,
+		RoleId:        role.RoleID,
+		CreatedAt:     role.CreatedAt.Unix(),
+		UpdatedAt:     role.UpdatedAt.Unix(),
+	}
+}
+
 func (s *OrganizationIAMService) PutOrganizationAccessToken(ctx context.Context, req *organization_iam.PutOrganizationAccessTokenRequest) (*organization_iam.PutOrganizationAccessTokenResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
@@ -96,6 +105,41 @@ func (s *OrganizationIAMService) DeleteOrganizationAccessToken(ctx context.Conte
 		return nil, err
 	}
 	if err := s.repository.DeleteOrgAccessToken(ctx, req.OrganizationId, req.AccessTokenId); err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
+}
+
+func (s *OrganizationIAMService) AuthenticateOrganizationAccessToken(ctx context.Context, req *organization_iam.AuthenticateOrganizationAccessTokenRequest) (*organization_iam.AuthenticateOrganizationAccessTokenResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	token, err := s.repository.GetActiveOrgAccessTokenHash(ctx, req.OrganizationId, req.AccessTokenId, hashOrgToken(req.PlainTextToken))
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &organization_iam.AuthenticateOrganizationAccessTokenResponse{}, nil
+		}
+		return nil, err
+	}
+	return &organization_iam.AuthenticateOrganizationAccessTokenResponse{AccessToken: convertOrgAccessToken(token)}, nil
+}
+
+func (s *OrganizationIAMService) AttachOrganizationAccessTokenRole(ctx context.Context, req *organization_iam.AttachOrganizationAccessTokenRoleRequest) (*organization_iam.AttachOrganizationAccessTokenRoleResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	role, err := s.repository.AttachOrgAccessTokenRole(ctx, req.OrganizationId, req.RoleId, req.AccessTokenId)
+	if err != nil {
+		return nil, err
+	}
+	return &organization_iam.AttachOrganizationAccessTokenRoleResponse{AccessTokenRole: convertOrgAccessTokenRole(role)}, nil
+}
+
+func (s *OrganizationIAMService) DetachOrganizationAccessTokenRole(ctx context.Context, req *organization_iam.DetachOrganizationAccessTokenRoleRequest) (*empty.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	if err := s.repository.DetachOrgAccessTokenRole(ctx, req.OrganizationId, req.RoleId, req.AccessTokenId); err != nil {
 		return nil, err
 	}
 	return &empty.Empty{}, nil

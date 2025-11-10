@@ -41,3 +41,10 @@ message OrganizationAccessToken {
   int64 created_at = 7;
   int64 updated_at = 8;
 }
+
+message OrganizationAccessTokenRole {
+  uint32 access_token_id = 1;
+  uint32 role_id = 2;
+  int64 created_at = 3;
+  int64 updated_at = 4;
+}

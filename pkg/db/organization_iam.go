@@ -40,6 +40,11 @@ type OrganizationIAMRepository interface {
 	GetOrgAccessTokenByUniqueKey(ctx context.Context, orgID uint32, name string) (*model.OrgAccessToken, error)
 	PutOrgAccessToken(ctx context.Context, token *model.OrgAccessToken) (*model.OrgAccessToken, error)
 	DeleteOrgAccessToken(ctx context.Context, orgID, accessTokenID uint32) error
+	GetActiveOrgAccessTokenHash(ctx context.Context, orgID, accessTokenID uint32, tokenHash string) (*model.OrgAccessToken, error)
+	AttachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) (*model.OrgAccessTokenRole, error)
+	DetachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) error
+	ExistsOrgAccessTokenMaintainer(ctx context.Context, orgID, accessTokenID uint32) (bool, error)
+	ListExpiredOrgAccessToken(ctx context.Context) (*[]model.OrgAccessToken, error)
 }
 
 var _ OrganizationIAMRepository = (*Client)(nil)
@@ -384,6 +389,15 @@ func (c *Client) organizationUserExists(ctx context.Context, userID uint32) (boo
 	return true, nil
 }
 
+func (c *Client) orgAccessTokenExists(ctx context.Context, orgID, accessTokenID uint32) (bool, error) {
+	if _, err := c.getOrgAccessTokenByID(ctx, orgID, accessTokenID); errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, nil
+	} else if err != nil {
+		return false, fmt.Errorf("failed to get organization access token. organization_id=%d, access_token_id=%d, error: %w", orgID, accessTokenID, err)
+	}
+	return true, nil
+}
+
 const listOrganizationUserReserved = `
 select ur.*
 from organization_user_reserved ur inner join organization_role r using(role_id)
@@ -488,6 +502,16 @@ func (c *Client) ListOrgAccessToken(ctx context.Context, orgID uint32, name stri
 	return &data, nil
 }
 
+const selectGetOrgAccessTokenByID = `select * from organization_access_token where organization_id = ? and access_token_id = ?`
+
+func (c *Client) getOrgAccessTokenByID(ctx context.Context, orgID, accessTokenID uint32) (*model.OrgAccessToken, error) {
+	var data model.OrgAccessToken
+	if err := c.Master.WithContext(ctx).Raw(selectGetOrgAccessTokenByID, orgID, accessTokenID).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
 const selectGetOrgAccessTokenByUniqueKey = `select * from organization_access_token where organization_id = ? and name = ?`
 
 func (c *Client) GetOrgAccessTokenByUniqueKey(ctx context.Context, orgID uint32, name string) (*model.OrgAccessToken, error) {
@@ -531,4 +555,118 @@ const deleteOrgAccessToken = `delete from organization_access_token where organi
 
 func (c *Client) DeleteOrgAccessToken(ctx context.Context, orgID, accessTokenID uint32) error {
 	return c.Master.WithContext(ctx).Exec(deleteOrgAccessToken, orgID, accessTokenID).Error
+}
+
+const selectGetActiveOrgAccessTokenHash = `select * from organization_access_token where organization_id = ? and access_token_id = ? and token_hash = ? and expired_at >= NOW()`
+
+func (c *Client) GetActiveOrgAccessTokenHash(ctx context.Context, orgID, accessTokenID uint32, tokenHash string) (*model.OrgAccessToken, error) {
+	var data model.OrgAccessToken
+	if err := c.Master.WithContext(ctx).Raw(selectGetActiveOrgAccessTokenHash, orgID, accessTokenID, tokenHash).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const selectGetOrgAccessTokenRole = `
+select
+  *
+from
+  organization_access_token_role atr
+where
+  atr.access_token_id = ?
+  and atr.role_id = ?
+`
+
+func (c *Client) getOrgAccessTokenRole(ctx context.Context, accessTokenID, roleID uint32) (*model.OrgAccessTokenRole, error) {
+	var data model.OrgAccessTokenRole
+	if err := c.Master.WithContext(ctx).Raw(selectGetOrgAccessTokenRole, accessTokenID, roleID).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const insertAttachOrgAccessTokenRole = `
+INSERT INTO organization_access_token_role
+  (access_token_id, role_id)
+VALUES
+  (?, ?)
+ON DUPLICATE KEY UPDATE
+  access_token_id=VALUES(access_token_id),
+  role_id=VALUES(role_id)
+`
+
+func (c *Client) AttachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) (*model.OrgAccessTokenRole, error) {
+	tokenExists, err := c.orgAccessTokenExists(ctx, orgID, accessTokenID)
+	if err != nil {
+		return nil, err
+	}
+	if !tokenExists {
+		return nil, fmt.Errorf("not found organization_access_token: organization_id=%d, access_token_id=%d", orgID, accessTokenID)
+	}
+	roleExists, err := c.organizationRoleExists(ctx, orgID, roleID)
+	if err != nil {
+		return nil, err
+	}
+	if !roleExists {
+		return nil, fmt.Errorf("not found organization_role: organization_id=%d, role_id=%d", orgID, roleID)
+	}
+	if err := c.Master.WithContext(ctx).Exec(insertAttachOrgAccessTokenRole, accessTokenID, roleID).Error; err != nil {
+		return nil, err
+	}
+	return c.getOrgAccessTokenRole(ctx, accessTokenID, roleID)
+}
+
+const deleteDetachOrgAccessTokenRole = `delete from organization_access_token_role where access_token_id = ? and role_id = ?`
+
+func (c *Client) DetachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) error {
+	tokenExists, err := c.orgAccessTokenExists(ctx, orgID, accessTokenID)
+	if err != nil {
+		return err
+	}
+	if !tokenExists {
+		return fmt.Errorf("not found organization_access_token: organization_id=%d, access_token_id=%d", orgID, accessTokenID)
+	}
+	roleExists, err := c.organizationRoleExists(ctx, orgID, roleID)
+	if err != nil {
+		return err
+	}
+	if !roleExists {
+		return fmt.Errorf("not found organization_role: organization_id=%d, role_id=%d", orgID, roleID)
+	}
+	return c.Master.WithContext(ctx).Exec(deleteDetachOrgAccessTokenRole, accessTokenID, roleID).Error
+}
+
+const selectExistsOrgAccessTokenMaintainer = `
+select
+  u.user_id
+from
+  organization_access_token oat
+  inner join organization_role r on r.organization_id = oat.organization_id
+  inner join user_organization_role uor using(role_id)
+  inner join user u using(user_id)
+where
+  oat.organization_id = ?
+  and oat.expired_at >= NOW()
+  and oat.access_token_id = ?
+  and u.activated = 'true'
+`
+
+func (c *Client) ExistsOrgAccessTokenMaintainer(ctx context.Context, orgID, accessTokenID uint32) (bool, error) {
+	var data model.User
+	if err := c.Slave.WithContext(ctx).Raw(selectExistsOrgAccessTokenMaintainer, orgID, accessTokenID).First(&data).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+const selectListExpiredOrgAccessToken = `select * from organization_access_token where expired_at < NOW()`
+
+func (c *Client) ListExpiredOrgAccessToken(ctx context.Context) (*[]model.OrgAccessToken, error) {
+	var data []model.OrgAccessToken
+	if err := c.Slave.WithContext(ctx).Raw(selectListExpiredOrgAccessToken).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
 }

@@ -727,3 +727,690 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DeleteOrganizationAccessTokenRequestValidationError{}
+
+// Validate checks the field values on
+// AuthenticateOrganizationAccessTokenRequest with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *AuthenticateOrganizationAccessTokenRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// AuthenticateOrganizationAccessTokenRequest with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// AuthenticateOrganizationAccessTokenRequestMultiError, or nil if none found.
+func (m *AuthenticateOrganizationAccessTokenRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AuthenticateOrganizationAccessTokenRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() <= 0 {
+		err := AuthenticateOrganizationAccessTokenRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetAccessTokenId() <= 0 {
+		err := AuthenticateOrganizationAccessTokenRequestValidationError{
+			field:  "AccessTokenId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if utf8.RuneCountInString(m.GetPlainTextToken()) < 1 {
+		err := AuthenticateOrganizationAccessTokenRequestValidationError{
+			field:  "PlainTextToken",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return AuthenticateOrganizationAccessTokenRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// AuthenticateOrganizationAccessTokenRequestMultiError is an error wrapping
+// multiple validation errors returned by
+// AuthenticateOrganizationAccessTokenRequest.ValidateAll() if the designated
+// constraints aren't met.
+type AuthenticateOrganizationAccessTokenRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AuthenticateOrganizationAccessTokenRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AuthenticateOrganizationAccessTokenRequestMultiError) AllErrors() []error { return m }
+
+// AuthenticateOrganizationAccessTokenRequestValidationError is the validation
+// error returned by AuthenticateOrganizationAccessTokenRequest.Validate if
+// the designated constraints aren't met.
+type AuthenticateOrganizationAccessTokenRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AuthenticateOrganizationAccessTokenRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AuthenticateOrganizationAccessTokenRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AuthenticateOrganizationAccessTokenRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AuthenticateOrganizationAccessTokenRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AuthenticateOrganizationAccessTokenRequestValidationError) ErrorName() string {
+	return "AuthenticateOrganizationAccessTokenRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AuthenticateOrganizationAccessTokenRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAuthenticateOrganizationAccessTokenRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AuthenticateOrganizationAccessTokenRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AuthenticateOrganizationAccessTokenRequestValidationError{}
+
+// Validate checks the field values on
+// AuthenticateOrganizationAccessTokenResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *AuthenticateOrganizationAccessTokenResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// AuthenticateOrganizationAccessTokenResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// AuthenticateOrganizationAccessTokenResponseMultiError, or nil if none found.
+func (m *AuthenticateOrganizationAccessTokenResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AuthenticateOrganizationAccessTokenResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetAccessToken()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, AuthenticateOrganizationAccessTokenResponseValidationError{
+					field:  "AccessToken",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, AuthenticateOrganizationAccessTokenResponseValidationError{
+					field:  "AccessToken",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetAccessToken()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return AuthenticateOrganizationAccessTokenResponseValidationError{
+				field:  "AccessToken",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return AuthenticateOrganizationAccessTokenResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// AuthenticateOrganizationAccessTokenResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// AuthenticateOrganizationAccessTokenResponse.ValidateAll() if the designated
+// constraints aren't met.
+type AuthenticateOrganizationAccessTokenResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AuthenticateOrganizationAccessTokenResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AuthenticateOrganizationAccessTokenResponseMultiError) AllErrors() []error { return m }
+
+// AuthenticateOrganizationAccessTokenResponseValidationError is the validation
+// error returned by AuthenticateOrganizationAccessTokenResponse.Validate if
+// the designated constraints aren't met.
+type AuthenticateOrganizationAccessTokenResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AuthenticateOrganizationAccessTokenResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AuthenticateOrganizationAccessTokenResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AuthenticateOrganizationAccessTokenResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AuthenticateOrganizationAccessTokenResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AuthenticateOrganizationAccessTokenResponseValidationError) ErrorName() string {
+	return "AuthenticateOrganizationAccessTokenResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AuthenticateOrganizationAccessTokenResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAuthenticateOrganizationAccessTokenResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AuthenticateOrganizationAccessTokenResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AuthenticateOrganizationAccessTokenResponseValidationError{}
+
+// Validate checks the field values on AttachOrganizationAccessTokenRoleRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *AttachOrganizationAccessTokenRoleRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// AttachOrganizationAccessTokenRoleRequest with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// AttachOrganizationAccessTokenRoleRequestMultiError, or nil if none found.
+func (m *AttachOrganizationAccessTokenRoleRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AttachOrganizationAccessTokenRoleRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() <= 0 {
+		err := AttachOrganizationAccessTokenRoleRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetAccessTokenId() <= 0 {
+		err := AttachOrganizationAccessTokenRoleRequestValidationError{
+			field:  "AccessTokenId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetRoleId() <= 0 {
+		err := AttachOrganizationAccessTokenRoleRequestValidationError{
+			field:  "RoleId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return AttachOrganizationAccessTokenRoleRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// AttachOrganizationAccessTokenRoleRequestMultiError is an error wrapping
+// multiple validation errors returned by
+// AttachOrganizationAccessTokenRoleRequest.ValidateAll() if the designated
+// constraints aren't met.
+type AttachOrganizationAccessTokenRoleRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AttachOrganizationAccessTokenRoleRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AttachOrganizationAccessTokenRoleRequestMultiError) AllErrors() []error { return m }
+
+// AttachOrganizationAccessTokenRoleRequestValidationError is the validation
+// error returned by AttachOrganizationAccessTokenRoleRequest.Validate if the
+// designated constraints aren't met.
+type AttachOrganizationAccessTokenRoleRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AttachOrganizationAccessTokenRoleRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AttachOrganizationAccessTokenRoleRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AttachOrganizationAccessTokenRoleRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AttachOrganizationAccessTokenRoleRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AttachOrganizationAccessTokenRoleRequestValidationError) ErrorName() string {
+	return "AttachOrganizationAccessTokenRoleRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AttachOrganizationAccessTokenRoleRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAttachOrganizationAccessTokenRoleRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AttachOrganizationAccessTokenRoleRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AttachOrganizationAccessTokenRoleRequestValidationError{}
+
+// Validate checks the field values on
+// AttachOrganizationAccessTokenRoleResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *AttachOrganizationAccessTokenRoleResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// AttachOrganizationAccessTokenRoleResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// AttachOrganizationAccessTokenRoleResponseMultiError, or nil if none found.
+func (m *AttachOrganizationAccessTokenRoleResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AttachOrganizationAccessTokenRoleResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetAccessTokenRole()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, AttachOrganizationAccessTokenRoleResponseValidationError{
+					field:  "AccessTokenRole",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, AttachOrganizationAccessTokenRoleResponseValidationError{
+					field:  "AccessTokenRole",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetAccessTokenRole()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return AttachOrganizationAccessTokenRoleResponseValidationError{
+				field:  "AccessTokenRole",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return AttachOrganizationAccessTokenRoleResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// AttachOrganizationAccessTokenRoleResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// AttachOrganizationAccessTokenRoleResponse.ValidateAll() if the designated
+// constraints aren't met.
+type AttachOrganizationAccessTokenRoleResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AttachOrganizationAccessTokenRoleResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AttachOrganizationAccessTokenRoleResponseMultiError) AllErrors() []error { return m }
+
+// AttachOrganizationAccessTokenRoleResponseValidationError is the validation
+// error returned by AttachOrganizationAccessTokenRoleResponse.Validate if the
+// designated constraints aren't met.
+type AttachOrganizationAccessTokenRoleResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AttachOrganizationAccessTokenRoleResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AttachOrganizationAccessTokenRoleResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AttachOrganizationAccessTokenRoleResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AttachOrganizationAccessTokenRoleResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AttachOrganizationAccessTokenRoleResponseValidationError) ErrorName() string {
+	return "AttachOrganizationAccessTokenRoleResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AttachOrganizationAccessTokenRoleResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAttachOrganizationAccessTokenRoleResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AttachOrganizationAccessTokenRoleResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AttachOrganizationAccessTokenRoleResponseValidationError{}
+
+// Validate checks the field values on DetachOrganizationAccessTokenRoleRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *DetachOrganizationAccessTokenRoleRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// DetachOrganizationAccessTokenRoleRequest with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// DetachOrganizationAccessTokenRoleRequestMultiError, or nil if none found.
+func (m *DetachOrganizationAccessTokenRoleRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DetachOrganizationAccessTokenRoleRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() <= 0 {
+		err := DetachOrganizationAccessTokenRoleRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetAccessTokenId() <= 0 {
+		err := DetachOrganizationAccessTokenRoleRequestValidationError{
+			field:  "AccessTokenId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetRoleId() <= 0 {
+		err := DetachOrganizationAccessTokenRoleRequestValidationError{
+			field:  "RoleId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return DetachOrganizationAccessTokenRoleRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// DetachOrganizationAccessTokenRoleRequestMultiError is an error wrapping
+// multiple validation errors returned by
+// DetachOrganizationAccessTokenRoleRequest.ValidateAll() if the designated
+// constraints aren't met.
+type DetachOrganizationAccessTokenRoleRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DetachOrganizationAccessTokenRoleRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DetachOrganizationAccessTokenRoleRequestMultiError) AllErrors() []error { return m }
+
+// DetachOrganizationAccessTokenRoleRequestValidationError is the validation
+// error returned by DetachOrganizationAccessTokenRoleRequest.Validate if the
+// designated constraints aren't met.
+type DetachOrganizationAccessTokenRoleRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DetachOrganizationAccessTokenRoleRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DetachOrganizationAccessTokenRoleRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DetachOrganizationAccessTokenRoleRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DetachOrganizationAccessTokenRoleRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DetachOrganizationAccessTokenRoleRequestValidationError) ErrorName() string {
+	return "DetachOrganizationAccessTokenRoleRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DetachOrganizationAccessTokenRoleRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDetachOrganizationAccessTokenRoleRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DetachOrganizationAccessTokenRoleRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DetachOrganizationAccessTokenRoleRequestValidationError{}
