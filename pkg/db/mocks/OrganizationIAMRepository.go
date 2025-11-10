@@ -76,6 +76,24 @@ func (_m *OrganizationIAMRepository) AttachOrganizationRole(ctx context.Context,
 	return r0, r1
 }
 
+// DeleteOrgAccessToken provides a mock function with given fields: ctx, orgID, accessTokenID
+func (_m *OrganizationIAMRepository) DeleteOrgAccessToken(ctx context.Context, orgID uint32, accessTokenID uint32) error {
+	ret := _m.Called(ctx, orgID, accessTokenID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteOrgAccessToken")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) error); ok {
+		r0 = rf(ctx, orgID, accessTokenID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DeleteOrganizationPolicy provides a mock function with given fields: ctx, organizationID, policyID
 func (_m *OrganizationIAMRepository) DeleteOrganizationPolicy(ctx context.Context, organizationID uint32, policyID uint32) error {
 	ret := _m.Called(ctx, organizationID, policyID)
@@ -164,6 +182,36 @@ func (_m *OrganizationIAMRepository) DetachOrganizationRole(ctx context.Context,
 	}
 
 	return r0
+}
+
+// GetOrgAccessTokenByUniqueKey provides a mock function with given fields: ctx, orgID, name
+func (_m *OrganizationIAMRepository) GetOrgAccessTokenByUniqueKey(ctx context.Context, orgID uint32, name string) (*model.OrgAccessToken, error) {
+	ret := _m.Called(ctx, orgID, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetOrgAccessTokenByUniqueKey")
+	}
+
+	var r0 *model.OrgAccessToken
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) (*model.OrgAccessToken, error)); ok {
+		return rf(ctx, orgID, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) *model.OrgAccessToken); ok {
+		r0 = rf(ctx, orgID, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.OrgAccessToken)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, string) error); ok {
+		r1 = rf(ctx, orgID, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // GetOrganizationPolicy provides a mock function with given fields: ctx, organizationID, policyID
@@ -316,6 +364,36 @@ func (_m *OrganizationIAMRepository) GetOrganizationRoleByName(ctx context.Conte
 	return r0, r1
 }
 
+// ListOrgAccessToken provides a mock function with given fields: ctx, orgID, name, accessTokenID
+func (_m *OrganizationIAMRepository) ListOrgAccessToken(ctx context.Context, orgID uint32, name string, accessTokenID uint32) (*[]model.OrgAccessToken, error) {
+	ret := _m.Called(ctx, orgID, name, accessTokenID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListOrgAccessToken")
+	}
+
+	var r0 *[]model.OrgAccessToken
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string, uint32) (*[]model.OrgAccessToken, error)); ok {
+		return rf(ctx, orgID, name, accessTokenID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string, uint32) *[]model.OrgAccessToken); ok {
+		r0 = rf(ctx, orgID, name, accessTokenID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*[]model.OrgAccessToken)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, string, uint32) error); ok {
+		r1 = rf(ctx, orgID, name, accessTokenID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListOrganizationPolicy provides a mock function with given fields: ctx, organizationID, name, roleID
 func (_m *OrganizationIAMRepository) ListOrganizationPolicy(ctx context.Context, organizationID uint32, name string, roleID uint32) ([]*model.OrganizationPolicy, error) {
 	ret := _m.Called(ctx, organizationID, name, roleID)
@@ -429,6 +507,36 @@ func (_m *OrganizationIAMRepository) ListOrganizationUserReservedWithOrganizatio
 
 	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
 		r1 = rf(ctx, userIdpKey)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PutOrgAccessToken provides a mock function with given fields: ctx, token
+func (_m *OrganizationIAMRepository) PutOrgAccessToken(ctx context.Context, token *model.OrgAccessToken) (*model.OrgAccessToken, error) {
+	ret := _m.Called(ctx, token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PutOrgAccessToken")
+	}
+
+	var r0 *model.OrgAccessToken
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *model.OrgAccessToken) (*model.OrgAccessToken, error)); ok {
+		return rf(ctx, token)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *model.OrgAccessToken) *model.OrgAccessToken); ok {
+		r0 = rf(ctx, token)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.OrgAccessToken)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *model.OrgAccessToken) error); ok {
+		r1 = rf(ctx, token)
 	} else {
 		r1 = ret.Error(1)
 	}
