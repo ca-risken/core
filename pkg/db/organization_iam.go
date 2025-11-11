@@ -43,8 +43,6 @@ type OrganizationIAMRepository interface {
 	GetActiveOrgAccessTokenHash(ctx context.Context, orgID, accessTokenID uint32, tokenHash string) (*model.OrgAccessToken, error)
 	AttachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) (*model.OrgAccessTokenRole, error)
 	DetachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) error
-	ExistsOrgAccessTokenMaintainer(ctx context.Context, orgID, accessTokenID uint32) (bool, error)
-	ListExpiredOrgAccessToken(ctx context.Context) (*[]model.OrgAccessToken, error)
 }
 
 var _ OrganizationIAMRepository = (*Client)(nil)
@@ -634,39 +632,4 @@ func (c *Client) DetachOrgAccessTokenRole(ctx context.Context, orgID, roleID, ac
 		return fmt.Errorf("not found organization_role: organization_id=%d, role_id=%d", orgID, roleID)
 	}
 	return c.Master.WithContext(ctx).Exec(deleteDetachOrgAccessTokenRole, accessTokenID, roleID).Error
-}
-
-const selectExistsOrgAccessTokenMaintainer = `
-select
-  u.user_id
-from
-  organization_access_token oat
-  inner join organization_role r on r.organization_id = oat.organization_id
-  inner join user_organization_role uor using(role_id)
-  inner join user u using(user_id)
-where
-  oat.organization_id = ?
-  and oat.expired_at >= NOW()
-  and oat.access_token_id = ?
-  and u.activated = 'true'
-`
-
-func (c *Client) ExistsOrgAccessTokenMaintainer(ctx context.Context, orgID, accessTokenID uint32) (bool, error) {
-	var data model.User
-	if err := c.Slave.WithContext(ctx).Raw(selectExistsOrgAccessTokenMaintainer, orgID, accessTokenID).First(&data).Error; errors.Is(err, gorm.ErrRecordNotFound) {
-		return false, nil
-	} else if err != nil {
-		return false, err
-	}
-	return true, nil
-}
-
-const selectListExpiredOrgAccessToken = `select * from organization_access_token where expired_at < NOW()`
-
-func (c *Client) ListExpiredOrgAccessToken(ctx context.Context) (*[]model.OrgAccessToken, error) {
-	var data []model.OrgAccessToken
-	if err := c.Slave.WithContext(ctx).Raw(selectListExpiredOrgAccessToken).Scan(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
 }

@@ -232,34 +232,6 @@ func (_m *OrganizationIAMRepository) DetachOrganizationRole(ctx context.Context,
 	return r0
 }
 
-// ExistsOrgAccessTokenMaintainer provides a mock function with given fields: ctx, orgID, accessTokenID
-func (_m *OrganizationIAMRepository) ExistsOrgAccessTokenMaintainer(ctx context.Context, orgID uint32, accessTokenID uint32) (bool, error) {
-	ret := _m.Called(ctx, orgID, accessTokenID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ExistsOrgAccessTokenMaintainer")
-	}
-
-	var r0 bool
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) (bool, error)); ok {
-		return rf(ctx, orgID, accessTokenID)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) bool); ok {
-		r0 = rf(ctx, orgID, accessTokenID)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
-		r1 = rf(ctx, orgID, accessTokenID)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetActiveOrgAccessTokenHash provides a mock function with given fields: ctx, orgID, accessTokenID, tokenHash
 func (_m *OrganizationIAMRepository) GetActiveOrgAccessTokenHash(ctx context.Context, orgID uint32, accessTokenID uint32, tokenHash string) (*model.OrgAccessToken, error) {
 	ret := _m.Called(ctx, orgID, accessTokenID, tokenHash)
@@ -463,36 +435,6 @@ func (_m *OrganizationIAMRepository) GetOrganizationRoleByName(ctx context.Conte
 
 	if rf, ok := ret.Get(1).(func(context.Context, uint32, string) error); ok {
 		r1 = rf(ctx, organizationID, name)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// ListExpiredOrgAccessToken provides a mock function with given fields: ctx
-func (_m *OrganizationIAMRepository) ListExpiredOrgAccessToken(ctx context.Context) (*[]model.OrgAccessToken, error) {
-	ret := _m.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ListExpiredOrgAccessToken")
-	}
-
-	var r0 *[]model.OrgAccessToken
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (*[]model.OrgAccessToken, error)); ok {
-		return rf(ctx)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context) *[]model.OrgAccessToken); ok {
-		r0 = rf(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*[]model.OrgAccessToken)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
