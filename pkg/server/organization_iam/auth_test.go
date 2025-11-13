@@ -9,6 +9,7 @@ import (
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
+	findingmock "github.com/ca-risken/core/proto/finding/mocks"
 	"github.com/ca-risken/core/proto/iam"
 	iammock "github.com/ca-risken/core/proto/iam/mocks"
 	"github.com/ca-risken/core/proto/organization_iam"
@@ -174,7 +175,8 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 			mockRepo := mocks.NewOrganizationIAMRepository(t)
 			logger := logging.NewLogger()
 			mockIAM := iammock.NewIAMServiceClient(t)
-			svc := NewOrganizationIAMService(mockRepo, mockIAM, logger)
+			mockFinding := findingmock.NewFindingServiceClient(t)
+			svc := NewOrganizationIAMService(mockRepo, mockIAM, mockFinding, logger)
 
 			if c.expectIsAdminCall {
 				if c.mockIsAdminErr != nil {

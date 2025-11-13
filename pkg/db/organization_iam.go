@@ -37,6 +37,7 @@ type OrganizationIAMRepository interface {
 
 	// OrganizationAccessToken
 	ListOrgAccessToken(ctx context.Context, orgID uint32, name string, accessTokenID uint32) (*[]model.OrgAccessToken, error)
+	ListExpiredOrgAccessToken(ctx context.Context) (*[]model.OrgAccessToken, error)
 	GetOrgAccessTokenByUniqueKey(ctx context.Context, orgID uint32, name string) (*model.OrgAccessToken, error)
 	PutOrgAccessToken(ctx context.Context, token *model.OrgAccessToken) (*model.OrgAccessToken, error)
 	DeleteOrgAccessToken(ctx context.Context, orgID, accessTokenID uint32) error
@@ -495,6 +496,16 @@ func (c *Client) ListOrgAccessToken(ctx context.Context, orgID uint32, name stri
 	}
 	var data []model.OrgAccessToken
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const selectListExpiredOrgAccessToken = `select * from organization_access_token where expired_at < NOW()`
+
+func (c *Client) ListExpiredOrgAccessToken(ctx context.Context) (*[]model.OrgAccessToken, error) {
+	var data []model.OrgAccessToken
+	if err := c.Slave.WithContext(ctx).Raw(selectListExpiredOrgAccessToken).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

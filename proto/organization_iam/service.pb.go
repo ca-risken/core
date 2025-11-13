@@ -42,7 +42,7 @@ var file_organization_iam_service_proto_rawDesc = []byte{
 	0x75, 0x73, 0x65, 0x72, 0x5f, 0x72, 0x65, 0x73, 0x65, 0x72, 0x76, 0x65, 0x64, 0x2e, 0x70, 0x72,
 	0x6f, 0x74, 0x6f, 0x1a, 0x23, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f,
 	0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x2f, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x5f, 0x74, 0x6f, 0x6b,
-	0x65, 0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x32, 0xe9, 0x18, 0x0a, 0x16, 0x4f, 0x72, 0x67,
+	0x65, 0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x32, 0xbf, 0x19, 0x0a, 0x16, 0x4f, 0x72, 0x67,
 	0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x41, 0x4d, 0x53, 0x65, 0x72, 0x76,
 	0x69, 0x63, 0x65, 0x12, 0x7f, 0x0a, 0x14, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x72, 0x67, 0x61, 0x6e,
 	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x32, 0x2e, 0x63, 0x6f,
@@ -241,10 +241,16 @@ var file_organization_iam_service_proto_rawDesc = []byte{
 	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x41, 0x63, 0x63, 0x65, 0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65,
 	0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67,
 	0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45,
-	0x6d, 0x70, 0x74, 0x79, 0x42, 0x32, 0x5a, 0x30, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63,
-	0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69, 0x73, 0x6b, 0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72,
-	0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6d, 0x70, 0x74, 0x79, 0x12, 0x54, 0x0a, 0x22, 0x41, 0x6e, 0x61, 0x6c, 0x79, 0x7a, 0x65, 0x4f,
+	0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x6f, 0x6b, 0x65, 0x6e,
+	0x45, 0x78, 0x70, 0x69, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f,
+	0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70,
+	0x74, 0x79, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x42, 0x32, 0x5a, 0x30, 0x67, 0x69,
+	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69, 0x73, 0x6b,
+	0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x6f, 0x72,
+	0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var file_organization_iam_service_proto_goTypes = []interface{}{
@@ -271,10 +277,10 @@ var file_organization_iam_service_proto_goTypes = []interface{}{
 	(*AuthenticateOrganizationAccessTokenRequest)(nil),               // 20: core.organization_iam.AuthenticateOrganizationAccessTokenRequest
 	(*AttachOrganizationAccessTokenRoleRequest)(nil),                 // 21: core.organization_iam.AttachOrganizationAccessTokenRoleRequest
 	(*DetachOrganizationAccessTokenRoleRequest)(nil),                 // 22: core.organization_iam.DetachOrganizationAccessTokenRoleRequest
-	(*ListOrganizationRoleResponse)(nil),                             // 23: core.organization_iam.ListOrganizationRoleResponse
-	(*GetOrganizationRoleResponse)(nil),                              // 24: core.organization_iam.GetOrganizationRoleResponse
-	(*PutOrganizationRoleResponse)(nil),                              // 25: core.organization_iam.PutOrganizationRoleResponse
-	(*emptypb.Empty)(nil),                                            // 26: google.protobuf.Empty
+	(*emptypb.Empty)(nil),                                            // 23: google.protobuf.Empty
+	(*ListOrganizationRoleResponse)(nil),                             // 24: core.organization_iam.ListOrganizationRoleResponse
+	(*GetOrganizationRoleResponse)(nil),                              // 25: core.organization_iam.GetOrganizationRoleResponse
+	(*PutOrganizationRoleResponse)(nil),                              // 26: core.organization_iam.PutOrganizationRoleResponse
 	(*AttachOrganizationRoleResponse)(nil),                           // 27: core.organization_iam.AttachOrganizationRoleResponse
 	(*AttachOrganizationRoleByOrganizationUserReservedResponse)(nil), // 28: core.organization_iam.AttachOrganizationRoleByOrganizationUserReservedResponse
 	(*ListOrganizationPolicyResponse)(nil),                           // 29: core.organization_iam.ListOrganizationPolicyResponse
@@ -313,31 +319,33 @@ var file_organization_iam_service_proto_depIdxs = []int32{
 	20, // 20: core.organization_iam.OrganizationIAMService.AuthenticateOrganizationAccessToken:input_type -> core.organization_iam.AuthenticateOrganizationAccessTokenRequest
 	21, // 21: core.organization_iam.OrganizationIAMService.AttachOrganizationAccessTokenRole:input_type -> core.organization_iam.AttachOrganizationAccessTokenRoleRequest
 	22, // 22: core.organization_iam.OrganizationIAMService.DetachOrganizationAccessTokenRole:input_type -> core.organization_iam.DetachOrganizationAccessTokenRoleRequest
-	23, // 23: core.organization_iam.OrganizationIAMService.ListOrganizationRole:output_type -> core.organization_iam.ListOrganizationRoleResponse
-	24, // 24: core.organization_iam.OrganizationIAMService.GetOrganizationRole:output_type -> core.organization_iam.GetOrganizationRoleResponse
-	25, // 25: core.organization_iam.OrganizationIAMService.PutOrganizationRole:output_type -> core.organization_iam.PutOrganizationRoleResponse
-	26, // 26: core.organization_iam.OrganizationIAMService.DeleteOrganizationRole:output_type -> google.protobuf.Empty
-	27, // 27: core.organization_iam.OrganizationIAMService.AttachOrganizationRole:output_type -> core.organization_iam.AttachOrganizationRoleResponse
-	26, // 28: core.organization_iam.OrganizationIAMService.DetachOrganizationRole:output_type -> google.protobuf.Empty
-	28, // 29: core.organization_iam.OrganizationIAMService.AttachOrganizationRoleByOrganizationUserReserved:output_type -> core.organization_iam.AttachOrganizationRoleByOrganizationUserReservedResponse
-	29, // 30: core.organization_iam.OrganizationIAMService.ListOrganizationPolicy:output_type -> core.organization_iam.ListOrganizationPolicyResponse
-	30, // 31: core.organization_iam.OrganizationIAMService.GetOrganizationPolicy:output_type -> core.organization_iam.GetOrganizationPolicyResponse
-	31, // 32: core.organization_iam.OrganizationIAMService.PutOrganizationPolicy:output_type -> core.organization_iam.PutOrganizationPolicyResponse
-	26, // 33: core.organization_iam.OrganizationIAMService.DeleteOrganizationPolicy:output_type -> google.protobuf.Empty
-	32, // 34: core.organization_iam.OrganizationIAMService.AttachOrganizationPolicy:output_type -> core.organization_iam.AttachOrganizationPolicyResponse
-	26, // 35: core.organization_iam.OrganizationIAMService.DetachOrganizationPolicy:output_type -> google.protobuf.Empty
-	33, // 36: core.organization_iam.OrganizationIAMService.IsAuthorizedOrganization:output_type -> core.organization_iam.IsAuthorizedOrganizationResponse
-	34, // 37: core.organization_iam.OrganizationIAMService.ListOrganizationUserReserved:output_type -> core.organization_iam.ListOrganizationUserReservedResponse
-	35, // 38: core.organization_iam.OrganizationIAMService.PutOrganizationUserReserved:output_type -> core.organization_iam.PutOrganizationUserReservedResponse
-	26, // 39: core.organization_iam.OrganizationIAMService.DeleteOrganizationUserReserved:output_type -> google.protobuf.Empty
-	36, // 40: core.organization_iam.OrganizationIAMService.ListOrganizationAccessToken:output_type -> core.organization_iam.ListOrganizationAccessTokenResponse
-	37, // 41: core.organization_iam.OrganizationIAMService.PutOrganizationAccessToken:output_type -> core.organization_iam.PutOrganizationAccessTokenResponse
-	26, // 42: core.organization_iam.OrganizationIAMService.DeleteOrganizationAccessToken:output_type -> google.protobuf.Empty
-	38, // 43: core.organization_iam.OrganizationIAMService.AuthenticateOrganizationAccessToken:output_type -> core.organization_iam.AuthenticateOrganizationAccessTokenResponse
-	39, // 44: core.organization_iam.OrganizationIAMService.AttachOrganizationAccessTokenRole:output_type -> core.organization_iam.AttachOrganizationAccessTokenRoleResponse
-	26, // 45: core.organization_iam.OrganizationIAMService.DetachOrganizationAccessTokenRole:output_type -> google.protobuf.Empty
-	23, // [23:46] is the sub-list for method output_type
-	0,  // [0:23] is the sub-list for method input_type
+	23, // 23: core.organization_iam.OrganizationIAMService.AnalyzeOrganizationTokenExpiration:input_type -> google.protobuf.Empty
+	24, // 24: core.organization_iam.OrganizationIAMService.ListOrganizationRole:output_type -> core.organization_iam.ListOrganizationRoleResponse
+	25, // 25: core.organization_iam.OrganizationIAMService.GetOrganizationRole:output_type -> core.organization_iam.GetOrganizationRoleResponse
+	26, // 26: core.organization_iam.OrganizationIAMService.PutOrganizationRole:output_type -> core.organization_iam.PutOrganizationRoleResponse
+	23, // 27: core.organization_iam.OrganizationIAMService.DeleteOrganizationRole:output_type -> google.protobuf.Empty
+	27, // 28: core.organization_iam.OrganizationIAMService.AttachOrganizationRole:output_type -> core.organization_iam.AttachOrganizationRoleResponse
+	23, // 29: core.organization_iam.OrganizationIAMService.DetachOrganizationRole:output_type -> google.protobuf.Empty
+	28, // 30: core.organization_iam.OrganizationIAMService.AttachOrganizationRoleByOrganizationUserReserved:output_type -> core.organization_iam.AttachOrganizationRoleByOrganizationUserReservedResponse
+	29, // 31: core.organization_iam.OrganizationIAMService.ListOrganizationPolicy:output_type -> core.organization_iam.ListOrganizationPolicyResponse
+	30, // 32: core.organization_iam.OrganizationIAMService.GetOrganizationPolicy:output_type -> core.organization_iam.GetOrganizationPolicyResponse
+	31, // 33: core.organization_iam.OrganizationIAMService.PutOrganizationPolicy:output_type -> core.organization_iam.PutOrganizationPolicyResponse
+	23, // 34: core.organization_iam.OrganizationIAMService.DeleteOrganizationPolicy:output_type -> google.protobuf.Empty
+	32, // 35: core.organization_iam.OrganizationIAMService.AttachOrganizationPolicy:output_type -> core.organization_iam.AttachOrganizationPolicyResponse
+	23, // 36: core.organization_iam.OrganizationIAMService.DetachOrganizationPolicy:output_type -> google.protobuf.Empty
+	33, // 37: core.organization_iam.OrganizationIAMService.IsAuthorizedOrganization:output_type -> core.organization_iam.IsAuthorizedOrganizationResponse
+	34, // 38: core.organization_iam.OrganizationIAMService.ListOrganizationUserReserved:output_type -> core.organization_iam.ListOrganizationUserReservedResponse
+	35, // 39: core.organization_iam.OrganizationIAMService.PutOrganizationUserReserved:output_type -> core.organization_iam.PutOrganizationUserReservedResponse
+	23, // 40: core.organization_iam.OrganizationIAMService.DeleteOrganizationUserReserved:output_type -> google.protobuf.Empty
+	36, // 41: core.organization_iam.OrganizationIAMService.ListOrganizationAccessToken:output_type -> core.organization_iam.ListOrganizationAccessTokenResponse
+	37, // 42: core.organization_iam.OrganizationIAMService.PutOrganizationAccessToken:output_type -> core.organization_iam.PutOrganizationAccessTokenResponse
+	23, // 43: core.organization_iam.OrganizationIAMService.DeleteOrganizationAccessToken:output_type -> google.protobuf.Empty
+	38, // 44: core.organization_iam.OrganizationIAMService.AuthenticateOrganizationAccessToken:output_type -> core.organization_iam.AuthenticateOrganizationAccessTokenResponse
+	39, // 45: core.organization_iam.OrganizationIAMService.AttachOrganizationAccessTokenRole:output_type -> core.organization_iam.AttachOrganizationAccessTokenRoleResponse
+	23, // 46: core.organization_iam.OrganizationIAMService.DetachOrganizationAccessTokenRole:output_type -> google.protobuf.Empty
+	23, // 47: core.organization_iam.OrganizationIAMService.AnalyzeOrganizationTokenExpiration:output_type -> google.protobuf.Empty
+	24, // [24:48] is the sub-list for method output_type
+	0,  // [0:24] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
@@ -412,6 +420,7 @@ type OrganizationIAMServiceClient interface {
 	AuthenticateOrganizationAccessToken(ctx context.Context, in *AuthenticateOrganizationAccessTokenRequest, opts ...grpc.CallOption) (*AuthenticateOrganizationAccessTokenResponse, error)
 	AttachOrganizationAccessTokenRole(ctx context.Context, in *AttachOrganizationAccessTokenRoleRequest, opts ...grpc.CallOption) (*AttachOrganizationAccessTokenRoleResponse, error)
 	DetachOrganizationAccessTokenRole(ctx context.Context, in *DetachOrganizationAccessTokenRoleRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	AnalyzeOrganizationTokenExpiration(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type organizationIAMServiceClient struct {
@@ -629,6 +638,15 @@ func (c *organizationIAMServiceClient) DetachOrganizationAccessTokenRole(ctx con
 	return out, nil
 }
 
+func (c *organizationIAMServiceClient) AnalyzeOrganizationTokenExpiration(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/core.organization_iam.OrganizationIAMService/AnalyzeOrganizationTokenExpiration", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrganizationIAMServiceServer is the server API for OrganizationIAMService service.
 type OrganizationIAMServiceServer interface {
 	// Role
@@ -659,6 +677,7 @@ type OrganizationIAMServiceServer interface {
 	AuthenticateOrganizationAccessToken(context.Context, *AuthenticateOrganizationAccessTokenRequest) (*AuthenticateOrganizationAccessTokenResponse, error)
 	AttachOrganizationAccessTokenRole(context.Context, *AttachOrganizationAccessTokenRoleRequest) (*AttachOrganizationAccessTokenRoleResponse, error)
 	DetachOrganizationAccessTokenRole(context.Context, *DetachOrganizationAccessTokenRoleRequest) (*emptypb.Empty, error)
+	AnalyzeOrganizationTokenExpiration(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 }
 
 // UnimplementedOrganizationIAMServiceServer can be embedded to have forward compatible implementations.
@@ -733,6 +752,9 @@ func (*UnimplementedOrganizationIAMServiceServer) AttachOrganizationAccessTokenR
 }
 func (*UnimplementedOrganizationIAMServiceServer) DetachOrganizationAccessTokenRole(context.Context, *DetachOrganizationAccessTokenRoleRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DetachOrganizationAccessTokenRole not implemented")
+}
+func (*UnimplementedOrganizationIAMServiceServer) AnalyzeOrganizationTokenExpiration(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AnalyzeOrganizationTokenExpiration not implemented")
 }
 
 func RegisterOrganizationIAMServiceServer(s *grpc.Server, srv OrganizationIAMServiceServer) {
@@ -1153,6 +1175,24 @@ func _OrganizationIAMService_DetachOrganizationAccessTokenRole_Handler(srv inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrganizationIAMService_AnalyzeOrganizationTokenExpiration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrganizationIAMServiceServer).AnalyzeOrganizationTokenExpiration(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.organization_iam.OrganizationIAMService/AnalyzeOrganizationTokenExpiration",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrganizationIAMServiceServer).AnalyzeOrganizationTokenExpiration(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _OrganizationIAMService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "core.organization_iam.OrganizationIAMService",
 	HandlerType: (*OrganizationIAMServiceServer)(nil),
@@ -1248,6 +1288,10 @@ var _OrganizationIAMService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DetachOrganizationAccessTokenRole",
 			Handler:    _OrganizationIAMService_DetachOrganizationAccessTokenRole_Handler,
+		},
+		{
+			MethodName: "AnalyzeOrganizationTokenExpiration",
+			Handler:    _OrganizationIAMService_AnalyzeOrganizationTokenExpiration_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -2,6 +2,7 @@ package organization_iam
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"testing"
 	"time"
@@ -9,7 +10,10 @@ import (
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
+	"github.com/ca-risken/core/proto/finding"
+	findingmock "github.com/ca-risken/core/proto/finding/mocks"
 	"github.com/ca-risken/core/proto/organization_iam"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
 )
 
@@ -427,6 +431,105 @@ func TestDetachOrganizationAccessTokenRole(t *testing.T) {
 			_, err := svc.DetachOrganizationAccessTokenRole(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
+}
+
+func TestAnalyzeOrganizationTokenExpiration(t *testing.T) {
+	now := time.Now()
+	token := model.OrgAccessToken{
+		AccessTokenID:     10,
+		TokenHash:         "hash",
+		Name:              "token",
+		Description:       "desc",
+		OrgID:             1,
+		ExpiredAt:         now,
+		LastUpdatedUserID: 2,
+		CreatedAt:         now,
+		UpdatedAt:         now,
+	}
+	cases := []struct {
+		name        string
+		mockRepo    func(*mocks.OrganizationIAMRepository)
+		mockFinding func(*findingmock.FindingServiceClient)
+		wantErr     bool
+	}{
+		{
+			name: "OK",
+			mockRepo: func(m *mocks.OrganizationIAMRepository) {
+				m.On("ListExpiredOrgAccessToken", test.RepeatMockAnything(1)...).Return(&[]model.OrgAccessToken{token}, nil).Once()
+			},
+			mockFinding: func(m *findingmock.FindingServiceClient) {
+				m.On("ClearScore", test.RepeatMockAnything(3)...).Return(&emptypb.Empty{}, nil).Once()
+				m.On("PutFinding", test.RepeatMockAnything(3)...).Return(&finding.PutFindingResponse{Finding: &finding.Finding{FindingId: 100}}, nil).Once()
+				m.On("TagFinding", test.RepeatMockAnything(3)...).Return(&finding.TagFindingResponse{}, nil).Once()
+			},
+		},
+		{
+			name: "OK no expired token",
+			mockRepo: func(m *mocks.OrganizationIAMRepository) {
+				m.On("ListExpiredOrgAccessToken", test.RepeatMockAnything(1)...).Return(&[]model.OrgAccessToken{}, gorm.ErrRecordNotFound).Once()
+			},
+		},
+		{
+			name: "NG repository error",
+			mockRepo: func(m *mocks.OrganizationIAMRepository) {
+				m.On("ListExpiredOrgAccessToken", test.RepeatMockAnything(1)...).Return(nil, errors.New("db error")).Once()
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG clear score error",
+			mockRepo: func(m *mocks.OrganizationIAMRepository) {
+				m.On("ListExpiredOrgAccessToken", test.RepeatMockAnything(1)...).Return(&[]model.OrgAccessToken{token}, nil).Once()
+			},
+			mockFinding: func(m *findingmock.FindingServiceClient) {
+				m.On("ClearScore", test.RepeatMockAnything(3)...).Return(nil, errors.New("clear error")).Once()
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG put finding error",
+			mockRepo: func(m *mocks.OrganizationIAMRepository) {
+				m.On("ListExpiredOrgAccessToken", test.RepeatMockAnything(1)...).Return(&[]model.OrgAccessToken{token}, nil).Once()
+			},
+			mockFinding: func(m *findingmock.FindingServiceClient) {
+				m.On("ClearScore", test.RepeatMockAnything(3)...).Return(&emptypb.Empty{}, nil).Once()
+				m.On("PutFinding", test.RepeatMockAnything(3)...).Return(nil, errors.New("put finding error")).Once()
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG tag finding error",
+			mockRepo: func(m *mocks.OrganizationIAMRepository) {
+				m.On("ListExpiredOrgAccessToken", test.RepeatMockAnything(1)...).Return(&[]model.OrgAccessToken{token}, nil).Once()
+			},
+			mockFinding: func(m *findingmock.FindingServiceClient) {
+				m.On("ClearScore", test.RepeatMockAnything(3)...).Return(&emptypb.Empty{}, nil).Once()
+				m.On("PutFinding", test.RepeatMockAnything(3)...).Return(&finding.PutFindingResponse{Finding: &finding.Finding{FindingId: 100}}, nil).Once()
+				m.On("TagFinding", test.RepeatMockAnything(3)...).Return(nil, errors.New("tag finding error")).Once()
+			},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			repo := mocks.NewOrganizationIAMRepository(t)
+			findingClient := findingmock.NewFindingServiceClient(t)
+			if c.mockRepo != nil {
+				c.mockRepo(repo)
+			}
+			if c.mockFinding != nil {
+				c.mockFinding(findingClient)
+			}
+			svc := OrganizationIAMService{
+				repository:    repo,
+				findingClient: findingClient,
+			}
+			_, err := svc.AnalyzeOrganizationTokenExpiration(context.Background(), &emptypb.Empty{})
+			if (err != nil) != c.wantErr {
+				t.Fatalf("Unexpected error: wantErr=%v, err=%v", c.wantErr, err)
 			}
 		})
 	}

@@ -4,10 +4,13 @@ import (
 	"context"
 	"crypto/sha512"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
+	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/organization_iam"
 	"github.com/golang/protobuf/ptypes/empty"
 	"gorm.io/gorm"
@@ -15,6 +18,8 @@ import (
 
 const (
 	maxOrgTokenExpiredAtUnix int64 = 253402268399 // 9999-12-31T23:59:59
+	riskenDataSource               = "RISKEN"
+	orgAccessTokenTag              = "organization-access-token"
 )
 
 func (s *OrganizationIAMService) ListOrganizationAccessToken(ctx context.Context, req *organization_iam.ListOrganizationAccessTokenRequest) (*organization_iam.ListOrganizationAccessTokenResponse, error) {
@@ -148,4 +153,56 @@ func (s *OrganizationIAMService) DetachOrganizationAccessTokenRole(ctx context.C
 func hashOrgToken(plainText string) string {
 	hash := sha512.Sum512([]byte(plainText))
 	return base64.RawURLEncoding.EncodeToString(hash[:])
+}
+
+func (s *OrganizationIAMService) AnalyzeOrganizationTokenExpiration(ctx context.Context, _ *empty.Empty) (*empty.Empty, error) {
+	tokens, err := s.repository.ListExpiredOrgAccessToken(ctx)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &empty.Empty{}, nil
+		}
+		return nil, err
+	}
+	if _, err := s.findingClient.ClearScore(ctx, &finding.ClearScoreRequest{
+		DataSource: riskenDataSource,
+		Tag:        []string{orgAccessTokenTag},
+	}); err != nil {
+		return nil, err
+	}
+
+	for _, token := range *tokens {
+		token.TokenHash = "xxx"
+		buf, err := json.Marshal(token)
+		if err != nil {
+			s.logger.Errorf(ctx, "Failed to encoding json, organizationAccessToken=%+v, err=%+v", token, err)
+			return nil, err
+		}
+		resp, err := s.findingClient.PutFinding(ctx, &finding.PutFindingRequest{
+			ProjectId: token.OrgID,
+			Finding: &finding.FindingForUpsert{
+				Description:      "RISKEN OrganizationAccessToken expired",
+				DataSource:       riskenDataSource,
+				DataSourceId:     fmt.Sprintf("risken-organization-access-token-id-%d", token.AccessTokenID),
+				ResourceName:     token.Name,
+				ProjectId:        token.OrgID,
+				OriginalScore:    0.8,
+				OriginalMaxScore: 1.0,
+				Data:             string(buf),
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+		if _, err = s.findingClient.TagFinding(ctx, &finding.TagFindingRequest{
+			ProjectId: token.OrgID,
+			Tag: &finding.FindingTagForUpsert{
+				FindingId: resp.Finding.FindingId,
+				ProjectId: token.OrgID,
+				Tag:       orgAccessTokenTag,
+			},
+		}); err != nil {
+			return nil, err
+		}
+	}
+	return &empty.Empty{}, nil
 }

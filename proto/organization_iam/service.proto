@@ -69,4 +69,6 @@ service OrganizationIAMService {
       returns (AttachOrganizationAccessTokenRoleResponse);
   rpc DetachOrganizationAccessTokenRole(
       DetachOrganizationAccessTokenRoleRequest) returns (google.protobuf.Empty);
+  rpc AnalyzeOrganizationTokenExpiration(google.protobuf.Empty)
+      returns (google.protobuf.Empty); // For scheduled job
 }

@@ -472,6 +472,36 @@ func (_m *OrganizationIAMRepository) ListOrgAccessToken(ctx context.Context, org
 	return r0, r1
 }
 
+// ListExpiredOrgAccessToken provides a mock function with given fields: ctx
+func (_m *OrganizationIAMRepository) ListExpiredOrgAccessToken(ctx context.Context) (*[]model.OrgAccessToken, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListExpiredOrgAccessToken")
+	}
+
+	var r0 *[]model.OrgAccessToken
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*[]model.OrgAccessToken, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) *[]model.OrgAccessToken); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*[]model.OrgAccessToken)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListOrganizationPolicy provides a mock function with given fields: ctx, organizationID, name, roleID
 func (_m *OrganizationIAMRepository) ListOrganizationPolicy(ctx context.Context, organizationID uint32, name string, roleID uint32) ([]*model.OrganizationPolicy, error) {
 	ret := _m.Called(ctx, organizationID, name, roleID)
