@@ -250,3 +250,184 @@ func TestDeleteOrganizationAccessToken(t *testing.T) {
 		})
 	}
 }
+
+func TestAuthenticateOrganizationAccessToken(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name      string
+		input     *organization_iam.AuthenticateOrganizationAccessTokenRequest
+		want      *organization_iam.AuthenticateOrganizationAccessTokenResponse
+		wantErr   bool
+		mockResp  *model.OrgAccessToken
+		mockError error
+	}{
+		{
+			name:  "OK",
+			input: &organization_iam.AuthenticateOrganizationAccessTokenRequest{OrganizationId: 1, AccessTokenId: 10, PlainTextToken: "plain"},
+			want: &organization_iam.AuthenticateOrganizationAccessTokenResponse{
+				AccessToken: &organization_iam.OrganizationAccessToken{
+					AccessTokenId:     10,
+					Name:              "token",
+					Description:       "desc",
+					OrganizationId:    1,
+					ExpiredAt:         now.Unix(),
+					LastUpdatedUserId: 100,
+					CreatedAt:         now.Unix(),
+					UpdatedAt:         now.Unix(),
+				},
+			},
+			mockResp: &model.OrgAccessToken{
+				AccessTokenID:     10,
+				TokenHash:         "hash",
+				Name:              "token",
+				Description:       "desc",
+				OrgID:             1,
+				ExpiredAt:         now,
+				LastUpdatedUserID: 100,
+				CreatedAt:         now,
+				UpdatedAt:         now,
+			},
+		},
+		{
+			name:      "OK record not found",
+			input:     &organization_iam.AuthenticateOrganizationAccessTokenRequest{OrganizationId: 1, AccessTokenId: 10, PlainTextToken: "plain"},
+			want:      &organization_iam.AuthenticateOrganizationAccessTokenResponse{},
+			mockError: gorm.ErrRecordNotFound,
+		},
+		{
+			name:    "NG validation error",
+			input:   &organization_iam.AuthenticateOrganizationAccessTokenRequest{},
+			wantErr: true,
+		},
+		{
+			name:      "NG DB error",
+			input:     &organization_iam.AuthenticateOrganizationAccessTokenRequest{OrganizationId: 1, AccessTokenId: 10, PlainTextToken: "plain"},
+			wantErr:   true,
+			mockError: gorm.ErrInvalidDB,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewOrganizationIAMRepository(t)
+			svc := OrganizationIAMService{repository: mock}
+
+			if c.mockResp != nil || c.mockError != nil {
+				mock.On("GetActiveOrgAccessTokenHash", test.RepeatMockAnything(4)...).Return(c.mockResp, c.mockError).Once()
+			}
+			got, err := svc.AuthenticateOrganizationAccessToken(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestAttachOrganizationAccessTokenRole(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name      string
+		input     *organization_iam.AttachOrganizationAccessTokenRoleRequest
+		want      *organization_iam.AttachOrganizationAccessTokenRoleResponse
+		wantErr   bool
+		mockResp  *model.OrgAccessTokenRole
+		mockError error
+	}{
+		{
+			name:  "OK",
+			input: &organization_iam.AttachOrganizationAccessTokenRoleRequest{OrganizationId: 1, AccessTokenId: 2, RoleId: 3},
+			want: &organization_iam.AttachOrganizationAccessTokenRoleResponse{
+				AccessTokenRole: &organization_iam.OrganizationAccessTokenRole{
+					AccessTokenId: 2,
+					RoleId:        3,
+					CreatedAt:     now.Unix(),
+					UpdatedAt:     now.Unix(),
+				},
+			},
+			mockResp: &model.OrgAccessTokenRole{
+				AccessTokenID: 2,
+				RoleID:        3,
+				CreatedAt:     now,
+				UpdatedAt:     now,
+			},
+		},
+		{
+			name:    "NG validation error",
+			input:   &organization_iam.AttachOrganizationAccessTokenRoleRequest{},
+			wantErr: true,
+		},
+		{
+			name:      "NG DB error",
+			input:     &organization_iam.AttachOrganizationAccessTokenRoleRequest{OrganizationId: 1, AccessTokenId: 2, RoleId: 3},
+			wantErr:   true,
+			mockError: gorm.ErrInvalidDB,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewOrganizationIAMRepository(t)
+			svc := OrganizationIAMService{repository: mock}
+
+			if c.mockResp != nil || c.mockError != nil {
+				mock.On("AttachOrgAccessTokenRole", test.RepeatMockAnything(4)...).Return(c.mockResp, c.mockError).Once()
+			}
+			got, err := svc.AttachOrganizationAccessTokenRole(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestDetachOrganizationAccessTokenRole(t *testing.T) {
+	cases := []struct {
+		name      string
+		input     *organization_iam.DetachOrganizationAccessTokenRoleRequest
+		wantErr   bool
+		mockError error
+	}{
+		{
+			name:  "OK",
+			input: &organization_iam.DetachOrganizationAccessTokenRoleRequest{OrganizationId: 1, AccessTokenId: 2, RoleId: 3},
+		},
+		{
+			name:    "NG validation error",
+			input:   &organization_iam.DetachOrganizationAccessTokenRoleRequest{},
+			wantErr: true,
+		},
+		{
+			name:      "NG DB error",
+			input:     &organization_iam.DetachOrganizationAccessTokenRoleRequest{OrganizationId: 1, AccessTokenId: 2, RoleId: 3},
+			wantErr:   true,
+			mockError: gorm.ErrInvalidDB,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mock := mocks.NewOrganizationIAMRepository(t)
+			svc := OrganizationIAMService{repository: mock}
+
+			if c.mockError == nil && !c.wantErr {
+				mock.On("DetachOrgAccessTokenRole", test.RepeatMockAnything(4)...).Return(nil).Once()
+			}
+			if c.mockError != nil {
+				mock.On("DetachOrgAccessTokenRole", test.RepeatMockAnything(4)...).Return(c.mockError).Once()
+			}
+			_, err := svc.DetachOrganizationAccessTokenRole(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
+}

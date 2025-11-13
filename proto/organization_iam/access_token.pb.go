@@ -328,6 +328,289 @@ func (x *DeleteOrganizationAccessTokenRequest) GetAccessTokenId() uint32 {
 	return 0
 }
 
+type AuthenticateOrganizationAccessTokenRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	OrganizationId uint32 `protobuf:"varint,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`  // Required
+	AccessTokenId  uint32 `protobuf:"varint,2,opt,name=access_token_id,json=accessTokenId,proto3" json:"access_token_id,omitempty"`   // Required
+	PlainTextToken string `protobuf:"bytes,3,opt,name=plain_text_token,json=plainTextToken,proto3" json:"plain_text_token,omitempty"` // Required
+}
+
+func (x *AuthenticateOrganizationAccessTokenRequest) Reset() {
+	*x = AuthenticateOrganizationAccessTokenRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_iam_access_token_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AuthenticateOrganizationAccessTokenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthenticateOrganizationAccessTokenRequest) ProtoMessage() {}
+
+func (x *AuthenticateOrganizationAccessTokenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_iam_access_token_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AuthenticateOrganizationAccessTokenRequest.ProtoReflect.Descriptor instead.
+func (*AuthenticateOrganizationAccessTokenRequest) Descriptor() ([]byte, []int) {
+	return file_organization_iam_access_token_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *AuthenticateOrganizationAccessTokenRequest) GetOrganizationId() uint32 {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return 0
+}
+
+func (x *AuthenticateOrganizationAccessTokenRequest) GetAccessTokenId() uint32 {
+	if x != nil {
+		return x.AccessTokenId
+	}
+	return 0
+}
+
+func (x *AuthenticateOrganizationAccessTokenRequest) GetPlainTextToken() string {
+	if x != nil {
+		return x.PlainTextToken
+	}
+	return ""
+}
+
+type AuthenticateOrganizationAccessTokenResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	AccessToken *OrganizationAccessToken `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+}
+
+func (x *AuthenticateOrganizationAccessTokenResponse) Reset() {
+	*x = AuthenticateOrganizationAccessTokenResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_iam_access_token_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AuthenticateOrganizationAccessTokenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthenticateOrganizationAccessTokenResponse) ProtoMessage() {}
+
+func (x *AuthenticateOrganizationAccessTokenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_iam_access_token_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AuthenticateOrganizationAccessTokenResponse.ProtoReflect.Descriptor instead.
+func (*AuthenticateOrganizationAccessTokenResponse) Descriptor() ([]byte, []int) {
+	return file_organization_iam_access_token_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *AuthenticateOrganizationAccessTokenResponse) GetAccessToken() *OrganizationAccessToken {
+	if x != nil {
+		return x.AccessToken
+	}
+	return nil
+}
+
+type AttachOrganizationAccessTokenRoleRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	OrganizationId uint32 `protobuf:"varint,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"` // Required
+	AccessTokenId  uint32 `protobuf:"varint,2,opt,name=access_token_id,json=accessTokenId,proto3" json:"access_token_id,omitempty"`  // Required
+	RoleId         uint32 `protobuf:"varint,3,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`                         // Required
+}
+
+func (x *AttachOrganizationAccessTokenRoleRequest) Reset() {
+	*x = AttachOrganizationAccessTokenRoleRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_iam_access_token_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AttachOrganizationAccessTokenRoleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AttachOrganizationAccessTokenRoleRequest) ProtoMessage() {}
+
+func (x *AttachOrganizationAccessTokenRoleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_iam_access_token_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AttachOrganizationAccessTokenRoleRequest.ProtoReflect.Descriptor instead.
+func (*AttachOrganizationAccessTokenRoleRequest) Descriptor() ([]byte, []int) {
+	return file_organization_iam_access_token_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *AttachOrganizationAccessTokenRoleRequest) GetOrganizationId() uint32 {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return 0
+}
+
+func (x *AttachOrganizationAccessTokenRoleRequest) GetAccessTokenId() uint32 {
+	if x != nil {
+		return x.AccessTokenId
+	}
+	return 0
+}
+
+func (x *AttachOrganizationAccessTokenRoleRequest) GetRoleId() uint32 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+type AttachOrganizationAccessTokenRoleResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	AccessTokenRole *OrganizationAccessTokenRole `protobuf:"bytes,1,opt,name=access_token_role,json=accessTokenRole,proto3" json:"access_token_role,omitempty"`
+}
+
+func (x *AttachOrganizationAccessTokenRoleResponse) Reset() {
+	*x = AttachOrganizationAccessTokenRoleResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_iam_access_token_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AttachOrganizationAccessTokenRoleResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AttachOrganizationAccessTokenRoleResponse) ProtoMessage() {}
+
+func (x *AttachOrganizationAccessTokenRoleResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_iam_access_token_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AttachOrganizationAccessTokenRoleResponse.ProtoReflect.Descriptor instead.
+func (*AttachOrganizationAccessTokenRoleResponse) Descriptor() ([]byte, []int) {
+	return file_organization_iam_access_token_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *AttachOrganizationAccessTokenRoleResponse) GetAccessTokenRole() *OrganizationAccessTokenRole {
+	if x != nil {
+		return x.AccessTokenRole
+	}
+	return nil
+}
+
+type DetachOrganizationAccessTokenRoleRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	OrganizationId uint32 `protobuf:"varint,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"` // Required
+	AccessTokenId  uint32 `protobuf:"varint,2,opt,name=access_token_id,json=accessTokenId,proto3" json:"access_token_id,omitempty"`  // Required
+	RoleId         uint32 `protobuf:"varint,3,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`                         // Required
+}
+
+func (x *DetachOrganizationAccessTokenRoleRequest) Reset() {
+	*x = DetachOrganizationAccessTokenRoleRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_iam_access_token_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DetachOrganizationAccessTokenRoleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DetachOrganizationAccessTokenRoleRequest) ProtoMessage() {}
+
+func (x *DetachOrganizationAccessTokenRoleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_iam_access_token_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DetachOrganizationAccessTokenRoleRequest.ProtoReflect.Descriptor instead.
+func (*DetachOrganizationAccessTokenRoleRequest) Descriptor() ([]byte, []int) {
+	return file_organization_iam_access_token_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *DetachOrganizationAccessTokenRoleRequest) GetOrganizationId() uint32 {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return 0
+}
+
+func (x *DetachOrganizationAccessTokenRoleRequest) GetAccessTokenId() uint32 {
+	if x != nil {
+		return x.AccessTokenId
+	}
+	return 0
+}
+
+func (x *DetachOrganizationAccessTokenRoleRequest) GetRoleId() uint32 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
 var File_organization_iam_access_token_proto protoreflect.FileDescriptor
 
 var file_organization_iam_access_token_proto_rawDesc = []byte{
@@ -393,11 +676,63 @@ var file_organization_iam_access_token_proto_rawDesc = []byte{
 	0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x2f,
 	0x0a, 0x0f, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x5f, 0x69,
 	0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00,
-	0x52, 0x0d, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x49, 0x64, 0x42,
-	0x32, 0x5a, 0x30, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61,
-	0x2d, 0x72, 0x69, 0x73, 0x6b, 0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x2f, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f,
-	0x69, 0x61, 0x6d, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x52, 0x0d, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x49, 0x64, 0x22,
+	0xc2, 0x01, 0x0a, 0x2a, 0x41, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x65,
+	0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x41, 0x63, 0x63, 0x65,
+	0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x30,
+	0x0a, 0x0f, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00,
+	0x52, 0x0e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64,
+	0x12, 0x2f, 0x0a, 0x0f, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e,
+	0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02,
+	0x20, 0x00, 0x52, 0x0d, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x49,
+	0x64, 0x12, 0x31, 0x0a, 0x10, 0x70, 0x6c, 0x61, 0x69, 0x6e, 0x5f, 0x74, 0x65, 0x78, 0x74, 0x5f,
+	0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x42, 0x07, 0xfa, 0x42, 0x04,
+	0x72, 0x02, 0x10, 0x01, 0x52, 0x0e, 0x70, 0x6c, 0x61, 0x69, 0x6e, 0x54, 0x65, 0x78, 0x74, 0x54,
+	0x6f, 0x6b, 0x65, 0x6e, 0x22, 0x80, 0x01, 0x0a, 0x2b, 0x41, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74,
+	0x69, 0x63, 0x61, 0x74, 0x65, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x41, 0x63, 0x63, 0x65, 0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x51, 0x0a, 0x0c, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x5f, 0x74,
+	0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2e, 0x2e, 0x63, 0x6f, 0x72,
+	0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69,
+	0x61, 0x6d, 0x2e, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x41,
+	0x63, 0x63, 0x65, 0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x0b, 0x61, 0x63, 0x63, 0x65,
+	0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x22, 0xaf, 0x01, 0x0a, 0x28, 0x41, 0x74, 0x74, 0x61,
+	0x63, 0x68, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x41, 0x63,
+	0x63, 0x65, 0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x30, 0x0a, 0x0f, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa,
+	0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x0e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x2f, 0x0a, 0x0f, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73,
+	0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x42,
+	0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x0d, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73,
+	0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x49, 0x64, 0x12, 0x20, 0x0a, 0x07, 0x72, 0x6f, 0x6c, 0x65, 0x5f,
+	0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20,
+	0x00, 0x52, 0x06, 0x72, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x22, 0x8b, 0x01, 0x0a, 0x29, 0x41, 0x74,
+	0x74, 0x61, 0x63, 0x68, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x41, 0x63, 0x63, 0x65, 0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x5e, 0x0a, 0x11, 0x61, 0x63, 0x63, 0x65, 0x73,
+	0x73, 0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x5f, 0x72, 0x6f, 0x6c, 0x65, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x32, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69,
+	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x2e, 0x4f, 0x72, 0x67, 0x61, 0x6e,
+	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x41, 0x63, 0x63, 0x65, 0x73, 0x73, 0x54, 0x6f, 0x6b,
+	0x65, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x0f, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x54, 0x6f,
+	0x6b, 0x65, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x22, 0xaf, 0x01, 0x0a, 0x28, 0x44, 0x65, 0x74, 0x61,
+	0x63, 0x68, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x41, 0x63,
+	0x63, 0x65, 0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x30, 0x0a, 0x0f, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa,
+	0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x0e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x2f, 0x0a, 0x0f, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73,
+	0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x42,
+	0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x0d, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73,
+	0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x49, 0x64, 0x12, 0x20, 0x0a, 0x07, 0x72, 0x6f, 0x6c, 0x65, 0x5f,
+	0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20,
+	0x00, 0x52, 0x06, 0x72, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x42, 0x32, 0x5a, 0x30, 0x67, 0x69, 0x74,
+	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69, 0x73, 0x6b, 0x65,
+	0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x6f, 0x72, 0x67,
+	0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x62, 0x06, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -412,23 +747,31 @@ func file_organization_iam_access_token_proto_rawDescGZIP() []byte {
 	return file_organization_iam_access_token_proto_rawDescData
 }
 
-var file_organization_iam_access_token_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_organization_iam_access_token_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_organization_iam_access_token_proto_goTypes = []interface{}{
-	(*ListOrganizationAccessTokenRequest)(nil),   // 0: core.organization_iam.ListOrganizationAccessTokenRequest
-	(*ListOrganizationAccessTokenResponse)(nil),  // 1: core.organization_iam.ListOrganizationAccessTokenResponse
-	(*PutOrganizationAccessTokenRequest)(nil),    // 2: core.organization_iam.PutOrganizationAccessTokenRequest
-	(*PutOrganizationAccessTokenResponse)(nil),   // 3: core.organization_iam.PutOrganizationAccessTokenResponse
-	(*DeleteOrganizationAccessTokenRequest)(nil), // 4: core.organization_iam.DeleteOrganizationAccessTokenRequest
-	(*OrganizationAccessToken)(nil),              // 5: core.organization_iam.OrganizationAccessToken
+	(*ListOrganizationAccessTokenRequest)(nil),          // 0: core.organization_iam.ListOrganizationAccessTokenRequest
+	(*ListOrganizationAccessTokenResponse)(nil),         // 1: core.organization_iam.ListOrganizationAccessTokenResponse
+	(*PutOrganizationAccessTokenRequest)(nil),           // 2: core.organization_iam.PutOrganizationAccessTokenRequest
+	(*PutOrganizationAccessTokenResponse)(nil),          // 3: core.organization_iam.PutOrganizationAccessTokenResponse
+	(*DeleteOrganizationAccessTokenRequest)(nil),        // 4: core.organization_iam.DeleteOrganizationAccessTokenRequest
+	(*AuthenticateOrganizationAccessTokenRequest)(nil),  // 5: core.organization_iam.AuthenticateOrganizationAccessTokenRequest
+	(*AuthenticateOrganizationAccessTokenResponse)(nil), // 6: core.organization_iam.AuthenticateOrganizationAccessTokenResponse
+	(*AttachOrganizationAccessTokenRoleRequest)(nil),    // 7: core.organization_iam.AttachOrganizationAccessTokenRoleRequest
+	(*AttachOrganizationAccessTokenRoleResponse)(nil),   // 8: core.organization_iam.AttachOrganizationAccessTokenRoleResponse
+	(*DetachOrganizationAccessTokenRoleRequest)(nil),    // 9: core.organization_iam.DetachOrganizationAccessTokenRoleRequest
+	(*OrganizationAccessToken)(nil),                     // 10: core.organization_iam.OrganizationAccessToken
+	(*OrganizationAccessTokenRole)(nil),                 // 11: core.organization_iam.OrganizationAccessTokenRole
 }
 var file_organization_iam_access_token_proto_depIdxs = []int32{
-	5, // 0: core.organization_iam.ListOrganizationAccessTokenResponse.access_token:type_name -> core.organization_iam.OrganizationAccessToken
-	5, // 1: core.organization_iam.PutOrganizationAccessTokenResponse.access_token:type_name -> core.organization_iam.OrganizationAccessToken
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	10, // 0: core.organization_iam.ListOrganizationAccessTokenResponse.access_token:type_name -> core.organization_iam.OrganizationAccessToken
+	10, // 1: core.organization_iam.PutOrganizationAccessTokenResponse.access_token:type_name -> core.organization_iam.OrganizationAccessToken
+	10, // 2: core.organization_iam.AuthenticateOrganizationAccessTokenResponse.access_token:type_name -> core.organization_iam.OrganizationAccessToken
+	11, // 3: core.organization_iam.AttachOrganizationAccessTokenRoleResponse.access_token_role:type_name -> core.organization_iam.OrganizationAccessTokenRole
+	4,  // [4:4] is the sub-list for method output_type
+	4,  // [4:4] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_organization_iam_access_token_proto_init() }
@@ -498,6 +841,66 @@ func file_organization_iam_access_token_proto_init() {
 				return nil
 			}
 		}
+		file_organization_iam_access_token_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AuthenticateOrganizationAccessTokenRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_organization_iam_access_token_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AuthenticateOrganizationAccessTokenResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_organization_iam_access_token_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AttachOrganizationAccessTokenRoleRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_organization_iam_access_token_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AttachOrganizationAccessTokenRoleResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_organization_iam_access_token_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DetachOrganizationAccessTokenRoleRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -505,7 +908,7 @@ func file_organization_iam_access_token_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_organization_iam_access_token_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

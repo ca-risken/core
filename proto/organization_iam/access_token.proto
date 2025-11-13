@@ -36,3 +36,30 @@ message DeleteOrganizationAccessTokenRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
   uint32 access_token_id = 2 [ (validate.rules).uint32.gt = 0 ]; // Required
 }
+
+message AuthenticateOrganizationAccessTokenRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 access_token_id = 2 [ (validate.rules).uint32.gt = 0 ]; // Required
+  string plain_text_token = 3
+      [ (validate.rules).string = {min_len : 1} ]; // Required
+}
+
+message AuthenticateOrganizationAccessTokenResponse {
+  OrganizationAccessToken access_token = 1;
+}
+
+message AttachOrganizationAccessTokenRoleRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 access_token_id = 2 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 role_id = 3 [ (validate.rules).uint32.gt = 0 ];         // Required
+}
+
+message AttachOrganizationAccessTokenRoleResponse {
+  OrganizationAccessTokenRole access_token_role = 1;
+}
+
+message DetachOrganizationAccessTokenRoleRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 access_token_id = 2 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 role_id = 3 [ (validate.rules).uint32.gt = 0 ];         // Required
+}

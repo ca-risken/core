@@ -47,6 +47,13 @@ type OrgAccessToken struct {
 	UpdatedAt         time.Time
 }
 
+type OrgAccessTokenRole struct {
+	AccessTokenID uint32
+	RoleID        uint32
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
 type OrganizationUserReserved struct {
 	ReservedID uint32 `gorm:"primary_key"`
 	UserIdpKey string

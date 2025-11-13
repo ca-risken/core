@@ -16,6 +16,36 @@ type OrganizationIAMRepository struct {
 	mock.Mock
 }
 
+// AttachOrgAccessTokenRole provides a mock function with given fields: ctx, orgID, roleID, accessTokenID
+func (_m *OrganizationIAMRepository) AttachOrgAccessTokenRole(ctx context.Context, orgID uint32, roleID uint32, accessTokenID uint32) (*model.OrgAccessTokenRole, error) {
+	ret := _m.Called(ctx, orgID, roleID, accessTokenID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AttachOrgAccessTokenRole")
+	}
+
+	var r0 *model.OrgAccessTokenRole
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32) (*model.OrgAccessTokenRole, error)); ok {
+		return rf(ctx, orgID, roleID, accessTokenID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32) *model.OrgAccessTokenRole); ok {
+		r0 = rf(ctx, orgID, roleID, accessTokenID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.OrgAccessTokenRole)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint32) error); ok {
+		r1 = rf(ctx, orgID, roleID, accessTokenID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // AttachOrganizationPolicy provides a mock function with given fields: ctx, organizationID, policyID, roleID
 func (_m *OrganizationIAMRepository) AttachOrganizationPolicy(ctx context.Context, organizationID uint32, policyID uint32, roleID uint32) (*model.OrganizationPolicy, error) {
 	ret := _m.Called(ctx, organizationID, policyID, roleID)
@@ -148,6 +178,24 @@ func (_m *OrganizationIAMRepository) DeleteOrganizationUserReserved(ctx context.
 	return r0
 }
 
+// DetachOrgAccessTokenRole provides a mock function with given fields: ctx, orgID, roleID, accessTokenID
+func (_m *OrganizationIAMRepository) DetachOrgAccessTokenRole(ctx context.Context, orgID uint32, roleID uint32, accessTokenID uint32) error {
+	ret := _m.Called(ctx, orgID, roleID, accessTokenID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DetachOrgAccessTokenRole")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32) error); ok {
+		r0 = rf(ctx, orgID, roleID, accessTokenID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DetachOrganizationPolicy provides a mock function with given fields: ctx, organizationID, policyID, roleID
 func (_m *OrganizationIAMRepository) DetachOrganizationPolicy(ctx context.Context, organizationID uint32, policyID uint32, roleID uint32) error {
 	ret := _m.Called(ctx, organizationID, policyID, roleID)
@@ -182,6 +230,36 @@ func (_m *OrganizationIAMRepository) DetachOrganizationRole(ctx context.Context,
 	}
 
 	return r0
+}
+
+// GetActiveOrgAccessTokenHash provides a mock function with given fields: ctx, orgID, accessTokenID, tokenHash
+func (_m *OrganizationIAMRepository) GetActiveOrgAccessTokenHash(ctx context.Context, orgID uint32, accessTokenID uint32, tokenHash string) (*model.OrgAccessToken, error) {
+	ret := _m.Called(ctx, orgID, accessTokenID, tokenHash)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetActiveOrgAccessTokenHash")
+	}
+
+	var r0 *model.OrgAccessToken
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, string) (*model.OrgAccessToken, error)); ok {
+		return rf(ctx, orgID, accessTokenID, tokenHash)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, string) *model.OrgAccessToken); ok {
+		r0 = rf(ctx, orgID, accessTokenID, tokenHash)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.OrgAccessToken)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, string) error); ok {
+		r1 = rf(ctx, orgID, accessTokenID, tokenHash)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // GetOrgAccessTokenByUniqueKey provides a mock function with given fields: ctx, orgID, name
