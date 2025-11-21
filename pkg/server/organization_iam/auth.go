@@ -48,7 +48,7 @@ func (i *OrganizationIAMService) IsAuthorizedOrganization(ctx context.Context, r
 	return &organization_iam.IsAuthorizedOrganizationResponse{Ok: isAuthorized}, nil
 }
 
-func (i *OrganizationIAMService) IsAuthorizedOrgToken(ctx context.Context, req *organization_iam.IsAuthorizedOrgTokenRequest) (*organization_iam.IsAuthorizedOrgTokenResponse, error) {
+func (i *OrganizationIAMService) IsAuthorizedOrganizationToken(ctx context.Context, req *organization_iam.IsAuthorizedOrganizationTokenRequest) (*organization_iam.IsAuthorizedOrganizationTokenResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
@@ -61,23 +61,23 @@ func (i *OrganizationIAMService) IsAuthorizedOrgToken(ctx context.Context, req *
 	}
 	if !existsToken {
 		i.logger.Warnf(ctx, "Unauthorized organization access token that has expired or not found. organization_id=%d, access_token_id=%d", req.OrganizationId, req.AccessTokenId)
-		return &organization_iam.IsAuthorizedOrgTokenResponse{Ok: false}, nil
+		return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, nil
 	}
 	policies, err := i.repository.GetOrgTokenPolicy(ctx, req.OrganizationId, req.AccessTokenId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &organization_iam.IsAuthorizedOrgTokenResponse{Ok: false}, nil
+			return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, nil
 		}
 		return nil, err
 	}
 	isAuthorized, err := isAuthorizedByOrganizationPolicy(req.ActionName, policies)
 	if err != nil {
-		return &organization_iam.IsAuthorizedOrgTokenResponse{Ok: false}, err
+		return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, err
 	}
 	if isAuthorized {
 		i.logger.Infof(ctx, "Authorized organization access token action, request=%+v", req)
 	}
-	return &organization_iam.IsAuthorizedOrgTokenResponse{Ok: isAuthorized}, nil
+	return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: isAuthorized}, nil
 }
 
 func isAuthorizedByOrganizationPolicy(action string, policies *[]model.OrganizationPolicy) (bool, error) {

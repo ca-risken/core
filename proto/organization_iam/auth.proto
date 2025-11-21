@@ -14,11 +14,11 @@ message IsAuthorizedOrganizationRequest {
 
 message IsAuthorizedOrganizationResponse { bool ok = 1; }
 
-// IsAuthorizedOrgTokenRequest
-message IsAuthorizedOrgTokenRequest {
+// IsAuthorizedOrganizationTokenRequest
+message IsAuthorizedOrganizationTokenRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];  // Required
   uint32 access_token_id = 2 [ (validate.rules).uint32.gt = 0 ];  // Required
   string action_name = 3 [ (validate.rules).string.min_len = 1 ]; // Required
 }
 
-message IsAuthorizedOrgTokenResponse { bool ok = 1; }
+message IsAuthorizedOrganizationTokenResponse { bool ok = 1; }
