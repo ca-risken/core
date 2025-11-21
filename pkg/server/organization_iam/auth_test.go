@@ -201,3 +201,134 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 		})
 	}
 }
+
+func TestIsAuthorizedOrgToken(t *testing.T) {
+	cases := []struct {
+		name          string
+		input         *organization_iam.IsAuthorizedOrgTokenRequest
+		want          *organization_iam.IsAuthorizedOrgTokenResponse
+		wantErr       bool
+		callExists    bool
+		existsResp    bool
+		existsErr     error
+		callGetPolicy bool
+		getPolicyResp *[]model.OrganizationPolicy
+		getPolicyErr  error
+	}{
+		{
+			name: "OK Authorized",
+			input: &organization_iam.IsAuthorizedOrgTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "organization/update",
+			},
+			want:          &organization_iam.IsAuthorizedOrgTokenResponse{Ok: true},
+			callExists:    true,
+			existsResp:    true,
+			callGetPolicy: true,
+			getPolicyResp: &[]model.OrganizationPolicy{
+				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/.*"},
+			},
+		},
+		{
+			name: "OK Unauthorized policy not found",
+			input: &organization_iam.IsAuthorizedOrgTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "organization/delete",
+			},
+			want:          &organization_iam.IsAuthorizedOrgTokenResponse{Ok: false},
+			callExists:    true,
+			existsResp:    true,
+			callGetPolicy: true,
+			getPolicyResp: &[]model.OrganizationPolicy{
+				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/(get|list)"},
+			},
+		},
+		{
+			name: "OK Record not found",
+			input: &organization_iam.IsAuthorizedOrgTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "organization/update",
+			},
+			want:          &organization_iam.IsAuthorizedOrgTokenResponse{Ok: false},
+			callExists:    true,
+			existsResp:    true,
+			callGetPolicy: true,
+			getPolicyErr:  gorm.ErrRecordNotFound,
+		},
+		{
+			name: "NG Invalid parameter - action",
+			input: &organization_iam.IsAuthorizedOrgTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "",
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG Exists check error",
+			input: &organization_iam.IsAuthorizedOrgTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "organization/update",
+			},
+			wantErr:    true,
+			callExists: true,
+			existsErr:  gorm.ErrInvalidDB,
+		},
+		{
+			name: "NG Token not active",
+			input: &organization_iam.IsAuthorizedOrgTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "organization/update",
+			},
+			want:       &organization_iam.IsAuthorizedOrgTokenResponse{Ok: false},
+			callExists: true,
+			existsResp: false,
+		},
+		{
+			name: "NG Get policy error",
+			input: &organization_iam.IsAuthorizedOrgTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "organization/update",
+			},
+			wantErr:       true,
+			callExists:    true,
+			existsResp:    true,
+			callGetPolicy: true,
+			getPolicyErr:  gorm.ErrInvalidDB,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			mockRepo := mocks.NewOrganizationIAMRepository(t)
+			logger := logging.NewLogger()
+			mockIAM := iammock.NewIAMServiceClient(t)
+			svc := NewOrganizationIAMService(mockRepo, mockIAM, logger)
+
+			if c.callExists {
+				mockRepo.On("ExistsOrgActiveAccessToken", test.RepeatMockAnything(3)...).Return(c.existsResp, c.existsErr).Once()
+			}
+			if c.callGetPolicy {
+				mockRepo.On("GetOrgTokenPolicy", test.RepeatMockAnything(3)...).Return(c.getPolicyResp, c.getPolicyErr).Once()
+			}
+
+			got, err := svc.IsAuthorizedOrgToken(ctx, c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatal("expected error but got nil")
+			}
+			if !c.wantErr && !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}

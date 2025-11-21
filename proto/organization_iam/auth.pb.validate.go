@@ -277,3 +277,248 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = IsAuthorizedOrganizationResponseValidationError{}
+
+// Validate checks the field values on IsAuthorizedOrganizationTokenRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *IsAuthorizedOrganizationTokenRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on IsAuthorizedOrganizationTokenRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// IsAuthorizedOrganizationTokenRequestMultiError, or nil if none found.
+func (m *IsAuthorizedOrganizationTokenRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *IsAuthorizedOrganizationTokenRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() <= 0 {
+		err := IsAuthorizedOrganizationTokenRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetAccessTokenId() <= 0 {
+		err := IsAuthorizedOrganizationTokenRequestValidationError{
+			field:  "AccessTokenId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if utf8.RuneCountInString(m.GetActionName()) < 1 {
+		err := IsAuthorizedOrganizationTokenRequestValidationError{
+			field:  "ActionName",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return IsAuthorizedOrganizationTokenRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// IsAuthorizedOrganizationTokenRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// IsAuthorizedOrganizationTokenRequest.ValidateAll() if the designated
+// constraints aren't met.
+type IsAuthorizedOrganizationTokenRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m IsAuthorizedOrganizationTokenRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m IsAuthorizedOrganizationTokenRequestMultiError) AllErrors() []error { return m }
+
+// IsAuthorizedOrganizationTokenRequestValidationError is the validation error
+// returned by IsAuthorizedOrganizationTokenRequest.Validate if the designated
+// constraints aren't met.
+type IsAuthorizedOrganizationTokenRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e IsAuthorizedOrganizationTokenRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e IsAuthorizedOrganizationTokenRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e IsAuthorizedOrganizationTokenRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e IsAuthorizedOrganizationTokenRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e IsAuthorizedOrganizationTokenRequestValidationError) ErrorName() string {
+	return "IsAuthorizedOrganizationTokenRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e IsAuthorizedOrganizationTokenRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sIsAuthorizedOrganizationTokenRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = IsAuthorizedOrganizationTokenRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = IsAuthorizedOrganizationTokenRequestValidationError{}
+
+// Validate checks the field values on IsAuthorizedOrganizationTokenResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *IsAuthorizedOrganizationTokenResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on IsAuthorizedOrganizationTokenResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// IsAuthorizedOrganizationTokenResponseMultiError, or nil if none found.
+func (m *IsAuthorizedOrganizationTokenResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *IsAuthorizedOrganizationTokenResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Ok
+
+	if len(errors) > 0 {
+		return IsAuthorizedOrganizationTokenResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// IsAuthorizedOrganizationTokenResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// IsAuthorizedOrganizationTokenResponse.ValidateAll() if the designated
+// constraints aren't met.
+type IsAuthorizedOrganizationTokenResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m IsAuthorizedOrganizationTokenResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m IsAuthorizedOrganizationTokenResponseMultiError) AllErrors() []error { return m }
+
+// IsAuthorizedOrganizationTokenResponseValidationError is the validation error
+// returned by IsAuthorizedOrganizationTokenResponse.Validate if the
+// designated constraints aren't met.
+type IsAuthorizedOrganizationTokenResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e IsAuthorizedOrganizationTokenResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e IsAuthorizedOrganizationTokenResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e IsAuthorizedOrganizationTokenResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e IsAuthorizedOrganizationTokenResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e IsAuthorizedOrganizationTokenResponseValidationError) ErrorName() string {
+	return "IsAuthorizedOrganizationTokenResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e IsAuthorizedOrganizationTokenResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sIsAuthorizedOrganizationTokenResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = IsAuthorizedOrganizationTokenResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = IsAuthorizedOrganizationTokenResponseValidationError{}

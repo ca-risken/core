@@ -45,6 +45,8 @@ service OrganizationIAMService {
   // Authorization
   rpc IsAuthorizedOrganization(IsAuthorizedOrganizationRequest)
       returns (IsAuthorizedOrganizationResponse);
+  rpc IsAuthorizedOrganizationToken(IsAuthorizedOrganizationTokenRequest)
+      returns (IsAuthorizedOrganizationTokenResponse);
 
   // OrganizationUserReserved
   rpc ListOrganizationUserReserved(ListOrganizationUserReservedRequest)
