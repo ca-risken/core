@@ -132,6 +132,117 @@ func (x *IsAuthorizedOrganizationResponse) GetOk() bool {
 	return false
 }
 
+// IsAuthorizedOrgTokenRequest
+type IsAuthorizedOrgTokenRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	OrganizationId uint32 `protobuf:"varint,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"` // Required
+	AccessTokenId  uint32 `protobuf:"varint,2,opt,name=access_token_id,json=accessTokenId,proto3" json:"access_token_id,omitempty"`  // Required
+	ActionName     string `protobuf:"bytes,3,opt,name=action_name,json=actionName,proto3" json:"action_name,omitempty"`              // Required
+}
+
+func (x *IsAuthorizedOrgTokenRequest) Reset() {
+	*x = IsAuthorizedOrgTokenRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_iam_auth_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *IsAuthorizedOrgTokenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IsAuthorizedOrgTokenRequest) ProtoMessage() {}
+
+func (x *IsAuthorizedOrgTokenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_iam_auth_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IsAuthorizedOrgTokenRequest.ProtoReflect.Descriptor instead.
+func (*IsAuthorizedOrgTokenRequest) Descriptor() ([]byte, []int) {
+	return file_organization_iam_auth_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *IsAuthorizedOrgTokenRequest) GetOrganizationId() uint32 {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return 0
+}
+
+func (x *IsAuthorizedOrgTokenRequest) GetAccessTokenId() uint32 {
+	if x != nil {
+		return x.AccessTokenId
+	}
+	return 0
+}
+
+func (x *IsAuthorizedOrgTokenRequest) GetActionName() string {
+	if x != nil {
+		return x.ActionName
+	}
+	return ""
+}
+
+type IsAuthorizedOrgTokenResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Ok bool `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+}
+
+func (x *IsAuthorizedOrgTokenResponse) Reset() {
+	*x = IsAuthorizedOrgTokenResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_organization_iam_auth_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *IsAuthorizedOrgTokenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IsAuthorizedOrgTokenResponse) ProtoMessage() {}
+
+func (x *IsAuthorizedOrgTokenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_iam_auth_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IsAuthorizedOrgTokenResponse.ProtoReflect.Descriptor instead.
+func (*IsAuthorizedOrgTokenResponse) Descriptor() ([]byte, []int) {
+	return file_organization_iam_auth_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *IsAuthorizedOrgTokenResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
 var File_organization_iam_auth_proto protoreflect.FileDescriptor
 
 var file_organization_iam_auth_proto_rawDesc = []byte{
@@ -153,10 +264,24 @@ var file_organization_iam_auth_proto_rawDesc = []byte{
 	0x32, 0x0a, 0x20, 0x49, 0x73, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x65, 0x64, 0x4f,
 	0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f,
 	0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x6f, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52,
-	0x02, 0x6f, 0x6b, 0x42, 0x32, 0x5a, 0x30, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69, 0x73, 0x6b, 0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65,
-	0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x61, 0x6d, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x02, 0x6f, 0x6b, 0x22, 0xaa, 0x01, 0x0a, 0x1b, 0x49, 0x73, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72,
+	0x69, 0x7a, 0x65, 0x64, 0x4f, 0x72, 0x67, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x30, 0x0a, 0x0f, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa, 0x42,
+	0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x0e, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x2f, 0x0a, 0x0f, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x5f,
+	0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x42, 0x07,
+	0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x0d, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x54,
+	0x6f, 0x6b, 0x65, 0x6e, 0x49, 0x64, 0x12, 0x28, 0x0a, 0x0b, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e,
+	0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x42, 0x07, 0xfa, 0x42, 0x04,
+	0x72, 0x02, 0x10, 0x01, 0x52, 0x0a, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x4e, 0x61, 0x6d, 0x65,
+	0x22, 0x2e, 0x0a, 0x1c, 0x49, 0x73, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x65, 0x64,
+	0x4f, 0x72, 0x67, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x12, 0x0e, 0x0a, 0x02, 0x6f, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x02, 0x6f, 0x6b,
+	0x42, 0x32, 0x5a, 0x30, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63,
+	0x61, 0x2d, 0x72, 0x69, 0x73, 0x6b, 0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x2f, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x5f, 0x69, 0x61, 0x6d, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -171,10 +296,12 @@ func file_organization_iam_auth_proto_rawDescGZIP() []byte {
 	return file_organization_iam_auth_proto_rawDescData
 }
 
-var file_organization_iam_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_organization_iam_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_organization_iam_auth_proto_goTypes = []interface{}{
 	(*IsAuthorizedOrganizationRequest)(nil),  // 0: core.organization_iam.IsAuthorizedOrganizationRequest
 	(*IsAuthorizedOrganizationResponse)(nil), // 1: core.organization_iam.IsAuthorizedOrganizationResponse
+	(*IsAuthorizedOrgTokenRequest)(nil),      // 2: core.organization_iam.IsAuthorizedOrgTokenRequest
+	(*IsAuthorizedOrgTokenResponse)(nil),     // 3: core.organization_iam.IsAuthorizedOrgTokenResponse
 }
 var file_organization_iam_auth_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -214,6 +341,30 @@ func file_organization_iam_auth_proto_init() {
 				return nil
 			}
 		}
+		file_organization_iam_auth_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*IsAuthorizedOrgTokenRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_organization_iam_auth_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*IsAuthorizedOrgTokenResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -221,7 +372,7 @@ func file_organization_iam_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_organization_iam_auth_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
