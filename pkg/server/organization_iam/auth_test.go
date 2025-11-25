@@ -21,37 +21,26 @@ func TestIsAuthorizedByOrganizationPolicy(t *testing.T) {
 		{PolicyID: 2, Name: "organizatino-viewer", OrganizationID: 1, ActionPtn: "project/(get|list)"},
 	}
 	cases := []struct {
-		name           string
-		organizationID uint32
-		action         string
-		policy         *[]model.OrganizationPolicy
-		want           bool
-		wantErr        bool
+		name    string
+		action  string
+		policy  *[]model.OrganizationPolicy
+		want    bool
+		wantErr bool
 	}{
 		{
 			name:           "OK Authorized organization get",
-			organizationID: 1,
 			action:         "organization/get-organization",
 			policy:         validPolicies,
 			want:           true,
 		},
 		{
 			name:           "OK Unauthorized action not allowed",
-			organizationID: 1,
 			action:         "organization/delete-organization",
 			policy:         &[]model.OrganizationPolicy{{PolicyID: 2, Name: "organization-viewer", OrganizationID: 1, ActionPtn: "organization/(get|list)"}},
 			want:           false,
 		},
 		{
-			name:           "OK Unauthorized different organization ID",
-			organizationID: 1,
-			action:         "organization/get-organization",
-			policy:         &[]model.OrganizationPolicy{{PolicyID: 1, Name: "organization-admin", OrganizationID: 2, ActionPtn: "organization/.*"}},
-			want:           false,
-		},
-		{
 			name:           "NG Error invalid regex pattern",
-			organizationID: 1,
 			action:         "organization/get",
 			policy:         &[]model.OrganizationPolicy{{PolicyID: 1, Name: "invalid-pattern", OrganizationID: 1, ActionPtn: "[invalid regex"}},
 			wantErr:        true,
@@ -60,7 +49,7 @@ func TestIsAuthorizedByOrganizationPolicy(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := isAuthorizedByOrganizationPolicy(c.organizationID, c.action, c.policy)
+			got, err := isAuthorizedByOrganizationPolicy(c.action, c.policy)
 			if (err != nil) != c.wantErr {
 				t.Errorf("isAuthorizedByOrganizationPolicy() error = %v, wantErr %v", err, c.wantErr)
 				return
