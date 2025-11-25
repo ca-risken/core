@@ -202,11 +202,11 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 	}
 }
 
-func TestIsAuthorizedOrgToken(t *testing.T) {
+func TestIsAuthorizedOrganizationToken(t *testing.T) {
 	cases := []struct {
 		name          string
-		input         *organization_iam.IsAuthorizedOrgTokenRequest
-		want          *organization_iam.IsAuthorizedOrgTokenResponse
+		input         *organization_iam.IsAuthorizedOrganizationTokenRequest
+		want          *organization_iam.IsAuthorizedOrganizationTokenResponse
 		wantErr       bool
 		callExists    bool
 		existsResp    bool
@@ -217,12 +217,12 @@ func TestIsAuthorizedOrgToken(t *testing.T) {
 	}{
 		{
 			name: "OK Authorized",
-			input: &organization_iam.IsAuthorizedOrgTokenRequest{
+			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
 				OrganizationId: 1001,
 				AccessTokenId:  2001,
 				ActionName:     "organization/update",
 			},
-			want:          &organization_iam.IsAuthorizedOrgTokenResponse{Ok: true},
+			want:          &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: true},
 			callExists:    true,
 			existsResp:    true,
 			callGetPolicy: true,
@@ -232,12 +232,12 @@ func TestIsAuthorizedOrgToken(t *testing.T) {
 		},
 		{
 			name: "OK Unauthorized policy not found",
-			input: &organization_iam.IsAuthorizedOrgTokenRequest{
+			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
 				OrganizationId: 1001,
 				AccessTokenId:  2001,
 				ActionName:     "organization/delete",
 			},
-			want:          &organization_iam.IsAuthorizedOrgTokenResponse{Ok: false},
+			want:          &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
 			callExists:    true,
 			existsResp:    true,
 			callGetPolicy: true,
@@ -247,12 +247,12 @@ func TestIsAuthorizedOrgToken(t *testing.T) {
 		},
 		{
 			name: "OK Record not found",
-			input: &organization_iam.IsAuthorizedOrgTokenRequest{
+			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
 				OrganizationId: 1001,
 				AccessTokenId:  2001,
 				ActionName:     "organization/update",
 			},
-			want:          &organization_iam.IsAuthorizedOrgTokenResponse{Ok: false},
+			want:          &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
 			callExists:    true,
 			existsResp:    true,
 			callGetPolicy: true,
@@ -260,7 +260,7 @@ func TestIsAuthorizedOrgToken(t *testing.T) {
 		},
 		{
 			name: "NG Invalid parameter - action",
-			input: &organization_iam.IsAuthorizedOrgTokenRequest{
+			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
 				OrganizationId: 1001,
 				AccessTokenId:  2001,
 				ActionName:     "",
@@ -269,7 +269,7 @@ func TestIsAuthorizedOrgToken(t *testing.T) {
 		},
 		{
 			name: "NG Exists check error",
-			input: &organization_iam.IsAuthorizedOrgTokenRequest{
+			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
 				OrganizationId: 1001,
 				AccessTokenId:  2001,
 				ActionName:     "organization/update",
@@ -280,18 +280,18 @@ func TestIsAuthorizedOrgToken(t *testing.T) {
 		},
 		{
 			name: "NG Token not active",
-			input: &organization_iam.IsAuthorizedOrgTokenRequest{
+			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
 				OrganizationId: 1001,
 				AccessTokenId:  2001,
 				ActionName:     "organization/update",
 			},
-			want:       &organization_iam.IsAuthorizedOrgTokenResponse{Ok: false},
+			want:       &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
 			callExists: true,
 			existsResp: false,
 		},
 		{
 			name: "NG Get policy error",
-			input: &organization_iam.IsAuthorizedOrgTokenRequest{
+			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
 				OrganizationId: 1001,
 				AccessTokenId:  2001,
 				ActionName:     "organization/update",
@@ -319,7 +319,7 @@ func TestIsAuthorizedOrgToken(t *testing.T) {
 				mockRepo.On("GetOrgTokenPolicy", test.RepeatMockAnything(3)...).Return(c.getPolicyResp, c.getPolicyErr).Once()
 			}
 
-			got, err := svc.IsAuthorizedOrgToken(ctx, c.input)
+			got, err := svc.IsAuthorizedOrganizationToken(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
