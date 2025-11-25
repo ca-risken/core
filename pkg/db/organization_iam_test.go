@@ -1403,7 +1403,7 @@ func TestGetActiveOrgAccessTokenHash(t *testing.T) {
 	}
 }
 
-func TestExistsOrgActiveAccessToken(t *testing.T) {
+func TestExistsOrgAccessTokenMaintainer(t *testing.T) {
 	ctx := context.Background()
 	cases := []struct {
 		name    string
@@ -1415,8 +1415,8 @@ func TestExistsOrgActiveAccessToken(t *testing.T) {
 			name: "OK exists",
 			want: true,
 			mock: func(mock sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows([]string{"access_token_id"}).AddRow(uint32(2))
-				mock.ExpectQuery(regexp.QuoteMeta(selectExistsOrgActiveAccessToken)).
+				rows := sqlmock.NewRows([]string{"user_id"}).AddRow(uint32(10))
+				mock.ExpectQuery(regexp.QuoteMeta(selectExistsOrgAccessTokenMaintainer)).
 					WithArgs(uint32(1), uint32(2)).
 					WillReturnRows(rows)
 			},
@@ -1425,7 +1425,7 @@ func TestExistsOrgActiveAccessToken(t *testing.T) {
 			name: "OK not found",
 			want: false,
 			mock: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(selectExistsOrgActiveAccessToken)).
+				mock.ExpectQuery(regexp.QuoteMeta(selectExistsOrgAccessTokenMaintainer)).
 					WithArgs(uint32(1), uint32(2)).
 					WillReturnError(gorm.ErrRecordNotFound)
 			},
@@ -1434,7 +1434,7 @@ func TestExistsOrgActiveAccessToken(t *testing.T) {
 			name:    "NG DB error",
 			wantErr: true,
 			mock: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(selectExistsOrgActiveAccessToken)).
+				mock.ExpectQuery(regexp.QuoteMeta(selectExistsOrgAccessTokenMaintainer)).
 					WithArgs(uint32(1), uint32(2)).
 					WillReturnError(errors.New("select error"))
 			},
@@ -1448,7 +1448,7 @@ func TestExistsOrgActiveAccessToken(t *testing.T) {
 				t.Fatalf("failed to prepare mock db: %v", err)
 			}
 			c.mock(mock)
-			got, err := client.ExistsOrgActiveAccessToken(ctx, 1, 2)
+			got, err := client.ExistsOrgAccessTokenMaintainer(ctx, 1, 2)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}

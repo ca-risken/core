@@ -232,12 +232,12 @@ func (_m *OrganizationIAMRepository) DetachOrganizationRole(ctx context.Context,
 	return r0
 }
 
-// ExistsOrgActiveAccessToken provides a mock function with given fields: ctx, orgID, accessTokenID
-func (_m *OrganizationIAMRepository) ExistsOrgActiveAccessToken(ctx context.Context, orgID uint32, accessTokenID uint32) (bool, error) {
+// ExistsOrgAccessTokenMaintainer provides a mock function with given fields: ctx, orgID, accessTokenID
+func (_m *OrganizationIAMRepository) ExistsOrgAccessTokenMaintainer(ctx context.Context, orgID uint32, accessTokenID uint32) (bool, error) {
 	ret := _m.Called(ctx, orgID, accessTokenID)
 
 	if len(ret) == 0 {
-		panic("no return value specified for ExistsOrgActiveAccessToken")
+		panic("no return value specified for ExistsOrgAccessTokenMaintainer")
 	}
 
 	var r0 bool

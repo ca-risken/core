@@ -38,7 +38,7 @@ func (i *OrganizationIAMService) IsAuthorizedOrganization(ctx context.Context, r
 		}
 		return nil, err
 	}
-	isAuthorized, err := isAuthorizedByOrganizationPolicy(req.ActionName, policies)
+	isAuthorized, err := isAuthorizedByOrganizationPolicy(req.OrganizationId, req.ActionName, policies)
 	if err != nil {
 		return &organization_iam.IsAuthorizedOrganizationResponse{Ok: false}, err
 	}
@@ -55,12 +55,12 @@ func (i *OrganizationIAMService) IsAuthorizedOrganizationToken(ctx context.Conte
 	if !actionNamePattern.MatchString(req.ActionName) {
 		return nil, fmt.Errorf("invalid action name, pattern=%s, action_name=%s", actionNamePattern, req.ActionName)
 	}
-	existsToken, err := i.repository.ExistsOrgActiveAccessToken(ctx, req.OrganizationId, req.AccessTokenId)
+	existsMaintainer, err := i.repository.ExistsOrgAccessTokenMaintainer(ctx, req.OrganizationId, req.AccessTokenId)
 	if err != nil {
 		return nil, err
 	}
-	if !existsToken {
-		i.logger.Warnf(ctx, "Unauthorized organization access token that has expired or not found. organization_id=%d, access_token_id=%d", req.OrganizationId, req.AccessTokenId)
+	if !existsMaintainer {
+		i.logger.Warnf(ctx, "Unauthorized organization access token that has no maintainers or expired. organization_id=%d, access_token_id=%d", req.OrganizationId, req.AccessTokenId)
 		return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, nil
 	}
 	policies, err := i.repository.GetOrgTokenPolicy(ctx, req.OrganizationId, req.AccessTokenId)
@@ -70,7 +70,7 @@ func (i *OrganizationIAMService) IsAuthorizedOrganizationToken(ctx context.Conte
 		}
 		return nil, err
 	}
-	isAuthorized, err := isAuthorizedByOrganizationPolicy(req.ActionName, policies)
+	isAuthorized, err := isAuthorizedByOrganizationPolicy(req.OrganizationId, req.ActionName, policies)
 	if err != nil {
 		return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, err
 	}
@@ -80,11 +80,14 @@ func (i *OrganizationIAMService) IsAuthorizedOrganizationToken(ctx context.Conte
 	return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: isAuthorized}, nil
 }
 
-func isAuthorizedByOrganizationPolicy(action string, policies *[]model.OrganizationPolicy) (bool, error) {
+func isAuthorizedByOrganizationPolicy(organizationID uint32, action string, policies *[]model.OrganizationPolicy) (bool, error) {
 	for _, p := range *policies {
 		actionPtn, err := regexp.Compile(p.ActionPtn)
 		if err != nil {
 			return false, err
+		}
+		if organizationID != p.OrganizationID {
+			continue
 		}
 		if actionPtn.MatchString(action) {
 			return true, nil

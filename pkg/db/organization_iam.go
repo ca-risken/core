@@ -41,7 +41,7 @@ type OrganizationIAMRepository interface {
 	PutOrgAccessToken(ctx context.Context, token *model.OrgAccessToken) (*model.OrgAccessToken, error)
 	DeleteOrgAccessToken(ctx context.Context, orgID, accessTokenID uint32) error
 	GetActiveOrgAccessTokenHash(ctx context.Context, orgID, accessTokenID uint32, tokenHash string) (*model.OrgAccessToken, error)
-	ExistsOrgActiveAccessToken(ctx context.Context, orgID, accessTokenID uint32) (bool, error)
+	ExistsOrgAccessTokenMaintainer(ctx context.Context, orgID, accessTokenID uint32) (bool, error)
 	GetOrgTokenPolicy(ctx context.Context, orgID, accessTokenID uint32) (*[]model.OrganizationPolicy, error)
 	AttachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) (*model.OrgAccessTokenRole, error)
 	DetachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) error
@@ -589,20 +589,24 @@ func (c *Client) GetActiveOrgAccessTokenHash(ctx context.Context, orgID, accessT
 	return &data, nil
 }
 
-const selectExistsOrgActiveAccessToken = `
+const selectExistsOrgAccessTokenMaintainer = `
 select
-  access_token_id
+  u.user_id
 from
-  organization_access_token
+  organization_access_token oat
+  inner join organization_role r using(organization_id)
+  inner join user_organization_role uor using(role_id)
+  inner join user u using(user_id)
 where
-  organization_id = ?
-  and access_token_id = ?
-  and expired_at >= NOW()
+  oat.organization_id = ?
+  and oat.access_token_id = ?
+  and oat.expired_at >= NOW()
+  and u.activated = 'true'
 `
 
-func (c *Client) ExistsOrgActiveAccessToken(ctx context.Context, orgID, accessTokenID uint32) (bool, error) {
-	var token model.OrgAccessToken
-	if err := c.Slave.WithContext(ctx).Raw(selectExistsOrgActiveAccessToken, orgID, accessTokenID).First(&token).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+func (c *Client) ExistsOrgAccessTokenMaintainer(ctx context.Context, orgID, accessTokenID uint32) (bool, error) {
+	var user model.User
+	if err := c.Slave.WithContext(ctx).Raw(selectExistsOrgAccessTokenMaintainer, orgID, accessTokenID).First(&user).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		return false, nil
 	} else if err != nil {
 		return false, err

@@ -29,28 +29,38 @@ func TestIsAuthorizedByOrganizationPolicy(t *testing.T) {
 		wantErr        bool
 	}{
 		{
-			name:   "OK Authorized organization get",
-			action: "organization/get-organization",
-			policy: validPolicies,
-			want:   true,
+			name:           "OK Authorized organization get",
+			organizationID: 1,
+			action:         "organization/get-organization",
+			policy:         validPolicies,
+			want:           true,
 		},
 		{
-			name:   "OK Unauthorized action not allowed",
-			action: "organization/delete-organization",
-			policy: &[]model.OrganizationPolicy{{PolicyID: 2, Name: "organization-viewer", OrganizationID: 1, ActionPtn: "organization/(get|list)"}},
-			want:   false,
+			name:           "OK Unauthorized action not allowed",
+			organizationID: 1,
+			action:         "organization/delete-organization",
+			policy:         &[]model.OrganizationPolicy{{PolicyID: 2, Name: "organization-viewer", OrganizationID: 1, ActionPtn: "organization/(get|list)"}},
+			want:           false,
 		},
 		{
-			name:    "NG Error invalid regex pattern",
-			action:  "organization/get",
-			policy:  &[]model.OrganizationPolicy{{PolicyID: 1, Name: "invalid-pattern", OrganizationID: 1, ActionPtn: "[invalid regex"}},
-			wantErr: true,
+			name:           "OK Unauthorized different organization ID",
+			organizationID: 1,
+			action:         "organization/get-organization",
+			policy:         &[]model.OrganizationPolicy{{PolicyID: 1, Name: "organization-admin", OrganizationID: 2, ActionPtn: "organization/.*"}},
+			want:           false,
+		},
+		{
+			name:           "NG Error invalid regex pattern",
+			organizationID: 1,
+			action:         "organization/get",
+			policy:         &[]model.OrganizationPolicy{{PolicyID: 1, Name: "invalid-pattern", OrganizationID: 1, ActionPtn: "[invalid regex"}},
+			wantErr:        true,
 		},
 	}
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := isAuthorizedByOrganizationPolicy(c.action, c.policy)
+			got, err := isAuthorizedByOrganizationPolicy(c.organizationID, c.action, c.policy)
 			if (err != nil) != c.wantErr {
 				t.Errorf("isAuthorizedByOrganizationPolicy() error = %v, wantErr %v", err, c.wantErr)
 				return
@@ -204,16 +214,16 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 
 func TestIsAuthorizedOrganizationToken(t *testing.T) {
 	cases := []struct {
-		name          string
-		input         *organization_iam.IsAuthorizedOrganizationTokenRequest
-		want          *organization_iam.IsAuthorizedOrganizationTokenResponse
-		wantErr       bool
-		callExists    bool
-		existsResp    bool
-		existsErr     error
-		callGetPolicy bool
-		getPolicyResp *[]model.OrganizationPolicy
-		getPolicyErr  error
+		name           string
+		input          *organization_iam.IsAuthorizedOrganizationTokenRequest
+		want           *organization_iam.IsAuthorizedOrganizationTokenResponse
+		wantErr        bool
+		callMaintainer bool
+		maintainerResp bool
+		maintainerErr  error
+		callGetPolicy  bool
+		getPolicyResp  *[]model.OrganizationPolicy
+		getPolicyErr   error
 	}{
 		{
 			name: "OK Authorized",
@@ -222,10 +232,10 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 				AccessTokenId:  2001,
 				ActionName:     "organization/update",
 			},
-			want:          &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: true},
-			callExists:    true,
-			existsResp:    true,
-			callGetPolicy: true,
+			want:           &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: true},
+			callMaintainer: true,
+			maintainerResp: true,
+			callGetPolicy:  true,
 			getPolicyResp: &[]model.OrganizationPolicy{
 				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/.*"},
 			},
@@ -237,10 +247,10 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 				AccessTokenId:  2001,
 				ActionName:     "organization/delete",
 			},
-			want:          &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
-			callExists:    true,
-			existsResp:    true,
-			callGetPolicy: true,
+			want:           &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
+			callMaintainer: true,
+			maintainerResp: true,
+			callGetPolicy:  true,
 			getPolicyResp: &[]model.OrganizationPolicy{
 				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/(get|list)"},
 			},
@@ -252,11 +262,11 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 				AccessTokenId:  2001,
 				ActionName:     "organization/update",
 			},
-			want:          &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
-			callExists:    true,
-			existsResp:    true,
-			callGetPolicy: true,
-			getPolicyErr:  gorm.ErrRecordNotFound,
+			want:           &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
+			callMaintainer: true,
+			maintainerResp: true,
+			callGetPolicy:  true,
+			getPolicyErr:   gorm.ErrRecordNotFound,
 		},
 		{
 			name: "NG Invalid parameter - action",
@@ -268,26 +278,26 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "NG Exists check error",
+			name: "NG Maintainer check error",
 			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
 				OrganizationId: 1001,
 				AccessTokenId:  2001,
 				ActionName:     "organization/update",
 			},
-			wantErr:    true,
-			callExists: true,
-			existsErr:  gorm.ErrInvalidDB,
+			wantErr:        true,
+			callMaintainer: true,
+			maintainerErr:  gorm.ErrInvalidDB,
 		},
 		{
-			name: "NG Token not active",
+			name: "NG Maintainer not found or token expired",
 			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
 				OrganizationId: 1001,
 				AccessTokenId:  2001,
 				ActionName:     "organization/update",
 			},
-			want:       &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
-			callExists: true,
-			existsResp: false,
+			want:           &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
+			callMaintainer: true,
+			maintainerResp: false,
 		},
 		{
 			name: "NG Get policy error",
@@ -296,11 +306,11 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 				AccessTokenId:  2001,
 				ActionName:     "organization/update",
 			},
-			wantErr:       true,
-			callExists:    true,
-			existsResp:    true,
-			callGetPolicy: true,
-			getPolicyErr:  gorm.ErrInvalidDB,
+			wantErr:        true,
+			callMaintainer: true,
+			maintainerResp: true,
+			callGetPolicy:  true,
+			getPolicyErr:   gorm.ErrInvalidDB,
 		},
 	}
 
@@ -312,8 +322,8 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 			mockIAM := iammock.NewIAMServiceClient(t)
 			svc := NewOrganizationIAMService(mockRepo, mockIAM, logger)
 
-			if c.callExists {
-				mockRepo.On("ExistsOrgActiveAccessToken", test.RepeatMockAnything(3)...).Return(c.existsResp, c.existsErr).Once()
+			if c.callMaintainer {
+				mockRepo.On("ExistsOrgAccessTokenMaintainer", test.RepeatMockAnything(3)...).Return(c.maintainerResp, c.maintainerErr).Once()
 			}
 			if c.callGetPolicy {
 				mockRepo.On("GetOrgTokenPolicy", test.RepeatMockAnything(3)...).Return(c.getPolicyResp, c.getPolicyErr).Once()
