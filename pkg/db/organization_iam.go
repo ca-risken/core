@@ -41,6 +41,8 @@ type OrganizationIAMRepository interface {
 	PutOrgAccessToken(ctx context.Context, token *model.OrgAccessToken) (*model.OrgAccessToken, error)
 	DeleteOrgAccessToken(ctx context.Context, orgID, accessTokenID uint32) error
 	GetActiveOrgAccessTokenHash(ctx context.Context, orgID, accessTokenID uint32, tokenHash string) (*model.OrgAccessToken, error)
+	ExistsOrgAccessTokenMaintainer(ctx context.Context, orgID, accessTokenID uint32) (bool, error)
+	GetOrgTokenPolicy(ctx context.Context, orgID, accessTokenID uint32) (*[]model.OrganizationPolicy, error)
 	AttachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) (*model.OrgAccessTokenRole, error)
 	DetachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) error
 }
@@ -205,6 +207,28 @@ where
 func (c *Client) GetOrganizationPolicyByUserID(ctx context.Context, userID, organizationID uint32) (*[]model.OrganizationPolicy, error) {
 	var data []model.OrganizationPolicy
 	if err := c.Slave.WithContext(ctx).Raw(getOrganizationPolicyByUserID, userID, organizationID).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const selectGetOrgTokenPolicy = `
+select
+  op.*
+from
+  organization_access_token oat
+  inner join organization_access_token_role oatr using(access_token_id)
+  inner join organization_role_policy orp using(role_id)
+  inner join organization_policy op using(policy_id)
+where
+  oat.organization_id = ?
+  and oat.access_token_id = ?
+  and oat.expired_at >= NOW()
+`
+
+func (c *Client) GetOrgTokenPolicy(ctx context.Context, orgID, accessTokenID uint32) (*[]model.OrganizationPolicy, error) {
+	var data []model.OrganizationPolicy
+	if err := c.Slave.WithContext(ctx).Raw(selectGetOrgTokenPolicy, orgID, accessTokenID).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -563,6 +587,31 @@ func (c *Client) GetActiveOrgAccessTokenHash(ctx context.Context, orgID, accessT
 		return nil, err
 	}
 	return &data, nil
+}
+
+const selectExistsOrgAccessTokenMaintainer = `
+select
+  u.user_id
+from
+  organization_access_token oat
+  inner join organization_role r using(organization_id)
+  inner join user_organization_role uor using(role_id)
+  inner join user u using(user_id)
+where
+  oat.organization_id = ?
+  and oat.access_token_id = ?
+  and oat.expired_at >= NOW()
+  and u.activated = 'true'
+`
+
+func (c *Client) ExistsOrgAccessTokenMaintainer(ctx context.Context, orgID, accessTokenID uint32) (bool, error) {
+	var user model.User
+	if err := c.Slave.WithContext(ctx).Raw(selectExistsOrgAccessTokenMaintainer, orgID, accessTokenID).First(&user).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 const selectGetOrgAccessTokenRole = `

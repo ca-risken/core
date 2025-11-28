@@ -48,6 +48,38 @@ func (i *OrganizationIAMService) IsAuthorizedOrganization(ctx context.Context, r
 	return &organization_iam.IsAuthorizedOrganizationResponse{Ok: isAuthorized}, nil
 }
 
+func (i *OrganizationIAMService) IsAuthorizedOrganizationToken(ctx context.Context, req *organization_iam.IsAuthorizedOrganizationTokenRequest) (*organization_iam.IsAuthorizedOrganizationTokenResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	if !actionNamePattern.MatchString(req.ActionName) {
+		return nil, fmt.Errorf("invalid action name, pattern=%s, action_name=%s", actionNamePattern, req.ActionName)
+	}
+	existsMaintainer, err := i.repository.ExistsOrgAccessTokenMaintainer(ctx, req.OrganizationId, req.AccessTokenId)
+	if err != nil {
+		return nil, err
+	}
+	if !existsMaintainer {
+		i.logger.Warnf(ctx, "Unauthorized organization access token that has no maintainers or expired. organization_id=%d, access_token_id=%d", req.OrganizationId, req.AccessTokenId)
+		return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, nil
+	}
+	policies, err := i.repository.GetOrgTokenPolicy(ctx, req.OrganizationId, req.AccessTokenId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, nil
+		}
+		return nil, err
+	}
+	isAuthorized, err := isAuthorizedByOrganizationPolicy(req.ActionName, policies)
+	if err != nil {
+		return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, err
+	}
+	if isAuthorized {
+		i.logger.Infof(ctx, "Authorized organization access token action, request=%+v", req)
+	}
+	return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: isAuthorized}, nil
+}
+
 func isAuthorizedByOrganizationPolicy(action string, policies *[]model.OrganizationPolicy) (bool, error) {
 	for _, p := range *policies {
 		actionPtn, err := regexp.Compile(p.ActionPtn)

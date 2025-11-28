@@ -1403,6 +1403,123 @@ func TestGetActiveOrgAccessTokenHash(t *testing.T) {
 	}
 }
 
+func TestExistsOrgAccessTokenMaintainer(t *testing.T) {
+	ctx := context.Background()
+	cases := []struct {
+		name    string
+		want    bool
+		wantErr bool
+		mock    func(sqlmock.Sqlmock)
+	}{
+		{
+			name: "OK exists",
+			want: true,
+			mock: func(mock sqlmock.Sqlmock) {
+				rows := sqlmock.NewRows([]string{"user_id"}).AddRow(uint32(10))
+				mock.ExpectQuery(regexp.QuoteMeta(selectExistsOrgAccessTokenMaintainer)).
+					WithArgs(uint32(1), uint32(2)).
+					WillReturnRows(rows)
+			},
+		},
+		{
+			name: "OK not found",
+			want: false,
+			mock: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectExistsOrgAccessTokenMaintainer)).
+					WithArgs(uint32(1), uint32(2)).
+					WillReturnError(gorm.ErrRecordNotFound)
+			},
+		},
+		{
+			name:    "NG DB error",
+			wantErr: true,
+			mock: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectExistsOrgAccessTokenMaintainer)).
+					WithArgs(uint32(1), uint32(2)).
+					WillReturnError(errors.New("select error"))
+			},
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			client, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("failed to prepare mock db: %v", err)
+			}
+			c.mock(mock)
+			got, err := client.ExistsOrgAccessTokenMaintainer(ctx, 1, 2)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatal("expected error but got nil")
+			}
+			if !c.wantErr && got != c.want {
+				t.Fatalf("unexpected result: want=%t, got=%t", c.want, got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestGetOrgTokenPolicy(t *testing.T) {
+	ctx := context.Background()
+	now := time.Now()
+	cases := []struct {
+		name    string
+		wantLen int
+		wantErr bool
+		mock    func(sqlmock.Sqlmock)
+	}{
+		{
+			name:    "OK",
+			wantLen: 1,
+			mock: func(mock sqlmock.Sqlmock) {
+				rows := sqlmock.NewRows([]string{"policy_id", "name", "organization_id", "action_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), "policy", uint32(2), "organization/.*", now, now)
+				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrgTokenPolicy)).
+					WithArgs(uint32(1), uint32(2)).
+					WillReturnRows(rows)
+			},
+		},
+		{
+			name:    "NG DB error",
+			wantErr: true,
+			mock: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrgTokenPolicy)).
+					WithArgs(uint32(1), uint32(2)).
+					WillReturnError(errors.New("select error"))
+			},
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			client, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("failed to prepare mock db: %v", err)
+			}
+			c.mock(mock)
+			got, err := client.GetOrgTokenPolicy(ctx, 1, 2)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatal("expected error but got nil")
+			}
+			if !c.wantErr && len(*got) != c.wantLen {
+				t.Fatalf("unexpected result length: want=%d, got=%d", c.wantLen, len(*got))
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
 func TestAttachOrgAccessTokenRole(t *testing.T) {
 	ctx := context.Background()
 	now := time.Now()
