@@ -64,7 +64,7 @@ func TestListOrganizationRole(t *testing.T) {
 			svc := OrganizationIAMService{repository: mock}
 
 			if len(c.mockResponce) > 0 || c.mockError != nil {
-				mock.On("ListOrganizationRole", test.RepeatMockAnything(4)...).Return(c.mockResponce, c.mockError).Once()
+				mock.On("ListOrganizationRole", test.RepeatMockAnything(5)...).Return(c.mockResponce, c.mockError).Once()
 			}
 			got, err := svc.ListOrganizationRole(ctx, c.input)
 			if err != nil && !c.wantErr {
