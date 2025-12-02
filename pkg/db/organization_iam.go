@@ -11,7 +11,7 @@ import (
 
 type OrganizationIAMRepository interface {
 	// OrganizationRole
-	ListOrganizationRole(ctx context.Context, organizationID uint32, name string, userID uint32) ([]*model.OrganizationRole, error)
+	ListOrganizationRole(ctx context.Context, organizationID uint32, name string, userID uint32, accessTokenID uint32) ([]*model.OrganizationRole, error)
 	GetOrganizationRole(ctx context.Context, organizationID, roleID uint32) (*model.OrganizationRole, error)
 	GetOrganizationRoleByName(ctx context.Context, organizationID uint32, name string) (*model.OrganizationRole, error)
 	PutOrganizationRole(ctx context.Context, r *model.OrganizationRole) (*model.OrganizationRole, error)
@@ -51,7 +51,7 @@ var _ OrganizationIAMRepository = (*Client)(nil)
 
 const ListOrganizationRole = `select * from organization_role r where 1=1`
 
-func (c *Client) ListOrganizationRole(ctx context.Context, organizationID uint32, name string, userID uint32) ([]*model.OrganizationRole, error) {
+func (c *Client) ListOrganizationRole(ctx context.Context, organizationID uint32, name string, userID uint32, accessTokenID uint32) ([]*model.OrganizationRole, error) {
 	query := ListOrganizationRole
 	var params []interface{}
 	if organizationID != 0 {
@@ -65,6 +65,10 @@ func (c *Client) ListOrganizationRole(ctx context.Context, organizationID uint32
 	if userID != 0 {
 		query += " and exists (select * from user_organization_role uor where uor.role_id = r.role_id and uor.user_id = ? )"
 		params = append(params, userID)
+	}
+	if accessTokenID != 0 {
+		query += " and exists (select * from organization_access_token_role oatr where oatr.role_id = r.role_id and oatr.access_token_id = ? )"
+		params = append(params, accessTokenID)
 	}
 	var data []*model.OrganizationRole
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {

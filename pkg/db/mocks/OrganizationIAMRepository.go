@@ -560,9 +560,9 @@ func (_m *OrganizationIAMRepository) ListOrganizationPolicy(ctx context.Context,
 	return r0, r1
 }
 
-// ListOrganizationRole provides a mock function with given fields: ctx, organizationID, name, userID
-func (_m *OrganizationIAMRepository) ListOrganizationRole(ctx context.Context, organizationID uint32, name string, userID uint32) ([]*model.OrganizationRole, error) {
-	ret := _m.Called(ctx, organizationID, name, userID)
+// ListOrganizationRole provides a mock function with given fields: ctx, organizationID, name, userID, accessTokenID
+func (_m *OrganizationIAMRepository) ListOrganizationRole(ctx context.Context, organizationID uint32, name string, userID uint32, accessTokenID uint32) ([]*model.OrganizationRole, error) {
+	ret := _m.Called(ctx, organizationID, name, userID, accessTokenID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListOrganizationRole")
@@ -570,19 +570,19 @@ func (_m *OrganizationIAMRepository) ListOrganizationRole(ctx context.Context, o
 
 	var r0 []*model.OrganizationRole
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, string, uint32) ([]*model.OrganizationRole, error)); ok {
-		return rf(ctx, organizationID, name, userID)
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string, uint32, uint32) ([]*model.OrganizationRole, error)); ok {
+		return rf(ctx, organizationID, name, userID, accessTokenID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, string, uint32) []*model.OrganizationRole); ok {
-		r0 = rf(ctx, organizationID, name, userID)
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string, uint32, uint32) []*model.OrganizationRole); ok {
+		r0 = rf(ctx, organizationID, name, userID, accessTokenID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.OrganizationRole)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, string, uint32) error); ok {
-		r1 = rf(ctx, organizationID, name, userID)
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, string, uint32, uint32) error); ok {
+		r1 = rf(ctx, organizationID, name, userID, accessTokenID)
 	} else {
 		r1 = ret.Error(1)
 	}

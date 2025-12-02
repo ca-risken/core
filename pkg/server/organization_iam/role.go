@@ -14,7 +14,7 @@ func (i *OrganizationIAMService) ListOrganizationRole(ctx context.Context, req *
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := i.repository.ListOrganizationRole(ctx, req.OrganizationId, req.Name, req.UserId)
+	list, err := i.repository.ListOrganizationRole(ctx, req.OrganizationId, req.Name, req.UserId, req.AccessTokenId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &organization_iam.ListOrganizationRoleResponse{}, nil
