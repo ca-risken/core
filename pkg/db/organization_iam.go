@@ -36,14 +36,14 @@ type OrganizationIAMRepository interface {
 	ListOrganizationUserReservedWithOrganizationID(ctx context.Context, userIdpKey string) (*[]UserReservedWithOrganizationID, error)
 
 	// OrganizationAccessToken
-	ListOrgAccessToken(ctx context.Context, orgID uint32, name string, accessTokenID uint32) (*[]model.OrgAccessToken, error)
-	GetOrgAccessTokenByUniqueKey(ctx context.Context, orgID uint32, name string) (*model.OrgAccessToken, error)
-	PutOrgAccessToken(ctx context.Context, token *model.OrgAccessToken) (*model.OrgAccessToken, error)
+	ListOrgAccessToken(ctx context.Context, orgID uint32, name string, accessTokenID uint32) (*[]model.OrganizationAccessToken, error)
+	GetOrgAccessTokenByUniqueKey(ctx context.Context, orgID uint32, name string) (*model.OrganizationAccessToken, error)
+	PutOrgAccessToken(ctx context.Context, token *model.OrganizationAccessToken) (*model.OrganizationAccessToken, error)
 	DeleteOrgAccessToken(ctx context.Context, orgID, accessTokenID uint32) error
-	GetActiveOrgAccessTokenHash(ctx context.Context, orgID, accessTokenID uint32, tokenHash string) (*model.OrgAccessToken, error)
+	GetActiveOrgAccessTokenHash(ctx context.Context, orgID, accessTokenID uint32, tokenHash string) (*model.OrganizationAccessToken, error)
 	ExistsOrgAccessTokenMaintainer(ctx context.Context, orgID, accessTokenID uint32) (bool, error)
 	GetOrgTokenPolicy(ctx context.Context, orgID, accessTokenID uint32) (*[]model.OrganizationPolicy, error)
-	AttachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) (*model.OrgAccessTokenRole, error)
+	AttachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) (*model.OrganizationAccessTokenRole, error)
 	DetachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) error
 }
 
@@ -510,7 +510,7 @@ func (c *Client) DeleteOrganizationUserReserved(ctx context.Context, organizatio
 	return nil
 }
 
-func (c *Client) ListOrgAccessToken(ctx context.Context, orgID uint32, name string, accessTokenID uint32) (*[]model.OrgAccessToken, error) {
+func (c *Client) ListOrgAccessToken(ctx context.Context, orgID uint32, name string, accessTokenID uint32) (*[]model.OrganizationAccessToken, error) {
 	query := `select * from organization_access_token a where a.organization_id = ?`
 	params := []interface{}{orgID}
 	if name != "" {
@@ -521,7 +521,7 @@ func (c *Client) ListOrgAccessToken(ctx context.Context, orgID uint32, name stri
 		query += " and a.access_token_id = ?"
 		params = append(params, accessTokenID)
 	}
-	var data []model.OrgAccessToken
+	var data []model.OrganizationAccessToken
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
@@ -530,8 +530,8 @@ func (c *Client) ListOrgAccessToken(ctx context.Context, orgID uint32, name stri
 
 const selectGetOrgAccessTokenByID = `select * from organization_access_token where organization_id = ? and access_token_id = ?`
 
-func (c *Client) getOrgAccessTokenByID(ctx context.Context, orgID, accessTokenID uint32) (*model.OrgAccessToken, error) {
-	var data model.OrgAccessToken
+func (c *Client) getOrgAccessTokenByID(ctx context.Context, orgID, accessTokenID uint32) (*model.OrganizationAccessToken, error) {
+	var data model.OrganizationAccessToken
 	if err := c.Master.WithContext(ctx).Raw(selectGetOrgAccessTokenByID, orgID, accessTokenID).First(&data).Error; err != nil {
 		return nil, err
 	}
@@ -540,8 +540,8 @@ func (c *Client) getOrgAccessTokenByID(ctx context.Context, orgID, accessTokenID
 
 const selectGetOrgAccessTokenByUniqueKey = `select * from organization_access_token where organization_id = ? and name = ?`
 
-func (c *Client) GetOrgAccessTokenByUniqueKey(ctx context.Context, orgID uint32, name string) (*model.OrgAccessToken, error) {
-	var data model.OrgAccessToken
+func (c *Client) GetOrgAccessTokenByUniqueKey(ctx context.Context, orgID uint32, name string) (*model.OrganizationAccessToken, error) {
+	var data model.OrganizationAccessToken
 	if err := c.Master.WithContext(ctx).Raw(selectGetOrgAccessTokenByUniqueKey, orgID, name).First(&data).Error; err != nil {
 		return nil, err
 	}
@@ -562,19 +562,19 @@ ON DUPLICATE KEY UPDATE
   last_updated_user_id=VALUES(last_updated_user_id)
 `
 
-func (c *Client) PutOrgAccessToken(ctx context.Context, token *model.OrgAccessToken) (*model.OrgAccessToken, error) {
+func (c *Client) PutOrgAccessToken(ctx context.Context, token *model.OrganizationAccessToken) (*model.OrganizationAccessToken, error) {
 	if err := c.Master.WithContext(ctx).Exec(insertPutOrgAccessToken,
 		token.AccessTokenID,
 		token.TokenHash,
 		token.Name,
 		convertZeroValueToNull(token.Description),
-		token.OrgID,
+		token.OrganizationID,
 		token.ExpiredAt,
 		token.LastUpdatedUserID,
 	).Error; err != nil {
 		return nil, err
 	}
-	return c.GetOrgAccessTokenByUniqueKey(ctx, token.OrgID, token.Name)
+	return c.GetOrgAccessTokenByUniqueKey(ctx, token.OrganizationID, token.Name)
 }
 
 const deleteOrgAccessToken = `delete from organization_access_token where organization_id = ? and access_token_id = ?`
@@ -585,8 +585,8 @@ func (c *Client) DeleteOrgAccessToken(ctx context.Context, orgID, accessTokenID 
 
 const selectGetActiveOrgAccessTokenHash = `select * from organization_access_token where organization_id = ? and access_token_id = ? and token_hash = ? and expired_at >= NOW()`
 
-func (c *Client) GetActiveOrgAccessTokenHash(ctx context.Context, orgID, accessTokenID uint32, tokenHash string) (*model.OrgAccessToken, error) {
-	var data model.OrgAccessToken
+func (c *Client) GetActiveOrgAccessTokenHash(ctx context.Context, orgID, accessTokenID uint32, tokenHash string) (*model.OrganizationAccessToken, error) {
+	var data model.OrganizationAccessToken
 	if err := c.Master.WithContext(ctx).Raw(selectGetActiveOrgAccessTokenHash, orgID, accessTokenID, tokenHash).First(&data).Error; err != nil {
 		return nil, err
 	}
@@ -628,8 +628,8 @@ where
   and atr.role_id = ?
 `
 
-func (c *Client) getOrgAccessTokenRole(ctx context.Context, accessTokenID, roleID uint32) (*model.OrgAccessTokenRole, error) {
-	var data model.OrgAccessTokenRole
+func (c *Client) getOrgAccessTokenRole(ctx context.Context, accessTokenID, roleID uint32) (*model.OrganizationAccessTokenRole, error) {
+	var data model.OrganizationAccessTokenRole
 	if err := c.Master.WithContext(ctx).Raw(selectGetOrgAccessTokenRole, accessTokenID, roleID).First(&data).Error; err != nil {
 		return nil, err
 	}
@@ -646,7 +646,7 @@ ON DUPLICATE KEY UPDATE
   role_id=VALUES(role_id)
 `
 
-func (c *Client) AttachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) (*model.OrgAccessTokenRole, error) {
+func (c *Client) AttachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) (*model.OrganizationAccessTokenRole, error) {
 	tokenExists, err := c.orgAccessTokenExists(ctx, orgID, accessTokenID)
 	if err != nil {
 		return nil, err

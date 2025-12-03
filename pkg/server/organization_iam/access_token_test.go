@@ -20,7 +20,7 @@ func TestListOrganizationAccessToken(t *testing.T) {
 		input        *organization_iam.ListOrganizationAccessTokenRequest
 		want         *organization_iam.ListOrganizationAccessTokenResponse
 		wantErr      bool
-		mockResponse *[]model.OrgAccessToken
+		mockResponse *[]model.OrganizationAccessToken
 		mockError    error
 	}{
 		{
@@ -29,8 +29,8 @@ func TestListOrganizationAccessToken(t *testing.T) {
 			want: &organization_iam.ListOrganizationAccessTokenResponse{AccessToken: []*organization_iam.OrganizationAccessToken{
 				{AccessTokenId: 10, Name: "token", Description: "desc", OrganizationId: 1, ExpiredAt: now.Unix(), LastUpdatedUserId: 100, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 			}},
-			mockResponse: &[]model.OrgAccessToken{
-				{AccessTokenID: 10, TokenHash: "hash", Name: "token", Description: "desc", OrgID: 1, ExpiredAt: now, LastUpdatedUserID: 100, CreatedAt: now, UpdatedAt: now},
+			mockResponse: &[]model.OrganizationAccessToken{
+				{AccessTokenID: 10, TokenHash: "hash", Name: "token", Description: "desc", OrganizationID: 1, ExpiredAt: now, LastUpdatedUserID: 100, CreatedAt: now, UpdatedAt: now},
 			},
 		},
 		{
@@ -78,9 +78,9 @@ func TestPutOrganizationAccessToken(t *testing.T) {
 		input       *organization_iam.PutOrganizationAccessTokenRequest
 		want        *organization_iam.PutOrganizationAccessTokenResponse
 		wantErr     bool
-		mockGetResp *model.OrgAccessToken
+		mockGetResp *model.OrganizationAccessToken
 		mockGetErr  error
-		mockPutResp *model.OrgAccessToken
+		mockPutResp *model.OrganizationAccessToken
 		mockPutErr  error
 	}{
 		{
@@ -105,12 +105,12 @@ func TestPutOrganizationAccessToken(t *testing.T) {
 				},
 			},
 			mockGetErr: gorm.ErrRecordNotFound,
-			mockPutResp: &model.OrgAccessToken{
+			mockPutResp: &model.OrganizationAccessToken{
 				AccessTokenID:     2,
 				TokenHash:         "hash",
 				Name:              "token",
 				Description:       "desc",
-				OrgID:             1,
+				OrganizationID:    1,
 				ExpiredAt:         now,
 				LastUpdatedUserID: 200,
 				CreatedAt:         now,
@@ -138,23 +138,23 @@ func TestPutOrganizationAccessToken(t *testing.T) {
 					UpdatedAt:         now.Unix(),
 				},
 			},
-			mockGetResp: &model.OrgAccessToken{
+			mockGetResp: &model.OrganizationAccessToken{
 				AccessTokenID:     2,
 				TokenHash:         "hash",
 				Name:              "token",
 				Description:       "desc",
-				OrgID:             1,
+				OrganizationID:    1,
 				ExpiredAt:         now,
 				LastUpdatedUserID: 200,
 				CreatedAt:         now,
 				UpdatedAt:         now,
 			},
-			mockPutResp: &model.OrgAccessToken{
+			mockPutResp: &model.OrganizationAccessToken{
 				AccessTokenID:     2,
 				TokenHash:         "hash",
 				Name:              "token",
 				Description:       "desc",
-				OrgID:             1,
+				OrganizationID:    1,
 				ExpiredAt:         now,
 				LastUpdatedUserID: 200,
 				CreatedAt:         now,
@@ -258,7 +258,7 @@ func TestAuthenticateOrganizationAccessToken(t *testing.T) {
 		input     *organization_iam.AuthenticateOrganizationAccessTokenRequest
 		want      *organization_iam.AuthenticateOrganizationAccessTokenResponse
 		wantErr   bool
-		mockResp  *model.OrgAccessToken
+		mockResp  *model.OrganizationAccessToken
 		mockError error
 	}{
 		{
@@ -276,12 +276,12 @@ func TestAuthenticateOrganizationAccessToken(t *testing.T) {
 					UpdatedAt:         now.Unix(),
 				},
 			},
-			mockResp: &model.OrgAccessToken{
+			mockResp: &model.OrganizationAccessToken{
 				AccessTokenID:     10,
 				TokenHash:         "hash",
 				Name:              "token",
 				Description:       "desc",
-				OrgID:             1,
+				OrganizationID:    1,
 				ExpiredAt:         now,
 				LastUpdatedUserID: 100,
 				CreatedAt:         now,
@@ -334,7 +334,7 @@ func TestAttachOrganizationAccessTokenRole(t *testing.T) {
 		input     *organization_iam.AttachOrganizationAccessTokenRoleRequest
 		want      *organization_iam.AttachOrganizationAccessTokenRoleResponse
 		wantErr   bool
-		mockResp  *model.OrgAccessTokenRole
+		mockResp  *model.OrganizationAccessTokenRole
 		mockError error
 	}{
 		{
@@ -348,7 +348,7 @@ func TestAttachOrganizationAccessTokenRole(t *testing.T) {
 					UpdatedAt:     now.Unix(),
 				},
 			},
-			mockResp: &model.OrgAccessTokenRole{
+			mockResp: &model.OrganizationAccessTokenRole{
 				AccessTokenID: 2,
 				RoleID:        3,
 				CreatedAt:     now,

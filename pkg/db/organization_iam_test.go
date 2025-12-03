@@ -1282,17 +1282,17 @@ func TestPutOrgAccessToken(t *testing.T) {
 		t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
 	}
 
-	token := &model.OrgAccessToken{
+	token := &model.OrganizationAccessToken{
 		TokenHash:         "hash",
 		Name:              "token",
 		Description:       "desc",
-		OrgID:             1,
+		OrganizationID:    1,
 		ExpiredAt:         now,
 		LastUpdatedUserID: 2,
 	}
 
 	mock.ExpectExec(regexp.QuoteMeta(insertPutOrgAccessToken)).
-		WithArgs(token.AccessTokenID, token.TokenHash, token.Name, token.Description, token.OrgID, sqlmock.AnyArg(), token.LastUpdatedUserID).
+		WithArgs(token.AccessTokenID, token.TokenHash, token.Name, token.Description, token.OrganizationID, sqlmock.AnyArg(), token.LastUpdatedUserID).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	rows := sqlmock.NewRows([]string{

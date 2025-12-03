@@ -35,19 +35,19 @@ type OrganizationRolePolicy struct {
 	UpdatedAt time.Time
 }
 
-type OrgAccessToken struct {
+type OrganizationAccessToken struct {
 	AccessTokenID     uint32 `gorm:"primary_key"`
 	TokenHash         string
 	Name              string
 	Description       string
-	OrgID             uint32
+	OrganizationID    uint32
 	ExpiredAt         time.Time
 	LastUpdatedUserID uint32
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 }
 
-type OrgAccessTokenRole struct {
+type OrganizationAccessTokenRole struct {
 	AccessTokenID uint32
 	RoleID        uint32
 	CreatedAt     time.Time
