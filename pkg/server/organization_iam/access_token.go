@@ -35,12 +35,12 @@ func (s *OrganizationIAMService) ListOrganizationAccessToken(ctx context.Context
 	return &organization_iam.ListOrganizationAccessTokenResponse{AccessToken: list}, nil
 }
 
-func convertOrgAccessToken(token *model.OrgAccessToken) *organization_iam.OrganizationAccessToken {
+func convertOrgAccessToken(token *model.OrganizationAccessToken) *organization_iam.OrganizationAccessToken {
 	return &organization_iam.OrganizationAccessToken{
 		AccessTokenId:     token.AccessTokenID,
 		Name:              token.Name,
 		Description:       token.Description,
-		OrganizationId:    token.OrgID,
+		OrganizationId:    token.OrganizationID,
 		ExpiredAt:         token.ExpiredAt.Unix(),
 		LastUpdatedUserId: token.LastUpdatedUserID,
 		CreatedAt:         token.CreatedAt.Unix(),
@@ -48,7 +48,7 @@ func convertOrgAccessToken(token *model.OrgAccessToken) *organization_iam.Organi
 	}
 }
 
-func convertOrgAccessTokenRole(role *model.OrgAccessTokenRole) *organization_iam.OrganizationAccessTokenRole {
+func convertOrgAccessTokenRole(role *model.OrganizationAccessTokenRole) *organization_iam.OrganizationAccessTokenRole {
 	return &organization_iam.OrganizationAccessTokenRole{
 		AccessTokenId: role.AccessTokenID,
 		RoleId:        role.RoleID,
@@ -83,12 +83,12 @@ func (s *OrganizationIAMService) PutOrganizationAccessToken(ctx context.Context,
 		expiredAt = time.Unix(req.ExpiredAt, 0)
 	}
 
-	token := &model.OrgAccessToken{
+	token := &model.OrganizationAccessToken{
 		AccessTokenID:     accessTokenID,
 		TokenHash:         tokenHash,
 		Name:              req.Name,
 		Description:       req.Description,
-		OrgID:             req.OrganizationId,
+		OrganizationID:    req.OrganizationId,
 		ExpiredAt:         expiredAt,
 		LastUpdatedUserID: req.LastUpdatedUserId,
 	}

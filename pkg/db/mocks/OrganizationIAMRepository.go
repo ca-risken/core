@@ -17,23 +17,23 @@ type OrganizationIAMRepository struct {
 }
 
 // AttachOrgAccessTokenRole provides a mock function with given fields: ctx, orgID, roleID, accessTokenID
-func (_m *OrganizationIAMRepository) AttachOrgAccessTokenRole(ctx context.Context, orgID uint32, roleID uint32, accessTokenID uint32) (*model.OrgAccessTokenRole, error) {
+func (_m *OrganizationIAMRepository) AttachOrgAccessTokenRole(ctx context.Context, orgID uint32, roleID uint32, accessTokenID uint32) (*model.OrganizationAccessTokenRole, error) {
 	ret := _m.Called(ctx, orgID, roleID, accessTokenID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AttachOrgAccessTokenRole")
 	}
 
-	var r0 *model.OrgAccessTokenRole
+	var r0 *model.OrganizationAccessTokenRole
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32) (*model.OrgAccessTokenRole, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32) (*model.OrganizationAccessTokenRole, error)); ok {
 		return rf(ctx, orgID, roleID, accessTokenID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32) *model.OrgAccessTokenRole); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32) *model.OrganizationAccessTokenRole); ok {
 		r0 = rf(ctx, orgID, roleID, accessTokenID)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.OrgAccessTokenRole)
+			r0 = ret.Get(0).(*model.OrganizationAccessTokenRole)
 		}
 	}
 
@@ -261,23 +261,23 @@ func (_m *OrganizationIAMRepository) ExistsOrgAccessTokenMaintainer(ctx context.
 }
 
 // GetActiveOrgAccessTokenHash provides a mock function with given fields: ctx, orgID, accessTokenID, tokenHash
-func (_m *OrganizationIAMRepository) GetActiveOrgAccessTokenHash(ctx context.Context, orgID uint32, accessTokenID uint32, tokenHash string) (*model.OrgAccessToken, error) {
+func (_m *OrganizationIAMRepository) GetActiveOrgAccessTokenHash(ctx context.Context, orgID uint32, accessTokenID uint32, tokenHash string) (*model.OrganizationAccessToken, error) {
 	ret := _m.Called(ctx, orgID, accessTokenID, tokenHash)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetActiveOrgAccessTokenHash")
 	}
 
-	var r0 *model.OrgAccessToken
+	var r0 *model.OrganizationAccessToken
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, string) (*model.OrgAccessToken, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, string) (*model.OrganizationAccessToken, error)); ok {
 		return rf(ctx, orgID, accessTokenID, tokenHash)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, string) *model.OrgAccessToken); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, string) *model.OrganizationAccessToken); ok {
 		r0 = rf(ctx, orgID, accessTokenID, tokenHash)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.OrgAccessToken)
+			r0 = ret.Get(0).(*model.OrganizationAccessToken)
 		}
 	}
 
@@ -291,23 +291,23 @@ func (_m *OrganizationIAMRepository) GetActiveOrgAccessTokenHash(ctx context.Con
 }
 
 // GetOrgAccessTokenByUniqueKey provides a mock function with given fields: ctx, orgID, name
-func (_m *OrganizationIAMRepository) GetOrgAccessTokenByUniqueKey(ctx context.Context, orgID uint32, name string) (*model.OrgAccessToken, error) {
+func (_m *OrganizationIAMRepository) GetOrgAccessTokenByUniqueKey(ctx context.Context, orgID uint32, name string) (*model.OrganizationAccessToken, error) {
 	ret := _m.Called(ctx, orgID, name)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetOrgAccessTokenByUniqueKey")
 	}
 
-	var r0 *model.OrgAccessToken
+	var r0 *model.OrganizationAccessToken
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) (*model.OrgAccessToken, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) (*model.OrganizationAccessToken, error)); ok {
 		return rf(ctx, orgID, name)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) *model.OrgAccessToken); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) *model.OrganizationAccessToken); ok {
 		r0 = rf(ctx, orgID, name)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.OrgAccessToken)
+			r0 = ret.Get(0).(*model.OrganizationAccessToken)
 		}
 	}
 
@@ -501,23 +501,23 @@ func (_m *OrganizationIAMRepository) GetOrganizationRoleByName(ctx context.Conte
 }
 
 // ListOrgAccessToken provides a mock function with given fields: ctx, orgID, name, accessTokenID
-func (_m *OrganizationIAMRepository) ListOrgAccessToken(ctx context.Context, orgID uint32, name string, accessTokenID uint32) (*[]model.OrgAccessToken, error) {
+func (_m *OrganizationIAMRepository) ListOrgAccessToken(ctx context.Context, orgID uint32, name string, accessTokenID uint32) (*[]model.OrganizationAccessToken, error) {
 	ret := _m.Called(ctx, orgID, name, accessTokenID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListOrgAccessToken")
 	}
 
-	var r0 *[]model.OrgAccessToken
+	var r0 *[]model.OrganizationAccessToken
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, string, uint32) (*[]model.OrgAccessToken, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string, uint32) (*[]model.OrganizationAccessToken, error)); ok {
 		return rf(ctx, orgID, name, accessTokenID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, string, uint32) *[]model.OrgAccessToken); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, string, uint32) *[]model.OrganizationAccessToken); ok {
 		r0 = rf(ctx, orgID, name, accessTokenID)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*[]model.OrgAccessToken)
+			r0 = ret.Get(0).(*[]model.OrganizationAccessToken)
 		}
 	}
 
@@ -651,27 +651,27 @@ func (_m *OrganizationIAMRepository) ListOrganizationUserReservedWithOrganizatio
 }
 
 // PutOrgAccessToken provides a mock function with given fields: ctx, token
-func (_m *OrganizationIAMRepository) PutOrgAccessToken(ctx context.Context, token *model.OrgAccessToken) (*model.OrgAccessToken, error) {
+func (_m *OrganizationIAMRepository) PutOrgAccessToken(ctx context.Context, token *model.OrganizationAccessToken) (*model.OrganizationAccessToken, error) {
 	ret := _m.Called(ctx, token)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PutOrgAccessToken")
 	}
 
-	var r0 *model.OrgAccessToken
+	var r0 *model.OrganizationAccessToken
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *model.OrgAccessToken) (*model.OrgAccessToken, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *model.OrganizationAccessToken) (*model.OrganizationAccessToken, error)); ok {
 		return rf(ctx, token)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *model.OrgAccessToken) *model.OrgAccessToken); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *model.OrganizationAccessToken) *model.OrganizationAccessToken); ok {
 		r0 = rf(ctx, token)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.OrgAccessToken)
+			r0 = ret.Get(0).(*model.OrganizationAccessToken)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *model.OrgAccessToken) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *model.OrganizationAccessToken) error); ok {
 		r1 = rf(ctx, token)
 	} else {
 		r1 = ret.Error(1)
