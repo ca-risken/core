@@ -206,6 +206,14 @@ func TestIsAuthorizedToken(t *testing.T) {
 		callMockGetTokenPolicy  bool
 		mockGetTokenPolicyResp  *[]model.Policy
 		mockGetTokenPolicyError error
+
+		callMockListOrganization bool
+		mockOrganizationListResp *organization.ListOrganizationResponse
+		mockOrganizationListErr  error
+
+		callMockOrgIAMToken bool
+		mockOrgIAMTokenResp *organization_iam.IsAuthorizedOrganizationTokenResponse
+		mockOrgIAMTokenErr  error
 	}{
 		{
 			name:  "OK Authorized",
@@ -262,12 +270,50 @@ func TestIsAuthorizedToken(t *testing.T) {
 			mockMaintainerCheckResp: false,
 			mockMaintainerCheckErr:  gorm.ErrInvalidDB,
 		},
+		{
+			name:  "OK Authorized by organization policy",
+			input: &iam.IsAuthorizedTokenRequest{AccessTokenId: 222, ProjectId: 1002, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
+			want:  &iam.IsAuthorizedTokenResponse{Ok: true},
+
+			callMockMaintainerCheck:  true,
+			mockMaintainerCheckResp:  false,
+			callMockListOrganization: true,
+			mockOrganizationListResp: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{{OrganizationId: 3001}},
+			},
+			callMockOrgIAMToken: true,
+			mockOrgIAMTokenResp: &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: true},
+		},
+		{
+			name:  "OK organization authorization error ignored",
+			input: &iam.IsAuthorizedTokenRequest{AccessTokenId: 333, ProjectId: 1003, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
+			want:  &iam.IsAuthorizedTokenResponse{Ok: false},
+
+			callMockMaintainerCheck:  true,
+			mockMaintainerCheckResp:  false,
+			callMockListOrganization: true,
+			mockOrganizationListErr:  gorm.ErrInvalidDB,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mock := mocks.NewIAMRepository(t)
 			svc := IAMService{repository: mock, logger: logging.NewLogger()}
+
+			if c.callMockListOrganization || c.callMockOrgIAMToken {
+				mockOrgClient := organizationmock.NewOrganizationServiceClient(t)
+				mockOrgIAMClient := organizationiammock.NewOrganizationIAMServiceClient(t)
+				svc.organizationClient = mockOrgClient
+				svc.organizationIamClient = mockOrgIAMClient
+
+				if c.callMockListOrganization {
+					mockOrgClient.On("ListOrganization", test.RepeatMockAnything(2)...).Return(c.mockOrganizationListResp, c.mockOrganizationListErr).Once()
+				}
+				if c.callMockOrgIAMToken {
+					mockOrgIAMClient.On("IsAuthorizedOrganizationToken", test.RepeatMockAnything(2)...).Return(c.mockOrgIAMTokenResp, c.mockOrgIAMTokenErr).Once()
+				}
+			}
 
 			if c.callMockMaintainerCheck {
 				mock.On("ExistsAccessTokenMaintainer", test.RepeatMockAnything(3)...).Return(c.mockMaintainerCheckResp, c.mockMaintainerCheckErr).Once()
