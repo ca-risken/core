@@ -214,6 +214,8 @@ func TestIsAuthorizedToken(t *testing.T) {
 		callMockOrgIAMToken bool
 		mockOrgIAMTokenResp *organization_iam.IsAuthorizedOrganizationTokenResponse
 		mockOrgIAMTokenErr  error
+
+		setupOrgClients bool
 	}{
 		{
 			name:  "OK Authorized",
@@ -271,8 +273,17 @@ func TestIsAuthorizedToken(t *testing.T) {
 			mockMaintainerCheckErr:  gorm.ErrInvalidDB,
 		},
 		{
+			name:  "OK skip organization authorization without organization_id",
+			input: &iam.IsAuthorizedTokenRequest{AccessTokenId: 444, ProjectId: 1004, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
+			want:  &iam.IsAuthorizedTokenResponse{Ok: false},
+
+			callMockMaintainerCheck: true,
+			mockMaintainerCheckResp: false,
+			setupOrgClients:         true,
+		},
+		{
 			name:  "OK Authorized by organization policy",
-			input: &iam.IsAuthorizedTokenRequest{AccessTokenId: 222, ProjectId: 1002, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
+			input: &iam.IsAuthorizedTokenRequest{AccessTokenId: 222, ProjectId: 1002, OrganizationId: 3001, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
 			want:  &iam.IsAuthorizedTokenResponse{Ok: true},
 
 			callMockMaintainerCheck:  true,
@@ -286,7 +297,7 @@ func TestIsAuthorizedToken(t *testing.T) {
 		},
 		{
 			name:  "OK organization authorization error ignored",
-			input: &iam.IsAuthorizedTokenRequest{AccessTokenId: 333, ProjectId: 1003, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
+			input: &iam.IsAuthorizedTokenRequest{AccessTokenId: 333, ProjectId: 1003, OrganizationId: 4001, ActionName: "finding/PutFinding", ResourceName: "aws:guardduty/ec2-instance-id"},
 			want:  &iam.IsAuthorizedTokenResponse{Ok: false},
 
 			callMockMaintainerCheck:  true,
@@ -301,7 +312,7 @@ func TestIsAuthorizedToken(t *testing.T) {
 			mock := mocks.NewIAMRepository(t)
 			svc := IAMService{repository: mock, logger: logging.NewLogger()}
 
-			if c.callMockListOrganization || c.callMockOrgIAMToken {
+			if c.setupOrgClients || c.callMockListOrganization || c.callMockOrgIAMToken {
 				mockOrgClient := organizationmock.NewOrganizationServiceClient(t)
 				mockOrgIAMClient := organizationiammock.NewOrganizationIAMServiceClient(t)
 				svc.organizationClient = mockOrgClient

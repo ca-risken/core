@@ -1492,6 +1492,68 @@ func TestExistsOrgAccessTokenMaintainer(t *testing.T) {
 	}
 }
 
+func TestExistsOrganizationMaintainer(t *testing.T) {
+	ctx := context.Background()
+	cases := []struct {
+		name    string
+		want    bool
+		wantErr bool
+		mock    func(sqlmock.Sqlmock)
+	}{
+		{
+			name: "OK exists",
+			want: true,
+			mock: func(mock sqlmock.Sqlmock) {
+				rows := sqlmock.NewRows([]string{"user_id"}).AddRow(uint32(20))
+				mock.ExpectQuery(regexp.QuoteMeta(selectExistsOrganizationMaintainer)).
+					WithArgs(uint32(1)).
+					WillReturnRows(rows)
+			},
+		},
+		{
+			name: "OK not found",
+			want: false,
+			mock: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectExistsOrganizationMaintainer)).
+					WithArgs(uint32(1)).
+					WillReturnError(gorm.ErrRecordNotFound)
+			},
+		},
+		{
+			name:    "NG DB error",
+			wantErr: true,
+			mock: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectExistsOrganizationMaintainer)).
+					WithArgs(uint32(1)).
+					WillReturnError(errors.New("select error"))
+			},
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			client, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("failed to prepare mock db: %v", err)
+			}
+			c.mock(mock)
+			got, err := client.ExistsOrganizationMaintainer(ctx, 1)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatal("expected error but got nil")
+			}
+			if !c.wantErr && got != c.want {
+				t.Fatalf("unexpected result: want=%t, got=%t", c.want, got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
 func TestGetOrgTokenPolicy(t *testing.T) {
 	ctx := context.Background()
 	now := time.Now()

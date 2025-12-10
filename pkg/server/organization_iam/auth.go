@@ -80,6 +80,30 @@ func (i *OrganizationIAMService) IsAuthorizedOrganizationToken(ctx context.Conte
 	return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: isAuthorized}, nil
 }
 
+func (i *OrganizationIAMService) IsAuthorizedTokenWithOrganization(ctx context.Context, req *organization_iam.IsAuthorizedTokenWithOrganizationRequest) (*organization_iam.IsAuthorizedTokenWithOrganizationResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	existsMaintainer, err := i.repository.ExistsOrganizationMaintainer(ctx, req.OrganizationId)
+	if err != nil {
+		return nil, err
+	}
+	if !existsMaintainer {
+		i.logger.Warnf(ctx, "Unauthorized organization token because organization has no maintainer. organization_id=%d", req.OrganizationId)
+		return &organization_iam.IsAuthorizedTokenWithOrganizationResponse{Ok: false}, nil
+	}
+	belongs, err := i.repository.ExistsOrganizationProject(ctx, req.OrganizationId, req.ProjectId)
+	if err != nil {
+		return nil, err
+	}
+	if !belongs {
+		i.logger.Warnf(ctx, "Unauthorized organization token because project is not attached to organization. organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
+		return &organization_iam.IsAuthorizedTokenWithOrganizationResponse{Ok: false}, nil
+	}
+	i.logger.Infof(ctx, "Authorized organization token mapping, organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
+	return &organization_iam.IsAuthorizedTokenWithOrganizationResponse{Ok: true}, nil
+}
+
 func isAuthorizedByOrganizationPolicy(action string, policies *[]model.OrganizationPolicy) (bool, error) {
 	for _, p := range *policies {
 		actionPtn, err := regexp.Compile(p.ActionPtn)

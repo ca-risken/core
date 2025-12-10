@@ -260,6 +260,62 @@ func (_m *OrganizationIAMRepository) ExistsOrgAccessTokenMaintainer(ctx context.
 	return r0, r1
 }
 
+// ExistsOrganizationMaintainer provides a mock function with given fields: ctx, organizationID
+func (_m *OrganizationIAMRepository) ExistsOrganizationMaintainer(ctx context.Context, organizationID uint32) (bool, error) {
+	ret := _m.Called(ctx, organizationID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ExistsOrganizationMaintainer")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) (bool, error)); ok {
+		return rf(ctx, organizationID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) bool); ok {
+		r0 = rf(ctx, organizationID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32) error); ok {
+		r1 = rf(ctx, organizationID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ExistsOrganizationProject provides a mock function with given fields: ctx, organizationID, projectID
+func (_m *OrganizationIAMRepository) ExistsOrganizationProject(ctx context.Context, organizationID uint32, projectID uint32) (bool, error) {
+	ret := _m.Called(ctx, organizationID, projectID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ExistsOrganizationProject")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) (bool, error)); ok {
+		return rf(ctx, organizationID, projectID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32) bool); ok {
+		r0 = rf(ctx, organizationID, projectID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
+		r1 = rf(ctx, organizationID, projectID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetActiveOrgAccessTokenHash provides a mock function with given fields: ctx, orgID, accessTokenID, tokenHash
 func (_m *OrganizationIAMRepository) GetActiveOrgAccessTokenHash(ctx context.Context, orgID uint32, accessTokenID uint32, tokenHash string) (*model.OrganizationAccessToken, error) {
 	ret := _m.Called(ctx, orgID, accessTokenID, tokenHash)

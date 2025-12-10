@@ -496,6 +496,36 @@ func (_m *OrganizationIAMServiceServer) IsAuthorizedOrganizationToken(_a0 contex
 	return r0, r1
 }
 
+// IsAuthorizedTokenWithOrganization provides a mock function with given fields: _a0, _a1
+func (_m *OrganizationIAMServiceServer) IsAuthorizedTokenWithOrganization(_a0 context.Context, _a1 *organization_iam.IsAuthorizedTokenWithOrganizationRequest) (*organization_iam.IsAuthorizedTokenWithOrganizationResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsAuthorizedTokenWithOrganization")
+	}
+
+	var r0 *organization_iam.IsAuthorizedTokenWithOrganizationResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.IsAuthorizedTokenWithOrganizationRequest) (*organization_iam.IsAuthorizedTokenWithOrganizationResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_iam.IsAuthorizedTokenWithOrganizationRequest) *organization_iam.IsAuthorizedTokenWithOrganizationResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization_iam.IsAuthorizedTokenWithOrganizationResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_iam.IsAuthorizedTokenWithOrganizationRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListOrganizationAccessToken provides a mock function with given fields: _a0, _a1
 func (_m *OrganizationIAMServiceServer) ListOrganizationAccessToken(_a0 context.Context, _a1 *organization_iam.ListOrganizationAccessTokenRequest) (*organization_iam.ListOrganizationAccessTokenResponse, error) {
 	ret := _m.Called(_a0, _a1)

@@ -45,6 +45,10 @@ type OrganizationIAMRepository interface {
 	GetOrgTokenPolicy(ctx context.Context, orgID, accessTokenID uint32) (*[]model.OrganizationPolicy, error)
 	AttachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) (*model.OrganizationAccessTokenRole, error)
 	DetachOrgAccessTokenRole(ctx context.Context, orgID, roleID, accessTokenID uint32) error
+
+	// Organization helper
+	ExistsOrganizationProject(ctx context.Context, organizationID, projectID uint32) (bool, error)
+	ExistsOrganizationMaintainer(ctx context.Context, organizationID uint32) (bool, error)
 }
 
 var _ OrganizationIAMRepository = (*Client)(nil)
@@ -611,6 +615,29 @@ where
 func (c *Client) ExistsOrgAccessTokenMaintainer(ctx context.Context, orgID, accessTokenID uint32) (bool, error) {
 	var user model.User
 	if err := c.Slave.WithContext(ctx).Raw(selectExistsOrgAccessTokenMaintainer, orgID, accessTokenID).First(&user).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+const selectExistsOrganizationMaintainer = `
+select
+  u.user_id
+from
+  organization_role r
+  inner join user_organization_role uor using(role_id)
+  inner join user u using(user_id)
+where
+  r.organization_id = ?
+  and u.activated = 'true'
+limit 1
+`
+
+func (c *Client) ExistsOrganizationMaintainer(ctx context.Context, orgID uint32) (bool, error) {
+	var user model.User
+	if err := c.Slave.WithContext(ctx).Raw(selectExistsOrganizationMaintainer, orgID).First(&user).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		return false, nil
 	} else if err != nil {
 		return false, err
