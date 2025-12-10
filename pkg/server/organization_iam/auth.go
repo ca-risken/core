@@ -8,6 +8,7 @@ import (
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/iam"
+	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/organization_iam"
 	"gorm.io/gorm"
 )
@@ -56,12 +57,21 @@ func (i *OrganizationIAMService) IsAuthorizedOrganizationToken(ctx context.Conte
 		return nil, fmt.Errorf("invalid action name, pattern=%s, action_name=%s", actionNamePattern, req.ActionName)
 	}
 	if req.ProjectId != 0 {
-		existsProject, err := i.repository.ExistsOrganizationProject(ctx, req.OrganizationId, req.GetProjectId())
+		orgList, err := i.orgClient.ListOrganization(ctx, &organization.ListOrganizationRequest{
+			ProjectId: req.ProjectId,
+		})
 		if err != nil {
-			return nil, err
+			i.logger.Warnf(ctx, "Failed to list organizations for project %d: %v", req.ProjectId, err)
+			return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, nil
 		}
-		if !existsProject {
-			i.logger.Warnf(ctx, "Unauthorized organization access token for unrelated project. organization_id=%d, project_id=%d, access_token_id=%d", req.OrganizationId, req.GetProjectId(), req.AccessTokenId)
+		isExists := false
+		for _, org := range orgList.Organization {
+			if org.OrganizationId == req.OrganizationId {
+				isExists = true
+				break
+			}
+		}
+		if !isExists {
 			return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, nil
 		}
 	}

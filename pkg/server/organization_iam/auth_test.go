@@ -11,6 +11,8 @@ import (
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
 	iammock "github.com/ca-risken/core/proto/iam/mocks"
+	"github.com/ca-risken/core/proto/organization"
+	organizationmock "github.com/ca-risken/core/proto/organization/mocks"
 	"github.com/ca-risken/core/proto/organization_iam"
 	"gorm.io/gorm"
 )
@@ -173,7 +175,8 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 			mockRepo := mocks.NewOrganizationIAMRepository(t)
 			logger := logging.NewLogger()
 			mockIAM := iammock.NewIAMServiceClient(t)
-			svc := NewOrganizationIAMService(mockRepo, mockIAM, logger)
+			mockOrg := organizationmock.NewOrganizationServiceClient(t)
+			svc := NewOrganizationIAMService(mockRepo, mockOrg, mockIAM, logger)
 
 			if c.expectIsAdminCall {
 				if c.mockIsAdminErr != nil {
@@ -207,9 +210,9 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 		input          *organization_iam.IsAuthorizedOrganizationTokenRequest
 		want           *organization_iam.IsAuthorizedOrganizationTokenResponse
 		wantErr        bool
-		callProject    bool
-		projectResp    bool
-		projectErr     error
+		callOrgList    bool
+		orgListResp    *organization.ListOrganizationResponse
+		orgListErr     error
 		callMaintainer bool
 		maintainerResp bool
 		maintainerErr  error
@@ -312,9 +315,13 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 				ActionName:     "organization/update",
 				ProjectId:      3001,
 			},
-			want:           &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: true},
-			callProject:    true,
-			projectResp:    true,
+			want:        &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: true},
+			callOrgList: true,
+			orgListResp: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{
+					{OrganizationId: 1001},
+				},
+			},
 			callMaintainer: true,
 			maintainerResp: true,
 			callGetPolicy:  true,
@@ -331,8 +338,12 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 				ProjectId:      3001,
 			},
 			want:        &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
-			callProject: true,
-			projectResp: false,
+			callOrgList: true,
+			orgListResp: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{
+					{OrganizationId: 9999},
+				},
+			},
 		},
 		{
 			name: "NG Project check error",
@@ -342,9 +353,9 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 				ActionName:     "organization/update",
 				ProjectId:      3001,
 			},
-			wantErr:     true,
-			callProject: true,
-			projectErr:  gorm.ErrInvalidDB,
+			want:        &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
+			callOrgList: true,
+			orgListErr:  gorm.ErrInvalidDB,
 		},
 		{
 			name: "OK Unauthorized policy not found with project",
@@ -354,9 +365,13 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 				ActionName:     "organization/delete",
 				ProjectId:      3001,
 			},
-			want:           &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
-			callProject:    true,
-			projectResp:    true,
+			want:        &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
+			callOrgList: true,
+			orgListResp: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{
+					{OrganizationId: 1001},
+				},
+			},
 			callMaintainer: true,
 			maintainerResp: true,
 			callGetPolicy:  true,
@@ -372,10 +387,11 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 			mockRepo := mocks.NewOrganizationIAMRepository(t)
 			logger := logging.NewLogger()
 			mockIAM := iammock.NewIAMServiceClient(t)
-			svc := NewOrganizationIAMService(mockRepo, mockIAM, logger)
+			mockOrg := organizationmock.NewOrganizationServiceClient(t)
+			svc := NewOrganizationIAMService(mockRepo, mockOrg, mockIAM, logger)
 
-			if c.callProject {
-				mockRepo.On("ExistsOrganizationProject", test.RepeatMockAnything(3)...).Return(c.projectResp, c.projectErr).Once()
+			if c.callOrgList {
+				mockOrg.On("ListOrganization", test.RepeatMockAnything(2)...).Return(c.orgListResp, c.orgListErr).Once()
 			}
 			if c.callMaintainer {
 				mockRepo.On("ExistsOrgAccessTokenMaintainer", test.RepeatMockAnything(3)...).Return(c.maintainerResp, c.maintainerErr).Once()
