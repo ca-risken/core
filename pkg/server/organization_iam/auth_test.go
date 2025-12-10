@@ -207,6 +207,9 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 		input          *organization_iam.IsAuthorizedOrganizationTokenRequest
 		want           *organization_iam.IsAuthorizedOrganizationTokenResponse
 		wantErr        bool
+		callProject    bool
+		projectResp    bool
+		projectErr     error
 		callMaintainer bool
 		maintainerResp bool
 		maintainerErr  error
@@ -301,6 +304,66 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 			callGetPolicy:  true,
 			getPolicyErr:   gorm.ErrInvalidDB,
 		},
+		{
+			name: "OK Authorized with project",
+			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "organization/update",
+				ProjectId:      3001,
+			},
+			want:           &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: true},
+			callProject:    true,
+			projectResp:    true,
+			callMaintainer: true,
+			maintainerResp: true,
+			callGetPolicy:  true,
+			getPolicyResp: &[]model.OrganizationPolicy{
+				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/.*"},
+			},
+		},
+		{
+			name: "OK Unauthorized project not linked",
+			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "organization/update",
+				ProjectId:      3001,
+			},
+			want:        &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
+			callProject: true,
+			projectResp: false,
+		},
+		{
+			name: "NG Project check error",
+			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "organization/update",
+				ProjectId:      3001,
+			},
+			wantErr:     true,
+			callProject: true,
+			projectErr:  gorm.ErrInvalidDB,
+		},
+		{
+			name: "OK Unauthorized policy not found with project",
+			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "organization/delete",
+				ProjectId:      3001,
+			},
+			want:           &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
+			callProject:    true,
+			projectResp:    true,
+			callMaintainer: true,
+			maintainerResp: true,
+			callGetPolicy:  true,
+			getPolicyResp: &[]model.OrganizationPolicy{
+				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/(get|list)"},
+			},
+		},
 	}
 
 	for _, c := range cases {
@@ -311,6 +374,9 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 			mockIAM := iammock.NewIAMServiceClient(t)
 			svc := NewOrganizationIAMService(mockRepo, mockIAM, logger)
 
+			if c.callProject {
+				mockRepo.On("ExistsOrganizationProject", test.RepeatMockAnything(3)...).Return(c.projectResp, c.projectErr).Once()
+			}
 			if c.callMaintainer {
 				mockRepo.On("ExistsOrgAccessTokenMaintainer", test.RepeatMockAnything(3)...).Return(c.maintainerResp, c.maintainerErr).Once()
 			}
@@ -319,114 +385,6 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 			}
 
 			got, err := svc.IsAuthorizedOrganizationToken(ctx, c.input)
-			if err != nil && !c.wantErr {
-				t.Fatalf("Unexpected error: %+v", err)
-			}
-			if err == nil && c.wantErr {
-				t.Fatal("expected error but got nil")
-			}
-			if !c.wantErr && !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
-			}
-		})
-	}
-}
-
-func TestIsAuthorizedTokenWithOrganization(t *testing.T) {
-	ctx := context.Background()
-	cases := []struct {
-		name                string
-		input               *organization_iam.IsAuthorizedTokenWithOrganizationRequest
-		want                *organization_iam.IsAuthorizedTokenWithOrganizationResponse
-		wantErr             bool
-		callMaintainerCheck bool
-		maintainerResp      bool
-		maintainerErr       error
-		callProjectCheck    bool
-		projectResp         bool
-		projectErr          error
-	}{
-		{
-			name: "OK Authorized",
-			input: &organization_iam.IsAuthorizedTokenWithOrganizationRequest{
-				OrganizationId: 1001,
-				ProjectId:      2001,
-			},
-			want:                &organization_iam.IsAuthorizedTokenWithOrganizationResponse{Ok: true},
-			callMaintainerCheck: true,
-			maintainerResp:      true,
-			callProjectCheck:    true,
-			projectResp:         true,
-		},
-		{
-			name: "OK Unauthorized - no maintainer",
-			input: &organization_iam.IsAuthorizedTokenWithOrganizationRequest{
-				OrganizationId: 1001,
-				ProjectId:      2001,
-			},
-			want:                &organization_iam.IsAuthorizedTokenWithOrganizationResponse{Ok: false},
-			callMaintainerCheck: true,
-			maintainerResp:      false,
-		},
-		{
-			name: "OK Unauthorized - project not linked",
-			input: &organization_iam.IsAuthorizedTokenWithOrganizationRequest{
-				OrganizationId: 1001,
-				ProjectId:      2001,
-			},
-			want:                &organization_iam.IsAuthorizedTokenWithOrganizationResponse{Ok: false},
-			callMaintainerCheck: true,
-			maintainerResp:      true,
-			callProjectCheck:    true,
-			projectResp:         false,
-		},
-		{
-			name: "NG Invalid request",
-			input: &organization_iam.IsAuthorizedTokenWithOrganizationRequest{
-				OrganizationId: 0,
-				ProjectId:      2001,
-			},
-			wantErr: true,
-		},
-		{
-			name: "NG Maintainer check error",
-			input: &organization_iam.IsAuthorizedTokenWithOrganizationRequest{
-				OrganizationId: 1001,
-				ProjectId:      2001,
-			},
-			wantErr:             true,
-			callMaintainerCheck: true,
-			maintainerErr:       gorm.ErrInvalidDB,
-		},
-		{
-			name: "NG Project check error",
-			input: &organization_iam.IsAuthorizedTokenWithOrganizationRequest{
-				OrganizationId: 1001,
-				ProjectId:      2001,
-			},
-			wantErr:             true,
-			callMaintainerCheck: true,
-			maintainerResp:      true,
-			callProjectCheck:    true,
-			projectErr:          gorm.ErrInvalidDB,
-		},
-	}
-
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			mockRepo := mocks.NewOrganizationIAMRepository(t)
-			logger := logging.NewLogger()
-			mockIAM := iammock.NewIAMServiceClient(t)
-			svc := NewOrganizationIAMService(mockRepo, mockIAM, logger)
-
-			if c.callMaintainerCheck {
-				mockRepo.On("ExistsOrganizationMaintainer", test.RepeatMockAnything(2)...).Return(c.maintainerResp, c.maintainerErr).Once()
-			}
-			if c.callProjectCheck {
-				mockRepo.On("ExistsOrganizationProject", test.RepeatMockAnything(3)...).Return(c.projectResp, c.projectErr).Once()
-			}
-
-			got, err := svc.IsAuthorizedTokenWithOrganization(ctx, c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}

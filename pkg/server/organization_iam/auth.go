@@ -55,22 +55,17 @@ func (i *OrganizationIAMService) IsAuthorizedOrganizationToken(ctx context.Conte
 	if !actionNamePattern.MatchString(req.ActionName) {
 		return nil, fmt.Errorf("invalid action name, pattern=%s, action_name=%s", actionNamePattern, req.ActionName)
 	}
-	existsMaintainer, err := i.repository.ExistsOrgAccessTokenMaintainer(ctx, req.OrganizationId, req.AccessTokenId)
-	if err != nil {
-		return nil, err
-	}
-	if !existsMaintainer {
-		i.logger.Warnf(ctx, "Unauthorized organization access token that has no maintainers or expired. organization_id=%d, access_token_id=%d", req.OrganizationId, req.AccessTokenId)
-		return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, nil
-	}
-	policies, err := i.repository.GetOrgTokenPolicy(ctx, req.OrganizationId, req.AccessTokenId)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+	if req.ProjectId != 0 {
+		existsProject, err := i.repository.ExistsOrganizationProject(ctx, req.OrganizationId, req.GetProjectId())
+		if err != nil {
+			return nil, err
+		}
+		if !existsProject {
+			i.logger.Warnf(ctx, "Unauthorized organization access token for unrelated project. organization_id=%d, project_id=%d, access_token_id=%d", req.OrganizationId, req.GetProjectId(), req.AccessTokenId)
 			return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, nil
 		}
-		return nil, err
 	}
-	isAuthorized, err := isAuthorizedByOrganizationPolicy(req.ActionName, policies)
+	isAuthorized, err := i.checkTokenAuthorization(ctx, req.OrganizationId, req.AccessTokenId, req.ActionName)
 	if err != nil {
 		return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, err
 	}
@@ -80,28 +75,23 @@ func (i *OrganizationIAMService) IsAuthorizedOrganizationToken(ctx context.Conte
 	return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: isAuthorized}, nil
 }
 
-func (i *OrganizationIAMService) IsAuthorizedTokenWithOrganization(ctx context.Context, req *organization_iam.IsAuthorizedTokenWithOrganizationRequest) (*organization_iam.IsAuthorizedTokenWithOrganizationResponse, error) {
-	if err := req.Validate(); err != nil {
-		return nil, err
-	}
-	existsMaintainer, err := i.repository.ExistsOrganizationMaintainer(ctx, req.OrganizationId)
+func (i *OrganizationIAMService) checkTokenAuthorization(ctx context.Context, organizationID, accessTokenID uint32, actionName string) (bool, error) {
+	existsMaintainer, err := i.repository.ExistsOrgAccessTokenMaintainer(ctx, organizationID, accessTokenID)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 	if !existsMaintainer {
-		i.logger.Warnf(ctx, "Unauthorized organization token because organization has no maintainer. organization_id=%d", req.OrganizationId)
-		return &organization_iam.IsAuthorizedTokenWithOrganizationResponse{Ok: false}, nil
+		i.logger.Warnf(ctx, "Unauthorized organization access token that has no maintainers or expired. organization_id=%d, access_token_id=%d", organizationID, accessTokenID)
+		return false, nil
 	}
-	belongs, err := i.repository.ExistsOrganizationProject(ctx, req.OrganizationId, req.ProjectId)
+	policies, err := i.repository.GetOrgTokenPolicy(ctx, organizationID, accessTokenID)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+		return false, err
 	}
-	if !belongs {
-		i.logger.Warnf(ctx, "Unauthorized organization token because project is not attached to organization. organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
-		return &organization_iam.IsAuthorizedTokenWithOrganizationResponse{Ok: false}, nil
-	}
-	i.logger.Infof(ctx, "Authorized organization token mapping, organization_id=%d, project_id=%d", req.OrganizationId, req.ProjectId)
-	return &organization_iam.IsAuthorizedTokenWithOrganizationResponse{Ok: true}, nil
+	return isAuthorizedByOrganizationPolicy(actionName, policies)
 }
 
 func isAuthorizedByOrganizationPolicy(action string, policies *[]model.OrganizationPolicy) (bool, error) {

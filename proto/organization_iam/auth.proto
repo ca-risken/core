@@ -19,14 +19,7 @@ message IsAuthorizedOrganizationTokenRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];  // Required
   uint32 access_token_id = 2 [ (validate.rules).uint32.gt = 0 ];  // Required
   string action_name = 3 [ (validate.rules).string.min_len = 1 ]; // Required
+  uint32 project_id = 4;                                          // Optional
 }
 
 message IsAuthorizedOrganizationTokenResponse { bool ok = 1; }
-
-// IsAuthorizedTokenWithOrganizationRequest
-message IsAuthorizedTokenWithOrganizationRequest {
-  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
-  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];      // Required
-}
-
-message IsAuthorizedTokenWithOrganizationResponse { bool ok = 1; }

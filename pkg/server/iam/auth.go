@@ -161,40 +161,6 @@ func (i *IAMService) isAuthorizedByOrganizations(ctx context.Context, userID, pr
 	return false, nil
 }
 
-func (i *IAMService) isAuthorizedTokenByOrganizations(ctx context.Context, accessTokenID, projectID, organizationID uint32, actionName string) (bool, error) {
-	if i.organizationClient == nil || i.organizationIamClient == nil {
-		return false, nil
-	}
-	if organizationID == 0 {
-		return false, nil
-	}
-	orgList, err := i.organizationClient.ListOrganization(ctx, &organization.ListOrganizationRequest{
-		ProjectId:      projectID,
-		OrganizationId: organizationID,
-	})
-	if err != nil {
-		i.logger.Warnf(ctx, "Failed to list organizations for project %d (organization_id=%d): %v", projectID, organizationID, err)
-		return false, err
-	}
-	for _, org := range orgList.Organization {
-		isAuthorized, err := i.organizationIamClient.IsAuthorizedOrganizationToken(ctx, &organization_iam.IsAuthorizedOrganizationTokenRequest{
-			OrganizationId: org.OrganizationId,
-			AccessTokenId:  accessTokenID,
-			ActionName:     actionName,
-		})
-		if err != nil {
-			i.logger.Warnf(ctx, "Failed to check organization token authorization: org_id=%d, access_token_id=%d, action=%s, error=%v", org.OrganizationId, accessTokenID, actionName, err)
-			continue
-		}
-		if isAuthorized.Ok {
-			i.logger.Infof(ctx, "Access token authorized through organization: access_token_id=%d, organization_id=%d, action=%s", accessTokenID, org.OrganizationId, actionName)
-			return true, nil
-		}
-	}
-	i.logger.Debugf(ctx, "Access token not authorized through any organization: access_token_id=%d, project_id=%d, organization_id=%d, action=%s", accessTokenID, projectID, organizationID, actionName)
-	return false, nil
-}
-
 func (i *IAMService) isAuthorizedByProject(ctx context.Context, userID, projectID uint32, actionName, resourceName string) (bool, error) {
 	policies, err := i.repository.GetUserPolicy(ctx, userID)
 	if err != nil {
