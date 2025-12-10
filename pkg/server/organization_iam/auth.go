@@ -65,7 +65,22 @@ func (i *OrganizationIAMService) IsAuthorizedOrganizationToken(ctx context.Conte
 			return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, nil
 		}
 	}
-	isAuthorized, err := i.checkTokenAuthorization(ctx, req.OrganizationId, req.AccessTokenId, req.ActionName)
+	existsMaintainer, err := i.repository.ExistsOrgAccessTokenMaintainer(ctx, req.OrganizationId, req.AccessTokenId)
+	if err != nil {
+		return nil, err
+	}
+	if !existsMaintainer {
+		i.logger.Warnf(ctx, "Unauthorized organization access token that has no maintainers or expired. organization_id=%d, access_token_id=%d", req.OrganizationId, req.AccessTokenId)
+		return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, nil
+	}
+	policies, err := i.repository.GetOrgTokenPolicy(ctx, req.OrganizationId, req.AccessTokenId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, nil
+		}
+		return nil, err
+	}
+	isAuthorized, err := isAuthorizedByOrganizationPolicy(req.ActionName, policies)
 	if err != nil {
 		return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, err
 	}
@@ -73,25 +88,6 @@ func (i *OrganizationIAMService) IsAuthorizedOrganizationToken(ctx context.Conte
 		i.logger.Infof(ctx, "Authorized organization access token action, request=%+v", req)
 	}
 	return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: isAuthorized}, nil
-}
-
-func (i *OrganizationIAMService) checkTokenAuthorization(ctx context.Context, organizationID, accessTokenID uint32, actionName string) (bool, error) {
-	existsMaintainer, err := i.repository.ExistsOrgAccessTokenMaintainer(ctx, organizationID, accessTokenID)
-	if err != nil {
-		return false, err
-	}
-	if !existsMaintainer {
-		i.logger.Warnf(ctx, "Unauthorized organization access token that has no maintainers or expired. organization_id=%d, access_token_id=%d", organizationID, accessTokenID)
-		return false, nil
-	}
-	policies, err := i.repository.GetOrgTokenPolicy(ctx, organizationID, accessTokenID)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return false, nil
-		}
-		return false, err
-	}
-	return isAuthorizedByOrganizationPolicy(actionName, policies)
 }
 
 func isAuthorizedByOrganizationPolicy(action string, policies *[]model.OrganizationPolicy) (bool, error) {
