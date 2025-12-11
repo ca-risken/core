@@ -206,7 +206,6 @@ func TestIsAuthorizedToken(t *testing.T) {
 		callMockGetTokenPolicy  bool
 		mockGetTokenPolicyResp  *[]model.Policy
 		mockGetTokenPolicyError error
-
 	}{
 		{
 			name:  "OK Authorized",
