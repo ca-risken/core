@@ -117,7 +117,7 @@ func (s *Server) Run(ctx context.Context) error {
 		s.config.defaultLocale,
 		s.config.SlackAPIToken,
 	)
-	oisvc := organization_iamserver.NewOrganizationIAMService(s.db, iamc, s.logger)
+	oisvc := organization_iamserver.NewOrganizationIAMService(s.db, oc, iamc, s.logger)
 	fsvc := findingserver.NewFindingService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, s.config.excludeDeleteDataSource, s.logger)
 	psvc := projectserver.NewProjectService(s.db, iamc, oc, s.logger)
 	rsvc := reportserver.NewReportService(s.db, s.logger)

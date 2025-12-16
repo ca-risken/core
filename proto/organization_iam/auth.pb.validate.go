@@ -334,6 +334,8 @@ func (m *IsAuthorizedOrganizationTokenRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	// no validation rules for ProjectId
+
 	if len(errors) > 0 {
 		return IsAuthorizedOrganizationTokenRequestMultiError(errors)
 	}

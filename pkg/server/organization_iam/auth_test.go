@@ -11,6 +11,8 @@ import (
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
 	iammock "github.com/ca-risken/core/proto/iam/mocks"
+	"github.com/ca-risken/core/proto/organization"
+	organizationmock "github.com/ca-risken/core/proto/organization/mocks"
 	"github.com/ca-risken/core/proto/organization_iam"
 	"gorm.io/gorm"
 )
@@ -28,22 +30,22 @@ func TestIsAuthorizedByOrganizationPolicy(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:           "OK Authorized organization get",
-			action:         "organization/get-organization",
-			policy:         validPolicies,
-			want:           true,
+			name:   "OK Authorized organization get",
+			action: "organization/get-organization",
+			policy: validPolicies,
+			want:   true,
 		},
 		{
-			name:           "OK Unauthorized action not allowed",
-			action:         "organization/delete-organization",
-			policy:         &[]model.OrganizationPolicy{{PolicyID: 2, Name: "organization-viewer", OrganizationID: 1, ActionPtn: "organization/(get|list)"}},
-			want:           false,
+			name:   "OK Unauthorized action not allowed",
+			action: "organization/delete-organization",
+			policy: &[]model.OrganizationPolicy{{PolicyID: 2, Name: "organization-viewer", OrganizationID: 1, ActionPtn: "organization/(get|list)"}},
+			want:   false,
 		},
 		{
-			name:           "NG Error invalid regex pattern",
-			action:         "organization/get",
-			policy:         &[]model.OrganizationPolicy{{PolicyID: 1, Name: "invalid-pattern", OrganizationID: 1, ActionPtn: "[invalid regex"}},
-			wantErr:        true,
+			name:    "NG Error invalid regex pattern",
+			action:  "organization/get",
+			policy:  &[]model.OrganizationPolicy{{PolicyID: 1, Name: "invalid-pattern", OrganizationID: 1, ActionPtn: "[invalid regex"}},
+			wantErr: true,
 		},
 	}
 
@@ -173,7 +175,8 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 			mockRepo := mocks.NewOrganizationIAMRepository(t)
 			logger := logging.NewLogger()
 			mockIAM := iammock.NewIAMServiceClient(t)
-			svc := NewOrganizationIAMService(mockRepo, mockIAM, logger)
+			mockOrg := organizationmock.NewOrganizationServiceClient(t)
+			svc := NewOrganizationIAMService(mockRepo, mockOrg, mockIAM, logger)
 
 			if c.expectIsAdminCall {
 				if c.mockIsAdminErr != nil {
@@ -207,6 +210,9 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 		input          *organization_iam.IsAuthorizedOrganizationTokenRequest
 		want           *organization_iam.IsAuthorizedOrganizationTokenResponse
 		wantErr        bool
+		callOrgList    bool
+		orgListResp    *organization.ListOrganizationResponse
+		orgListErr     error
 		callMaintainer bool
 		maintainerResp bool
 		maintainerErr  error
@@ -301,6 +307,78 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 			callGetPolicy:  true,
 			getPolicyErr:   gorm.ErrInvalidDB,
 		},
+		{
+			name: "OK Authorized with project",
+			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "organization/update",
+				ProjectId:      3001,
+			},
+			want:        &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: true},
+			callOrgList: true,
+			orgListResp: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{
+					{OrganizationId: 1001},
+				},
+			},
+			callMaintainer: true,
+			maintainerResp: true,
+			callGetPolicy:  true,
+			getPolicyResp: &[]model.OrganizationPolicy{
+				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/.*"},
+			},
+		},
+		{
+			name: "OK Unauthorized project not linked",
+			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "organization/update",
+				ProjectId:      3001,
+			},
+			want:        &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
+			callOrgList: true,
+			orgListResp: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{
+					{OrganizationId: 9999},
+				},
+			},
+		},
+		{
+			name: "NG Project check error",
+			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "organization/update",
+				ProjectId:      3001,
+			},
+			want:        &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
+			callOrgList: true,
+			orgListErr:  gorm.ErrInvalidDB,
+		},
+		{
+			name: "OK Unauthorized policy not found with project",
+			input: &organization_iam.IsAuthorizedOrganizationTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "organization/delete",
+				ProjectId:      3001,
+			},
+			want:        &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false},
+			callOrgList: true,
+			orgListResp: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{
+					{OrganizationId: 1001},
+				},
+			},
+			callMaintainer: true,
+			maintainerResp: true,
+			callGetPolicy:  true,
+			getPolicyResp: &[]model.OrganizationPolicy{
+				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/(get|list)"},
+			},
+		},
 	}
 
 	for _, c := range cases {
@@ -309,8 +387,12 @@ func TestIsAuthorizedOrganizationToken(t *testing.T) {
 			mockRepo := mocks.NewOrganizationIAMRepository(t)
 			logger := logging.NewLogger()
 			mockIAM := iammock.NewIAMServiceClient(t)
-			svc := NewOrganizationIAMService(mockRepo, mockIAM, logger)
+			mockOrg := organizationmock.NewOrganizationServiceClient(t)
+			svc := NewOrganizationIAMService(mockRepo, mockOrg, mockIAM, logger)
 
+			if c.callOrgList {
+				mockOrg.On("ListOrganization", test.RepeatMockAnything(2)...).Return(c.orgListResp, c.orgListErr).Once()
+			}
 			if c.callMaintainer {
 				mockRepo.On("ExistsOrgAccessTokenMaintainer", test.RepeatMockAnything(3)...).Return(c.maintainerResp, c.maintainerErr).Once()
 			}

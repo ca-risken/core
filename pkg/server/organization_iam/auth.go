@@ -8,6 +8,7 @@ import (
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/iam"
+	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/organization_iam"
 	"gorm.io/gorm"
 )
@@ -54,6 +55,25 @@ func (i *OrganizationIAMService) IsAuthorizedOrganizationToken(ctx context.Conte
 	}
 	if !actionNamePattern.MatchString(req.ActionName) {
 		return nil, fmt.Errorf("invalid action name, pattern=%s, action_name=%s", actionNamePattern, req.ActionName)
+	}
+	if req.ProjectId != 0 {
+		orgList, err := i.orgClient.ListOrganization(ctx, &organization.ListOrganizationRequest{
+			ProjectId: req.ProjectId,
+		})
+		if err != nil {
+			i.logger.Warnf(ctx, "Failed to list organizations for project %d: %v", req.ProjectId, err)
+			return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, nil
+		}
+		isExists := false
+		for _, org := range orgList.Organization {
+			if org.OrganizationId == req.OrganizationId {
+				isExists = true
+				break
+			}
+		}
+		if !isExists {
+			return &organization_iam.IsAuthorizedOrganizationTokenResponse{Ok: false}, nil
+		}
 	}
 	existsMaintainer, err := i.repository.ExistsOrgAccessTokenMaintainer(ctx, req.OrganizationId, req.AccessTokenId)
 	if err != nil {
