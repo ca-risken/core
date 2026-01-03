@@ -435,21 +435,41 @@ func (c *Client) ListFindingTagCount(ctx context.Context, param *finding.ListFin
 
 const selectListFindingTagName = `
 select
-  tag
+  ft.tag
 from
-  finding_tag
+  finding_tag ft
 where
-  project_id = ?
-group by project_id, tag
+  ft.project_id = ?
+group by ft.project_id, ft.tag
+order by %s %s limit %d, %d
+`
+
+const selectListFindingTagNameForOrg = `
+select
+  ft.tag
+from
+  finding_tag ft
+  inner join organization_project op on ft.project_id = op.project_id
+where
+  op.organization_id = ?
+group by ft.tag
 order by %s %s limit %d, %d
 `
 
 func (c *Client) ListFindingTagName(ctx context.Context, param *finding.ListFindingTagNameRequest) (*[]TagName, error) {
 	var data []TagName
-	if err := c.Slave.WithContext(ctx).Raw(
-		fmt.Sprintf(selectListFindingTagName, param.Sort, param.Direction, param.Offset, param.Limit),
-		param.ProjectId).Scan(&data).Error; err != nil {
-		return nil, err
+	if param.ProjectId > 0 {
+		if err := c.Slave.WithContext(ctx).Raw(
+			fmt.Sprintf(selectListFindingTagName, param.Sort, param.Direction, param.Offset, param.Limit),
+			param.ProjectId).Scan(&data).Error; err != nil {
+			return nil, err
+		}
+	} else {
+		if err := c.Slave.WithContext(ctx).Raw(
+			fmt.Sprintf(selectListFindingTagNameForOrg, param.Sort, param.Direction, param.Offset, param.Limit),
+			param.OrganizationId).Scan(&data).Error; err != nil {
+			return nil, err
+		}
 	}
 	return &data, nil
 }
@@ -463,11 +483,28 @@ select count(*) from (
 ) tag
 `
 
+const selectListFindingTagNameCountForOrg = `
+select count(*) from (
+  select ft.tag
+  from finding_tag ft
+  inner join organization_project op on ft.project_id = op.project_id
+  where op.organization_id = ?
+  group by ft.tag
+) tag
+`
+
 func (c *Client) ListFindingTagNameCount(ctx context.Context, param *finding.ListFindingTagNameRequest) (int64, error) {
 	var count int64
-	if err := c.Slave.WithContext(ctx).Raw(selectListFindingTagNameCount,
-		param.ProjectId).Count(&count).Error; err != nil {
-		return count, err
+	if param.ProjectId > 0 {
+		if err := c.Slave.WithContext(ctx).Raw(selectListFindingTagNameCount,
+			param.ProjectId).Count(&count).Error; err != nil {
+			return count, err
+		}
+	} else {
+		if err := c.Slave.WithContext(ctx).Raw(selectListFindingTagNameCountForOrg,
+			param.OrganizationId).Count(&count).Error; err != nil {
+			return count, err
+		}
 	}
 	return count, nil
 }
@@ -677,7 +714,7 @@ select
 from
   resource r `
 	where, params := generateListResourceCondition(
-		req.ProjectId,
+		req.ProjectId, req.OrganizationId,
 		req.ResourceId, req.ResourceName, req.Tag,
 		req.Namespace, req.ResourceType,
 	)
@@ -698,7 +735,7 @@ select count(*) from (
   from
     resource r `
 	where, params := generateListResourceCondition(
-		req.ProjectId,
+		req.ProjectId, req.OrganizationId,
 		req.ResourceId, req.ResourceName, req.Tag,
 		req.Namespace, req.ResourceType,
 	)
@@ -712,17 +749,27 @@ select count(*) from (
 }
 
 func generateListResourceCondition(
-	projectID uint32,
+	projectID, organizationID uint32,
 	resourceID uint64,
 	resourceNames, tags []string,
 	namespace, resourceType string,
 ) (string, []interface{}) {
 	var params []interface{}
 	join := ""
-	query := `
+	query := ""
+
+	if projectID > 0 {
+		query = `
 where
   r.project_id = ?`
-	params = append(params, projectID)
+		params = append(params, projectID)
+	} else {
+		join += "\n  inner join organization_project op on r.project_id = op.project_id"
+		query = `
+where
+  op.organization_id = ?`
+		params = append(params, organizationID)
+	}
 	if !zero.IsZeroVal(resourceID) {
 		query += " and r.resource_id = ?"
 		params = append(params, resourceID)
