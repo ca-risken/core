@@ -10,6 +10,7 @@ import (
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/vikyd/zero"
+	"gorm.io/gorm"
 )
 
 const (
@@ -388,7 +389,14 @@ WHERE
 
 func (c *Client) UpdateFindingAISummary(ctx context.Context, projectID uint32, findingID uint64, aiSummary string, aiSummaryCreatedAt time.Time) error {
 	operation := func() error {
-		return c.Master.WithContext(ctx).Exec(updateFindingAISummary, aiSummary, aiSummaryCreatedAt, projectID, findingID).Error
+		result := c.Master.WithContext(ctx).Exec(updateFindingAISummary, aiSummary, aiSummaryCreatedAt, projectID, findingID)
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected == 0 {
+			return backoff.Permanent(gorm.ErrRecordNotFound)
+		}
+		return nil
 	}
 	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "UpdateFindingAISummary"))
 }

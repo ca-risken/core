@@ -11,6 +11,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/google/go-cmp/cmp"
+	"gorm.io/gorm"
 )
 
 func TestListFindingTagByFindingID(t *testing.T) {
@@ -116,14 +117,40 @@ func TestUpdateFindingAISummary(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open mock sql db, error: %+v", err)
 	}
-	now := time.Unix(1735689600, 0)
-	mock.ExpectExec(regexp.QuoteMeta(updateFindingAISummary)).
-		WithArgs("summary", now, uint32(1), uint64(1)).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-
-	err = f.UpdateFindingAISummary(context.Background(), 1, 1, "summary", now)
-	if err != nil {
-		t.Fatalf("Unexpected error: %+v", err)
+	cases := []struct {
+		name          string
+		rowsAffected  int64
+		wantErr       bool
+		wantErrIs     error
+	}{
+		{
+			name:         "OK",
+			rowsAffected: 1,
+		},
+		{
+			name:         "NG no rows updated",
+			rowsAffected: 0,
+			wantErr:      true,
+			wantErrIs:    gorm.ErrRecordNotFound,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			now := time.Unix(1735689600, 0)
+			mock.ExpectExec(regexp.QuoteMeta(updateFindingAISummary)).
+				WithArgs("summary", now, uint32(1), uint64(1)).
+				WillReturnResult(sqlmock.NewResult(0, c.rowsAffected))
+			err := f.UpdateFindingAISummary(context.Background(), 1, 1, "summary", now)
+			if c.wantErr && err == nil {
+				t.Fatal("Expected error, got nil")
+			}
+			if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if c.wantErrIs != nil && !errors.Is(err, c.wantErrIs) {
+				t.Fatalf("Unexpected error type: want=%v, got=%v", c.wantErrIs, err)
+			}
+		})
 	}
 }
 
