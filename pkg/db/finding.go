@@ -346,9 +346,9 @@ func (c *Client) GetFinding(ctx context.Context, projectID uint32, findingID uin
 
 const insertUpsertFinding = `
 INSERT INTO finding
-  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data, ai_summary, ai_summary_created_at)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
   resource_name=VALUES(resource_name),
@@ -356,6 +356,8 @@ ON DUPLICATE KEY UPDATE
   original_score=VALUES(original_score),
   score=VALUES(score),
 	data=VALUES(data),
+	ai_summary=COALESCE(VALUES(ai_summary), ai_summary),
+	ai_summary_created_at=COALESCE(VALUES(ai_summary_created_at), ai_summary_created_at),
 	updated_at=NOW()
 `
 
@@ -369,7 +371,7 @@ func (c *Client) UpsertFinding(ctx context.Context, data *model.Finding) (*model
 func (c *Client) upsertFinding(ctx context.Context, data *model.Finding) (*model.Finding, error) {
 	if err := c.Master.WithContext(ctx).Exec(insertUpsertFinding,
 		data.FindingID, data.Description, data.DataSource, data.DataSourceID, data.ResourceName,
-		data.ProjectID, data.OriginalScore, data.Score, data.Data).Error; err != nil {
+		data.ProjectID, data.OriginalScore, data.Score, data.Data, data.AISummary, data.AISummaryCreatedAt).Error; err != nil {
 		return nil, err
 	}
 	return c.GetFindingByDataSource(ctx, data.ProjectID, data.DataSource, data.DataSourceID)
