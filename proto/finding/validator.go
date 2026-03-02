@@ -476,3 +476,13 @@ func (a *GetAISummaryRequest) Validate() error {
 		validation.Field(&a.Lang, validation.In("en", "ja")),
 	)
 }
+
+// Validate for UpdateFindingAISummaryRequest
+func (u *UpdateFindingAISummaryRequest) Validate() error {
+	return validation.ValidateStruct(u,
+		validation.Field(&u.ProjectId, validation.Required),
+		validation.Field(&u.FindingId, validation.Required),
+		validation.Field(&u.AiSummary, validation.Required, validation.Length(1, 10000)),
+		validation.Field(&u.AiSummaryCreatedAt, validation.Required, validation.Min(int64(0)), validation.Max(int64(253402268399))), // 1970-01-01T00:00:00 ~ 9999-12-31T23:59:59
+	)
+}

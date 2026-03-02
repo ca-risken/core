@@ -21,6 +21,8 @@ message Finding {
   string data = 10;
   int64 created_at = 11;
   int64 updated_at = 12;
+  string ai_summary = 13;
+  int64 ai_summary_created_at = 14;
 }
 
 // Finding For Upsert
