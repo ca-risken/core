@@ -564,13 +564,13 @@ func generateBulkUpsertFindingSQL(data []*model.Finding) (string, []interface{})
 	var params []interface{}
 	sql := `
 INSERT INTO finding
-  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data, ai_summary, ai_summary_created_at)
 VALUES`
 	for _, d := range data {
 		sql += `
-  (?, ?, ?, ?, ?, ?, ?, ?, ?),`
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
 		params = append(params, d.FindingID, d.Description, d.DataSource, d.DataSourceID,
-			d.ResourceName, d.ProjectID, d.OriginalScore, d.Score, d.Data)
+			d.ResourceName, d.ProjectID, d.OriginalScore, d.Score, d.Data, d.AISummary, d.AISummaryCreatedAt)
 	}
 	sql = strings.TrimRight(sql, ",")
 	sql += `
@@ -581,6 +581,8 @@ ON DUPLICATE KEY UPDATE
   original_score=VALUES(original_score),
   score=VALUES(score),
   data=VALUES(data),
+  ai_summary=COALESCE(VALUES(ai_summary), ai_summary),
+  ai_summary_created_at=COALESCE(VALUES(ai_summary_created_at), ai_summary_created_at),
   updated_at=NOW()`
 	return sql, params
 }

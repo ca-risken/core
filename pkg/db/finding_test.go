@@ -88,7 +88,7 @@ func TestBulkUpsertFinding(t *testing.T) {
 			},
 			mockSQL: regexp.QuoteMeta(`
 INSERT INTO finding
-  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data, ai_summary, ai_summary_created_at)
 VALUES`),
 		},
 		{
@@ -125,9 +125,9 @@ func TestGenerateBulkUpsertFindingSQL(t *testing.T) {
 			},
 			wantSQL: `
 INSERT INTO finding
-  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data, ai_summary, ai_summary_created_at)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
   resource_name=VALUES(resource_name),
@@ -135,9 +135,11 @@ ON DUPLICATE KEY UPDATE
   original_score=VALUES(original_score),
   score=VALUES(score),
   data=VALUES(data),
+  ai_summary=COALESCE(VALUES(ai_summary), ai_summary),
+  ai_summary_created_at=COALESCE(VALUES(ai_summary_created_at), ai_summary_created_at),
   updated_at=NOW()`,
 			wantParam: []interface{}{
-				uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(1), "data", (*string)(nil), (*time.Time)(nil),
 			},
 		},
 		{
@@ -149,11 +151,11 @@ ON DUPLICATE KEY UPDATE
 			},
 			wantSQL: `
 INSERT INTO finding
-  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data, ai_summary, ai_summary_created_at)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?, ?),
-  (?, ?, ?, ?, ?, ?, ?, ?, ?),
-  (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
   resource_name=VALUES(resource_name),
@@ -161,11 +163,13 @@ ON DUPLICATE KEY UPDATE
   original_score=VALUES(original_score),
   score=VALUES(score),
   data=VALUES(data),
+  ai_summary=COALESCE(VALUES(ai_summary), ai_summary),
+  ai_summary_created_at=COALESCE(VALUES(ai_summary_created_at), ai_summary_created_at),
   updated_at=NOW()`,
 			wantParam: []interface{}{
-				uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(1), "data",
-				uint64(2), "desc", "ds", "2", "r", uint32(1), float32(1), float32(1), "data",
-				uint64(3), "desc", "ds", "3", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(1), "data", (*string)(nil), (*time.Time)(nil),
+				uint64(2), "desc", "ds", "2", "r", uint32(1), float32(1), float32(1), "data", (*string)(nil), (*time.Time)(nil),
+				uint64(3), "desc", "ds", "3", "r", uint32(1), float32(1), float32(1), "data", (*string)(nil), (*time.Time)(nil),
 			},
 		},
 	}
