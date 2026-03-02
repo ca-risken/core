@@ -60,6 +60,8 @@ service FindingService {
   rpc GetAISummary(GetAISummaryRequest) returns (GetAISummaryResponse);
   rpc GetAISummaryStream(GetAISummaryRequest)
       returns (stream GetAISummaryResponse);
+  rpc UpdateFindingAISummary(UpdateFindingAISummaryRequest)
+      returns (google.protobuf.Empty);
 
   // finding/resource common
   rpc UntagByResourceName(UntagByResourceNameRequest)
@@ -371,6 +373,13 @@ message GetAISummaryRequest {
 }
 
 message GetAISummaryResponse { string answer = 1; }
+
+message UpdateFindingAISummaryRequest {
+  uint32 project_id = 1;
+  uint64 finding_id = 2;
+  string ai_summary = 3;
+  int64 ai_summary_created_at = 4;
+}
 
 message UntagByResourceNameRequest {
   uint32 project_id = 1;

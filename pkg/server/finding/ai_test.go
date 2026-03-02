@@ -122,3 +122,47 @@ func TestAskAISummary(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateFindingAISummary(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *finding.UpdateFindingAISummaryRequest
+		wantErr bool
+		mockErr error
+	}{
+		{
+			name:  "OK",
+			input: &finding.UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: "summary", AiSummaryCreatedAt: 1735689600},
+		},
+		{
+			name:    "NG invalid param",
+			input:   &finding.UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummaryCreatedAt: 1735689600},
+			wantErr: true,
+		},
+		{
+			name:    "NG DB error",
+			input:   &finding.UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: "summary", AiSummaryCreatedAt: 1735689600},
+			wantErr: true,
+			mockErr: errors.New("some error"),
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mockDB := dbmocks.NewFindingRepository(t)
+			svc := FindingService{repository: mockDB}
+			if !c.wantErr || c.mockErr != nil {
+				mockDB.
+					On("UpdateFindingAISummary", test.RepeatMockAnything(5)...).
+					Return(c.mockErr).
+					Once()
+			}
+			_, err := svc.UpdateFindingAISummary(context.TODO(), c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatalf("Expected error, got nil")
+			}
+		})
+	}
+}

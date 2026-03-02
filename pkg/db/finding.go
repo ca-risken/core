@@ -42,6 +42,7 @@ type FindingRepository interface {
 	GetFinding(context.Context, uint32, uint64, bool) (*model.Finding, error)
 	GetFindingByDataSource(context.Context, uint32, string, string) (*model.Finding, error)
 	UpsertFinding(context.Context, *model.Finding) (*model.Finding, error)
+	UpdateFindingAISummary(ctx context.Context, projectID uint32, findingID uint64, aiSummary string, aiSummaryCreatedAt time.Time) error
 	DeleteFinding(context.Context, uint32, uint64) error
 	ListFindingTag(ctx context.Context, param *finding.ListFindingTagRequest) (*[]model.FindingTag, error)
 	ListFindingTagByFindingID(ctx context.Context, projectID uint32, findingID uint64) (*[]model.FindingTag, error)
@@ -346,9 +347,9 @@ func (c *Client) GetFinding(ctx context.Context, projectID uint32, findingID uin
 
 const insertUpsertFinding = `
 INSERT INTO finding
-  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data, ai_summary, ai_summary_created_at)
+  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
   resource_name=VALUES(resource_name),
@@ -356,8 +357,6 @@ ON DUPLICATE KEY UPDATE
   original_score=VALUES(original_score),
   score=VALUES(score),
 	data=VALUES(data),
-	ai_summary=COALESCE(VALUES(ai_summary), ai_summary),
-	ai_summary_created_at=COALESCE(VALUES(ai_summary_created_at), ai_summary_created_at),
 	updated_at=NOW()
 `
 
@@ -371,10 +370,27 @@ func (c *Client) UpsertFinding(ctx context.Context, data *model.Finding) (*model
 func (c *Client) upsertFinding(ctx context.Context, data *model.Finding) (*model.Finding, error) {
 	if err := c.Master.WithContext(ctx).Exec(insertUpsertFinding,
 		data.FindingID, data.Description, data.DataSource, data.DataSourceID, data.ResourceName,
-		data.ProjectID, data.OriginalScore, data.Score, data.Data, data.AISummary, data.AISummaryCreatedAt).Error; err != nil {
+		data.ProjectID, data.OriginalScore, data.Score, data.Data).Error; err != nil {
 		return nil, err
 	}
 	return c.GetFindingByDataSource(ctx, data.ProjectID, data.DataSource, data.DataSourceID)
+}
+
+const updateFindingAISummary = `
+UPDATE finding
+SET
+  ai_summary = ?,
+  ai_summary_created_at = ?
+WHERE
+  project_id = ?
+  AND finding_id = ?
+`
+
+func (c *Client) UpdateFindingAISummary(ctx context.Context, projectID uint32, findingID uint64, aiSummary string, aiSummaryCreatedAt time.Time) error {
+	operation := func() error {
+		return c.Master.WithContext(ctx).Exec(updateFindingAISummary, aiSummary, aiSummaryCreatedAt, projectID, findingID).Error
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "UpdateFindingAISummary"))
 }
 
 const selectGetFindingByDataSource = `select * from finding where project_id = ? and data_source = ? and data_source_id = ?`
@@ -564,13 +580,13 @@ func generateBulkUpsertFindingSQL(data []*model.Finding) (string, []interface{})
 	var params []interface{}
 	sql := `
 INSERT INTO finding
-  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data, ai_summary, ai_summary_created_at)
+  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
 VALUES`
 	for _, d := range data {
 		sql += `
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
+  (?, ?, ?, ?, ?, ?, ?, ?, ?),`
 		params = append(params, d.FindingID, d.Description, d.DataSource, d.DataSourceID,
-			d.ResourceName, d.ProjectID, d.OriginalScore, d.Score, d.Data, d.AISummary, d.AISummaryCreatedAt)
+			d.ResourceName, d.ProjectID, d.OriginalScore, d.Score, d.Data)
 	}
 	sql = strings.TrimRight(sql, ",")
 	sql += `
@@ -581,8 +597,6 @@ ON DUPLICATE KEY UPDATE
   original_score=VALUES(original_score),
   score=VALUES(score),
   data=VALUES(data),
-  ai_summary=COALESCE(VALUES(ai_summary), ai_summary),
-  ai_summary_created_at=COALESCE(VALUES(ai_summary_created_at), ai_summary_created_at),
   updated_at=NOW()`
 	return sql, params
 }
