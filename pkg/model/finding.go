@@ -4,17 +4,19 @@ import "time"
 
 // Finding entity model
 type Finding struct {
-	FindingID     uint64 `gorm:"primary_key"`
-	Description   string
-	DataSource    string
-	DataSourceID  string
-	ResourceName  string
-	ProjectID     uint32
-	OriginalScore float32
-	Score         float32
-	Data          string
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	FindingID          uint64 `gorm:"primary_key"`
+	Description        string
+	DataSource         string
+	DataSourceID       string
+	ResourceName       string
+	ProjectID          uint32
+	OriginalScore      float32
+	Score              float32
+	Data               string
+	AISummary          *string
+	AISummaryCreatedAt *time.Time
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
 }
 
 // FindingTag entity model
