@@ -1,6 +1,7 @@
 package finding
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -2012,13 +2013,22 @@ func TestValidate_UpdateFindingAISummaryRequest(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "NG required ai_summary_created_at",
-			input:   &UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: "summary"},
-			wantErr: true,
+			name:  "OK minimum ai_summary_created_at",
+			input: &UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: "summary", AiSummaryCreatedAt: 0},
 		},
 		{
 			name:    "NG invalid ai_summary_created_at",
 			input:   &UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: "summary", AiSummaryCreatedAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG ai_summary too long",
+			input:   &UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: strings.Repeat("a", 10001), AiSummaryCreatedAt: 1735689600},
+			wantErr: true,
+		},
+		{
+			name:    "NG ai_summary_created_at too large",
+			input:   &UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: "summary", AiSummaryCreatedAt: 253402268400},
 			wantErr: true,
 		},
 	}
