@@ -400,7 +400,8 @@ const updateFindingAISummary = `
 UPDATE finding
 SET
   ai_summary = ?,
-  ai_summary_created_at = ?
+  ai_summary_created_at = ?,
+  updated_at = NOW()
 WHERE
   project_id = ?
   AND finding_id = ?
