@@ -118,20 +118,30 @@ func TestUpdateFindingAISummary(t *testing.T) {
 		t.Fatalf("Failed to open mock sql db, error: %+v", err)
 	}
 	cases := []struct {
-		name          string
-		rowsAffected  int64
-		wantErr       bool
-		wantErrIs     error
+		name              string
+		rowsAffected      int64
+		mockGetFinding    *sqlmock.Rows
+		mockGetFindingErr error
+		wantErr           bool
+		wantErrIs         error
 	}{
 		{
 			name:         "OK",
 			rowsAffected: 1,
 		},
 		{
-			name:         "NG no rows updated",
+			name:         "OK idempotent retry",
 			rowsAffected: 0,
-			wantErr:      true,
-			wantErrIs:    gorm.ErrRecordNotFound,
+			mockGetFinding: sqlmock.NewRows([]string{
+				"finding_id", "description", "data_source", "data_source_id", "resource_name", "project_id", "original_score", "score", "data", "created_at", "updated_at"}).
+				AddRow(uint64(1), "desc", "ds", "ds-1", "resource", uint32(1), float32(0.1), float32(0.1), "{}", time.Unix(1735689600, 0), time.Unix(1735689600, 0)),
+		},
+		{
+			name:              "NG not found",
+			rowsAffected:      0,
+			mockGetFindingErr: gorm.ErrRecordNotFound,
+			wantErr:           true,
+			wantErrIs:         gorm.ErrRecordNotFound,
 		},
 	}
 	for _, c := range cases {
@@ -140,6 +150,15 @@ func TestUpdateFindingAISummary(t *testing.T) {
 			mock.ExpectExec(regexp.QuoteMeta(updateFindingAISummary)).
 				WithArgs("summary", now, uint32(1), uint64(1)).
 				WillReturnResult(sqlmock.NewResult(0, c.rowsAffected))
+			if c.rowsAffected == 0 {
+				expect := mock.ExpectQuery(regexp.QuoteMeta(selectGetFinding)).
+					WithArgs(uint32(1), uint64(1))
+				if c.mockGetFinding != nil {
+					expect.WillReturnRows(c.mockGetFinding)
+				} else if c.mockGetFindingErr != nil {
+					expect.WillReturnError(c.mockGetFindingErr)
+				}
+			}
 			err := f.UpdateFindingAISummary(context.Background(), 1, 1, "summary", now)
 			if c.wantErr && err == nil {
 				t.Fatal("Expected error, got nil")

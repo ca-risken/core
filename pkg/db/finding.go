@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -393,10 +394,17 @@ func (c *Client) UpdateFindingAISummary(ctx context.Context, projectID uint32, f
 		if result.Error != nil {
 			return result.Error
 		}
-		if result.RowsAffected == 0 {
+		if result.RowsAffected != 0 {
+			return nil
+		}
+		_, err := c.GetFinding(ctx, projectID, findingID, true)
+		if err == nil {
+			return nil
+		}
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return backoff.Permanent(gorm.ErrRecordNotFound)
 		}
-		return nil
+		return err
 	}
 	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "UpdateFindingAISummary"))
 }
