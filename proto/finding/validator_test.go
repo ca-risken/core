@@ -1998,8 +1998,9 @@ func TestValidate_UpdateFindingAISummaryRequest(t *testing.T) {
 			input: &UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: "summary", AiSummaryCreatedAt: 1735689600},
 		},
 		{
-			name:  "OK minimum ai_summary_created_at",
-			input: &UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: "summary", AiSummaryCreatedAt: 0},
+			name:    "NG minimum ai_summary_created_at",
+			input:   &UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: "summary", AiSummaryCreatedAt: 0},
+			wantErr: true,
 		},
 		{
 			name:    "NG required project_id",

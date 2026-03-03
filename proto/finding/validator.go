@@ -483,6 +483,6 @@ func (u *UpdateFindingAISummaryRequest) Validate() error {
 		validation.Field(&u.ProjectId, validation.Required),
 		validation.Field(&u.FindingId, validation.Required),
 		validation.Field(&u.AiSummary, validation.Required, validation.Length(1, 10000)),
-		validation.Field(&u.AiSummaryCreatedAt, validation.Min(int64(1)), validation.Max(int64(253402268399))), // 1970-01-01T00:00:01 ~ 9999-12-31T23:59:59
+		validation.Field(&u.AiSummaryCreatedAt, validation.Required, validation.Min(int64(1)), validation.Max(int64(253402268399))), // 1970-01-01T00:00:01 ~ 9999-12-31T23:59:59
 	)
 }
