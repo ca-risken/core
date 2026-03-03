@@ -137,8 +137,14 @@ func (l *ListFindingTagRequest) Validate() error {
 
 // Validate ListFindingTagNameRequest
 func (l *ListFindingTagNameRequest) Validate() error {
+	// Either ProjectId or OrganizationId must be provided, but not both
+	if l.ProjectId == 0 && l.OrganizationId == 0 {
+		return errors.New("Either project_id or organization_id is required")
+	}
+	if l.ProjectId != 0 && l.OrganizationId != 0 {
+		return errors.New("Cannot specify both project_id and organization_id")
+	}
 	return validation.ValidateStruct(l,
-		validation.Field(&l.ProjectId, validation.Required),
 		validation.Field(&l.Sort, validation.In(
 			"finding_tag_id", "tag", "updated_at")),
 		validation.Field(&l.Direction, validation.In("asc", "desc")),
@@ -179,8 +185,14 @@ func (c *ClearScoreRequest) Validate() error {
 
 // Validate ListResourceRequest
 func (l *ListResourceRequest) Validate() error {
+	// Either ProjectId or OrganizationId must be provided, but not both
+	if l.ProjectId == 0 && l.OrganizationId == 0 {
+		return errors.New("Either project_id or organization_id is required")
+	}
+	if l.ProjectId != 0 && l.OrganizationId != 0 {
+		return errors.New("Cannot specify both project_id and organization_id")
+	}
 	return validation.ValidateStruct(l,
-		validation.Field(&l.ProjectId, validation.Required),
 		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 512))),
 		validation.Field(&l.Tag, validation.Each(validation.Length(0, 64))),
 		validation.Field(&l.Sort, validation.In(
