@@ -332,6 +332,7 @@ func generatePrefixMatchSQLStatement(column string, params []string) (sql string
 }
 
 const selectGetFinding = `select * from finding where project_id = ? and finding_id = ?`
+const selectExistsFinding = `select 1 from finding where project_id = ? and finding_id = ? limit 1`
 
 func (c *Client) GetFinding(ctx context.Context, projectID uint32, findingID uint64, immediately bool) (*model.Finding, error) {
 	var data model.Finding
@@ -345,6 +346,23 @@ func (c *Client) GetFinding(ctx context.Context, projectID uint32, findingID uin
 		return nil, err
 	}
 	return &data, nil
+}
+
+func (c *Client) existsFinding(ctx context.Context, projectID uint32, findingID uint64, immediately bool) (bool, error) {
+	var data int
+	var err error
+	if immediately {
+		err = c.Master.WithContext(ctx).Raw(selectExistsFinding, projectID, findingID).First(&data).Error
+	} else {
+		err = c.Slave.WithContext(ctx).Raw(selectExistsFinding, projectID, findingID).First(&data).Error
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 const insertUpsertFinding = `
@@ -397,14 +415,14 @@ func (c *Client) UpdateFindingAISummary(ctx context.Context, projectID uint32, f
 		if result.RowsAffected != 0 {
 			return nil
 		}
-		_, err := c.GetFinding(ctx, projectID, findingID, true)
-		if err == nil {
-			return nil
+		exists, err := c.existsFinding(ctx, projectID, findingID, true)
+		if err != nil {
+			return err
 		}
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if !exists {
 			return backoff.Permanent(gorm.ErrRecordNotFound)
 		}
-		return err
+		return nil
 	}
 	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "UpdateFindingAISummary"))
 }

@@ -120,8 +120,8 @@ func TestUpdateFindingAISummary(t *testing.T) {
 	cases := []struct {
 		name              string
 		rowsAffected      int64
-		mockGetFinding    *sqlmock.Rows
-		mockGetFindingErr error
+		mockExistsFinding *sqlmock.Rows
+		mockExistsFindErr error
 		wantErr           bool
 		wantErrIs         error
 	}{
@@ -132,14 +132,13 @@ func TestUpdateFindingAISummary(t *testing.T) {
 		{
 			name:         "OK idempotent retry",
 			rowsAffected: 0,
-			mockGetFinding: sqlmock.NewRows([]string{
-				"finding_id", "description", "data_source", "data_source_id", "resource_name", "project_id", "original_score", "score", "data", "created_at", "updated_at"}).
-				AddRow(uint64(1), "desc", "ds", "ds-1", "resource", uint32(1), float32(0.1), float32(0.1), "{}", time.Unix(1735689600, 0), time.Unix(1735689600, 0)),
+			mockExistsFinding: sqlmock.NewRows([]string{"1"}).
+				AddRow(1),
 		},
 		{
 			name:              "NG not found",
 			rowsAffected:      0,
-			mockGetFindingErr: gorm.ErrRecordNotFound,
+			mockExistsFindErr: gorm.ErrRecordNotFound,
 			wantErr:           true,
 			wantErrIs:         gorm.ErrRecordNotFound,
 		},
@@ -151,12 +150,12 @@ func TestUpdateFindingAISummary(t *testing.T) {
 				WithArgs("summary", now, uint32(1), uint64(1)).
 				WillReturnResult(sqlmock.NewResult(0, c.rowsAffected))
 			if c.rowsAffected == 0 {
-				expect := mock.ExpectQuery(regexp.QuoteMeta(selectGetFinding)).
+				expect := mock.ExpectQuery(regexp.QuoteMeta(selectExistsFinding)).
 					WithArgs(uint32(1), uint64(1))
-				if c.mockGetFinding != nil {
-					expect.WillReturnRows(c.mockGetFinding)
-				} else if c.mockGetFindingErr != nil {
-					expect.WillReturnError(c.mockGetFindingErr)
+				if c.mockExistsFinding != nil {
+					expect.WillReturnRows(c.mockExistsFinding)
+				} else if c.mockExistsFindErr != nil {
+					expect.WillReturnError(c.mockExistsFindErr)
 				}
 			}
 			err := f.UpdateFindingAISummary(context.Background(), 1, 1, "summary", now)
