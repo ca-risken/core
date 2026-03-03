@@ -11,6 +11,9 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/finding"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
 )
 
 func TestAskAISummary(t *testing.T) {
@@ -125,10 +128,11 @@ func TestAskAISummary(t *testing.T) {
 
 func TestUpdateFindingAISummary(t *testing.T) {
 	cases := []struct {
-		name    string
-		input   *finding.UpdateFindingAISummaryRequest
-		wantErr bool
-		mockErr error
+		name        string
+		input       *finding.UpdateFindingAISummaryRequest
+		wantErr     bool
+		wantErrCode codes.Code
+		mockErr     error
 	}{
 		{
 			name:  "OK",
@@ -144,6 +148,13 @@ func TestUpdateFindingAISummary(t *testing.T) {
 			input:   &finding.UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: "summary", AiSummaryCreatedAt: 1735689600},
 			wantErr: true,
 			mockErr: errors.New("some error"),
+		},
+		{
+			name:        "NG not found",
+			input:       &finding.UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: "summary", AiSummaryCreatedAt: 1735689600},
+			wantErr:     true,
+			wantErrCode: codes.NotFound,
+			mockErr:     gorm.ErrRecordNotFound,
 		},
 	}
 	for _, c := range cases {
@@ -162,6 +173,9 @@ func TestUpdateFindingAISummary(t *testing.T) {
 			}
 			if err == nil && c.wantErr {
 				t.Fatalf("Expected error, got nil")
+			}
+			if c.wantErrCode != 0 && status.Code(err) != c.wantErrCode {
+				t.Fatalf("Unexpected gRPC code: want=%v, got=%v err=%v", c.wantErrCode, status.Code(err), err)
 			}
 		})
 	}
