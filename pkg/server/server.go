@@ -119,6 +119,8 @@ func (s *Server) Run(ctx context.Context) error {
 		s.db,
 		s.logger,
 		s.config.defaultLocale,
+		s.config.aiSummaryEnabled,
+		s.config.aiSummaryLanguage,
 		s.config.SlackAPIToken,
 	)
 	oisvc := organization_iamserver.NewOrganizationIAMService(s.db, oc, iamc, s.logger)

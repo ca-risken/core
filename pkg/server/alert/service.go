@@ -25,6 +25,8 @@ type AlertService struct {
 	baseURL           string
 	logger            logging.Logger
 	defaultLocale     string
+	aiSummaryEnabled  bool
+	summaryLanguage   string
 	slackClient       slack.Client
 	retryer           backoff.BackOff
 }
@@ -38,6 +40,8 @@ func NewAlertService(
 	repository db.AlertRepository,
 	logger logging.Logger,
 	defaultLocale string,
+	aiSummaryEnabled bool,
+	summaryLanguage string,
 	slackApiToken string,
 ) *AlertService {
 	return &AlertService{
@@ -49,6 +53,8 @@ func NewAlertService(
 		baseURL:           baseURL,
 		logger:            logger,
 		defaultLocale:     defaultLocale,
+		aiSummaryEnabled:  aiSummaryEnabled,
+		summaryLanguage:   summaryLanguage,
 		slackClient:       *slack.New(slackApiToken),
 		retryer:           backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10),
 	}
