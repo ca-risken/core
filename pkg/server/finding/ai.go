@@ -4,8 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/ca-risken/core/proto/finding"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
 )
 
@@ -57,4 +61,17 @@ func (f *FindingService) GetAISummaryStream(req *finding.GetAISummaryRequest, st
 		return fmt.Errorf("openai API error: err=%w", err)
 	}
 	return nil
+}
+
+func (f *FindingService) UpdateFindingAISummary(ctx context.Context, req *finding.UpdateFindingAISummaryRequest) (*emptypb.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	if err := f.repository.UpdateFindingAISummary(ctx, req.ProjectId, req.FindingId, req.AiSummary, time.Unix(req.AiSummaryCreatedAt, 0)); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Errorf(codes.NotFound, "no finding: project_id=%d, finding_id=%d", req.ProjectId, req.FindingId)
+		}
+		return nil, err
+	}
+	return &emptypb.Empty{}, nil
 }

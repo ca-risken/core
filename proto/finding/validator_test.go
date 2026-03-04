@@ -1,6 +1,7 @@
 package finding
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -1971,6 +1972,64 @@ func TestValidate_GetAISummaryRequest(t *testing.T) {
 		{
 			name:    "NG unsupported lang",
 			input:   &GetAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "xxx"},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if c.wantErr && err == nil {
+				t.Fatal("Unexpected no error")
+			} else if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_UpdateFindingAISummaryRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *UpdateFindingAISummaryRequest
+		wantErr bool
+	}{
+		{
+			name:  "OK",
+			input: &UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: "summary", AiSummaryCreatedAt: 1735689600},
+		},
+		{
+			name:    "NG minimum ai_summary_created_at",
+			input:   &UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: "summary", AiSummaryCreatedAt: 0},
+			wantErr: true,
+		},
+		{
+			name:    "NG required project_id",
+			input:   &UpdateFindingAISummaryRequest{FindingId: 1, AiSummary: "summary", AiSummaryCreatedAt: 1735689600},
+			wantErr: true,
+		},
+		{
+			name:    "NG required finding_id",
+			input:   &UpdateFindingAISummaryRequest{ProjectId: 1, AiSummary: "summary", AiSummaryCreatedAt: 1735689600},
+			wantErr: true,
+		},
+		{
+			name:    "NG required ai_summary",
+			input:   &UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummaryCreatedAt: 1735689600},
+			wantErr: true,
+		},
+		{
+			name:    "NG invalid ai_summary_created_at",
+			input:   &UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: "summary", AiSummaryCreatedAt: -1},
+			wantErr: true,
+		},
+		{
+			name:    "NG ai_summary too long",
+			input:   &UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: strings.Repeat("a", 10001), AiSummaryCreatedAt: 1735689600},
+			wantErr: true,
+		},
+		{
+			name:    "NG ai_summary_created_at too large",
+			input:   &UpdateFindingAISummaryRequest{ProjectId: 1, FindingId: 1, AiSummary: "summary", AiSummaryCreatedAt: 253402268400},
 			wantErr: true,
 		},
 	}

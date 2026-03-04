@@ -11,6 +11,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/google/go-cmp/cmp"
+	"gorm.io/gorm"
 )
 
 func TestListFindingTagByFindingID(t *testing.T) {
@@ -106,6 +107,66 @@ VALUES`),
 			err := f.BulkUpsertFinding(ctx, c.input)
 			if err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
+}
+
+func TestUpdateFindingAISummary(t *testing.T) {
+	f, mock, err := newMockClient()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+	cases := []struct {
+		name              string
+		rowsAffected      int64
+		mockExistsFinding *sqlmock.Rows
+		mockExistsFindErr error
+		wantErr           bool
+		wantErrIs         error
+	}{
+		{
+			name:         "OK",
+			rowsAffected: 1,
+		},
+		{
+			name:         "OK idempotent retry",
+			rowsAffected: 0,
+			mockExistsFinding: sqlmock.NewRows([]string{"1"}).
+				AddRow(1),
+		},
+		{
+			name:              "NG not found",
+			rowsAffected:      0,
+			mockExistsFindErr: gorm.ErrRecordNotFound,
+			wantErr:           true,
+			wantErrIs:         gorm.ErrRecordNotFound,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			now := time.Unix(1735689600, 0)
+			mock.ExpectExec(regexp.QuoteMeta(updateFindingAISummary)).
+				WithArgs("summary", now, uint32(1), uint64(1)).
+				WillReturnResult(sqlmock.NewResult(0, c.rowsAffected))
+			if c.rowsAffected == 0 {
+				expect := mock.ExpectQuery(regexp.QuoteMeta(selectExistsFinding)).
+					WithArgs(uint32(1), uint64(1))
+				if c.mockExistsFinding != nil {
+					expect.WillReturnRows(c.mockExistsFinding)
+				} else if c.mockExistsFindErr != nil {
+					expect.WillReturnError(c.mockExistsFindErr)
+				}
+			}
+			err := f.UpdateFindingAISummary(context.Background(), 1, 1, "summary", now)
+			if c.wantErr && err == nil {
+				t.Fatal("Expected error, got nil")
+			}
+			if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if c.wantErrIs != nil && !errors.Is(err, c.wantErrIs) {
+				t.Fatalf("Unexpected error type: want=%v, got=%v", c.wantErrIs, err)
 			}
 		})
 	}
