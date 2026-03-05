@@ -62,11 +62,13 @@ type Config struct {
 	ChatGPTModel            string
 	ReasoningModel          string
 	defaultLocale           string
+	aiSummaryLanguage       string
+	aiSummaryEnabled        bool
 	excludeDeleteDataSource []string
 	SlackAPIToken           string
 }
 
-func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, reasoningModel, defaultLocale, SlackAPIToken string, excludeDeleteDataSource []string) Config {
+func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, reasoningModel, defaultLocale, aiSummaryLanguage string, aiSummaryEnabled bool, SlackAPIToken string, excludeDeleteDataSource []string) Config {
 	return Config{
 		MaxAnalyzeAPICall:       maxAnalyzeAPICall,
 		BaseURL:                 baseURL,
@@ -74,6 +76,8 @@ func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, reas
 		ChatGPTModel:            chatGPTModel,
 		ReasoningModel:          reasoningModel,
 		defaultLocale:           defaultLocale,
+		aiSummaryLanguage:       aiSummaryLanguage,
+		aiSummaryEnabled:        aiSummaryEnabled,
 		SlackAPIToken:           SlackAPIToken,
 		excludeDeleteDataSource: excludeDeleteDataSource,
 	}
@@ -115,6 +119,8 @@ func (s *Server) Run(ctx context.Context) error {
 		s.db,
 		s.logger,
 		s.config.defaultLocale,
+		s.config.aiSummaryEnabled,
+		s.config.aiSummaryLanguage,
 		s.config.SlackAPIToken,
 	)
 	oisvc := organization_iamserver.NewOrganizationIAMService(s.db, oc, iamc, s.logger)
