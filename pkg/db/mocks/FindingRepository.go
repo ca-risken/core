@@ -4,6 +4,7 @@ package mocks
 
 import (
 	context "context"
+	time "time"
 
 	db "github.com/ca-risken/core/pkg/db"
 	finding "github.com/ca-risken/core/proto/finding"
@@ -1240,6 +1241,24 @@ func (_m *FindingRepository) UpsertFinding(_a0 context.Context, _a1 *model.Findi
 	}
 
 	return r0, r1
+}
+
+// UpdateFindingAISummary provides a mock function with given fields: ctx, projectID, findingID, aiSummary, aiSummaryCreatedAt
+func (_m *FindingRepository) UpdateFindingAISummary(ctx context.Context, projectID uint32, findingID uint64, aiSummary string, aiSummaryCreatedAt time.Time) error {
+	ret := _m.Called(ctx, projectID, findingID, aiSummary, aiSummaryCreatedAt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateFindingAISummary")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint64, string, time.Time) error); ok {
+		r0 = rf(ctx, projectID, findingID, aiSummary, aiSummaryCreatedAt)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // UpsertFindingSetting provides a mock function with given fields: ctx, data

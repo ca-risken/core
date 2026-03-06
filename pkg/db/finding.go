@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/vikyd/zero"
+	"gorm.io/gorm"
 )
 
 const (
@@ -42,6 +44,7 @@ type FindingRepository interface {
 	GetFinding(context.Context, uint32, uint64, bool) (*model.Finding, error)
 	GetFindingByDataSource(context.Context, uint32, string, string) (*model.Finding, error)
 	UpsertFinding(context.Context, *model.Finding) (*model.Finding, error)
+	UpdateFindingAISummary(ctx context.Context, projectID uint32, findingID uint64, aiSummary string, aiSummaryCreatedAt time.Time) error
 	DeleteFinding(context.Context, uint32, uint64) error
 	ListFindingTag(ctx context.Context, param *finding.ListFindingTagRequest) (*[]model.FindingTag, error)
 	ListFindingTagByFindingID(ctx context.Context, projectID uint32, findingID uint64) (*[]model.FindingTag, error)
@@ -329,6 +332,7 @@ func generatePrefixMatchSQLStatement(column string, params []string) (sql string
 }
 
 const selectGetFinding = `select * from finding where project_id = ? and finding_id = ?`
+const selectExistsFinding = `select 1 from finding where project_id = ? and finding_id = ? limit 1`
 
 func (c *Client) GetFinding(ctx context.Context, projectID uint32, findingID uint64, immediately bool) (*model.Finding, error) {
 	var data model.Finding
@@ -342,6 +346,23 @@ func (c *Client) GetFinding(ctx context.Context, projectID uint32, findingID uin
 		return nil, err
 	}
 	return &data, nil
+}
+
+func (c *Client) existsFinding(ctx context.Context, projectID uint32, findingID uint64, immediately bool) (bool, error) {
+	var data int
+	var err error
+	if immediately {
+		err = c.Master.WithContext(ctx).Raw(selectExistsFinding, projectID, findingID).First(&data).Error
+	} else {
+		err = c.Slave.WithContext(ctx).Raw(selectExistsFinding, projectID, findingID).First(&data).Error
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 const insertUpsertFinding = `
@@ -373,6 +394,38 @@ func (c *Client) upsertFinding(ctx context.Context, data *model.Finding) (*model
 		return nil, err
 	}
 	return c.GetFindingByDataSource(ctx, data.ProjectID, data.DataSource, data.DataSourceID)
+}
+
+const updateFindingAISummary = `
+UPDATE finding
+SET
+  ai_summary = ?,
+  ai_summary_created_at = ?,
+  updated_at = NOW()
+WHERE
+  project_id = ?
+  AND finding_id = ?
+`
+
+func (c *Client) UpdateFindingAISummary(ctx context.Context, projectID uint32, findingID uint64, aiSummary string, aiSummaryCreatedAt time.Time) error {
+	operation := func() error {
+		result := c.Master.WithContext(ctx).Exec(updateFindingAISummary, aiSummary, aiSummaryCreatedAt, projectID, findingID)
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 0 {
+			return nil
+		}
+		exists, err := c.existsFinding(ctx, projectID, findingID, true)
+		if err != nil {
+			return err
+		}
+		if !exists {
+			return backoff.Permanent(gorm.ErrRecordNotFound)
+		}
+		return nil
+	}
+	return backoff.RetryNotify(operation, c.retryer, c.newRetryLogger(ctx, "UpdateFindingAISummary"))
 }
 
 const selectGetFindingByDataSource = `select * from finding where project_id = ? and data_source = ? and data_source_id = ?`
