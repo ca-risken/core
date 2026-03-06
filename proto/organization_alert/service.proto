@@ -30,7 +30,10 @@ message GetOrganizationNotificationResponse {
 // PutOrganizationNotification
 message PutOrganizationNotificationRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
-  OrganizationNotificationForUpsert organization_notification = 2;
+  uint32 notification_id = 2;
+  string name = 3;
+  string type = 4;
+  string notify_setting = 5;
 }
 
 message PutOrganizationNotificationResponse {

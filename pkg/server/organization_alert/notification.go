@@ -55,14 +55,14 @@ func (s *OrganizationAlertService) GetOrganizationNotification(ctx context.Conte
 }
 
 func (s *OrganizationAlertService) PutOrganizationNotification(ctx context.Context, req *organization_alert.PutOrganizationNotificationRequest) (*organization_alert.PutOrganizationNotificationResponse, error) {
-	if err := req.OrganizationNotification.Validate(); err != nil {
+	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 
 	var existData *model.OrganizationNotification
 	var err error
-	if !zero.IsZeroVal(req.OrganizationNotification.NotificationId) {
-		existData, err = s.repository.GetOrganizationNotification(ctx, req.OrganizationId, req.OrganizationNotification.NotificationId)
+	if !zero.IsZeroVal(req.NotificationId) {
+		existData, err = s.repository.GetOrganizationNotification(ctx, req.OrganizationId, req.NotificationId)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return &organization_alert.PutOrganizationNotificationResponse{}, nil
@@ -72,11 +72,11 @@ func (s *OrganizationAlertService) PutOrganizationNotification(ctx context.Conte
 	}
 
 	data := &model.OrganizationNotification{
-		NotificationID: req.OrganizationNotification.NotificationId,
-		Name:           req.OrganizationNotification.Name,
-		OrganizationID: req.OrganizationNotification.OrganizationId,
-		Type:           req.OrganizationNotification.Type,
-		NotifySetting:  req.OrganizationNotification.NotifySetting,
+		NotificationID: req.NotificationId,
+		Name:           req.Name,
+		OrganizationID: req.OrganizationId,
+		Type:           req.Type,
+		NotifySetting:  req.NotifySetting,
 	}
 
 	if !zero.IsZeroVal(existData) {

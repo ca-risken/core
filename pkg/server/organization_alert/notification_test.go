@@ -154,9 +154,9 @@ func TestPutOrganizationNotification(t *testing.T) {
 			name: "OK Insert",
 			input: &organization_alert.PutOrganizationNotificationRequest{
 				OrganizationId: 1,
-				OrganizationNotification: &organization_alert.OrganizationNotificationForUpsert{
-					OrganizationId: 1, Name: "notif1", Type: "slack", NotifySetting: `{"webhook_url":"https://example.com"}`,
-				},
+				Name:           "notif1",
+				Type:           "slack",
+				NotifySetting:  `{"webhook_url":"https://example.com"}`,
 			},
 			want: &organization_alert.PutOrganizationNotificationResponse{
 				OrganizationNotification: &organization_alert.OrganizationNotification{
@@ -170,10 +170,11 @@ func TestPutOrganizationNotification(t *testing.T) {
 		{
 			name: "OK Update",
 			input: &organization_alert.PutOrganizationNotificationRequest{
-				OrganizationId: 1,
-				OrganizationNotification: &organization_alert.OrganizationNotificationForUpsert{
-					NotificationId: 1, OrganizationId: 1, Name: "notif1", Type: "slack", NotifySetting: `{"webhook_url":"https://example.com"}`,
-				},
+				OrganizationId:  1,
+				NotificationId:  1,
+				Name:            "notif1",
+				Type:            "slack",
+				NotifySetting:   `{"webhook_url":"https://example.com"}`,
 			},
 			want: &organization_alert.PutOrganizationNotificationResponse{
 				OrganizationNotification: &organization_alert.OrganizationNotification{
@@ -188,10 +189,11 @@ func TestPutOrganizationNotification(t *testing.T) {
 		{
 			name: "NG - record not found on update",
 			input: &organization_alert.PutOrganizationNotificationRequest{
-				OrganizationId: 1,
-				OrganizationNotification: &organization_alert.OrganizationNotificationForUpsert{
-					NotificationId: 1, OrganizationId: 1, Name: "notif1", Type: "slack", NotifySetting: `{"webhook_url":"https://example.com"}`,
-				},
+				OrganizationId:  1,
+				NotificationId:  1,
+				Name:            "notif1",
+				Type:            "slack",
+				NotifySetting:   `{"webhook_url":"https://example.com"}`,
 			},
 			want:       &organization_alert.PutOrganizationNotificationResponse{},
 			mockGetErr: gorm.ErrRecordNotFound,
