@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package core.organization_alert;
+option go_package = "github.com/ca-risken/core/proto/organization_alert";
+
+import "google/protobuf/empty.proto";
+import "organization_alert/entity.proto";
+import "validate/validate.proto";
+
+// ListOrganizationNotification
+message ListOrganizationNotificationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  string type = 2;
+}
+
+message ListOrganizationNotificationResponse {
+  repeated OrganizationNotification organization_notification = 1;
+}
+
+// GetOrganizationNotification
+message GetOrganizationNotificationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 notification_id = 2 [ (validate.rules).uint32.gt = 0 ];
+}
+
+message GetOrganizationNotificationResponse {
+  OrganizationNotification organization_notification = 1;
+}
+
+// PutOrganizationNotification
+message PutOrganizationNotificationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  OrganizationNotificationForUpsert organization_notification = 2;
+}
+
+message PutOrganizationNotificationResponse {
+  OrganizationNotification organization_notification = 1;
+}
+
+// DeleteOrganizationNotification
+message DeleteOrganizationNotificationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 notification_id = 2 [ (validate.rules).uint32.gt = 0 ];
+}
+
+// TestOrganizationNotification
+message TestOrganizationNotificationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 notification_id = 2 [ (validate.rules).uint32.gt = 0 ];
+}
+
+// OrganizationAlertService
+service OrganizationAlertService {
+  rpc ListOrganizationNotification(ListOrganizationNotificationRequest)
+      returns (ListOrganizationNotificationResponse) {}
+  rpc GetOrganizationNotification(GetOrganizationNotificationRequest)
+      returns (GetOrganizationNotificationResponse) {}
+  rpc PutOrganizationNotification(PutOrganizationNotificationRequest)
+      returns (PutOrganizationNotificationResponse) {}
+  rpc DeleteOrganizationNotification(DeleteOrganizationNotificationRequest)
+      returns (google.protobuf.Empty) {}
+  rpc TestOrganizationNotification(TestOrganizationNotificationRequest)
+      returns (google.protobuf.Empty) {}
+}
