@@ -141,7 +141,7 @@ type IsAuthorizedOrganizationTokenRequest struct {
 	OrganizationId uint32 `protobuf:"varint,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"` // Required
 	AccessTokenId  uint32 `protobuf:"varint,2,opt,name=access_token_id,json=accessTokenId,proto3" json:"access_token_id,omitempty"`  // Required
 	ActionName     string `protobuf:"bytes,3,opt,name=action_name,json=actionName,proto3" json:"action_name,omitempty"`              // Required
-	ProjectId      uint32 `protobuf:"varint,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`                // Optional
+	ProjectId      uint32 `protobuf:"varint,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 }
 
 func (x *IsAuthorizedOrganizationTokenRequest) Reset() {
