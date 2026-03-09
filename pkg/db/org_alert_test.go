@@ -12,7 +12,7 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 )
 
-func TestListOrganizationNotification(t *testing.T) {
+func TestListOrgNotification(t *testing.T) {
 	now := time.Now()
 	type args struct {
 		organizationID uint32
@@ -55,7 +55,7 @@ func TestListOrganizationNotification(t *testing.T) {
 				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
 			}
 			c.mockClosure(mock)
-			got, err := db.ListOrganizationNotification(ctx, c.args.organizationID)
+			got, err := db.ListOrgNotification(ctx, c.args.organizationID)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -69,7 +69,7 @@ func TestListOrganizationNotification(t *testing.T) {
 	}
 }
 
-func TestGetOrganizationNotification(t *testing.T) {
+func TestGetOrgNotification(t *testing.T) {
 	now := time.Now()
 	type args struct {
 		organizationID uint32
@@ -88,7 +88,7 @@ func TestGetOrganizationNotification(t *testing.T) {
 			want:    &model.OrganizationNotification{NotificationID: 1, Name: "notif1", OrganizationID: 1, Type: "slack", NotifySetting: "{}", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrganizationNotification)).WillReturnRows(sqlmock.NewRows([]string{
+				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrgNotification)).WillReturnRows(sqlmock.NewRows([]string{
 					"notification_id", "name", "organization_id", "type", "notify_setting", "created_at", "updated_at"}).
 					AddRow(uint32(1), "notif1", uint32(1), "slack", "{}", now, now))
 			},
@@ -99,7 +99,7 @@ func TestGetOrganizationNotification(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrganizationNotification)).WillReturnError(errors.New("DB error"))
+				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrgNotification)).WillReturnError(errors.New("DB error"))
 			},
 		},
 	}
@@ -111,7 +111,7 @@ func TestGetOrganizationNotification(t *testing.T) {
 				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
 			}
 			c.mockClosure(mock)
-			got, err := db.GetOrganizationNotification(ctx, c.args.organizationID, c.args.notificationID)
+			got, err := db.GetOrgNotification(ctx, c.args.organizationID, c.args.notificationID)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -125,7 +125,7 @@ func TestGetOrganizationNotification(t *testing.T) {
 	}
 }
 
-func TestUpsertOrganizationNotification(t *testing.T) {
+func TestUpsertOrgNotification(t *testing.T) {
 	type args struct {
 		data *model.OrganizationNotification
 	}
@@ -175,7 +175,7 @@ func TestUpsertOrganizationNotification(t *testing.T) {
 				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
 			}
 			c.mockClosure(mock)
-			got, err := db.UpsertOrganizationNotification(ctx, c.args.data)
+			got, err := db.UpsertOrgNotification(ctx, c.args.data)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -189,7 +189,7 @@ func TestUpsertOrganizationNotification(t *testing.T) {
 	}
 }
 
-func TestDeleteOrganizationNotification(t *testing.T) {
+func TestDeleteOrgNotification(t *testing.T) {
 	type args struct {
 		organizationID uint32
 		notificationID uint32
@@ -205,7 +205,7 @@ func TestDeleteOrganizationNotification(t *testing.T) {
 			args:    args{organizationID: 1, notificationID: 1},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(regexp.QuoteMeta(deleteOrganizationNotification)).WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectExec(regexp.QuoteMeta(deleteOrgNotification)).WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 		},
 		{
@@ -213,7 +213,7 @@ func TestDeleteOrganizationNotification(t *testing.T) {
 			args:    args{organizationID: 1, notificationID: 1},
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(regexp.QuoteMeta(deleteOrganizationNotification)).WillReturnError(errors.New("DB error"))
+				mock.ExpectExec(regexp.QuoteMeta(deleteOrgNotification)).WillReturnError(errors.New("DB error"))
 			},
 		},
 	}
@@ -225,7 +225,7 @@ func TestDeleteOrganizationNotification(t *testing.T) {
 				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
 			}
 			c.mockClosure(mock)
-			err = db.DeleteOrganizationNotification(ctx, c.args.organizationID, c.args.notificationID)
+			err = db.DeleteOrgNotification(ctx, c.args.organizationID, c.args.notificationID)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}

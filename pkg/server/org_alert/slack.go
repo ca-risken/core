@@ -1,4 +1,4 @@
-package organization_alert
+package org_alert
 
 import (
 	"context"
@@ -17,7 +17,7 @@ type slackNotifyOption struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (s *OrganizationAlertService) replaceSlackNotifySetting(ctx context.Context, jsonNotifySettingExist, jsonNotifySettingUpdate string) (slackNotifySetting, error) {
+func (s *OrgAlertService) replaceSlackNotifySetting(ctx context.Context, jsonNotifySettingExist, jsonNotifySettingUpdate string) (slackNotifySetting, error) {
 	var notifySettingUpdate slackNotifySetting
 	if err := json.Unmarshal([]byte(jsonNotifySettingUpdate), &notifySettingUpdate); err != nil {
 		s.logger.Errorf(ctx, "Error occured when unmarshal update.NotifySetting. err: %v", err)

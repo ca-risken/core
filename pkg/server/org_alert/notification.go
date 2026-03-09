@@ -1,4 +1,4 @@
-package organization_alert
+package org_alert
 
 import (
 	"context"
@@ -11,26 +11,25 @@ import (
 	is "github.com/go-ozzo/ozzo-validation/v4/is"
 
 	"github.com/ca-risken/core/pkg/model"
-	"github.com/ca-risken/core/proto/organization_alert"
+	"github.com/ca-risken/core/proto/org_alert"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/vikyd/zero"
 	"gorm.io/gorm"
 )
 
-func (s *OrganizationAlertService) ListOrganizationNotification(ctx context.Context, req *organization_alert.ListOrganizationNotificationRequest) (*organization_alert.ListOrganizationNotificationResponse, error) {
+func (s *OrgAlertService) ListOrgNotification(ctx context.Context, req *org_alert.ListOrgNotificationRequest) (*org_alert.ListOrgNotificationResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := s.repository.ListOrganizationNotification(ctx, req.OrganizationId)
+	list, err := s.repository.ListOrgNotification(ctx, req.OrganizationId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &organization_alert.ListOrganizationNotificationResponse{}, nil
+			return &org_alert.ListOrgNotificationResponse{}, nil
 		}
 		return nil, err
 	}
-	data := organization_alert.ListOrganizationNotificationResponse{}
+	data := org_alert.ListOrgNotificationResponse{}
 	for _, d := range list {
-		converted, err := convertOrganizationNotification(d, true)
+		converted, err := convertOrgNotification(d, true)
 		if err != nil {
 			s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
 			return nil, err
@@ -40,30 +39,30 @@ func (s *OrganizationAlertService) ListOrganizationNotification(ctx context.Cont
 	return &data, nil
 }
 
-func (s *OrganizationAlertService) GetOrganizationNotification(ctx context.Context, req *organization_alert.GetOrganizationNotificationRequest) (*organization_alert.GetOrganizationNotificationResponse, error) {
+func (s *OrgAlertService) GetOrgNotification(ctx context.Context, req *org_alert.GetOrgNotificationRequest) (*org_alert.GetOrgNotificationResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	data, err := s.repository.GetOrganizationNotification(ctx, req.OrganizationId, req.NotificationId)
+	data, err := s.repository.GetOrgNotification(ctx, req.OrganizationId, req.NotificationId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &organization_alert.GetOrganizationNotificationResponse{}, nil
+			return &org_alert.GetOrgNotificationResponse{}, nil
 		}
 		return nil, err
 	}
-	converted, err := convertOrganizationNotification(data, true)
+	converted, err := convertOrgNotification(data, true)
 	if err != nil {
 		s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
 		return nil, err
 	}
-	return &organization_alert.GetOrganizationNotificationResponse{OrganizationNotification: converted}, nil
+	return &org_alert.GetOrgNotificationResponse{OrganizationNotification: converted}, nil
 }
 
-func (s *OrganizationAlertService) PutOrganizationNotification(ctx context.Context, req *organization_alert.PutOrganizationNotificationRequest) (*organization_alert.PutOrganizationNotificationResponse, error) {
+func (s *OrgAlertService) PutOrgNotification(ctx context.Context, req *org_alert.PutOrgNotificationRequest) (*org_alert.PutOrgNotificationResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if zero.IsZeroVal(req.NotificationId) {
+	if req.NotificationId == 0 {
 		if err := validateNewNotifySetting(req.NotifySetting); err != nil {
 			return nil, err
 		}
@@ -75,11 +74,11 @@ func (s *OrganizationAlertService) PutOrganizationNotification(ctx context.Conte
 
 	var existData *model.OrganizationNotification
 	var err error
-	if !zero.IsZeroVal(req.NotificationId) {
-		existData, err = s.repository.GetOrganizationNotification(ctx, req.OrganizationId, req.NotificationId)
+	if req.NotificationId != 0 {
+		existData, err = s.repository.GetOrgNotification(ctx, req.OrganizationId, req.NotificationId)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return &organization_alert.PutOrganizationNotificationResponse{}, nil
+				return &org_alert.PutOrgNotificationResponse{}, nil
 			}
 			return nil, err
 		}
@@ -93,7 +92,7 @@ func (s *OrganizationAlertService) PutOrganizationNotification(ctx context.Conte
 		NotifySetting:  req.NotifySetting,
 	}
 
-	if !zero.IsZeroVal(existData) {
+	if existData != nil {
 		switch existData.Type {
 		case "slack":
 			convertedNotifySetting, err := s.replaceSlackNotifySetting(ctx, existData.NotifySetting, data.NotifySetting)
@@ -111,23 +110,23 @@ func (s *OrganizationAlertService) PutOrganizationNotification(ctx context.Conte
 		}
 	}
 
-	registeredData, err := s.repository.UpsertOrganizationNotification(ctx, data)
+	registeredData, err := s.repository.UpsertOrgNotification(ctx, data)
 	if err != nil {
 		return nil, err
 	}
-	converted, err := convertOrganizationNotification(registeredData, true)
+	converted, err := convertOrgNotification(registeredData, true)
 	if err != nil {
 		s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
 		return nil, err
 	}
-	return &organization_alert.PutOrganizationNotificationResponse{OrganizationNotification: converted}, nil
+	return &org_alert.PutOrgNotificationResponse{OrganizationNotification: converted}, nil
 }
 
-func (s *OrganizationAlertService) DeleteOrganizationNotification(ctx context.Context, req *organization_alert.DeleteOrganizationNotificationRequest) (*empty.Empty, error) {
+func (s *OrgAlertService) DeleteOrgNotification(ctx context.Context, req *org_alert.DeleteOrgNotificationRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if err := s.repository.DeleteOrganizationNotification(ctx, req.OrganizationId, req.NotificationId); err != nil {
+	if err := s.repository.DeleteOrgNotification(ctx, req.OrganizationId, req.NotificationId); err != nil {
 		return nil, err
 	}
 	return &empty.Empty{}, nil
@@ -160,9 +159,9 @@ func validateExistingNotifySetting(value string) error {
 	return nil
 }
 
-func convertOrganizationNotification(n *model.OrganizationNotification, mask bool) (*organization_alert.OrganizationNotification, error) {
+func convertOrgNotification(n *model.OrganizationNotification, mask bool) (*org_alert.OrgNotification, error) {
 	if n == nil {
-		return &organization_alert.OrganizationNotification{}, nil
+		return &org_alert.OrgNotification{}, nil
 	}
 	setting := n.NotifySetting
 	if mask {
@@ -172,7 +171,7 @@ func convertOrganizationNotification(n *model.OrganizationNotification, mask boo
 			return nil, err
 		}
 	}
-	return &organization_alert.OrganizationNotification{
+	return &org_alert.OrgNotification{
 		NotificationId: n.NotificationID,
 		Name:           n.Name,
 		OrganizationId: n.OrganizationID,

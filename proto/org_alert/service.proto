@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package core.org_alert;
+option go_package = "github.com/ca-risken/core/proto/org_alert";
+
+import "google/protobuf/empty.proto";
+import "org_alert/entity.proto";
+import "validate/validate.proto";
+
+// ListOrgNotification
+message ListOrgNotificationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+}
+
+message ListOrgNotificationResponse {
+  repeated OrgNotification organization_notification = 1;
+}
+
+// GetOrgNotification
+message GetOrgNotificationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 notification_id = 2 [ (validate.rules).uint32.gt = 0 ];
+}
+
+message GetOrgNotificationResponse {
+  OrgNotification organization_notification = 1;
+}
+
+// PutOrgNotification
+message PutOrgNotificationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 notification_id = 2;
+  string name = 3 [ (validate.rules).string = {min_len : 1, max_len : 200} ];
+  string type = 4 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
+  string notify_setting = 5 [ (validate.rules).string.min_len = 1 ];
+}
+
+message PutOrgNotificationResponse {
+  OrgNotification organization_notification = 1;
+}
+
+// DeleteOrgNotification
+message DeleteOrgNotificationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 notification_id = 2 [ (validate.rules).uint32.gt = 0 ];
+}
+
+// OrgAlertService
+service OrgAlertService {
+  rpc ListOrgNotification(ListOrgNotificationRequest)
+      returns (ListOrgNotificationResponse) {}
+  rpc GetOrgNotification(GetOrgNotificationRequest)
+      returns (GetOrgNotificationResponse) {}
+  rpc PutOrgNotification(PutOrgNotificationRequest)
+      returns (PutOrgNotificationResponse) {}
+  rpc DeleteOrgNotification(DeleteOrgNotificationRequest)
+      returns (google.protobuf.Empty) {}
+}
