@@ -12,7 +12,6 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/organization_alert"
-	"github.com/jarcoal/httpmock"
 	"gorm.io/gorm"
 )
 
@@ -258,51 +257,3 @@ func TestDeleteOrganizationNotification(t *testing.T) {
 	}
 }
 
-func TestTestOrganizationNotification(t *testing.T) {
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
-	httpmock.RegisterResponder("POST", "https://example.com", httpmock.NewStringResponder(200, "ok"))
-
-	cases := []struct {
-		name     string
-		input    *organization_alert.TestOrganizationNotificationRequest
-		wantErr  bool
-		mockResp *model.OrganizationNotification
-		mockErr  error
-	}{
-		{
-			name:     "OK - webhook",
-			input:    &organization_alert.TestOrganizationNotificationRequest{OrganizationId: 1, NotificationId: 1},
-			mockResp: &model.OrganizationNotification{NotificationID: 1, OrganizationID: 1, Type: "slack", NotifySetting: `{"webhook_url":"https://example.com"}`},
-		},
-		{
-			name:    "OK - record not found",
-			input:   &organization_alert.TestOrganizationNotificationRequest{OrganizationId: 1, NotificationId: 999},
-			mockErr: gorm.ErrRecordNotFound,
-		},
-		{
-			name:    "NG - DB error",
-			input:   &organization_alert.TestOrganizationNotificationRequest{OrganizationId: 1, NotificationId: 1},
-			wantErr: true,
-			mockErr: errors.New("DB error"),
-		},
-		{
-			name:    "NG - validation error",
-			input:   &organization_alert.TestOrganizationNotificationRequest{OrganizationId: 0, NotificationId: 1},
-			wantErr: true,
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			mockDB := mocks.NewOrganizationAlertRepository(t)
-			svc := OrganizationAlertService{repository: mockDB, logger: logging.NewLogger()}
-			if c.mockResp != nil || c.mockErr != nil {
-				mockDB.On("GetOrganizationNotification", test.RepeatMockAnything(3)...).Return(c.mockResp, c.mockErr).Once()
-			}
-			_, err := svc.TestOrganizationNotification(context.Background(), c.input)
-			if err != nil && !c.wantErr {
-				t.Fatalf("Unexpected error: %+v", err)
-			}
-		})
-	}
-}

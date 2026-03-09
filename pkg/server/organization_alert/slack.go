@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ca-risken/common/pkg/logging"
 	"github.com/slack-go/slack"
 )
 
@@ -76,15 +75,15 @@ func (s *OrganizationAlertService) postMessageSlackWithRetry(ctx context.Context
 	return err
 }
 
-func replaceSlackNotifySetting(ctx context.Context, logger logging.Logger, jsonNotifySettingExist, jsonNotifySettingUpdate string) (slackNotifySetting, error) {
+func (s *OrganizationAlertService) replaceSlackNotifySetting(ctx context.Context, jsonNotifySettingExist, jsonNotifySettingUpdate string) (slackNotifySetting, error) {
 	var notifySettingUpdate slackNotifySetting
 	if err := json.Unmarshal([]byte(jsonNotifySettingUpdate), &notifySettingUpdate); err != nil {
-		logger.Errorf(ctx, "Error occured when unmarshal update.NotifySetting. err: %v", err)
+		s.logger.Errorf(ctx, "Error occured when unmarshal update.NotifySetting. err: %v", err)
 		return slackNotifySetting{}, err
 	}
 	var notifySettingExist slackNotifySetting
 	if err := json.Unmarshal([]byte(jsonNotifySettingExist), &notifySettingExist); err != nil {
-		logger.Errorf(ctx, "Error occured when unmarshal exist.NotifySetting. err: %v", err)
+		s.logger.Errorf(ctx, "Error occured when unmarshal exist.NotifySetting. err: %v", err)
 		return slackNotifySetting{}, err
 	}
 

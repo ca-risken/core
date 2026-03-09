@@ -45,12 +45,6 @@ message DeleteOrganizationNotificationRequest {
   uint32 notification_id = 2 [ (validate.rules).uint32.gt = 0 ];
 }
 
-// TestOrganizationNotification
-message TestOrganizationNotificationRequest {
-  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
-  uint32 notification_id = 2 [ (validate.rules).uint32.gt = 0 ];
-}
-
 // OrganizationAlertService
 service OrganizationAlertService {
   rpc ListOrganizationNotification(ListOrganizationNotificationRequest)
@@ -60,7 +54,5 @@ service OrganizationAlertService {
   rpc PutOrganizationNotification(PutOrganizationNotificationRequest)
       returns (PutOrganizationNotificationResponse) {}
   rpc DeleteOrganizationNotification(DeleteOrganizationNotificationRequest)
-      returns (google.protobuf.Empty) {}
-  rpc TestOrganizationNotification(TestOrganizationNotificationRequest)
       returns (google.protobuf.Empty) {}
 }

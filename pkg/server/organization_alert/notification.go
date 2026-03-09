@@ -94,7 +94,7 @@ func (s *OrganizationAlertService) PutOrganizationNotification(ctx context.Conte
 	if !zero.IsZeroVal(existData) {
 		switch existData.Type {
 		case "slack":
-			convertedNotifySetting, err := replaceSlackNotifySetting(ctx, s.logger, existData.NotifySetting, data.NotifySetting)
+			convertedNotifySetting, err := s.replaceSlackNotifySetting(ctx, existData.NotifySetting, data.NotifySetting)
 			if err != nil {
 				return nil, err
 			}
@@ -127,30 +127,6 @@ func (s *OrganizationAlertService) DeleteOrganizationNotification(ctx context.Co
 	}
 	if err := s.repository.DeleteOrganizationNotification(ctx, req.OrganizationId, req.NotificationId); err != nil {
 		return nil, err
-	}
-	return &empty.Empty{}, nil
-}
-
-func (s *OrganizationAlertService) TestOrganizationNotification(ctx context.Context, req *organization_alert.TestOrganizationNotificationRequest) (*empty.Empty, error) {
-	if err := req.Validate(); err != nil {
-		return nil, err
-	}
-	notification, err := s.repository.GetOrganizationNotification(ctx, req.OrganizationId, req.NotificationId)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &empty.Empty{}, nil
-		}
-		return nil, err
-	}
-	switch notification.Type {
-	case "slack":
-		err = s.sendSlackTestNotification(ctx, notification.NotifySetting, s.defaultLocale)
-		if err != nil {
-			s.logger.Errorf(ctx, "Error occured when sending test slack notification. err: %v", err)
-			return nil, err
-		}
-	default:
-		s.logger.Warnf(ctx, "This notification_type is unimplemented. type: %v", notification.Type)
 	}
 	return &empty.Empty{}, nil
 }

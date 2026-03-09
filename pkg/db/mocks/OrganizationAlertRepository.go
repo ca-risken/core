@@ -93,36 +93,6 @@ func (_m *OrganizationAlertRepository) ListOrganizationNotification(ctx context.
 	return r0, r1
 }
 
-// ListOrganizationNotificationByProjectID provides a mock function with given fields: ctx, projectID
-func (_m *OrganizationAlertRepository) ListOrganizationNotificationByProjectID(ctx context.Context, projectID uint32) ([]*model.OrganizationNotification, error) {
-	ret := _m.Called(ctx, projectID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ListOrganizationNotificationByProjectID")
-	}
-
-	var r0 []*model.OrganizationNotification
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32) ([]*model.OrganizationNotification, error)); ok {
-		return rf(ctx, projectID)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32) []*model.OrganizationNotification); ok {
-		r0 = rf(ctx, projectID)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*model.OrganizationNotification)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, uint32) error); ok {
-		r1 = rf(ctx, projectID)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // UpsertOrganizationNotification provides a mock function with given fields: ctx, data
 func (_m *OrganizationAlertRepository) UpsertOrganizationNotification(ctx context.Context, data *model.OrganizationNotification) (*model.OrganizationNotification, error) {
 	ret := _m.Called(ctx, data)
