@@ -1,4 +1,4 @@
-TARGETS = ai alert finding iam project report organization_iam organization org_alert
+TARGETS = ai alert finding iam project report organization_iam organization organization_alert
 MOCK_TARGETS = $(TARGETS:=.mock)
 BUILD_OPT=""
 IMAGE_TAG=latest
@@ -45,7 +45,7 @@ proto-without-validate: fmt
 # build with protoc-gen-validate
 .PHONY: proto-validate
 proto-validate: fmt
-	for svc in "project" "report" "ai" "organization" "organization_iam" "org_alert"; do \
+	for svc in "project" "report" "ai" "organization" "organization_iam" "organization_alert"; do \
 		protoc \
 			--proto_path=proto \
 			--error_format=gcc \

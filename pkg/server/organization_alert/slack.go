@@ -1,4 +1,4 @@
-package org_alert
+package organization_alert
 
 import (
 	"context"
