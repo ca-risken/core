@@ -19,7 +19,7 @@ func (s *OrganizationAlertService) ListOrganizationNotification(ctx context.Cont
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := s.repository.ListOrganizationNotification(ctx, req.OrganizationId, req.Type)
+	list, err := s.repository.ListOrganizationNotification(ctx, req.OrganizationId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &organization_alert.ListOrganizationNotificationResponse{}, nil

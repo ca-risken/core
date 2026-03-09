@@ -8,7 +8,7 @@ import (
 
 type OrganizationAlertRepository interface {
 	// OrganizationNotification
-	ListOrganizationNotification(ctx context.Context, organizationID uint32, notifyType string) ([]*model.OrganizationNotification, error)
+	ListOrganizationNotification(ctx context.Context, organizationID uint32) ([]*model.OrganizationNotification, error)
 	GetOrganizationNotification(ctx context.Context, organizationID, notificationID uint32) (*model.OrganizationNotification, error)
 	UpsertOrganizationNotification(ctx context.Context, data *model.OrganizationNotification) (*model.OrganizationNotification, error)
 	DeleteOrganizationNotification(ctx context.Context, organizationID, notificationID uint32) error
@@ -17,17 +17,10 @@ type OrganizationAlertRepository interface {
 
 var _ OrganizationAlertRepository = (*Client)(nil)
 
-func (c *Client) ListOrganizationNotification(ctx context.Context, organizationID uint32, notifyType string) ([]*model.OrganizationNotification, error) {
-	query := `select * from organization_notification where organization_id = ?`
-	var params []interface{}
-	params = append(params, organizationID)
-	if notifyType != "" {
-		query += " and type = ?"
-		params = append(params, notifyType)
-	}
-	query += " order by notification_id"
+func (c *Client) ListOrganizationNotification(ctx context.Context, organizationID uint32) ([]*model.OrganizationNotification, error) {
+	query := `select * from organization_notification where organization_id = ? order by notification_id`
 	var data []*model.OrganizationNotification
-	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
+	if err := c.Slave.WithContext(ctx).Raw(query, organizationID).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return data, nil

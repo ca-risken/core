@@ -28,7 +28,7 @@ func TestListOrganizationNotification(t *testing.T) {
 	}{
 		{
 			name:  "OK",
-			input: &organization_alert.ListOrganizationNotificationRequest{OrganizationId: 1, Type: ""},
+			input: &organization_alert.ListOrganizationNotificationRequest{OrganizationId: 1},
 			want: &organization_alert.ListOrganizationNotificationResponse{
 				OrganizationNotification: []*organization_alert.OrganizationNotification{
 					{NotificationId: 1, Name: "notif1", OrganizationId: 1, Type: "slack", NotifySetting: `{"channel_id":"ch1"}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},

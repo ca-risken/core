@@ -63,9 +63,9 @@ func (_m *OrganizationAlertRepository) GetOrganizationNotification(ctx context.C
 	return r0, r1
 }
 
-// ListOrganizationNotification provides a mock function with given fields: ctx, organizationID, notifyType
-func (_m *OrganizationAlertRepository) ListOrganizationNotification(ctx context.Context, organizationID uint32, notifyType string) ([]*model.OrganizationNotification, error) {
-	ret := _m.Called(ctx, organizationID, notifyType)
+// ListOrganizationNotification provides a mock function with given fields: ctx, organizationID
+func (_m *OrganizationAlertRepository) ListOrganizationNotification(ctx context.Context, organizationID uint32) ([]*model.OrganizationNotification, error) {
+	ret := _m.Called(ctx, organizationID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListOrganizationNotification")
@@ -73,19 +73,19 @@ func (_m *OrganizationAlertRepository) ListOrganizationNotification(ctx context.
 
 	var r0 []*model.OrganizationNotification
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) ([]*model.OrganizationNotification, error)); ok {
-		return rf(ctx, organizationID, notifyType)
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) ([]*model.OrganizationNotification, error)); ok {
+		return rf(ctx, organizationID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, string) []*model.OrganizationNotification); ok {
-		r0 = rf(ctx, organizationID, notifyType)
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) []*model.OrganizationNotification); ok {
+		r0 = rf(ctx, organizationID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.OrganizationNotification)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, string) error); ok {
-		r1 = rf(ctx, organizationID, notifyType)
+	if rf, ok := ret.Get(1).(func(context.Context, uint32) error); ok {
+		r1 = rf(ctx, organizationID)
 	} else {
 		r1 = ret.Error(1)
 	}

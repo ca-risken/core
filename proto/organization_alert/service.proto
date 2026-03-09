@@ -10,7 +10,6 @@ import "validate/validate.proto";
 // ListOrganizationNotification
 message ListOrganizationNotificationRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
-  string type = 2;
 }
 
 message ListOrganizationNotificationResponse {

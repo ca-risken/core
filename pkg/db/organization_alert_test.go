@@ -16,7 +16,6 @@ func TestListOrganizationNotification(t *testing.T) {
 	now := time.Now()
 	type args struct {
 		organizationID uint32
-		notifyType     string
 	}
 	cases := []struct {
 		name        string
@@ -26,8 +25,8 @@ func TestListOrganizationNotification(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK - no type filter",
-			args: args{organizationID: 1, notifyType: ""},
+			name: "OK",
+			args: args{organizationID: 1},
 			want: []*model.OrganizationNotification{
 				{NotificationID: 1, Name: "notif1", OrganizationID: 1, Type: "slack", NotifySetting: "{}", CreatedAt: now, UpdatedAt: now},
 			},
@@ -39,21 +38,8 @@ func TestListOrganizationNotification(t *testing.T) {
 			},
 		},
 		{
-			name: "OK - with type filter",
-			args: args{organizationID: 1, notifyType: "slack"},
-			want: []*model.OrganizationNotification{
-				{NotificationID: 1, Name: "notif1", OrganizationID: 1, Type: "slack", NotifySetting: "{}", CreatedAt: now, UpdatedAt: now},
-			},
-			wantErr: false,
-			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta("select * from organization_notification where organization_id = ? and type = ? order by notification_id")).WillReturnRows(sqlmock.NewRows([]string{
-					"notification_id", "name", "organization_id", "type", "notify_setting", "created_at", "updated_at"}).
-					AddRow(uint32(1), "notif1", uint32(1), "slack", "{}", now, now))
-			},
-		},
-		{
 			name:    "NG DB error",
-			args:    args{organizationID: 1, notifyType: ""},
+			args:    args{organizationID: 1},
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
@@ -69,7 +55,7 @@ func TestListOrganizationNotification(t *testing.T) {
 				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
 			}
 			c.mockClosure(mock)
-			got, err := db.ListOrganizationNotification(ctx, c.args.organizationID, c.args.notifyType)
+			got, err := db.ListOrganizationNotification(ctx, c.args.organizationID)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
