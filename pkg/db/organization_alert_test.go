@@ -126,10 +126,14 @@ func TestGetOrganizationNotification(t *testing.T) {
 }
 
 func TestUpsertOrganizationNotification(t *testing.T) {
-	now := time.Now()
 	type args struct {
 		data *model.OrganizationNotification
 	}
+
+	// FirstOrCreate: SELECT → (INSERT if not found)
+	selectFirstOrCreate := `SELECT * FROM ` + "`organization_notification`" + ` WHERE organization_id = ? AND notification_id = ? ORDER BY ` + "`organization_notification`" + `.` + "`notification_id`" + ` LIMIT 1`
+	insertFirstOrCreate := "INSERT INTO `organization_notification`"
+
 	cases := []struct {
 		name        string
 		args        args
@@ -138,33 +142,28 @@ func TestUpsertOrganizationNotification(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK",
-			args: args{data: &model.OrganizationNotification{NotificationID: 0, Name: "notif1", OrganizationID: 1, Type: "slack", NotifySetting: "{}"}},
-			want: &model.OrganizationNotification{NotificationID: 1, Name: "notif1", OrganizationID: 1, Type: "slack", NotifySetting: "{}", CreatedAt: now, UpdatedAt: now},
+			name:    "OK - create new",
+			args:    args{data: &model.OrganizationNotification{NotificationID: 0, Name: "notif1", OrganizationID: 1, Type: "slack", NotifySetting: "{}"}},
+			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(regexp.QuoteMeta(putOrganizationNotification)).WillReturnResult(sqlmock.NewResult(1, 1))
-				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrganizationNotification)).WillReturnRows(sqlmock.NewRows([]string{
-					"notification_id", "name", "organization_id", "type", "notify_setting", "created_at", "updated_at"}).
-					AddRow(uint32(1), "notif1", uint32(1), "slack", "{}", now, now))
+				mock.ExpectQuery(regexp.QuoteMeta(selectFirstOrCreate)).
+					WithArgs(uint32(1), uint32(0)).
+					WillReturnRows(sqlmock.NewRows([]string{"notification_id"}))
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(insertFirstOrCreate)).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectCommit()
 			},
 		},
 		{
-			name:    "NG failed to insert",
+			name:    "NG - DB error on select",
 			args:    args{data: &model.OrganizationNotification{NotificationID: 0, Name: "notif1", OrganizationID: 1, Type: "slack", NotifySetting: "{}"}},
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(regexp.QuoteMeta(putOrganizationNotification)).WillReturnError(errors.New("DB error"))
-			},
-		},
-		{
-			name:    "NG failed to get after insert",
-			args:    args{data: &model.OrganizationNotification{NotificationID: 0, Name: "notif1", OrganizationID: 1, Type: "slack", NotifySetting: "{}"}},
-			want:    nil,
-			wantErr: true,
-			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(regexp.QuoteMeta(putOrganizationNotification)).WillReturnResult(sqlmock.NewResult(1, 1))
-				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrganizationNotification)).WillReturnError(errors.New("DB error"))
+				mock.ExpectQuery(regexp.QuoteMeta(selectFirstOrCreate)).
+					WithArgs(uint32(1), uint32(0)).
+					WillReturnError(errors.New("DB error"))
 			},
 		},
 	}
@@ -180,8 +179,8 @@ func TestUpsertOrganizationNotification(t *testing.T) {
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
-			if !reflect.DeepEqual(got, c.want) {
-				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			if !c.wantErr && got == nil {
+				t.Fatal("Expected non-nil result, got nil")
 			}
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)

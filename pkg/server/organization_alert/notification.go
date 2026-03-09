@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/url"
 	"strings"
+
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	is "github.com/go-ozzo/ozzo-validation/v4/is"
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/organization_alert"
@@ -131,17 +133,6 @@ func (s *OrganizationAlertService) DeleteOrganizationNotification(ctx context.Co
 	return &empty.Empty{}, nil
 }
 
-func validateURL(rawURL string) error {
-	u, err := url.ParseRequestURI(rawURL)
-	if err != nil {
-		return fmt.Errorf("invalid url: %s", rawURL)
-	}
-	if u.Scheme == "" || u.Host == "" {
-		return fmt.Errorf("invalid url: %s", rawURL)
-	}
-	return nil
-}
-
 func validateNewNotifySetting(value string) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(value), &setting); err != nil {
@@ -150,10 +141,8 @@ func validateNewNotifySetting(value string) error {
 	if strings.TrimSpace(setting.WebhookURL) == "" && strings.TrimSpace(setting.ChannelID) == "" {
 		return errors.New("required webhook_url or channel_id in json")
 	}
-	if strings.TrimSpace(setting.WebhookURL) != "" {
-		if err := validateURL(strings.TrimSpace(setting.WebhookURL)); err != nil {
-			return err
-		}
+	if err := validation.Validate(strings.TrimSpace(setting.WebhookURL), is.URL); err != nil {
+		return err
 	}
 	return nil
 }
@@ -164,7 +153,7 @@ func validateExistingNotifySetting(value string) error {
 		return fmt.Errorf("invalid json, %w", err)
 	}
 	if strings.TrimSpace(setting.WebhookURL) != "" {
-		if err := validateURL(strings.TrimSpace(setting.WebhookURL)); err != nil {
+		if err := validation.Validate(strings.TrimSpace(setting.WebhookURL), validation.Required, is.URL); err != nil {
 			return err
 		}
 	}

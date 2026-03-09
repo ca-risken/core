@@ -3,11 +3,6 @@ package organization_alert
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
-	"time"
-
-	"github.com/slack-go/slack"
 )
 
 type slackNotifySetting struct {
@@ -20,59 +15,6 @@ type slackNotifySetting struct {
 type slackNotifyOption struct {
 	Channel string `json:"channel,omitempty"`
 	Message string `json:"message,omitempty"`
-}
-
-const (
-	localeJa                         = "ja"
-	localeEn                         = "en"
-	slackNotificationTestMessageJa   = "RISKENからのテスト通知です"
-	slackNotificationTestMessageEn   = "This is a test notification from RISKEN"
-)
-
-func (s *OrganizationAlertService) sendSlackTestNotification(ctx context.Context, notifySetting, defaultLocale string) error {
-	var setting slackNotifySetting
-	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
-		return err
-	}
-
-	locale := resolveLocale(setting.Locale, defaultLocale)
-
-	if setting.WebhookURL != "" {
-		webhookMsg := getTestWebhookMessage(setting.Data.Channel, locale)
-		if err := slack.PostWebhook(setting.WebhookURL, webhookMsg); err != nil {
-			return fmt.Errorf("failed to send slack(webhookurl): %w", err)
-		}
-	} else if setting.ChannelID != "" {
-		if err := s.postMessageSlackWithRetry(ctx,
-			setting.ChannelID, slack.MsgOptionText(getTestSlackMessageText(locale), false)); err != nil {
-			return fmt.Errorf("failed to send slack(postmessage): %w", err)
-		}
-	}
-	return nil
-}
-
-func (s *OrganizationAlertService) postMessageSlack(channelID string, msg ...slack.MsgOption) error {
-	if _, _, err := s.slackClient.PostMessage(channelID, msg...); err != nil {
-		var rateLimitError *slack.RateLimitedError
-		if errors.As(err, &rateLimitError) {
-			time.Sleep(rateLimitError.RetryAfter)
-		}
-		return err
-	}
-	return nil
-}
-
-func (s *OrganizationAlertService) postMessageSlackWithRetry(ctx context.Context, channelID string, msg ...slack.MsgOption) error {
-	const maxRetries = 3
-	var err error
-	for i := 0; i < maxRetries; i++ {
-		err = s.postMessageSlack(channelID, msg...)
-		if err == nil {
-			return nil
-		}
-		s.logger.Warnf(ctx, "[RetryLogger] postMessageSlack error: attempt=%d, err=%+v", i+1, err)
-	}
-	return err
 }
 
 func (s *OrganizationAlertService) replaceSlackNotifySetting(ctx context.Context, jsonNotifySettingExist, jsonNotifySettingUpdate string) (slackNotifySetting, error) {
@@ -129,34 +71,4 @@ func maskRight(s string, num int) string {
 		rs[i] = '*'
 	}
 	return string(rs)
-}
-
-func resolveLocale(settingLocale, defaultLocale string) string {
-	switch settingLocale {
-	case localeJa:
-		return localeJa
-	case localeEn:
-		return localeEn
-	default:
-		return defaultLocale
-	}
-}
-
-func getTestWebhookMessage(channel, locale string) *slack.WebhookMessage {
-	msg := slack.WebhookMessage{
-		Text: getTestSlackMessageText(locale),
-	}
-	if channel != "" {
-		msg.Channel = channel
-	}
-	return &msg
-}
-
-func getTestSlackMessageText(locale string) string {
-	switch locale {
-	case localeJa:
-		return slackNotificationTestMessageJa
-	default:
-		return slackNotificationTestMessageEn
-	}
 }

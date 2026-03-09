@@ -131,7 +131,7 @@ func (s *Server) Run(ctx context.Context) error {
 	rsvc := reportserver.NewReportService(s.db, s.logger)
 	aisvc := aiserver.NewAIService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, rc, s.logger)
 	osvc := organizationserver.NewOrganizationService(s.db, oimac, s.logger)
-	oasvc := organization_alertserver.NewOrganizationAlertService(s.db, s.logger, s.config.defaultLocale, s.config.BaseURL, s.config.SlackAPIToken)
+	oasvc := organization_alertserver.NewOrganizationAlertService(s.db, s.logger)
 	hsvc := health.NewServer()
 
 	server := grpc.NewServer(
