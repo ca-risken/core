@@ -589,11 +589,38 @@ func (m *PutOrganizationNotificationRequest) validate(all bool) error {
 
 	// no validation rules for NotificationId
 
-	// no validation rules for Name
+	if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 200 {
+		err := PutOrganizationNotificationRequestValidationError{
+			field:  "Name",
+			reason: "value length must be between 1 and 200 runes, inclusive",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for Type
+	if l := utf8.RuneCountInString(m.GetType()); l < 1 || l > 64 {
+		err := PutOrganizationNotificationRequestValidationError{
+			field:  "Type",
+			reason: "value length must be between 1 and 64 runes, inclusive",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for NotifySetting
+	if utf8.RuneCountInString(m.GetNotifySetting()) < 1 {
+		err := PutOrganizationNotificationRequestValidationError{
+			field:  "NotifySetting",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return PutOrganizationNotificationRequestMultiError(errors)

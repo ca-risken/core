@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"net/url"
+	"strings"
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/organization_alert"
@@ -57,6 +60,15 @@ func (s *OrganizationAlertService) GetOrganizationNotification(ctx context.Conte
 func (s *OrganizationAlertService) PutOrganizationNotification(ctx context.Context, req *organization_alert.PutOrganizationNotificationRequest) (*organization_alert.PutOrganizationNotificationResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
+	}
+	if zero.IsZeroVal(req.NotificationId) {
+		if err := validateNewNotifySetting(req.NotifySetting); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := validateExistingNotifySetting(req.NotifySetting); err != nil {
+			return nil, err
+		}
 	}
 
 	var existData *model.OrganizationNotification
@@ -141,6 +153,46 @@ func (s *OrganizationAlertService) TestOrganizationNotification(ctx context.Cont
 		s.logger.Warnf(ctx, "This notification_type is unimplemented. type: %v", notification.Type)
 	}
 	return &empty.Empty{}, nil
+}
+
+func validateURL(rawURL string) error {
+	u, err := url.ParseRequestURI(rawURL)
+	if err != nil {
+		return fmt.Errorf("invalid url: %s", rawURL)
+	}
+	if u.Scheme == "" || u.Host == "" {
+		return fmt.Errorf("invalid url: %s", rawURL)
+	}
+	return nil
+}
+
+func validateNewNotifySetting(value string) error {
+	var setting slackNotifySetting
+	if err := json.Unmarshal([]byte(value), &setting); err != nil {
+		return fmt.Errorf("invalid json, %w", err)
+	}
+	if strings.TrimSpace(setting.WebhookURL) == "" && strings.TrimSpace(setting.ChannelID) == "" {
+		return errors.New("required webhook_url or channel_id in json")
+	}
+	if strings.TrimSpace(setting.WebhookURL) != "" {
+		if err := validateURL(strings.TrimSpace(setting.WebhookURL)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func validateExistingNotifySetting(value string) error {
+	var setting slackNotifySetting
+	if err := json.Unmarshal([]byte(value), &setting); err != nil {
+		return fmt.Errorf("invalid json, %w", err)
+	}
+	if strings.TrimSpace(setting.WebhookURL) != "" {
+		if err := validateURL(strings.TrimSpace(setting.WebhookURL)); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func convertOrganizationNotification(n *model.OrganizationNotification, mask bool) (*organization_alert.OrganizationNotification, error) {
