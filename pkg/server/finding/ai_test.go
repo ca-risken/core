@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/ca-risken/common/pkg/logging"
 	aimocks "github.com/ca-risken/core/pkg/ai/mocks"
 	dbmocks "github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
@@ -95,7 +96,7 @@ func TestAskAISummary(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			mockDB := dbmocks.NewFindingRepository(t)
 			mockAI := aimocks.NewAIService(t)
-			svc := FindingService{repository: mockDB, ai: mockAI}
+			svc := FindingService{repository: mockDB, ai: mockAI, logger: logging.NewLogger()}
 
 			if c.mockGetFinding != nil {
 				mockDB.
@@ -118,6 +119,152 @@ func TestAskAISummary(t *testing.T) {
 			got, err := svc.GetAISummary(context.TODO(), c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestGetAlertAISummary(t *testing.T) {
+	savedSummary := "saved"
+	type MockGetFinding struct {
+		Resp *model.Finding
+		Err  error
+	}
+	type MockGetRecommend struct {
+		Resp *model.Recommend
+		Err  error
+	}
+	type MockAskAI struct {
+		Resp string
+		Err  error
+	}
+	cases := []struct {
+		name             string
+		input            *finding.GetAlertAISummaryRequest
+		want             *finding.GetAlertAISummaryResponse
+		wantErr          bool
+		mockGetFinding   *MockGetFinding
+		mockGetRecommend *MockGetRecommend
+		mockAskAI        *MockAskAI
+		mockUpdateErr    error
+	}{
+		{
+			name:  "OK generate and save",
+			input: &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
+			want:  &finding.GetAlertAISummaryResponse{AiSummary: "summary"},
+			mockGetFinding: &MockGetFinding{
+				Resp: &model.Finding{},
+			},
+			mockGetRecommend: &MockGetRecommend{
+				Resp: &model.Recommend{},
+			},
+			mockAskAI: &MockAskAI{
+				Resp: "summary",
+			},
+		},
+		{
+			name:    "OK return saved summary",
+			input:   &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
+			want:    &finding.GetAlertAISummaryResponse{AiSummary: "saved"},
+			wantErr: false,
+			mockGetFinding: &MockGetFinding{
+				Resp: &model.Finding{AISummary: &savedSummary},
+			},
+		},
+		{
+			name:    "OK save failure still returns summary",
+			input:   &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
+			want:    &finding.GetAlertAISummaryResponse{AiSummary: "summary"},
+			wantErr: false,
+			mockGetFinding: &MockGetFinding{
+				Resp: &model.Finding{},
+			},
+			mockGetRecommend: &MockGetRecommend{
+				Resp: &model.Recommend{},
+			},
+			mockAskAI: &MockAskAI{
+				Resp: "summary",
+			},
+			mockUpdateErr: errors.New("save error"),
+		},
+		{
+			name:    "NG invalid param",
+			input:   &finding.GetAlertAISummaryRequest{FindingId: 1, Lang: "ja"},
+			wantErr: true,
+		},
+		{
+			name:    "NG DB error(GetFinding)",
+			input:   &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
+			wantErr: true,
+			mockGetFinding: &MockGetFinding{
+				Err: errors.New("some error"),
+			},
+		},
+		{
+			name:    "NG DB error(GetRecommend)",
+			input:   &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
+			wantErr: true,
+			mockGetFinding: &MockGetFinding{
+				Resp: &model.Finding{},
+			},
+			mockGetRecommend: &MockGetRecommend{
+				Err: errors.New("some error"),
+			},
+		},
+		{
+			name:    "NG OpenAI API error",
+			input:   &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
+			wantErr: true,
+			mockGetFinding: &MockGetFinding{
+				Resp: &model.Finding{},
+			},
+			mockGetRecommend: &MockGetRecommend{
+				Resp: &model.Recommend{},
+			},
+			mockAskAI: &MockAskAI{
+				Err: errors.New("some error"),
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mockDB := dbmocks.NewFindingRepository(t)
+			mockAI := aimocks.NewAIService(t)
+			svc := FindingService{repository: mockDB, ai: mockAI, logger: logging.NewLogger()}
+
+			if c.mockGetFinding != nil {
+				mockDB.
+					On("GetFinding", test.RepeatMockAnything(4)...).
+					Return(c.mockGetFinding.Resp, c.mockGetFinding.Err).
+					Once()
+			}
+			if c.mockGetRecommend != nil {
+				mockDB.
+					On("GetRecommend", test.RepeatMockAnything(3)...).
+					Return(c.mockGetRecommend.Resp, c.mockGetRecommend.Err).
+					Once()
+			}
+			if c.mockAskAI != nil {
+				mockAI.
+					On("AskAlertAISummaryFromFinding", test.RepeatMockAnything(4)...).
+					Return(c.mockAskAI.Resp, c.mockAskAI.Err).
+					Once()
+			}
+			if c.mockAskAI != nil && c.mockAskAI.Err == nil {
+				mockDB.
+					On("UpdateFindingAISummary", test.RepeatMockAnything(5)...).
+					Return(c.mockUpdateErr).
+					Once()
+			}
+			got, err := svc.GetAlertAISummary(context.TODO(), c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatalf("Expected error, got nil")
 			}
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)

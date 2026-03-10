@@ -58,6 +58,8 @@ service FindingService {
 
   // AI
   rpc GetAISummary(GetAISummaryRequest) returns (GetAISummaryResponse);
+  rpc GetAlertAISummary(GetAlertAISummaryRequest)
+      returns (GetAlertAISummaryResponse);
   rpc GetAISummaryStream(GetAISummaryRequest)
       returns (stream GetAISummaryResponse);
   rpc UpdateFindingAISummary(UpdateFindingAISummaryRequest)
@@ -373,6 +375,14 @@ message GetAISummaryRequest {
 }
 
 message GetAISummaryResponse { string answer = 1; }
+
+message GetAlertAISummaryRequest {
+  uint32 project_id = 1;
+  uint64 finding_id = 2;
+  string lang = 3;
+}
+
+message GetAlertAISummaryResponse { string ai_summary = 1; }
 
 message UpdateFindingAISummaryRequest {
   uint32 project_id = 1;
