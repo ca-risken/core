@@ -12,6 +12,7 @@ type OrgAlertRepository interface {
 	GetOrgNotification(ctx context.Context, organizationID, notificationID uint32) (*model.OrganizationNotification, error)
 	UpsertOrgNotification(ctx context.Context, data *model.OrganizationNotification) (*model.OrganizationNotification, error)
 	DeleteOrgNotification(ctx context.Context, organizationID, notificationID uint32) error
+	ListOrgNotificationByProjectID(ctx context.Context, projectID uint32) ([]*model.OrganizationNotification, error)
 }
 
 var _ OrgAlertRepository = (*Client)(nil)
@@ -56,5 +57,21 @@ const deleteOrgNotification = `
 
 func (c *Client) DeleteOrgNotification(ctx context.Context, organizationID, notificationID uint32) error {
 	return c.Master.WithContext(ctx).Exec(deleteOrgNotification, organizationID, notificationID).Error
+}
+
+const selectOrgNotificationByProjectID = `
+	select on.*
+	from organization_notification on
+	inner join organization_project op on on.organization_id = op.organization_id
+	where op.project_id = ?
+	order by on.notification_id
+`
+
+func (c *Client) ListOrgNotificationByProjectID(ctx context.Context, projectID uint32) ([]*model.OrganizationNotification, error) {
+	var data []*model.OrganizationNotification
+	if err := c.Slave.WithContext(ctx).Raw(selectOrgNotificationByProjectID, projectID).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 

@@ -106,6 +106,36 @@ func (_m *OrganizationAlertServiceServer) ListOrganizationNotification(_a0 conte
 	return r0, r1
 }
 
+// ListOrganizationNotificationByProject provides a mock function with given fields: _a0, _a1
+func (_m *OrganizationAlertServiceServer) ListOrganizationNotificationByProject(_a0 context.Context, _a1 *organization_alert.ListOrganizationNotificationByProjectRequest) (*organization_alert.ListOrganizationNotificationByProjectResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListOrganizationNotificationByProject")
+	}
+
+	var r0 *organization_alert.ListOrganizationNotificationByProjectResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_alert.ListOrganizationNotificationByProjectRequest) (*organization_alert.ListOrganizationNotificationByProjectResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_alert.ListOrganizationNotificationByProjectRequest) *organization_alert.ListOrganizationNotificationByProjectResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organization_alert.ListOrganizationNotificationByProjectResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_alert.ListOrganizationNotificationByProjectRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PutOrganizationNotification provides a mock function with given fields: _a0, _a1
 func (_m *OrganizationAlertServiceServer) PutOrganizationNotification(_a0 context.Context, _a1 *organization_alert.PutOrganizationNotificationRequest) (*organization_alert.PutOrganizationNotificationResponse, error) {
 	ret := _m.Called(_a0, _a1)
@@ -128,6 +158,36 @@ func (_m *OrganizationAlertServiceServer) PutOrganizationNotification(_a0 contex
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *organization_alert.PutOrganizationNotificationRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// TestOrganizationNotification provides a mock function with given fields: _a0, _a1
+func (_m *OrganizationAlertServiceServer) TestOrganizationNotification(_a0 context.Context, _a1 *organization_alert.TestOrganizationNotificationRequest) (*emptypb.Empty, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TestOrganizationNotification")
+	}
+
+	var r0 *emptypb.Empty
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_alert.TestOrganizationNotificationRequest) (*emptypb.Empty, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organization_alert.TestOrganizationNotificationRequest) *emptypb.Empty); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*emptypb.Empty)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organization_alert.TestOrganizationNotificationRequest) error); ok {
 		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)

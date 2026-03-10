@@ -16,6 +16,15 @@ message ListOrganizationNotificationResponse {
   repeated OrganizationNotification organization_notification = 1;
 }
 
+// ListOrganizationNotificationByProject
+message ListOrganizationNotificationByProjectRequest {
+  uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ];
+}
+
+message ListOrganizationNotificationByProjectResponse {
+  repeated OrganizationNotification organization_notification = 1;
+}
+
 // GetOrganizationNotification
 message GetOrganizationNotificationRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
@@ -45,14 +54,25 @@ message DeleteOrganizationNotificationRequest {
   uint32 notification_id = 2 [ (validate.rules).uint32.gt = 0 ];
 }
 
+// TestOrganizationNotification
+message TestOrganizationNotificationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 notification_id = 2 [ (validate.rules).uint32.gt = 0 ];
+}
+
 // OrganizationAlertService
 service OrganizationAlertService {
   rpc ListOrganizationNotification(ListOrganizationNotificationRequest)
       returns (ListOrganizationNotificationResponse) {}
+  rpc ListOrganizationNotificationByProject(
+      ListOrganizationNotificationByProjectRequest)
+      returns (ListOrganizationNotificationByProjectResponse) {}
   rpc GetOrganizationNotification(GetOrganizationNotificationRequest)
       returns (GetOrganizationNotificationResponse) {}
   rpc PutOrganizationNotification(PutOrganizationNotificationRequest)
       returns (PutOrganizationNotificationResponse) {}
   rpc DeleteOrganizationNotification(DeleteOrganizationNotificationRequest)
+      returns (google.protobuf.Empty) {}
+  rpc TestOrganizationNotification(TestOrganizationNotificationRequest)
       returns (google.protobuf.Empty) {}
 }

@@ -236,3 +236,72 @@ func TestDeleteOrgNotification(t *testing.T) {
 	}
 }
 
+func TestListOrgNotificationByProjectID(t *testing.T) {
+	now := time.Now()
+	type args struct {
+		projectID uint32
+	}
+	cases := []struct {
+		name        string
+		args        args
+		want        []*model.OrganizationNotification
+		wantErr     bool
+		mockClosure func(mock sqlmock.Sqlmock)
+	}{
+		{
+			name: "OK",
+			args: args{projectID: 1},
+			want: []*model.OrganizationNotification{
+				{NotificationID: 1, Name: "notif1", OrganizationID: 10, Type: "slack", NotifySetting: "{}", CreatedAt: now, UpdatedAt: now},
+			},
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgNotificationByProjectID)).
+					WithArgs(uint32(1)).
+					WillReturnRows(sqlmock.NewRows([]string{
+						"notification_id", "name", "organization_id", "type", "notify_setting", "created_at", "updated_at"}).
+						AddRow(uint32(1), "notif1", uint32(10), "slack", "{}", now, now))
+			},
+		},
+		{
+			name: "OK - empty",
+			args: args{projectID: 999},
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgNotificationByProjectID)).
+					WithArgs(uint32(999)).
+					WillReturnRows(sqlmock.NewRows([]string{
+						"notification_id", "name", "organization_id", "type", "notify_setting", "created_at", "updated_at"}))
+			},
+		},
+		{
+			name:    "NG DB error",
+			args:    args{projectID: 1},
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgNotificationByProjectID)).
+					WithArgs(uint32(1)).
+					WillReturnError(errors.New("DB error"))
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := context.Background()
+			db, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("An error '%s' was not expected when opening a stub database connection", err)
+			}
+			c.mockClosure(mock)
+			got, err := db.ListOrgNotificationByProjectID(ctx, c.args.projectID)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+

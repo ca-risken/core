@@ -132,6 +132,48 @@ func (s *OrgAlertService) DeleteOrganizationNotification(ctx context.Context, re
 	return &empty.Empty{}, nil
 }
 
+func (s *OrgAlertService) ListOrganizationNotificationByProject(ctx context.Context, req *organization_alert.ListOrganizationNotificationByProjectRequest) (*organization_alert.ListOrganizationNotificationByProjectResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	list, err := s.repository.ListOrgNotificationByProjectID(ctx, req.ProjectId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &organization_alert.ListOrganizationNotificationByProjectResponse{}, nil
+		}
+		return nil, err
+	}
+	data := organization_alert.ListOrganizationNotificationByProjectResponse{}
+	for _, d := range list {
+		converted, err := convertOrgNotification(d, false)
+		if err != nil {
+			s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
+			return nil, err
+		}
+		data.OrganizationNotification = append(data.OrganizationNotification, converted)
+	}
+	return &data, nil
+}
+
+func (s *OrgAlertService) TestOrganizationNotification(ctx context.Context, req *organization_alert.TestOrganizationNotificationRequest) (*empty.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	data, err := s.repository.GetOrgNotification(ctx, req.OrganizationId, req.NotificationId)
+	if err != nil {
+		return nil, err
+	}
+	switch data.Type {
+	case "slack":
+		if err := s.sendSlackTestNotification(ctx, data.NotifySetting); err != nil {
+			return nil, fmt.Errorf("failed to send test notification: %w", err)
+		}
+	default:
+		s.logger.Warnf(ctx, "Unsupported notification type for test: %s", data.Type)
+	}
+	return &empty.Empty{}, nil
+}
+
 func validateNewNotifySetting(value string) error {
 	var setting slackNotifySetting
 	if err := json.Unmarshal([]byte(value), &setting); err != nil {

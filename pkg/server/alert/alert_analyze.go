@@ -13,6 +13,7 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
+	orgalert "github.com/ca-risken/core/proto/organization_alert"
 	projectproto "github.com/ca-risken/core/proto/project"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
@@ -351,6 +352,42 @@ func (a *AlertService) NotificationAlert(
 		_, err = a.repository.UpsertAlertCondNotification(ctx, dataAlertCondNotification)
 		if err != nil {
 			return err
+		}
+	}
+
+	// Organization通知
+	if err := a.notifyOrgAlerts(ctx, alert, rules, project, findings); err != nil {
+		a.logger.Errorf(ctx, "Failed to notify organization alerts: %v", err)
+	}
+
+	return nil
+}
+
+func (a *AlertService) notifyOrgAlerts(
+	ctx context.Context,
+	alert *model.Alert,
+	rules *[]model.AlertRule,
+	project *projectproto.Project,
+	findings *findingDetail,
+) error {
+	resp, err := a.orgAlertClient.ListOrganizationNotificationByProject(ctx, &orgalert.ListOrganizationNotificationByProjectRequest{
+		ProjectId: project.ProjectId,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to list org notifications: %w", err)
+	}
+	if resp == nil || len(resp.OrganizationNotification) == 0 {
+		return nil
+	}
+	for _, n := range resp.OrganizationNotification {
+		switch n.Type {
+		case "slack":
+			if err := a.sendSlackNotification(ctx, a.baseURL, n.NotifySetting, alert, project, rules, findings, a.defaultLocale); err != nil {
+				a.logger.Errorf(ctx, "Failed to send org notification: notification_id=%d, err=%v", n.NotificationId, err)
+				continue
+			}
+		default:
+			a.logger.Warnf(ctx, "Unsupported org notification type: %s", n.Type)
 		}
 	}
 	return nil
