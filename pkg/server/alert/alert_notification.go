@@ -329,6 +329,7 @@ type findingExample struct {
 	DataSource   string
 	Score        float32
 	Tags         []string
+	AISummary    string
 }
 
 func (a *AlertService) getFindingDetailsForNotification(ctx context.Context, projectID uint32, findingIDs *[]uint64) (
