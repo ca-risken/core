@@ -60,11 +60,11 @@ func (c *Client) DeleteOrgNotification(ctx context.Context, organizationID, noti
 }
 
 const selectOrgNotificationByProjectID = `
-	select on.*
-	from organization_notification on
-	inner join organization_project op on on.organization_id = op.organization_id
+	select orgn.*
+	from organization_notification orgn
+	inner join organization_project op on orgn.organization_id = op.organization_id
 	where op.project_id = ?
-	order by on.notification_id
+	order by orgn.notification_id
 `
 
 func (c *Client) ListOrgNotificationByProjectID(ctx context.Context, projectID uint32) ([]*model.OrganizationNotification, error) {
