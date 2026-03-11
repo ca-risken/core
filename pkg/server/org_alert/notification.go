@@ -18,9 +18,6 @@ func (s *OrgAlertService) ListOrgNotification(ctx context.Context, req *org_aler
 	}
 	list, err := s.repository.ListOrgNotification(ctx, req.OrganizationId)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &org_alert.ListOrgNotificationResponse{}, nil
-		}
 		return nil, err
 	}
 	data := org_alert.ListOrgNotificationResponse{}
