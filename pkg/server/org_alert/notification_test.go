@@ -1,4 +1,4 @@
-package organization_alert
+package org_alert
 
 import (
 	"context"
@@ -11,25 +11,25 @@ import (
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
-	"github.com/ca-risken/core/proto/organization_alert"
+	"github.com/ca-risken/core/proto/org_alert"
 	"gorm.io/gorm"
 )
 
-func TestListOrganizationNotification(t *testing.T) {
+func TestListOrgNotification(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
 		name     string
-		input    *organization_alert.ListOrganizationNotificationRequest
-		want     *organization_alert.ListOrganizationNotificationResponse
+		input    *org_alert.ListOrgNotificationRequest
+		want     *org_alert.ListOrgNotificationResponse
 		wantErr  bool
 		mockResp []*model.OrganizationNotification
 		mockErr  error
 	}{
 		{
 			name:  "OK",
-			input: &organization_alert.ListOrganizationNotificationRequest{OrganizationId: 1},
-			want: &organization_alert.ListOrganizationNotificationResponse{
-				OrganizationNotification: []*organization_alert.OrganizationNotification{
+			input: &org_alert.ListOrgNotificationRequest{OrganizationId: 1},
+			want: &org_alert.ListOrgNotificationResponse{
+				OrganizationNotification: []*org_alert.OrganizationNotification{
 					{NotificationId: 1, Name: "notif1", OrganizationId: 1, Type: "slack", NotifySetting: `{"channel_id":"ch1"}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 				},
 			},
@@ -39,25 +39,25 @@ func TestListOrganizationNotification(t *testing.T) {
 		},
 		{
 			name:     "OK - empty",
-			input:    &organization_alert.ListOrganizationNotificationRequest{OrganizationId: 1},
-			want:     &organization_alert.ListOrganizationNotificationResponse{},
+			input:    &org_alert.ListOrgNotificationRequest{OrganizationId: 1},
+			want:     &org_alert.ListOrgNotificationResponse{},
 			mockResp: []*model.OrganizationNotification{},
 		},
 		{
 			name:    "OK - record not found",
-			input:   &organization_alert.ListOrganizationNotificationRequest{OrganizationId: 1},
-			want:    &organization_alert.ListOrganizationNotificationResponse{},
+			input:   &org_alert.ListOrgNotificationRequest{OrganizationId: 1},
+			want:    &org_alert.ListOrgNotificationResponse{},
 			mockErr: gorm.ErrRecordNotFound,
 		},
 		{
 			name:    "NG - DB error",
-			input:   &organization_alert.ListOrganizationNotificationRequest{OrganizationId: 1},
+			input:   &org_alert.ListOrgNotificationRequest{OrganizationId: 1},
 			wantErr: true,
 			mockErr: errors.New("DB error"),
 		},
 		{
 			name:    "NG - validation error",
-			input:   &organization_alert.ListOrganizationNotificationRequest{OrganizationId: 0},
+			input:   &org_alert.ListOrgNotificationRequest{OrganizationId: 0},
 			wantErr: true,
 		},
 	}
@@ -68,7 +68,7 @@ func TestListOrganizationNotification(t *testing.T) {
 			if c.mockResp != nil || c.mockErr != nil {
 				mockDB.On("ListOrgNotification", test.RepeatMockAnything(2)...).Return(c.mockResp, c.mockErr).Once()
 			}
-			got, err := svc.ListOrganizationNotification(context.Background(), c.input)
+			got, err := svc.ListOrgNotification(context.Background(), c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -79,21 +79,21 @@ func TestListOrganizationNotification(t *testing.T) {
 	}
 }
 
-func TestGetOrganizationNotification(t *testing.T) {
+func TestGetOrgNotification(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
 		name     string
-		input    *organization_alert.GetOrganizationNotificationRequest
-		want     *organization_alert.GetOrganizationNotificationResponse
+		input    *org_alert.GetOrgNotificationRequest
+		want     *org_alert.GetOrgNotificationResponse
 		wantErr  bool
 		mockResp *model.OrganizationNotification
 		mockErr  error
 	}{
 		{
 			name:  "OK",
-			input: &organization_alert.GetOrganizationNotificationRequest{OrganizationId: 1, NotificationId: 1},
-			want: &organization_alert.GetOrganizationNotificationResponse{
-				OrganizationNotification: &organization_alert.OrganizationNotification{
+			input: &org_alert.GetOrgNotificationRequest{OrganizationId: 1, NotificationId: 1},
+			want: &org_alert.GetOrgNotificationResponse{
+				OrganizationNotification: &org_alert.OrganizationNotification{
 					NotificationId: 1, Name: "notif1", OrganizationId: 1, Type: "slack",
 					NotifySetting: `{"channel_id":"ch1"}`,
 					CreatedAt:     now.Unix(), UpdatedAt: now.Unix(),
@@ -103,19 +103,19 @@ func TestGetOrganizationNotification(t *testing.T) {
 		},
 		{
 			name:    "OK - record not found",
-			input:   &organization_alert.GetOrganizationNotificationRequest{OrganizationId: 1, NotificationId: 999},
-			want:    &organization_alert.GetOrganizationNotificationResponse{},
+			input:   &org_alert.GetOrgNotificationRequest{OrganizationId: 1, NotificationId: 999},
+			want:    &org_alert.GetOrgNotificationResponse{},
 			mockErr: gorm.ErrRecordNotFound,
 		},
 		{
 			name:    "NG - DB error",
-			input:   &organization_alert.GetOrganizationNotificationRequest{OrganizationId: 1, NotificationId: 1},
+			input:   &org_alert.GetOrgNotificationRequest{OrganizationId: 1, NotificationId: 1},
 			wantErr: true,
 			mockErr: errors.New("DB error"),
 		},
 		{
 			name:    "NG - validation error",
-			input:   &organization_alert.GetOrganizationNotificationRequest{OrganizationId: 0, NotificationId: 1},
+			input:   &org_alert.GetOrgNotificationRequest{OrganizationId: 0, NotificationId: 1},
 			wantErr: true,
 		},
 	}
@@ -126,7 +126,7 @@ func TestGetOrganizationNotification(t *testing.T) {
 			if c.mockResp != nil || c.mockErr != nil {
 				mockDB.On("GetOrgNotification", test.RepeatMockAnything(3)...).Return(c.mockResp, c.mockErr).Once()
 			}
-			got, err := svc.GetOrganizationNotification(context.Background(), c.input)
+			got, err := svc.GetOrgNotification(context.Background(), c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -137,12 +137,12 @@ func TestGetOrganizationNotification(t *testing.T) {
 	}
 }
 
-func TestPutOrganizationNotification(t *testing.T) {
+func TestPutOrgNotification(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
 		name        string
-		input       *organization_alert.PutOrganizationNotificationRequest
-		want        *organization_alert.PutOrganizationNotificationResponse
+		input       *org_alert.PutOrgNotificationRequest
+		want        *org_alert.PutOrgNotificationResponse
 		wantErr     bool
 		mockGetResp *model.OrganizationNotification
 		mockGetErr  error
@@ -151,14 +151,14 @@ func TestPutOrganizationNotification(t *testing.T) {
 	}{
 		{
 			name: "OK Insert",
-			input: &organization_alert.PutOrganizationNotificationRequest{
+			input: &org_alert.PutOrgNotificationRequest{
 				OrganizationId: 1,
 				Name:           "notif1",
 				Type:           "slack",
 				NotifySetting:  `{"webhook_url":"https://example.com"}`,
 			},
-			want: &organization_alert.PutOrganizationNotificationResponse{
-				OrganizationNotification: &organization_alert.OrganizationNotification{
+			want: &org_alert.PutOrgNotificationResponse{
+				OrganizationNotification: &org_alert.OrganizationNotification{
 					NotificationId: 1, Name: "notif1", OrganizationId: 1, Type: "slack",
 					NotifySetting: `{"webhook_url":"https://e**********","channel_id":"","data":{},"locale":""}`,
 					CreatedAt:     now.Unix(), UpdatedAt: now.Unix(),
@@ -168,15 +168,15 @@ func TestPutOrganizationNotification(t *testing.T) {
 		},
 		{
 			name: "OK Update",
-			input: &organization_alert.PutOrganizationNotificationRequest{
+			input: &org_alert.PutOrgNotificationRequest{
 				OrganizationId: 1,
 				NotificationId: 1,
 				Name:           "notif1",
 				Type:           "slack",
 				NotifySetting:  `{"webhook_url":"https://example.com"}`,
 			},
-			want: &organization_alert.PutOrganizationNotificationResponse{
-				OrganizationNotification: &organization_alert.OrganizationNotification{
+			want: &org_alert.PutOrgNotificationResponse{
+				OrganizationNotification: &org_alert.OrganizationNotification{
 					NotificationId: 1, Name: "notif1", OrganizationId: 1, Type: "slack",
 					NotifySetting: `{"webhook_url":"https://e**********","channel_id":"","data":{},"locale":""}`,
 					CreatedAt:     now.Unix(), UpdatedAt: now.Unix(),
@@ -187,14 +187,14 @@ func TestPutOrganizationNotification(t *testing.T) {
 		},
 		{
 			name: "NG - record not found on update",
-			input: &organization_alert.PutOrganizationNotificationRequest{
+			input: &org_alert.PutOrgNotificationRequest{
 				OrganizationId: 1,
 				NotificationId: 1,
 				Name:           "notif1",
 				Type:           "slack",
 				NotifySetting:  `{"webhook_url":"https://example.com"}`,
 			},
-			want:       &organization_alert.PutOrganizationNotificationResponse{},
+			want:       &org_alert.PutOrgNotificationResponse{},
 			mockGetErr: gorm.ErrRecordNotFound,
 		},
 	}
@@ -208,7 +208,7 @@ func TestPutOrganizationNotification(t *testing.T) {
 			if c.mockUpResp != nil || c.mockUpErr != nil {
 				mockDB.On("UpsertOrgNotification", test.RepeatMockAnything(2)...).Return(c.mockUpResp, c.mockUpErr).Once()
 			}
-			got, err := svc.PutOrganizationNotification(context.Background(), c.input)
+			got, err := svc.PutOrgNotification(context.Background(), c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -219,26 +219,26 @@ func TestPutOrganizationNotification(t *testing.T) {
 	}
 }
 
-func TestDeleteOrganizationNotification(t *testing.T) {
+func TestDeleteOrgNotification(t *testing.T) {
 	cases := []struct {
 		name    string
-		input   *organization_alert.DeleteOrganizationNotificationRequest
+		input   *org_alert.DeleteOrgNotificationRequest
 		wantErr bool
 		mockErr error
 	}{
 		{
 			name:  "OK",
-			input: &organization_alert.DeleteOrganizationNotificationRequest{OrganizationId: 1, NotificationId: 1},
+			input: &org_alert.DeleteOrgNotificationRequest{OrganizationId: 1, NotificationId: 1},
 		},
 		{
 			name:    "NG - DB error",
-			input:   &organization_alert.DeleteOrganizationNotificationRequest{OrganizationId: 1, NotificationId: 1},
+			input:   &org_alert.DeleteOrgNotificationRequest{OrganizationId: 1, NotificationId: 1},
 			wantErr: true,
 			mockErr: errors.New("DB error"),
 		},
 		{
 			name:    "NG - validation error",
-			input:   &organization_alert.DeleteOrganizationNotificationRequest{OrganizationId: 0, NotificationId: 1},
+			input:   &org_alert.DeleteOrgNotificationRequest{OrganizationId: 0, NotificationId: 1},
 			wantErr: true,
 		},
 	}
@@ -249,7 +249,7 @@ func TestDeleteOrganizationNotification(t *testing.T) {
 			if c.mockErr != nil || c.input.OrganizationId != 0 && !c.wantErr {
 				mockDB.On("DeleteOrgNotification", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
 			}
-			_, err := svc.DeleteOrganizationNotification(context.Background(), c.input)
+			_, err := svc.DeleteOrgNotification(context.Background(), c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
