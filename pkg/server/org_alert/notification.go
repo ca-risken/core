@@ -4,13 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
-	"strings"
-
-	validation "github.com/go-ozzo/ozzo-validation/v4"
-	is "github.com/go-ozzo/ozzo-validation/v4/is"
 
 	"github.com/ca-risken/core/pkg/model"
+	riskenslack "github.com/ca-risken/core/pkg/slack"
 	"github.com/ca-risken/core/proto/org_alert"
 	"github.com/golang/protobuf/ptypes/empty"
 	"gorm.io/gorm"
@@ -63,11 +59,11 @@ func (s *OrgAlertService) PutOrgNotification(ctx context.Context, req *org_alert
 		return nil, err
 	}
 	if req.NotificationId == 0 {
-		if err := validateNewNotifySetting(req.NotifySetting); err != nil {
+		if err := riskenslack.ValidateNewNotifySetting(req.NotifySetting); err != nil {
 			return nil, err
 		}
 	} else {
-		if err := validateExistingNotifySetting(req.NotifySetting); err != nil {
+		if err := riskenslack.ValidateExistingNotifySetting(req.NotifySetting); err != nil {
 			return nil, err
 		}
 	}
@@ -95,8 +91,9 @@ func (s *OrgAlertService) PutOrgNotification(ctx context.Context, req *org_alert
 	if existData != nil {
 		switch existData.Type {
 		case "slack":
-			convertedNotifySetting, err := s.replaceSlackNotifySetting(ctx, existData.NotifySetting, data.NotifySetting)
+			convertedNotifySetting, err := riskenslack.ReplaceNotifySetting(existData.NotifySetting, data.NotifySetting)
 			if err != nil {
+				s.logger.Errorf(ctx, "Error occured when replace NotifySetting. err: %v", err)
 				return nil, err
 			}
 			newNotifySetting, err := json.Marshal(convertedNotifySetting)
@@ -132,33 +129,6 @@ func (s *OrgAlertService) DeleteOrgNotification(ctx context.Context, req *org_al
 	return &empty.Empty{}, nil
 }
 
-func validateNewNotifySetting(value string) error {
-	var setting slackNotifySetting
-	if err := json.Unmarshal([]byte(value), &setting); err != nil {
-		return fmt.Errorf("invalid json, %w", err)
-	}
-	if strings.TrimSpace(setting.WebhookURL) == "" && strings.TrimSpace(setting.ChannelID) == "" {
-		return errors.New("required webhook_url or channel_id in json")
-	}
-	if err := validation.Validate(strings.TrimSpace(setting.WebhookURL), is.URL); err != nil {
-		return err
-	}
-	return nil
-}
-
-func validateExistingNotifySetting(value string) error {
-	var setting slackNotifySetting
-	if err := json.Unmarshal([]byte(value), &setting); err != nil {
-		return fmt.Errorf("invalid json, %w", err)
-	}
-	if strings.TrimSpace(setting.WebhookURL) != "" {
-		if err := validation.Validate(strings.TrimSpace(setting.WebhookURL), validation.Required, is.URL); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func convertOrgNotification(n *model.OrganizationNotification, mask bool) (*org_alert.OrganizationNotification, error) {
 	if n == nil {
 		return &org_alert.OrganizationNotification{}, nil
@@ -166,7 +136,7 @@ func convertOrgNotification(n *model.OrganizationNotification, mask bool) (*org_
 	setting := n.NotifySetting
 	if mask {
 		var err error
-		setting, err = maskingNotifySetting(n.Type, setting)
+		setting, err = riskenslack.MaskNotifySetting(n.Type, setting)
 		if err != nil {
 			return nil, err
 		}
