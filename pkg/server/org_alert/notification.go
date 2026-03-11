@@ -160,7 +160,7 @@ func (s *OrgAlertService) TestOrgNotification(ctx context.Context, req *org_aler
 	}
 	switch data.Type {
 	case "slack":
-		if err := s.sendSlackTestNotification(ctx, data.NotifySetting); err != nil {
+		if err := riskenslack.SendTestNotification(&s.slackClient, data.NotifySetting, s.defaultLocale); err != nil {
 			return nil, fmt.Errorf("failed to send test notification: %w", err)
 		}
 	default:

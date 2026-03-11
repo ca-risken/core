@@ -8,6 +8,15 @@ import (
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	is "github.com/go-ozzo/ozzo-validation/v4/is"
+	goslack "github.com/slack-go/slack"
+)
+
+const (
+	LocaleJa = "ja"
+	LocaleEn = "en"
+
+	TestNotificationMessageJa = "RISKENからのテスト通知です"
+	TestNotificationMessageEn = "This is a test notification from RISKEN"
 )
 
 // NotifySetting is the Slack notification setting shared by alert and org_alert services.
@@ -105,6 +114,54 @@ func ValidateExistingNotifySetting(value any) error {
 	if strings.TrimSpace(setting.WebhookURL) != "" {
 		if err := validation.Validate(strings.TrimSpace(setting.WebhookURL), validation.Required, is.URL); err != nil {
 			return err
+		}
+	}
+	return nil
+}
+
+// GetLocale returns a valid locale string, falling back to defaultLocale.
+func GetLocale(settingLocale, defaultLocale string) string {
+	switch settingLocale {
+	case LocaleJa:
+		return LocaleJa
+	case LocaleEn:
+		return LocaleEn
+	default:
+		return defaultLocale
+	}
+}
+
+// GetTestMessageText returns the test notification message for the given locale.
+func GetTestMessageText(locale string) string {
+	switch locale {
+	case LocaleJa:
+		return TestNotificationMessageJa
+	default:
+		return TestNotificationMessageEn
+	}
+}
+
+// SendTestNotification sends a test Slack notification using the given settings.
+func SendTestNotification(slackClient *goslack.Client, notifySettingJSON, defaultLocale string) error {
+	var setting NotifySetting
+	if err := json.Unmarshal([]byte(notifySettingJSON), &setting); err != nil {
+		return err
+	}
+
+	locale := GetLocale(setting.Locale, defaultLocale)
+	msg := GetTestMessageText(locale)
+
+	if setting.WebhookURL != "" {
+		webhookMsg := &goslack.WebhookMessage{Text: msg}
+		if setting.Data.Channel != "" {
+			webhookMsg.Channel = setting.Data.Channel
+		}
+		if err := goslack.PostWebhook(setting.WebhookURL, webhookMsg); err != nil {
+			return fmt.Errorf("failed to send slack(webhookurl): %w", err)
+		}
+	} else if setting.ChannelID != "" {
+		if _, _, err := slackClient.PostMessage(setting.ChannelID, goslack.MsgOptionText(msg, false)); err != nil {
+			return fmt.Errorf("failed to send slack(postmessage): %w", err)
 		}
 	}
 	return nil
