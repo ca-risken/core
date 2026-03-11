@@ -18,6 +18,7 @@ import (
 )
 
 func TestAskAISummary(t *testing.T) {
+	savedAlertSummary := "saved alert summary"
 	type MockGetFinding struct {
 		Resp *model.Finding
 		Err  error
@@ -51,6 +52,20 @@ func TestAskAISummary(t *testing.T) {
 			},
 			mockAskAI: &MockAskAI{
 				Resp: "answer",
+			},
+		},
+		{
+			name:  "OK ignore persisted alert summary",
+			input: &finding.GetAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "en"},
+			want:  &finding.GetAISummaryResponse{Answer: "fresh answer"},
+			mockGetFinding: &MockGetFinding{
+				Resp: &model.Finding{AISummary: &savedAlertSummary},
+			},
+			mockGetRecommend: &MockGetRecommend{
+				Resp: &model.Recommend{},
+			},
+			mockAskAI: &MockAskAI{
+				Resp: "fresh answer",
 			},
 		},
 		{

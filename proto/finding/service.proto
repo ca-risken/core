@@ -384,6 +384,8 @@ message GetAlertAISummaryRequest {
 
 message GetAlertAISummaryResponse { string ai_summary = 1; }
 
+// UpdateFindingAISummary persists the alert-notification summary cache.
+// UI on-demand summaries must not be written via this API.
 message UpdateFindingAISummaryRequest {
   uint32 project_id = 1;
   uint64 finding_id = 2;
