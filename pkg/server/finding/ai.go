@@ -20,7 +20,8 @@ func (f *FindingService) GetAISummary(ctx context.Context, req *finding.GetAISum
 	if f.ai == nil {
 		return nil, errors.New("unsupported AI service")
 	}
-	data, err := f.repository.GetFinding(ctx, req.ProjectId, req.FindingId, false)
+	// Alert summaries read from master so the saved DB cache is visible immediately.
+	data, err := f.repository.GetFinding(ctx, req.ProjectId, req.FindingId, true)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("no finding: project_id=%d, finding_id=%d", req.ProjectId, req.FindingId)

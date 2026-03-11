@@ -116,18 +116,10 @@ func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding
 }
 
 func (a *AIClient) AskAlertAISummaryFromFinding(ctx context.Context, f *model.Finding, r *model.Recommend, lang string) (string, error) {
-	if summaryCache := a.getAICache(ctx, generateAlertSummaryCacheKeyForFinding(f.FindingID, lang)); summaryCache != "" {
-		a.logger.Infof(ctx, "Cache HIT(alert-summary): finding_id=%d, lang=%s", f.FindingID, lang)
-		return summaryCache, nil
-	}
-
 	instruction, inputs := generateAskAlertAISummaryInputs(f, r, lang)
 	answer, err := a.responsesAPI(ctx, a.chatGPTModel, instruction, inputs, DefaultTools, "")
 	if err != nil {
 		return "", fmt.Errorf("openai API error(alert-summary): finding_id=%d, err=%w", f.FindingID, err)
-	}
-	if err := a.setAICache(generateAlertSummaryCacheKeyForFinding(f.FindingID, lang), answer.OutputText()); err != nil {
-		return "", fmt.Errorf("cache set error(alert-summary): err=%w", err)
 	}
 	return answer.OutputText(), nil
 }
@@ -175,10 +167,6 @@ func generateFindingDataForAI(f *model.Finding, r *model.Recommend) string {
 
 func generateCacheKeyForFinding(findingID uint64, lang string) string {
 	return fmt.Sprintf("%d/%s", findingID, lang)
-}
-
-func generateAlertSummaryCacheKeyForFinding(findingID uint64, lang string) string {
-	return fmt.Sprintf("alert/%d/%s", findingID, lang)
 }
 
 func getAskAISummaryPrompt(lang string) (promptSystem, promptSummary string) {

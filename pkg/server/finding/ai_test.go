@@ -12,6 +12,7 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/finding"
+	"github.com/stretchr/testify/mock"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -115,7 +116,7 @@ func TestAskAISummary(t *testing.T) {
 
 			if c.mockGetFinding != nil {
 				mockDB.
-					On("GetFinding", test.RepeatMockAnything(4)...).
+					On("GetFinding", mock.Anything, c.input.ProjectId, c.input.FindingId, true).
 					Return(c.mockGetFinding.Resp, c.mockGetFinding.Err).
 					Once()
 			}
