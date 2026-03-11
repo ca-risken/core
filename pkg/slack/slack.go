@@ -72,8 +72,8 @@ func MaskNotifySetting(notificationType, notifySetting string) (string, error) {
 }
 
 // ValidateNewNotifySetting validates notify setting for new notification.
-// Compatible with validation.By (func(interface{}) error).
-func ValidateNewNotifySetting(value interface{}) error {
+// Compatible with validation.By (func(any) error).
+func ValidateNewNotifySetting(value any) error {
 	s, ok := value.(string)
 	if !ok {
 		return fmt.Errorf("notify setting is not string, %v", value)
@@ -92,8 +92,8 @@ func ValidateNewNotifySetting(value interface{}) error {
 }
 
 // ValidateExistingNotifySetting validates notify setting for existing notification.
-// Compatible with validation.By (func(interface{}) error).
-func ValidateExistingNotifySetting(value interface{}) error {
+// Compatible with validation.By (func(any) error).
+func ValidateExistingNotifySetting(value any) error {
 	s, ok := value.(string)
 	if !ok {
 		return fmt.Errorf("notify setting is not string, %v", value)

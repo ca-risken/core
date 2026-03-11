@@ -30,7 +30,7 @@ func (s *OrgAlertService) ListOrgNotification(ctx context.Context, req *org_aler
 			s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
 			return nil, err
 		}
-		data.OrganizationNotification = append(data.OrganizationNotification, converted)
+		data.OrgNotification = append(data.OrgNotification, converted)
 	}
 	return &data, nil
 }
@@ -51,7 +51,7 @@ func (s *OrgAlertService) GetOrgNotification(ctx context.Context, req *org_alert
 		s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
 		return nil, err
 	}
-	return &org_alert.GetOrgNotificationResponse{OrganizationNotification: converted}, nil
+	return &org_alert.GetOrgNotificationResponse{OrgNotification: converted}, nil
 }
 
 func (s *OrgAlertService) PutOrgNotification(ctx context.Context, req *org_alert.PutOrgNotificationRequest) (*org_alert.PutOrgNotificationResponse, error) {
@@ -116,7 +116,7 @@ func (s *OrgAlertService) PutOrgNotification(ctx context.Context, req *org_alert
 		s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
 		return nil, err
 	}
-	return &org_alert.PutOrgNotificationResponse{OrganizationNotification: converted}, nil
+	return &org_alert.PutOrgNotificationResponse{OrgNotification: converted}, nil
 }
 
 func (s *OrgAlertService) DeleteOrgNotification(ctx context.Context, req *org_alert.DeleteOrgNotificationRequest) (*empty.Empty, error) {
@@ -129,9 +129,9 @@ func (s *OrgAlertService) DeleteOrgNotification(ctx context.Context, req *org_al
 	return &empty.Empty{}, nil
 }
 
-func convertOrgNotification(n *model.OrganizationNotification, mask bool) (*org_alert.OrganizationNotification, error) {
+func convertOrgNotification(n *model.OrganizationNotification, mask bool) (*org_alert.OrgNotification, error) {
 	if n == nil {
-		return &org_alert.OrganizationNotification{}, nil
+		return &org_alert.OrgNotification{}, nil
 	}
 	setting := n.NotifySetting
 	if mask {
@@ -141,7 +141,7 @@ func convertOrgNotification(n *model.OrganizationNotification, mask bool) (*org_
 			return nil, err
 		}
 	}
-	return &org_alert.OrganizationNotification{
+	return &org_alert.OrgNotification{
 		NotificationId: n.NotificationID,
 		Name:           n.Name,
 		OrganizationId: n.OrganizationID,

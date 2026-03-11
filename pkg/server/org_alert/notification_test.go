@@ -29,7 +29,7 @@ func TestListOrgNotification(t *testing.T) {
 			name:  "OK",
 			input: &org_alert.ListOrgNotificationRequest{OrganizationId: 1},
 			want: &org_alert.ListOrgNotificationResponse{
-				OrganizationNotification: []*org_alert.OrganizationNotification{
+				OrgNotification: []*org_alert.OrgNotification{
 					{NotificationId: 1, Name: "notif1", OrganizationId: 1, Type: "slack", NotifySetting: `{"channel_id":"ch1"}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 				},
 			},
@@ -93,7 +93,7 @@ func TestGetOrgNotification(t *testing.T) {
 			name:  "OK",
 			input: &org_alert.GetOrgNotificationRequest{OrganizationId: 1, NotificationId: 1},
 			want: &org_alert.GetOrgNotificationResponse{
-				OrganizationNotification: &org_alert.OrganizationNotification{
+				OrgNotification: &org_alert.OrgNotification{
 					NotificationId: 1, Name: "notif1", OrganizationId: 1, Type: "slack",
 					NotifySetting: `{"channel_id":"ch1"}`,
 					CreatedAt:     now.Unix(), UpdatedAt: now.Unix(),
@@ -158,7 +158,7 @@ func TestPutOrgNotification(t *testing.T) {
 				NotifySetting:  `{"webhook_url":"https://example.com"}`,
 			},
 			want: &org_alert.PutOrgNotificationResponse{
-				OrganizationNotification: &org_alert.OrganizationNotification{
+				OrgNotification: &org_alert.OrgNotification{
 					NotificationId: 1, Name: "notif1", OrganizationId: 1, Type: "slack",
 					NotifySetting: `{"webhook_url":"https://e**********","channel_id":"","data":{},"locale":""}`,
 					CreatedAt:     now.Unix(), UpdatedAt: now.Unix(),
@@ -176,7 +176,7 @@ func TestPutOrgNotification(t *testing.T) {
 				NotifySetting:  `{"webhook_url":"https://example.com"}`,
 			},
 			want: &org_alert.PutOrgNotificationResponse{
-				OrganizationNotification: &org_alert.OrganizationNotification{
+				OrgNotification: &org_alert.OrgNotification{
 					NotificationId: 1, Name: "notif1", OrganizationId: 1, Type: "slack",
 					NotifySetting: `{"webhook_url":"https://e**********","channel_id":"","data":{},"locale":""}`,
 					CreatedAt:     now.Unix(), UpdatedAt: now.Unix(),

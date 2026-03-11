@@ -35,22 +35,22 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on OrganizationNotification with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *OrganizationNotification) Validate() error {
+// Validate checks the field values on OrgNotification with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *OrgNotification) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on OrganizationNotification with the
-// rules defined in the proto definition for this message. If any rules are
+// ValidateAll checks the field values on OrgNotification with the rules
+// defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// OrganizationNotificationMultiError, or nil if none found.
-func (m *OrganizationNotification) ValidateAll() error {
+// OrgNotificationMultiError, or nil if none found.
+func (m *OrgNotification) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *OrganizationNotification) validate(all bool) error {
+func (m *OrgNotification) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -72,19 +72,19 @@ func (m *OrganizationNotification) validate(all bool) error {
 	// no validation rules for UpdatedAt
 
 	if len(errors) > 0 {
-		return OrganizationNotificationMultiError(errors)
+		return OrgNotificationMultiError(errors)
 	}
 
 	return nil
 }
 
-// OrganizationNotificationMultiError is an error wrapping multiple validation
-// errors returned by OrganizationNotification.ValidateAll() if the designated
-// constraints aren't met.
-type OrganizationNotificationMultiError []error
+// OrgNotificationMultiError is an error wrapping multiple validation errors
+// returned by OrgNotification.ValidateAll() if the designated constraints
+// aren't met.
+type OrgNotificationMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m OrganizationNotificationMultiError) Error() string {
+func (m OrgNotificationMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -93,11 +93,11 @@ func (m OrganizationNotificationMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m OrganizationNotificationMultiError) AllErrors() []error { return m }
+func (m OrgNotificationMultiError) AllErrors() []error { return m }
 
-// OrganizationNotificationValidationError is the validation error returned by
-// OrganizationNotification.Validate if the designated constraints aren't met.
-type OrganizationNotificationValidationError struct {
+// OrgNotificationValidationError is the validation error returned by
+// OrgNotification.Validate if the designated constraints aren't met.
+type OrgNotificationValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -105,24 +105,22 @@ type OrganizationNotificationValidationError struct {
 }
 
 // Field function returns field value.
-func (e OrganizationNotificationValidationError) Field() string { return e.field }
+func (e OrgNotificationValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e OrganizationNotificationValidationError) Reason() string { return e.reason }
+func (e OrgNotificationValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e OrganizationNotificationValidationError) Cause() error { return e.cause }
+func (e OrgNotificationValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e OrganizationNotificationValidationError) Key() bool { return e.key }
+func (e OrgNotificationValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e OrganizationNotificationValidationError) ErrorName() string {
-	return "OrganizationNotificationValidationError"
-}
+func (e OrgNotificationValidationError) ErrorName() string { return "OrgNotificationValidationError" }
 
 // Error satisfies the builtin error interface
-func (e OrganizationNotificationValidationError) Error() string {
+func (e OrgNotificationValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -134,14 +132,14 @@ func (e OrganizationNotificationValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sOrganizationNotification.%s: %s%s",
+		"invalid %sOrgNotification.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = OrganizationNotificationValidationError{}
+var _ error = OrgNotificationValidationError{}
 
 var _ interface {
 	Field() string
@@ -149,4 +147,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = OrganizationNotificationValidationError{}
+} = OrgNotificationValidationError{}

@@ -170,7 +170,7 @@ func (m *ListOrgNotificationResponse) validate(all bool) error {
 
 	var errors []error
 
-	for idx, item := range m.GetOrganizationNotification() {
+	for idx, item := range m.GetOrgNotification() {
 		_, _ = idx, item
 
 		if all {
@@ -178,7 +178,7 @@ func (m *ListOrgNotificationResponse) validate(all bool) error {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
 					errors = append(errors, ListOrgNotificationResponseValidationError{
-						field:  fmt.Sprintf("OrganizationNotification[%v]", idx),
+						field:  fmt.Sprintf("OrgNotification[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
 					})
@@ -186,7 +186,7 @@ func (m *ListOrgNotificationResponse) validate(all bool) error {
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
 					errors = append(errors, ListOrgNotificationResponseValidationError{
-						field:  fmt.Sprintf("OrganizationNotification[%v]", idx),
+						field:  fmt.Sprintf("OrgNotification[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
 					})
@@ -195,7 +195,7 @@ func (m *ListOrgNotificationResponse) validate(all bool) error {
 		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return ListOrgNotificationResponseValidationError{
-					field:  fmt.Sprintf("OrganizationNotification[%v]", idx),
+					field:  fmt.Sprintf("OrgNotification[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
@@ -432,11 +432,11 @@ func (m *GetOrgNotificationResponse) validate(all bool) error {
 	var errors []error
 
 	if all {
-		switch v := interface{}(m.GetOrganizationNotification()).(type) {
+		switch v := interface{}(m.GetOrgNotification()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
 				errors = append(errors, GetOrgNotificationResponseValidationError{
-					field:  "OrganizationNotification",
+					field:  "OrgNotification",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
@@ -444,16 +444,16 @@ func (m *GetOrgNotificationResponse) validate(all bool) error {
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
 				errors = append(errors, GetOrgNotificationResponseValidationError{
-					field:  "OrganizationNotification",
+					field:  "OrgNotification",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
 			}
 		}
-	} else if v, ok := interface{}(m.GetOrganizationNotification()).(interface{ Validate() error }); ok {
+	} else if v, ok := interface{}(m.GetOrgNotification()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return GetOrgNotificationResponseValidationError{
-				field:  "OrganizationNotification",
+				field:  "OrgNotification",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
@@ -711,11 +711,11 @@ func (m *PutOrgNotificationResponse) validate(all bool) error {
 	var errors []error
 
 	if all {
-		switch v := interface{}(m.GetOrganizationNotification()).(type) {
+		switch v := interface{}(m.GetOrgNotification()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
 				errors = append(errors, PutOrgNotificationResponseValidationError{
-					field:  "OrganizationNotification",
+					field:  "OrgNotification",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
@@ -723,16 +723,16 @@ func (m *PutOrgNotificationResponse) validate(all bool) error {
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
 				errors = append(errors, PutOrgNotificationResponseValidationError{
-					field:  "OrganizationNotification",
+					field:  "OrgNotification",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
 			}
 		}
-	} else if v, ok := interface{}(m.GetOrganizationNotification()).(interface{ Validate() error }); ok {
+	} else if v, ok := interface{}(m.GetOrgNotification()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return PutOrgNotificationResponseValidationError{
-				field:  "OrganizationNotification",
+				field:  "OrgNotification",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}

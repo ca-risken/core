@@ -13,7 +13,7 @@ message ListOrgNotificationRequest {
 }
 
 message ListOrgNotificationResponse {
-  repeated OrganizationNotification organization_notification = 1;
+  repeated OrgNotification org_notification = 1;
 }
 
 // GetOrgNotification
@@ -22,9 +22,7 @@ message GetOrgNotificationRequest {
   uint32 notification_id = 2 [ (validate.rules).uint32.gt = 0 ];
 }
 
-message GetOrgNotificationResponse {
-  OrganizationNotification organization_notification = 1;
-}
+message GetOrgNotificationResponse { OrgNotification org_notification = 1; }
 
 // PutOrgNotification
 message PutOrgNotificationRequest {
@@ -35,9 +33,7 @@ message PutOrgNotificationRequest {
   string notify_setting = 5 [ (validate.rules).string.min_len = 1 ];
 }
 
-message PutOrgNotificationResponse {
-  OrganizationNotification organization_notification = 1;
-}
+message PutOrgNotificationResponse { OrgNotification org_notification = 1; }
 
 // DeleteOrgNotification
 message DeleteOrgNotificationRequest {

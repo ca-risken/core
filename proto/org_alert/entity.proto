@@ -3,8 +3,8 @@ syntax = "proto3";
 package core.org_alert;
 option go_package = "github.com/ca-risken/core/proto/org_alert";
 
-// OrganizationNotification
-message OrganizationNotification {
+// OrgNotification
+message OrgNotification {
   uint32 notification_id = 1;
   string name = 2;
   uint32 organization_id = 3;
