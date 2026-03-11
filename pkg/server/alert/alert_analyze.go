@@ -13,7 +13,7 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
-	orgalert "github.com/ca-risken/core/proto/organization_alert"
+	orgalert "github.com/ca-risken/core/proto/org_alert"
 	projectproto "github.com/ca-risken/core/proto/project"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
@@ -370,16 +370,16 @@ func (a *AlertService) notifyOrgAlerts(
 	project *projectproto.Project,
 	findings *findingDetail,
 ) error {
-	resp, err := a.orgAlertClient.ListOrganizationNotificationByProject(ctx, &orgalert.ListOrganizationNotificationByProjectRequest{
+	resp, err := a.orgAlertClient.ListOrgNotificationByProject(ctx, &orgalert.ListOrgNotificationByProjectRequest{
 		ProjectId: project.ProjectId,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to list org notifications: %w", err)
 	}
-	if resp == nil || len(resp.OrganizationNotification) == 0 {
+	if resp == nil || len(resp.OrgNotification) == 0 {
 		return nil
 	}
-	for _, n := range resp.OrganizationNotification {
+	for _, n := range resp.OrgNotification {
 		switch n.Type {
 		case "slack":
 			if err := a.sendSlackNotification(ctx, a.baseURL, n.NotifySetting, alert, project, rules, findings, a.defaultLocale); err != nil {

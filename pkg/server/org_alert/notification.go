@@ -1,52 +1,46 @@
-package organization_alert
+package org_alert
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
-
-	validation "github.com/go-ozzo/ozzo-validation/v4"
-	is "github.com/go-ozzo/ozzo-validation/v4/is"
 
 	"github.com/ca-risken/core/pkg/model"
-	"github.com/ca-risken/core/proto/organization_alert"
+	riskenslack "github.com/ca-risken/core/pkg/slack"
+	"github.com/ca-risken/core/proto/org_alert"
 	"github.com/golang/protobuf/ptypes/empty"
 	"gorm.io/gorm"
 )
 
-func (s *OrgAlertService) ListOrganizationNotification(ctx context.Context, req *organization_alert.ListOrganizationNotificationRequest) (*organization_alert.ListOrganizationNotificationResponse, error) {
+func (s *OrgAlertService) ListOrgNotification(ctx context.Context, req *org_alert.ListOrgNotificationRequest) (*org_alert.ListOrgNotificationResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 	list, err := s.repository.ListOrgNotification(ctx, req.OrganizationId)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &organization_alert.ListOrganizationNotificationResponse{}, nil
-		}
 		return nil, err
 	}
-	data := organization_alert.ListOrganizationNotificationResponse{}
+	data := org_alert.ListOrgNotificationResponse{}
 	for _, d := range list {
 		converted, err := convertOrgNotification(d, true)
 		if err != nil {
 			s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
 			return nil, err
 		}
-		data.OrganizationNotification = append(data.OrganizationNotification, converted)
+		data.OrgNotification = append(data.OrgNotification, converted)
 	}
 	return &data, nil
 }
 
-func (s *OrgAlertService) GetOrganizationNotification(ctx context.Context, req *organization_alert.GetOrganizationNotificationRequest) (*organization_alert.GetOrganizationNotificationResponse, error) {
+func (s *OrgAlertService) GetOrgNotification(ctx context.Context, req *org_alert.GetOrgNotificationRequest) (*org_alert.GetOrgNotificationResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 	data, err := s.repository.GetOrgNotification(ctx, req.OrganizationId, req.NotificationId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &organization_alert.GetOrganizationNotificationResponse{}, nil
+			return &org_alert.GetOrgNotificationResponse{}, nil
 		}
 		return nil, err
 	}
@@ -55,19 +49,19 @@ func (s *OrgAlertService) GetOrganizationNotification(ctx context.Context, req *
 		s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
 		return nil, err
 	}
-	return &organization_alert.GetOrganizationNotificationResponse{OrganizationNotification: converted}, nil
+	return &org_alert.GetOrgNotificationResponse{OrgNotification: converted}, nil
 }
 
-func (s *OrgAlertService) PutOrganizationNotification(ctx context.Context, req *organization_alert.PutOrganizationNotificationRequest) (*organization_alert.PutOrganizationNotificationResponse, error) {
+func (s *OrgAlertService) PutOrgNotification(ctx context.Context, req *org_alert.PutOrgNotificationRequest) (*org_alert.PutOrgNotificationResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 	if req.NotificationId == 0 {
-		if err := validateNewNotifySetting(req.NotifySetting); err != nil {
+		if err := riskenslack.ValidateNewNotifySetting(req.NotifySetting); err != nil {
 			return nil, err
 		}
 	} else {
-		if err := validateExistingNotifySetting(req.NotifySetting); err != nil {
+		if err := riskenslack.ValidateExistingNotifySetting(req.NotifySetting); err != nil {
 			return nil, err
 		}
 	}
@@ -78,7 +72,7 @@ func (s *OrgAlertService) PutOrganizationNotification(ctx context.Context, req *
 		existData, err = s.repository.GetOrgNotification(ctx, req.OrganizationId, req.NotificationId)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return &organization_alert.PutOrganizationNotificationResponse{}, nil
+				return &org_alert.PutOrgNotificationResponse{}, nil
 			}
 			return nil, err
 		}
@@ -95,8 +89,9 @@ func (s *OrgAlertService) PutOrganizationNotification(ctx context.Context, req *
 	if existData != nil {
 		switch existData.Type {
 		case "slack":
-			convertedNotifySetting, err := s.replaceSlackNotifySetting(ctx, existData.NotifySetting, data.NotifySetting)
+			convertedNotifySetting, err := riskenslack.ReplaceNotifySetting(existData.NotifySetting, data.NotifySetting)
 			if err != nil {
+				s.logger.Errorf(ctx, "Error occured when replace NotifySetting. err: %v", err)
 				return nil, err
 			}
 			newNotifySetting, err := json.Marshal(convertedNotifySetting)
@@ -119,10 +114,10 @@ func (s *OrgAlertService) PutOrganizationNotification(ctx context.Context, req *
 		s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
 		return nil, err
 	}
-	return &organization_alert.PutOrganizationNotificationResponse{OrganizationNotification: converted}, nil
+	return &org_alert.PutOrgNotificationResponse{OrgNotification: converted}, nil
 }
 
-func (s *OrgAlertService) DeleteOrganizationNotification(ctx context.Context, req *organization_alert.DeleteOrganizationNotificationRequest) (*empty.Empty, error) {
+func (s *OrgAlertService) DeleteOrgNotification(ctx context.Context, req *org_alert.DeleteOrgNotificationRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
@@ -132,30 +127,30 @@ func (s *OrgAlertService) DeleteOrganizationNotification(ctx context.Context, re
 	return &empty.Empty{}, nil
 }
 
-func (s *OrgAlertService) ListOrganizationNotificationByProject(ctx context.Context, req *organization_alert.ListOrganizationNotificationByProjectRequest) (*organization_alert.ListOrganizationNotificationByProjectResponse, error) {
+func (s *OrgAlertService) ListOrgNotificationByProject(ctx context.Context, req *org_alert.ListOrgNotificationByProjectRequest) (*org_alert.ListOrgNotificationByProjectResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 	list, err := s.repository.ListOrgNotificationByProjectID(ctx, req.ProjectId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &organization_alert.ListOrganizationNotificationByProjectResponse{}, nil
+			return &org_alert.ListOrgNotificationByProjectResponse{}, nil
 		}
 		return nil, err
 	}
-	data := organization_alert.ListOrganizationNotificationByProjectResponse{}
+	data := org_alert.ListOrgNotificationByProjectResponse{}
 	for _, d := range list {
 		converted, err := convertOrgNotification(d, false)
 		if err != nil {
 			s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
 			return nil, err
 		}
-		data.OrganizationNotification = append(data.OrganizationNotification, converted)
+		data.OrgNotification = append(data.OrgNotification, converted)
 	}
 	return &data, nil
 }
 
-func (s *OrgAlertService) TestOrganizationNotification(ctx context.Context, req *organization_alert.TestOrganizationNotificationRequest) (*empty.Empty, error) {
+func (s *OrgAlertService) TestOrgNotification(ctx context.Context, req *org_alert.TestOrgNotificationRequest) (*empty.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
@@ -174,46 +169,19 @@ func (s *OrgAlertService) TestOrganizationNotification(ctx context.Context, req 
 	return &empty.Empty{}, nil
 }
 
-func validateNewNotifySetting(value string) error {
-	var setting slackNotifySetting
-	if err := json.Unmarshal([]byte(value), &setting); err != nil {
-		return fmt.Errorf("invalid json, %w", err)
-	}
-	if strings.TrimSpace(setting.WebhookURL) == "" && strings.TrimSpace(setting.ChannelID) == "" {
-		return errors.New("required webhook_url or channel_id in json")
-	}
-	if err := validation.Validate(strings.TrimSpace(setting.WebhookURL), is.URL); err != nil {
-		return err
-	}
-	return nil
-}
-
-func validateExistingNotifySetting(value string) error {
-	var setting slackNotifySetting
-	if err := json.Unmarshal([]byte(value), &setting); err != nil {
-		return fmt.Errorf("invalid json, %w", err)
-	}
-	if strings.TrimSpace(setting.WebhookURL) != "" {
-		if err := validation.Validate(strings.TrimSpace(setting.WebhookURL), validation.Required, is.URL); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func convertOrgNotification(n *model.OrganizationNotification, mask bool) (*organization_alert.OrganizationNotification, error) {
+func convertOrgNotification(n *model.OrganizationNotification, mask bool) (*org_alert.OrgNotification, error) {
 	if n == nil {
-		return &organization_alert.OrganizationNotification{}, nil
+		return &org_alert.OrgNotification{}, nil
 	}
 	setting := n.NotifySetting
 	if mask {
 		var err error
-		setting, err = maskingNotifySetting(n.Type, setting)
+		setting, err = riskenslack.MaskNotifySetting(n.Type, setting)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return &organization_alert.OrganizationNotification{
+	return &org_alert.OrgNotification{
 		NotificationId: n.NotificationID,
 		Name:           n.Name,
 		OrganizationId: n.OrganizationID,

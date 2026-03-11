@@ -17,7 +17,7 @@ import (
 	findingserver "github.com/ca-risken/core/pkg/server/finding"
 	iamserver "github.com/ca-risken/core/pkg/server/iam"
 	organizationserver "github.com/ca-risken/core/pkg/server/organization"
-	organization_alertserver "github.com/ca-risken/core/pkg/server/organization_alert"
+	org_alertserver "github.com/ca-risken/core/pkg/server/org_alert"
 	organization_iamserver "github.com/ca-risken/core/pkg/server/organization_iam"
 	projectserver "github.com/ca-risken/core/pkg/server/project"
 	reportserver "github.com/ca-risken/core/pkg/server/report"
@@ -26,7 +26,7 @@ import (
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/iam"
 	"github.com/ca-risken/core/proto/organization"
-	"github.com/ca-risken/core/proto/organization_alert"
+	"github.com/ca-risken/core/proto/org_alert"
 	"github.com/ca-risken/core/proto/organization_iam"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/ca-risken/core/proto/report"
@@ -136,7 +136,7 @@ func (s *Server) Run(ctx context.Context) error {
 	rsvc := reportserver.NewReportService(s.db, s.logger)
 	aisvc := aiserver.NewAIService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, rc, s.logger)
 	osvc := organizationserver.NewOrganizationService(s.db, oimac, s.logger)
-	oasvc := organization_alertserver.NewOrgAlertService(s.db, s.logger, s.config.SlackAPIToken, s.config.defaultLocale)
+	oasvc := org_alertserver.NewOrgAlertService(s.db, s.logger, s.config.SlackAPIToken, s.config.defaultLocale)
 	hsvc := health.NewServer()
 
 	server := grpc.NewServer(
@@ -152,7 +152,7 @@ func (s *Server) Run(ctx context.Context) error {
 	ai.RegisterAIServiceServer(server, aisvc)
 	organization.RegisterOrganizationServiceServer(server, osvc)
 	organization_iam.RegisterOrganizationIAMServiceServer(server, oisvc)
-	organization_alert.RegisterOrganizationAlertServiceServer(server, oasvc)
+	org_alert.RegisterOrgAlertServiceServer(server, oasvc)
 	grpc_health_v1.RegisterHealthServer(server, hsvc)
 
 	reflection.Register(server) // enable reflection API
@@ -230,13 +230,13 @@ func (s *Server) newOrganizationClient(svcAddr string) (organization.Organizatio
 	return organization.NewOrganizationServiceClient(conn), nil
 }
 
-func (s *Server) newOrgAlertClient(svcAddr string) (organization_alert.OrganizationAlertServiceClient, error) {
+func (s *Server) newOrgAlertClient(svcAddr string) (org_alert.OrgAlertServiceClient, error) {
 	ctx := context.Background()
 	conn, err := getGRPCConn(ctx, svcAddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
 	}
-	return organization_alert.NewOrganizationAlertServiceClient(conn), nil
+	return org_alert.NewOrgAlertServiceClient(conn), nil
 }
 
 func (s *Server) newReportClient(svcAddr string) (report.ReportServiceClient, error) {

@@ -9,6 +9,7 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/jarcoal/httpmock"
+	"github.com/slack-go/slack"
 )
 
 func TestSendSlackNotification(t *testing.T) {
@@ -113,6 +114,71 @@ func TestGenerateRuleList(t *testing.T) {
 			got := generateRuleList(c.input)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected result: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestGetFindingAttachment(t *testing.T) {
+	cases := []struct {
+		name     string
+		input    *findingDetail
+		wantNum  int
+		wantLast slack.AttachmentField
+	}{
+		{
+			name: "without ai summary",
+			input: &findingDetail{
+				FindingCount: 1,
+				Exampls: []*findingExample{{
+					FindingID:    1,
+					Description:  "desc",
+					ResourceName: "resource",
+					DataSource:   "ds",
+					Score:        0.9,
+					Tags:         []string{"tag1"},
+				}},
+			},
+			wantNum: 4,
+			wantLast: slack.AttachmentField{
+				Title: "Tags",
+				Value: "`tag1`",
+			},
+		},
+		{
+			name: "with ai summary",
+			input: &findingDetail{
+				FindingCount: 1,
+				Exampls: []*findingExample{{
+					FindingID:    1,
+					Description:  "desc",
+					ResourceName: "resource",
+					DataSource:   "ds",
+					Score:        0.9,
+					Tags:         []string{"tag1"},
+					AISummary:    "summary",
+				}},
+			},
+			wantNum: 5,
+			wantLast: slack.AttachmentField{
+				Title: "AI Summary",
+				Value: "summary",
+			},
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := getFindingAttachment("https://example.com", 1, c.input, LocaleEn)
+			if len(got) != 1 {
+				t.Fatalf("Unexpected attachment count: got=%d", len(got))
+			}
+			if len(got[0].Fields) != c.wantNum {
+				t.Fatalf("Unexpected field count: got=%d want=%d", len(got[0].Fields), c.wantNum)
+			}
+			lastField := got[0].Fields[len(got[0].Fields)-1]
+			if !reflect.DeepEqual(lastField, c.wantLast) {
+				t.Fatalf("Unexpected last field: got=%+v want=%+v", lastField, c.wantLast)
 			}
 		})
 	}

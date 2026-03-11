@@ -362,27 +362,34 @@ func generateRuleList(rules *[]model.AlertRule) string {
 func getFindingAttachment(url string, projectID uint32, findings *findingDetail, locale string) []slack.Attachment {
 	attachments := []slack.Attachment{}
 	for _, f := range findings.Exampls {
-		a := slack.Attachment{
-			Color: getColorByScore(f.Score),
-			Fields: []slack.AttachmentField{
-				{
-					Value: fmt.Sprintf("<%s/finding/finding?project_id=%d&finding_id=%d&from_score=0&status=1&from=slack|%s>", url, projectID, f.FindingID, f.Description),
-				},
-				{
-					Title: "DataSource",
-					Value: f.DataSource,
-					Short: true,
-				},
-				{
-					Title: "ResourceName",
-					Value: f.ResourceName,
-					Short: true,
-				},
-				{
-					Title: "Tags",
-					Value: generateTagContentByFinding(f.Tags),
-				},
+		fields := []slack.AttachmentField{
+			{
+				Value: fmt.Sprintf("<%s/finding/finding?project_id=%d&finding_id=%d&from_score=0&status=1&from=slack|%s>", url, projectID, f.FindingID, f.Description),
 			},
+			{
+				Title: "DataSource",
+				Value: f.DataSource,
+				Short: true,
+			},
+			{
+				Title: "ResourceName",
+				Value: f.ResourceName,
+				Short: true,
+			},
+			{
+				Title: "Tags",
+				Value: generateTagContentByFinding(f.Tags),
+			},
+		}
+		if f.AISummary != "" {
+			fields = append(fields, slack.AttachmentField{
+				Title: "AI Summary",
+				Value: f.AISummary,
+			})
+		}
+		a := slack.Attachment{
+			Color:  getColorByScore(f.Score),
+			Fields: fields,
 		}
 		attachments = append(attachments, a)
 	}

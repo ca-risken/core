@@ -1,13 +1,13 @@
-package organization_alert
+package org_alert
 
 import (
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db"
-	"github.com/ca-risken/core/proto/organization_alert"
+	"github.com/ca-risken/core/proto/org_alert"
 	"github.com/slack-go/slack"
 )
 
-var _ organization_alert.OrganizationAlertServiceServer = (*OrgAlertService)(nil)
+var _ org_alert.OrgAlertServiceServer = (*OrgAlertService)(nil)
 
 type OrgAlertService struct {
 	repository    db.OrgAlertRepository
