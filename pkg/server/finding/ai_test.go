@@ -116,7 +116,7 @@ func TestAskAISummary(t *testing.T) {
 
 			if c.mockGetFinding != nil {
 				mockDB.
-					On("GetFinding", mock.Anything, c.input.ProjectId, c.input.FindingId, true).
+					On("GetFinding", mock.Anything, c.input.ProjectId, c.input.FindingId, false).
 					Return(c.mockGetFinding.Resp, c.mockGetFinding.Err).
 					Once()
 			}
@@ -162,6 +162,7 @@ func TestGetAlertAISummary(t *testing.T) {
 		input            *finding.GetAlertAISummaryRequest
 		want             *finding.GetAlertAISummaryResponse
 		wantErr          bool
+		wantErrCode      codes.Code
 		mockGetFinding   *MockGetFinding
 		mockGetRecommend *MockGetRecommend
 		mockAskAI        *MockAskAI
@@ -220,6 +221,15 @@ func TestGetAlertAISummary(t *testing.T) {
 			},
 		},
 		{
+			name:        "NG finding not found",
+			input:       &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
+			wantErr:     true,
+			wantErrCode: codes.NotFound,
+			mockGetFinding: &MockGetFinding{
+				Err: gorm.ErrRecordNotFound,
+			},
+		},
+		{
 			name:    "NG DB error(GetRecommend)",
 			input:   &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
 			wantErr: true,
@@ -253,7 +263,7 @@ func TestGetAlertAISummary(t *testing.T) {
 
 			if c.mockGetFinding != nil {
 				mockDB.
-					On("GetFinding", test.RepeatMockAnything(4)...).
+					On("GetFinding", mock.Anything, c.input.ProjectId, c.input.FindingId, true).
 					Return(c.mockGetFinding.Resp, c.mockGetFinding.Err).
 					Once()
 			}
@@ -281,6 +291,9 @@ func TestGetAlertAISummary(t *testing.T) {
 			}
 			if err == nil && c.wantErr {
 				t.Fatalf("Expected error, got nil")
+			}
+			if c.wantErrCode != 0 && status.Code(err) != c.wantErrCode {
+				t.Fatalf("Unexpected gRPC code: want=%v, got=%v err=%v", c.wantErrCode, status.Code(err), err)
 			}
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
