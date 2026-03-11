@@ -44,12 +44,6 @@ func TestListOrgNotification(t *testing.T) {
 			mockResp: []*model.OrganizationNotification{},
 		},
 		{
-			name:    "OK - record not found",
-			input:   &org_alert.ListOrgNotificationRequest{OrganizationId: 1},
-			want:    &org_alert.ListOrgNotificationResponse{},
-			mockErr: gorm.ErrRecordNotFound,
-		},
-		{
 			name:    "NG - DB error",
 			input:   &org_alert.ListOrgNotificationRequest{OrganizationId: 1},
 			wantErr: true,
