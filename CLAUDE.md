@@ -117,6 +117,13 @@ proto/          # Protocol buffer definitions
 hack/           # Build scripts
 ```
 
+**Consistent Naming Convention Across Packages**:
+Files and directories in `proto/`, `pkg/model/`, `pkg/server/`, and `pkg/db/` must all use the same name for a given service.
+- `proto/organization/` → `pkg/model/organization.go`, `pkg/server/organization/`, `pkg/db/organization.go`
+- `proto/alert/` → `pkg/model/alert.go`, `pkg/server/alert/`, `pkg/db/alert.go`
+- `proto/org_alert/` → `pkg/model/org_alert.go`, `pkg/server/org_alert/`, `pkg/db/org_alert.go`
+- `proto/finding/` → `pkg/model/finding.go`, `pkg/server/finding/`, `pkg/db/finding.go`
+
 ### Development Guidelines
 
 **Adding New Services**:
