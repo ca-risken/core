@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package core.org_alert;
+option go_package = "github.com/ca-risken/core/proto/org_alert";
+
+// OrgNotification
+message OrgNotification {
+  uint32 notification_id = 1;
+  string name = 2;
+  uint32 organization_id = 3;
+  string type = 4;
+  string notify_setting = 5;
+  int64 created_at = 6;
+  int64 updated_at = 7;
+}
