@@ -102,7 +102,6 @@ func TestValidate_ListFindingRequest(t *testing.T) {
 	}
 }
 
-
 func TestValidate_ListFindingForOrgRequest(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -1982,6 +1981,53 @@ func TestValidate_GetAISummaryRequest(t *testing.T) {
 				t.Fatal("Unexpected no error")
 			} else if !c.wantErr && err != nil {
 				t.Fatalf("Unexpected error occured: wantErr=%t, err=%+v", c.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestValidate_GetAlertAISummaryRequest(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   *GetAlertAISummaryRequest
+		wantErr bool
+	}{
+		{
+			name:  "OK minimum",
+			input: &GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1},
+		},
+		{
+			name:  "OK with lang en",
+			input: &GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "en"},
+		},
+		{
+			name:  "OK with lang ja",
+			input: &GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
+		},
+		{
+			name:    "NG required project_id",
+			input:   &GetAlertAISummaryRequest{FindingId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG required finding_id",
+			input:   &GetAlertAISummaryRequest{ProjectId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG invalid lang",
+			input:   &GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "xxx"},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.input.Validate()
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatal("Expected error, got nil")
 			}
 		})
 	}

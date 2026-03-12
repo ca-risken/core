@@ -4,15 +4,17 @@ import "time"
 
 // Finding entity model
 type Finding struct {
-	FindingID          uint64 `gorm:"primary_key"`
-	Description        string
-	DataSource         string
-	DataSourceID       string
-	ResourceName       string
-	ProjectID          uint32
-	OriginalScore      float32
-	Score              float32
-	Data               string
+	FindingID     uint64 `gorm:"primary_key"`
+	Description   string
+	DataSource    string
+	DataSourceID  string
+	ResourceName  string
+	ProjectID     uint32
+	OriginalScore float32
+	Score         float32
+	Data          string
+	// AISummary is reserved for alert notification summaries.
+	// UI on-demand summaries are generated separately and must not be persisted here.
 	AISummary          *string
 	AISummaryCreatedAt *time.Time
 	CreatedAt          time.Time
