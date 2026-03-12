@@ -133,9 +133,6 @@ func (s *OrgAlertService) ListOrgNotificationByProject(ctx context.Context, req 
 	}
 	list, err := s.repository.ListOrgNotificationByProjectID(ctx, req.ProjectId)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &org_alert.ListOrgNotificationByProjectResponse{}, nil
-		}
 		return nil, err
 	}
 	data := org_alert.ListOrgNotificationByProjectResponse{}
@@ -156,6 +153,9 @@ func (s *OrgAlertService) TestOrgNotification(ctx context.Context, req *org_aler
 	}
 	data, err := s.repository.GetOrgNotification(ctx, req.OrganizationId, req.NotificationId)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &empty.Empty{}, nil
+		}
 		return nil, err
 	}
 	switch data.Type {
