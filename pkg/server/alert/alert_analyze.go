@@ -322,6 +322,7 @@ func (a *AlertService) NotificationAlert(
 	if err != nil {
 		return err
 	}
+	notified := false
 	for _, alertCondNotification := range *alertCondNotifications {
 		// 連続通知を防ぐ
 		if !existsNewFindings && time.Now().Unix() < alertCondNotification.NotifiedAt.Unix()+int64(alertCondNotification.CacheSecond) {
@@ -341,6 +342,7 @@ func (a *AlertService) NotificationAlert(
 		default:
 			a.logger.Warn(ctx, "This notification_type is unimprement.", notification.Type)
 		}
+		notified = true
 		// 通知時刻を更新する
 		dataAlertCondNotification := &model.AlertCondNotification{
 			AlertConditionID: alertCondNotification.AlertConditionID,
@@ -355,8 +357,8 @@ func (a *AlertService) NotificationAlert(
 		}
 	}
 
-	// Organization通知（CacheSecondによる抑制あり）
-	if shouldNotifyOrg(alertCondNotifications, existsNewFindings) {
+	// プロジェクト通知が送信された場合、Organization通知も送信する
+	if notified {
 		if err := a.notifyOrgAlerts(ctx, alert, rules, project, findings); err != nil {
 			a.logger.Errorf(ctx, "Failed to notify organization alerts: %v", err)
 		}
@@ -395,36 +397,6 @@ func (a *AlertService) notifyOrgAlerts(
 	return nil
 }
 
-const defaultOrgCacheSecond uint32 = 2592000 // 30 days
-
-// shouldNotifyOrg determines whether org notifications should be sent.
-// It uses the minimum CacheSecond from project's AlertCondNotifications (default 30 days)
-// and the maximum NotifiedAt as the last notification timestamp.
-func shouldNotifyOrg(alertCondNotifications *[]model.AlertCondNotification, existsNewFindings bool) bool {
-	if existsNewFindings {
-		return true
-	}
-	if alertCondNotifications == nil || len(*alertCondNotifications) == 0 {
-		return true
-	}
-
-	minCacheSecond := defaultOrgCacheSecond
-	var maxNotifiedAt time.Time
-	for _, acn := range *alertCondNotifications {
-		if acn.CacheSecond > 0 && acn.CacheSecond < minCacheSecond {
-			minCacheSecond = acn.CacheSecond
-		}
-		if acn.NotifiedAt.After(maxNotifiedAt) {
-			maxNotifiedAt = acn.NotifiedAt
-		}
-	}
-
-	// 最後の通知時刻 + CacheSecond が現在時刻より未来の場合は抑制
-	if time.Now().Unix() < maxNotifiedAt.Unix()+int64(minCacheSecond) {
-		return false
-	}
-	return true
-}
 
 func (a *AlertService) analyzeAlertByRule(ctx context.Context, alertRule *model.AlertRule) (bool, *[]uint64, error) {
 	param := &finding.BatchListFindingRequest{
