@@ -339,10 +339,10 @@ func (a *AlertService) NotificationAlert(
 			if err != nil {
 				return fmt.Errorf("notify error: notification_id=%d, err=%w", notification.NotificationID, err)
 			}
+			notified = true
 		default:
 			a.logger.Warn(ctx, "This notification_type is unimprement.", notification.Type)
 		}
-		notified = true
 		// 通知時刻を更新する
 		dataAlertCondNotification := &model.AlertCondNotification{
 			AlertConditionID: alertCondNotification.AlertConditionID,
@@ -357,7 +357,6 @@ func (a *AlertService) NotificationAlert(
 		}
 	}
 
-	// プロジェクト通知が送信された場合、Organization通知も送信する
 	if notified {
 		if err := a.notifyOrgAlerts(ctx, alert, rules, project, findings); err != nil {
 			a.logger.Errorf(ctx, "Failed to notify organization alerts: %v", err)
@@ -396,7 +395,6 @@ func (a *AlertService) notifyOrgAlerts(
 	}
 	return nil
 }
-
 
 func (a *AlertService) analyzeAlertByRule(ctx context.Context, alertRule *model.AlertRule) (bool, *[]uint64, error) {
 	param := &finding.BatchListFindingRequest{

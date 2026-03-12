@@ -415,7 +415,6 @@ func TestRegistAlertByAnalyze(t *testing.T) {
 	}
 }
 
-
 func TestCompareLatestAlertFinding(t *testing.T) {
 	type args struct {
 		alert      *model.Alert

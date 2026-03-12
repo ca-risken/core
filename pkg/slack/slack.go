@@ -12,11 +12,11 @@ import (
 )
 
 const (
-	LocaleJa = "ja"
-	LocaleEn = "en"
+	localeJa = "ja"
+	localeEn = "en"
 
-	TestNotificationMessageJa = "RISKENからのテスト通知です"
-	TestNotificationMessageEn = "This is a test notification from RISKEN"
+	testNotificationMessageJa = "RISKENからのテスト通知です"
+	testNotificationMessageEn = "This is a test notification from RISKEN"
 )
 
 // NotifySetting is the Slack notification setting shared by alert and org_alert services.
@@ -119,25 +119,25 @@ func ValidateExistingNotifySetting(value any) error {
 	return nil
 }
 
-// GetLocale returns a valid locale string, falling back to defaultLocale.
-func GetLocale(settingLocale, defaultLocale string) string {
+// getLocale returns a valid locale string, falling back to defaultLocale.
+func getLocale(settingLocale, defaultLocale string) string {
 	switch settingLocale {
-	case LocaleJa:
-		return LocaleJa
-	case LocaleEn:
-		return LocaleEn
+	case localeJa:
+		return localeJa
+	case localeEn:
+		return localeEn
 	default:
 		return defaultLocale
 	}
 }
 
-// GetTestMessageText returns the test notification message for the given locale.
-func GetTestMessageText(locale string) string {
+// getTestMessageText returns the test notification message for the given locale.
+func getTestMessageText(locale string) string {
 	switch locale {
-	case LocaleJa:
-		return TestNotificationMessageJa
+	case localeJa:
+		return testNotificationMessageJa
 	default:
-		return TestNotificationMessageEn
+		return testNotificationMessageEn
 	}
 }
 
@@ -148,8 +148,8 @@ func SendTestNotification(slackClient *goslack.Client, notifySettingJSON, defaul
 		return err
 	}
 
-	locale := GetLocale(setting.Locale, defaultLocale)
-	msg := GetTestMessageText(locale)
+	locale := getLocale(setting.Locale, defaultLocale)
+	msg := getTestMessageText(locale)
 
 	if setting.WebhookURL != "" {
 		webhookMsg := &goslack.WebhookMessage{Text: msg}
