@@ -60,6 +60,24 @@ Use the following markdown format for your response.
 ・bbb
 </format>
 `
+	PROMPT_ALERT_SUMMARY_EN = `A security finding will be posted to Slack.
+Write a short, natural summary for Slack that helps a non-security expert understand the issue quickly.
+
+Requirements:
+- Use plain English
+- Keep it within 300 characters
+- Briefly explain what was detected and what action should be considered
+- Do not use markdown headings or bullet points
+`
+	PROMPT_ALERT_SUMMARY_JP = `セキュリティの検知結果をSlackに通知します。
+非セキュリティ担当者でもすぐ理解できるように、Slack向けの短く自然な日本語の要約を書いてください。
+
+要件:
+- 日本語
+- 300文字以内で簡潔にまとめる
+- 何を検知したかと、取るべき対応を短く含める
+- Markdown見出しや箇条書きは使わない
+`
 	FINDING_FORMAT_FOR_AI = `The RISKEN tool detected the following issue related to cloud security.
 Score: 
 %.1f
@@ -93,6 +111,15 @@ func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding
 	}
 	if err := a.setAICache(generateCacheKeyForFinding(f.FindingID, lang), answer.OutputText()); err != nil {
 		return "", fmt.Errorf("cache set error: err=%w", err)
+	}
+	return answer.OutputText(), nil
+}
+
+func (a *AIClient) AskAlertAISummaryFromFinding(ctx context.Context, f *model.Finding, r *model.Recommend, lang string) (string, error) {
+	instruction, inputs := generateAskAlertAISummaryInputs(f, r, lang)
+	answer, err := a.responsesAPI(ctx, a.chatGPTModel, instruction, inputs, DefaultTools, "")
+	if err != nil {
+		return "", fmt.Errorf("openai API error(alert-summary): finding_id=%d, err=%w", f.FindingID, err)
 	}
 	return answer.OutputText(), nil
 }
@@ -152,8 +179,41 @@ func getAskAISummaryPrompt(lang string) (promptSystem, promptSummary string) {
 	return
 }
 
+func getAskAlertAISummaryPrompt(lang string) (promptSystem, promptSummary string) {
+	promptSystem = PROMPT_SYSTEM_MSG_EN
+	promptSummary = PROMPT_ALERT_SUMMARY_EN
+	if lang == LANG_JP {
+		promptSystem = PROMPT_SYSTEM_MSG_JP
+		promptSummary = PROMPT_ALERT_SUMMARY_JP
+	}
+	return
+}
+
 func generateAskAISummaryInputs(f *model.Finding, r *model.Recommend, lang string) (string, responses.ResponseNewParamsInputUnion) {
 	promptSystem, promptSummary := getAskAISummaryPrompt(lang)
+	inputParam := responses.ResponseInputParam{
+		responses.ResponseInputItemUnionParam{
+			OfMessage: &responses.EasyInputMessageParam{
+				Role: responses.EasyInputMessageRoleAssistant,
+				Content: responses.EasyInputMessageContentUnionParam{
+					OfString: openai.String(promptSummary),
+				},
+			},
+		},
+		responses.ResponseInputItemUnionParam{
+			OfMessage: &responses.EasyInputMessageParam{
+				Role: responses.EasyInputMessageRoleUser,
+				Content: responses.EasyInputMessageContentUnionParam{
+					OfString: openai.String(generateFindingDataForAI(f, r)),
+				},
+			},
+		},
+	}
+	return promptSystem, responses.ResponseNewParamsInputUnion{OfInputItemList: inputParam}
+}
+
+func generateAskAlertAISummaryInputs(f *model.Finding, r *model.Recommend, lang string) (string, responses.ResponseNewParamsInputUnion) {
+	promptSystem, promptSummary := getAskAlertAISummaryPrompt(lang)
 	inputParam := responses.ResponseInputParam{
 		responses.ResponseInputItemUnionParam{
 			OfMessage: &responses.EasyInputMessageParam{

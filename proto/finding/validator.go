@@ -31,7 +31,6 @@ func (l *ListFindingRequest) Validate() error {
 	)
 }
 
-
 // Validate ListFindingForOrgRequest
 func (l *ListFindingForOrgRequest) Validate() error {
 	return validation.ValidateStruct(l,
@@ -470,6 +469,15 @@ func (r *ResourceTagForBatch) Validate() error {
 
 // Validate for GetAISummaryRequest
 func (a *GetAISummaryRequest) Validate() error {
+	return validation.ValidateStruct(a,
+		validation.Field(&a.ProjectId, validation.Required),
+		validation.Field(&a.FindingId, validation.Required),
+		validation.Field(&a.Lang, validation.In("en", "ja")),
+	)
+}
+
+// Validate for GetAlertAISummaryRequest
+func (a *GetAlertAISummaryRequest) Validate() error {
 	return validation.ValidateStruct(a,
 		validation.Field(&a.ProjectId, validation.Required),
 		validation.Field(&a.FindingId, validation.Required),

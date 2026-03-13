@@ -375,7 +375,7 @@ func TestDeleteOrgNotification(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			mockDB := mocks.NewOrgAlertRepository(t)
 			svc := OrgAlertService{repository: mockDB, logger: logging.NewLogger()}
-			if c.mockErr != nil || c.input.OrganizationId != 0 && !c.wantErr {
+			if c.mockErr != nil || (c.input.OrganizationId != 0 && !c.wantErr) {
 				mockDB.On("DeleteOrgNotification", test.RepeatMockAnything(3)...).Return(c.mockErr).Once()
 			}
 			_, err := svc.DeleteOrgNotification(context.Background(), c.input)
