@@ -139,11 +139,18 @@ func TestGetFindingDetailsForNotification(t *testing.T) {
 		Resp *finding.ListFindingTagResponse
 		Err  error
 	}
+	type mockGetAlertAISummary struct {
+		Resp *finding.GetAlertAISummaryResponse
+		Err  error
+	}
 	cases := []struct {
-		name           string
-		input          inputParam
-		getFinding     mockGetFinding
-		listFindingTag mockListFindingTag
+		name              string
+		input             inputParam
+		aiSummaryEnabled  bool
+		summaryLanguage   string
+		getFinding        mockGetFinding
+		getAlertAISummary *mockGetAlertAISummary
+		listFindingTag    mockListFindingTag
 
 		want    *findingDetail
 		wantErr bool
@@ -156,6 +163,68 @@ func TestGetFindingDetailsForNotification(t *testing.T) {
 					Finding: &finding.Finding{FindingId: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0},
 				},
 				Err: nil,
+			},
+			listFindingTag: mockListFindingTag{
+				Resp: &finding.ListFindingTagResponse{
+					Tag: []*finding.FindingTag{
+						{FindingTagId: 1, Tag: "tag1"},
+					},
+				},
+				Err: nil,
+			},
+			want: &findingDetail{
+				FindingCount: 1,
+				Exampls: []*findingExample{
+					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0, Tags: []string{"tag1"}},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:             "OK with alert AI summary",
+			input:            inputParam{ProjectID: 1, FindingIDs: &[]uint64{1}},
+			aiSummaryEnabled: true,
+			summaryLanguage:  "ja",
+			getFinding: mockGetFinding{
+				Resp: &finding.GetFindingResponse{
+					Finding: &finding.Finding{FindingId: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0},
+				},
+				Err: nil,
+			},
+			getAlertAISummary: &mockGetAlertAISummary{
+				Resp: &finding.GetAlertAISummaryResponse{AiSummary: "summary"},
+				Err:  nil,
+			},
+			listFindingTag: mockListFindingTag{
+				Resp: &finding.ListFindingTagResponse{
+					Tag: []*finding.FindingTag{
+						{FindingTagId: 1, Tag: "tag1"},
+					},
+				},
+				Err: nil,
+			},
+			want: &findingDetail{
+				FindingCount: 1,
+				Exampls: []*findingExample{
+					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0, Tags: []string{"tag1"}, AISummary: "summary"},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:             "OK alert AI summary failure continues",
+			input:            inputParam{ProjectID: 1, FindingIDs: &[]uint64{1}},
+			aiSummaryEnabled: true,
+			summaryLanguage:  "ja",
+			getFinding: mockGetFinding{
+				Resp: &finding.GetFindingResponse{
+					Finding: &finding.Finding{FindingId: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0},
+				},
+				Err: nil,
+			},
+			getAlertAISummary: &mockGetAlertAISummary{
+				Resp: nil,
+				Err:  errors.New("ai error"),
 			},
 			listFindingTag: mockListFindingTag{
 				Resp: &finding.ListFindingTagResponse{
@@ -260,8 +329,16 @@ func TestGetFindingDetailsForNotification(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			mockFinding := findingmock.FindingServiceClient{}
-			svc := AlertService{findingClient: &mockFinding, logger: logging.NewLogger()}
+			svc := AlertService{
+				findingClient:    &mockFinding,
+				logger:           logging.NewLogger(),
+				aiSummaryEnabled: c.aiSummaryEnabled,
+				summaryLanguage:  c.summaryLanguage,
+			}
 			mockFinding.On("GetFinding", mock.Anything, mock.Anything).Return(c.getFinding.Resp, c.getFinding.Err)
+			if c.getAlertAISummary != nil {
+				mockFinding.On("GetAlertAISummary", mock.Anything, mock.Anything).Return(c.getAlertAISummary.Resp, c.getAlertAISummary.Err)
+			}
 			mockFinding.On("ListFindingTag", mock.Anything, mock.Anything).Return(c.listFindingTag.Resp, c.listFindingTag.Err)
 			got, err := svc.getFindingDetailsForNotification(context.TODO(), c.input.ProjectID, c.input.FindingIDs)
 			if err != nil && !c.wantErr {

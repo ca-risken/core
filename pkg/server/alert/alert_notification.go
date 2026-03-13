@@ -354,6 +354,18 @@ func (a *AlertService) getFindingDetailsForNotification(ctx context.Context, pro
 		ex.ResourceName = resp.Finding.ResourceName
 		ex.DataSource = resp.Finding.DataSource
 		ex.Score = resp.Finding.Score
+		if a.aiSummaryEnabled {
+			summaryResp, err := a.findingClient.GetAlertAISummary(ctx, &finding.GetAlertAISummaryRequest{
+				ProjectId: projectID,
+				FindingId: id,
+				Lang:      a.summaryLanguage,
+			})
+			if err != nil {
+				a.logger.Warnf(ctx, "Failed to get alert AI summary, project_id=%d, finding_id=%d, err=%+v", projectID, id, err)
+			} else {
+				ex.AISummary = summaryResp.AiSummary
+			}
+		}
 
 		// finding tag
 		tagResp, err := a.findingClient.ListFindingTag(ctx, &finding.ListFindingTagRequest{FindingId: id, ProjectId: projectID})
