@@ -41,14 +41,33 @@ message DeleteOrgNotificationRequest {
   uint32 notification_id = 2 [ (validate.rules).uint32.gt = 0 ];
 }
 
+// ListOrgNotificationByProject
+message ListOrgNotificationByProjectRequest {
+  uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ];
+}
+
+message ListOrgNotificationByProjectResponse {
+  repeated OrgNotification org_notification = 1;
+}
+
+// TestOrgNotification
+message TestOrgNotificationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 notification_id = 2 [ (validate.rules).uint32.gt = 0 ];
+}
+
 // OrgAlertService
 service OrgAlertService {
   rpc ListOrgNotification(ListOrgNotificationRequest)
       returns (ListOrgNotificationResponse) {}
+  rpc ListOrgNotificationByProject(ListOrgNotificationByProjectRequest)
+      returns (ListOrgNotificationByProjectResponse) {}
   rpc GetOrgNotification(GetOrgNotificationRequest)
       returns (GetOrgNotificationResponse) {}
   rpc PutOrgNotification(PutOrgNotificationRequest)
       returns (PutOrgNotificationResponse) {}
   rpc DeleteOrgNotification(DeleteOrgNotificationRequest)
+      returns (google.protobuf.Empty) {}
+  rpc TestOrgNotification(TestOrgNotificationRequest)
       returns (google.protobuf.Empty) {}
 }

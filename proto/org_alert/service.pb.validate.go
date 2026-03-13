@@ -943,3 +943,382 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DeleteOrgNotificationRequestValidationError{}
+
+// Validate checks the field values on ListOrgNotificationByProjectRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *ListOrgNotificationByProjectRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListOrgNotificationByProjectRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// ListOrgNotificationByProjectRequestMultiError, or nil if none found.
+func (m *ListOrgNotificationByProjectRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListOrgNotificationByProjectRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetProjectId() <= 0 {
+		err := ListOrgNotificationByProjectRequestValidationError{
+			field:  "ProjectId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return ListOrgNotificationByProjectRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListOrgNotificationByProjectRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// ListOrgNotificationByProjectRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ListOrgNotificationByProjectRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListOrgNotificationByProjectRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListOrgNotificationByProjectRequestMultiError) AllErrors() []error { return m }
+
+// ListOrgNotificationByProjectRequestValidationError is the validation error
+// returned by ListOrgNotificationByProjectRequest.Validate if the designated
+// constraints aren't met.
+type ListOrgNotificationByProjectRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListOrgNotificationByProjectRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListOrgNotificationByProjectRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListOrgNotificationByProjectRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListOrgNotificationByProjectRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListOrgNotificationByProjectRequestValidationError) ErrorName() string {
+	return "ListOrgNotificationByProjectRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListOrgNotificationByProjectRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListOrgNotificationByProjectRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListOrgNotificationByProjectRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListOrgNotificationByProjectRequestValidationError{}
+
+// Validate checks the field values on ListOrgNotificationByProjectResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *ListOrgNotificationByProjectResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListOrgNotificationByProjectResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// ListOrgNotificationByProjectResponseMultiError, or nil if none found.
+func (m *ListOrgNotificationByProjectResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListOrgNotificationByProjectResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetOrgNotification() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ListOrgNotificationByProjectResponseValidationError{
+						field:  fmt.Sprintf("OrgNotification[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ListOrgNotificationByProjectResponseValidationError{
+						field:  fmt.Sprintf("OrgNotification[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListOrgNotificationByProjectResponseValidationError{
+					field:  fmt.Sprintf("OrgNotification[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ListOrgNotificationByProjectResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListOrgNotificationByProjectResponseMultiError is an error wrapping multiple
+// validation errors returned by
+// ListOrgNotificationByProjectResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ListOrgNotificationByProjectResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListOrgNotificationByProjectResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListOrgNotificationByProjectResponseMultiError) AllErrors() []error { return m }
+
+// ListOrgNotificationByProjectResponseValidationError is the validation error
+// returned by ListOrgNotificationByProjectResponse.Validate if the designated
+// constraints aren't met.
+type ListOrgNotificationByProjectResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListOrgNotificationByProjectResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListOrgNotificationByProjectResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListOrgNotificationByProjectResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListOrgNotificationByProjectResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListOrgNotificationByProjectResponseValidationError) ErrorName() string {
+	return "ListOrgNotificationByProjectResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListOrgNotificationByProjectResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListOrgNotificationByProjectResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListOrgNotificationByProjectResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListOrgNotificationByProjectResponseValidationError{}
+
+// Validate checks the field values on TestOrgNotificationRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *TestOrgNotificationRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on TestOrgNotificationRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// TestOrgNotificationRequestMultiError, or nil if none found.
+func (m *TestOrgNotificationRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *TestOrgNotificationRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() <= 0 {
+		err := TestOrgNotificationRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetNotificationId() <= 0 {
+		err := TestOrgNotificationRequestValidationError{
+			field:  "NotificationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return TestOrgNotificationRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// TestOrgNotificationRequestMultiError is an error wrapping multiple
+// validation errors returned by TestOrgNotificationRequest.ValidateAll() if
+// the designated constraints aren't met.
+type TestOrgNotificationRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m TestOrgNotificationRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m TestOrgNotificationRequestMultiError) AllErrors() []error { return m }
+
+// TestOrgNotificationRequestValidationError is the validation error returned
+// by TestOrgNotificationRequest.Validate if the designated constraints aren't met.
+type TestOrgNotificationRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e TestOrgNotificationRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e TestOrgNotificationRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e TestOrgNotificationRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e TestOrgNotificationRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e TestOrgNotificationRequestValidationError) ErrorName() string {
+	return "TestOrgNotificationRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e TestOrgNotificationRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sTestOrgNotificationRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = TestOrgNotificationRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = TestOrgNotificationRequestValidationError{}
