@@ -15,8 +15,10 @@ const (
 	localeJa = "ja"
 	localeEn = "en"
 
-	testNotificationMessageJa = "RISKENからのテスト通知です"
-	testNotificationMessageEn = "This is a test notification from RISKEN"
+	testNotificationMessageJa    = "RISKENからのテスト通知です"
+	testNotificationMessageEn    = "This is a test notification from RISKEN"
+	testOrgNotificationMessageJa = "RISKENからのテスト通知です（Organization）"
+	testOrgNotificationMessageEn = "This is a test notification from RISKEN (Organization)"
 )
 
 // NotifySetting is the Slack notification setting shared by alert and org_alert services.
@@ -141,15 +143,34 @@ func getTestMessageText(locale string) string {
 	}
 }
 
+// getOrgTestMessageText returns the Organization test notification message for the given locale.
+func getOrgTestMessageText(locale string) string {
+	switch locale {
+	case localeJa:
+		return testOrgNotificationMessageJa
+	default:
+		return testOrgNotificationMessageEn
+	}
+}
+
 // SendTestNotification sends a test Slack notification using the given settings.
 func SendTestNotification(slackClient *goslack.Client, notifySettingJSON, defaultLocale string) error {
+	return sendTestNotificationWithMessage(slackClient, notifySettingJSON, defaultLocale, getTestMessageText)
+}
+
+// SendOrgTestNotification sends a test Slack notification for Organization using the given settings.
+func SendOrgTestNotification(slackClient *goslack.Client, notifySettingJSON, defaultLocale string) error {
+	return sendTestNotificationWithMessage(slackClient, notifySettingJSON, defaultLocale, getOrgTestMessageText)
+}
+
+func sendTestNotificationWithMessage(slackClient *goslack.Client, notifySettingJSON, defaultLocale string, msgFunc func(string) string) error {
 	var setting NotifySetting
 	if err := json.Unmarshal([]byte(notifySettingJSON), &setting); err != nil {
 		return err
 	}
 
 	locale := getLocale(setting.Locale, defaultLocale)
-	msg := getTestMessageText(locale)
+	msg := msgFunc(locale)
 
 	if setting.WebhookURL != "" {
 		webhookMsg := &goslack.WebhookMessage{Text: msg}
