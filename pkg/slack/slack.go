@@ -8,7 +8,6 @@ import (
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	is "github.com/go-ozzo/ozzo-validation/v4/is"
-	goslack "github.com/slack-go/slack"
 )
 
 const (
@@ -21,7 +20,6 @@ const (
 	testOrgNotificationMessageEn = "This is a test notification from RISKEN (Organization)"
 )
 
-// NotifySetting is the Slack notification setting shared by alert and org_alert services.
 type NotifySetting struct {
 	WebhookURL string       `json:"webhook_url"`
 	ChannelID  string       `json:"channel_id"`
@@ -29,7 +27,6 @@ type NotifySetting struct {
 	Locale     string       `json:"locale"`
 }
 
-// NotifyOption is the optional Slack notification parameters.
 type NotifyOption struct {
 	Channel string `json:"channel,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -121,8 +118,7 @@ func ValidateExistingNotifySetting(value any) error {
 	return nil
 }
 
-// getLocale returns a valid locale string, falling back to defaultLocale.
-func getLocale(settingLocale, defaultLocale string) string {
+func GetLocale(settingLocale, defaultLocale string) string {
 	switch settingLocale {
 	case localeJa:
 		return localeJa
@@ -133,8 +129,7 @@ func getLocale(settingLocale, defaultLocale string) string {
 	}
 }
 
-// getTestMessageText returns the test notification message for the given locale.
-func getTestMessageText(locale string) string {
+func GetTestMessageText(locale string) string {
 	switch locale {
 	case localeJa:
 		return testNotificationMessageJa
@@ -143,49 +138,13 @@ func getTestMessageText(locale string) string {
 	}
 }
 
-// getOrgTestMessageText returns the Organization test notification message for the given locale.
-func getOrgTestMessageText(locale string) string {
+func GetOrgTestMessageText(locale string) string {
 	switch locale {
 	case localeJa:
 		return testOrgNotificationMessageJa
 	default:
 		return testOrgNotificationMessageEn
 	}
-}
-
-// SendTestNotification sends a test Slack notification using the given settings.
-func SendTestNotification(slackClient *goslack.Client, notifySettingJSON, defaultLocale string) error {
-	return sendTestNotificationWithMessage(slackClient, notifySettingJSON, defaultLocale, getTestMessageText)
-}
-
-// SendOrgTestNotification sends a test Slack notification for Organization using the given settings.
-func SendOrgTestNotification(slackClient *goslack.Client, notifySettingJSON, defaultLocale string) error {
-	return sendTestNotificationWithMessage(slackClient, notifySettingJSON, defaultLocale, getOrgTestMessageText)
-}
-
-func sendTestNotificationWithMessage(slackClient *goslack.Client, notifySettingJSON, defaultLocale string, msgFunc func(string) string) error {
-	var setting NotifySetting
-	if err := json.Unmarshal([]byte(notifySettingJSON), &setting); err != nil {
-		return err
-	}
-
-	locale := getLocale(setting.Locale, defaultLocale)
-	msg := msgFunc(locale)
-
-	if setting.WebhookURL != "" {
-		webhookMsg := &goslack.WebhookMessage{Text: msg}
-		if setting.Data.Channel != "" {
-			webhookMsg.Channel = setting.Data.Channel
-		}
-		if err := goslack.PostWebhook(setting.WebhookURL, webhookMsg); err != nil {
-			return fmt.Errorf("failed to send slack(webhookurl): %w", err)
-		}
-	} else if setting.ChannelID != "" {
-		if _, _, err := slackClient.PostMessage(setting.ChannelID, goslack.MsgOptionText(msg, false)); err != nil {
-			return fmt.Errorf("failed to send slack(postmessage): %w", err)
-		}
-	}
-	return nil
 }
 
 func maskRight(s string, num int) string {
