@@ -28,7 +28,7 @@ func (s *OrgAlertService) ListOrgNotification(ctx context.Context, req *org_aler
 			s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
 			return nil, err
 		}
-		data.OrgNotification = append(data.OrgNotification, converted)
+		data.Notification = append(data.Notification, converted)
 	}
 	return &data, nil
 }
@@ -49,7 +49,7 @@ func (s *OrgAlertService) GetOrgNotification(ctx context.Context, req *org_alert
 		s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
 		return nil, err
 	}
-	return &org_alert.GetOrgNotificationResponse{OrgNotification: converted}, nil
+	return &org_alert.GetOrgNotificationResponse{Notification: converted}, nil
 }
 
 func (s *OrgAlertService) PutOrgNotification(ctx context.Context, req *org_alert.PutOrgNotificationRequest) (*org_alert.PutOrgNotificationResponse, error) {
@@ -114,7 +114,7 @@ func (s *OrgAlertService) PutOrgNotification(ctx context.Context, req *org_alert
 		s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
 		return nil, err
 	}
-	return &org_alert.PutOrgNotificationResponse{OrgNotification: converted}, nil
+	return &org_alert.PutOrgNotificationResponse{Notification: converted}, nil
 }
 
 func (s *OrgAlertService) DeleteOrgNotification(ctx context.Context, req *org_alert.DeleteOrgNotificationRequest) (*empty.Empty, error) {
