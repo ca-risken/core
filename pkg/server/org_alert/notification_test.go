@@ -228,7 +228,7 @@ func TestListOrgNotificationByProject(t *testing.T) {
 			name:  "OK",
 			input: &org_alert.ListOrgNotificationByProjectRequest{ProjectId: 1},
 			want: &org_alert.ListOrgNotificationByProjectResponse{
-				OrgNotification: []*org_alert.OrgNotification{
+				Notification: []*org_alert.OrgNotification{
 					{NotificationId: 1, Name: "notif1", OrganizationId: 1, Type: "slack", NotifySetting: `{"channel_id":"ch1"}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 				},
 			},

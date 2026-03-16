@@ -47,7 +47,7 @@ message ListOrgNotificationByProjectRequest {
 }
 
 message ListOrgNotificationByProjectResponse {
-  repeated OrgNotification org_notification = 1;
+  repeated OrgNotification notification = 1;
 }
 
 // TestOrgNotification

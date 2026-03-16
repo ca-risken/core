@@ -379,10 +379,10 @@ func (a *AlertService) notifyOrgAlerts(
 	if err != nil {
 		return fmt.Errorf("failed to list org notifications: %w", err)
 	}
-	if resp == nil || len(resp.OrgNotification) == 0 {
+	if resp == nil || len(resp.Notification) == 0 {
 		return nil
 	}
-	for _, n := range resp.OrgNotification {
+	for _, n := range resp.Notification {
 		switch n.Type {
 		case "slack":
 			if err := a.sendSlackNotification(ctx, a.baseURL, n.NotifySetting, alert, project, rules, findings, a.defaultLocale); err != nil {

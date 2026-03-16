@@ -142,7 +142,7 @@ func (s *OrgAlertService) ListOrgNotificationByProject(ctx context.Context, req 
 			s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
 			return nil, err
 		}
-		data.OrgNotification = append(data.OrgNotification, converted)
+		data.Notification = append(data.Notification, converted)
 	}
 	return &data, nil
 }
