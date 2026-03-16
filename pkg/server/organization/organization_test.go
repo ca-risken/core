@@ -12,8 +12,8 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/organization"
-	"github.com/ca-risken/core/proto/organization_iam"
-	organization_iammock "github.com/ca-risken/core/proto/organization_iam/mocks"
+	"github.com/ca-risken/core/proto/org_iam"
+	org_iammock "github.com/ca-risken/core/proto/org_iam/mocks"
 	"github.com/ca-risken/core/proto/project"
 	"gorm.io/gorm"
 )
@@ -113,21 +113,21 @@ func TestCreateOrganization(t *testing.T) {
 		wantErr                    bool
 		createOrganizationResponse *model.Organization
 		createOrganizationError    error
-		putPolicyResponse          *organization_iam.PutOrganizationPolicyResponse
-		putRoleResponse            *organization_iam.PutOrganizationRoleResponse
-		attachPolicyResponse       *organization_iam.AttachOrganizationPolicyResponse
-		attachRoleResponse         *organization_iam.AttachOrganizationRoleResponse
-		mockOrganizationIAMError   error
+		putPolicyResponse          *org_iam.PutOrgPolicyResponse
+		putRoleResponse            *org_iam.PutOrgRoleResponse
+		attachPolicyResponse       *org_iam.AttachOrgPolicyResponse
+		attachRoleResponse         *org_iam.AttachOrgRoleResponse
+		mockOrgIAMError   error
 	}{
 		{
 			name:                       "OK",
 			input:                      &organization.CreateOrganizationRequest{Name: "nm", Description: "desc", UserId: 1},
 			want:                       &organization.CreateOrganizationResponse{Organization: &organization.Organization{OrganizationId: 1, Name: "nm", Description: "desc", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			createOrganizationResponse: &model.Organization{OrganizationID: 1, Name: "nm", Description: "desc", CreatedAt: now, UpdatedAt: now},
-			putPolicyResponse:          &organization_iam.PutOrganizationPolicyResponse{Policy: &organization_iam.OrganizationPolicy{PolicyId: 1, Name: "policy", ActionPtn: ".*", OrganizationId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			putRoleResponse:            &organization_iam.PutOrganizationRoleResponse{Role: &organization_iam.OrganizationRole{RoleId: 1, OrganizationId: 1, Name: "role", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			attachPolicyResponse:       &organization_iam.AttachOrganizationPolicyResponse{Policy: &organization_iam.OrganizationPolicy{PolicyId: 1, Name: "policy", ActionPtn: ".*", OrganizationId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			attachRoleResponse:         &organization_iam.AttachOrganizationRoleResponse{Role: &organization_iam.OrganizationRole{RoleId: 1, OrganizationId: 1, Name: "role", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			putPolicyResponse:          &org_iam.PutOrgPolicyResponse{Policy: &org_iam.OrgPolicy{PolicyId: 1, Name: "policy", ActionPtn: ".*", OrganizationId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			putRoleResponse:            &org_iam.PutOrgRoleResponse{Role: &org_iam.OrgRole{RoleId: 1, OrganizationId: 1, Name: "role", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			attachPolicyResponse:       &org_iam.AttachOrgPolicyResponse{Policy: &org_iam.OrgPolicy{PolicyId: 1, Name: "policy", ActionPtn: ".*", OrganizationId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			attachRoleResponse:         &org_iam.AttachOrgRoleResponse{Role: &org_iam.OrgRole{RoleId: 1, OrganizationId: 1, Name: "role", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 		},
 		{
 			name:    "NG Invalid param",
@@ -144,8 +144,8 @@ func TestCreateOrganization(t *testing.T) {
 			name:                       "NG Organization IAM service error",
 			input:                      &organization.CreateOrganizationRequest{Name: "nm", Description: "desc", UserId: 1},
 			createOrganizationResponse: &model.Organization{OrganizationID: 1, Name: "nm", Description: "desc", CreatedAt: now, UpdatedAt: now},
-			putPolicyResponse:          &organization_iam.PutOrganizationPolicyResponse{Policy: &organization_iam.OrganizationPolicy{PolicyId: 1, Name: "policy", ActionPtn: ".*", OrganizationId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockOrganizationIAMError:   errors.New("Something error occurred"),
+			putPolicyResponse:          &org_iam.PutOrgPolicyResponse{Policy: &org_iam.OrgPolicy{PolicyId: 1, Name: "policy", ActionPtn: ".*", OrganizationId: 1, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockOrgIAMError:   errors.New("Something error occurred"),
 			wantErr:                    true,
 		},
 	}
@@ -154,30 +154,30 @@ func TestCreateOrganization(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mockDB := mocks.NewOrganizationRepository(t)
-			mockOrganizationIAM := organization_iammock.NewOrganizationIAMServiceClient(t)
+			mockOrgIAM := org_iammock.NewOrgIAMServiceClient(t)
 			svc := OrganizationService{
 				repository:            mockDB,
-				organizationIamClient: mockOrganizationIAM,
+				orgIamClient: mockOrgIAM,
 				logger:                logging.NewLogger(),
 			}
 			if c.createOrganizationResponse != nil || c.createOrganizationError != nil {
 				mockDB.On("CreateOrganization", test.RepeatMockAnything(3)...).Return(c.createOrganizationResponse, c.createOrganizationError).Once()
 			}
 			if c.putPolicyResponse != nil {
-				if c.wantErr && c.mockOrganizationIAMError != nil {
-					mockOrganizationIAM.On("PutOrganizationPolicy", test.RepeatMockAnything(2)...).Return(c.putPolicyResponse, c.mockOrganizationIAMError).Once()
+				if c.wantErr && c.mockOrgIAMError != nil {
+					mockOrgIAM.On("PutOrgPolicy", test.RepeatMockAnything(2)...).Return(c.putPolicyResponse, c.mockOrgIAMError).Once()
 				} else {
-					mockOrganizationIAM.On("PutOrganizationPolicy", test.RepeatMockAnything(2)...).Return(c.putPolicyResponse, c.mockOrganizationIAMError).Times(2)
+					mockOrgIAM.On("PutOrgPolicy", test.RepeatMockAnything(2)...).Return(c.putPolicyResponse, c.mockOrgIAMError).Times(2)
 				}
 			}
 			if c.putRoleResponse != nil {
-				mockOrganizationIAM.On("PutOrganizationRole", test.RepeatMockAnything(2)...).Return(c.putRoleResponse, c.mockOrganizationIAMError).Times(2)
+				mockOrgIAM.On("PutOrgRole", test.RepeatMockAnything(2)...).Return(c.putRoleResponse, c.mockOrgIAMError).Times(2)
 			}
 			if c.attachPolicyResponse != nil {
-				mockOrganizationIAM.On("AttachOrganizationPolicy", test.RepeatMockAnything(2)...).Return(c.attachPolicyResponse, c.mockOrganizationIAMError).Times(2)
+				mockOrgIAM.On("AttachOrgPolicy", test.RepeatMockAnything(2)...).Return(c.attachPolicyResponse, c.mockOrgIAMError).Times(2)
 			}
 			if c.attachRoleResponse != nil {
-				mockOrganizationIAM.On("AttachOrganizationRole", test.RepeatMockAnything(2)...).Return(c.attachRoleResponse, c.mockOrganizationIAMError).Once()
+				mockOrgIAM.On("AttachOrgRole", test.RepeatMockAnything(2)...).Return(c.attachRoleResponse, c.mockOrgIAMError).Once()
 			}
 			result, err := svc.CreateOrganization(ctx, c.input)
 			if !c.wantErr && err != nil {
