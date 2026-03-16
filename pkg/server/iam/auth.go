@@ -8,7 +8,7 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/iam"
 	"github.com/ca-risken/core/proto/organization"
-	"github.com/ca-risken/core/proto/organization_iam"
+	"github.com/ca-risken/core/proto/org_iam"
 	"gorm.io/gorm"
 )
 
@@ -143,7 +143,7 @@ func (i *IAMService) isAuthorizedByOrganizations(ctx context.Context, userID, pr
 		return false, err
 	}
 	for _, org := range orgList.Organization {
-		isAuthorized, err := i.organizationIamClient.IsAuthorizedOrganization(ctx, &organization_iam.IsAuthorizedOrganizationRequest{
+		isAuthorized, err := i.orgIamClient.IsAuthorizedOrg(ctx, &org_iam.IsAuthorizedOrgRequest{
 			UserId:         userID,
 			OrganizationId: org.OrganizationId,
 			ActionName:     actionName,

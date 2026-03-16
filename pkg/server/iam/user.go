@@ -6,7 +6,7 @@ import (
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/iam"
-	"github.com/ca-risken/core/proto/organization_iam"
+	"github.com/ca-risken/core/proto/org_iam"
 	"gorm.io/gorm"
 )
 
@@ -115,11 +115,11 @@ func (i *IAMService) PutUser(ctx context.Context, req *iam.PutUserRequest) (*iam
 		if err := i.AttachRoleByUserReserved(ctx, registerdData.UserID, registerdData.UserIdpKey); err != nil {
 			return nil, err
 		}
-		req := &organization_iam.AttachOrganizationRoleByOrganizationUserReservedRequest{
+		req := &org_iam.AttachOrgRoleByOrgUserReservedRequest{
 			UserId:     registerdData.UserID,
 			UserIdpKey: registerdData.UserIdpKey,
 		}
-		if _, err := i.organizationIamClient.AttachOrganizationRoleByOrganizationUserReserved(ctx, req); err != nil {
+		if _, err := i.orgIamClient.AttachOrgRoleByOrgUserReserved(ctx, req); err != nil {
 			return nil, err
 		}
 	}

@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package core.org_iam;
+option go_package = "github.com/ca-risken/core/proto/org_iam";
+
+import "google/protobuf/empty.proto";
+import "org_iam/role.proto";
+import "org_iam/policy.proto";
+import "org_iam/auth.proto";
+import "org_iam/user_reserved.proto";
+import "org_iam/access_token.proto";
+
+service OrgIAMService {
+  // Role
+  rpc ListOrgRole(ListOrgRoleRequest) returns (ListOrgRoleResponse);
+  rpc GetOrgRole(GetOrgRoleRequest) returns (GetOrgRoleResponse);
+  rpc PutOrgRole(PutOrgRoleRequest) returns (PutOrgRoleResponse);
+  rpc DeleteOrgRole(DeleteOrgRoleRequest) returns (google.protobuf.Empty);
+  rpc AttachOrgRole(AttachOrgRoleRequest) returns (AttachOrgRoleResponse);
+  rpc DetachOrgRole(DetachOrgRoleRequest) returns (google.protobuf.Empty);
+  rpc AttachOrgRoleByOrgUserReserved(AttachOrgRoleByOrgUserReservedRequest)
+      returns (AttachOrgRoleByOrgUserReservedResponse);
+
+  // Policy
+  rpc ListOrgPolicy(ListOrgPolicyRequest) returns (ListOrgPolicyResponse);
+  rpc GetOrgPolicy(GetOrgPolicyRequest) returns (GetOrgPolicyResponse);
+  rpc PutOrgPolicy(PutOrgPolicyRequest) returns (PutOrgPolicyResponse);
+  rpc DeleteOrgPolicy(DeleteOrgPolicyRequest) returns (google.protobuf.Empty);
+  rpc AttachOrgPolicy(AttachOrgPolicyRequest) returns (AttachOrgPolicyResponse);
+  rpc DetachOrgPolicy(DetachOrgPolicyRequest) returns (google.protobuf.Empty);
+
+  // Authorization
+  rpc IsAuthorizedOrg(IsAuthorizedOrgRequest) returns (IsAuthorizedOrgResponse);
+  rpc IsAuthorizedOrgToken(IsAuthorizedOrgTokenRequest)
+      returns (IsAuthorizedOrgTokenResponse);
+
+  // OrgUserReserved
+  rpc ListOrgUserReserved(ListOrgUserReservedRequest)
+      returns (ListOrgUserReservedResponse);
+  rpc PutOrgUserReserved(PutOrgUserReservedRequest)
+      returns (PutOrgUserReservedResponse);
+  rpc DeleteOrgUserReserved(DeleteOrgUserReservedRequest)
+      returns (google.protobuf.Empty);
+
+  // AccessToken
+  rpc ListOrgAccessToken(ListOrgAccessTokenRequest)
+      returns (ListOrgAccessTokenResponse);
+  rpc PutOrgAccessToken(PutOrgAccessTokenRequest)
+      returns (PutOrgAccessTokenResponse);
+  rpc DeleteOrgAccessToken(DeleteOrgAccessTokenRequest)
+      returns (google.protobuf.Empty);
+  rpc AuthenticateOrgAccessToken(AuthenticateOrgAccessTokenRequest)
+      returns (AuthenticateOrgAccessTokenResponse);
+  rpc AttachOrgAccessTokenRole(AttachOrgAccessTokenRoleRequest)
+      returns (AttachOrgAccessTokenRoleResponse);
+  rpc DetachOrgAccessTokenRole(DetachOrgAccessTokenRoleRequest)
+      returns (google.protobuf.Empty);
+}
