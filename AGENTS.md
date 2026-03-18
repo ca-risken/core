@@ -16,7 +16,16 @@ proto/          # Protocol buffer definitions (generated code sits next to its .
 hack/           # Build scripts (mock generation, tooling install)
 ```
 
+### Consistent Naming Convention Across Packages
+Files and directories in `proto/`, `pkg/model/`, `pkg/server/`, and `pkg/db/` must all use the same name for a given service.
+- `proto/organization/` → `pkg/model/organization.go`, `pkg/server/organization/`, `pkg/db/organization.go`
+- `proto/alert/` → `pkg/model/alert.go`, `pkg/server/alert/`, `pkg/db/alert.go`
+- `proto/org_alert/` → `pkg/model/org_alert.go`, `pkg/server/org_alert/`, `pkg/db/org_alert.go`
+- `proto/finding/` → `pkg/model/finding.go`, `pkg/server/finding/`, `pkg/db/finding.go`
+
 ## Build, Test, and Development Commands
+- `make install` — installs repository tooling including grpc/protoc-related dependencies expected by the build targets.
+- `make generate-mock` — regenerates mocks across `proto/`, `pkg/db`, and `pkg/ai`; use `sh hack/generate-mock.sh <path>` for a narrower target.
 - `GO111MODULE=on go test ./...` (or `make test`) — executes the full Go test suite.
 - `make lint` — runs `golangci-lint` with a 5‑minute timeout; keep GOFLAGS free of `-mod=vendor`.
 - `make build` / `make build-ci` — builds the Docker image locally or for CI; `make build` runs tests first.
