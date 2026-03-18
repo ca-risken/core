@@ -10,7 +10,16 @@ import (
 	is "github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
-// NotifySetting is the Slack notification setting shared by alert and org_alert services.
+const (
+	localeJa = "ja"
+	localeEn = "en"
+
+	testNotificationMessageJa    = "RISKENからのテスト通知です"
+	testNotificationMessageEn    = "This is a test notification from RISKEN"
+	testOrgNotificationMessageJa = "RISKENからのテスト通知です（Organization）"
+	testOrgNotificationMessageEn = "This is a test notification from RISKEN (Organization)"
+)
+
 type NotifySetting struct {
 	WebhookURL string       `json:"webhook_url"`
 	ChannelID  string       `json:"channel_id"`
@@ -18,7 +27,6 @@ type NotifySetting struct {
 	Locale     string       `json:"locale"`
 }
 
-// NotifyOption is the optional Slack notification parameters.
 type NotifyOption struct {
 	Channel string `json:"channel,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -108,6 +116,35 @@ func ValidateExistingNotifySetting(value any) error {
 		}
 	}
 	return nil
+}
+
+func GetLocale(settingLocale, defaultLocale string) string {
+	switch settingLocale {
+	case localeJa:
+		return localeJa
+	case localeEn:
+		return localeEn
+	default:
+		return defaultLocale
+	}
+}
+
+func GetTestMessageText(locale string) string {
+	switch locale {
+	case localeJa:
+		return testNotificationMessageJa
+	default:
+		return testNotificationMessageEn
+	}
+}
+
+func GetOrgTestMessageText(locale string) string {
+	switch locale {
+	case localeJa:
+		return testOrgNotificationMessageJa
+	default:
+		return testOrgNotificationMessageEn
+	}
 }
 
 func maskRight(s string, num int) string {
