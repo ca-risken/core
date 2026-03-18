@@ -429,10 +429,10 @@ func getFindingAttachment(url string, projectID uint32, findings *findingDetail,
 
 func getAlertFindingLinkLabel(locale string) string {
 	switch locale {
-	case LocaleEn:
-		return alertFindingLinkLabelEn
-	default:
+	case LocaleJa:
 		return alertFindingLinkLabelJa
+	default:
+		return alertFindingLinkLabelEn
 	}
 }
 

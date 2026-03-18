@@ -245,6 +245,22 @@ func TestGetFindingAttachmentUsesLocaleAwareRISKENLinkLabel(t *testing.T) {
 	if gotEn[0].Fields[1].Value != wantEn {
 		t.Fatalf("Unexpected RISKEN link label for en: got=%q want=%q", gotEn[0].Fields[1].Value, wantEn)
 	}
+
+	gotDefault := getFindingAttachment("https://example.com", 1, &findingDetail{
+		FindingCount: 1,
+		Exampls: []*findingExample{{
+			FindingID:    1,
+			Description:  "desc",
+			ResourceName: "resource",
+			DataSource:   "ds",
+			Score:        0.9,
+			Tags:         []string{"tag1"},
+			AISummary:    `{"blocks":[{"type":"text","text":"summary"}]}`,
+		}},
+	}, "")
+	if gotDefault[0].Fields[1].Value != wantEn {
+		t.Fatalf("Unexpected RISKEN link label for default locale: got=%q want=%q", gotDefault[0].Fields[1].Value, wantEn)
+	}
 }
 
 func TestBuildSlackAttachmentsOrdersFindingBeforeAlert(t *testing.T) {
