@@ -31,7 +31,8 @@ type slackNotifyOption struct {
 const (
 	LocaleJa                   = "ja"
 	LocaleEn                   = "en"
-	alertFindingLinkLabel      = "アラートの詳細をRISKENで確認"
+	alertFindingLinkLabelJa    = "アラートの詳細をRISKENで確認"
+	alertFindingLinkLabelEn    = "View alert details in RISKEN"
 	slackNotificationMessageJa = `%v問題を検知しました。内容を確認し以下のいずれかの対応を行ってください。
 	- 問題の根本原因を取り除く
 	- 意図的な設定・操作であり、リスクが小さい場合はアーカイブする
@@ -371,6 +372,7 @@ func generateRuleList(rules *[]model.AlertRule) string {
 
 func getFindingAttachment(url string, projectID uint32, findings *findingDetail, locale string) []slack.Attachment {
 	attachments := []slack.Attachment{}
+	linkLabel := getAlertFindingLinkLabel(locale)
 	for _, f := range findings.Exampls {
 		fields := []slack.AttachmentField{}
 		if renderedSummary := alertsummary.RenderSlack(f.AISummary); renderedSummary != "" {
@@ -381,7 +383,7 @@ func getFindingAttachment(url string, projectID uint32, findings *findingDetail,
 		}
 		fields = append(fields,
 			slack.AttachmentField{
-				Value: fmt.Sprintf("<%s/finding/finding?project_id=%d&finding_id=%d&from_score=0&status=1&from=slack|%s>", url, projectID, f.FindingID, alertFindingLinkLabel),
+				Value: fmt.Sprintf("<%s/finding/finding?project_id=%d&finding_id=%d&from_score=0&status=1&from=slack|%s>", url, projectID, f.FindingID, linkLabel),
 			},
 			slack.AttachmentField{
 				Title: "DataSource",
@@ -423,6 +425,15 @@ func getFindingAttachment(url string, projectID uint32, findings *findingDetail,
 		})
 	}
 	return attachments
+}
+
+func getAlertFindingLinkLabel(locale string) string {
+	switch locale {
+	case LocaleEn:
+		return alertFindingLinkLabelEn
+	default:
+		return alertFindingLinkLabelJa
+	}
 }
 
 func getColorByScore(score float32) string {

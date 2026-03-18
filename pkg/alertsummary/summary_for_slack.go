@@ -11,6 +11,12 @@ const (
 	BlockTypeLink = "link"
 )
 
+var slackMrkdwnReplacer = strings.NewReplacer(
+	"&", "&amp;",
+	"<", "&lt;",
+	">", "&gt;",
+)
+
 type Payload struct {
 	Blocks []Block `json:"blocks"`
 }
@@ -45,16 +51,16 @@ func RenderSlack(raw string) string {
 		for _, block := range sanitizePayload(payload).Blocks {
 			switch block.Type {
 			case BlockTypeText:
-				if text := strings.TrimSpace(block.Text); text != "" {
+				if text := escapeSlackMrkdwn(strings.TrimSpace(block.Text)); text != "" {
 					lines = append(lines, text)
 				}
 			case BlockTypeLink:
 				if !isSlackSafeURL(block.URL) {
 					continue
 				}
-				label := strings.TrimSpace(block.Label)
+				label := sanitizeSlackLinkLabel(strings.TrimSpace(block.Label))
 				if label == "" {
-					label = block.URL
+					label = sanitizeSlackLinkLabel(block.URL)
 				}
 				lines = append(lines, fmt.Sprintf("<%s|%s>", block.URL, label))
 			}
@@ -122,4 +128,13 @@ func marshalPayload(payload Payload) (string, bool) {
 
 func isSlackSafeURL(url string) bool {
 	return strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://")
+}
+
+func escapeSlackMrkdwn(text string) string {
+	return slackMrkdwnReplacer.Replace(text)
+}
+
+func sanitizeSlackLinkLabel(label string) string {
+	label = escapeSlackMrkdwn(label)
+	return strings.ReplaceAll(label, "|", "¦")
 }

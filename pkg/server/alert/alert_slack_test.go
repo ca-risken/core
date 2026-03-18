@@ -142,7 +142,7 @@ func TestGetFindingAttachment(t *testing.T) {
 			},
 			wantNum: 4,
 			wantFirst: slack.AttachmentField{
-				Value: "<https://example.com/finding/finding?project_id=1&finding_id=1&from_score=0&status=1&from=slack|アラートの詳細をRISKENで確認>",
+				Value: "<https://example.com/finding/finding?project_id=1&finding_id=1&from_score=0&status=1&from=slack|View alert details in RISKEN>",
 			},
 		},
 		{
@@ -204,7 +204,7 @@ func TestGetFindingAttachment(t *testing.T) {
 	}
 }
 
-func TestGetFindingAttachmentUsesFixedRISKENLinkLabel(t *testing.T) {
+func TestGetFindingAttachmentUsesLocaleAwareRISKENLinkLabel(t *testing.T) {
 	got := getFindingAttachment("https://example.com", 1, &findingDetail{
 		FindingCount: 1,
 		Exampls: []*findingExample{{
@@ -227,6 +227,23 @@ func TestGetFindingAttachmentUsesFixedRISKENLinkLabel(t *testing.T) {
 	want := "<https://example.com/finding/finding?project_id=1&finding_id=1&from_score=0&status=1&from=slack|アラートの詳細をRISKENで確認>"
 	if got[0].Fields[1].Value != want {
 		t.Fatalf("Unexpected RISKEN link label: got=%q want=%q", got[0].Fields[1].Value, want)
+	}
+
+	gotEn := getFindingAttachment("https://example.com", 1, &findingDetail{
+		FindingCount: 1,
+		Exampls: []*findingExample{{
+			FindingID:    1,
+			Description:  "desc",
+			ResourceName: "resource",
+			DataSource:   "ds",
+			Score:        0.9,
+			Tags:         []string{"tag1"},
+			AISummary:    `{"blocks":[{"type":"text","text":"summary"}]}`,
+		}},
+	}, LocaleEn)
+	wantEn := "<https://example.com/finding/finding?project_id=1&finding_id=1&from_score=0&status=1&from=slack|View alert details in RISKEN>"
+	if gotEn[0].Fields[1].Value != wantEn {
+		t.Fatalf("Unexpected RISKEN link label for en: got=%q want=%q", gotEn[0].Fields[1].Value, wantEn)
 	}
 }
 

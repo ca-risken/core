@@ -42,6 +42,11 @@ func TestRenderSlack(t *testing.T) {
 			want:  "summary\n<https://example.com|GitHub>",
 		},
 		{
+			name:  "escape mrkdwn in text and label",
+			input: `{"blocks":[{"type":"text","text":"notify <!here> & review <this>"},{"type":"link","label":"Git|Hub > docs","url":"https://example.com"}]}`,
+			want:  "notify &lt;!here&gt; &amp; review &lt;this&gt;\n<https://example.com|Git¦Hub &gt; docs>",
+		},
+		{
 			name:  "invalid payload",
 			input: "確認: [GitHubリンク](https://example.com/path)",
 			want:  "",
