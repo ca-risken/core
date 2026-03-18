@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ca-risken/core/pkg/alertsummary"
 	"github.com/ca-risken/core/pkg/model"
 	projectproto "github.com/ca-risken/core/proto/project"
 	"github.com/cenkalti/backoff/v4"
@@ -30,6 +31,7 @@ type slackNotifyOption struct {
 const (
 	LocaleJa                   = "ja"
 	LocaleEn                   = "en"
+	alertFindingLinkLabel      = "アラートの詳細をRISKENで確認"
 	slackNotificationMessageJa = `%v問題を検知しました。内容を確認し以下のいずれかの対応を行ってください。
 	- 問題の根本原因を取り除く
 	- 意図的な設定・操作であり、リスクが小さい場合はアーカイブする
@@ -174,11 +176,7 @@ func getWebhookMessage(
 	locale string,
 ) *slack.WebhookMessage {
 	msgText := getSlackMessageText(locale, alert.Severity)
-	alertAttachment := getAlertAttachment(url, alert, project, rules, findings)
-	findingAttachments := getFindingAttachment(url, project.ProjectId, findings, locale)
-	attachments := []slack.Attachment{}
-	attachments = append(attachments, alertAttachment)
-	attachments = append(attachments, findingAttachments...)
+	attachments := buildSlackAttachments(url, alert, project, rules, findings, locale)
 	msg := slack.WebhookMessage{
 		Text:        msgText,
 		Attachments: attachments,
@@ -206,15 +204,27 @@ func getApiMessage(
 	if message != "" {
 		text = overrideToCustomMessage(message, alert.Severity)
 	}
-	alertAttachment := getAlertAttachment(url, alert, project, rules, findings)
-	findingAttachments := getFindingAttachment(url, project.ProjectId, findings, locale)
-	attachments := []slack.Attachment{}
-	attachments = append(attachments, alertAttachment)
-	attachments = append(attachments, findingAttachments...)
+	attachments := buildSlackAttachments(url, alert, project, rules, findings, locale)
 
 	msgOptions = append(msgOptions, slack.MsgOptionText(text, false))
 	msgOptions = append(msgOptions, slack.MsgOptionAttachments(attachments...))
 	return msgOptions
+}
+
+func buildSlackAttachments(
+	url string,
+	alert *model.Alert,
+	project *projectproto.Project,
+	rules *[]model.AlertRule,
+	findings *findingDetail,
+	locale string,
+) []slack.Attachment {
+	findingAttachments := getFindingAttachment(url, project.ProjectId, findings, locale)
+	alertAttachment := getAlertAttachment(url, alert, project, rules, findings)
+	attachments := make([]slack.Attachment, 0, len(findingAttachments)+1)
+	attachments = append(attachments, findingAttachments...)
+	attachments = append(attachments, alertAttachment)
+	return attachments
 }
 
 func getAlertAttachment(
@@ -362,31 +372,32 @@ func generateRuleList(rules *[]model.AlertRule) string {
 func getFindingAttachment(url string, projectID uint32, findings *findingDetail, locale string) []slack.Attachment {
 	attachments := []slack.Attachment{}
 	for _, f := range findings.Exampls {
-		fields := []slack.AttachmentField{
-			{
-				Value: fmt.Sprintf("<%s/finding/finding?project_id=%d&finding_id=%d&from_score=0&status=1&from=slack|%s>", url, projectID, f.FindingID, f.Description),
+		fields := []slack.AttachmentField{}
+		if renderedSummary := alertsummary.RenderSlack(f.AISummary); renderedSummary != "" {
+			fields = append(fields, slack.AttachmentField{
+				Title: "AI Summary",
+				Value: renderedSummary,
+			})
+		}
+		fields = append(fields,
+			slack.AttachmentField{
+				Value: fmt.Sprintf("<%s/finding/finding?project_id=%d&finding_id=%d&from_score=0&status=1&from=slack|%s>", url, projectID, f.FindingID, alertFindingLinkLabel),
 			},
-			{
+			slack.AttachmentField{
 				Title: "DataSource",
 				Value: f.DataSource,
 				Short: true,
 			},
-			{
+			slack.AttachmentField{
 				Title: "ResourceName",
 				Value: f.ResourceName,
 				Short: true,
 			},
-			{
+			slack.AttachmentField{
 				Title: "Tags",
 				Value: generateTagContentByFinding(f.Tags),
 			},
-		}
-		if f.AISummary != "" {
-			fields = append(fields, slack.AttachmentField{
-				Title: "AI Summary",
-				Value: f.AISummary,
-			})
-		}
+		)
 		a := slack.Attachment{
 			Color:  getColorByScore(f.Score),
 			Fields: fields,
