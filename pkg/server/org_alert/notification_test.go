@@ -12,6 +12,7 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/org_alert"
+	"github.com/jarcoal/httpmock"
 	"gorm.io/gorm"
 )
 
@@ -208,6 +209,140 @@ func TestPutOrgNotification(t *testing.T) {
 			}
 			if !c.wantErr && !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestListOrgNotificationByProject(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name     string
+		input    *org_alert.ListOrgNotificationByProjectRequest
+		want     *org_alert.ListOrgNotificationByProjectResponse
+		wantErr  bool
+		mockResp []*model.OrganizationNotification
+		mockErr  error
+	}{
+		{
+			name:  "OK",
+			input: &org_alert.ListOrgNotificationByProjectRequest{ProjectId: 1},
+			want: &org_alert.ListOrgNotificationByProjectResponse{
+				Notification: []*org_alert.OrgNotification{
+					{NotificationId: 1, Name: "notif1", OrganizationId: 1, Type: "slack", NotifySetting: `{"channel_id":"ch1"}`, CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+				},
+			},
+			mockResp: []*model.OrganizationNotification{
+				{NotificationID: 1, Name: "notif1", OrganizationID: 1, Type: "slack", NotifySetting: `{"channel_id":"ch1"}`, CreatedAt: now, UpdatedAt: now},
+			},
+		},
+		{
+			name:     "OK - empty",
+			input:    &org_alert.ListOrgNotificationByProjectRequest{ProjectId: 1},
+			want:     &org_alert.ListOrgNotificationByProjectResponse{},
+			mockResp: []*model.OrganizationNotification{},
+		},
+		{
+			name:    "NG - DB error",
+			input:   &org_alert.ListOrgNotificationByProjectRequest{ProjectId: 1},
+			wantErr: true,
+			mockErr: errors.New("DB error"),
+		},
+		{
+			name:    "NG - validation error",
+			input:   &org_alert.ListOrgNotificationByProjectRequest{ProjectId: 0},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewOrgAlertRepository(t)
+			svc := OrgAlertService{repository: mockDB, logger: logging.NewLogger()}
+			if c.mockResp != nil || c.mockErr != nil {
+				mockDB.On("ListOrgNotificationByProjectID", test.RepeatMockAnything(2)...).Return(c.mockResp, c.mockErr).Once()
+			}
+			got, err := svc.ListOrgNotificationByProject(context.Background(), c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !c.wantErr && !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestTestOrgNotification(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("POST", "https://hooks.slack.com/test",
+		httpmock.NewStringResponder(200, "ok"))
+	httpmock.RegisterResponder("POST", "https://hooks.slack.com/error",
+		httpmock.NewErrorResponder(errors.New("webhook error")))
+
+	cases := []struct {
+		name    string
+		input   *org_alert.TestOrgNotificationRequest
+		wantErr bool
+		mockResp *model.OrganizationNotification
+		mockErr  error
+	}{
+		{
+			name:  "OK - webhook",
+			input: &org_alert.TestOrgNotificationRequest{OrganizationId: 1, NotificationId: 1},
+			mockResp: &model.OrganizationNotification{
+				NotificationID: 1, OrganizationID: 1, Type: "slack",
+				NotifySetting: `{"webhook_url":"https://hooks.slack.com/test"}`,
+			},
+		},
+		{
+			name:    "OK - record not found",
+			input:   &org_alert.TestOrgNotificationRequest{OrganizationId: 1, NotificationId: 999},
+			mockErr: gorm.ErrRecordNotFound,
+		},
+		{
+			name:  "OK - unsupported type",
+			input: &org_alert.TestOrgNotificationRequest{OrganizationId: 1, NotificationId: 1},
+			mockResp: &model.OrganizationNotification{
+				NotificationID: 1, OrganizationID: 1, Type: "email",
+				NotifySetting: `{}`,
+			},
+		},
+		{
+			name:    "NG - DB error",
+			input:   &org_alert.TestOrgNotificationRequest{OrganizationId: 1, NotificationId: 1},
+			wantErr: true,
+			mockErr: errors.New("DB error"),
+		},
+		{
+			name:    "NG - validation error",
+			input:   &org_alert.TestOrgNotificationRequest{OrganizationId: 0, NotificationId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG - webhook error",
+			input:   &org_alert.TestOrgNotificationRequest{OrganizationId: 1, NotificationId: 1},
+			wantErr: true,
+			mockResp: &model.OrganizationNotification{
+				NotificationID: 1, OrganizationID: 1, Type: "slack",
+				NotifySetting: `{"webhook_url":"https://hooks.slack.com/error"}`,
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewOrgAlertRepository(t)
+			svc := OrgAlertService{repository: mockDB, logger: logging.NewLogger()}
+			if c.mockResp != nil || c.mockErr != nil {
+				mockDB.On("GetOrgNotification", test.RepeatMockAnything(3)...).Return(c.mockResp, c.mockErr).Once()
+			}
+			_, err := svc.TestOrgNotification(context.Background(), c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatal("Expected error but got nil")
 			}
 		})
 	}
