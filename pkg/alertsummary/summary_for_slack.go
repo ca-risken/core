@@ -55,14 +55,15 @@ func RenderSlack(raw string) string {
 					lines = append(lines, text)
 				}
 			case BlockTypeLink:
-				if !isSlackSafeURL(block.URL) {
+				url := sanitizeSlackLinkURL(strings.TrimSpace(block.URL))
+				if url == "" {
 					continue
 				}
 				label := sanitizeSlackLinkLabel(strings.TrimSpace(block.Label))
 				if label == "" {
-					label = sanitizeSlackLinkLabel(block.URL)
+					label = sanitizeSlackLinkLabel(url)
 				}
-				lines = append(lines, fmt.Sprintf("<%s|%s>", block.URL, label))
+				lines = append(lines, fmt.Sprintf("<%s|%s>", url, label))
 			}
 		}
 		if len(lines) > 0 {
@@ -97,8 +98,8 @@ func sanitizePayload(payload Payload) Payload {
 				Text: text,
 			})
 		case BlockTypeLink:
-			url := strings.TrimSpace(block.URL)
-			if !isSlackSafeURL(url) {
+			url := sanitizeSlackLinkURL(strings.TrimSpace(block.URL))
+			if url == "" {
 				continue
 			}
 			label := strings.TrimSpace(block.Label)
@@ -128,6 +129,16 @@ func marshalPayload(payload Payload) (string, bool) {
 
 func isSlackSafeURL(url string) bool {
 	return strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://")
+}
+
+func sanitizeSlackLinkURL(url string) string {
+	if !isSlackSafeURL(url) {
+		return ""
+	}
+	if strings.ContainsAny(url, "<>|") {
+		return ""
+	}
+	return url
 }
 
 func escapeSlackMrkdwn(text string) string {

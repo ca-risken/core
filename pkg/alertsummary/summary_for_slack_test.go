@@ -47,6 +47,11 @@ func TestRenderSlack(t *testing.T) {
 			want:  "notify &lt;!here&gt; &amp; review &lt;this&gt;\n<https://example.com|Git¦Hub &gt; docs>",
 		},
 		{
+			name:  "drop unsafe url in link block",
+			input: `{"blocks":[{"type":"text","text":"summary"},{"type":"link","label":"malicious","url":"https://example.com/a><!channel>"}]}`,
+			want:  "summary",
+		},
+		{
 			name:  "invalid payload",
 			input: "確認: [GitHubリンク](https://example.com/path)",
 			want:  "",
