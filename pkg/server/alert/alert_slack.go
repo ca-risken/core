@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ca-risken/core/pkg/alertsummary"
 	"github.com/ca-risken/core/pkg/model"
 	projectproto "github.com/ca-risken/core/proto/project"
 	"github.com/cenkalti/backoff/v4"
@@ -30,6 +31,8 @@ type slackNotifyOption struct {
 const (
 	LocaleJa                   = "ja"
 	LocaleEn                   = "en"
+	alertFindingLinkLabelJa    = "アラートの詳細をRISKENで確認"
+	alertFindingLinkLabelEn    = "View alert details in RISKEN"
 	slackNotificationMessageJa = `%v問題を検知しました。内容を確認し以下のいずれかの対応を行ってください。
 	- 問題の根本原因を取り除く
 	- 意図的な設定・操作であり、リスクが小さい場合はアーカイブする
@@ -44,6 +47,12 @@ const (
 	slackNotificationTestMessageEn               = "This is a test notification from RISKEN"
 	slackRequestProjectRoleNotificationMessageJa = `<!here> %sさんがプロジェクト%sへのアクセスをリクエストしました。プロジェクト管理者は問題がなければ<%s/iam/user?project_id=%d|ユーザー一覧>から%sさんを招待してください。`
 	slackRequestProjectRoleNotificationMessageEn = `<!here> %s has requested access to your Project %s. If there are no issues, the project administrator should  <%s/iam/user?project_id=%d|the user list> and invite %s.`
+)
+
+var slackMrkdwnReplacer = strings.NewReplacer(
+	"&", "&amp;",
+	"<", "&lt;",
+	">", "&gt;",
 )
 
 func (a *AlertService) sendSlackNotification(
@@ -174,11 +183,7 @@ func getWebhookMessage(
 	locale string,
 ) *slack.WebhookMessage {
 	msgText := getSlackMessageText(locale, alert.Severity)
-	alertAttachment := getAlertAttachment(url, alert, project, rules, findings)
-	findingAttachments := getFindingAttachment(url, project.ProjectId, findings, locale)
-	attachments := []slack.Attachment{}
-	attachments = append(attachments, alertAttachment)
-	attachments = append(attachments, findingAttachments...)
+	attachments := buildSlackAttachments(url, alert, project, rules, findings, locale)
 	msg := slack.WebhookMessage{
 		Text:        msgText,
 		Attachments: attachments,
@@ -206,15 +211,27 @@ func getApiMessage(
 	if message != "" {
 		text = overrideToCustomMessage(message, alert.Severity)
 	}
-	alertAttachment := getAlertAttachment(url, alert, project, rules, findings)
-	findingAttachments := getFindingAttachment(url, project.ProjectId, findings, locale)
-	attachments := []slack.Attachment{}
-	attachments = append(attachments, alertAttachment)
-	attachments = append(attachments, findingAttachments...)
+	attachments := buildSlackAttachments(url, alert, project, rules, findings, locale)
 
 	msgOptions = append(msgOptions, slack.MsgOptionText(text, false))
 	msgOptions = append(msgOptions, slack.MsgOptionAttachments(attachments...))
 	return msgOptions
+}
+
+func buildSlackAttachments(
+	url string,
+	alert *model.Alert,
+	project *projectproto.Project,
+	rules *[]model.AlertRule,
+	findings *findingDetail,
+	locale string,
+) []slack.Attachment {
+	findingAttachments := getFindingAttachment(url, project.ProjectId, findings, locale)
+	alertAttachment := getAlertAttachment(url, alert, project, rules, findings)
+	attachments := make([]slack.Attachment, 0, len(findingAttachments)+1)
+	attachments = append(attachments, findingAttachments...)
+	attachments = append(attachments, alertAttachment)
+	return attachments
 }
 
 func getAlertAttachment(
@@ -361,32 +378,34 @@ func generateRuleList(rules *[]model.AlertRule) string {
 
 func getFindingAttachment(url string, projectID uint32, findings *findingDetail, locale string) []slack.Attachment {
 	attachments := []slack.Attachment{}
+	linkLabel := getAlertFindingLinkLabel(locale)
 	for _, f := range findings.Exampls {
-		fields := []slack.AttachmentField{
-			{
-				Value: fmt.Sprintf("<%s/finding/finding?project_id=%d&finding_id=%d&from_score=0&status=1&from=slack|%s>", url, projectID, f.FindingID, f.Description),
+		fields := []slack.AttachmentField{}
+		if renderedSummary := renderAlertAISummary(f.AISummary); renderedSummary != "" {
+			fields = append(fields, slack.AttachmentField{
+				Title: "AI Summary",
+				Value: renderedSummary,
+			})
+		}
+		fields = append(fields,
+			slack.AttachmentField{
+				Value: fmt.Sprintf("<%s/finding/finding?project_id=%d&finding_id=%d&from_score=0&status=1&from=slack|%s>", url, projectID, f.FindingID, linkLabel),
 			},
-			{
+			slack.AttachmentField{
 				Title: "DataSource",
 				Value: f.DataSource,
 				Short: true,
 			},
-			{
+			slack.AttachmentField{
 				Title: "ResourceName",
 				Value: f.ResourceName,
 				Short: true,
 			},
-			{
+			slack.AttachmentField{
 				Title: "Tags",
 				Value: generateTagContentByFinding(f.Tags),
 			},
-		}
-		if f.AISummary != "" {
-			fields = append(fields, slack.AttachmentField{
-				Title: "AI Summary",
-				Value: f.AISummary,
-			})
-		}
+		)
 		a := slack.Attachment{
 			Color:  getColorByScore(f.Score),
 			Fields: fields,
@@ -412,6 +431,61 @@ func getFindingAttachment(url string, projectID uint32, findings *findingDetail,
 		})
 	}
 	return attachments
+}
+
+func renderAlertAISummary(raw string) string {
+	payload, ok := alertsummary.Parse(raw)
+	if !ok {
+		return ""
+	}
+	lines := []string{}
+	for _, block := range payload.Blocks {
+		switch block.Type {
+		case alertsummary.BlockTypeText:
+			if text := escapeSlackMrkdwn(strings.TrimSpace(block.Text)); text != "" {
+				lines = append(lines, text)
+			}
+		case alertsummary.BlockTypeLink:
+			url := sanitizeSlackLinkURL(strings.TrimSpace(block.URL))
+			if url == "" {
+				continue
+			}
+			label := sanitizeSlackLinkLabel(strings.TrimSpace(block.Label))
+			if label == "" {
+				label = sanitizeSlackLinkLabel(url)
+			}
+			lines = append(lines, fmt.Sprintf("<%s|%s>", url, label))
+		}
+	}
+	return strings.Join(lines, "\n")
+}
+
+func sanitizeSlackLinkURL(url string) string {
+	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+		return ""
+	}
+	if strings.ContainsAny(url, "<>| \t\n\r") {
+		return ""
+	}
+	return url
+}
+
+func escapeSlackMrkdwn(text string) string {
+	return slackMrkdwnReplacer.Replace(text)
+}
+
+func sanitizeSlackLinkLabel(label string) string {
+	label = escapeSlackMrkdwn(label)
+	return strings.ReplaceAll(label, "|", "¦")
+}
+
+func getAlertFindingLinkLabel(locale string) string {
+	switch locale {
+	case LocaleJa:
+		return alertFindingLinkLabelJa
+	default:
+		return alertFindingLinkLabelEn
+	}
 }
 
 func getColorByScore(score float32) string {

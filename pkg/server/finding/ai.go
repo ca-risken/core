@@ -66,6 +66,9 @@ func (f *FindingService) GetAlertAISummary(ctx context.Context, req *finding.Get
 	if err != nil {
 		return nil, fmt.Errorf("openai API error: err=%w", err)
 	}
+	if answer == "" {
+		return nil, fmt.Errorf("empty alert AI summary: finding_id=%d", req.FindingId)
+	}
 
 	now := time.Now()
 	// finding.ai_summary is reserved for alert-summary cache only.

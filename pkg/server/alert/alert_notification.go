@@ -314,7 +314,7 @@ func maskRight(s string, num int) string {
 }
 
 const (
-	MAX_NOTIFY_FINDING_NUM = 3
+	MAX_NOTIFY_FINDING_NUM = 1
 )
 
 type findingDetail struct {
@@ -342,28 +342,42 @@ func (a *AlertService) getFindingDetailsForNotification(ctx context.Context, pro
 		if len(findings.Exampls) >= MAX_NOTIFY_FINDING_NUM {
 			break
 		}
-
-		ex := findingExample{}
 		// finding
 		resp, err := a.findingClient.GetFinding(ctx, &finding.GetFindingRequest{FindingId: id, ProjectId: projectID})
 		if err != nil {
-			return nil, fmt.Errorf("get finding error: err=%w", err)
+			a.logger.Warnf(ctx, "Failed to get finding for alert notification, project_id=%d, finding_id=%d, err=%+v", projectID, id, err)
+			continue
 		}
-		ex.FindingID = resp.Finding.FindingId
-		ex.Description = resp.Finding.Description
-		ex.ResourceName = resp.Finding.ResourceName
-		ex.DataSource = resp.Finding.DataSource
-		ex.Score = resp.Finding.Score
+		ex := &findingExample{
+			FindingID:    resp.Finding.FindingId,
+			Description:  resp.Finding.Description,
+			ResourceName: resp.Finding.ResourceName,
+			DataSource:   resp.Finding.DataSource,
+			Score:        resp.Finding.Score,
+		}
+		if a.aiSummaryEnabled {
+			summaryResp, err := a.findingClient.GetAlertAISummary(ctx, &finding.GetAlertAISummaryRequest{
+				ProjectId: projectID,
+				FindingId: ex.FindingID,
+				Lang:      a.summaryLanguage,
+			})
+			if err != nil {
+				a.logger.Warnf(ctx, "Failed to get alert AI summary, project_id=%d, finding_id=%d, err=%+v", projectID, ex.FindingID, err)
+			} else {
+				ex.AISummary = summaryResp.AiSummary
+			}
+		}
 
 		// finding tag
-		tagResp, err := a.findingClient.ListFindingTag(ctx, &finding.ListFindingTagRequest{FindingId: id, ProjectId: projectID})
+		tagResp, err := a.findingClient.ListFindingTag(ctx, &finding.ListFindingTagRequest{FindingId: ex.FindingID, ProjectId: projectID})
 		if err != nil {
-			return nil, fmt.Errorf("get finding tag error: err=%w", err)
+			a.logger.Warnf(ctx, "Failed to get finding tag for alert notification, project_id=%d, finding_id=%d, err=%+v", projectID, ex.FindingID, err)
+		} else {
+			for _, t := range tagResp.Tag {
+				ex.Tags = append(ex.Tags, t.Tag)
+			}
 		}
-		for _, t := range tagResp.Tag {
-			ex.Tags = append(ex.Tags, t.Tag)
-		}
-		findings.Exampls = append(findings.Exampls, &ex)
+		findings.Exampls = append(findings.Exampls, ex)
 	}
 	return &findings, nil
 }

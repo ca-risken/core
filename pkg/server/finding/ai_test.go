@@ -144,7 +144,7 @@ func TestAskAISummary(t *testing.T) {
 }
 
 func TestGetAlertAISummary(t *testing.T) {
-	savedSummary := "saved"
+	savedSummary := `{"blocks":[{"type":"text","text":"saved"}]}`
 	type MockGetFinding struct {
 		Resp *model.Finding
 		Err  error
@@ -171,7 +171,7 @@ func TestGetAlertAISummary(t *testing.T) {
 		{
 			name:  "OK generate and save",
 			input: &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
-			want:  &finding.GetAlertAISummaryResponse{AiSummary: "summary"},
+			want:  &finding.GetAlertAISummaryResponse{AiSummary: `{"blocks":[{"type":"text","text":"summary"}]}`},
 			mockGetFinding: &MockGetFinding{
 				Resp: &model.Finding{},
 			},
@@ -179,13 +179,13 @@ func TestGetAlertAISummary(t *testing.T) {
 				Resp: &model.Recommend{},
 			},
 			mockAskAI: &MockAskAI{
-				Resp: "summary",
+				Resp: `{"blocks":[{"type":"text","text":"summary"}]}`,
 			},
 		},
 		{
 			name:    "OK return saved summary",
 			input:   &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
-			want:    &finding.GetAlertAISummaryResponse{AiSummary: "saved"},
+			want:    &finding.GetAlertAISummaryResponse{AiSummary: savedSummary},
 			wantErr: false,
 			mockGetFinding: &MockGetFinding{
 				Resp: &model.Finding{AISummary: &savedSummary},
@@ -193,6 +193,31 @@ func TestGetAlertAISummary(t *testing.T) {
 		},
 		{
 			name:    "OK save failure still returns summary",
+			input:   &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
+			want:    &finding.GetAlertAISummaryResponse{AiSummary: `{"blocks":[{"type":"text","text":"summary"}]}`},
+			wantErr: false,
+			mockGetFinding: &MockGetFinding{
+				Resp: &model.Finding{},
+			},
+			mockGetRecommend: &MockGetRecommend{
+				Resp: &model.Recommend{},
+			},
+			mockAskAI: &MockAskAI{
+				Resp: `{"blocks":[{"type":"text","text":"summary"}]}`,
+			},
+			mockUpdateErr: errors.New("save error"),
+		},
+		{
+			name:    "OK return saved summary without payload validation",
+			input:   &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
+			want:    &finding.GetAlertAISummaryResponse{AiSummary: "saved"},
+			wantErr: false,
+			mockGetFinding: &MockGetFinding{
+				Resp: &model.Finding{AISummary: ptr("saved")},
+			},
+		},
+		{
+			name:    "OK save raw summary without payload validation",
 			input:   &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
 			want:    &finding.GetAlertAISummaryResponse{AiSummary: "summary"},
 			wantErr: false,
@@ -205,7 +230,6 @@ func TestGetAlertAISummary(t *testing.T) {
 			mockAskAI: &MockAskAI{
 				Resp: "summary",
 			},
-			mockUpdateErr: errors.New("save error"),
 		},
 		{
 			name:    "NG invalid param",
@@ -279,7 +303,7 @@ func TestGetAlertAISummary(t *testing.T) {
 					Return(c.mockAskAI.Resp, c.mockAskAI.Err).
 					Once()
 			}
-			if c.mockAskAI != nil && c.mockAskAI.Err == nil {
+			if c.mockAskAI != nil && c.mockAskAI.Err == nil && c.mockAskAI.Resp != "" {
 				mockDB.
 					On("UpdateFindingAISummary", test.RepeatMockAnything(5)...).
 					Return(c.mockUpdateErr).
@@ -300,6 +324,10 @@ func TestGetAlertAISummary(t *testing.T) {
 			}
 		})
 	}
+}
+
+func ptr[T any](v T) *T {
+	return &v
 }
 
 func TestUpdateFindingAISummary(t *testing.T) {
