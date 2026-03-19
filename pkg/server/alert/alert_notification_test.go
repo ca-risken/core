@@ -306,15 +306,15 @@ func TestGetFindingDetailsForNotification(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:  "NG getFinding API error",
-			input: inputParam{ProjectID: 1, FindingIDs: &[]uint64{1, 1, 1}},
-			getFinding: mockGetFinding{
-				Resp: nil,
-				Err:  errors.New("api error"),
+			name:  "OK getFinding API error skipped",
+			input: inputParam{ProjectID: 1, FindingIDs: &[]uint64{1, 2}},
+			want: &findingDetail{
+				FindingCount: 2,
+				Exampls: []*findingExample{
+					{FindingID: 2, Description: "desc-2", ResourceName: "rn-2", DataSource: "ds", Score: 0.9, CreatedAt: 200, Tags: []string{"tag2"}},
+				},
 			},
-			listFindingTag: mockListFindingTag{},
-			want:           nil,
-			wantErr:        true,
+			wantErr: false,
 		},
 		{
 			name:  "NG listFindingTag API error",
@@ -357,6 +357,20 @@ func TestGetFindingDetailsForNotification(t *testing.T) {
 					return req.ProjectId == 1 && req.FindingId == 3
 				})).Return(&finding.GetFindingResponse{
 					Finding: &finding.Finding{FindingId: 3, Description: "desc-3", ResourceName: "rn-3", DataSource: "ds", Score: 0.9, CreatedAt: 100},
+				}, nil).Once()
+				mockFinding.On("ListFindingTag", mock.Anything, mock.MatchedBy(func(req *finding.ListFindingTagRequest) bool {
+					return req.ProjectId == 1 && req.FindingId == 2
+				})).Return(&finding.ListFindingTagResponse{
+					Tag: []*finding.FindingTag{{FindingTagId: 2, Tag: "tag2"}},
+				}, nil).Once()
+			} else if c.name == "OK getFinding API error skipped" {
+				mockFinding.On("GetFinding", mock.Anything, mock.MatchedBy(func(req *finding.GetFindingRequest) bool {
+					return req.ProjectId == 1 && req.FindingId == 1
+				})).Return(nil, errors.New("api error")).Once()
+				mockFinding.On("GetFinding", mock.Anything, mock.MatchedBy(func(req *finding.GetFindingRequest) bool {
+					return req.ProjectId == 1 && req.FindingId == 2
+				})).Return(&finding.GetFindingResponse{
+					Finding: &finding.Finding{FindingId: 2, Description: "desc-2", ResourceName: "rn-2", DataSource: "ds", Score: 0.9, CreatedAt: 200},
 				}, nil).Once()
 				mockFinding.On("ListFindingTag", mock.Anything, mock.MatchedBy(func(req *finding.ListFindingTagRequest) bool {
 					return req.ProjectId == 1 && req.FindingId == 2

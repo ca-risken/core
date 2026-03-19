@@ -345,7 +345,8 @@ func (a *AlertService) getFindingDetailsForNotification(ctx context.Context, pro
 		// finding
 		resp, err := a.findingClient.GetFinding(ctx, &finding.GetFindingRequest{FindingId: id, ProjectId: projectID})
 		if err != nil {
-			return nil, fmt.Errorf("get finding error: err=%w", err)
+			a.logger.Warnf(ctx, "Failed to get finding for alert notification, project_id=%d, finding_id=%d, err=%+v", projectID, id, err)
+			continue
 		}
 		ex := &findingExample{
 			FindingID:    resp.Finding.FindingId,
