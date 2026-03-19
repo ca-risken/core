@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ca-risken/core/pkg/alertsummary"
 	"github.com/ca-risken/core/pkg/model"
 	projectproto "github.com/ca-risken/core/proto/project"
 	"github.com/cenkalti/backoff/v4"
@@ -53,22 +54,6 @@ var slackMrkdwnReplacer = strings.NewReplacer(
 	"<", "&lt;",
 	">", "&gt;",
 )
-
-const (
-	alertSummaryBlockTypeText = "text"
-	alertSummaryBlockTypeLink = "link"
-)
-
-type alertSummaryPayload struct {
-	Blocks []alertSummaryBlock `json:"blocks"`
-}
-
-type alertSummaryBlock struct {
-	Type  string `json:"type"`
-	Text  string `json:"text,omitempty"`
-	Label string `json:"label,omitempty"`
-	URL   string `json:"url,omitempty"`
-}
 
 func (a *AlertService) sendSlackNotification(
 	ctx context.Context, url, notifySetting string,
@@ -449,18 +434,18 @@ func getFindingAttachment(url string, projectID uint32, findings *findingDetail,
 }
 
 func renderAlertAISummary(raw string) string {
-	payload, ok := parseAlertSummaryPayload(raw)
+	payload, ok := alertsummary.Parse(raw)
 	if !ok {
 		return ""
 	}
 	lines := []string{}
 	for _, block := range payload.Blocks {
 		switch block.Type {
-		case alertSummaryBlockTypeText:
+		case alertsummary.BlockTypeText:
 			if text := escapeSlackMrkdwn(strings.TrimSpace(block.Text)); text != "" {
 				lines = append(lines, text)
 			}
-		case alertSummaryBlockTypeLink:
+		case alertsummary.BlockTypeLink:
 			url := sanitizeSlackLinkURL(strings.TrimSpace(block.URL))
 			if url == "" {
 				continue
@@ -473,70 +458,6 @@ func renderAlertAISummary(raw string) string {
 		}
 	}
 	return strings.Join(lines, "\n")
-}
-
-func parseAlertSummaryPayload(raw string) (alertSummaryPayload, bool) {
-	raw = strings.TrimSpace(raw)
-	if raw == "" {
-		return alertSummaryPayload{}, false
-	}
-	raw = stripAlertSummaryCodeFence(raw)
-
-	var payload alertSummaryPayload
-	if err := json.Unmarshal([]byte(raw), &payload); err != nil {
-		return alertSummaryPayload{}, false
-	}
-	payload = sanitizeAlertSummaryPayload(payload)
-	if len(payload.Blocks) == 0 {
-		return alertSummaryPayload{}, false
-	}
-	return payload, true
-}
-
-func stripAlertSummaryCodeFence(raw string) string {
-	lines := strings.Split(strings.TrimSpace(raw), "\n")
-	if len(lines) < 3 {
-		return raw
-	}
-	if !strings.HasPrefix(strings.TrimSpace(lines[0]), "```") {
-		return raw
-	}
-	if strings.TrimSpace(lines[len(lines)-1]) != "```" {
-		return raw
-	}
-	return strings.TrimSpace(strings.Join(lines[1:len(lines)-1], "\n"))
-}
-
-func sanitizeAlertSummaryPayload(payload alertSummaryPayload) alertSummaryPayload {
-	blocks := make([]alertSummaryBlock, 0, len(payload.Blocks))
-	for _, block := range payload.Blocks {
-		switch block.Type {
-		case alertSummaryBlockTypeText:
-			text := strings.TrimSpace(block.Text)
-			if text == "" {
-				continue
-			}
-			blocks = append(blocks, alertSummaryBlock{
-				Type: alertSummaryBlockTypeText,
-				Text: text,
-			})
-		case alertSummaryBlockTypeLink:
-			url := sanitizeSlackLinkURL(strings.TrimSpace(block.URL))
-			if url == "" {
-				continue
-			}
-			label := strings.TrimSpace(block.Label)
-			if label == "" {
-				label = url
-			}
-			blocks = append(blocks, alertSummaryBlock{
-				Type:  alertSummaryBlockTypeLink,
-				Label: label,
-				URL:   url,
-			})
-		}
-	}
-	return alertSummaryPayload{Blocks: blocks}
 }
 
 func sanitizeSlackLinkURL(url string) string {
