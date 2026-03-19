@@ -285,6 +285,11 @@ func TestRenderAlertAISummary(t *testing.T) {
 			want:  "summary",
 		},
 		{
+			name:  "drop url with whitespace in link block",
+			input: "{\"blocks\":[{\"type\":\"text\",\"text\":\"summary\"},{\"type\":\"link\",\"label\":\"docs\",\"url\":\"https://example.com/path\\nnext\"}]}",
+			want:  "summary",
+		},
+		{
 			name:  "payload wrapped by json code fence",
 			input: "```json\n{\"blocks\":[{\"type\":\"text\",\"text\":\"summary\"}]}\n```",
 			want:  "summary",

@@ -543,7 +543,7 @@ func sanitizeSlackLinkURL(url string) string {
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 		return ""
 	}
-	if strings.ContainsAny(url, "<>|") {
+	if strings.ContainsAny(url, "<>| \t\n\r") {
 		return ""
 	}
 	return url
