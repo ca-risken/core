@@ -18,6 +18,16 @@ func TestNormalize(t *testing.T) {
 			input: "summary",
 			want:  "",
 		},
+		{
+			name:  "payload wrapped by json code fence",
+			input: "```json\n{\"blocks\":[{\"type\":\"text\",\"text\":\"summary\"}]}\n```",
+			want:  `{"blocks":[{"type":"text","text":"summary"}]}`,
+		},
+		{
+			name:  "payload wrapped by plain code fence",
+			input: "```\n{\"blocks\":[{\"type\":\"text\",\"text\":\"summary\"}]}\n```",
+			want:  `{"blocks":[{"type":"text","text":"summary"}]}`,
+		},
 	}
 
 	for _, c := range cases {

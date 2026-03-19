@@ -35,7 +35,22 @@ func Parse(raw string) (Payload, bool) {
 	if raw == "" {
 		return Payload{}, false
 	}
+	raw = stripCodeFence(raw)
 	return parsePayload(raw)
+}
+
+func stripCodeFence(raw string) string {
+	lines := strings.Split(strings.TrimSpace(raw), "\n")
+	if len(lines) < 3 {
+		return raw
+	}
+	if !strings.HasPrefix(strings.TrimSpace(lines[0]), "```") {
+		return raw
+	}
+	if strings.TrimSpace(lines[len(lines)-1]) != "```" {
+		return raw
+	}
+	return strings.TrimSpace(strings.Join(lines[1:len(lines)-1], "\n"))
 }
 
 func parsePayload(raw string) (Payload, bool) {
