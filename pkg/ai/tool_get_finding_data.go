@@ -17,20 +17,16 @@ func GetFindingDataTool() responses.ToolUnionParam {
 		OfFunction: &responses.FunctionToolParam{
 			Name: "get_finding_data",
 			Description: openai.String(
-				"Get RISKEN findings in a project. " +
+				"Get RISKEN findings in the current authorized project. " +
 					"Use this when a request include \"finding\", \"issue\", \"ファインディング\", \"問題\"..." +
 					"Only data that can be retrieved with a single SQL query per execution will be returned.",
 			),
 			Parameters: map[string]any{
 				"type": "object",
 				"properties": map[string]any{
-					"project_id": map[string]any{
-						"type":        "integer",
-						"description": "Project ID to get findings for",
-					},
 					"prompt": map[string]any{
 						"type":        "string",
-						"description": "Prompt to get findings. Generate SQL from natural language. e.g. \"Summarize aws findings by data_source. and sort by data_source name.\"",
+						"description": "Prompt to get findings in the current authorized project. Generate SQL from natural language. e.g. \"Summarize aws findings by data_source. and sort by data_source name.\"",
 					},
 					"limit": map[string]any{
 						"type":        "integer",
@@ -41,7 +37,7 @@ func GetFindingDataTool() responses.ToolUnionParam {
 						"description": "Offset of the results to return. (default: 0)",
 					},
 				},
-				"required": []string{"project_id", "prompt"},
+				"required": []string{"prompt"},
 			},
 		},
 	}
@@ -49,14 +45,13 @@ func GetFindingDataTool() responses.ToolUnionParam {
 
 // GetFindingDataParams represents the parameters for get_finding_data function
 type GetFindingDataParams struct {
-	ProjectID uint32 `json:"project_id"`
-	Prompt    string `json:"prompt"`
-	Limit     uint32 `json:"limit"`
-	Offset    uint32 `json:"offset"`
+	Prompt string `json:"prompt"`
+	Limit  uint32 `json:"limit"`
+	Offset uint32 `json:"offset"`
 }
 
 // GetFindingDataFunction handles the get_finding_data function call
-func (a *AIClient) GetFindingDataFunction(ctx context.Context, params GetFindingDataParams) ([]map[string]any, error) {
+func (a *AIClient) GetFindingDataFunction(ctx context.Context, projectID uint32, params GetFindingDataParams) ([]map[string]any, error) {
 	// Default params
 	if params.Limit == 0 {
 		params.Limit = 20
@@ -74,7 +69,7 @@ func (a *AIClient) GetFindingDataFunction(ctx context.Context, params GetFinding
 	var results []map[string]any
 	var err error
 	operation := func() error {
-		results, err = a.getFindingDataFunction(ctx, params)
+		results, err = a.getFindingDataFunction(ctx, projectID, params)
 		if err != nil {
 			a.logger.Warnf(ctx, "[RetryLogger] GetFindingDataFunction error: err=%+v", err)
 		}
@@ -88,8 +83,8 @@ func (a *AIClient) GetFindingDataFunction(ctx context.Context, params GetFinding
 	return results, nil
 }
 
-func (a *AIClient) getFindingDataFunction(ctx context.Context, params GetFindingDataParams) ([]map[string]any, error) {
-	sql, sqlParams, err := a.generateSQL(ctx, params.Prompt, params.ProjectID, params.Limit, params.Offset)
+func (a *AIClient) getFindingDataFunction(ctx context.Context, projectID uint32, params GetFindingDataParams) ([]map[string]any, error) {
+	sql, sqlParams, err := a.generateSQL(ctx, params.Prompt, projectID, params.Limit, params.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +138,7 @@ CREATE TABLE finding (
 ## Strict Rules
 - Must return a valid JSON object. No other text.
 - Must return a valid SQL string.
-- Do NOT include project_id condition in the WHERE clause(it will be automatically inserted when retrieving data).
+- Do NOT include project_id condition in the WHERE clause(it will be automatically inserted from the authorized project when retrieving data).
 - Must has prefix "SELECT" and include "WHERE" keywords.
 - Do NOT use dangerous keywords like "INSERT", "UPDATE", "DELETE" etc.
 - Do NOT include semicolons (;) in the SQL(multiple statements are not allowed).
@@ -155,7 +150,7 @@ CREATE TABLE finding (
 }
 
 ## Output Example
-{"sql": "SELECT * FROM finding WHERE project_id = 1001 AND score >= 0.8 AND data_source like 'aws%' GROUP BY data_source ORDER BY data_source"}
+{"sql": "SELECT * FROM finding WHERE score >= 0.8 AND data_source like 'aws%' GROUP BY data_source ORDER BY data_source"}
 `
 
 type GenerateSQLOutput struct {

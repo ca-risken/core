@@ -36,11 +36,18 @@ func (a *AIClient) ChatAI(ctx context.Context, req *ai.ChatAIRequest) (*ai.ChatA
 		},
 	})
 	inputs := responses.ResponseNewParamsInputUnion{OfInputItemList: inputParam}
-	tools := DefaultTools
-	tools = append(tools, GetFindingDataTool())
-	answer, err := a.responsesAPI(ctx, a.chatGPTModel, instruction, inputs, tools, "")
+	tools := buildChatAITools(req.ProjectId)
+	answer, err := a.responsesAPI(ctx, a.chatGPTModel, instruction, inputs, tools, "", req.ProjectId)
 	if err != nil {
 		return nil, fmt.Errorf("ChatAI API error: err=%w", err)
 	}
 	return &ai.ChatAIResponse{Answer: answer.OutputText()}, nil
+}
+
+func buildChatAITools(projectID uint32) []responses.ToolUnionParam {
+	tools := append([]responses.ToolUnionParam{}, DefaultTools...)
+	if projectID > 0 {
+		tools = append(tools, GetFindingDataTool())
+	}
+	return tools
 }
