@@ -387,7 +387,8 @@ func (a *AlertService) getFindingDetailsForNotification(ctx context.Context, pro
 		// finding tag
 		tagResp, err := a.findingClient.ListFindingTag(ctx, &finding.ListFindingTagRequest{FindingId: ex.FindingID, ProjectId: projectID})
 		if err != nil {
-			return nil, fmt.Errorf("get finding tag error: err=%w", err)
+			a.logger.Warnf(ctx, "Failed to get finding tag for alert notification, project_id=%d, finding_id=%d, err=%+v", projectID, ex.FindingID, err)
+			continue
 		}
 		for _, t := range tagResp.Tag {
 			ex.Tags = append(ex.Tags, t.Tag)

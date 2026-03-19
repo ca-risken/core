@@ -322,7 +322,7 @@ func TestGetFindingDetailsForNotification(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:  "NG listFindingTag API error",
+			name:  "OK listFindingTag API error skipped",
 			input: inputParam{ProjectID: 1, FindingIDs: &[]uint64{1, 1, 1}},
 			getFinding: mockGetFinding{
 				Resp: &finding.GetFindingResponse{
@@ -334,8 +334,13 @@ func TestGetFindingDetailsForNotification(t *testing.T) {
 				Resp: nil,
 				Err:  errors.New("api error"),
 			},
-			want:    nil,
-			wantErr: true,
+			want: &findingDetail{
+				FindingCount: 3,
+				Exampls: []*findingExample{
+					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0},
+				},
+			},
+			wantErr: false,
 		},
 	}
 	for _, c := range cases {
