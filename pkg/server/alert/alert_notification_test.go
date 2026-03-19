@@ -19,6 +19,8 @@ import (
 	findingmock "github.com/ca-risken/core/proto/finding/mocks"
 	"github.com/ca-risken/core/proto/iam"
 	iammock "github.com/ca-risken/core/proto/iam/mocks"
+	"github.com/ca-risken/core/proto/org_alert"
+	orgalertmock "github.com/ca-risken/core/proto/org_alert/mocks"
 	"github.com/ca-risken/core/proto/project"
 	projectmock "github.com/ca-risken/core/proto/project/mocks"
 	"github.com/jarcoal/httpmock"
@@ -108,7 +110,10 @@ func TestNotificationAlert(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			mockDB := mocks.NewAlertRepository(t)
-			svc := AlertService{repository: mockDB, logger: logging.NewLogger()}
+			mockOrgAlertClient := orgalertmock.NewOrgAlertServiceClient(t)
+			mockOrgAlertClient.On("ListOrgNotificationByProject", mock.Anything, mock.Anything, mock.Anything).
+				Return(&org_alert.ListOrgNotificationByProjectResponse{}, nil).Maybe()
+			svc := AlertService{repository: mockDB, orgAlertClient: mockOrgAlertClient, logger: logging.NewLogger()}
 			if c.mockListAlertCondNotification != nil || c.mockListAlertCondNotificationErr != nil {
 				mockDB.On("ListAlertCondNotification", test.RepeatMockAnything(6)...).Return(c.mockListAlertCondNotification, c.mockListAlertCondNotificationErr).Once()
 			}

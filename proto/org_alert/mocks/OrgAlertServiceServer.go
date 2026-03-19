@@ -106,6 +106,36 @@ func (_m *OrgAlertServiceServer) ListOrgNotification(_a0 context.Context, _a1 *o
 	return r0, r1
 }
 
+// ListOrgNotificationByProject provides a mock function with given fields: _a0, _a1
+func (_m *OrgAlertServiceServer) ListOrgNotificationByProject(_a0 context.Context, _a1 *org_alert.ListOrgNotificationByProjectRequest) (*org_alert.ListOrgNotificationByProjectResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListOrgNotificationByProject")
+	}
+
+	var r0 *org_alert.ListOrgNotificationByProjectResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *org_alert.ListOrgNotificationByProjectRequest) (*org_alert.ListOrgNotificationByProjectResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *org_alert.ListOrgNotificationByProjectRequest) *org_alert.ListOrgNotificationByProjectResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*org_alert.ListOrgNotificationByProjectResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *org_alert.ListOrgNotificationByProjectRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PutOrgNotification provides a mock function with given fields: _a0, _a1
 func (_m *OrgAlertServiceServer) PutOrgNotification(_a0 context.Context, _a1 *org_alert.PutOrgNotificationRequest) (*org_alert.PutOrgNotificationResponse, error) {
 	ret := _m.Called(_a0, _a1)
@@ -128,6 +158,36 @@ func (_m *OrgAlertServiceServer) PutOrgNotification(_a0 context.Context, _a1 *or
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *org_alert.PutOrgNotificationRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// TestOrgNotification provides a mock function with given fields: _a0, _a1
+func (_m *OrgAlertServiceServer) TestOrgNotification(_a0 context.Context, _a1 *org_alert.TestOrgNotificationRequest) (*emptypb.Empty, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TestOrgNotification")
+	}
+
+	var r0 *emptypb.Empty
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *org_alert.TestOrgNotificationRequest) (*emptypb.Empty, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *org_alert.TestOrgNotificationRequest) *emptypb.Empty); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*emptypb.Empty)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *org_alert.TestOrgNotificationRequest) error); ok {
 		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
