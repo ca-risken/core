@@ -18,6 +18,7 @@ func (a *AIClient) responsesAPI(
 	inputs responses.ResponseNewParamsInputUnion,
 	tools []responses.ToolUnionParam,
 	reasoningEffort openai.ReasoningEffort,
+	projectID uint32,
 ) (*responses.Response, error) {
 	currentInputs := inputs
 	for range MAX_TOOL_USE_COUNT {
@@ -31,7 +32,7 @@ func (a *AIClient) responsesAPI(
 			a.logger.Infof(ctx, "Responses API Finished: %+v", resp.Usage)
 			return resp, nil
 		}
-		currentInputs, err = a.handleFunctionCalls(ctx, currentInputs, functionCalls)
+		currentInputs, err = a.handleFunctionCalls(ctx, currentInputs, functionCalls, projectID)
 		if err != nil {
 			return nil, fmt.Errorf("function call handling error: %w", err)
 		}

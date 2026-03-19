@@ -45,6 +45,7 @@ func (a *AIClient) handleFunctionCalls(
 	ctx context.Context,
 	currentInputs responses.ResponseNewParamsInputUnion,
 	functionCalls []FunctionCallInfo,
+	projectID uint32,
 ) (responses.ResponseNewParamsInputUnion, error) {
 	// Get current input items
 	var inputItems responses.ResponseInputParam
@@ -63,7 +64,7 @@ func (a *AIClient) handleFunctionCalls(
 		a.logger.Infof(ctx, "Executing function: call_id=%s, name=%s, args=%s", funcCall.CallID, funcCall.Name, funcCall.Arguments)
 
 		// Execute the function
-		result, err := a.executeFunctionCall(ctx, funcCall.Name, funcCall.Arguments)
+		result, err := a.executeFunctionCall(ctx, funcCall.Name, funcCall.Arguments, projectID)
 		if err != nil {
 			return responses.ResponseNewParamsInputUnion{}, fmt.Errorf("function call execution failed: %w", err)
 		}
@@ -79,15 +80,19 @@ func (a *AIClient) handleFunctionCalls(
 }
 
 // executeFunctionCall executes the specified function call
-func (a *AIClient) executeFunctionCall(ctx context.Context, functionName string, arguments string) (string, error) {
+func (a *AIClient) executeFunctionCall(ctx context.Context, functionName string, arguments string, projectID uint32) (string, error) {
 	switch functionName {
 	case "get_finding_data":
+		if projectID == 0 {
+			return "", fmt.Errorf("project_id is required for get_finding_data")
+		}
+
 		var params GetFindingDataParams
 		if err := json.Unmarshal([]byte(arguments), &params); err != nil {
 			return "", fmt.Errorf("failed to parse get_finding_data parameters: %w", err)
 		}
 
-		data, err := a.GetFindingDataFunction(ctx, params)
+		data, err := a.GetFindingDataFunction(ctx, projectID, params)
 		if err != nil {
 			return "", fmt.Errorf("failed to get findings: %w", err)
 		}
