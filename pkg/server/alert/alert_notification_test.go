@@ -264,14 +264,12 @@ func TestGetFindingDetailsForNotification(t *testing.T) {
 				FindingCount: 3,
 				Exampls: []*findingExample{
 					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0, Tags: []string{"tag1", "tag2"}},
-					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0, Tags: []string{"tag1", "tag2"}},
-					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0, Tags: []string{"tag1", "tag2"}},
 				},
 			},
 			wantErr: false,
 		},
 		{
-			name:  "OK over max findings(max=3)",
+			name:  "OK over max findings(max=1)",
 			input: inputParam{ProjectID: 1, FindingIDs: &[]uint64{1, 1, 1, 1}},
 			getFinding: mockGetFinding{
 				Resp: &finding.GetFindingResponse{
@@ -292,8 +290,17 @@ func TestGetFindingDetailsForNotification(t *testing.T) {
 				FindingCount: 4,
 				Exampls: []*findingExample{
 					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0, Tags: []string{"tag1", "tag2"}},
-					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0, Tags: []string{"tag1", "tag2"}},
-					{FindingID: 1, Description: "desc", ResourceName: "rn", DataSource: "ds", Score: 1.0, Tags: []string{"tag1", "tag2"}},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:  "OK sort by score and created_at desc",
+			input: inputParam{ProjectID: 1, FindingIDs: &[]uint64{1, 2, 3}},
+			want: &findingDetail{
+				FindingCount: 3,
+				Exampls: []*findingExample{
+					{FindingID: 2, Description: "desc-2", ResourceName: "rn-2", DataSource: "ds", Score: 0.9, CreatedAt: 200, Tags: []string{"tag2"}},
 				},
 			},
 			wantErr: false,
@@ -335,11 +342,34 @@ func TestGetFindingDetailsForNotification(t *testing.T) {
 				aiSummaryEnabled: c.aiSummaryEnabled,
 				summaryLanguage:  c.summaryLanguage,
 			}
-			mockFinding.On("GetFinding", mock.Anything, mock.Anything).Return(c.getFinding.Resp, c.getFinding.Err)
-			if c.getAlertAISummary != nil {
-				mockFinding.On("GetAlertAISummary", mock.Anything, mock.Anything).Return(c.getAlertAISummary.Resp, c.getAlertAISummary.Err)
+			if c.name == "OK sort by score and created_at desc" {
+				mockFinding.On("GetFinding", mock.Anything, mock.MatchedBy(func(req *finding.GetFindingRequest) bool {
+					return req.ProjectId == 1 && req.FindingId == 1
+				})).Return(&finding.GetFindingResponse{
+					Finding: &finding.Finding{FindingId: 1, Description: "desc-1", ResourceName: "rn-1", DataSource: "ds", Score: 0.8, CreatedAt: 300},
+				}, nil).Once()
+				mockFinding.On("GetFinding", mock.Anything, mock.MatchedBy(func(req *finding.GetFindingRequest) bool {
+					return req.ProjectId == 1 && req.FindingId == 2
+				})).Return(&finding.GetFindingResponse{
+					Finding: &finding.Finding{FindingId: 2, Description: "desc-2", ResourceName: "rn-2", DataSource: "ds", Score: 0.9, CreatedAt: 200},
+				}, nil).Once()
+				mockFinding.On("GetFinding", mock.Anything, mock.MatchedBy(func(req *finding.GetFindingRequest) bool {
+					return req.ProjectId == 1 && req.FindingId == 3
+				})).Return(&finding.GetFindingResponse{
+					Finding: &finding.Finding{FindingId: 3, Description: "desc-3", ResourceName: "rn-3", DataSource: "ds", Score: 0.9, CreatedAt: 100},
+				}, nil).Once()
+				mockFinding.On("ListFindingTag", mock.Anything, mock.MatchedBy(func(req *finding.ListFindingTagRequest) bool {
+					return req.ProjectId == 1 && req.FindingId == 2
+				})).Return(&finding.ListFindingTagResponse{
+					Tag: []*finding.FindingTag{{FindingTagId: 2, Tag: "tag2"}},
+				}, nil).Once()
+			} else {
+				mockFinding.On("GetFinding", mock.Anything, mock.Anything).Return(c.getFinding.Resp, c.getFinding.Err)
+				if c.getAlertAISummary != nil {
+					mockFinding.On("GetAlertAISummary", mock.Anything, mock.Anything).Return(c.getAlertAISummary.Resp, c.getAlertAISummary.Err)
+				}
+				mockFinding.On("ListFindingTag", mock.Anything, mock.Anything).Return(c.listFindingTag.Resp, c.listFindingTag.Err)
 			}
-			mockFinding.On("ListFindingTag", mock.Anything, mock.Anything).Return(c.listFindingTag.Resp, c.listFindingTag.Err)
 			got, err := svc.getFindingDetailsForNotification(context.TODO(), c.input.ProjectID, c.input.FindingIDs)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)

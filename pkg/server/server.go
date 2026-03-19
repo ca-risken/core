@@ -16,8 +16,8 @@ import (
 	alertserver "github.com/ca-risken/core/pkg/server/alert"
 	findingserver "github.com/ca-risken/core/pkg/server/finding"
 	iamserver "github.com/ca-risken/core/pkg/server/iam"
-	organizationserver "github.com/ca-risken/core/pkg/server/organization"
 	org_alertserver "github.com/ca-risken/core/pkg/server/org_alert"
+	organizationserver "github.com/ca-risken/core/pkg/server/organization"
 	organization_iamserver "github.com/ca-risken/core/pkg/server/organization_iam"
 	projectserver "github.com/ca-risken/core/pkg/server/project"
 	reportserver "github.com/ca-risken/core/pkg/server/report"
@@ -25,8 +25,8 @@ import (
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/iam"
-	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/org_alert"
+	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/organization_iam"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/ca-risken/core/proto/report"
@@ -70,7 +70,7 @@ type Config struct {
 	SlackAPIToken           string
 }
 
-func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, reasoningModel, defaultLocale, aiSummaryLanguage string, aiSummaryEnabled bool, SlackAPIToken string, excludeDeleteDataSource []string) Config {
+func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, reasoningModel, defaultLocale, aiSummaryLanguage, SlackAPIToken string, excludeDeleteDataSource []string) Config {
 	return Config{
 		MaxAnalyzeAPICall:       maxAnalyzeAPICall,
 		BaseURL:                 baseURL,
@@ -79,7 +79,7 @@ func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, reas
 		ReasoningModel:          reasoningModel,
 		defaultLocale:           defaultLocale,
 		aiSummaryLanguage:       aiSummaryLanguage,
-		aiSummaryEnabled:        aiSummaryEnabled,
+		aiSummaryEnabled:        openaiToken != "",
 		SlackAPIToken:           SlackAPIToken,
 		excludeDeleteDataSource: excludeDeleteDataSource,
 	}

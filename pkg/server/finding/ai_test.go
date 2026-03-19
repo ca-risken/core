@@ -213,7 +213,7 @@ func TestGetAlertAISummary(t *testing.T) {
 			input:   &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
 			wantErr: true,
 			mockGetFinding: &MockGetFinding{
-				Resp: &model.Finding{AISummary: testStringPtr("saved")},
+				Resp: &model.Finding{AISummary: ptr("saved")},
 			},
 			mockGetRecommend: &MockGetRecommend{
 				Resp: &model.Recommend{},
@@ -317,8 +317,8 @@ func TestGetAlertAISummary(t *testing.T) {
 	}
 }
 
-func testStringPtr(s string) *string {
-	return &s
+func ptr[T any](v T) *T {
+	return &v
 }
 
 func TestUpdateFindingAISummary(t *testing.T) {

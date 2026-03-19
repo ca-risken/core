@@ -2,19 +2,12 @@ package alertsummary
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 )
 
 const (
 	BlockTypeText = "text"
 	BlockTypeLink = "link"
-)
-
-var slackMrkdwnReplacer = strings.NewReplacer(
-	"&", "&amp;",
-	"<", "&lt;",
-	">", "&gt;",
 )
 
 type Payload struct {
@@ -29,48 +22,20 @@ type Block struct {
 }
 
 func Normalize(raw string) string {
-	raw = strings.TrimSpace(raw)
-	if raw == "" {
-		return ""
-	}
-	if payload, ok := parsePayload(raw); ok {
-		if normalized, ok := marshalPayload(sanitizePayload(payload)); ok {
+	if payload, ok := Parse(raw); ok {
+		if normalized, ok := marshalPayload(payload); ok {
 			return normalized
 		}
 	}
 	return ""
 }
 
-func RenderSlack(raw string) string {
+func Parse(raw string) (Payload, bool) {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {
-		return ""
+		return Payload{}, false
 	}
-	if payload, ok := parsePayload(raw); ok {
-		lines := []string{}
-		for _, block := range sanitizePayload(payload).Blocks {
-			switch block.Type {
-			case BlockTypeText:
-				if text := escapeSlackMrkdwn(strings.TrimSpace(block.Text)); text != "" {
-					lines = append(lines, text)
-				}
-			case BlockTypeLink:
-				url := sanitizeSlackLinkURL(strings.TrimSpace(block.URL))
-				if url == "" {
-					continue
-				}
-				label := sanitizeSlackLinkLabel(strings.TrimSpace(block.Label))
-				if label == "" {
-					label = sanitizeSlackLinkLabel(url)
-				}
-				lines = append(lines, fmt.Sprintf("<%s|%s>", url, label))
-			}
-		}
-		if len(lines) > 0 {
-			return strings.Join(lines, "\n")
-		}
-	}
-	return ""
+	return parsePayload(raw)
 }
 
 func parsePayload(raw string) (Payload, bool) {
@@ -78,6 +43,7 @@ func parsePayload(raw string) (Payload, bool) {
 	if err := json.Unmarshal([]byte(raw), &payload); err != nil {
 		return Payload{}, false
 	}
+	payload = sanitizePayload(payload)
 	if len(payload.Blocks) == 0 {
 		return Payload{}, false
 	}
@@ -98,7 +64,7 @@ func sanitizePayload(payload Payload) Payload {
 				Text: text,
 			})
 		case BlockTypeLink:
-			url := sanitizeSlackLinkURL(strings.TrimSpace(block.URL))
+			url := sanitizeLinkURL(strings.TrimSpace(block.URL))
 			if url == "" {
 				continue
 			}
@@ -131,7 +97,7 @@ func isSlackSafeURL(url string) bool {
 	return strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://")
 }
 
-func sanitizeSlackLinkURL(url string) string {
+func sanitizeLinkURL(url string) string {
 	if !isSlackSafeURL(url) {
 		return ""
 	}
@@ -139,13 +105,4 @@ func sanitizeSlackLinkURL(url string) string {
 		return ""
 	}
 	return url
-}
-
-func escapeSlackMrkdwn(text string) string {
-	return slackMrkdwnReplacer.Replace(text)
-}
-
-func sanitizeSlackLinkLabel(label string) string {
-	label = escapeSlackMrkdwn(label)
-	return strings.ReplaceAll(label, "|", "¦")
 }

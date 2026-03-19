@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
@@ -314,7 +315,7 @@ func maskRight(s string, num int) string {
 }
 
 const (
-	MAX_NOTIFY_FINDING_NUM = 3
+	MAX_NOTIFY_FINDING_NUM = 1
 )
 
 type findingDetail struct {
@@ -328,6 +329,7 @@ type findingExample struct {
 	ResourceName string
 	DataSource   string
 	Score        float32
+	CreatedAt    int64
 	Tags         []string
 	AISummary    string
 }
@@ -338,44 +340,58 @@ func (a *AlertService) getFindingDetailsForNotification(ctx context.Context, pro
 	findings := findingDetail{
 		FindingCount: len(*findingIDs),
 	}
+	examples := make([]*findingExample, 0, len(*findingIDs))
 	for _, id := range *findingIDs {
-		if len(findings.Exampls) >= MAX_NOTIFY_FINDING_NUM {
-			break
-		}
-
-		ex := findingExample{}
 		// finding
 		resp, err := a.findingClient.GetFinding(ctx, &finding.GetFindingRequest{FindingId: id, ProjectId: projectID})
 		if err != nil {
 			return nil, fmt.Errorf("get finding error: err=%w", err)
 		}
-		ex.FindingID = resp.Finding.FindingId
-		ex.Description = resp.Finding.Description
-		ex.ResourceName = resp.Finding.ResourceName
-		ex.DataSource = resp.Finding.DataSource
-		ex.Score = resp.Finding.Score
+		ex := &findingExample{
+			FindingID:    resp.Finding.FindingId,
+			Description:  resp.Finding.Description,
+			ResourceName: resp.Finding.ResourceName,
+			DataSource:   resp.Finding.DataSource,
+			Score:        resp.Finding.Score,
+			CreatedAt:    resp.Finding.CreatedAt,
+		}
+		examples = append(examples, ex)
+	}
+	sort.SliceStable(examples, func(i, j int) bool {
+		if examples[i].Score != examples[j].Score {
+			return examples[i].Score > examples[j].Score
+		}
+		if examples[i].CreatedAt != examples[j].CreatedAt {
+			return examples[i].CreatedAt > examples[j].CreatedAt
+		}
+		return examples[i].FindingID > examples[j].FindingID
+	})
+	if len(examples) > MAX_NOTIFY_FINDING_NUM {
+		examples = examples[:MAX_NOTIFY_FINDING_NUM]
+	}
+	for _, ex := range examples {
 		if a.aiSummaryEnabled {
 			summaryResp, err := a.findingClient.GetAlertAISummary(ctx, &finding.GetAlertAISummaryRequest{
 				ProjectId: projectID,
-				FindingId: id,
+				FindingId: ex.FindingID,
 				Lang:      a.summaryLanguage,
 			})
 			if err != nil {
-				a.logger.Warnf(ctx, "Failed to get alert AI summary, project_id=%d, finding_id=%d, err=%+v", projectID, id, err)
+				a.logger.Warnf(ctx, "Failed to get alert AI summary, project_id=%d, finding_id=%d, err=%+v", projectID, ex.FindingID, err)
 			} else {
 				ex.AISummary = summaryResp.AiSummary
 			}
 		}
 
 		// finding tag
-		tagResp, err := a.findingClient.ListFindingTag(ctx, &finding.ListFindingTagRequest{FindingId: id, ProjectId: projectID})
+		tagResp, err := a.findingClient.ListFindingTag(ctx, &finding.ListFindingTagRequest{FindingId: ex.FindingID, ProjectId: projectID})
 		if err != nil {
 			return nil, fmt.Errorf("get finding tag error: err=%w", err)
 		}
 		for _, t := range tagResp.Tag {
 			ex.Tags = append(ex.Tags, t.Tag)
 		}
-		findings.Exampls = append(findings.Exampls, &ex)
 	}
+	findings.Exampls = examples
 	return &findings, nil
 }

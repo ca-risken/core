@@ -49,6 +49,12 @@ const (
 	slackRequestProjectRoleNotificationMessageEn = `<!here> %s has requested access to your Project %s. If there are no issues, the project administrator should  <%s/iam/user?project_id=%d|the user list> and invite %s.`
 )
 
+var slackMrkdwnReplacer = strings.NewReplacer(
+	"&", "&amp;",
+	"<", "&lt;",
+	">", "&gt;",
+)
+
 func (a *AlertService) sendSlackNotification(
 	ctx context.Context, url, notifySetting string,
 	alert *model.Alert,
@@ -375,7 +381,7 @@ func getFindingAttachment(url string, projectID uint32, findings *findingDetail,
 	linkLabel := getAlertFindingLinkLabel(locale)
 	for _, f := range findings.Exampls {
 		fields := []slack.AttachmentField{}
-		if renderedSummary := alertsummary.RenderSlack(f.AISummary); renderedSummary != "" {
+		if renderedSummary := renderAlertAISummary(f.AISummary); renderedSummary != "" {
 			fields = append(fields, slack.AttachmentField{
 				Title: "AI Summary",
 				Value: renderedSummary,
@@ -425,6 +431,52 @@ func getFindingAttachment(url string, projectID uint32, findings *findingDetail,
 		})
 	}
 	return attachments
+}
+
+func renderAlertAISummary(raw string) string {
+	payload, ok := alertsummary.Parse(raw)
+	if !ok {
+		return ""
+	}
+	lines := []string{}
+	for _, block := range payload.Blocks {
+		switch block.Type {
+		case alertsummary.BlockTypeText:
+			if text := escapeSlackMrkdwn(strings.TrimSpace(block.Text)); text != "" {
+				lines = append(lines, text)
+			}
+		case alertsummary.BlockTypeLink:
+			url := sanitizeSlackLinkURL(strings.TrimSpace(block.URL))
+			if url == "" {
+				continue
+			}
+			label := sanitizeSlackLinkLabel(strings.TrimSpace(block.Label))
+			if label == "" {
+				label = sanitizeSlackLinkLabel(url)
+			}
+			lines = append(lines, fmt.Sprintf("<%s|%s>", url, label))
+		}
+	}
+	return strings.Join(lines, "\n")
+}
+
+func sanitizeSlackLinkURL(url string) string {
+	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+		return ""
+	}
+	if strings.ContainsAny(url, "<>|") {
+		return ""
+	}
+	return url
+}
+
+func escapeSlackMrkdwn(text string) string {
+	return slackMrkdwnReplacer.Replace(text)
+}
+
+func sanitizeSlackLinkLabel(label string) string {
+	label = escapeSlackMrkdwn(label)
+	return strings.ReplaceAll(label, "|", "¦")
 }
 
 func getAlertFindingLinkLabel(locale string) string {
