@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ca-risken/core/pkg/alertsummary"
 	"github.com/ca-risken/core/proto/finding"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -56,9 +55,7 @@ func (f *FindingService) GetAlertAISummary(ctx context.Context, req *finding.Get
 		return nil, err
 	}
 	if data.AISummary != nil && *data.AISummary != "" {
-		if normalized := alertsummary.Normalize(*data.AISummary); normalized != "" {
-			return &finding.GetAlertAISummaryResponse{AiSummary: normalized}, nil
-		}
+		return &finding.GetAlertAISummaryResponse{AiSummary: *data.AISummary}, nil
 	}
 
 	recommend, err := f.repository.GetRecommend(ctx, req.ProjectId, req.FindingId)
@@ -69,17 +66,16 @@ func (f *FindingService) GetAlertAISummary(ctx context.Context, req *finding.Get
 	if err != nil {
 		return nil, fmt.Errorf("openai API error: err=%w", err)
 	}
-	normalizedAnswer := alertsummary.Normalize(answer)
-	if normalizedAnswer == "" {
-		return nil, fmt.Errorf("invalid alert AI summary payload: finding_id=%d", req.FindingId)
+	if answer == "" {
+		return nil, fmt.Errorf("empty alert AI summary: finding_id=%d", req.FindingId)
 	}
 
 	now := time.Now()
 	// finding.ai_summary is reserved for alert-summary cache only.
-	if err := f.repository.UpdateFindingAISummary(ctx, req.ProjectId, req.FindingId, normalizedAnswer, now); err != nil {
+	if err := f.repository.UpdateFindingAISummary(ctx, req.ProjectId, req.FindingId, answer, now); err != nil {
 		f.logger.Errorf(ctx, "Failed to save alert AI summary. project_id=%d finding_id=%d err=%v", req.ProjectId, req.FindingId, err)
 	}
-	return &finding.GetAlertAISummaryResponse{AiSummary: normalizedAnswer}, nil
+	return &finding.GetAlertAISummaryResponse{AiSummary: answer}, nil
 }
 
 func (f *FindingService) GetAISummaryStream(req *finding.GetAISummaryRequest, stream finding.FindingService_GetAISummaryStreamServer) error {

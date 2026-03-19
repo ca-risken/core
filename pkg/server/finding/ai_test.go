@@ -8,7 +8,6 @@ import (
 
 	"github.com/ca-risken/common/pkg/logging"
 	aimocks "github.com/ca-risken/core/pkg/ai/mocks"
-	"github.com/ca-risken/core/pkg/alertsummary"
 	dbmocks "github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
@@ -209,11 +208,21 @@ func TestGetAlertAISummary(t *testing.T) {
 			mockUpdateErr: errors.New("save error"),
 		},
 		{
-			name:    "NG invalid saved payload regenerates and fails when ai returns invalid payload",
+			name:    "OK return saved summary without payload validation",
 			input:   &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
-			wantErr: true,
+			want:    &finding.GetAlertAISummaryResponse{AiSummary: "saved"},
+			wantErr: false,
 			mockGetFinding: &MockGetFinding{
 				Resp: &model.Finding{AISummary: ptr("saved")},
+			},
+		},
+		{
+			name:    "OK save raw summary without payload validation",
+			input:   &finding.GetAlertAISummaryRequest{ProjectId: 1, FindingId: 1, Lang: "ja"},
+			want:    &finding.GetAlertAISummaryResponse{AiSummary: "summary"},
+			wantErr: false,
+			mockGetFinding: &MockGetFinding{
+				Resp: &model.Finding{},
 			},
 			mockGetRecommend: &MockGetRecommend{
 				Resp: &model.Recommend{},
@@ -294,7 +303,7 @@ func TestGetAlertAISummary(t *testing.T) {
 					Return(c.mockAskAI.Resp, c.mockAskAI.Err).
 					Once()
 			}
-			if c.mockAskAI != nil && c.mockAskAI.Err == nil && alertsummary.Normalize(c.mockAskAI.Resp) != "" {
+			if c.mockAskAI != nil && c.mockAskAI.Err == nil && c.mockAskAI.Resp != "" {
 				mockDB.
 					On("UpdateFindingAISummary", test.RepeatMockAnything(5)...).
 					Return(c.mockUpdateErr).

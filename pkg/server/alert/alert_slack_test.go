@@ -285,6 +285,16 @@ func TestRenderAlertAISummary(t *testing.T) {
 			want:  "summary",
 		},
 		{
+			name:  "payload wrapped by json code fence",
+			input: "```json\n{\"blocks\":[{\"type\":\"text\",\"text\":\"summary\"}]}\n```",
+			want:  "summary",
+		},
+		{
+			name:  "payload wrapped by plain code fence",
+			input: "```\n{\"blocks\":[{\"type\":\"text\",\"text\":\"summary\"}]}\n```",
+			want:  "summary",
+		},
+		{
 			name:  "invalid payload",
 			input: "確認: [GitHubリンク](https://example.com/path)",
 			want:  "",
