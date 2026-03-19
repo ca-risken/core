@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
@@ -329,7 +328,6 @@ type findingExample struct {
 	ResourceName string
 	DataSource   string
 	Score        float32
-	CreatedAt    int64
 	Tags         []string
 	AISummary    string
 }
@@ -340,8 +338,10 @@ func (a *AlertService) getFindingDetailsForNotification(ctx context.Context, pro
 	findings := findingDetail{
 		FindingCount: len(*findingIDs),
 	}
-	examples := make([]*findingExample, 0, len(*findingIDs))
 	for _, id := range *findingIDs {
+		if len(findings.Exampls) >= MAX_NOTIFY_FINDING_NUM {
+			break
+		}
 		// finding
 		resp, err := a.findingClient.GetFinding(ctx, &finding.GetFindingRequest{FindingId: id, ProjectId: projectID})
 		if err != nil {
@@ -354,23 +354,7 @@ func (a *AlertService) getFindingDetailsForNotification(ctx context.Context, pro
 			ResourceName: resp.Finding.ResourceName,
 			DataSource:   resp.Finding.DataSource,
 			Score:        resp.Finding.Score,
-			CreatedAt:    resp.Finding.CreatedAt,
 		}
-		examples = append(examples, ex)
-	}
-	sort.SliceStable(examples, func(i, j int) bool {
-		if examples[i].Score != examples[j].Score {
-			return examples[i].Score > examples[j].Score
-		}
-		if examples[i].CreatedAt != examples[j].CreatedAt {
-			return examples[i].CreatedAt > examples[j].CreatedAt
-		}
-		return examples[i].FindingID > examples[j].FindingID
-	})
-	if len(examples) > MAX_NOTIFY_FINDING_NUM {
-		examples = examples[:MAX_NOTIFY_FINDING_NUM]
-	}
-	for _, ex := range examples {
 		if a.aiSummaryEnabled {
 			summaryResp, err := a.findingClient.GetAlertAISummary(ctx, &finding.GetAlertAISummaryRequest{
 				ProjectId: projectID,
@@ -388,12 +372,12 @@ func (a *AlertService) getFindingDetailsForNotification(ctx context.Context, pro
 		tagResp, err := a.findingClient.ListFindingTag(ctx, &finding.ListFindingTagRequest{FindingId: ex.FindingID, ProjectId: projectID})
 		if err != nil {
 			a.logger.Warnf(ctx, "Failed to get finding tag for alert notification, project_id=%d, finding_id=%d, err=%+v", projectID, ex.FindingID, err)
-			continue
+		} else {
+			for _, t := range tagResp.Tag {
+				ex.Tags = append(ex.Tags, t.Tag)
+			}
 		}
-		for _, t := range tagResp.Tag {
-			ex.Tags = append(ex.Tags, t.Tag)
-		}
+		findings.Exampls = append(findings.Exampls, ex)
 	}
-	findings.Exampls = examples
 	return &findings, nil
 }
