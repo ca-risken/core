@@ -14,7 +14,6 @@ type Finding struct {
 	Score         float32
 	Data          string
 	// AISummary is reserved for alert notification summaries.
-	// It stores a Slack-oriented structured payload as JSON.
 	// UI on-demand summaries are generated separately and must not be persisted here.
 	AISummary          *string
 	AISummaryCreatedAt *time.Time
