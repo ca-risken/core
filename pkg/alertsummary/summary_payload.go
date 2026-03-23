@@ -76,7 +76,7 @@ func sanitizePayload(payload Payload) Payload {
 				Text: text,
 			})
 		case BlockTypeLink:
-			url := sanitizeLinkURL(strings.TrimSpace(block.URL))
+			url := SanitizeLinkURL(strings.TrimSpace(block.URL))
 			if url == "" {
 				continue
 			}
@@ -105,7 +105,7 @@ func marshalPayload(payload Payload) (string, bool) {
 	return string(b), true
 }
 
-func sanitizeLinkURL(url string) string {
+func SanitizeLinkURL(url string) string {
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 		return ""
 	}

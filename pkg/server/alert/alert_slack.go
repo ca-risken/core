@@ -446,7 +446,7 @@ func renderAlertAISummary(raw string) string {
 				lines = append(lines, text)
 			}
 		case alertsummary.BlockTypeLink:
-			url := sanitizeSlackLinkURL(strings.TrimSpace(block.URL))
+			url := alertsummary.SanitizeLinkURL(strings.TrimSpace(block.URL))
 			if url == "" {
 				continue
 			}
@@ -458,16 +458,6 @@ func renderAlertAISummary(raw string) string {
 		}
 	}
 	return strings.Join(lines, "\n")
-}
-
-func sanitizeSlackLinkURL(url string) string {
-	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-		return ""
-	}
-	if strings.ContainsAny(url, "<>| \t\n\r") {
-		return ""
-	}
-	return url
 }
 
 func escapeSlackMrkdwn(text string) string {
