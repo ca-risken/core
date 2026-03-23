@@ -61,22 +61,32 @@ Use the following markdown format for your response.
 </format>
 `
 	PROMPT_ALERT_SUMMARY_EN = `A security finding will be posted to Slack.
-Write a short, natural summary for Slack that helps a non-security expert understand the issue quickly.
+Create a short Slack-ready summary for a non-security expert.
 
 Requirements:
-- Use plain English
-- Keep it within 300 characters
-- Briefly explain what was detected and what action should be considered
-- Do not use markdown headings or bullet points
+- Return JSON only. Do not wrap it in code fences.
+- Use this schema exactly:
+  {"blocks":[{"type":"text","text":"..."},{"type":"link","label":"...","url":"https://..."}]}
+- The first block must be a "text" block.
+- Use 1 to 3 blocks in total.
+- Keep the total text concise, within about 300 characters.
+- Briefly explain what was detected and what action should be considered.
+- Add a "link" block only when a concrete http/https URL is clearly useful.
+- Do not use markdown headings or bullet points inside text blocks.
 `
 	PROMPT_ALERT_SUMMARY_JP = `セキュリティの検知結果をSlackに通知します。
-非セキュリティ担当者でもすぐ理解できるように、Slack向けの短く自然な日本語の要約を書いてください。
+非セキュリティ担当者でもすぐ理解できるように、Slack向けの短く自然な日本語要約を作成してください。
 
 要件:
-- 日本語
-- 300文字以内で簡潔にまとめる
-- 何を検知したかと、取るべき対応を短く含める
-- Markdown見出しや箇条書きは使わない
+- JSONのみを返してください。コードブロックは不要です。
+- 形式は必ず次の schema に従ってください:
+  {"blocks":[{"type":"text","text":"..."},{"type":"link","label":"...","url":"https://..."}]}
+- 先頭ブロックは必ず "text" にしてください。
+- ブロック数は 1 から 3 個までにしてください。
+- 全体は 300文字程度以内で簡潔にまとめてください。
+- 何を検知したかと、取るべき対応を短く含めてください。
+- 明確に有用な http/https URL がある場合のみ "link" ブロックを追加してください。
+- text ブロック内では Markdown 見出しや箇条書きを使わないでください。
 `
 	FINDING_FORMAT_FOR_AI = `The RISKEN tool detected the following issue related to cloud security.
 Score: 
