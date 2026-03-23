@@ -14,6 +14,7 @@ service AIService {
 message ChatAIRequest {
   string question = 1 [ (validate.rules).string.min_len = 1 ]; // Required
   repeated ChatHistory chat_history = 2;
+  uint32 project_id = 3;
 }
 
 message ChatAIResponse { string answer = 1; }

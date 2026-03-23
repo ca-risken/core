@@ -115,7 +115,7 @@ func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding
 	}
 
 	instruction, inputs := generateAskAISummaryInputs(f, r, lang)
-	answer, err := a.responsesAPI(ctx, a.chatGPTModel, instruction, inputs, DefaultTools, "")
+	answer, err := a.responsesAPI(ctx, a.chatGPTModel, instruction, inputs, DefaultTools, "", 0)
 	if err != nil {
 		return "", fmt.Errorf("openai API error: finding_id=%d, err=%w", f.FindingID, err)
 	}
@@ -127,7 +127,7 @@ func (a *AIClient) AskAISummaryFromFinding(ctx context.Context, f *model.Finding
 
 func (a *AIClient) AskAlertAISummaryFromFinding(ctx context.Context, f *model.Finding, r *model.Recommend, lang string) (string, error) {
 	instruction, inputs := generateAskAlertAISummaryInputs(f, r, lang)
-	answer, err := a.responsesAPI(ctx, a.chatGPTModel, instruction, inputs, DefaultTools, "")
+	answer, err := a.responsesAPI(ctx, a.chatGPTModel, instruction, inputs, DefaultTools, "", 0)
 	if err != nil {
 		return "", fmt.Errorf("openai API error(alert-summary): finding_id=%d, err=%w", f.FindingID, err)
 	}
