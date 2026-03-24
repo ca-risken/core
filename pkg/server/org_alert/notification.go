@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/ca-risken/core/pkg/model"
 	riskenslack "github.com/ca-risken/core/pkg/slack"
@@ -122,6 +123,48 @@ func (s *OrgAlertService) DeleteOrgNotification(ctx context.Context, req *org_al
 	}
 	if err := s.repository.DeleteOrgNotification(ctx, req.OrganizationId, req.NotificationId); err != nil {
 		return nil, err
+	}
+	return &empty.Empty{}, nil
+}
+
+func (s *OrgAlertService) ListOrgNotificationByProject(ctx context.Context, req *org_alert.ListOrgNotificationByProjectRequest) (*org_alert.ListOrgNotificationByProjectResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	list, err := s.repository.ListOrgNotificationByProjectID(ctx, req.ProjectId)
+	if err != nil {
+		return nil, err
+	}
+	data := org_alert.ListOrgNotificationByProjectResponse{}
+	for _, d := range list {
+		converted, err := convertOrgNotification(d, false)
+		if err != nil {
+			s.logger.Errorf(ctx, "Failed to convert OrganizationNotification. error: %v", err)
+			return nil, err
+		}
+		data.Notification = append(data.Notification, converted)
+	}
+	return &data, nil
+}
+
+func (s *OrgAlertService) TestOrgNotification(ctx context.Context, req *org_alert.TestOrgNotificationRequest) (*empty.Empty, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	notification, err := s.repository.GetOrgNotification(ctx, req.OrganizationId, req.NotificationId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &empty.Empty{}, nil
+		}
+		return nil, err
+	}
+	switch notification.Type {
+	case "slack":
+		if err := s.sendTestOrgNotification(ctx, notification.NotifySetting); err != nil {
+			return nil, fmt.Errorf("failed to send test notification: %w", err)
+		}
+	default:
+		s.logger.Warnf(ctx, "Unsupported notification type for test: %s", notification.Type)
 	}
 	return &empty.Empty{}, nil
 }

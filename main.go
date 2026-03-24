@@ -37,7 +37,6 @@ type AppConf struct {
 	ReasoningModel          string   `split_words:"true" default:"gpt-5"`
 	DefaultLocale           string   `split_words:"true" default:"en"`
 	AISummaryLanguage       string   `split_words:"true" default:"en"`
-	AISummaryEnabled        bool     `split_words:"true" default:"false"`
 	SlackAPIToken           string   `split_words:"true"`
 	ExcludeDeleteDataSource []string `split_words:"true" default:"code:gitleaks"`
 
@@ -120,7 +119,6 @@ func main() {
 		conf.ReasoningModel,
 		conf.DefaultLocale,
 		conf.AISummaryLanguage,
-		conf.AISummaryEnabled,
 		conf.SlackAPIToken,
 		conf.ExcludeDeleteDataSource,
 	)

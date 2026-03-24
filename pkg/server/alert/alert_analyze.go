@@ -13,6 +13,7 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
+	orgalert "github.com/ca-risken/core/proto/org_alert"
 	projectproto "github.com/ca-risken/core/proto/project"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
@@ -321,6 +322,7 @@ func (a *AlertService) NotificationAlert(
 	if err != nil {
 		return err
 	}
+	notified := false
 	for _, alertCondNotification := range *alertCondNotifications {
 		// 連続通知を防ぐ
 		if !existsNewFindings && time.Now().Unix() < alertCondNotification.NotifiedAt.Unix()+int64(alertCondNotification.CacheSecond) {
@@ -337,6 +339,7 @@ func (a *AlertService) NotificationAlert(
 			if err != nil {
 				return fmt.Errorf("notify error: notification_id=%d, err=%w", notification.NotificationID, err)
 			}
+			notified = true
 		default:
 			a.logger.Warn(ctx, "This notification_type is unimprement.", notification.Type)
 		}
@@ -351,6 +354,43 @@ func (a *AlertService) NotificationAlert(
 		_, err = a.repository.UpsertAlertCondNotification(ctx, dataAlertCondNotification)
 		if err != nil {
 			return err
+		}
+	}
+
+	if notified {
+		if err := a.notifyOrgAlerts(ctx, alert, rules, project, findings); err != nil {
+			a.logger.Errorf(ctx, "Failed to notify organization alerts: %v", err)
+		}
+	}
+
+	return nil
+}
+
+func (a *AlertService) notifyOrgAlerts(
+	ctx context.Context,
+	alert *model.Alert,
+	rules *[]model.AlertRule,
+	project *projectproto.Project,
+	findings *findingDetail,
+) error {
+	resp, err := a.orgAlertClient.ListOrgNotificationByProject(ctx, &orgalert.ListOrgNotificationByProjectRequest{
+		ProjectId: project.ProjectId,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to list org notifications: %w", err)
+	}
+	if resp == nil || len(resp.Notification) == 0 {
+		return nil
+	}
+	for _, n := range resp.Notification {
+		switch n.Type {
+		case "slack":
+			if err := a.sendSlackNotification(ctx, a.baseURL, n.NotifySetting, alert, project, rules, findings, a.defaultLocale); err != nil {
+				a.logger.Errorf(ctx, "Failed to send org notification: notification_id=%d, err=%v", n.NotificationId, err)
+				continue
+			}
+		default:
+			a.logger.Warnf(ctx, "Unsupported org notification type: %s", n.Type)
 		}
 	}
 	return nil

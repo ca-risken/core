@@ -16,18 +16,18 @@ import (
 	alertserver "github.com/ca-risken/core/pkg/server/alert"
 	findingserver "github.com/ca-risken/core/pkg/server/finding"
 	iamserver "github.com/ca-risken/core/pkg/server/iam"
-	organizationserver "github.com/ca-risken/core/pkg/server/organization"
 	org_alertserver "github.com/ca-risken/core/pkg/server/org_alert"
 	org_iamserver "github.com/ca-risken/core/pkg/server/org_iam"
+	organizationserver "github.com/ca-risken/core/pkg/server/organization"
 	projectserver "github.com/ca-risken/core/pkg/server/project"
 	reportserver "github.com/ca-risken/core/pkg/server/report"
 	"github.com/ca-risken/core/proto/ai"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/iam"
-	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/org_alert"
 	"github.com/ca-risken/core/proto/org_iam"
+	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/ca-risken/core/proto/report"
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -70,7 +70,7 @@ type Config struct {
 	SlackAPIToken           string
 }
 
-func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, reasoningModel, defaultLocale, aiSummaryLanguage string, aiSummaryEnabled bool, SlackAPIToken string, excludeDeleteDataSource []string) Config {
+func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, reasoningModel, defaultLocale, aiSummaryLanguage, SlackAPIToken string, excludeDeleteDataSource []string) Config {
 	return Config{
 		MaxAnalyzeAPICall:       maxAnalyzeAPICall,
 		BaseURL:                 baseURL,
@@ -79,7 +79,7 @@ func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, reas
 		ReasoningModel:          reasoningModel,
 		defaultLocale:           defaultLocale,
 		aiSummaryLanguage:       aiSummaryLanguage,
-		aiSummaryEnabled:        aiSummaryEnabled,
+		aiSummaryEnabled:        openaiToken != "",
 		SlackAPIToken:           SlackAPIToken,
 		excludeDeleteDataSource: excludeDeleteDataSource,
 	}
@@ -111,6 +111,10 @@ func (s *Server) Run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	oac, err := s.newOrgAlertClient(clientAddr)
+	if err != nil {
+		return err
+	}
 	isvc := iamserver.NewIAMService(s.db, fc, oc, oimac, s.logger)
 	asvc := alertserver.NewAlertService(
 		s.config.MaxAnalyzeAPICall,
@@ -118,6 +122,7 @@ func (s *Server) Run(ctx context.Context) error {
 		fc,
 		pc,
 		iamc,
+		oac,
 		s.db,
 		s.logger,
 		s.config.defaultLocale,
@@ -131,7 +136,7 @@ func (s *Server) Run(ctx context.Context) error {
 	rsvc := reportserver.NewReportService(s.db, s.logger)
 	aisvc := aiserver.NewAIService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, rc, s.logger)
 	osvc := organizationserver.NewOrganizationService(s.db, oimac, s.logger)
-	oasvc := org_alertserver.NewOrgAlertService(s.db, s.logger)
+	oasvc := org_alertserver.NewOrgAlertService(s.db, s.logger, s.config.SlackAPIToken, s.config.defaultLocale)
 	hsvc := health.NewServer()
 
 	server := grpc.NewServer(
@@ -223,6 +228,15 @@ func (s *Server) newOrganizationClient(svcAddr string) (organization.Organizatio
 		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
 	}
 	return organization.NewOrganizationServiceClient(conn), nil
+}
+
+func (s *Server) newOrgAlertClient(svcAddr string) (org_alert.OrgAlertServiceClient, error) {
+	ctx := context.Background()
+	conn, err := getGRPCConn(ctx, svcAddr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
+	}
+	return org_alert.NewOrgAlertServiceClient(conn), nil
 }
 
 func (s *Server) newReportClient(svcAddr string) (report.ReportServiceClient, error) {
