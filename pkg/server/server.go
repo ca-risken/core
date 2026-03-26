@@ -17,8 +17,8 @@ import (
 	findingserver "github.com/ca-risken/core/pkg/server/finding"
 	iamserver "github.com/ca-risken/core/pkg/server/iam"
 	org_alertserver "github.com/ca-risken/core/pkg/server/org_alert"
+	org_iamserver "github.com/ca-risken/core/pkg/server/org_iam"
 	organizationserver "github.com/ca-risken/core/pkg/server/organization"
-	organization_iamserver "github.com/ca-risken/core/pkg/server/organization_iam"
 	projectserver "github.com/ca-risken/core/pkg/server/project"
 	reportserver "github.com/ca-risken/core/pkg/server/report"
 	"github.com/ca-risken/core/proto/ai"
@@ -26,8 +26,8 @@ import (
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/iam"
 	"github.com/ca-risken/core/proto/org_alert"
+	"github.com/ca-risken/core/proto/org_iam"
 	"github.com/ca-risken/core/proto/organization"
-	"github.com/ca-risken/core/proto/organization_iam"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/ca-risken/core/proto/report"
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -99,7 +99,7 @@ func (s *Server) Run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	oimac, err := s.newOrganizationIAMClient(clientAddr)
+	oimac, err := s.newOrgIAMClient(clientAddr)
 	if err != nil {
 		return err
 	}
@@ -130,7 +130,7 @@ func (s *Server) Run(ctx context.Context) error {
 		s.config.aiSummaryLanguage,
 		s.config.SlackAPIToken,
 	)
-	oisvc := organization_iamserver.NewOrganizationIAMService(s.db, oc, iamc, s.logger)
+	oisvc := org_iamserver.NewOrgIAMService(s.db, oc, iamc, s.logger)
 	fsvc := findingserver.NewFindingService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, s.config.excludeDeleteDataSource, s.logger)
 	psvc := projectserver.NewProjectService(s.db, iamc, oc, s.logger)
 	rsvc := reportserver.NewReportService(s.db, s.logger)
@@ -151,7 +151,7 @@ func (s *Server) Run(ctx context.Context) error {
 	project.RegisterProjectServiceServer(server, psvc)
 	ai.RegisterAIServiceServer(server, aisvc)
 	organization.RegisterOrganizationServiceServer(server, osvc)
-	organization_iam.RegisterOrganizationIAMServiceServer(server, oisvc)
+	org_iam.RegisterOrgIAMServiceServer(server, oisvc)
 	org_alert.RegisterOrgAlertServiceServer(server, oasvc)
 	grpc_health_v1.RegisterHealthServer(server, hsvc)
 
@@ -212,13 +212,13 @@ func (s *Server) newProjectClient(svcAddr string) (project.ProjectServiceClient,
 	return project.NewProjectServiceClient(conn), nil
 }
 
-func (s *Server) newOrganizationIAMClient(svcAddr string) (organization_iam.OrganizationIAMServiceClient, error) {
+func (s *Server) newOrgIAMClient(svcAddr string) (org_iam.OrgIAMServiceClient, error) {
 	ctx := context.Background()
 	conn, err := getGRPCConn(ctx, svcAddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
 	}
-	return organization_iam.NewOrganizationIAMServiceClient(conn), nil
+	return org_iam.NewOrgIAMServiceClient(conn), nil
 }
 
 func (s *Server) newOrganizationClient(svcAddr string) (organization.OrganizationServiceClient, error) {

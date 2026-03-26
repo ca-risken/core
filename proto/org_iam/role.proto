@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package core.org_iam;
+option go_package = "github.com/ca-risken/core/proto/org_iam";
+
+import "org_iam/entity.proto";
+import "validate/validate.proto";
+
+message ListOrgRoleRequest {
+  uint32 organization_id = 1;
+  string name = 2 [ (validate.rules).string.max_len = 64 ];
+  uint32 user_id = 3;
+  uint32 access_token_id = 4;
+}
+
+message ListOrgRoleResponse { repeated uint32 role_id = 1; }
+
+message GetOrgRoleRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 role_id = 2 [ (validate.rules).uint32.gt = 0 ];         // Required
+}
+
+message GetOrgRoleResponse { OrgRole role = 1; }
+
+message PutOrgRoleRequest {
+  uint32 organization_id = 2 [ (validate.rules).uint32.gt = 0 ]; // Required
+  string name = 1
+      [ (validate.rules).string = {min_len : 1, max_len : 64} ]; // Required
+}
+
+message PutOrgRoleResponse { OrgRole role = 1; }
+
+message DeleteOrgRoleRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 role_id = 2 [ (validate.rules).uint32.gt = 0 ];         // Required
+}
+
+message AttachOrgRoleRequest {
+  uint32 user_id = 1 [ (validate.rules).uint32.gt = 0 ];         // Required
+  uint32 role_id = 2 [ (validate.rules).uint32.gt = 0 ];         // Required
+  uint32 organization_id = 3 [ (validate.rules).uint32.gt = 0 ]; // Required
+}
+
+message AttachOrgRoleResponse { OrgRole role = 1; }
+
+message DetachOrgRoleRequest {
+  uint32 user_id = 1 [ (validate.rules).uint32.gt = 0 ];         // Required
+  uint32 role_id = 2 [ (validate.rules).uint32.gt = 0 ];         // Required
+  uint32 organization_id = 3 [ (validate.rules).uint32.gt = 0 ]; // Required
+}
+
+message AttachOrgRoleByOrgUserReservedRequest {
+  uint32 user_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  string user_idp_key = 2
+      [ (validate.rules).string = {max_len : 255} ]; // Required
+}
+
+message AttachOrgRoleByOrgUserReservedResponse { OrgRole role = 1; }

@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package core.org_iam;
+option go_package = "github.com/ca-risken/core/proto/org_iam";
+
+import "org_iam/entity.proto";
+import "validate/validate.proto";
+
+message ListOrgAccessTokenRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  string name = 2 [ (validate.rules).string.max_len = 64 ];
+  uint32 access_token_id = 3;
+}
+
+message ListOrgAccessTokenResponse { repeated OrgAccessToken access_token = 1; }
+
+message PutOrgAccessTokenRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 access_token_id = 2;
+  string plain_text_token = 3;
+  string name = 4 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
+  string description = 5 [ (validate.rules).string.max_len = 255 ];
+  int64 expired_at = 6
+      [ (validate.rules).int64 = {gte : 0, lte : 253402268399} ];
+  uint32 last_updated_user_id = 7
+      [ (validate.rules).uint32.gt = 0 ]; // Required
+}
+
+message PutOrgAccessTokenResponse { OrgAccessToken access_token = 1; }
+
+message DeleteOrgAccessTokenRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 access_token_id = 2 [ (validate.rules).uint32.gt = 0 ]; // Required
+}
+
+message AuthenticateOrgAccessTokenRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 access_token_id = 2 [ (validate.rules).uint32.gt = 0 ]; // Required
+  string plain_text_token = 3
+      [ (validate.rules).string = {min_len : 1} ]; // Required
+}
+
+message AuthenticateOrgAccessTokenResponse { OrgAccessToken access_token = 1; }
+
+message AttachOrgAccessTokenRoleRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 access_token_id = 2 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 role_id = 3 [ (validate.rules).uint32.gt = 0 ];         // Required
+}
+
+message AttachOrgAccessTokenRoleResponse {
+  OrgAccessTokenRole access_token_role = 1;
+}
+
+message DetachOrgAccessTokenRoleRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 access_token_id = 2 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 role_id = 3 [ (validate.rules).uint32.gt = 0 ];         // Required
+}

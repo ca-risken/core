@@ -8,7 +8,7 @@ import (
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/organization"
-	"github.com/ca-risken/core/proto/organization_iam"
+	"github.com/ca-risken/core/proto/org_iam"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/golang/protobuf/ptypes/empty"
 	"gorm.io/gorm"
@@ -197,7 +197,7 @@ func (o *OrganizationService) createDefaultRole(ctx context.Context, ownerUserID
 		organizationAdmin:  ".*",
 		organizationViewer: viewerActionPtn,
 	} {
-		policy, err := o.organizationIamClient.PutOrganizationPolicy(ctx, &organization_iam.PutOrganizationPolicyRequest{
+		policy, err := o.orgIamClient.PutOrgPolicy(ctx, &org_iam.PutOrgPolicyRequest{
 			OrganizationId: organizationID,
 			Name:           name,
 			ActionPtn:      actionPtn,
@@ -205,14 +205,14 @@ func (o *OrganizationService) createDefaultRole(ctx context.Context, ownerUserID
 		if err != nil {
 			return fmt.Errorf("could not put %s-policy, err=%w", name, err)
 		}
-		role, err := o.organizationIamClient.PutOrganizationRole(ctx, &organization_iam.PutOrganizationRoleRequest{
+		role, err := o.orgIamClient.PutOrgRole(ctx, &org_iam.PutOrgRoleRequest{
 			OrganizationId: organizationID,
 			Name:           name + "-role",
 		})
 		if err != nil {
 			return fmt.Errorf("could not put %s-role, err=%w", name, err)
 		}
-		if _, err := o.organizationIamClient.AttachOrganizationPolicy(ctx, &organization_iam.AttachOrganizationPolicyRequest{
+		if _, err := o.orgIamClient.AttachOrgPolicy(ctx, &org_iam.AttachOrgPolicyRequest{
 			OrganizationId: organizationID,
 			RoleId:         role.Role.RoleId,
 			PolicyId:       policy.Policy.PolicyId,
@@ -220,7 +220,7 @@ func (o *OrganizationService) createDefaultRole(ctx context.Context, ownerUserID
 			return fmt.Errorf("could not attach %s-policy to %s-role, err=%w", name, name, err)
 		}
 		if name == organizationAdmin {
-			if _, err := o.organizationIamClient.AttachOrganizationRole(ctx, &organization_iam.AttachOrganizationRoleRequest{
+			if _, err := o.orgIamClient.AttachOrgRole(ctx, &org_iam.AttachOrgRoleRequest{
 				OrganizationId: organizationID,
 				UserId:         ownerUserID,
 				RoleId:         role.Role.RoleId,

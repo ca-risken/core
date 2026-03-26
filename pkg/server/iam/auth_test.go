@@ -12,8 +12,8 @@ import (
 	"github.com/ca-risken/core/proto/iam"
 	"github.com/ca-risken/core/proto/organization"
 	organizationmock "github.com/ca-risken/core/proto/organization/mocks"
-	"github.com/ca-risken/core/proto/organization_iam"
-	organizationiammock "github.com/ca-risken/core/proto/organization_iam/mocks"
+	"github.com/ca-risken/core/proto/org_iam"
+	org_iammock "github.com/ca-risken/core/proto/org_iam/mocks"
 	"gorm.io/gorm"
 )
 
@@ -29,7 +29,7 @@ func TestIsAuthorized(t *testing.T) {
 		mockPolicyErr               error
 		mockOrganizationListResp    *organization.ListOrganizationResponse
 		mockOrganizationListErr     error
-		mockOrgIAMAuthResp          *organization_iam.IsAuthorizedOrganizationResponse
+		mockOrgIAMAuthResp          *org_iam.IsAuthorizedOrgResponse
 		mockOrgIAMAuthErr           error
 		expectOrganizationAuthCheck bool
 	}{
@@ -67,7 +67,7 @@ func TestIsAuthorized(t *testing.T) {
 					{OrganizationId: 3001, Name: "test-org"},
 				},
 			},
-			mockOrgIAMAuthResp: &organization_iam.IsAuthorizedOrganizationResponse{Ok: true},
+			mockOrgIAMAuthResp: &org_iam.IsAuthorizedOrgResponse{Ok: true},
 		},
 		{
 			name:  "OK Non-admin user without valid policies and no organization access",
@@ -84,7 +84,7 @@ func TestIsAuthorized(t *testing.T) {
 					{OrganizationId: 3001, Name: "test-org"},
 				},
 			},
-			mockOrgIAMAuthResp: &organization_iam.IsAuthorizedOrganizationResponse{Ok: false},
+			mockOrgIAMAuthResp: &org_iam.IsAuthorizedOrgResponse{Ok: false},
 		},
 		{
 			name:    "NG Invalid parameter (invalid actionName format)",
@@ -103,17 +103,17 @@ func TestIsAuthorized(t *testing.T) {
 			ctx := context.Background()
 			mockRepo := mocks.NewIAMRepository(t)
 			mockOrgClient := organizationmock.NewOrganizationServiceClient(t)
-			mockOrgIAMClient := organizationiammock.NewOrganizationIAMServiceClient(t)
+			mockOrgIAMClient := org_iammock.NewOrgIAMServiceClient(t)
 			svc := &IAMService{
 				repository:            mockRepo,
 				organizationClient:    mockOrgClient,
-				organizationIamClient: mockOrgIAMClient,
+				orgIamClient: mockOrgIAMClient,
 				logger:                logging.NewLogger(),
 			}
 			if c.expectOrganizationAuthCheck {
 				mockOrgClient.On("ListOrganization", test.RepeatMockAnything(2)...).Return(c.mockOrganizationListResp, c.mockOrganizationListErr).Once()
 				if c.mockOrganizationListResp != nil && len(c.mockOrganizationListResp.Organization) > 0 {
-					mockOrgIAMClient.On("IsAuthorizedOrganization", test.RepeatMockAnything(2)...).Return(c.mockOrgIAMAuthResp, c.mockOrgIAMAuthErr).Once()
+					mockOrgIAMClient.On("IsAuthorizedOrg", test.RepeatMockAnything(2)...).Return(c.mockOrgIAMAuthResp, c.mockOrgIAMAuthErr).Once()
 				}
 			}
 			if c.mockUser != nil || c.mockUserErr != nil {
@@ -449,7 +449,7 @@ func TestIsAuthorizedByOrganizations(t *testing.T) {
 		wantErr                  bool
 		mockOrganizationListResp *organization.ListOrganizationResponse
 		mockOrganizationListErr  error
-		mockOrgIAMAuthResp       []*organization_iam.IsAuthorizedOrganizationResponse
+		mockOrgIAMAuthResp       []*org_iam.IsAuthorizedOrgResponse
 		mockOrgIAMAuthErr        []error
 		expectOrgIAMAuthCalls    int
 	}{
@@ -467,7 +467,7 @@ func TestIsAuthorizedByOrganizations(t *testing.T) {
 				},
 			},
 			expectOrgIAMAuthCalls: 2,
-			mockOrgIAMAuthResp: []*organization_iam.IsAuthorizedOrganizationResponse{
+			mockOrgIAMAuthResp: []*org_iam.IsAuthorizedOrgResponse{
 				{Ok: false},
 				{Ok: true},
 			},
@@ -487,7 +487,7 @@ func TestIsAuthorizedByOrganizations(t *testing.T) {
 				},
 			},
 			expectOrgIAMAuthCalls: 2,
-			mockOrgIAMAuthResp: []*organization_iam.IsAuthorizedOrganizationResponse{
+			mockOrgIAMAuthResp: []*org_iam.IsAuthorizedOrgResponse{
 				{Ok: false},
 				{Ok: false},
 			},
@@ -529,7 +529,7 @@ func TestIsAuthorizedByOrganizations(t *testing.T) {
 				},
 			},
 			expectOrgIAMAuthCalls: 2,
-			mockOrgIAMAuthResp: []*organization_iam.IsAuthorizedOrganizationResponse{
+			mockOrgIAMAuthResp: []*org_iam.IsAuthorizedOrgResponse{
 				nil,
 				{Ok: true},
 			},
@@ -542,16 +542,16 @@ func TestIsAuthorizedByOrganizations(t *testing.T) {
 			mockRepo := mocks.NewIAMRepository(t)
 			logger := logging.NewLogger()
 			mockOrgClient := organizationmock.NewOrganizationServiceClient(t)
-			mockOrgIAMClient := organizationiammock.NewOrganizationIAMServiceClient(t)
+			mockOrgIAMClient := org_iammock.NewOrgIAMServiceClient(t)
 			svc := &IAMService{
 				repository:            mockRepo,
 				logger:                logger,
 				organizationClient:    mockOrgClient,
-				organizationIamClient: mockOrgIAMClient,
+				orgIamClient: mockOrgIAMClient,
 			}
 			mockOrgClient.On("ListOrganization", test.RepeatMockAnything(2)...).Return(c.mockOrganizationListResp, c.mockOrganizationListErr).Once()
 			for i := 0; i < c.expectOrgIAMAuthCalls; i++ {
-				var resp *organization_iam.IsAuthorizedOrganizationResponse
+				var resp *org_iam.IsAuthorizedOrgResponse
 				var err error
 				if i < len(c.mockOrgIAMAuthResp) {
 					resp = c.mockOrgIAMAuthResp[i]
@@ -559,7 +559,7 @@ func TestIsAuthorizedByOrganizations(t *testing.T) {
 				if i < len(c.mockOrgIAMAuthErr) {
 					err = c.mockOrgIAMAuthErr[i]
 				}
-				mockOrgIAMClient.On("IsAuthorizedOrganization", test.RepeatMockAnything(2)...).Return(resp, err).Once()
+				mockOrgIAMClient.On("IsAuthorizedOrg", test.RepeatMockAnything(2)...).Return(resp, err).Once()
 			}
 			got, err := svc.isAuthorizedByOrganizations(ctx, c.userID, c.projectID, c.actionName)
 			if err != nil && !c.wantErr {

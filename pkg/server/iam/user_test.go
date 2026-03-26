@@ -12,8 +12,8 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
-	organization_iam "github.com/ca-risken/core/proto/organization_iam"
-	organization_iam_mocks "github.com/ca-risken/core/proto/organization_iam/mocks"
+	org_iam "github.com/ca-risken/core/proto/org_iam"
+	org_iam_mocks "github.com/ca-risken/core/proto/org_iam/mocks"
 	"gorm.io/gorm"
 )
 
@@ -264,8 +264,8 @@ func TestPutUser(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			var ctx context.Context
 			mock := mocks.NewIAMRepository(t)
-			orgIamMock := organization_iam_mocks.NewOrganizationIAMServiceClient(t)
-			svc := IAMService{repository: mock, organizationIamClient: orgIamMock, logger: logging.NewLogger()}
+			orgIamMock := org_iam_mocks.NewOrgIAMServiceClient(t)
+			svc := IAMService{repository: mock, orgIamClient: orgIamMock, logger: logging.NewLogger()}
 
 			if c.callGetActiveUserCount {
 				if c.name == "OK Insert First User (Auto Admin)" {
@@ -294,7 +294,7 @@ func TestPutUser(t *testing.T) {
 					}
 				}
 				if c.mockOrgAttachRoleErr != nil || (c.mockInsertErr == nil && c.mockListUserReservedErr == nil && c.mockAttachRoleErr == nil) {
-					orgIamMock.On("AttachOrganizationRoleByOrganizationUserReserved", test.RepeatMockAnything(3)...).Return(&organization_iam.AttachOrganizationRoleByOrganizationUserReservedResponse{}, c.mockOrgAttachRoleErr).Once()
+					orgIamMock.On("AttachOrgRoleByOrgUserReserved", test.RepeatMockAnything(3)...).Return(&org_iam.AttachOrgRoleByOrgUserReservedResponse{}, c.mockOrgAttachRoleErr).Once()
 				}
 			}
 			got, err := svc.PutUser(ctx, c.input)

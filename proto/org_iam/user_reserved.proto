@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package core.org_iam;
+option go_package = "github.com/ca-risken/core/proto/org_iam";
+
+import "org_iam/entity.proto";
+import "validate/validate.proto";
+
+message ListOrgUserReservedRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  string user_idp_key = 2 [ (validate.rules).string = {max_len : 255} ];
+}
+
+message ListOrgUserReservedResponse {
+  repeated OrgUserReserved user_reserved = 1;
+}
+
+message PutOrgUserReservedRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 reserved_id = 2;
+  string user_idp_key = 3 [ (validate.rules).string = {max_len : 255} ];
+  uint32 role_id = 4 [ (validate.rules).uint32.gt = 0 ]; // Required
+}
+
+message PutOrgUserReservedResponse { OrgUserReserved user_reserved = 1; }
+
+message DeleteOrgUserReservedRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint32 reserved_id = 2 [ (validate.rules).uint32.gt = 0 ];     // Required
+}
