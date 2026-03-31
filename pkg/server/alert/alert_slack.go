@@ -11,22 +11,11 @@ import (
 
 	"github.com/ca-risken/core/pkg/alertsummary"
 	"github.com/ca-risken/core/pkg/model"
+	riskenslack "github.com/ca-risken/core/pkg/slack"
 	projectproto "github.com/ca-risken/core/proto/project"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/slack-go/slack"
 )
-
-type slackNotifySetting struct {
-	WebhookURL string            `json:"webhook_url"`
-	ChannelID  string            `json:"channel_id"`
-	Data       slackNotifyOption `json:"data"`
-	Locale     string            `json:"locale"`
-}
-
-type slackNotifyOption struct {
-	Channel string `json:"channel,omitempty"`
-	Message string `json:"message,omitempty"`
-}
 
 const (
 	LocaleJa                   = "ja"
@@ -43,8 +32,6 @@ const (
 	- If the nature of the problem is not urgent and immediate action is difficult, set a target deadline and PEND`
 	slackNotificationAttachmentJa                = "その他、%d件すべてのFindingは <%s/alert/alert?project_id=%d&from=slack|アラート画面> からご確認ください。"
 	slackNotificationAttachmentEn                = "Please check all %d Findings from <%s/alert/alert?project_id=%d&from=slack|Alert screen>."
-	slackNotificationTestMessageJa               = "RISKENからのテスト通知です"
-	slackNotificationTestMessageEn               = "This is a test notification from RISKEN"
 	slackRequestProjectRoleNotificationMessageJa = `<!here> %sさんがプロジェクト%sへのアクセスをリクエストしました。プロジェクト管理者は問題がなければ<%s/iam/user?project_id=%d|ユーザー一覧>から%sさんを招待してください。`
 	slackRequestProjectRoleNotificationMessageEn = `<!here> %s has requested access to your Project %s. If there are no issues, the project administrator should  <%s/iam/user?project_id=%d|the user list> and invite %s.`
 )
@@ -63,20 +50,12 @@ func (a *AlertService) sendSlackNotification(
 	findings *findingDetail,
 	defaultLocale string,
 ) error {
-	var setting slackNotifySetting
+	var setting riskenslack.NotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
 	}
 
-	var locale string
-	switch setting.Locale {
-	case LocaleJa:
-		locale = LocaleJa
-	case LocaleEn:
-		locale = LocaleEn
-	default:
-		locale = defaultLocale
-	}
+	locale := riskenslack.GetLocale(setting.Locale, defaultLocale)
 
 	if setting.WebhookURL != "" {
 		webhookMsg := getWebhookMessage(setting.Data.Channel, setting.Data.Message, url, alert, project, rules, findings, locale)
@@ -93,29 +72,25 @@ func (a *AlertService) sendSlackNotification(
 }
 
 func (a *AlertService) sendSlackTestNotification(ctx context.Context, notifySetting, defaultLocale string) error {
-	var setting slackNotifySetting
+	var setting riskenslack.NotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
 	}
 
-	var locale string
-	switch setting.Locale {
-	case LocaleJa:
-		locale = LocaleJa
-	case LocaleEn:
-		locale = LocaleEn
-	default:
-		locale = defaultLocale
-	}
+	locale := riskenslack.GetLocale(setting.Locale, defaultLocale)
+	msg := riskenslack.GetTestMessageText(locale)
 
 	if setting.WebhookURL != "" {
-		webhookMsg := getTestWebhookMessage(setting.Data.Channel, locale)
+		webhookMsg := &slack.WebhookMessage{Text: msg}
+		if setting.Data.Channel != "" {
+			webhookMsg.Channel = setting.Data.Channel
+		}
 		if err := slack.PostWebhook(setting.WebhookURL, webhookMsg); err != nil {
 			return fmt.Errorf("failed to send slack(webhookurl): %w", err)
 		}
 	} else if setting.ChannelID != "" {
 		if err := a.postMessageSlackWithRetry(ctx,
-			setting.ChannelID, slack.MsgOptionText(getTestSlackMessageText(locale), false)); err != nil {
+			setting.ChannelID, slack.MsgOptionText(msg, false)); err != nil {
 			return fmt.Errorf("failed to send slack(postmessage): %w", err)
 		}
 	}
@@ -124,20 +99,12 @@ func (a *AlertService) sendSlackTestNotification(ctx context.Context, notifySett
 }
 
 func (a *AlertService) sendSlackRequestProjectRoleNotification(ctx context.Context, url, notifySetting, defaultLocale, userName, projectName string, projectID uint32) error {
-	var setting slackNotifySetting
+	var setting riskenslack.NotifySetting
 	if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
 		return err
 	}
 
-	var locale string
-	switch setting.Locale {
-	case LocaleJa:
-		locale = LocaleJa
-	case LocaleEn:
-		locale = LocaleEn
-	default:
-		locale = defaultLocale
-	}
+	locale := riskenslack.GetLocale(setting.Locale, defaultLocale)
 
 	if setting.WebhookURL != "" {
 		webhookMsg := getRequestProjectRoleWebhookMessage(setting.Data.Channel, locale, userName, projectName, url, projectID)
@@ -272,28 +239,6 @@ func getSlackMessageText(locale, severity string) string {
 		msgText = fmt.Sprintf(slackNotificationMessageJa, getMention(severity))
 	default:
 		msgText = fmt.Sprintf(slackNotificationMessageEn, getMention(severity))
-	}
-	return msgText
-}
-
-func getTestWebhookMessage(channel, locale string) *slack.WebhookMessage {
-	msg := slack.WebhookMessage{
-		Text: getTestSlackMessageText(locale),
-	}
-	// override message
-	if channel != "" {
-		msg.Channel = channel
-	}
-	return &msg
-}
-
-func getTestSlackMessageText(locale string) string {
-	var msgText string
-	switch locale {
-	case LocaleJa:
-		msgText = slackNotificationTestMessageJa
-	default:
-		msgText = slackNotificationTestMessageEn
 	}
 	return msgText
 }
