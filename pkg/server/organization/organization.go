@@ -190,11 +190,14 @@ func (o *OrganizationService) removeOrganizationProject(ctx context.Context, org
 
 func (o *OrganizationService) createDefaultRole(ctx context.Context, ownerUserID, organizationID uint32) error {
 	organizationAdmin := "organization-admin"
+	organizationEditor := "organization-editor"
 	organizationViewer := "organization-viewer"
-	viewerActionPtn := "get|list|is-admin|put-alert-first-viewed-at"
+	viewerActionPtn := "get|list|put-alert-first-viewed-at"
+	editorActionPtn := viewerActionPtn + "|^(list-|get-|organization/update-|project/update-|project/tag-|project/untag-|organization-alert/.*|finding/.*|alert/.*|report/.*|aws/.*|google/.*|azure/.*|osint/.*|diagnosis/.*|code/.*|datasource/.*|ai/.*)"
 
 	for name, actionPtn := range map[string]string{
 		organizationAdmin:  ".*",
+		organizationEditor: editorActionPtn,
 		organizationViewer: viewerActionPtn,
 	} {
 		policy, err := o.orgIamClient.PutOrgPolicy(ctx, &org_iam.PutOrgPolicyRequest{

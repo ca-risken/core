@@ -167,14 +167,14 @@ func TestCreateOrganization(t *testing.T) {
 				if c.wantErr && c.mockOrgIAMError != nil {
 					mockOrgIAM.On("PutOrgPolicy", test.RepeatMockAnything(2)...).Return(c.putPolicyResponse, c.mockOrgIAMError).Once()
 				} else {
-					mockOrgIAM.On("PutOrgPolicy", test.RepeatMockAnything(2)...).Return(c.putPolicyResponse, c.mockOrgIAMError).Times(2)
+					mockOrgIAM.On("PutOrgPolicy", test.RepeatMockAnything(2)...).Return(c.putPolicyResponse, c.mockOrgIAMError).Times(3)
 				}
 			}
 			if c.putRoleResponse != nil {
-				mockOrgIAM.On("PutOrgRole", test.RepeatMockAnything(2)...).Return(c.putRoleResponse, c.mockOrgIAMError).Times(2)
+				mockOrgIAM.On("PutOrgRole", test.RepeatMockAnything(2)...).Return(c.putRoleResponse, c.mockOrgIAMError).Times(3)
 			}
 			if c.attachPolicyResponse != nil {
-				mockOrgIAM.On("AttachOrgPolicy", test.RepeatMockAnything(2)...).Return(c.attachPolicyResponse, c.mockOrgIAMError).Times(2)
+				mockOrgIAM.On("AttachOrgPolicy", test.RepeatMockAnything(2)...).Return(c.attachPolicyResponse, c.mockOrgIAMError).Times(3)
 			}
 			if c.attachRoleResponse != nil {
 				mockOrgIAM.On("AttachOrgRole", test.RepeatMockAnything(2)...).Return(c.attachRoleResponse, c.mockOrgIAMError).Once()
