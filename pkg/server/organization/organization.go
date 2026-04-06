@@ -192,8 +192,8 @@ func (o *OrganizationService) createDefaultRole(ctx context.Context, ownerUserID
 	organizationAdmin := "organization-admin"
 	organizationEditor := "organization-editor"
 	organizationViewer := "organization-viewer"
-	viewerActionPtn := "list-|get-|put-alert-first-viewed-at"
-	editorActionPtn := viewerActionPtn + "|organization/update-|project/update-|project/tag-|project/untag-|organization-alert/.*|finding/.*|alert/.*|report/.*|aws/.*|google/.*|azure/.*|osint/.*|diagnosis/.*|code/.*|datasource/.*|ai/.*"
+	viewerActionPtn := "get|list|is-admin|put-alert-first-viewed-at"
+	editorActionPtn := viewerActionPtn + "|organization/update-organization|project/update-project|project/tag-project|project/untag-project|organization-alert/.*|finding/.*|alert/.*|report/.*|aws/.*|google/.*|azure/.*|osint/.*|diagnosis/.*|code/.*|datasource/.*|ai/.*"
 
 	for name, actionPtn := range map[string]string{
 		organizationAdmin:  ".*",
