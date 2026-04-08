@@ -10,6 +10,7 @@ import (
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
+	riskenslack "github.com/ca-risken/core/pkg/slack"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/alert"
 	"gorm.io/gorm"
@@ -1682,21 +1683,20 @@ func TestGetNotification(t *testing.T) {
 }
 
 func TestReplaceSlackNotifySetting(t *testing.T) {
-	a := AlertService{logger: logging.NewLogger()}
 	cases := []struct {
 		name        string
 		inputExist  string
 		inputUpdate string
-		want        slackNotifySetting
+		want        riskenslack.NotifySetting
 		wantErr     bool
 	}{
 		{
 			name:        "OK no replacing",
 			inputExist:  "{\"webhook_url\":\"hoge1\", \"data\":{\"channel\":\"ch\"}}",
 			inputUpdate: "{\"data\":{\"channel\":\"ch\"}}",
-			want: slackNotifySetting{
+			want: riskenslack.NotifySetting{
 				WebhookURL: "hoge1",
-				Data:       slackNotifyOption{Channel: "ch"},
+				Data:       riskenslack.NotifyOption{Channel: "ch"},
 			},
 			wantErr: false,
 		},
@@ -1704,20 +1704,20 @@ func TestReplaceSlackNotifySetting(t *testing.T) {
 			name:        "OK replace webhook_url",
 			inputExist:  "{\"webhook_url\":\"hoge1\",\"data\":{\"hoge\":\"fuga\"}}",
 			inputUpdate: "{\"webhook_url\":\"hoge2\"}",
-			want:        slackNotifySetting{WebhookURL: "hoge2"},
+			want:        riskenslack.NotifySetting{WebhookURL: "hoge2"},
 			wantErr:     false,
 		},
 		{
 			name:        "OK blank",
 			inputExist:  "{}",
 			inputUpdate: "{}",
-			want:        slackNotifySetting{},
+			want:        riskenslack.NotifySetting{},
 			wantErr:     false,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := a.replaceSlackNotifySetting(context.Background(), c.inputExist, c.inputUpdate)
+			got, err := riskenslack.ReplaceNotifySetting(c.inputExist, c.inputUpdate)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
