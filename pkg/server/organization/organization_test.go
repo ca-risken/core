@@ -11,10 +11,11 @@ import (
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
-	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/org_iam"
 	org_iammock "github.com/ca-risken/core/proto/org_iam/mocks"
+	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/project"
+	projectmock "github.com/ca-risken/core/proto/project/mocks"
 	"gorm.io/gorm"
 )
 
@@ -875,6 +876,104 @@ func TestReplyOrganizationInvitation(t *testing.T) {
 			}
 
 			result, err := svc.ReplyOrganizationInvitation(ctx, c.input)
+			if !c.wantErr && err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(result, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
+			}
+		})
+	}
+}
+
+func TestCreateProjectWithOrganization(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name                       string
+		input                      *organization.CreateProjectWithOrganizationRequest
+		want                       *organization.CreateProjectWithOrganizationResponse
+		wantErr                    bool
+		createProjectResponse      *project.CreateProjectResponse
+		createProjectError         error
+		putInvitationResponse      *model.OrganizationInvitation
+		putInvitationError         error
+		putOrgProjectResponse      *model.OrganizationProject
+		putOrgProjectError         error
+	}{
+		{
+			name:  "OK",
+			input: &organization.CreateProjectWithOrganizationRequest{UserId: 1, Name: "test-project", OrganizationId: 1},
+			want: &organization.CreateProjectWithOrganizationResponse{
+				Project: &project.Project{ProjectId: 100, Name: "test-project", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+			},
+			createProjectResponse: &project.CreateProjectResponse{
+				Project: &project.Project{ProjectId: 100, Name: "test-project", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+			},
+			putInvitationResponse: &model.OrganizationInvitation{OrganizationID: 1, ProjectID: 100, Status: "ACCEPTED", CreatedAt: now, UpdatedAt: now},
+			putOrgProjectResponse: &model.OrganizationProject{OrganizationID: 1, ProjectID: 100, CreatedAt: now, UpdatedAt: now},
+		},
+		{
+			name:    "NG Invalid param (no name)",
+			input:   &organization.CreateProjectWithOrganizationRequest{UserId: 1, Name: "", OrganizationId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid param (no user_id)",
+			input:   &organization.CreateProjectWithOrganizationRequest{UserId: 0, Name: "test", OrganizationId: 1},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid param (no organization_id)",
+			input:   &organization.CreateProjectWithOrganizationRequest{UserId: 1, Name: "test", OrganizationId: 0},
+			wantErr: true,
+		},
+		{
+			name:               "NG CreateProject error",
+			input:              &organization.CreateProjectWithOrganizationRequest{UserId: 1, Name: "test", OrganizationId: 1},
+			createProjectError: errors.New("create project error"),
+			wantErr:            true,
+		},
+		{
+			name:  "NG PutOrganizationInvitation error",
+			input: &organization.CreateProjectWithOrganizationRequest{UserId: 1, Name: "test", OrganizationId: 1},
+			createProjectResponse: &project.CreateProjectResponse{
+				Project: &project.Project{ProjectId: 100, Name: "test", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+			},
+			putInvitationError: errors.New("put invitation error"),
+			wantErr:            true,
+		},
+		{
+			name:  "NG PutOrganizationProject error",
+			input: &organization.CreateProjectWithOrganizationRequest{UserId: 1, Name: "test", OrganizationId: 1},
+			createProjectResponse: &project.CreateProjectResponse{
+				Project: &project.Project{ProjectId: 100, Name: "test", CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+			},
+			putInvitationResponse: &model.OrganizationInvitation{OrganizationID: 1, ProjectID: 100, Status: "ACCEPTED", CreatedAt: now, UpdatedAt: now},
+			putOrgProjectError:    errors.New("put org project error"),
+			wantErr:               true,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var ctx context.Context
+			mockDB := mocks.NewOrganizationRepository(t)
+			mockProjectClient := projectmock.NewProjectServiceClient(t)
+			svc := OrganizationService{
+				repository:    mockDB,
+				projectClient: mockProjectClient,
+				logger:        logging.NewLogger(),
+			}
+			if c.createProjectResponse != nil || c.createProjectError != nil {
+				mockProjectClient.On("CreateProject", test.RepeatMockAnything(2)...).Return(c.createProjectResponse, c.createProjectError).Once()
+			}
+			if c.putInvitationResponse != nil || c.putInvitationError != nil {
+				mockDB.On("PutOrganizationInvitation", test.RepeatMockAnything(4)...).Return(c.putInvitationResponse, c.putInvitationError).Once()
+			}
+			if c.putOrgProjectResponse != nil || c.putOrgProjectError != nil {
+				mockDB.On("PutOrganizationProject", test.RepeatMockAnything(3)...).Return(c.putOrgProjectResponse, c.putOrgProjectError).Once()
+			}
+			result, err := svc.CreateProjectWithOrganization(ctx, c.input)
 			if !c.wantErr && err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
 			}

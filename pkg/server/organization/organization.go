@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/ca-risken/core/pkg/model"
-	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/org_iam"
+	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/golang/protobuf/ptypes/empty"
 	"gorm.io/gorm"
@@ -172,6 +172,27 @@ func (o *OrganizationService) ReplyOrganizationInvitation(ctx context.Context, r
 		}
 	}
 	return &organization.ReplyOrganizationInvitationResponse{}, nil
+}
+
+func (o *OrganizationService) CreateProjectWithOrganization(ctx context.Context, req *organization.CreateProjectWithOrganizationRequest) (*organization.CreateProjectWithOrganizationResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	createResp, err := o.projectClient.CreateProject(ctx, &project.CreateProjectRequest{
+		UserId: req.UserId,
+		Name:   req.Name,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("could not create project: err=%w", err)
+	}
+	if _, err := o.repository.PutOrganizationInvitation(ctx, req.OrganizationId, createResp.Project.ProjectId, organization.OrganizationInvitationStatus_ACCEPTED.String()); err != nil {
+		return nil, fmt.Errorf("could not create organization invitation: err=%w", err)
+	}
+	if _, err := o.repository.PutOrganizationProject(ctx, req.OrganizationId, createResp.Project.ProjectId); err != nil {
+		return nil, fmt.Errorf("could not associate project with organization: err=%w", err)
+	}
+	o.logger.Infof(ctx, "Project created with organization: owner=%d, organization_id=%d, project_id=%d", req.UserId, req.OrganizationId, createResp.Project.ProjectId)
+	return &organization.CreateProjectWithOrganizationResponse{Project: createResp.Project}, nil
 }
 
 func (o *OrganizationService) removeOrganizationProject(ctx context.Context, organizationID, projectID uint32) error {
