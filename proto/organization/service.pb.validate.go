@@ -1979,6 +1979,278 @@ var _ interface {
 	ErrorName() string
 } = DeleteOrganizationInvitationRequestValidationError{}
 
+// Validate checks the field values on CreateProjectWithOrganizationRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *CreateProjectWithOrganizationRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreateProjectWithOrganizationRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// CreateProjectWithOrganizationRequestMultiError, or nil if none found.
+func (m *CreateProjectWithOrganizationRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreateProjectWithOrganizationRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetUserId() <= 0 {
+		err := CreateProjectWithOrganizationRequestValidationError{
+			field:  "UserId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 64 {
+		err := CreateProjectWithOrganizationRequestValidationError{
+			field:  "Name",
+			reason: "value length must be between 1 and 64 runes, inclusive",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetOrganizationId() <= 0 {
+		err := CreateProjectWithOrganizationRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return CreateProjectWithOrganizationRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreateProjectWithOrganizationRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// CreateProjectWithOrganizationRequest.ValidateAll() if the designated
+// constraints aren't met.
+type CreateProjectWithOrganizationRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreateProjectWithOrganizationRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreateProjectWithOrganizationRequestMultiError) AllErrors() []error { return m }
+
+// CreateProjectWithOrganizationRequestValidationError is the validation error
+// returned by CreateProjectWithOrganizationRequest.Validate if the designated
+// constraints aren't met.
+type CreateProjectWithOrganizationRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateProjectWithOrganizationRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateProjectWithOrganizationRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateProjectWithOrganizationRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateProjectWithOrganizationRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateProjectWithOrganizationRequestValidationError) ErrorName() string {
+	return "CreateProjectWithOrganizationRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreateProjectWithOrganizationRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateProjectWithOrganizationRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateProjectWithOrganizationRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateProjectWithOrganizationRequestValidationError{}
+
+// Validate checks the field values on CreateProjectWithOrganizationResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *CreateProjectWithOrganizationResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreateProjectWithOrganizationResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// CreateProjectWithOrganizationResponseMultiError, or nil if none found.
+func (m *CreateProjectWithOrganizationResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreateProjectWithOrganizationResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetProject()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CreateProjectWithOrganizationResponseValidationError{
+					field:  "Project",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CreateProjectWithOrganizationResponseValidationError{
+					field:  "Project",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetProject()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CreateProjectWithOrganizationResponseValidationError{
+				field:  "Project",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return CreateProjectWithOrganizationResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreateProjectWithOrganizationResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// CreateProjectWithOrganizationResponse.ValidateAll() if the designated
+// constraints aren't met.
+type CreateProjectWithOrganizationResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreateProjectWithOrganizationResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreateProjectWithOrganizationResponseMultiError) AllErrors() []error { return m }
+
+// CreateProjectWithOrganizationResponseValidationError is the validation error
+// returned by CreateProjectWithOrganizationResponse.Validate if the
+// designated constraints aren't met.
+type CreateProjectWithOrganizationResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateProjectWithOrganizationResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateProjectWithOrganizationResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateProjectWithOrganizationResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateProjectWithOrganizationResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateProjectWithOrganizationResponseValidationError) ErrorName() string {
+	return "CreateProjectWithOrganizationResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreateProjectWithOrganizationResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateProjectWithOrganizationResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateProjectWithOrganizationResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateProjectWithOrganizationResponseValidationError{}
+
 // Validate checks the field values on ReplyOrganizationInvitationRequest with
 // the rules defined in the proto definition for this message. If any rules
 // are violated, the first error encountered is returned, or nil if there are
