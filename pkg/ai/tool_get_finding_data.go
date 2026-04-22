@@ -3,6 +3,7 @@ package ai
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/responses"
 )
+
+var whereClauseRe = regexp.MustCompile(`(?i)\bwhere\b`)
 
 // GetFindingDataTool returns the get_finding_data function tool definition
 func GetFindingDataTool() responses.ToolUnionParam {
@@ -196,8 +199,19 @@ func formatSQL(sql string, projectID, limit, offset uint32) (string, []any) {
 		sql = strings.TrimSpace(sql[:idx])
 	}
 
+	whereLoc := whereClauseRe.FindStringIndex(sql)
+	if whereLoc == nil {
+		sql = fmt.Sprintf(`SELECT * FROM (%s) as t LIMIT ? OFFSET ?`, sql)
+		params = append(params, limit, offset)
+		return sql, params
+	}
+
+	head := strings.TrimSpace(sql[:whereLoc[0]])
+	whereClause := strings.TrimSpace(sql[whereLoc[1]:])
+	condition, suffix := splitWhereConditionAndSuffix(whereClause)
+
 	// strict project_id filter & ignore pend_findings
-	sql = strings.ReplaceAll(sql, "WHERE", `WHERE
+	sql = fmt.Sprintf(`%s WHERE
 	project_id = ? 
 	AND not exists (
 		SELECT 1 
@@ -206,13 +220,97 @@ func formatSQL(sql string, projectID, limit, offset uint32) (string, []any) {
 		  pend_finding.finding_id = finding.finding_id
 			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
 	)
-	AND`)
+	AND (%s)`, head, condition)
+	if suffix != "" {
+		sql = fmt.Sprintf("%s %s", sql, suffix)
+	}
 	params = append(params, projectID)
 
 	// add limit and offset
 	sql = fmt.Sprintf(`SELECT * FROM (%s) as t LIMIT ? OFFSET ?`, sql)
 	params = append(params, limit, offset)
 	return sql, params
+}
+
+func splitWhereConditionAndSuffix(whereClause string) (string, string) {
+	upper := strings.ToUpper(whereClause)
+	inSingleQuote := false
+	inDoubleQuote := false
+	inBacktick := false
+	parenthesesDepth := 0
+	clauseKeywords := []string{"GROUP BY", "HAVING", "ORDER BY", "LIMIT"}
+
+	for i := 0; i < len(whereClause); i++ {
+		ch := whereClause[i]
+
+		if inSingleQuote {
+			if ch == '\'' && (i == 0 || whereClause[i-1] != '\\') {
+				inSingleQuote = false
+			}
+			continue
+		}
+		if inDoubleQuote {
+			if ch == '"' && (i == 0 || whereClause[i-1] != '\\') {
+				inDoubleQuote = false
+			}
+			continue
+		}
+		if inBacktick {
+			if ch == '`' {
+				inBacktick = false
+			}
+			continue
+		}
+
+		switch ch {
+		case '\'':
+			inSingleQuote = true
+			continue
+		case '"':
+			inDoubleQuote = true
+			continue
+		case '`':
+			inBacktick = true
+			continue
+		case '(':
+			parenthesesDepth++
+			continue
+		case ')':
+			if parenthesesDepth > 0 {
+				parenthesesDepth--
+			}
+			continue
+		}
+
+		if parenthesesDepth != 0 {
+			continue
+		}
+
+		for _, keyword := range clauseKeywords {
+			if hasClauseKeywordAt(upper, i, keyword) {
+				return strings.TrimSpace(whereClause[:i]), strings.TrimSpace(whereClause[i:])
+			}
+		}
+	}
+	return strings.TrimSpace(whereClause), ""
+}
+
+func hasClauseKeywordAt(sqlUpper string, idx int, keyword string) bool {
+	if !strings.HasPrefix(sqlUpper[idx:], keyword) {
+		return false
+	}
+	if idx > 0 && isSQLIdentifierChar(sqlUpper[idx-1]) {
+		return false
+	}
+	end := idx + len(keyword)
+	if end < len(sqlUpper) && isSQLIdentifierChar(sqlUpper[end]) {
+		return false
+	}
+	return true
+}
+
+func isSQLIdentifierChar(ch byte) bool {
+	return (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_'
 }
 
 func validateSQL(sql string) error {

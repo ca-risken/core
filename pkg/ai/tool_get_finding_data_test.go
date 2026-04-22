@@ -36,7 +36,7 @@ func TestFormatSQL(t *testing.T) {
 		  pend_finding.finding_id = finding.finding_id
 			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
 	)
-	AND score > 0.5) as t LIMIT ? OFFSET ?`,
+	AND (score > 0.5)) as t LIMIT ? OFFSET ?`,
 			wantParams: []any{uint32(1001), uint32(100), uint32(0)},
 		},
 		{
@@ -56,7 +56,7 @@ func TestFormatSQL(t *testing.T) {
 		  pend_finding.finding_id = finding.finding_id
 			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
 	)
-	AND data_source LIKE 'aws%' GROUP BY data_source ORDER BY count DESC) as t LIMIT ? OFFSET ?`,
+	AND (data_source LIKE 'aws%') GROUP BY data_source ORDER BY count DESC) as t LIMIT ? OFFSET ?`,
 			wantParams: []any{uint32(2002), uint32(50), uint32(10)},
 		},
 		{
@@ -76,7 +76,7 @@ func TestFormatSQL(t *testing.T) {
 		  pend_finding.finding_id = finding.finding_id
 			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
 	)
-	AND score >= 0.8 AND data_source = 'aws:guardduty') as t LIMIT ? OFFSET ?`,
+	AND (score >= 0.8 AND data_source = 'aws:guardduty')) as t LIMIT ? OFFSET ?`,
 			wantParams: []any{uint32(3003), uint32(200), uint32(5)},
 		},
 		{
@@ -96,7 +96,7 @@ func TestFormatSQL(t *testing.T) {
 		  pend_finding.finding_id = finding.finding_id
 			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
 	)
-	AND updated_at > '2024-01-01') as t LIMIT ? OFFSET ?`,
+	AND (updated_at > '2024-01-01')) as t LIMIT ? OFFSET ?`,
 			wantParams: []any{uint32(4004), uint32(10), uint32(0)},
 		},
 		{
@@ -116,7 +116,7 @@ func TestFormatSQL(t *testing.T) {
 		  pend_finding.finding_id = finding.finding_id
 			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
 	)
-	AND resource_name LIKE '%bucket%' GROUP BY data_source) as t LIMIT ? OFFSET ?`,
+	AND (resource_name LIKE '%bucket%') GROUP BY data_source) as t LIMIT ? OFFSET ?`,
 			wantParams: []any{uint32(5005), uint32(25), uint32(3)},
 		},
 		{
@@ -136,8 +136,48 @@ func TestFormatSQL(t *testing.T) {
 		  pend_finding.finding_id = finding.finding_id
 			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
 	)
-	AND score > 0.5) as t LIMIT ? OFFSET ?`,
+	AND (score > 0.5)) as t LIMIT ? OFFSET ?`,
 			wantParams: []any{uint32(6006), uint32(10), uint32(0)},
+		},
+		{
+			name: "SELECT with OR condition should keep project scope",
+			args: args{
+				sql:       "SELECT * FROM finding WHERE score >= 0.8 OR score <= 0.3",
+				projectID: 7007,
+				limit:     20,
+				offset:    0,
+			},
+			wantSQL: `SELECT * FROM (SELECT * FROM finding WHERE
+	project_id = ? 
+	AND not exists (
+		SELECT 1 
+		FROM pend_finding
+		WHERE 
+		  pend_finding.finding_id = finding.finding_id
+			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
+	)
+	AND (score >= 0.8 OR score <= 0.3)) as t LIMIT ? OFFSET ?`,
+			wantParams: []any{uint32(7007), uint32(20), uint32(0)},
+		},
+		{
+			name: "Case insensitive where clause",
+			args: args{
+				sql:       "select * from finding where score > 0.5",
+				projectID: 8008,
+				limit:     15,
+				offset:    2,
+			},
+			wantSQL: `SELECT * FROM (select * from finding WHERE
+	project_id = ? 
+	AND not exists (
+		SELECT 1 
+		FROM pend_finding
+		WHERE 
+		  pend_finding.finding_id = finding.finding_id
+			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
+	)
+	AND (score > 0.5)) as t LIMIT ? OFFSET ?`,
+			wantParams: []any{uint32(8008), uint32(15), uint32(2)},
 		},
 	}
 
