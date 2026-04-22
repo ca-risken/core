@@ -3,6 +3,7 @@ package project
 import (
 	"context"
 	"errors"
+	"net"
 	"reflect"
 	"testing"
 	"time"
@@ -14,6 +15,11 @@ import (
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/iam"
 	"github.com/ca-risken/core/proto/project"
+	"github.com/stretchr/testify/mock"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/peer"
+	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 
 	iammock "github.com/ca-risken/core/proto/iam/mocks"
@@ -184,6 +190,87 @@ func TestCreateProject(t *testing.T) {
 				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
 			}
 		})
+	}
+}
+
+func TestCreateProject_OverwriteOwnerByCallerMetadata(t *testing.T) {
+	now := time.Now()
+	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("x-risken-user-id", "999"))
+	ctx = peer.NewContext(ctx, &peer.Peer{Addr: &net.TCPAddr{IP: net.ParseIP("10.0.0.10"), Port: 10000}})
+
+	mockDB := mocks.NewProjectRepository(t)
+	mockIAM := iammock.NewIAMServiceClient(t)
+	svc := ProjectService{
+		repository: mockDB,
+		iamClient:  mockIAM,
+		logger:     logging.NewLogger(),
+	}
+	mockDB.On("CreateProject", test.RepeatMockAnything(2)...).
+		Return(&model.Project{ProjectID: 1, Name: "nm", CreatedAt: now, UpdatedAt: now}, nil).Once()
+	mockIAM.On("PutPolicy", test.RepeatMockAnything(2)...).
+		Return(&iam.PutPolicyResponse{Policy: &iam.Policy{PolicyId: 1}}, nil).Times(3)
+	mockIAM.On("PutRole", test.RepeatMockAnything(2)...).
+		Return(&iam.PutRoleResponse{Role: &iam.Role{RoleId: 1}}, nil).Times(3)
+	mockIAM.On("AttachPolicy", test.RepeatMockAnything(2)...).
+		Return(&iam.AttachPolicyResponse{RolePolicy: &iam.RolePolicy{RoleId: 1}}, nil).Times(3)
+	mockIAM.On("AttachRole", mock.Anything, mock.MatchedBy(func(req *iam.AttachRoleRequest) bool {
+		return req.GetUserId() == 999
+	})).Return(&iam.AttachRoleResponse{UserRole: &iam.UserRole{RoleId: 1}}, nil).Once()
+
+	_, err := svc.CreateProject(ctx, &project.CreateProjectRequest{UserId: 1, Name: "nm"})
+	if err != nil {
+		t.Fatalf("Unexpected error: %+v", err)
+	}
+}
+
+func TestCreateProject_DenyExternalWithoutCallerMetadata(t *testing.T) {
+	ctx := peer.NewContext(context.Background(), &peer.Peer{Addr: &net.TCPAddr{IP: net.ParseIP("10.0.0.11"), Port: 10000}})
+	mockDB := mocks.NewProjectRepository(t)
+	mockIAM := iammock.NewIAMServiceClient(t)
+	svc := ProjectService{
+		repository: mockDB,
+		iamClient:  mockIAM,
+		logger:     logging.NewLogger(),
+	}
+
+	got, err := svc.CreateProject(ctx, &project.CreateProjectRequest{UserId: 1, Name: "nm"})
+	if err == nil {
+		t.Fatalf("expected error but got nil")
+	}
+	if got != nil {
+		t.Fatalf("expected nil response but got %+v", got)
+	}
+	if status.Code(err) != codes.PermissionDenied {
+		t.Fatalf("unexpected status code: got=%s, want=%s", status.Code(err), codes.PermissionDenied)
+	}
+}
+
+func TestCreateProject_AllowLoopbackWithoutCallerMetadata(t *testing.T) {
+	now := time.Now()
+	ctx := peer.NewContext(context.Background(), &peer.Peer{Addr: &net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 10000}})
+
+	mockDB := mocks.NewProjectRepository(t)
+	mockIAM := iammock.NewIAMServiceClient(t)
+	svc := ProjectService{
+		repository: mockDB,
+		iamClient:  mockIAM,
+		logger:     logging.NewLogger(),
+	}
+	mockDB.On("CreateProject", test.RepeatMockAnything(2)...).
+		Return(&model.Project{ProjectID: 1, Name: "nm", CreatedAt: now, UpdatedAt: now}, nil).Once()
+	mockIAM.On("PutPolicy", test.RepeatMockAnything(2)...).
+		Return(&iam.PutPolicyResponse{Policy: &iam.Policy{PolicyId: 1}}, nil).Times(3)
+	mockIAM.On("PutRole", test.RepeatMockAnything(2)...).
+		Return(&iam.PutRoleResponse{Role: &iam.Role{RoleId: 1}}, nil).Times(3)
+	mockIAM.On("AttachPolicy", test.RepeatMockAnything(2)...).
+		Return(&iam.AttachPolicyResponse{RolePolicy: &iam.RolePolicy{RoleId: 1}}, nil).Times(3)
+	mockIAM.On("AttachRole", mock.Anything, mock.MatchedBy(func(req *iam.AttachRoleRequest) bool {
+		return req.GetUserId() == 123
+	})).Return(&iam.AttachRoleResponse{UserRole: &iam.UserRole{RoleId: 1}}, nil).Once()
+
+	_, err := svc.CreateProject(ctx, &project.CreateProjectRequest{UserId: 123, Name: "nm"})
+	if err != nil {
+		t.Fatalf("Unexpected error: %+v", err)
 	}
 }
 

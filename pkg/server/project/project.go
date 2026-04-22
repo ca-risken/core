@@ -4,12 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
+	"strconv"
 
 	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/iam"
 	"github.com/ca-risken/core/proto/project"
 	"github.com/golang/protobuf/ptypes/empty"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/peer"
+	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
 
@@ -67,6 +73,12 @@ func (p *ProjectService) CreateProject(ctx context.Context, req *project.CreateP
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
+	ownerUserID, err := resolveCreateProjectOwnerUserID(ctx, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+	req.UserId = ownerUserID
+
 	pr, err := p.repository.CreateProject(ctx, req.Name)
 	if err != nil {
 		return nil, err
@@ -77,6 +89,48 @@ func (p *ProjectService) CreateProject(ctx context.Context, req *project.CreateP
 	p.logger.Infof(ctx, "Project created: owner=%d, project=%+v", req.UserId, pr)
 
 	return &project.CreateProjectResponse{Project: convertProject(pr)}, nil
+}
+
+func resolveCreateProjectOwnerUserID(ctx context.Context, requestUserID uint32) (uint32, error) {
+	if ctx == nil {
+		return requestUserID, nil
+	}
+	pr, ok := peer.FromContext(ctx)
+	if !ok || pr == nil || pr.Addr == nil {
+		return requestUserID, nil
+	}
+	if isLoopbackPeerAddr(pr.Addr) {
+		return requestUserID, nil
+	}
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return 0, status.Error(codes.PermissionDenied, "caller user_id metadata is required")
+	}
+	var callerUserIDRaw string
+	for _, key := range []string{"x-risken-user-id", "x-user-id"} {
+		values := md.Get(key)
+		if len(values) > 0 {
+			callerUserIDRaw = values[0]
+			break
+		}
+	}
+	if callerUserIDRaw == "" {
+		return 0, status.Error(codes.PermissionDenied, "caller user_id metadata is required")
+	}
+	callerUserID, err := strconv.ParseUint(callerUserIDRaw, 10, 32)
+	if err != nil || callerUserID == 0 {
+		return 0, status.Error(codes.InvalidArgument, "invalid caller user_id metadata")
+	}
+	return uint32(callerUserID), nil
+}
+
+func isLoopbackPeerAddr(addr net.Addr) bool {
+	host, _, err := net.SplitHostPort(addr.String())
+	if err != nil {
+		host = addr.String()
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
 }
 
 func (p *ProjectService) UpdateProject(ctx context.Context, req *project.UpdateProjectRequest) (*project.UpdateProjectResponse, error) {
