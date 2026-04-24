@@ -90,6 +90,8 @@ func (m *IsAuthorizedOrgRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	// no validation rules for ProjectName
+
 	if len(errors) > 0 {
 		return IsAuthorizedOrgRequestMultiError(errors)
 	}
@@ -330,6 +332,8 @@ func (m *IsAuthorizedOrgTokenRequest) validate(all bool) error {
 	}
 
 	// no validation rules for ProjectId
+
+	// no validation rules for ProjectName
 
 	if len(errors) > 0 {
 		return IsAuthorizedOrgTokenRequestMultiError(errors)

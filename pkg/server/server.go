@@ -115,7 +115,7 @@ func (s *Server) Run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	isvc := iamserver.NewIAMService(s.db, fc, oc, oimac, s.logger)
+	isvc := iamserver.NewIAMService(s.db, fc, pc, oc, oimac, s.logger)
 	asvc := alertserver.NewAlertService(
 		s.config.MaxAnalyzeAPICall,
 		s.config.BaseURL,

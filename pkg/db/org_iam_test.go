@@ -383,54 +383,54 @@ func TestListOrgPolicy(t *testing.T) {
 			name: "OK - no filters",
 			args: args{organizationID: 1, name: "", roleID: 0},
 			want: []*model.OrganizationPolicy{
-				{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
-				{PolicyID: 2, OrganizationID: 1, Name: "policy2", CreatedAt: now, UpdatedAt: now},
+				{PolicyID: 1, OrganizationID: 1, Name: "policy1", ActionPtn: ".*", ProjectPtn: ".*", CreatedAt: now, UpdatedAt: now},
+				{PolicyID: 2, OrganizationID: 1, Name: "policy2", ActionPtn: ".*", ProjectPtn: ".*", CreatedAt: now, UpdatedAt: now},
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(ListOrgPolicy)).WillReturnRows(sqlmock.NewRows([]string{
-					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
-					AddRow(uint32(1), uint32(1), "policy1", now, now).
-					AddRow(uint32(2), uint32(1), "policy2", now, now))
+					"policy_id", "organization_id", "name", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "policy1", ".*", ".*", now, now).
+					AddRow(uint32(2), uint32(1), "policy2", ".*", ".*", now, now))
 			},
 		},
 		{
 			name: "OK - with roleID filter",
 			args: args{organizationID: 1, name: "", roleID: 456},
 			want: []*model.OrganizationPolicy{
-				{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
+				{PolicyID: 1, OrganizationID: 1, Name: "policy1", ActionPtn: ".*", ProjectPtn: ".*", CreatedAt: now, UpdatedAt: now},
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(ListOrgPolicy + " and exists(select * from organization_role_policy orp where orp.policy_id = op.policy_id and orp.role_id = ?)")).WillReturnRows(sqlmock.NewRows([]string{
-					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
-					AddRow(uint32(1), uint32(1), "policy1", now, now))
+					"policy_id", "organization_id", "name", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "policy1", ".*", ".*", now, now))
 			},
 		},
 		{
 			name: "OK - with name filter",
 			args: args{organizationID: 1, name: "read-only", roleID: 0},
 			want: []*model.OrganizationPolicy{
-				{PolicyID: 1, OrganizationID: 1, Name: "read-only", CreatedAt: now, UpdatedAt: now},
+				{PolicyID: 1, OrganizationID: 1, Name: "read-only", ActionPtn: ".*", ProjectPtn: ".*", CreatedAt: now, UpdatedAt: now},
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(ListOrgPolicy + " and op.name = ?")).WillReturnRows(sqlmock.NewRows([]string{
-					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
-					AddRow(uint32(1), uint32(1), "read-only", now, now))
+					"policy_id", "organization_id", "name", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "read-only", ".*", ".*", now, now))
 			},
 		},
 		{
 			name: "OK - with both filters",
 			args: args{organizationID: 1, name: "read-only", roleID: 456},
 			want: []*model.OrganizationPolicy{
-				{PolicyID: 1, OrganizationID: 1, Name: "read-only", CreatedAt: now, UpdatedAt: now},
+				{PolicyID: 1, OrganizationID: 1, Name: "read-only", ActionPtn: ".*", ProjectPtn: ".*", CreatedAt: now, UpdatedAt: now},
 			},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(ListOrgPolicy + " and op.name = ? and exists(select * from organization_role_policy orp where orp.policy_id = op.policy_id and orp.role_id = ?)")).WillReturnRows(sqlmock.NewRows([]string{
-					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
-					AddRow(uint32(1), uint32(1), "read-only", now, now))
+					"policy_id", "organization_id", "name", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "read-only", ".*", ".*", now, now))
 			},
 		},
 		{
@@ -481,12 +481,12 @@ func TestGetOrgPolicy(t *testing.T) {
 		{
 			name:    "OK",
 			args:    args{organizationID: 1, policyID: 1},
-			want:    &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
+			want:    &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", ActionPtn: ".*", ProjectPtn: ".*", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(getOrgPolicy)).WillReturnRows(sqlmock.NewRows([]string{
-					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
-					AddRow(uint32(1), uint32(1), "policy1", now, now))
+					"policy_id", "organization_id", "name", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "policy1", ".*", ".*", now, now))
 			},
 		},
 		{
@@ -537,12 +537,12 @@ func TestGetOrgPolicyByName(t *testing.T) {
 		{
 			name:    "OK",
 			args:    args{organizationID: 1, name: "policy1"},
-			want:    &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
+			want:    &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", ActionPtn: ".*", ProjectPtn: ".*", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(getOrgPolicyByName)).WillReturnRows(sqlmock.NewRows([]string{
-					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
-					AddRow(uint32(1), uint32(1), "policy1", now, now))
+					"policy_id", "organization_id", "name", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "policy1", ".*", ".*", now, now))
 			},
 		},
 		{
@@ -593,12 +593,12 @@ func TestGetOrgPolicyByUserID(t *testing.T) {
 		{
 			name:    "OK",
 			args:    args{organizationID: 1, userID: 1},
-			want:    &[]model.OrganizationPolicy{{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now}},
+			want:    &[]model.OrganizationPolicy{{PolicyID: 1, OrganizationID: 1, Name: "policy1", ActionPtn: ".*", ProjectPtn: ".*", CreatedAt: now, UpdatedAt: now}},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(getOrgPolicyByUserID)).WillReturnRows(sqlmock.NewRows([]string{
-					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
-					AddRow(uint32(1), uint32(1), "policy1", now, now))
+					"policy_id", "organization_id", "name", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "policy1", ".*", ".*", now, now))
 			},
 		},
 		{
@@ -647,19 +647,19 @@ func TestPutOrgPolicy(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			args:    args{policy: &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1"}},
-			want:    &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
+			args:    args{policy: &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", ActionPtn: ".*", ProjectPtn: ".*"}},
+			want:    &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", ActionPtn: ".*", ProjectPtn: ".*", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(regexp.QuoteMeta(putOrgPolicy)).WillReturnResult(sqlmock.NewResult(1, 1))
 				mock.ExpectQuery(regexp.QuoteMeta(getOrgPolicyByName)).WillReturnRows(sqlmock.NewRows([]string{
-					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
-					AddRow(uint32(1), uint32(1), "policy1", now, now))
+					"policy_id", "organization_id", "name", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "policy1", ".*", ".*", now, now))
 			},
 		},
 		{
 			name:    "NG failed to insert policy",
-			args:    args{policy: &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1"}},
+			args:    args{policy: &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", ActionPtn: ".*", ProjectPtn: ".*"}},
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
@@ -668,7 +668,7 @@ func TestPutOrgPolicy(t *testing.T) {
 		},
 		{
 			name:    "NG failed to get policy",
-			args:    args{policy: &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1"}},
+			args:    args{policy: &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", ActionPtn: ".*", ProjectPtn: ".*"}},
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
@@ -915,19 +915,19 @@ func TestAttachOrgPolicy(t *testing.T) {
 		{
 			name:    "OK",
 			args:    args{organizationID: 1, roleID: 1, policyID: 1},
-			want:    &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", CreatedAt: now, UpdatedAt: now},
+			want:    &model.OrganizationPolicy{PolicyID: 1, OrganizationID: 1, Name: "policy1", ActionPtn: ".*", ProjectPtn: ".*", CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(getOrgRole)).WillReturnRows(sqlmock.NewRows([]string{
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 				mock.ExpectQuery(regexp.QuoteMeta(getOrgPolicy)).WillReturnRows(sqlmock.NewRows([]string{
-					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
-					AddRow(uint32(1), uint32(1), "policy1", now, now))
+					"policy_id", "organization_id", "name", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "policy1", ".*", ".*", now, now))
 				mock.ExpectExec(regexp.QuoteMeta(insertAttachOrgPolicy)).WillReturnResult(sqlmock.NewResult(1, 1))
 				mock.ExpectQuery(regexp.QuoteMeta(getOrgPolicy)).WillReturnRows(sqlmock.NewRows([]string{
-					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
-					AddRow(uint32(1), uint32(1), "policy1", now, now))
+					"policy_id", "organization_id", "name", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "policy1", ".*", ".*", now, now))
 			},
 		},
 		{
@@ -940,8 +940,8 @@ func TestAttachOrgPolicy(t *testing.T) {
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 				mock.ExpectQuery(regexp.QuoteMeta(getOrgPolicy)).WillReturnRows(sqlmock.NewRows([]string{
-					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
-					AddRow(uint32(1), uint32(1), "policy1", now, now))
+					"policy_id", "organization_id", "name", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "policy1", ".*", ".*", now, now))
 				mock.ExpectExec(regexp.QuoteMeta(insertAttachOrgPolicy)).WillReturnError(errors.New("DB error"))
 			},
 		},
@@ -955,8 +955,8 @@ func TestAttachOrgPolicy(t *testing.T) {
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 				mock.ExpectQuery(regexp.QuoteMeta(getOrgPolicy)).WillReturnRows(sqlmock.NewRows([]string{
-					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
-					AddRow(uint32(1), uint32(1), "policy1", now, now))
+					"policy_id", "organization_id", "name", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "policy1", ".*", ".*", now, now))
 				mock.ExpectExec(regexp.QuoteMeta(insertAttachOrgPolicy)).WillReturnResult(sqlmock.NewResult(1, 1))
 				mock.ExpectQuery(regexp.QuoteMeta(getOrgPolicy)).WillReturnError(errors.New("DB error"))
 			},
@@ -1027,8 +1027,8 @@ func TestDetachOrgPolicy(t *testing.T) {
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 				mock.ExpectQuery(regexp.QuoteMeta(getOrgPolicy)).WillReturnRows(sqlmock.NewRows([]string{
-					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
-					AddRow(uint32(1), uint32(1), "policy1", now, now))
+					"policy_id", "organization_id", "name", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "policy1", ".*", ".*", now, now))
 				mock.ExpectExec(regexp.QuoteMeta(deleteDetachOrgPolicy)).WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 		},
@@ -1041,8 +1041,8 @@ func TestDetachOrgPolicy(t *testing.T) {
 					"role_id", "organization_id", "name", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), "role1", now, now))
 				mock.ExpectQuery(regexp.QuoteMeta(getOrgPolicy)).WillReturnRows(sqlmock.NewRows([]string{
-					"policy_id", "organization_id", "name", "created_at", "updated_at"}).
-					AddRow(uint32(1), uint32(1), "policy1", now, now))
+					"policy_id", "organization_id", "name", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), uint32(1), "policy1", ".*", ".*", now, now))
 				mock.ExpectExec(regexp.QuoteMeta(deleteDetachOrgPolicy)).WillReturnError(errors.New("DB error"))
 			},
 		},
@@ -1505,8 +1505,8 @@ func TestGetOrgTokenPolicy(t *testing.T) {
 			name:    "OK",
 			wantLen: 1,
 			mock: func(mock sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows([]string{"policy_id", "name", "organization_id", "action_ptn", "created_at", "updated_at"}).
-					AddRow(uint32(1), "policy", uint32(2), "organization/.*", now, now)
+				rows := sqlmock.NewRows([]string{"policy_id", "name", "organization_id", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), "policy", uint32(2), "organization/.*", ".*", now, now)
 				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrgTokenPolicy)).
 					WithArgs(uint32(1), uint32(2)).
 					WillReturnRows(rows)

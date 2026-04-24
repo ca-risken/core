@@ -9,6 +9,7 @@ import (
 	"github.com/ca-risken/core/proto/iam"
 	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/org_iam"
+	"github.com/ca-risken/core/proto/project"
 	"gorm.io/gorm"
 )
 
@@ -134,6 +135,17 @@ func (i *IAMService) isUserAdmin(ctx context.Context, userID uint32) (bool, erro
 }
 
 func (i *IAMService) isAuthorizedByOrganizations(ctx context.Context, userID, projectID uint32, actionName string) (bool, error) {
+	// Resolve project name from project ID
+	var projectName string
+	if projectID != 0 {
+		projects, err := i.projectClient.ListProject(ctx, &project.ListProjectRequest{ProjectId: projectID})
+		if err != nil {
+			i.logger.Warnf(ctx, "Failed to get project name for project_id=%d: %v", projectID, err)
+		} else if len(projects.Project) > 0 {
+			projectName = projects.Project[0].Name
+		}
+	}
+
 	orgList, err := i.organizationClient.ListOrganization(ctx, &organization.ListOrganizationRequest{
 		ProjectId: projectID,
 		UserId:    userID,
@@ -147,6 +159,7 @@ func (i *IAMService) isAuthorizedByOrganizations(ctx context.Context, userID, pr
 			UserId:         userID,
 			OrganizationId: org.OrganizationId,
 			ActionName:     actionName,
+			ProjectName:    projectName,
 		})
 		if err != nil {
 			i.logger.Warnf(ctx, "Failed to check organization authorization: org_id=%d, user_id=%d, action=%s, error=%v", org.OrganizationId, userID, actionName, err)

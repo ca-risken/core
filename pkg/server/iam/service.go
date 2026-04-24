@@ -7,24 +7,27 @@ import (
 	"github.com/ca-risken/core/proto/iam"
 	"github.com/ca-risken/core/proto/organization"
 	"github.com/ca-risken/core/proto/org_iam"
+	"github.com/ca-risken/core/proto/project"
 )
 
 var _ iam.IAMServiceServer = (*IAMService)(nil)
 
 type IAMService struct {
-	repository            db.IAMRepository
-	findingClient         finding.FindingServiceClient
-	organizationClient    organization.OrganizationServiceClient
-	orgIamClient org_iam.OrgIAMServiceClient
-	logger                logging.Logger
+	repository         db.IAMRepository
+	findingClient      finding.FindingServiceClient
+	projectClient      project.ProjectServiceClient
+	organizationClient organization.OrganizationServiceClient
+	orgIamClient       org_iam.OrgIAMServiceClient
+	logger             logging.Logger
 }
 
-func NewIAMService(repository db.IAMRepository, findingClient finding.FindingServiceClient, organizationClient organization.OrganizationServiceClient, orgIamClient org_iam.OrgIAMServiceClient, logger logging.Logger) *IAMService {
+func NewIAMService(repository db.IAMRepository, findingClient finding.FindingServiceClient, projectClient project.ProjectServiceClient, organizationClient organization.OrganizationServiceClient, orgIamClient org_iam.OrgIAMServiceClient, logger logging.Logger) *IAMService {
 	return &IAMService{
-		repository:            repository,
-		findingClient:         findingClient,
-		organizationClient:    organizationClient,
-		orgIamClient: orgIamClient,
-		logger:                logger,
+		repository:         repository,
+		findingClient:      findingClient,
+		projectClient:      projectClient,
+		organizationClient: organizationClient,
+		orgIamClient:       orgIamClient,
+		logger:             logger,
 	}
 }

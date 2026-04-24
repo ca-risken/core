@@ -19,15 +19,16 @@ import (
 
 func TestIsAuthorizedByOrgPolicy(t *testing.T) {
 	validPolicies := &[]model.OrganizationPolicy{
-		{PolicyID: 1, Name: "organization-admin", OrganizationID: 1, ActionPtn: "organization/.*"},
-		{PolicyID: 2, Name: "organizatino-viewer", OrganizationID: 1, ActionPtn: "project/(get|list)"},
+		{PolicyID: 1, Name: "organization-admin", OrganizationID: 1, ActionPtn: "organization/.*", ProjectPtn: ".*"},
+		{PolicyID: 2, Name: "organizatino-viewer", OrganizationID: 1, ActionPtn: "project/(get|list)", ProjectPtn: ".*"},
 	}
 	cases := []struct {
-		name    string
-		action  string
-		policy  *[]model.OrganizationPolicy
-		want    bool
-		wantErr bool
+		name        string
+		action      string
+		projectName string
+		policy      *[]model.OrganizationPolicy
+		want        bool
+		wantErr     bool
 	}{
 		{
 			name:   "OK Authorized organization get",
@@ -38,20 +39,47 @@ func TestIsAuthorizedByOrgPolicy(t *testing.T) {
 		{
 			name:   "OK Unauthorized action not allowed",
 			action: "organization/delete-organization",
-			policy: &[]model.OrganizationPolicy{{PolicyID: 2, Name: "organization-viewer", OrganizationID: 1, ActionPtn: "organization/(get|list)"}},
+			policy: &[]model.OrganizationPolicy{{PolicyID: 2, Name: "organization-viewer", OrganizationID: 1, ActionPtn: "organization/(get|list)", ProjectPtn: ".*"}},
 			want:   false,
 		},
 		{
 			name:    "NG Error invalid regex pattern",
 			action:  "organization/get",
-			policy:  &[]model.OrganizationPolicy{{PolicyID: 1, Name: "invalid-pattern", OrganizationID: 1, ActionPtn: "[invalid regex"}},
+			policy:  &[]model.OrganizationPolicy{{PolicyID: 1, Name: "invalid-pattern", OrganizationID: 1, ActionPtn: "[invalid regex", ProjectPtn: ".*"}},
+			wantErr: true,
+		},
+		{
+			name:        "OK Authorized with project_name matching project_ptn",
+			action:      "organization/get-organization",
+			projectName: "project-A",
+			policy:      &[]model.OrganizationPolicy{{PolicyID: 1, Name: "organization-admin", OrganizationID: 1, ActionPtn: "organization/.*", ProjectPtn: "project-.*"}},
+			want:        true,
+		},
+		{
+			name:        "OK Unauthorized project_name not matching project_ptn",
+			action:      "organization/get-organization",
+			projectName: "other-project",
+			policy:      &[]model.OrganizationPolicy{{PolicyID: 1, Name: "organization-admin", OrganizationID: 1, ActionPtn: "organization/.*", ProjectPtn: "^project-A$"}},
+			want:        false,
+		},
+		{
+			name:        "OK Authorized project_name empty with default project_ptn",
+			action:      "organization/get-organization",
+			projectName: "",
+			policy:      &[]model.OrganizationPolicy{{PolicyID: 1, Name: "organization-admin", OrganizationID: 1, ActionPtn: "organization/.*", ProjectPtn: ".*"}},
+			want:        true,
+		},
+		{
+			name:    "NG Error invalid project_ptn regex",
+			action:  "organization/get-organization",
+			policy:  &[]model.OrganizationPolicy{{PolicyID: 1, Name: "invalid-project-ptn", OrganizationID: 1, ActionPtn: "organization/.*", ProjectPtn: "[invalid regex"}},
 			wantErr: true,
 		},
 	}
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := isAuthorizedByOrgPolicy(c.action, c.policy)
+			got, err := isAuthorizedByOrgPolicy(c.action, c.projectName, c.policy)
 			if (err != nil) != c.wantErr {
 				t.Errorf("isAuthorizedByOrgPolicy() error = %v, wantErr %v", err, c.wantErr)
 				return
@@ -97,7 +125,7 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 			mockIsAdminResp:   false,
 			expectIsAdminCall: true,
 			mockResponse: &[]model.OrganizationPolicy{
-				{PolicyID: 101, Name: "organization-admin", OrganizationID: 1001, ActionPtn: "organization/.*"},
+				{PolicyID: 101, Name: "organization-admin", OrganizationID: 1001, ActionPtn: "organization/.*", ProjectPtn: ".*"},
 			},
 		},
 		{
@@ -111,7 +139,7 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 			mockIsAdminResp:   false,
 			expectIsAdminCall: true,
 			mockResponse: &[]model.OrganizationPolicy{
-				{PolicyID: 102, Name: "organization-viewer", OrganizationID: 1001, ActionPtn: "organization/(get|list)"},
+				{PolicyID: 102, Name: "organization-viewer", OrganizationID: 1001, ActionPtn: "organization/(get|list)", ProjectPtn: ".*"},
 			},
 		},
 		{
@@ -232,7 +260,7 @@ func TestIsAuthorizedOrgToken(t *testing.T) {
 			maintainerResp: true,
 			callGetPolicy:  true,
 			getPolicyResp: &[]model.OrganizationPolicy{
-				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/.*"},
+				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/.*", ProjectPtn: ".*"},
 			},
 		},
 		{
@@ -247,7 +275,7 @@ func TestIsAuthorizedOrgToken(t *testing.T) {
 			maintainerResp: true,
 			callGetPolicy:  true,
 			getPolicyResp: &[]model.OrganizationPolicy{
-				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/(get|list)"},
+				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/(get|list)", ProjectPtn: ".*"},
 			},
 		},
 		{
@@ -326,7 +354,7 @@ func TestIsAuthorizedOrgToken(t *testing.T) {
 			maintainerResp: true,
 			callGetPolicy:  true,
 			getPolicyResp: &[]model.OrganizationPolicy{
-				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/.*"},
+				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/.*", ProjectPtn: ".*"},
 			},
 		},
 		{
@@ -376,7 +404,7 @@ func TestIsAuthorizedOrgToken(t *testing.T) {
 			maintainerResp: true,
 			callGetPolicy:  true,
 			getPolicyResp: &[]model.OrganizationPolicy{
-				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/(get|list)"},
+				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/(get|list)", ProjectPtn: ".*"},
 			},
 		},
 	}

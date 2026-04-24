@@ -39,7 +39,7 @@ func (i *OrgIAMService) IsAuthorizedOrg(ctx context.Context, req *org_iam.IsAuth
 		}
 		return nil, err
 	}
-	isAuthorized, err := isAuthorizedByOrgPolicy(req.ActionName, policies)
+	isAuthorized, err := isAuthorizedByOrgPolicy(req.ActionName, req.ProjectName, policies)
 	if err != nil {
 		return &org_iam.IsAuthorizedOrgResponse{Ok: false}, err
 	}
@@ -90,7 +90,7 @@ func (i *OrgIAMService) IsAuthorizedOrgToken(ctx context.Context, req *org_iam.I
 		}
 		return nil, err
 	}
-	isAuthorized, err := isAuthorizedByOrgPolicy(req.ActionName, policies)
+	isAuthorized, err := isAuthorizedByOrgPolicy(req.ActionName, req.ProjectName, policies)
 	if err != nil {
 		return &org_iam.IsAuthorizedOrgTokenResponse{Ok: false}, err
 	}
@@ -100,13 +100,17 @@ func (i *OrgIAMService) IsAuthorizedOrgToken(ctx context.Context, req *org_iam.I
 	return &org_iam.IsAuthorizedOrgTokenResponse{Ok: isAuthorized}, nil
 }
 
-func isAuthorizedByOrgPolicy(action string, policies *[]model.OrganizationPolicy) (bool, error) {
+func isAuthorizedByOrgPolicy(action string, projectName string, policies *[]model.OrganizationPolicy) (bool, error) {
 	for _, p := range *policies {
 		actionPtn, err := regexp.Compile(p.ActionPtn)
 		if err != nil {
 			return false, err
 		}
-		if actionPtn.MatchString(action) {
+		projectPtn, err := regexp.Compile(p.ProjectPtn)
+		if err != nil {
+			return false, err
+		}
+		if actionPtn.MatchString(action) && projectPtn.MatchString(projectName) {
 			return true, nil
 		}
 	}

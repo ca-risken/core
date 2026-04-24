@@ -26,6 +26,7 @@ message PutOrgPolicyRequest {
   string name = 2
       [ (validate.rules).string = {min_len : 1, max_len : 64} ]; // Required
   string action_ptn = 3 [ (validate.rules).string.min_len = 1 ]; // Required
+  string project_ptn = 4;
 }
 
 message PutOrgPolicyResponse { OrgPolicy policy = 1; }

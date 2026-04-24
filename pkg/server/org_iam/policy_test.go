@@ -27,9 +27,9 @@ func TestListOrgPolicy(t *testing.T) {
 			input: &org_iam.ListOrgPolicyRequest{OrganizationId: 1, RoleId: 1},
 			want:  &org_iam.ListOrgPolicyResponse{PolicyId: []uint32{1, 2, 3}},
 			mockResponce: []*model.OrganizationPolicy{
-				{PolicyID: 1, Name: "nm1", OrganizationID: 1, ActionPtn: ".*"},
-				{PolicyID: 2, Name: "nm2", OrganizationID: 1, ActionPtn: ".*"},
-				{PolicyID: 3, Name: "nm3", OrganizationID: 1, ActionPtn: ".*"},
+				{PolicyID: 1, Name: "nm1", OrganizationID: 1, ActionPtn: ".*", ProjectPtn: ".*"},
+				{PolicyID: 2, Name: "nm2", OrganizationID: 1, ActionPtn: ".*", ProjectPtn: ".*"},
+				{PolicyID: 3, Name: "nm3", OrganizationID: 1, ActionPtn: ".*", ProjectPtn: ".*"},
 			},
 		},
 		{
@@ -83,8 +83,8 @@ func TestGetOrgPolicy(t *testing.T) {
 		{
 			name:         "OK",
 			input:        &org_iam.GetOrgPolicyRequest{PolicyId: 111, OrganizationId: 123},
-			want:         &org_iam.GetOrgPolicyResponse{Policy: &org_iam.OrgPolicy{PolicyId: 111, Name: "nm", ActionPtn: ".*", OrganizationId: 123, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockResponce: &model.OrganizationPolicy{PolicyID: 111, Name: "nm", ActionPtn: ".*", OrganizationID: 123, CreatedAt: now, UpdatedAt: now},
+			want:         &org_iam.GetOrgPolicyResponse{Policy: &org_iam.OrgPolicy{PolicyId: 111, Name: "nm", ActionPtn: ".*", ProjectPtn: ".*", OrganizationId: 123, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockResponce: &model.OrganizationPolicy{PolicyID: 111, Name: "nm", ActionPtn: ".*", ProjectPtn: ".*", OrganizationID: 123, CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:      "OK Record Not Found",
@@ -138,21 +138,26 @@ func TestPutOrgPolicy(t *testing.T) {
 	}{
 		{
 			name:        "OK Insert",
-			input:       &org_iam.PutOrgPolicyRequest{Name: "nm", OrganizationId: 123, ActionPtn: ".*"},
-			want:        &org_iam.PutOrgPolicyResponse{Policy: &org_iam.OrgPolicy{PolicyId: 1, Name: "nm", OrganizationId: 123, ActionPtn: ".*", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			input:       &org_iam.PutOrgPolicyRequest{Name: "nm", OrganizationId: 123, ActionPtn: ".*", ProjectPtn: ".*"},
+			want:        &org_iam.PutOrgPolicyResponse{Policy: &org_iam.OrgPolicy{PolicyId: 1, Name: "nm", OrganizationId: 123, ActionPtn: ".*", ProjectPtn: ".*", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetErr:  gorm.ErrRecordNotFound,
-			mockUpdResp: &model.OrganizationPolicy{PolicyID: 1, Name: "nm", OrganizationID: 123, ActionPtn: ".*", CreatedAt: now, UpdatedAt: now},
+			mockUpdResp: &model.OrganizationPolicy{PolicyID: 1, Name: "nm", OrganizationID: 123, ActionPtn: ".*", ProjectPtn: ".*", CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:        "OK Update",
-			input:       &org_iam.PutOrgPolicyRequest{Name: "nm", OrganizationId: 123, ActionPtn: ".*"},
-			want:        &org_iam.PutOrgPolicyResponse{Policy: &org_iam.OrgPolicy{PolicyId: 1, Name: "nm", OrganizationId: 123, ActionPtn: ".*", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockGetResp: &model.OrganizationPolicy{PolicyID: 1, Name: "nm", OrganizationID: 123, ActionPtn: ".+", CreatedAt: now, UpdatedAt: now},
-			mockUpdResp: &model.OrganizationPolicy{PolicyID: 1, Name: "nm", OrganizationID: 123, ActionPtn: ".*", CreatedAt: now, UpdatedAt: now},
+			input:       &org_iam.PutOrgPolicyRequest{Name: "nm", OrganizationId: 123, ActionPtn: ".*", ProjectPtn: ".*"},
+			want:        &org_iam.PutOrgPolicyResponse{Policy: &org_iam.OrgPolicy{PolicyId: 1, Name: "nm", OrganizationId: 123, ActionPtn: ".*", ProjectPtn: ".*", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockGetResp: &model.OrganizationPolicy{PolicyID: 1, Name: "nm", OrganizationID: 123, ActionPtn: ".+", ProjectPtn: ".*", CreatedAt: now, UpdatedAt: now},
+			mockUpdResp: &model.OrganizationPolicy{PolicyID: 1, Name: "nm", OrganizationID: 123, ActionPtn: ".*", ProjectPtn: ".*", CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:    "NG Invalid param",
 			input:   &org_iam.PutOrgPolicyRequest{Name: "nm", OrganizationId: 0, ActionPtn: ".*"},
+			wantErr: true,
+		},
+		{
+			name:    "NG Invalid project_ptn regex",
+			input:   &org_iam.PutOrgPolicyRequest{Name: "nm", OrganizationId: 123, ActionPtn: ".*", ProjectPtn: "[invalid"},
 			wantErr: true,
 		},
 		{
@@ -259,6 +264,7 @@ func TestAttachOrgPolicy(t *testing.T) {
 					PolicyId:       1,
 					Name:           "test-policy",
 					ActionPtn:      "test:*",
+					ProjectPtn:     ".*",
 					OrganizationId: 1,
 					CreatedAt:      now.Unix(),
 					UpdatedAt:      now.Unix(),
@@ -268,6 +274,7 @@ func TestAttachOrgPolicy(t *testing.T) {
 				PolicyID:       1,
 				Name:           "test-policy",
 				ActionPtn:      "test:*",
+				ProjectPtn:     ".*",
 				OrganizationID: 1,
 				CreatedAt:      now,
 				UpdatedAt:      now,

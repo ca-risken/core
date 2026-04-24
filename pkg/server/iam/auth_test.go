@@ -14,6 +14,8 @@ import (
 	organizationmock "github.com/ca-risken/core/proto/organization/mocks"
 	"github.com/ca-risken/core/proto/org_iam"
 	org_iammock "github.com/ca-risken/core/proto/org_iam/mocks"
+	"github.com/ca-risken/core/proto/project"
+	projectmock "github.com/ca-risken/core/proto/project/mocks"
 	"gorm.io/gorm"
 )
 
@@ -104,13 +106,18 @@ func TestIsAuthorized(t *testing.T) {
 			mockRepo := mocks.NewIAMRepository(t)
 			mockOrgClient := organizationmock.NewOrganizationServiceClient(t)
 			mockOrgIAMClient := org_iammock.NewOrgIAMServiceClient(t)
+			mockProjectClient := projectmock.NewProjectServiceClient(t)
 			svc := &IAMService{
-				repository:            mockRepo,
-				organizationClient:    mockOrgClient,
-				orgIamClient: mockOrgIAMClient,
-				logger:                logging.NewLogger(),
+				repository:         mockRepo,
+				projectClient:      mockProjectClient,
+				organizationClient: mockOrgClient,
+				orgIamClient:       mockOrgIAMClient,
+				logger:             logging.NewLogger(),
 			}
 			if c.expectOrganizationAuthCheck {
+				mockProjectClient.On("ListProject", test.RepeatMockAnything(2)...).Return(&project.ListProjectResponse{
+					Project: []*project.Project{{ProjectId: c.input.ProjectId, Name: "test-project"}},
+				}, nil).Once()
 				mockOrgClient.On("ListOrganization", test.RepeatMockAnything(2)...).Return(c.mockOrganizationListResp, c.mockOrganizationListErr).Once()
 				if c.mockOrganizationListResp != nil && len(c.mockOrganizationListResp.Organization) > 0 {
 					mockOrgIAMClient.On("IsAuthorizedOrg", test.RepeatMockAnything(2)...).Return(c.mockOrgIAMAuthResp, c.mockOrgIAMAuthErr).Once()
@@ -543,11 +550,18 @@ func TestIsAuthorizedByOrganizations(t *testing.T) {
 			logger := logging.NewLogger()
 			mockOrgClient := organizationmock.NewOrganizationServiceClient(t)
 			mockOrgIAMClient := org_iammock.NewOrgIAMServiceClient(t)
+			mockProjectClient := projectmock.NewProjectServiceClient(t)
 			svc := &IAMService{
-				repository:            mockRepo,
-				logger:                logger,
-				organizationClient:    mockOrgClient,
-				orgIamClient: mockOrgIAMClient,
+				repository:         mockRepo,
+				logger:             logger,
+				projectClient:      mockProjectClient,
+				organizationClient: mockOrgClient,
+				orgIamClient:       mockOrgIAMClient,
+			}
+			if c.projectID != 0 {
+				mockProjectClient.On("ListProject", test.RepeatMockAnything(2)...).Return(&project.ListProjectResponse{
+					Project: []*project.Project{{ProjectId: c.projectID, Name: "test-project"}},
+				}, nil).Once()
 			}
 			mockOrgClient.On("ListOrganization", test.RepeatMockAnything(2)...).Return(c.mockOrganizationListResp, c.mockOrganizationListErr).Once()
 			for i := 0; i < c.expectOrgIAMAuthCalls; i++ {
