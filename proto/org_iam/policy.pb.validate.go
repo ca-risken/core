@@ -564,7 +564,16 @@ func (m *PutOrgPolicyRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	// no validation rules for ProjectPtn
+	if utf8.RuneCountInString(m.GetProjectPtn()) < 1 {
+		err := PutOrgPolicyRequestValidationError{
+			field:  "ProjectPtn",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return PutOrgPolicyRequestMultiError(errors)

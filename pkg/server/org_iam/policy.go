@@ -63,12 +63,8 @@ func (i *OrgIAMService) PutOrgPolicy(ctx context.Context, req *org_iam.PutOrgPol
 	if _, err := regexp.Compile(req.ActionPtn); err != nil {
 		return nil, fmt.Errorf("could not regexp complie, pattern=%s, err=%+v", req.ActionPtn, err)
 	}
-	projectPtn := req.ProjectPtn
-	if projectPtn == "" {
-		projectPtn = ".*"
-	}
-	if _, err := regexp.Compile(projectPtn); err != nil {
-		return nil, fmt.Errorf("could not regexp compile, pattern=%s, err=%+v", projectPtn, err)
+	if _, err := regexp.Compile(req.ProjectPtn); err != nil {
+		return nil, fmt.Errorf("could not regexp compile, pattern=%s, err=%+v", req.ProjectPtn, err)
 	}
 	savedData, err := i.repository.GetOrgPolicyByName(ctx, req.OrganizationId, req.Name)
 	noRecord := errors.Is(err, gorm.ErrRecordNotFound)
@@ -84,7 +80,7 @@ func (i *OrgIAMService) PutOrgPolicy(ctx context.Context, req *org_iam.PutOrgPol
 		Name:           req.Name,
 		OrganizationID: req.OrganizationId,
 		ActionPtn:      req.ActionPtn,
-		ProjectPtn:     projectPtn,
+		ProjectPtn:     req.ProjectPtn,
 	}
 	registerdData, err := i.repository.PutOrgPolicy(ctx, p)
 	if err != nil {

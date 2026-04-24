@@ -162,13 +162,13 @@ func TestPutOrgPolicy(t *testing.T) {
 		},
 		{
 			name:       "NG DB error(GetPolicyByName)",
-			input:      &org_iam.PutOrgPolicyRequest{Name: "nm", OrganizationId: 123, ActionPtn: ".*"},
+			input:      &org_iam.PutOrgPolicyRequest{Name: "nm", OrganizationId: 123, ActionPtn: ".*", ProjectPtn: ".*"},
 			mockGetErr: gorm.ErrInvalidTransaction,
 			wantErr:    true,
 		},
 		{
 			name:       "NG DB error(PutPolicy)",
-			input:      &org_iam.PutOrgPolicyRequest{Name: "nm", OrganizationId: 123, ActionPtn: ".*"},
+			input:      &org_iam.PutOrgPolicyRequest{Name: "nm", OrganizationId: 123, ActionPtn: ".*", ProjectPtn: ".*"},
 			mockGetErr: gorm.ErrRecordNotFound,
 			mockUpdErr: gorm.ErrInvalidTransaction,
 			wantErr:    true,
