@@ -16,5 +16,9 @@ This repository intentionally uses the legacy `--go_out=plugins=grpc,paths=sourc
 Generated service and message code stays in a single `*.pb.go` file; do not expect separate `*_grpc.pb.go` outputs.
 If generation starts differing across environments, ensure the required repository tooling is installed.
 
+## Validation
+- `proto-validate`対象（`project`, `report`, `ai`, `organization`, `org_iam`, `org_alert`）: `.proto`ファイルに`protoc-gen-validate`ルールを定義し、`*.pb.validate.go`を自動生成
+- `proto-without-validate`対象（`alert`, `finding`, `iam`）: `proto/<service>/validator.go`に`go-ozzo/ozzo-validation`で手動実装
+
 ## Testing
 Run `go test ./proto/...` after regenerating validators.
