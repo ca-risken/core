@@ -17,8 +17,8 @@ Generated service and message code stays in a single `*.pb.go` file; do not expe
 If generation starts differing across environments, ensure the required repository tooling is installed.
 
 ## Validation
-- `proto-validate`対象（`project`, `report`, `ai`, `organization`, `org_iam`, `org_alert`）: `.proto`ファイルに`protoc-gen-validate`ルールを定義し、`*.pb.validate.go`を自動生成
-- `proto-without-validate`対象（`alert`, `finding`, `iam`）: `proto/<service>/validator.go`に`go-ozzo/ozzo-validation`で手動実装
+- `proto-validate` services (`project`, `report`, `ai`, `organization`, `org_iam`, `org_alert`): validation rules defined in `.proto` files, auto-generated into `*.pb.validate.go` via `protoc-gen-validate`
+- `proto-without-validate` services (`alert`, `finding`, `iam`): validation manually implemented in `proto/<service>/validator.go` using `go-ozzo/ozzo-validation`
 
 ## Testing
 Run `go test ./proto/...` after regenerating validators.
