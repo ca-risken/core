@@ -33,9 +33,16 @@ func (i *OrgIAMService) IsAuthorizedOrg(ctx context.Context, req *org_iam.IsAuth
 	if !actionNamePattern.MatchString(req.ActionName) {
 		return nil, fmt.Errorf("invalid action name, pattern=%s, action_name=%s", actionNamePattern, req.ActionName)
 	}
-	projectName, err := i.resolveProjectName(ctx, req.ProjectId)
-	if err != nil {
-		return nil, err
+	var projectName string
+	if req.ProjectId != 0 {
+		resp, err := i.projectClient.ListProject(ctx, &project.ListProjectRequest{ProjectId: req.ProjectId})
+		if err != nil {
+			return nil, fmt.Errorf("failed to list project, project_id=%d, err=%w", req.ProjectId, err)
+		}
+		if len(resp.Project) == 0 {
+			return nil, fmt.Errorf("project not found, project_id=%d", req.ProjectId)
+		}
+		projectName = resp.Project[0].Name
 	}
 	policies, err := i.repository.GetOrgPolicyByUserID(ctx, req.UserId, req.OrganizationId)
 	if err != nil {
@@ -88,9 +95,16 @@ func (i *OrgIAMService) IsAuthorizedOrgToken(ctx context.Context, req *org_iam.I
 		i.logger.Warnf(ctx, "Unauthorized organization access token that has no maintainers or expired. organization_id=%d, access_token_id=%d", req.OrganizationId, req.AccessTokenId)
 		return &org_iam.IsAuthorizedOrgTokenResponse{Ok: false}, nil
 	}
-	projectName, err := i.resolveProjectName(ctx, req.ProjectId)
-	if err != nil {
-		return nil, err
+	var projectName string
+	if req.ProjectId != 0 {
+		resp, err := i.projectClient.ListProject(ctx, &project.ListProjectRequest{ProjectId: req.ProjectId})
+		if err != nil {
+			return nil, fmt.Errorf("failed to list project, project_id=%d, err=%w", req.ProjectId, err)
+		}
+		if len(resp.Project) == 0 {
+			return nil, fmt.Errorf("project not found, project_id=%d", req.ProjectId)
+		}
+		projectName = resp.Project[0].Name
 	}
 	policies, err := i.repository.GetOrgTokenPolicy(ctx, req.OrganizationId, req.AccessTokenId)
 	if err != nil {
@@ -109,43 +123,17 @@ func (i *OrgIAMService) IsAuthorizedOrgToken(ctx context.Context, req *org_iam.I
 	return &org_iam.IsAuthorizedOrgTokenResponse{Ok: isAuthorized}, nil
 }
 
-// resolveProjectName resolves project name from project_id via projectClient.
-// Returns empty string when projectID is 0 (org-level authorization without project context).
-func (i *OrgIAMService) resolveProjectName(ctx context.Context, projectID uint32) (string, error) {
-	if projectID == 0 {
-		return "", nil
-	}
-	resp, err := i.projectClient.ListProject(ctx, &project.ListProjectRequest{ProjectId: projectID})
-	if err != nil {
-		return "", fmt.Errorf("failed to list project, project_id=%d, err=%w", projectID, err)
-	}
-	for _, p := range resp.Project {
-		if p.ProjectId == projectID {
-			return p.Name, nil
-		}
-	}
-	return "", fmt.Errorf("project not found, project_id=%d", projectID)
-}
-
-// isAuthorizedByOrgPolicy returns true when at least one policy matches the action and project name.
-// When projectName is empty (no project context), project_ptn is not evaluated.
 func isAuthorizedByOrgPolicy(action, projectName string, policies *[]model.OrganizationPolicy) (bool, error) {
 	for _, p := range *policies {
 		actionPtn, err := regexp.Compile(p.ActionPtn)
 		if err != nil {
 			return false, err
 		}
-		if !actionPtn.MatchString(action) {
-			continue
-		}
-		if projectName == "" {
-			return true, nil
-		}
 		projectPtn, err := regexp.Compile(p.ProjectPtn)
 		if err != nil {
 			return false, err
 		}
-		if projectPtn.MatchString(projectName) {
+		if actionPtn.MatchString(action) && projectPtn.MatchString(projectName) {
 			return true, nil
 		}
 	}
