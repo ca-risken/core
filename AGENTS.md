@@ -45,5 +45,8 @@ Store secrets in environment variables or parameter stores; avoid committing cre
 ### Authorization
 Each gRPC handler in Core is authorized by `ca-risken/gateway` using `organization_id` and `project_id`. Core itself does not implement authorization logic; the Gateway is responsible for request authorization.
 
+## Translation Guidelines
+- Organizationの日本語訳は"組織"とせず、"Org"にしてください。
+
 ## CLAUDE.md Placement Rule
 Every directory that contains an `AGENTS.md` file must also have a `CLAUDE.md` file that includes `@AGENTS.md` to ensure the agent guidelines are loaded automatically.
