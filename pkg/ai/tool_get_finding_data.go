@@ -197,7 +197,10 @@ func formatSQL(sql string, projectID, limit, offset uint32) (string, []any) {
 	}
 
 	// strict project_id filter & ignore pend_findings
-	sql = strings.ReplaceAll(sql, "WHERE", `WHERE
+	if whereIdx := strings.Index(strings.ToUpper(sql), "WHERE"); whereIdx >= 0 {
+		head := strings.TrimSpace(sql[:whereIdx])
+		condition := strings.TrimSpace(sql[whereIdx+len("WHERE"):])
+		sql = fmt.Sprintf(`%s WHERE
 	project_id = ? 
 	AND not exists (
 		SELECT 1 
@@ -206,8 +209,9 @@ func formatSQL(sql string, projectID, limit, offset uint32) (string, []any) {
 		  pend_finding.finding_id = finding.finding_id
 			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
 	)
-	AND`)
-	params = append(params, projectID)
+	AND (%s)`, head, condition)
+		params = append(params, projectID)
+	}
 
 	// add limit and offset
 	sql = fmt.Sprintf(`SELECT * FROM (%s) as t LIMIT ? OFFSET ?`, sql)
