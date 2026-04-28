@@ -140,6 +140,7 @@ CREATE TABLE finding (
 - Do NOT use JOIN, subqueries, UNION, or reference tables other than finding.
 - Do NOT use dangerous keywords like "INSERT", "UPDATE", "DELETE" etc.
 - Do NOT include semicolons (;) in the SQL(multiple statements are not allowed).
+- Do NOT include SQL comments (e.g. --, #, /* ... */).
 - Generate only ONE SELECT statement per request.
 
 ## Output Schema
