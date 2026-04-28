@@ -90,10 +90,6 @@ func (a *AIClient) getFindingDataFunction(ctx context.Context, projectID uint32,
 	}
 	a.logger.Infof(ctx, "Generated SQL: sql=%s, params=%v", sql, sqlParams)
 
-	if err := validateSQL(sql); err != nil {
-		return nil, err
-	}
-
 	data, err := a.executeSQL(ctx, sql, sqlParams)
 	if err != nil {
 		return nil, err
@@ -140,6 +136,8 @@ CREATE TABLE finding (
 - Must return a valid SQL string.
 - Do NOT include project_id condition in the WHERE clause(it will be automatically inserted from the authorized project when retrieving data).
 - Must has prefix "SELECT" and include "WHERE" keywords.
+- Use only a single direct FROM finding clause (optionally with an alias).
+- Do NOT use JOIN, subqueries, UNION, or reference tables other than finding.
 - Do NOT use dangerous keywords like "INSERT", "UPDATE", "DELETE" etc.
 - Do NOT include semicolons (;) in the SQL(multiple statements are not allowed).
 - Generate only ONE SELECT statement per request.
@@ -181,53 +179,166 @@ func (a *AIClient) generateSQL(ctx context.Context, prompt string, projectID, li
 		return "", nil, err
 	}
 
-	sql, params := formatSQL(output.SQL, projectID, limit, offset)
-	if err := validateSQL(sql); err != nil {
+	if err := validateSQL(output.SQL); err != nil {
+		return "", nil, err
+	}
+
+	sql, params, err := formatSQL(output.SQL, projectID, limit, offset)
+	if err != nil {
 		return "", nil, err
 	}
 	return sql, params, nil
 }
 
-func formatSQL(sql string, projectID, limit, offset uint32) (string, []any) {
-	params := []any{}
-
-	// Trim SQL after semicolon if exists (defensive programming)
-	if idx := strings.Index(sql, ";"); idx != -1 {
-		sql = strings.TrimSpace(sql[:idx])
+func formatSQL(sql string, projectID, limit, offset uint32) (string, []any, error) {
+	if err := validateSQLSafety(sql); err != nil {
+		return "", nil, err
+	}
+	parsed, err := parseFindingSQL(sql)
+	if err != nil {
+		return "", nil, err
 	}
 
-	// strict project_id filter & ignore pend_findings
-	sql = strings.ReplaceAll(sql, "WHERE", `WHERE
-	project_id = ? 
-	AND not exists (
-		SELECT 1 
-		FROM pend_finding
-		WHERE 
-		  pend_finding.finding_id = finding.finding_id
-			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
+	qualifier := parsed.alias
+	if qualifier == "" {
+		qualifier = "finding"
+	}
+	pendFindingAlias := "pf_scope"
+	if strings.EqualFold(qualifier, pendFindingAlias) {
+		pendFindingAlias = "pf_scope_1"
+	}
+	scopeCondition := fmt.Sprintf(
+		"%s.project_id = ? AND NOT EXISTS (SELECT 1 FROM pend_finding %s WHERE %s.project_id = %s.project_id AND %s.finding_id = %s.finding_id AND (%s.expired_at IS NULL OR %s.expired_at > NOW()))",
+		qualifier,
+		pendFindingAlias,
+		pendFindingAlias,
+		qualifier,
+		pendFindingAlias,
+		qualifier,
+		pendFindingAlias,
+		pendFindingAlias,
 	)
-	AND`)
-	params = append(params, projectID)
 
-	// add limit and offset
-	sql = fmt.Sprintf(`SELECT * FROM (%s) as t LIMIT ? OFFSET ?`, sql)
-	params = append(params, limit, offset)
-	return sql, params
+	scopedSQL := fmt.Sprintf("%s WHERE %s AND (%s)", parsed.selectFromClause, scopeCondition, parsed.whereClause)
+	if parsed.suffixClause != "" {
+		scopedSQL = fmt.Sprintf("%s %s", scopedSQL, parsed.suffixClause)
+	}
+
+	params := []any{projectID, limit, offset}
+	return fmt.Sprintf("SELECT * FROM (%s) as t LIMIT ? OFFSET ?", scopedSQL), params, nil
 }
 
 func validateSQL(sql string) error {
-	// keyword check
-	sqlUpper := strings.ToUpper(sql)
-	if !strings.HasPrefix(sqlUpper, "SELECT") || !strings.Contains(sqlUpper, "WHERE") || !strings.Contains(sqlUpper, "FINDING") {
-		return fmt.Errorf("sql must contain SELECT and WHERE keywords, sql=%s", sql)
+	if err := validateSQLSafety(sql); err != nil {
+		return err
+	}
+	_, err := parseFindingSQL(sql)
+	return err
+}
+
+type parsedFindingSQL struct {
+	selectFromClause string
+	whereClause      string
+	suffixClause     string
+	alias            string
+}
+
+type sqlWord struct {
+	text  string
+	start int
+	end   int
+	depth int
+}
+
+func parseFindingSQL(sql string) (*parsedFindingSQL, error) {
+	trimmedSQL := strings.TrimSpace(sql)
+	if trimmedSQL == "" {
+		return nil, fmt.Errorf("sql must not be empty")
 	}
 
-	// Check for semicolons (multiple SQL statements)
+	words, err := scanSQLWords(trimmedSQL)
+	if err != nil {
+		return nil, err
+	}
+	if len(words) == 0 || words[0].depth != 0 || words[0].text != "SELECT" || words[0].start != 0 {
+		return nil, fmt.Errorf("sql must start with SELECT")
+	}
+
+	var fromWord, whereWord *sqlWord
+	for i := range words {
+		word := words[i]
+		if word.text == "SELECT" {
+			if word.depth > 0 {
+				return nil, fmt.Errorf("subqueries are not allowed")
+			}
+			if i > 0 {
+				return nil, fmt.Errorf("multiple SELECT statements are not allowed")
+			}
+		}
+		if word.depth != 0 {
+			continue
+		}
+		switch word.text {
+		case "UNION", "INTERSECT", "EXCEPT":
+			return nil, fmt.Errorf("set operators are not allowed")
+		case "JOIN":
+			return nil, fmt.Errorf("JOIN is not allowed")
+		case "FROM":
+			if fromWord != nil {
+				return nil, fmt.Errorf("multiple FROM clauses are not allowed")
+			}
+			fromWord = &words[i]
+		case "WHERE":
+			if whereWord != nil {
+				return nil, fmt.Errorf("multiple WHERE clauses are not allowed")
+			}
+			whereWord = &words[i]
+		}
+	}
+	if fromWord == nil || whereWord == nil || fromWord.start >= whereWord.start {
+		return nil, fmt.Errorf("sql must contain SELECT, FROM finding, and WHERE")
+	}
+
+	fromSegment := strings.TrimSpace(trimmedSQL[fromWord.end:whereWord.start])
+	alias, err := parseFindingSource(fromSegment)
+	if err != nil {
+		return nil, err
+	}
+
+	suffixStart := len(trimmedSQL)
+	for _, word := range words {
+		if word.depth != 0 || word.start <= whereWord.end {
+			continue
+		}
+		if isSQLSuffixKeyword(word.text) {
+			suffixStart = word.start
+			break
+		}
+	}
+
+	whereClause := strings.TrimSpace(trimmedSQL[whereWord.end:suffixStart])
+	if whereClause == "" {
+		return nil, fmt.Errorf("WHERE clause is required")
+	}
+
+	suffixClause := strings.TrimSpace(trimmedSQL[suffixStart:])
+	return &parsedFindingSQL{
+		selectFromClause: strings.TrimSpace(trimmedSQL[:whereWord.start]),
+		whereClause:      whereClause,
+		suffixClause:     suffixClause,
+		alias:            alias,
+	}, nil
+}
+
+func validateSQLSafety(sql string) error {
+	sqlUpper := strings.ToUpper(strings.TrimSpace(sql))
+	if sqlUpper == "" {
+		return fmt.Errorf("sql must not be empty")
+	}
 	if strings.Contains(sql, ";") {
-		return fmt.Errorf("sql must not contain semicolons (multiple statements not allowed), sql=%s", sql)
+		return fmt.Errorf("sql must not contain semicolons (multiple statements not allowed)")
 	}
 
-	// Dangerous keywords check (case-insensitive)
 	dangerousKeywords := []string{
 		"INSERT ", "UPDATE ", "DELETE ", "DROP TABLE ", "CREATE TABLE ", "ALTER TABLE ",
 		"TRUNCATE ", "EXEC ", "EXECUTE ", "INTO OUTFILE ",
@@ -235,10 +346,143 @@ func validateSQL(sql string) error {
 	}
 	for _, keyword := range dangerousKeywords {
 		if strings.Contains(sqlUpper, keyword) {
-			return fmt.Errorf("sql must not contain dangerous keywords, sql=%s", sql)
+			return fmt.Errorf("sql must not contain dangerous keywords")
 		}
 	}
 	return nil
+}
+
+func parseFindingSource(source string) (string, error) {
+	if source == "" {
+		return "", fmt.Errorf("FROM finding clause is required")
+	}
+	if strings.ContainsAny(source, ",()") {
+		return "", fmt.Errorf("only direct finding table references are allowed")
+	}
+
+	tokens := strings.Fields(source)
+	switch len(tokens) {
+	case 1:
+		if !isFindingIdentifier(tokens[0]) {
+			return "", fmt.Errorf("only finding table is allowed")
+		}
+		return "", nil
+	case 2:
+		if !isFindingIdentifier(tokens[0]) {
+			return "", fmt.Errorf("only finding table is allowed")
+		}
+		alias := normalizeIdentifier(tokens[1])
+		if !isSafeIdentifier(alias) {
+			return "", fmt.Errorf("invalid finding alias")
+		}
+		return alias, nil
+	case 3:
+		if !isFindingIdentifier(tokens[0]) || !strings.EqualFold(tokens[1], "AS") {
+			return "", fmt.Errorf("only finding table is allowed")
+		}
+		alias := normalizeIdentifier(tokens[2])
+		if !isSafeIdentifier(alias) {
+			return "", fmt.Errorf("invalid finding alias")
+		}
+		return alias, nil
+	default:
+		return "", fmt.Errorf("only finding table is allowed")
+	}
+}
+
+func scanSQLWords(sql string) ([]sqlWord, error) {
+	words := make([]sqlWord, 0, 16)
+	depth := 0
+	var quote byte
+
+	for i := 0; i < len(sql); i++ {
+		ch := sql[i]
+		if quote != 0 {
+			if ch == quote {
+				if quote != '`' && i+1 < len(sql) && sql[i+1] == ch {
+					i++
+					continue
+				}
+				if i > 0 && sql[i-1] == '\\' {
+					continue
+				}
+				quote = 0
+			}
+			continue
+		}
+
+		switch ch {
+		case '\'', '"', '`':
+			quote = ch
+		case '(':
+			depth++
+		case ')':
+			if depth == 0 {
+				return nil, fmt.Errorf("sql has unbalanced parentheses")
+			}
+			depth--
+		default:
+			if !isSQLWordChar(ch) {
+				continue
+			}
+			start := i
+			for i+1 < len(sql) && isSQLWordChar(sql[i+1]) {
+				i++
+			}
+			words = append(words, sqlWord{
+				text:  strings.ToUpper(sql[start : i+1]),
+				start: start,
+				end:   i + 1,
+				depth: depth,
+			})
+		}
+	}
+
+	if quote != 0 || depth != 0 {
+		return nil, fmt.Errorf("sql has unbalanced quotes or parentheses")
+	}
+	return words, nil
+}
+
+func isSQLSuffixKeyword(word string) bool {
+	switch word {
+	case "GROUP", "ORDER", "HAVING", "LIMIT", "OFFSET":
+		return true
+	default:
+		return false
+	}
+}
+
+func isFindingIdentifier(identifier string) bool {
+	return strings.EqualFold(normalizeIdentifier(identifier), "finding")
+}
+
+func normalizeIdentifier(identifier string) string {
+	return strings.Trim(identifier, "`")
+}
+
+func isSafeIdentifier(identifier string) bool {
+	if identifier == "" {
+		return false
+	}
+	for i := 0; i < len(identifier); i++ {
+		ch := identifier[i]
+		if (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_' {
+			continue
+		}
+		if i > 0 && ch >= '0' && ch <= '9' {
+			continue
+		}
+		return false
+	}
+	return true
+}
+
+func isSQLWordChar(ch byte) bool {
+	return (ch >= 'a' && ch <= 'z') ||
+		(ch >= 'A' && ch <= 'Z') ||
+		(ch >= '0' && ch <= '9') ||
+		ch == '_'
 }
 
 func (a *AIClient) executeSQL(ctx context.Context, sql string, params []any) ([]map[string]any, error) {
