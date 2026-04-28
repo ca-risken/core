@@ -1,10 +1,28 @@
 package ai
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 )
+
+func buildExpectedFormattedSQL(head, whereCondition, tail string) string {
+	scopedSQL := fmt.Sprintf(`%s WHERE
+	project_id = ?
+	AND not exists (
+		SELECT 1
+		FROM pend_finding
+		WHERE
+		  pend_finding.finding_id = finding.finding_id
+			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
+	)
+	AND (%s)`, head, whereCondition)
+	if tail != "" {
+		scopedSQL = fmt.Sprintf("%s %s", scopedSQL, tail)
+	}
+	return fmt.Sprintf(`SELECT * FROM (%s) as t LIMIT ? OFFSET ?`, scopedSQL)
+}
 
 func TestFormatSQL(t *testing.T) {
 	type args struct {
@@ -18,132 +36,171 @@ func TestFormatSQL(t *testing.T) {
 		args       args
 		wantSQL    string
 		wantParams []any
+		wantErr    bool
 	}{
 		{
-			name: "Simple SELECT with WHERE clause",
+			name: "OR condition is enclosed by parentheses",
 			args: args{
-				sql:       "SELECT * FROM finding WHERE score > 0.5",
+				sql:       "SELECT * FROM finding WHERE score >= 0.8 OR score <= 0.3",
 				projectID: 1001,
-				limit:     100,
+				limit:     20,
 				offset:    0,
 			},
-			wantSQL: `SELECT * FROM (SELECT * FROM finding WHERE
-	project_id = ? 
-	AND not exists (
-		SELECT 1 
-		FROM pend_finding
-		WHERE 
-		  pend_finding.finding_id = finding.finding_id
-			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
-	)
-	AND score > 0.5) as t LIMIT ? OFFSET ?`,
-			wantParams: []any{uint32(1001), uint32(100), uint32(0)},
+			wantSQL:    buildExpectedFormattedSQL("SELECT * FROM finding", "score >= 0.8 OR score <= 0.3", ""),
+			wantParams: []any{uint32(1001), uint32(20), uint32(0)},
 		},
 		{
-			name: "Complex SELECT with GROUP BY and ORDER BY",
+			name: "AND and OR mixed condition is enclosed as one expression",
 			args: args{
-				sql:       "SELECT data_source, COUNT(*) as count FROM finding WHERE data_source LIKE 'aws%' GROUP BY data_source ORDER BY count DESC",
+				sql:       "SELECT * FROM finding WHERE score >= 0.8 OR score <= 0.3 AND data_source LIKE 'aws%'",
 				projectID: 2002,
 				limit:     50,
 				offset:    10,
 			},
-			wantSQL: `SELECT * FROM (SELECT data_source, COUNT(*) as count FROM finding WHERE
-	project_id = ? 
-	AND not exists (
-		SELECT 1 
-		FROM pend_finding
-		WHERE 
-		  pend_finding.finding_id = finding.finding_id
-			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
-	)
-	AND data_source LIKE 'aws%' GROUP BY data_source ORDER BY count DESC) as t LIMIT ? OFFSET ?`,
+			wantSQL:    buildExpectedFormattedSQL("SELECT * FROM finding", "score >= 0.8 OR score <= 0.3 AND data_source LIKE 'aws%'", ""),
 			wantParams: []any{uint32(2002), uint32(50), uint32(10)},
 		},
 		{
-			name: "SELECT with multiple WHERE conditions",
+			name: "lowercase where is accepted",
 			args: args{
-				sql:       "SELECT * FROM finding WHERE score >= 0.8 AND data_source = 'aws:guardduty'",
+				sql:       "select * from finding where score > 0.5",
 				projectID: 3003,
-				limit:     200,
+				limit:     15,
 				offset:    5,
 			},
-			wantSQL: `SELECT * FROM (SELECT * FROM finding WHERE
-	project_id = ? 
-	AND not exists (
-		SELECT 1 
-		FROM pend_finding
-		WHERE 
-		  pend_finding.finding_id = finding.finding_id
-			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
-	)
-	AND score >= 0.8 AND data_source = 'aws:guardduty') as t LIMIT ? OFFSET ?`,
-			wantParams: []any{uint32(3003), uint32(200), uint32(5)},
+			wantSQL:    buildExpectedFormattedSQL("select * from finding", "score > 0.5", ""),
+			wantParams: []any{uint32(3003), uint32(15), uint32(5)},
 		},
 		{
-			name: "SELECT with JSON field extraction",
+			name: "mixed-case Where is accepted",
 			args: args{
-				sql:       "SELECT finding_id, JSON_EXTRACT(data, '$.severity') as severity FROM finding WHERE updated_at > '2024-01-01'",
+				sql:       "SELECT * FROM finding Where score > 0.5",
 				projectID: 4004,
 				limit:     10,
 				offset:    0,
 			},
-			wantSQL: `SELECT * FROM (SELECT finding_id, JSON_EXTRACT(data, '$.severity') as severity FROM finding WHERE
-	project_id = ? 
-	AND not exists (
-		SELECT 1 
-		FROM pend_finding
-		WHERE 
-		  pend_finding.finding_id = finding.finding_id
-			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
-	)
-	AND updated_at > '2024-01-01') as t LIMIT ? OFFSET ?`,
+			wantSQL:    buildExpectedFormattedSQL("SELECT * FROM finding", "score > 0.5", ""),
 			wantParams: []any{uint32(4004), uint32(10), uint32(0)},
 		},
 		{
-			name: "SELECT with aggregate functions",
+			name: "backticked finding table is accepted",
 			args: args{
-				sql:       "SELECT data_source, AVG(score) as avg_score, MAX(score) as max_score FROM finding WHERE resource_name LIKE '%bucket%' GROUP BY data_source",
+				sql:       "SELECT * FROM `finding` WHERE score > 0.5",
+				projectID: 4504,
+				limit:     12,
+				offset:    1,
+			},
+			wantSQL:    buildExpectedFormattedSQL("SELECT * FROM `finding`", "score > 0.5", ""),
+			wantParams: []any{uint32(4504), uint32(12), uint32(1)},
+		},
+		{
+			name: "GROUP BY and ORDER BY are preserved",
+			args: args{
+				sql:       "SELECT data_source, AVG(score) as avg_score FROM finding WHERE resource_name LIKE '%bucket%' GROUP BY data_source ORDER BY avg_score DESC",
 				projectID: 5005,
 				limit:     25,
 				offset:    3,
 			},
-			wantSQL: `SELECT * FROM (SELECT data_source, AVG(score) as avg_score, MAX(score) as max_score FROM finding WHERE
-	project_id = ? 
-	AND not exists (
-		SELECT 1 
-		FROM pend_finding
-		WHERE 
-		  pend_finding.finding_id = finding.finding_id
-			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
-	)
-	AND resource_name LIKE '%bucket%' GROUP BY data_source) as t LIMIT ? OFFSET ?`,
+			wantSQL:    buildExpectedFormattedSQL("SELECT data_source, AVG(score) as avg_score FROM finding", "resource_name LIKE '%bucket%'", "GROUP BY data_source ORDER BY avg_score DESC"),
 			wantParams: []any{uint32(5005), uint32(25), uint32(3)},
 		},
 		{
-			name: "SQL with semicolon - should trim after semicolon",
+			name: "where and order by in string literal do not break parsing",
 			args: args{
-				sql:       "SELECT * FROM finding WHERE score > 0.5; SELECT * FROM finding WHERE score < 0.5",
+				sql:       "SELECT * FROM finding WHERE description = 'where order by' AND score > 0.5 ORDER BY score DESC",
 				projectID: 6006,
 				limit:     10,
 				offset:    0,
 			},
-			wantSQL: `SELECT * FROM (SELECT * FROM finding WHERE
-	project_id = ? 
-	AND not exists (
-		SELECT 1 
-		FROM pend_finding
-		WHERE 
-		  pend_finding.finding_id = finding.finding_id
-			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
-	)
-	AND score > 0.5) as t LIMIT ? OFFSET ?`,
+			wantSQL:    buildExpectedFormattedSQL("SELECT * FROM finding", "description = 'where order by' AND score > 0.5", "ORDER BY score DESC"),
 			wantParams: []any{uint32(6006), uint32(10), uint32(0)},
+		},
+		{
+			name: "comment and newline in where clause are preserved",
+			args: args{
+				sql: `SELECT * FROM finding
+WHERE score > 0.5 -- where in comment
+AND data_source LIKE 'aws%'
+ORDER BY score DESC`,
+				projectID: 6106,
+				limit:     11,
+				offset:    2,
+			},
+			wantSQL: buildExpectedFormattedSQL("SELECT * FROM finding", `score > 0.5 -- where in comment
+AND data_source LIKE 'aws%'`, "ORDER BY score DESC"),
+			wantParams: []any{uint32(6106), uint32(11), uint32(2)},
+		},
+		{
+			name: "fail closed when where clause is missing",
+			args: args{
+				sql:       "SELECT * FROM finding",
+				projectID: 7007,
+				limit:     20,
+				offset:    0,
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail closed when multiple statements are included",
+			args: args{
+				sql:       "SELECT * FROM finding WHERE score > 0.5; SELECT * FROM finding WHERE score < 0.5",
+				projectID: 8008,
+				limit:     20,
+				offset:    0,
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail closed when subquery is used",
+			args: args{
+				sql:       "SELECT * FROM finding WHERE finding_id IN (SELECT finding_id FROM finding WHERE score > 0.5)",
+				projectID: 9009,
+				limit:     20,
+				offset:    0,
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail closed when join is used",
+			args: args{
+				sql:       "SELECT f.* FROM finding f JOIN project p ON f.project_id = p.project_id WHERE f.score > 0.8",
+				projectID: 10010,
+				limit:     20,
+				offset:    0,
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail closed when alias declaration is invalid",
+			args: args{
+				sql:       "SELECT * FROM finding AS WHERE score > 0.5",
+				projectID: 10510,
+				limit:     20,
+				offset:    0,
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail closed when top-level where appears multiple times",
+			args: args{
+				sql:       "SELECT * FROM finding WHERE score > 0.5 WHERE created_at > '2024-01-01'",
+				projectID: 11011,
+				limit:     20,
+				offset:    0,
+			},
+			wantErr: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotSQL, gotParams := formatSQL(tt.args.sql, tt.args.projectID, tt.args.limit, tt.args.offset)
+			gotSQL, gotParams, err := formatSQL(tt.args.sql, tt.args.projectID, tt.args.limit, tt.args.offset)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("formatSQL() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if tt.wantErr {
+				return
+			}
 
 			if diff := cmp.Diff(tt.wantSQL, gotSQL); diff != "" {
 				t.Errorf("formatSQL() SQL mismatch (-want +got):\n%s", diff)
