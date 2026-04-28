@@ -3,6 +3,7 @@ package ai
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -181,14 +182,22 @@ func (a *AIClient) generateSQL(ctx context.Context, prompt string, projectID, li
 		return "", nil, err
 	}
 
-	sql, params := formatSQL(output.SQL, projectID, limit, offset)
+	sql, params, err := formatSQL(output.SQL, projectID, limit, offset)
+	if err != nil {
+		return "", nil, err
+	}
 	if err := validateSQL(sql); err != nil {
 		return "", nil, err
 	}
 	return sql, params, nil
 }
 
-func formatSQL(sql string, projectID, limit, offset uint32) (string, []any) {
+var (
+	whereClauseRe    = regexp.MustCompile(`(?i)\bwhere\b`)
+	trailingClauseRe = regexp.MustCompile(`(?i)\b(group\s+by|having|order\s+by|limit|offset|for\s+update|lock\s+in\s+share\s+mode)\b`)
+)
+
+func formatSQL(sql string, projectID, limit, offset uint32) (string, []any, error) {
 	params := []any{}
 
 	// Trim SQL after semicolon if exists (defensive programming)
@@ -196,8 +205,20 @@ func formatSQL(sql string, projectID, limit, offset uint32) (string, []any) {
 		sql = strings.TrimSpace(sql[:idx])
 	}
 
+	whereIdx := whereClauseRe.FindStringIndex(sql)
+	if whereIdx == nil {
+		return "", nil, fmt.Errorf("WHERE clause is required")
+	}
+
+	head := strings.TrimSpace(sql[:whereIdx[0]])
+	whereBody := strings.TrimSpace(sql[whereIdx[1]:])
+	condition, trailingClause := splitWhereConditionAndTrailingClause(whereBody)
+	if condition == "" {
+		return "", nil, fmt.Errorf("WHERE condition is required")
+	}
+
 	// strict project_id filter & ignore pend_findings
-	sql = strings.ReplaceAll(sql, "WHERE", `WHERE
+	sql = fmt.Sprintf(`%s WHERE
 	project_id = ? 
 	AND not exists (
 		SELECT 1 
@@ -206,13 +227,26 @@ func formatSQL(sql string, projectID, limit, offset uint32) (string, []any) {
 		  pend_finding.finding_id = finding.finding_id
 			and (pend_finding.expired_at is NULL or pend_finding.expired_at > NOW())
 	)
-	AND`)
+	AND (%s)%s`, head, condition, trailingClause)
 	params = append(params, projectID)
 
 	// add limit and offset
 	sql = fmt.Sprintf(`SELECT * FROM (%s) as t LIMIT ? OFFSET ?`, sql)
 	params = append(params, limit, offset)
-	return sql, params
+	return sql, params, nil
+}
+
+func splitWhereConditionAndTrailingClause(whereBody string) (string, string) {
+	loc := trailingClauseRe.FindStringIndex(whereBody)
+	if loc == nil {
+		return strings.TrimSpace(whereBody), ""
+	}
+	condition := strings.TrimSpace(whereBody[:loc[0]])
+	trailingClause := strings.TrimSpace(whereBody[loc[0]:])
+	if trailingClause == "" {
+		return condition, ""
+	}
+	return condition, " " + trailingClause
 }
 
 func validateSQL(sql string) error {
