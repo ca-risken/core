@@ -390,7 +390,7 @@ func TestGetFindingAttachmentAddsActionButtons(t *testing.T) {
 	if pendPayload.Action != slackActionButtonPend || pendPayload.ProjectID != 1 || pendPayload.FindingID != 10 {
 		t.Fatalf("Unexpected first action payload: got=%+v", pendPayload)
 	}
-	if !validSlackActionPayloadSignature(pendPayload, "test-secret") {
+	if !validSlackActionPayload(pendPayload, "test-secret", time.Now()) {
 		t.Fatalf("Unexpected first action payload signature: got=%+v", pendPayload)
 	}
 	if got[0].Actions[1].Name != "archive_finding" {
@@ -409,7 +409,7 @@ func TestGetFindingAttachmentAddsActionButtons(t *testing.T) {
 	if archivePayload.Action != slackActionButtonArchive || archivePayload.ProjectID != 1 || archivePayload.FindingID != 10 {
 		t.Fatalf("Unexpected second action payload: got=%+v", archivePayload)
 	}
-	if !validSlackActionPayloadSignature(archivePayload, "test-secret") {
+	if !validSlackActionPayload(archivePayload, "test-secret", time.Now()) {
 		t.Fatalf("Unexpected second action payload signature: got=%+v", archivePayload)
 	}
 }
@@ -461,7 +461,23 @@ func TestBuildSlackActionPayloadValue(t *testing.T) {
 	if payload.ExpiresAt != now.Add(slackActionPayloadTTL).Unix() {
 		t.Fatalf("Unexpected expires_at: got=%d", payload.ExpiresAt)
 	}
-	if !validSlackActionPayloadSignature(payload, "secret") {
+	if !validSlackActionPayload(payload, "secret", now) {
 		t.Fatalf("Unexpected signature: got=%s", payload.Signature)
+	}
+}
+
+func TestValidSlackActionPayloadRejectsExpiredPayload(t *testing.T) {
+	now := time.Unix(1779721200, 0)
+	got, err := buildSlackActionPayloadValue(slackActionButtonPend, 1001, 123456, "secret", now)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	var payload slackActionPayload
+	if err := json.Unmarshal([]byte(got), &payload); err != nil {
+		t.Fatalf("Unexpected payload json: %v", err)
+	}
+	if validSlackActionPayload(payload, "secret", now.Add(slackActionPayloadTTL+time.Second)) {
+		t.Fatal("Expected expired payload to be rejected")
 	}
 }

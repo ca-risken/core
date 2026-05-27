@@ -509,8 +509,11 @@ func signSlackActionPayload(payload slackActionPayload, secret string) string {
 	return hex.EncodeToString(mac.Sum(nil))
 }
 
-func validSlackActionPayloadSignature(payload slackActionPayload, secret string) bool {
+func validSlackActionPayload(payload slackActionPayload, secret string, now time.Time) bool {
 	if secret == "" || payload.Signature == "" {
+		return false
+	}
+	if now.Unix() > payload.ExpiresAt {
 		return false
 	}
 	want := signSlackActionPayload(payload, secret)
