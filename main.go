@@ -30,15 +30,16 @@ type AppConf struct {
 	TraceDebug      bool     `split_words:"true" default:"false"`
 
 	// service
-	MaxAnalyzeAPICall       int64    `split_words:"true" default:"10"`
-	BaseURL                 string   `split_words:"true" default:"http://localhost"`
-	OpenAIToken             string   `split_words:"true"`
-	ChatGPTModel            string   `split_words:"true" default:"gpt-5.4-mini"`
-	ReasoningModel          string   `split_words:"true" default:"gpt-5.4-mini"`
-	DefaultLocale           string   `split_words:"true" default:"en"`
-	AISummaryLanguage       string   `split_words:"true" default:"en"`
-	SlackAPIToken           string   `split_words:"true"`
-	ExcludeDeleteDataSource []string `split_words:"true" default:"code:gitleaks"`
+	MaxAnalyzeAPICall        int64    `split_words:"true" default:"10"`
+	BaseURL                  string   `split_words:"true" default:"http://localhost"`
+	OpenAIToken              string   `split_words:"true"`
+	ChatGPTModel             string   `split_words:"true" default:"gpt-5.4-mini"`
+	ReasoningModel           string   `split_words:"true" default:"gpt-5.4-mini"`
+	DefaultLocale            string   `split_words:"true" default:"en"`
+	AISummaryLanguage        string   `split_words:"true" default:"en"`
+	SlackAPIToken            string   `split_words:"true"`
+	SlackActionSigningSecret string   `split_words:"true"`
+	ExcludeDeleteDataSource  []string `split_words:"true" default:"code:gitleaks"`
 
 	// db
 	DBMasterHost     string `split_words:"true" default:"db.middleware.svc.cluster.local"`
@@ -120,6 +121,7 @@ func main() {
 		conf.DefaultLocale,
 		conf.AISummaryLanguage,
 		conf.SlackAPIToken,
+		conf.SlackActionSigningSecret,
 		conf.ExcludeDeleteDataSource,
 	)
 	server := server.NewServer("0.0.0.0", conf.Port, db, logger, c)

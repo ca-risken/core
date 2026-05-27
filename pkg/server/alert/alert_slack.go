@@ -2,6 +2,9 @@ package alert
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -29,11 +32,16 @@ type slackNotifyOption struct {
 }
 
 const (
-	LocaleJa                   = "ja"
-	LocaleEn                   = "en"
-	alertFindingLinkLabelJa    = "アラートの詳細をRISKENで確認"
-	alertFindingLinkLabelEn    = "View alert details in RISKEN"
-	slackNotificationMessageJa = `%v問題を検知しました。内容を確認し以下のいずれかの対応を行ってください。
+	LocaleJa                      = "ja"
+	LocaleEn                      = "en"
+	alertFindingLinkLabelJa       = "アラートの詳細をRISKENで確認"
+	alertFindingLinkLabelEn       = "View alert details in RISKEN"
+	slackActionButtonPend         = "pend"
+	slackActionButtonArchive      = "archive"
+	slackActionButtonLabelPend    = "PEND"
+	slackActionButtonArchiveLabel = "Archive"
+	slackActionPayloadTTL         = 30 * 24 * time.Hour
+	slackNotificationMessageJa    = `%v問題を検知しました。内容を確認し以下のいずれかの対応を行ってください。
 	- 問題の根本原因を取り除く
 	- 意図的な設定・操作であり、リスクが小さい場合はアーカイブする
 	- 問題の性質上緊急性はなく、すぐに対応が難しい場合は目標期限を設定してPENDする`
@@ -48,6 +56,15 @@ const (
 	slackRequestProjectRoleNotificationMessageJa = `<!here> %sさんがプロジェクト%sへのアクセスをリクエストしました。プロジェクト管理者は問題がなければ<%s/iam/user?project_id=%d|ユーザー一覧>から%sさんを招待してください。`
 	slackRequestProjectRoleNotificationMessageEn = `<!here> %s has requested access to your Project %s. If there are no issues, the project administrator should  <%s/iam/user?project_id=%d|the user list> and invite %s.`
 )
+
+type slackActionPayload struct {
+	Action    string `json:"action"`
+	ProjectID uint32 `json:"project_id"`
+	FindingID uint64 `json:"finding_id"`
+	IssuedAt  int64  `json:"issued_at"`
+	ExpiresAt int64  `json:"expires_at"`
+	Signature string `json:"signature"`
+}
 
 var slackMrkdwnReplacer = strings.NewReplacer(
 	"&", "&amp;",
@@ -79,12 +96,12 @@ func (a *AlertService) sendSlackNotification(
 	}
 
 	if setting.WebhookURL != "" {
-		webhookMsg := getWebhookMessage(setting.Data.Channel, setting.Data.Message, url, alert, project, rules, findings, locale)
+		webhookMsg := getWebhookMessage(setting.Data.Channel, setting.Data.Message, url, alert, project, rules, findings, locale, a.slackActionSigningSecret)
 		if err := slack.PostWebhook(setting.WebhookURL, webhookMsg); err != nil {
 			return fmt.Errorf("failed to send slack(webhookurl): %w", err)
 		}
 	} else if setting.ChannelID != "" {
-		apiMsg := getApiMessage(setting.Data.Message, url, alert, project, rules, findings, locale)
+		apiMsg := getApiMessage(setting.Data.Message, url, alert, project, rules, findings, locale, a.slackActionSigningSecret)
 		if err := a.postMessageSlackWithRetry(ctx, setting.ChannelID, apiMsg...); err != nil {
 			return fmt.Errorf("failed to send slack(postmessage): %w", err)
 		}
@@ -181,9 +198,10 @@ func getWebhookMessage(
 	rules *[]model.AlertRule,
 	findings *findingDetail,
 	locale string,
+	slackActionSigningSecret string,
 ) *slack.WebhookMessage {
 	msgText := getSlackMessageText(locale, alert.Severity)
-	attachments := buildSlackAttachments(url, alert, project, rules, findings, locale)
+	attachments := buildSlackAttachments(url, alert, project, rules, findings, locale, slackActionSigningSecret)
 	msg := slack.WebhookMessage{
 		Text:        msgText,
 		Attachments: attachments,
@@ -205,13 +223,14 @@ func getApiMessage(
 	rules *[]model.AlertRule,
 	findings *findingDetail,
 	locale string,
+	slackActionSigningSecret string,
 ) []slack.MsgOption {
 	msgOptions := []slack.MsgOption{}
 	text := getSlackMessageText(locale, alert.Severity)
 	if message != "" {
 		text = overrideToCustomMessage(message, alert.Severity)
 	}
-	attachments := buildSlackAttachments(url, alert, project, rules, findings, locale)
+	attachments := buildSlackAttachments(url, alert, project, rules, findings, locale, slackActionSigningSecret)
 
 	msgOptions = append(msgOptions, slack.MsgOptionText(text, false))
 	msgOptions = append(msgOptions, slack.MsgOptionAttachments(attachments...))
@@ -225,8 +244,9 @@ func buildSlackAttachments(
 	rules *[]model.AlertRule,
 	findings *findingDetail,
 	locale string,
+	slackActionSigningSecret string,
 ) []slack.Attachment {
-	findingAttachments := getFindingAttachment(url, project.ProjectId, findings, locale)
+	findingAttachments := getFindingAttachment(url, project.ProjectId, findings, locale, slackActionSigningSecret)
 	alertAttachment := getAlertAttachment(url, alert, project, rules, findings)
 	attachments := make([]slack.Attachment, 0, len(findingAttachments)+1)
 	attachments = append(attachments, findingAttachments...)
@@ -376,7 +396,7 @@ func generateRuleList(rules *[]model.AlertRule) string {
 	return list
 }
 
-func getFindingAttachment(url string, projectID uint32, findings *findingDetail, locale string) []slack.Attachment {
+func getFindingAttachment(url string, projectID uint32, findings *findingDetail, locale, slackActionSigningSecret string) []slack.Attachment {
 	attachments := []slack.Attachment{}
 	linkLabel := getAlertFindingLinkLabel(locale)
 	for _, f := range findings.Exampls {
@@ -407,8 +427,9 @@ func getFindingAttachment(url string, projectID uint32, findings *findingDetail,
 			},
 		)
 		a := slack.Attachment{
-			Color:  getColorByScore(f.Score),
-			Fields: fields,
+			Color:   getColorByScore(f.Score),
+			Fields:  fields,
+			Actions: getFindingActionButtons(projectID, f.FindingID, slackActionSigningSecret),
 		}
 		attachments = append(attachments, a)
 	}
@@ -431,6 +452,69 @@ func getFindingAttachment(url string, projectID uint32, findings *findingDetail,
 		})
 	}
 	return attachments
+}
+
+func getFindingActionButtons(projectID uint32, findingID uint64, slackActionSigningSecret string) []slack.AttachmentAction {
+	if slackActionSigningSecret == "" {
+		return nil
+	}
+	pendValue, err := buildSlackActionPayloadValue(slackActionButtonPend, projectID, findingID, slackActionSigningSecret, time.Now())
+	if err != nil {
+		return nil
+	}
+	archiveValue, err := buildSlackActionPayloadValue(slackActionButtonArchive, projectID, findingID, slackActionSigningSecret, time.Now())
+	if err != nil {
+		return nil
+	}
+	return []slack.AttachmentAction{
+		{
+			Name:  "pend_finding",
+			Text:  slackActionButtonLabelPend,
+			Type:  slack.ActionType("button"),
+			Style: "primary",
+			Value: pendValue,
+		},
+		{
+			Name:  "archive_finding",
+			Text:  slackActionButtonArchiveLabel,
+			Type:  slack.ActionType("button"),
+			Style: "danger",
+			Value: archiveValue,
+		},
+	}
+}
+
+func buildSlackActionPayloadValue(action string, projectID uint32, findingID uint64, secret string, now time.Time) (string, error) {
+	if action != slackActionButtonPend && action != slackActionButtonArchive {
+		return "", fmt.Errorf("invalid slack action: %s", action)
+	}
+	payload := slackActionPayload{
+		Action:    action,
+		ProjectID: projectID,
+		FindingID: findingID,
+		IssuedAt:  now.Unix(),
+		ExpiresAt: now.Add(slackActionPayloadTTL).Unix(),
+	}
+	payload.Signature = signSlackActionPayload(payload, secret)
+	buf, err := json.Marshal(payload)
+	if err != nil {
+		return "", err
+	}
+	return string(buf), nil
+}
+
+func signSlackActionPayload(payload slackActionPayload, secret string) string {
+	mac := hmac.New(sha256.New, []byte(secret))
+	fmt.Fprintf(mac, "%s:%d:%d:%d:%d", payload.Action, payload.ProjectID, payload.FindingID, payload.IssuedAt, payload.ExpiresAt)
+	return hex.EncodeToString(mac.Sum(nil))
+}
+
+func validSlackActionPayloadSignature(payload slackActionPayload, secret string) bool {
+	if secret == "" || payload.Signature == "" {
+		return false
+	}
+	want := signSlackActionPayload(payload, secret)
+	return hmac.Equal([]byte(payload.Signature), []byte(want))
 }
 
 func renderAlertAISummary(raw string) string {
