@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/alertsummary"
 	"github.com/ca-risken/core/pkg/model"
 	projectproto "github.com/ca-risken/core/proto/project"
@@ -96,12 +97,12 @@ func (a *AlertService) sendSlackNotification(
 	}
 
 	if setting.WebhookURL != "" {
-		webhookMsg := getWebhookMessage(setting.Data.Channel, setting.Data.Message, url, alert, project, rules, findings, locale, a.slackActionSigningSecret)
+		webhookMsg := getWebhookMessage(ctx, a.logger, setting.Data.Channel, setting.Data.Message, url, alert, project, rules, findings, locale, a.slackActionSigningSecret)
 		if err := slack.PostWebhook(setting.WebhookURL, webhookMsg); err != nil {
 			return fmt.Errorf("failed to send slack(webhookurl): %w", err)
 		}
 	} else if setting.ChannelID != "" {
-		apiMsg := getApiMessage(setting.Data.Message, url, alert, project, rules, findings, locale, a.slackActionSigningSecret)
+		apiMsg := getApiMessage(ctx, a.logger, setting.Data.Message, url, alert, project, rules, findings, locale, a.slackActionSigningSecret)
 		if err := a.postMessageSlackWithRetry(ctx, setting.ChannelID, apiMsg...); err != nil {
 			return fmt.Errorf("failed to send slack(postmessage): %w", err)
 		}
@@ -190,6 +191,8 @@ func (a *AlertService) postMessageSlackWithRetry(ctx context.Context, channelID 
 }
 
 func getWebhookMessage(
+	ctx context.Context,
+	logger logging.Logger,
 	channel string,
 	message string,
 	url string,
@@ -201,7 +204,7 @@ func getWebhookMessage(
 	slackActionSigningSecret string,
 ) *slack.WebhookMessage {
 	msgText := getSlackMessageText(locale, alert.Severity)
-	attachments := buildSlackAttachments(url, alert, project, rules, findings, locale, slackActionSigningSecret)
+	attachments := buildSlackAttachments(ctx, logger, url, alert, project, rules, findings, locale, slackActionSigningSecret)
 	msg := slack.WebhookMessage{
 		Text:        msgText,
 		Attachments: attachments,
@@ -216,6 +219,8 @@ func getWebhookMessage(
 }
 
 func getApiMessage(
+	ctx context.Context,
+	logger logging.Logger,
 	message string,
 	url string,
 	alert *model.Alert,
@@ -230,7 +235,7 @@ func getApiMessage(
 	if message != "" {
 		text = overrideToCustomMessage(message, alert.Severity)
 	}
-	attachments := buildSlackAttachments(url, alert, project, rules, findings, locale, slackActionSigningSecret)
+	attachments := buildSlackAttachments(ctx, logger, url, alert, project, rules, findings, locale, slackActionSigningSecret)
 
 	msgOptions = append(msgOptions, slack.MsgOptionText(text, false))
 	msgOptions = append(msgOptions, slack.MsgOptionAttachments(attachments...))
@@ -238,6 +243,8 @@ func getApiMessage(
 }
 
 func buildSlackAttachments(
+	ctx context.Context,
+	logger logging.Logger,
 	url string,
 	alert *model.Alert,
 	project *projectproto.Project,
@@ -246,7 +253,7 @@ func buildSlackAttachments(
 	locale string,
 	slackActionSigningSecret string,
 ) []slack.Attachment {
-	findingAttachments := getFindingAttachment(url, project.ProjectId, findings, locale, slackActionSigningSecret)
+	findingAttachments := getFindingAttachment(ctx, logger, url, project.ProjectId, findings, locale, slackActionSigningSecret)
 	alertAttachment := getAlertAttachment(url, alert, project, rules, findings)
 	attachments := make([]slack.Attachment, 0, len(findingAttachments)+1)
 	attachments = append(attachments, findingAttachments...)
@@ -396,7 +403,7 @@ func generateRuleList(rules *[]model.AlertRule) string {
 	return list
 }
 
-func getFindingAttachment(url string, projectID uint32, findings *findingDetail, locale, slackActionSigningSecret string) []slack.Attachment {
+func getFindingAttachment(ctx context.Context, logger logging.Logger, url string, projectID uint32, findings *findingDetail, locale, slackActionSigningSecret string) []slack.Attachment {
 	attachments := []slack.Attachment{}
 	linkLabel := getAlertFindingLinkLabel(locale)
 	for _, f := range findings.Exampls {
@@ -429,7 +436,7 @@ func getFindingAttachment(url string, projectID uint32, findings *findingDetail,
 		a := slack.Attachment{
 			Color:   getColorByScore(f.Score),
 			Fields:  fields,
-			Actions: getFindingActionButtons(projectID, f.FindingID, slackActionSigningSecret),
+			Actions: getFindingActionButtons(ctx, logger, projectID, f.FindingID, slackActionSigningSecret),
 		}
 		attachments = append(attachments, a)
 	}
@@ -454,16 +461,22 @@ func getFindingAttachment(url string, projectID uint32, findings *findingDetail,
 	return attachments
 }
 
-func getFindingActionButtons(projectID uint32, findingID uint64, slackActionSigningSecret string) []slack.AttachmentAction {
+func getFindingActionButtons(ctx context.Context, logger logging.Logger, projectID uint32, findingID uint64, slackActionSigningSecret string) []slack.AttachmentAction {
 	if slackActionSigningSecret == "" {
 		return nil
 	}
 	pendValue, err := buildSlackActionPayloadValue(slackActionButtonPend, projectID, findingID, slackActionSigningSecret, time.Now())
 	if err != nil {
+		if logger != nil {
+			logger.Warnf(ctx, "Failed to build slack action payload, action=%s, project_id=%d, finding_id=%d, err=%+v", slackActionButtonPend, projectID, findingID, err)
+		}
 		return nil
 	}
 	archiveValue, err := buildSlackActionPayloadValue(slackActionButtonArchive, projectID, findingID, slackActionSigningSecret, time.Now())
 	if err != nil {
+		if logger != nil {
+			logger.Warnf(ctx, "Failed to build slack action payload, action=%s, project_id=%d, finding_id=%d, err=%+v", slackActionButtonArchive, projectID, findingID, err)
+		}
 		return nil
 	}
 	return []slack.AttachmentAction{

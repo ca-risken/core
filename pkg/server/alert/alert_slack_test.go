@@ -191,7 +191,7 @@ func TestGetFindingAttachment(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := getFindingAttachment("https://example.com", 1, c.input, LocaleEn, "")
+			got := getFindingAttachment(context.Background(), nil, "https://example.com", 1, c.input, LocaleEn, "")
 			if len(got) != 1 {
 				t.Fatalf("Unexpected attachment count: got=%d", len(got))
 			}
@@ -207,7 +207,7 @@ func TestGetFindingAttachment(t *testing.T) {
 }
 
 func TestGetFindingAttachmentUsesLocaleAwareRISKENLinkLabel(t *testing.T) {
-	got := getFindingAttachment("https://example.com", 1, &findingDetail{
+	got := getFindingAttachment(context.Background(), nil, "https://example.com", 1, &findingDetail{
 		FindingCount: 1,
 		Exampls: []*findingExample{{
 			FindingID:    1,
@@ -231,7 +231,7 @@ func TestGetFindingAttachmentUsesLocaleAwareRISKENLinkLabel(t *testing.T) {
 		t.Fatalf("Unexpected RISKEN link label: got=%q want=%q", got[0].Fields[1].Value, want)
 	}
 
-	gotEn := getFindingAttachment("https://example.com", 1, &findingDetail{
+	gotEn := getFindingAttachment(context.Background(), nil, "https://example.com", 1, &findingDetail{
 		FindingCount: 1,
 		Exampls: []*findingExample{{
 			FindingID:    1,
@@ -248,7 +248,7 @@ func TestGetFindingAttachmentUsesLocaleAwareRISKENLinkLabel(t *testing.T) {
 		t.Fatalf("Unexpected RISKEN link label for en: got=%q want=%q", gotEn[0].Fields[1].Value, wantEn)
 	}
 
-	gotDefault := getFindingAttachment("https://example.com", 1, &findingDetail{
+	gotDefault := getFindingAttachment(context.Background(), nil, "https://example.com", 1, &findingDetail{
 		FindingCount: 1,
 		Exampls: []*findingExample{{
 			FindingID:    1,
@@ -342,7 +342,7 @@ func TestBuildSlackAttachmentsOrdersFindingBeforeAlert(t *testing.T) {
 		}},
 	}
 
-	got := buildSlackAttachments("https://example.com", alert, project, rules, findings, LocaleJa, "")
+	got := buildSlackAttachments(context.Background(), nil, "https://example.com", alert, project, rules, findings, LocaleJa, "")
 
 	if len(got) != 2 {
 		t.Fatalf("Unexpected attachment count: got=%d want=2", len(got))
@@ -356,7 +356,7 @@ func TestBuildSlackAttachmentsOrdersFindingBeforeAlert(t *testing.T) {
 }
 
 func TestGetFindingAttachmentAddsActionButtons(t *testing.T) {
-	got := getFindingAttachment("https://example.com", 1, &findingDetail{
+	got := getFindingAttachment(context.Background(), nil, "https://example.com", 1, &findingDetail{
 		FindingCount: 1,
 		Exampls: []*findingExample{{
 			FindingID:    10,
@@ -415,7 +415,7 @@ func TestGetFindingAttachmentAddsActionButtons(t *testing.T) {
 }
 
 func TestGetFindingAttachmentSkipsActionButtonsWithoutSigningSecret(t *testing.T) {
-	got := getFindingAttachment("https://example.com", 1, &findingDetail{
+	got := getFindingAttachment(context.Background(), nil, "https://example.com", 1, &findingDetail{
 		FindingCount: 1,
 		Exampls: []*findingExample{{
 			FindingID:    10,
