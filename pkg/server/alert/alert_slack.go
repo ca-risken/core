@@ -426,12 +426,12 @@ func (a *AlertService) getFindingAttachment(ctx context.Context, url string, pro
 				Value: generateTagContentByFinding(f.Tags),
 			},
 		)
-		a := slack.Attachment{
+		att := slack.Attachment{
 			Color:   getColorByScore(f.Score),
 			Fields:  fields,
 			Actions: a.getFindingActionButtons(ctx, projectID, f.FindingID),
 		}
-		attachments = append(attachments, a)
+		attachments = append(attachments, att)
 	}
 	if findings.FindingCount > len(findings.Exampls) {
 		var attachmentText string
