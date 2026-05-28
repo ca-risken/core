@@ -58,30 +58,32 @@ func NewServer(host string, port string, db *db.Client, logger logging.Logger, c
 }
 
 type Config struct {
-	MaxAnalyzeAPICall       int64
-	BaseURL                 string
-	OpenAIToken             string
-	ChatGPTModel            string
-	ReasoningModel          string
-	defaultLocale           string
-	aiSummaryLanguage       string
-	aiSummaryEnabled        bool
-	excludeDeleteDataSource []string
-	SlackAPIToken           string
+	MaxAnalyzeAPICall        int64
+	BaseURL                  string
+	OpenAIToken              string
+	ChatGPTModel             string
+	ReasoningModel           string
+	defaultLocale            string
+	aiSummaryLanguage        string
+	aiSummaryEnabled         bool
+	excludeDeleteDataSource  []string
+	SlackAPIToken            string
+	SlackActionSigningSecret string
 }
 
-func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, reasoningModel, defaultLocale, aiSummaryLanguage, SlackAPIToken string, excludeDeleteDataSource []string) Config {
+func NewConfig(maxAnalyzeAPICall int64, baseURL, openaiToken, chatGPTModel, reasoningModel, defaultLocale, aiSummaryLanguage, SlackAPIToken, slackActionSigningSecret string, excludeDeleteDataSource []string) Config {
 	return Config{
-		MaxAnalyzeAPICall:       maxAnalyzeAPICall,
-		BaseURL:                 baseURL,
-		OpenAIToken:             openaiToken,
-		ChatGPTModel:            chatGPTModel,
-		ReasoningModel:          reasoningModel,
-		defaultLocale:           defaultLocale,
-		aiSummaryLanguage:       aiSummaryLanguage,
-		aiSummaryEnabled:        openaiToken != "",
-		SlackAPIToken:           SlackAPIToken,
-		excludeDeleteDataSource: excludeDeleteDataSource,
+		MaxAnalyzeAPICall:        maxAnalyzeAPICall,
+		BaseURL:                  baseURL,
+		OpenAIToken:              openaiToken,
+		ChatGPTModel:             chatGPTModel,
+		ReasoningModel:           reasoningModel,
+		defaultLocale:            defaultLocale,
+		aiSummaryLanguage:        aiSummaryLanguage,
+		aiSummaryEnabled:         openaiToken != "",
+		SlackAPIToken:            SlackAPIToken,
+		SlackActionSigningSecret: slackActionSigningSecret,
+		excludeDeleteDataSource:  excludeDeleteDataSource,
 	}
 }
 
@@ -129,6 +131,7 @@ func (s *Server) Run(ctx context.Context) error {
 		s.config.aiSummaryEnabled,
 		s.config.aiSummaryLanguage,
 		s.config.SlackAPIToken,
+		s.config.SlackActionSigningSecret,
 	)
 	oisvc := org_iamserver.NewOrgIAMService(s.db, oc, iamc, s.logger)
 	fsvc := findingserver.NewFindingService(s.db, s.config.OpenAIToken, s.config.ChatGPTModel, s.config.ReasoningModel, s.config.excludeDeleteDataSource, s.logger)

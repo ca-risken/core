@@ -2,10 +2,12 @@ package alert
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/project"
@@ -189,7 +191,8 @@ func TestGetFindingAttachment(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := getFindingAttachment("https://example.com", 1, c.input, LocaleEn)
+			a := &AlertService{}
+			got := a.getFindingAttachment(context.Background(), "https://example.com", 1, c.input, LocaleEn)
 			if len(got) != 1 {
 				t.Fatalf("Unexpected attachment count: got=%d", len(got))
 			}
@@ -205,7 +208,8 @@ func TestGetFindingAttachment(t *testing.T) {
 }
 
 func TestGetFindingAttachmentUsesLocaleAwareRISKENLinkLabel(t *testing.T) {
-	got := getFindingAttachment("https://example.com", 1, &findingDetail{
+	a := &AlertService{}
+	got := a.getFindingAttachment(context.Background(), "https://example.com", 1, &findingDetail{
 		FindingCount: 1,
 		Exampls: []*findingExample{{
 			FindingID:    1,
@@ -229,7 +233,7 @@ func TestGetFindingAttachmentUsesLocaleAwareRISKENLinkLabel(t *testing.T) {
 		t.Fatalf("Unexpected RISKEN link label: got=%q want=%q", got[0].Fields[1].Value, want)
 	}
 
-	gotEn := getFindingAttachment("https://example.com", 1, &findingDetail{
+	gotEn := a.getFindingAttachment(context.Background(), "https://example.com", 1, &findingDetail{
 		FindingCount: 1,
 		Exampls: []*findingExample{{
 			FindingID:    1,
@@ -246,7 +250,7 @@ func TestGetFindingAttachmentUsesLocaleAwareRISKENLinkLabel(t *testing.T) {
 		t.Fatalf("Unexpected RISKEN link label for en: got=%q want=%q", gotEn[0].Fields[1].Value, wantEn)
 	}
 
-	gotDefault := getFindingAttachment("https://example.com", 1, &findingDetail{
+	gotDefault := a.getFindingAttachment(context.Background(), "https://example.com", 1, &findingDetail{
 		FindingCount: 1,
 		Exampls: []*findingExample{{
 			FindingID:    1,
@@ -340,7 +344,7 @@ func TestBuildSlackAttachmentsOrdersFindingBeforeAlert(t *testing.T) {
 		}},
 	}
 
-	got := buildSlackAttachments("https://example.com", alert, project, rules, findings, LocaleJa)
+	got := (&AlertService{}).buildSlackAttachments(context.Background(), "https://example.com", alert, project, rules, findings, LocaleJa)
 
 	if len(got) != 2 {
 		t.Fatalf("Unexpected attachment count: got=%d want=2", len(got))
@@ -350,5 +354,133 @@ func TestBuildSlackAttachmentsOrdersFindingBeforeAlert(t *testing.T) {
 	}
 	if !strings.Contains(got[1].Fields[0].Value, "alert-desc") {
 		t.Fatalf("Last attachment should be alert block: got=%+v", got[1].Fields[0].Value)
+	}
+}
+
+func TestGetFindingAttachmentAddsActionButtons(t *testing.T) {
+	a := &AlertService{slackActionSigningSecret: "test-secret"}
+	got := a.getFindingAttachment(context.Background(), "https://example.com", 1, &findingDetail{
+		FindingCount: 1,
+		Exampls: []*findingExample{{
+			FindingID:    10,
+			Description:  "finding-desc",
+			ResourceName: "resource-1",
+			DataSource:   "ds-1",
+			Score:        0.9,
+			Tags:         []string{"tag-1"},
+		}},
+	}, LocaleJa)
+
+	if len(got) != 1 {
+		t.Fatalf("Unexpected attachment count: got=%d want=1", len(got))
+	}
+	if len(got[0].Actions) != 2 {
+		t.Fatalf("Unexpected action count: got=%d want=2", len(got[0].Actions))
+	}
+	if got[0].Actions[0].Name != "pend_finding" {
+		t.Fatalf("Unexpected first action: got=%s want=pend_finding", got[0].Actions[0].Name)
+	}
+	if got[0].Actions[0].Text != "PEND" {
+		t.Fatalf("Unexpected first action label: got=%s", got[0].Actions[0].Text)
+	}
+	if got[0].Actions[0].URL != "" {
+		t.Fatalf("Unexpected first action URL: got=%s", got[0].Actions[0].URL)
+	}
+	var pendPayload slackActionPayload
+	if err := json.Unmarshal([]byte(got[0].Actions[0].Value), &pendPayload); err != nil {
+		t.Fatalf("Unexpected first action value: %s", got[0].Actions[0].Value)
+	}
+	if pendPayload.Action != slackActionButtonPend || pendPayload.ProjectID != 1 || pendPayload.FindingID != 10 {
+		t.Fatalf("Unexpected first action payload: got=%+v", pendPayload)
+	}
+	if !validSlackActionPayload(pendPayload, "test-secret", time.Now()) {
+		t.Fatalf("Unexpected first action payload signature: got=%+v", pendPayload)
+	}
+	if got[0].Actions[1].Name != "archive_finding" {
+		t.Fatalf("Unexpected second action: got=%s want=archive_finding", got[0].Actions[1].Name)
+	}
+	if got[0].Actions[1].Text != "Archive" {
+		t.Fatalf("Unexpected second action label: got=%s", got[0].Actions[1].Text)
+	}
+	if got[0].Actions[1].URL != "" {
+		t.Fatalf("Unexpected second action URL: got=%s", got[0].Actions[1].URL)
+	}
+	var archivePayload slackActionPayload
+	if err := json.Unmarshal([]byte(got[0].Actions[1].Value), &archivePayload); err != nil {
+		t.Fatalf("Unexpected second action value: %s", got[0].Actions[1].Value)
+	}
+	if archivePayload.Action != slackActionButtonArchive || archivePayload.ProjectID != 1 || archivePayload.FindingID != 10 {
+		t.Fatalf("Unexpected second action payload: got=%+v", archivePayload)
+	}
+	if !validSlackActionPayload(archivePayload, "test-secret", time.Now()) {
+		t.Fatalf("Unexpected second action payload signature: got=%+v", archivePayload)
+	}
+}
+
+func TestGetFindingAttachmentSkipsActionButtonsWithoutSigningSecret(t *testing.T) {
+	got := (&AlertService{}).getFindingAttachment(context.Background(), "https://example.com", 1, &findingDetail{
+		FindingCount: 1,
+		Exampls: []*findingExample{{
+			FindingID:    10,
+			Description:  "finding-desc",
+			ResourceName: "resource-1",
+			DataSource:   "ds-1",
+			Score:        0.9,
+			Tags:         []string{"tag-1"},
+		}},
+	}, LocaleJa)
+
+	if len(got) != 1 {
+		t.Fatalf("Unexpected attachment count: got=%d want=1", len(got))
+	}
+	if len(got[0].Actions) != 0 {
+		t.Fatalf("Unexpected action count: got=%d want=0", len(got[0].Actions))
+	}
+}
+
+func TestBuildSlackActionPayloadValue(t *testing.T) {
+	now := time.Unix(1779721200, 0)
+	got, err := buildSlackActionPayloadValue(slackActionButtonPend, 1001, 123456, "secret", now)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	var payload slackActionPayload
+	if err := json.Unmarshal([]byte(got), &payload); err != nil {
+		t.Fatalf("Unexpected payload json: %v", err)
+	}
+	if payload.Action != slackActionButtonPend {
+		t.Fatalf("Unexpected action: got=%s", payload.Action)
+	}
+	if payload.ProjectID != 1001 {
+		t.Fatalf("Unexpected project_id: got=%d", payload.ProjectID)
+	}
+	if payload.FindingID != 123456 {
+		t.Fatalf("Unexpected finding_id: got=%d", payload.FindingID)
+	}
+	if payload.IssuedAt != now.Unix() {
+		t.Fatalf("Unexpected issued_at: got=%d", payload.IssuedAt)
+	}
+	if payload.ExpiresAt != now.Add(slackActionPayloadTTL).Unix() {
+		t.Fatalf("Unexpected expires_at: got=%d", payload.ExpiresAt)
+	}
+	if !validSlackActionPayload(payload, "secret", now) {
+		t.Fatalf("Unexpected signature: got=%s", payload.Signature)
+	}
+}
+
+func TestValidSlackActionPayloadRejectsExpiredPayload(t *testing.T) {
+	now := time.Unix(1779721200, 0)
+	got, err := buildSlackActionPayloadValue(slackActionButtonPend, 1001, 123456, "secret", now)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	var payload slackActionPayload
+	if err := json.Unmarshal([]byte(got), &payload); err != nil {
+		t.Fatalf("Unexpected payload json: %v", err)
+	}
+	if validSlackActionPayload(payload, "secret", now.Add(slackActionPayloadTTL+time.Second)) {
+		t.Fatal("Expected expired payload to be rejected")
 	}
 }
