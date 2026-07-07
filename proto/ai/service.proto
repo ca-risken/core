@@ -9,6 +9,12 @@ import "validate/validate.proto";
 service AIService {
   rpc ChatAI(ChatAIRequest) returns (ChatAIResponse);
   rpc GenerateReport(GenerateReportRequest) returns (GenerateReportResponse);
+  rpc GetRemediationProposal(GetRemediationProposalRequest)
+      returns (GetRemediationProposalResponse);
+  rpc PutRemediationProposal(PutRemediationProposalRequest)
+      returns (PutRemediationProposalResponse);
+  rpc ListRemediationProposal(ListRemediationProposalRequest)
+      returns (ListRemediationProposalResponse);
 }
 
 message ChatAIRequest {
@@ -28,4 +34,36 @@ message GenerateReportRequest {
 message GenerateReportResponse {
   uint32 report_id = 1;
   string status = 2;
+}
+
+message GetRemediationProposalRequest {
+  uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  string request_id = 2
+      [ (validate.rules).string = {min_len : 1, max_len : 64} ]; // Required
+}
+
+message GetRemediationProposalResponse {
+  RemediationProposal remediation_proposal = 1;
+}
+
+message PutRemediationProposalRequest {
+  uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  RemediationProposalForUpsert remediation_proposal = 2
+      [ (validate.rules).message.required = true ]; // Required
+}
+
+message PutRemediationProposalResponse {
+  RemediationProposal remediation_proposal = 1;
+}
+
+message ListRemediationProposalRequest {
+  uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
+  uint64 finding_id = 2 [ (validate.rules).uint64.gt = 0 ]; // Required
+  repeated string status = 3 [ (validate.rules).repeated.items.string = {
+    in : [ "pending", "succeeded", "failed" ]
+  } ]; // Optional
+}
+
+message ListRemediationProposalResponse {
+  repeated RemediationProposal remediation_proposal = 1;
 }

@@ -253,6 +253,320 @@ func (x *GenerateReportResponse) GetStatus() string {
 	return ""
 }
 
+type GetRemediationProposalRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ProjectId uint32 `protobuf:"varint,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"` // Required
+	RequestId string `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`  // Required
+}
+
+func (x *GetRemediationProposalRequest) Reset() {
+	*x = GetRemediationProposalRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_ai_service_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetRemediationProposalRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRemediationProposalRequest) ProtoMessage() {}
+
+func (x *GetRemediationProposalRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ai_service_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRemediationProposalRequest.ProtoReflect.Descriptor instead.
+func (*GetRemediationProposalRequest) Descriptor() ([]byte, []int) {
+	return file_ai_service_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetRemediationProposalRequest) GetProjectId() uint32 {
+	if x != nil {
+		return x.ProjectId
+	}
+	return 0
+}
+
+func (x *GetRemediationProposalRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+type GetRemediationProposalResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RemediationProposal *RemediationProposal `protobuf:"bytes,1,opt,name=remediation_proposal,json=remediationProposal,proto3" json:"remediation_proposal,omitempty"`
+}
+
+func (x *GetRemediationProposalResponse) Reset() {
+	*x = GetRemediationProposalResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_ai_service_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetRemediationProposalResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRemediationProposalResponse) ProtoMessage() {}
+
+func (x *GetRemediationProposalResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ai_service_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRemediationProposalResponse.ProtoReflect.Descriptor instead.
+func (*GetRemediationProposalResponse) Descriptor() ([]byte, []int) {
+	return file_ai_service_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetRemediationProposalResponse) GetRemediationProposal() *RemediationProposal {
+	if x != nil {
+		return x.RemediationProposal
+	}
+	return nil
+}
+
+type PutRemediationProposalRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ProjectId           uint32                        `protobuf:"varint,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`                              // Required
+	RemediationProposal *RemediationProposalForUpsert `protobuf:"bytes,2,opt,name=remediation_proposal,json=remediationProposal,proto3" json:"remediation_proposal,omitempty"` // Required
+}
+
+func (x *PutRemediationProposalRequest) Reset() {
+	*x = PutRemediationProposalRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_ai_service_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PutRemediationProposalRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PutRemediationProposalRequest) ProtoMessage() {}
+
+func (x *PutRemediationProposalRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ai_service_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PutRemediationProposalRequest.ProtoReflect.Descriptor instead.
+func (*PutRemediationProposalRequest) Descriptor() ([]byte, []int) {
+	return file_ai_service_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *PutRemediationProposalRequest) GetProjectId() uint32 {
+	if x != nil {
+		return x.ProjectId
+	}
+	return 0
+}
+
+func (x *PutRemediationProposalRequest) GetRemediationProposal() *RemediationProposalForUpsert {
+	if x != nil {
+		return x.RemediationProposal
+	}
+	return nil
+}
+
+type PutRemediationProposalResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RemediationProposal *RemediationProposal `protobuf:"bytes,1,opt,name=remediation_proposal,json=remediationProposal,proto3" json:"remediation_proposal,omitempty"`
+}
+
+func (x *PutRemediationProposalResponse) Reset() {
+	*x = PutRemediationProposalResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_ai_service_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PutRemediationProposalResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PutRemediationProposalResponse) ProtoMessage() {}
+
+func (x *PutRemediationProposalResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ai_service_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PutRemediationProposalResponse.ProtoReflect.Descriptor instead.
+func (*PutRemediationProposalResponse) Descriptor() ([]byte, []int) {
+	return file_ai_service_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *PutRemediationProposalResponse) GetRemediationProposal() *RemediationProposal {
+	if x != nil {
+		return x.RemediationProposal
+	}
+	return nil
+}
+
+type ListRemediationProposalRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ProjectId uint32   `protobuf:"varint,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"` // Required
+	FindingId uint64   `protobuf:"varint,2,opt,name=finding_id,json=findingId,proto3" json:"finding_id,omitempty"` // Required
+	Status    []string `protobuf:"bytes,3,rep,name=status,proto3" json:"status,omitempty"`                         // Optional
+}
+
+func (x *ListRemediationProposalRequest) Reset() {
+	*x = ListRemediationProposalRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_ai_service_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListRemediationProposalRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRemediationProposalRequest) ProtoMessage() {}
+
+func (x *ListRemediationProposalRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ai_service_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRemediationProposalRequest.ProtoReflect.Descriptor instead.
+func (*ListRemediationProposalRequest) Descriptor() ([]byte, []int) {
+	return file_ai_service_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ListRemediationProposalRequest) GetProjectId() uint32 {
+	if x != nil {
+		return x.ProjectId
+	}
+	return 0
+}
+
+func (x *ListRemediationProposalRequest) GetFindingId() uint64 {
+	if x != nil {
+		return x.FindingId
+	}
+	return 0
+}
+
+func (x *ListRemediationProposalRequest) GetStatus() []string {
+	if x != nil {
+		return x.Status
+	}
+	return nil
+}
+
+type ListRemediationProposalResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RemediationProposal []*RemediationProposal `protobuf:"bytes,1,rep,name=remediation_proposal,json=remediationProposal,proto3" json:"remediation_proposal,omitempty"`
+}
+
+func (x *ListRemediationProposalResponse) Reset() {
+	*x = ListRemediationProposalResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_ai_service_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListRemediationProposalResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRemediationProposalResponse) ProtoMessage() {}
+
+func (x *ListRemediationProposalResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ai_service_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRemediationProposalResponse.ProtoReflect.Descriptor instead.
+func (*ListRemediationProposalResponse) Descriptor() ([]byte, []int) {
+	return file_ai_service_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ListRemediationProposalResponse) GetRemediationProposal() []*RemediationProposal {
+	if x != nil {
+		return x.RemediationProposal
+	}
+	return nil
+}
+
 var File_ai_service_proto protoreflect.FileDescriptor
 
 var file_ai_service_proto_rawDesc = []byte{
@@ -284,20 +598,91 @@ var file_ai_service_proto_rawDesc = []byte{
 	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x1b, 0x0a, 0x09, 0x72, 0x65, 0x70, 0x6f, 0x72,
 	0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x72, 0x65, 0x70, 0x6f,
 	0x72, 0x74, 0x49, 0x64, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x02,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x32, 0x99, 0x01, 0x0a,
-	0x09, 0x41, 0x49, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x39, 0x0a, 0x06, 0x43, 0x68,
-	0x61, 0x74, 0x41, 0x49, 0x12, 0x16, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x61, 0x69, 0x2e, 0x43,
-	0x68, 0x61, 0x74, 0x41, 0x49, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x63,
-	0x6f, 0x72, 0x65, 0x2e, 0x61, 0x69, 0x2e, 0x43, 0x68, 0x61, 0x74, 0x41, 0x49, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x51, 0x0a, 0x0e, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74,
-	0x65, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x12, 0x1e, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x61,
-	0x69, 0x2e, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x61,
-	0x69, 0x2e, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x24, 0x5a, 0x22, 0x67, 0x69, 0x74, 0x68,
-	0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69, 0x73, 0x6b, 0x65, 0x6e,
-	0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x61, 0x69, 0x62, 0x06,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x71, 0x0a, 0x1d,
+	0x47, 0x65, 0x74, 0x52, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72,
+	0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x26, 0x0a,
+	0x0a, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0d, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20, 0x00, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a,
+	0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x28, 0x0a, 0x0a, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x09, 0xfa, 0x42, 0x06, 0x72, 0x04,
+	0x10, 0x01, 0x18, 0x40, 0x52, 0x09, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x49, 0x64, 0x22,
+	0x71, 0x0a, 0x1e, 0x47, 0x65, 0x74, 0x52, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x12, 0x4f, 0x0a, 0x14, 0x72, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x5f, 0x70, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x1c, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x61, 0x69, 0x2e, 0x52, 0x65, 0x6d, 0x65, 0x64, 0x69,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x52, 0x13, 0x72,
+	0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73,
+	0x61, 0x6c, 0x22, 0xab, 0x01, 0x0a, 0x1d, 0x50, 0x75, 0x74, 0x52, 0x65, 0x6d, 0x65, 0x64, 0x69,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x26, 0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x5f,
+	0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a, 0x02, 0x20,
+	0x00, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x62, 0x0a, 0x14,
+	0x72, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x70, 0x72, 0x6f, 0x70,
+	0x6f, 0x73, 0x61, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x25, 0x2e, 0x63, 0x6f, 0x72,
+	0x65, 0x2e, 0x61, 0x69, 0x2e, 0x52, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x46, 0x6f, 0x72, 0x55, 0x70, 0x73, 0x65, 0x72,
+	0x74, 0x42, 0x08, 0xfa, 0x42, 0x05, 0x8a, 0x01, 0x02, 0x10, 0x01, 0x52, 0x13, 0x72, 0x65, 0x6d,
+	0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c,
+	0x22, 0x71, 0x0a, 0x1e, 0x50, 0x75, 0x74, 0x52, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x12, 0x4f, 0x0a, 0x14, 0x72, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x5f, 0x70, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x1c, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x61, 0x69, 0x2e, 0x52, 0x65, 0x6d, 0x65, 0x64,
+	0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x52, 0x13,
+	0x72, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f,
+	0x73, 0x61, 0x6c, 0x22, 0xb0, 0x01, 0x0a, 0x1e, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x6d, 0x65,
+	0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x26, 0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63,
+	0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x2a,
+	0x02, 0x20, 0x00, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x49, 0x64, 0x12, 0x26,
+	0x0a, 0x0a, 0x66, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x04, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x32, 0x02, 0x20, 0x00, 0x52, 0x09, 0x66, 0x69, 0x6e,
+	0x64, 0x69, 0x6e, 0x67, 0x49, 0x64, 0x12, 0x3e, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73,
+	0x18, 0x03, 0x20, 0x03, 0x28, 0x09, 0x42, 0x26, 0xfa, 0x42, 0x23, 0x92, 0x01, 0x20, 0x22, 0x1e,
+	0x72, 0x1c, 0x52, 0x07, 0x70, 0x65, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x73, 0x75, 0x63,
+	0x63, 0x65, 0x65, 0x64, 0x65, 0x64, 0x52, 0x06, 0x66, 0x61, 0x69, 0x6c, 0x65, 0x64, 0x52, 0x06,
+	0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x72, 0x0a, 0x1f, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65,
+	0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61,
+	0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x4f, 0x0a, 0x14, 0x72, 0x65, 0x6d,
+	0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x70, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61,
+	0x6c, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x61,
+	0x69, 0x2e, 0x52, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f,
+	0x70, 0x6f, 0x73, 0x61, 0x6c, 0x52, 0x13, 0x72, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x32, 0xdd, 0x03, 0x0a, 0x09, 0x41,
+	0x49, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x39, 0x0a, 0x06, 0x43, 0x68, 0x61, 0x74,
+	0x41, 0x49, 0x12, 0x16, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x61, 0x69, 0x2e, 0x43, 0x68, 0x61,
+	0x74, 0x41, 0x49, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x63, 0x6f, 0x72,
+	0x65, 0x2e, 0x61, 0x69, 0x2e, 0x43, 0x68, 0x61, 0x74, 0x41, 0x49, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x12, 0x51, 0x0a, 0x0e, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x52,
+	0x65, 0x70, 0x6f, 0x72, 0x74, 0x12, 0x1e, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x61, 0x69, 0x2e,
+	0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x61, 0x69, 0x2e,
+	0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x69, 0x0a, 0x16, 0x47, 0x65, 0x74, 0x52, 0x65, 0x6d,
+	0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c,
+	0x12, 0x26, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x61, 0x69, 0x2e, 0x47, 0x65, 0x74, 0x52, 0x65,
+	0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61,
+	0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x27, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e,
+	0x61, 0x69, 0x2e, 0x47, 0x65, 0x74, 0x52, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x12, 0x69, 0x0a, 0x16, 0x50, 0x75, 0x74, 0x52, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x12, 0x26, 0x2e, 0x63, 0x6f,
+	0x72, 0x65, 0x2e, 0x61, 0x69, 0x2e, 0x50, 0x75, 0x74, 0x52, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x27, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x61, 0x69, 0x2e, 0x50, 0x75,
+	0x74, 0x52, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70,
+	0x6f, 0x73, 0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x6c, 0x0a, 0x17,
+	0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50,
+	0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x12, 0x27, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x61,
+	0x69, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x28, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x61, 0x69, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x52,
+	0x65, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73,
+	0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x24, 0x5a, 0x22, 0x67, 0x69,
+	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x61, 0x2d, 0x72, 0x69, 0x73, 0x6b,
+	0x65, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x61, 0x69,
+	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -312,25 +697,43 @@ func file_ai_service_proto_rawDescGZIP() []byte {
 	return file_ai_service_proto_rawDescData
 }
 
-var file_ai_service_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_ai_service_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_ai_service_proto_goTypes = []interface{}{
-	(*ChatAIRequest)(nil),          // 0: core.ai.ChatAIRequest
-	(*ChatAIResponse)(nil),         // 1: core.ai.ChatAIResponse
-	(*GenerateReportRequest)(nil),  // 2: core.ai.GenerateReportRequest
-	(*GenerateReportResponse)(nil), // 3: core.ai.GenerateReportResponse
-	(*ChatHistory)(nil),            // 4: core.ai.ChatHistory
+	(*ChatAIRequest)(nil),                   // 0: core.ai.ChatAIRequest
+	(*ChatAIResponse)(nil),                  // 1: core.ai.ChatAIResponse
+	(*GenerateReportRequest)(nil),           // 2: core.ai.GenerateReportRequest
+	(*GenerateReportResponse)(nil),          // 3: core.ai.GenerateReportResponse
+	(*GetRemediationProposalRequest)(nil),   // 4: core.ai.GetRemediationProposalRequest
+	(*GetRemediationProposalResponse)(nil),  // 5: core.ai.GetRemediationProposalResponse
+	(*PutRemediationProposalRequest)(nil),   // 6: core.ai.PutRemediationProposalRequest
+	(*PutRemediationProposalResponse)(nil),  // 7: core.ai.PutRemediationProposalResponse
+	(*ListRemediationProposalRequest)(nil),  // 8: core.ai.ListRemediationProposalRequest
+	(*ListRemediationProposalResponse)(nil), // 9: core.ai.ListRemediationProposalResponse
+	(*ChatHistory)(nil),                     // 10: core.ai.ChatHistory
+	(*RemediationProposal)(nil),             // 11: core.ai.RemediationProposal
+	(*RemediationProposalForUpsert)(nil),    // 12: core.ai.RemediationProposalForUpsert
 }
 var file_ai_service_proto_depIdxs = []int32{
-	4, // 0: core.ai.ChatAIRequest.chat_history:type_name -> core.ai.ChatHistory
-	0, // 1: core.ai.AIService.ChatAI:input_type -> core.ai.ChatAIRequest
-	2, // 2: core.ai.AIService.GenerateReport:input_type -> core.ai.GenerateReportRequest
-	1, // 3: core.ai.AIService.ChatAI:output_type -> core.ai.ChatAIResponse
-	3, // 4: core.ai.AIService.GenerateReport:output_type -> core.ai.GenerateReportResponse
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	10, // 0: core.ai.ChatAIRequest.chat_history:type_name -> core.ai.ChatHistory
+	11, // 1: core.ai.GetRemediationProposalResponse.remediation_proposal:type_name -> core.ai.RemediationProposal
+	12, // 2: core.ai.PutRemediationProposalRequest.remediation_proposal:type_name -> core.ai.RemediationProposalForUpsert
+	11, // 3: core.ai.PutRemediationProposalResponse.remediation_proposal:type_name -> core.ai.RemediationProposal
+	11, // 4: core.ai.ListRemediationProposalResponse.remediation_proposal:type_name -> core.ai.RemediationProposal
+	0,  // 5: core.ai.AIService.ChatAI:input_type -> core.ai.ChatAIRequest
+	2,  // 6: core.ai.AIService.GenerateReport:input_type -> core.ai.GenerateReportRequest
+	4,  // 7: core.ai.AIService.GetRemediationProposal:input_type -> core.ai.GetRemediationProposalRequest
+	6,  // 8: core.ai.AIService.PutRemediationProposal:input_type -> core.ai.PutRemediationProposalRequest
+	8,  // 9: core.ai.AIService.ListRemediationProposal:input_type -> core.ai.ListRemediationProposalRequest
+	1,  // 10: core.ai.AIService.ChatAI:output_type -> core.ai.ChatAIResponse
+	3,  // 11: core.ai.AIService.GenerateReport:output_type -> core.ai.GenerateReportResponse
+	5,  // 12: core.ai.AIService.GetRemediationProposal:output_type -> core.ai.GetRemediationProposalResponse
+	7,  // 13: core.ai.AIService.PutRemediationProposal:output_type -> core.ai.PutRemediationProposalResponse
+	9,  // 14: core.ai.AIService.ListRemediationProposal:output_type -> core.ai.ListRemediationProposalResponse
+	10, // [10:15] is the sub-list for method output_type
+	5,  // [5:10] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_ai_service_proto_init() }
@@ -388,6 +791,78 @@ func file_ai_service_proto_init() {
 				return nil
 			}
 		}
+		file_ai_service_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetRemediationProposalRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_ai_service_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetRemediationProposalResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_ai_service_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PutRemediationProposalRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_ai_service_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PutRemediationProposalResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_ai_service_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListRemediationProposalRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_ai_service_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListRemediationProposalResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -395,7 +870,7 @@ func file_ai_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_ai_service_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -423,6 +898,9 @@ const _ = grpc.SupportPackageIsVersion6
 type AIServiceClient interface {
 	ChatAI(ctx context.Context, in *ChatAIRequest, opts ...grpc.CallOption) (*ChatAIResponse, error)
 	GenerateReport(ctx context.Context, in *GenerateReportRequest, opts ...grpc.CallOption) (*GenerateReportResponse, error)
+	GetRemediationProposal(ctx context.Context, in *GetRemediationProposalRequest, opts ...grpc.CallOption) (*GetRemediationProposalResponse, error)
+	PutRemediationProposal(ctx context.Context, in *PutRemediationProposalRequest, opts ...grpc.CallOption) (*PutRemediationProposalResponse, error)
+	ListRemediationProposal(ctx context.Context, in *ListRemediationProposalRequest, opts ...grpc.CallOption) (*ListRemediationProposalResponse, error)
 }
 
 type aIServiceClient struct {
@@ -451,10 +929,40 @@ func (c *aIServiceClient) GenerateReport(ctx context.Context, in *GenerateReport
 	return out, nil
 }
 
+func (c *aIServiceClient) GetRemediationProposal(ctx context.Context, in *GetRemediationProposalRequest, opts ...grpc.CallOption) (*GetRemediationProposalResponse, error) {
+	out := new(GetRemediationProposalResponse)
+	err := c.cc.Invoke(ctx, "/core.ai.AIService/GetRemediationProposal", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *aIServiceClient) PutRemediationProposal(ctx context.Context, in *PutRemediationProposalRequest, opts ...grpc.CallOption) (*PutRemediationProposalResponse, error) {
+	out := new(PutRemediationProposalResponse)
+	err := c.cc.Invoke(ctx, "/core.ai.AIService/PutRemediationProposal", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *aIServiceClient) ListRemediationProposal(ctx context.Context, in *ListRemediationProposalRequest, opts ...grpc.CallOption) (*ListRemediationProposalResponse, error) {
+	out := new(ListRemediationProposalResponse)
+	err := c.cc.Invoke(ctx, "/core.ai.AIService/ListRemediationProposal", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AIServiceServer is the server API for AIService service.
 type AIServiceServer interface {
 	ChatAI(context.Context, *ChatAIRequest) (*ChatAIResponse, error)
 	GenerateReport(context.Context, *GenerateReportRequest) (*GenerateReportResponse, error)
+	GetRemediationProposal(context.Context, *GetRemediationProposalRequest) (*GetRemediationProposalResponse, error)
+	PutRemediationProposal(context.Context, *PutRemediationProposalRequest) (*PutRemediationProposalResponse, error)
+	ListRemediationProposal(context.Context, *ListRemediationProposalRequest) (*ListRemediationProposalResponse, error)
 }
 
 // UnimplementedAIServiceServer can be embedded to have forward compatible implementations.
@@ -466,6 +974,15 @@ func (*UnimplementedAIServiceServer) ChatAI(context.Context, *ChatAIRequest) (*C
 }
 func (*UnimplementedAIServiceServer) GenerateReport(context.Context, *GenerateReportRequest) (*GenerateReportResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateReport not implemented")
+}
+func (*UnimplementedAIServiceServer) GetRemediationProposal(context.Context, *GetRemediationProposalRequest) (*GetRemediationProposalResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRemediationProposal not implemented")
+}
+func (*UnimplementedAIServiceServer) PutRemediationProposal(context.Context, *PutRemediationProposalRequest) (*PutRemediationProposalResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PutRemediationProposal not implemented")
+}
+func (*UnimplementedAIServiceServer) ListRemediationProposal(context.Context, *ListRemediationProposalRequest) (*ListRemediationProposalResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRemediationProposal not implemented")
 }
 
 func RegisterAIServiceServer(s *grpc.Server, srv AIServiceServer) {
@@ -508,6 +1025,60 @@ func _AIService_GenerateReport_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AIService_GetRemediationProposal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRemediationProposalRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AIServiceServer).GetRemediationProposal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.ai.AIService/GetRemediationProposal",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AIServiceServer).GetRemediationProposal(ctx, req.(*GetRemediationProposalRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AIService_PutRemediationProposal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutRemediationProposalRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AIServiceServer).PutRemediationProposal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.ai.AIService/PutRemediationProposal",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AIServiceServer).PutRemediationProposal(ctx, req.(*PutRemediationProposalRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AIService_ListRemediationProposal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRemediationProposalRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AIServiceServer).ListRemediationProposal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/core.ai.AIService/ListRemediationProposal",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AIServiceServer).ListRemediationProposal(ctx, req.(*ListRemediationProposalRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _AIService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "core.ai.AIService",
 	HandlerType: (*AIServiceServer)(nil),
@@ -519,6 +1090,18 @@ var _AIService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GenerateReport",
 			Handler:    _AIService_GenerateReport_Handler,
+		},
+		{
+			MethodName: "GetRemediationProposal",
+			Handler:    _AIService_GetRemediationProposal_Handler,
+		},
+		{
+			MethodName: "PutRemediationProposal",
+			Handler:    _AIService_PutRemediationProposal_Handler,
+		},
+		{
+			MethodName: "ListRemediationProposal",
+			Handler:    _AIService_ListRemediationProposal_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

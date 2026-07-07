@@ -75,6 +75,96 @@ func (_m *AIServiceServer) GenerateReport(_a0 context.Context, _a1 *ai.GenerateR
 	return r0, r1
 }
 
+// GetRemediationProposal provides a mock function with given fields: _a0, _a1
+func (_m *AIServiceServer) GetRemediationProposal(_a0 context.Context, _a1 *ai.GetRemediationProposalRequest) (*ai.GetRemediationProposalResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRemediationProposal")
+	}
+
+	var r0 *ai.GetRemediationProposalResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.GetRemediationProposalRequest) (*ai.GetRemediationProposalResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.GetRemediationProposalRequest) *ai.GetRemediationProposalResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ai.GetRemediationProposalResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *ai.GetRemediationProposalRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListRemediationProposal provides a mock function with given fields: _a0, _a1
+func (_m *AIServiceServer) ListRemediationProposal(_a0 context.Context, _a1 *ai.ListRemediationProposalRequest) (*ai.ListRemediationProposalResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListRemediationProposal")
+	}
+
+	var r0 *ai.ListRemediationProposalResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.ListRemediationProposalRequest) (*ai.ListRemediationProposalResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.ListRemediationProposalRequest) *ai.ListRemediationProposalResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ai.ListRemediationProposalResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *ai.ListRemediationProposalRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PutRemediationProposal provides a mock function with given fields: _a0, _a1
+func (_m *AIServiceServer) PutRemediationProposal(_a0 context.Context, _a1 *ai.PutRemediationProposalRequest) (*ai.PutRemediationProposalResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PutRemediationProposal")
+	}
+
+	var r0 *ai.PutRemediationProposalResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.PutRemediationProposalRequest) (*ai.PutRemediationProposalResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.PutRemediationProposalRequest) *ai.PutRemediationProposalResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ai.PutRemediationProposalResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *ai.PutRemediationProposalRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewAIServiceServer creates a new instance of AIServiceServer. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewAIServiceServer(t interface {

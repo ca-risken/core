@@ -137,3 +137,240 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ChatHistoryValidationError{}
+
+// Validate checks the field values on RemediationProposal with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *RemediationProposal) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on RemediationProposal with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// RemediationProposalMultiError, or nil if none found.
+func (m *RemediationProposal) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *RemediationProposal) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for RequestId
+
+	// no validation rules for FindingId
+
+	// no validation rules for ProjectId
+
+	// no validation rules for Status
+
+	// no validation rules for ErrorMessage
+
+	// no validation rules for RemediationPlan
+
+	// no validation rules for GeneratedAt
+
+	// no validation rules for CreatedAt
+
+	// no validation rules for UpdatedAt
+
+	if len(errors) > 0 {
+		return RemediationProposalMultiError(errors)
+	}
+
+	return nil
+}
+
+// RemediationProposalMultiError is an error wrapping multiple validation
+// errors returned by RemediationProposal.ValidateAll() if the designated
+// constraints aren't met.
+type RemediationProposalMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m RemediationProposalMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m RemediationProposalMultiError) AllErrors() []error { return m }
+
+// RemediationProposalValidationError is the validation error returned by
+// RemediationProposal.Validate if the designated constraints aren't met.
+type RemediationProposalValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RemediationProposalValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RemediationProposalValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RemediationProposalValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RemediationProposalValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RemediationProposalValidationError) ErrorName() string {
+	return "RemediationProposalValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e RemediationProposalValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRemediationProposal.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RemediationProposalValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RemediationProposalValidationError{}
+
+// Validate checks the field values on RemediationProposalForUpsert with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *RemediationProposalForUpsert) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on RemediationProposalForUpsert with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// RemediationProposalForUpsertMultiError, or nil if none found.
+func (m *RemediationProposalForUpsert) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *RemediationProposalForUpsert) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for RequestId
+
+	// no validation rules for FindingId
+
+	// no validation rules for ProjectId
+
+	// no validation rules for Status
+
+	// no validation rules for ErrorMessage
+
+	// no validation rules for RemediationPlan
+
+	// no validation rules for GeneratedAt
+
+	if len(errors) > 0 {
+		return RemediationProposalForUpsertMultiError(errors)
+	}
+
+	return nil
+}
+
+// RemediationProposalForUpsertMultiError is an error wrapping multiple
+// validation errors returned by RemediationProposalForUpsert.ValidateAll() if
+// the designated constraints aren't met.
+type RemediationProposalForUpsertMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m RemediationProposalForUpsertMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m RemediationProposalForUpsertMultiError) AllErrors() []error { return m }
+
+// RemediationProposalForUpsertValidationError is the validation error returned
+// by RemediationProposalForUpsert.Validate if the designated constraints
+// aren't met.
+type RemediationProposalForUpsertValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RemediationProposalForUpsertValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RemediationProposalForUpsertValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RemediationProposalForUpsertValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RemediationProposalForUpsertValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RemediationProposalForUpsertValidationError) ErrorName() string {
+	return "RemediationProposalForUpsertValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e RemediationProposalForUpsertValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRemediationProposalForUpsert.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RemediationProposalForUpsertValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RemediationProposalForUpsertValidationError{}
