@@ -11,7 +11,7 @@ type AIRepository interface {
 	// RemediationProposal
 	CreateRemediationProposal(ctx context.Context, data *model.RemediationProposal) (*model.RemediationProposal, error)
 	GetRemediationProposal(ctx context.Context, projectID uint32, requestID string) (*model.RemediationProposal, error)
-	ListRemediationProposal(ctx context.Context, projectID uint32, findingID uint64) ([]*model.RemediationProposal, error)
+	ListRemediationProposal(ctx context.Context, projectID uint32, findingID uint64, status []string) ([]*model.RemediationProposal, error)
 	GetLatestRemediationProposal(ctx context.Context, projectID uint32, findingID uint64) (*model.RemediationProposal, error)
 	UpdateRemediationProposalStatus(ctx context.Context, projectID uint32, requestID, status string, errorMessage, remediationPlan *string, generatedAt *time.Time) (*model.RemediationProposal, error)
 	GetActiveRemediationProposal(ctx context.Context, projectID uint32, findingID uint64, createdSince time.Time) (*model.RemediationProposal, error)
@@ -58,17 +58,16 @@ func (c *Client) getRemediationProposalMaster(ctx context.Context, projectID uin
 	return &data, nil
 }
 
-const selectListRemediationProposal = `
-	select *
-	from remediation_proposal
-	where project_id = ?
-	  and finding_id = ?
-	order by created_at desc
-`
-
-func (c *Client) ListRemediationProposal(ctx context.Context, projectID uint32, findingID uint64) ([]*model.RemediationProposal, error) {
+func (c *Client) ListRemediationProposal(ctx context.Context, projectID uint32, findingID uint64, status []string) ([]*model.RemediationProposal, error) {
+	query := `select * from remediation_proposal where project_id = ? and finding_id = ?`
+	params := []interface{}{projectID, findingID}
+	if len(status) > 0 {
+		query += " and status in (?)"
+		params = append(params, status)
+	}
+	query += " order by created_at desc"
 	var data []*model.RemediationProposal
-	if err := c.Slave.WithContext(ctx).Raw(selectListRemediationProposal, projectID, findingID).Scan(&data).Error; err != nil {
+	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return data, nil
