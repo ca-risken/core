@@ -4,9 +4,9 @@ import "time"
 
 // RemediationProposal status
 const (
-	RemediationProposalStatusPending   = "pending"
-	RemediationProposalStatusSucceeded = "succeeded"
-	RemediationProposalStatusFailed    = "failed"
+	RemediationProposalStatusPending   = "PENDING"
+	RemediationProposalStatusSucceeded = "SUCCEEDED"
+	RemediationProposalStatusFailed    = "FAILED"
 )
 
 // RemediationProposal entity model

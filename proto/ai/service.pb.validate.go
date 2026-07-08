@@ -1118,7 +1118,7 @@ func (m *ListRemediationProposalRequest) validate(all bool) error {
 		if _, ok := _ListRemediationProposalRequest_Status_InLookup[item]; !ok {
 			err := ListRemediationProposalRequestValidationError{
 				field:  fmt.Sprintf("Status[%v]", idx),
-				reason: "value must be in list [pending succeeded failed]",
+					reason: "value must be in list [PENDING SUCCEEDED FAILED]",
 			}
 			if !all {
 				return err
@@ -1210,9 +1210,9 @@ var _ interface {
 } = ListRemediationProposalRequestValidationError{}
 
 var _ListRemediationProposalRequest_Status_InLookup = map[string]struct{}{
-	"pending":   {},
-	"succeeded": {},
-	"failed":    {},
+	"PENDING":   {},
+	"SUCCEEDED": {},
+	"FAILED":    {},
 }
 
 // Validate checks the field values on ListRemediationProposalResponse with the

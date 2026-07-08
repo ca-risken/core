@@ -138,7 +138,7 @@ type RemediationProposal struct {
 	RequestId       string `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	FindingId       uint64 `protobuf:"varint,2,opt,name=finding_id,json=findingId,proto3" json:"finding_id,omitempty"`
 	ProjectId       uint32 `protobuf:"varint,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Status          string `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"` // pending / succeeded / failed
+	Status          string `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"` // PENDING / SUCCEEDED / FAILED
 	ErrorMessage    string `protobuf:"bytes,5,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	RemediationPlan string `protobuf:"bytes,6,opt,name=remediation_plan,json=remediationPlan,proto3" json:"remediation_plan,omitempty"` // JSON
 	GeneratedAt     int64  `protobuf:"varint,7,opt,name=generated_at,json=generatedAt,proto3" json:"generated_at,omitempty"`
@@ -250,7 +250,7 @@ type RemediationProposalForUpsert struct {
 	RequestId       string `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	FindingId       uint64 `protobuf:"varint,2,opt,name=finding_id,json=findingId,proto3" json:"finding_id,omitempty"`
 	ProjectId       uint32 `protobuf:"varint,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Status          string `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"` // pending / succeeded / failed
+	Status          string `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"` // PENDING / SUCCEEDED / FAILED
 	ErrorMessage    string `protobuf:"bytes,5,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	RemediationPlan string `protobuf:"bytes,6,opt,name=remediation_plan,json=remediationPlan,proto3" json:"remediation_plan,omitempty"` // JSON
 	GeneratedAt     int64  `protobuf:"varint,7,opt,name=generated_at,json=generatedAt,proto3" json:"generated_at,omitempty"`
