@@ -13,7 +13,7 @@ type AIRepository interface {
 	GetRemediationProposal(ctx context.Context, projectID uint32, requestID string) (*model.RemediationProposal, error)
 	ListRemediationProposal(ctx context.Context, projectID uint32, findingID uint64, status []string) ([]*model.RemediationProposal, error)
 	GetLatestRemediationProposal(ctx context.Context, projectID uint32, findingID uint64) (*model.RemediationProposal, error)
-	UpdateRemediationProposalStatus(ctx context.Context, projectID uint32, requestID, status string, errorMessage, remediationPlan *string, generatedAt *time.Time) (*model.RemediationProposal, error)
+	UpdateRemediationProposalStatus(ctx context.Context, projectID uint32, requestID, status string, statusDetail, remediationPlan *string, generatedAt *time.Time) (*model.RemediationProposal, error)
 	GetActiveRemediationProposal(ctx context.Context, projectID uint32, findingID uint64, createdSince time.Time) (*model.RemediationProposal, error)
 }
 
@@ -25,7 +25,7 @@ const insertCreateRemediationProposal = `
 		finding_id,
 		project_id,
 		status,
-		error_message,
+		status_detail,
 		remediation_plan,
 		generated_at
 	) values (?, ?, ?, ?, ?, ?, ?)
@@ -34,7 +34,7 @@ const insertCreateRemediationProposal = `
 func (c *Client) CreateRemediationProposal(ctx context.Context, data *model.RemediationProposal) (*model.RemediationProposal, error) {
 	if err := c.Master.WithContext(ctx).Exec(insertCreateRemediationProposal,
 		data.RequestID, data.FindingID, data.ProjectID, data.Status,
-		data.ErrorMessage, data.RemediationPlan, data.GeneratedAt).Error; err != nil {
+		data.StatusDetail, data.RemediationPlan, data.GeneratedAt).Error; err != nil {
 		return nil, err
 	}
 	return c.getRemediationProposalMaster(ctx, data.ProjectID, data.RequestID)
@@ -93,16 +93,16 @@ func (c *Client) GetLatestRemediationProposal(ctx context.Context, projectID uin
 const updateUpdateRemediationProposalStatus = `
 	update remediation_proposal
 	set status = ?,
-	    error_message = ?,
+	    status_detail = ?,
 	    remediation_plan = ?,
 	    generated_at = ?
 	where project_id = ?
 	  and request_id = ?
 `
 
-func (c *Client) UpdateRemediationProposalStatus(ctx context.Context, projectID uint32, requestID, status string, errorMessage, remediationPlan *string, generatedAt *time.Time) (*model.RemediationProposal, error) {
+func (c *Client) UpdateRemediationProposalStatus(ctx context.Context, projectID uint32, requestID, status string, statusDetail, remediationPlan *string, generatedAt *time.Time) (*model.RemediationProposal, error) {
 	if err := c.Master.WithContext(ctx).Exec(updateUpdateRemediationProposalStatus,
-		status, errorMessage, remediationPlan, generatedAt, projectID, requestID).Error; err != nil {
+		status, statusDetail, remediationPlan, generatedAt, projectID, requestID).Error; err != nil {
 		return nil, err
 	}
 	return c.getRemediationProposalMaster(ctx, projectID, requestID)

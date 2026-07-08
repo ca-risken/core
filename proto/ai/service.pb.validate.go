@@ -1118,7 +1118,7 @@ func (m *ListRemediationProposalRequest) validate(all bool) error {
 		if _, ok := _ListRemediationProposalRequest_Status_InLookup[item]; !ok {
 			err := ListRemediationProposalRequestValidationError{
 				field:  fmt.Sprintf("Status[%v]", idx),
-					reason: "value must be in list [PENDING SUCCEEDED FAILED]",
+				reason: "value must be in list [PENDING SUCCEEDED FAILED]",
 			}
 			if !all {
 				return err

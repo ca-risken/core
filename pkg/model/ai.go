@@ -15,7 +15,7 @@ type RemediationProposal struct {
 	FindingID       uint64
 	ProjectID       uint32
 	Status          string
-	ErrorMessage    *string
+	StatusDetail    *string
 	RemediationPlan *string
 	GeneratedAt     *time.Time
 	CreatedAt       time.Time

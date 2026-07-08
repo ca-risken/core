@@ -167,9 +167,9 @@ func (_m *AIRepository) ListRemediationProposal(ctx context.Context, projectID u
 	return r0, r1
 }
 
-// UpdateRemediationProposalStatus provides a mock function with given fields: ctx, projectID, requestID, status, errorMessage, remediationPlan, generatedAt
-func (_m *AIRepository) UpdateRemediationProposalStatus(ctx context.Context, projectID uint32, requestID string, status string, errorMessage *string, remediationPlan *string, generatedAt *time.Time) (*model.RemediationProposal, error) {
-	ret := _m.Called(ctx, projectID, requestID, status, errorMessage, remediationPlan, generatedAt)
+// UpdateRemediationProposalStatus provides a mock function with given fields: ctx, projectID, requestID, status, statusDetail, remediationPlan, generatedAt
+func (_m *AIRepository) UpdateRemediationProposalStatus(ctx context.Context, projectID uint32, requestID string, status string, statusDetail *string, remediationPlan *string, generatedAt *time.Time) (*model.RemediationProposal, error) {
+	ret := _m.Called(ctx, projectID, requestID, status, statusDetail, remediationPlan, generatedAt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateRemediationProposalStatus")
@@ -178,10 +178,10 @@ func (_m *AIRepository) UpdateRemediationProposalStatus(ctx context.Context, pro
 	var r0 *model.RemediationProposal
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, uint32, string, string, *string, *string, *time.Time) (*model.RemediationProposal, error)); ok {
-		return rf(ctx, projectID, requestID, status, errorMessage, remediationPlan, generatedAt)
+		return rf(ctx, projectID, requestID, status, statusDetail, remediationPlan, generatedAt)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, uint32, string, string, *string, *string, *time.Time) *model.RemediationProposal); ok {
-		r0 = rf(ctx, projectID, requestID, status, errorMessage, remediationPlan, generatedAt)
+		r0 = rf(ctx, projectID, requestID, status, statusDetail, remediationPlan, generatedAt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.RemediationProposal)
@@ -189,7 +189,7 @@ func (_m *AIRepository) UpdateRemediationProposalStatus(ctx context.Context, pro
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, uint32, string, string, *string, *string, *time.Time) error); ok {
-		r1 = rf(ctx, projectID, requestID, status, errorMessage, remediationPlan, generatedAt)
+		r1 = rf(ctx, projectID, requestID, status, statusDetail, remediationPlan, generatedAt)
 	} else {
 		r1 = ret.Error(1)
 	}

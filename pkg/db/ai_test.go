@@ -15,10 +15,10 @@ import (
 
 func newRemediationProposalRows(data ...*model.RemediationProposal) *sqlmock.Rows {
 	rows := sqlmock.NewRows([]string{
-		"request_id", "finding_id", "project_id", "status", "error_message", "remediation_plan", "generated_at", "created_at", "updated_at",
+		"request_id", "finding_id", "project_id", "status", "status_detail", "remediation_plan", "generated_at", "created_at", "updated_at",
 	})
 	for _, d := range data {
-		rows.AddRow(d.RequestID, d.FindingID, d.ProjectID, d.Status, d.ErrorMessage, d.RemediationPlan, d.GeneratedAt, d.CreatedAt, d.UpdatedAt)
+		rows.AddRow(d.RequestID, d.FindingID, d.ProjectID, d.Status, d.StatusDetail, d.RemediationPlan, d.GeneratedAt, d.CreatedAt, d.UpdatedAt)
 	}
 	return rows
 }
@@ -334,7 +334,7 @@ func TestUpdateRemediationProposalStatus(t *testing.T) {
 		FindingID:    1001,
 		ProjectID:    1,
 		Status:       model.RemediationProposalStatusFailed,
-		ErrorMessage: &errMsg,
+		StatusDetail: &errMsg,
 		CreatedAt:    now,
 		UpdatedAt:    now,
 	}
@@ -372,14 +372,14 @@ func TestUpdateRemediationProposalStatus(t *testing.T) {
 				mock.ExpectExec(regexp.QuoteMeta(updateUpdateRemediationProposalStatus)).WillReturnError(c.mockErr)
 			} else {
 				mock.ExpectExec(regexp.QuoteMeta(updateUpdateRemediationProposalStatus)).
-					WithArgs(c.want.Status, c.want.ErrorMessage, c.want.RemediationPlan, c.want.GeneratedAt, c.want.ProjectID, c.want.RequestID).
+					WithArgs(c.want.Status, c.want.StatusDetail, c.want.RemediationPlan, c.want.GeneratedAt, c.want.ProjectID, c.want.RequestID).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectQuery(regexp.QuoteMeta(selectGetRemediationProposal)).
 					WithArgs(c.want.ProjectID, c.want.RequestID).
 					WillReturnRows(newRemediationProposalRows(c.want))
 			}
 
-			got, err := client.UpdateRemediationProposalStatus(ctx, c.want.ProjectID, c.want.RequestID, c.want.Status, c.want.ErrorMessage, c.want.RemediationPlan, c.want.GeneratedAt)
+			got, err := client.UpdateRemediationProposalStatus(ctx, c.want.ProjectID, c.want.RequestID, c.want.Status, c.want.StatusDetail, c.want.RemediationPlan, c.want.GeneratedAt)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}

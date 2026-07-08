@@ -27,7 +27,7 @@ message RemediationProposal {
   uint64 finding_id = 2;
   uint32 project_id = 3;
   string status = 4; // PENDING / SUCCEEDED / FAILED
-  string error_message = 5;
+  string status_detail = 5;
   string remediation_plan = 6; // JSON
   int64 generated_at = 7;
   int64 created_at = 8;
@@ -40,7 +40,7 @@ message RemediationProposalForUpsert {
   uint64 finding_id = 2;
   uint32 project_id = 3;
   string status = 4; // PENDING / SUCCEEDED / FAILED
-  string error_message = 5;
+  string status_detail = 5;
   string remediation_plan = 6; // JSON
   int64 generated_at = 7;
 }

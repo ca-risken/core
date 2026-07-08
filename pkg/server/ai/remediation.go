@@ -20,8 +20,8 @@ func convertRemediationProposal(r *model.RemediationProposal) *ai.RemediationPro
 		CreatedAt: r.CreatedAt.Unix(),
 		UpdatedAt: r.UpdatedAt.Unix(),
 	}
-	if r.ErrorMessage != nil {
-		data.ErrorMessage = *r.ErrorMessage
+	if r.StatusDetail != nil {
+		data.StatusDetail = *r.StatusDetail
 	}
 	if r.RemediationPlan != nil {
 		data.RemediationPlan = *r.RemediationPlan
@@ -77,9 +77,9 @@ func (a *AIService) PutRemediationProposal(ctx context.Context, req *ai.PutRemed
 		exists = false
 	}
 
-	var errorMessage, remediationPlan *string
-	if req.RemediationProposal.ErrorMessage != "" {
-		errorMessage = &req.RemediationProposal.ErrorMessage
+	var statusDetail, remediationPlan *string
+	if req.RemediationProposal.StatusDetail != "" {
+		statusDetail = &req.RemediationProposal.StatusDetail
 	}
 	if req.RemediationProposal.RemediationPlan != "" {
 		remediationPlan = &req.RemediationProposal.RemediationPlan
@@ -94,14 +94,14 @@ func (a *AIService) PutRemediationProposal(ctx context.Context, req *ai.PutRemed
 	var err error
 	if exists {
 		result, err = a.repository.UpdateRemediationProposalStatus(ctx, req.ProjectId,
-			req.RemediationProposal.RequestId, req.RemediationProposal.Status, errorMessage, remediationPlan, generatedAt)
+			req.RemediationProposal.RequestId, req.RemediationProposal.Status, statusDetail, remediationPlan, generatedAt)
 	} else {
 		result, err = a.repository.CreateRemediationProposal(ctx, &model.RemediationProposal{
 			RequestID:       req.RemediationProposal.RequestId,
 			FindingID:       req.RemediationProposal.FindingId,
 			ProjectID:       req.RemediationProposal.ProjectId,
 			Status:          req.RemediationProposal.Status,
-			ErrorMessage:    errorMessage,
+			StatusDetail:    statusDetail,
 			RemediationPlan: remediationPlan,
 			GeneratedAt:     generatedAt,
 		})

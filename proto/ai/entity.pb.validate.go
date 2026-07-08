@@ -168,7 +168,7 @@ func (m *RemediationProposal) validate(all bool) error {
 
 	// no validation rules for Status
 
-	// no validation rules for ErrorMessage
+	// no validation rules for StatusDetail
 
 	// no validation rules for RemediationPlan
 
@@ -288,7 +288,7 @@ func (m *RemediationProposalForUpsert) validate(all bool) error {
 
 	// no validation rules for Status
 
-	// no validation rules for ErrorMessage
+	// no validation rules for StatusDetail
 
 	// no validation rules for RemediationPlan
 
