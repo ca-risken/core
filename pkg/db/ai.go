@@ -18,7 +18,6 @@ type AIRepository interface {
 var _ AIRepository = (*Client)(nil)
 
 func (c *Client) CreateRemediationProposal(ctx context.Context, data *model.RemediationProposal) (*model.RemediationProposal, error) {
-	data.RemediationProposalID = 0
 	if err := c.Master.WithContext(ctx).Create(data).Error; err != nil {
 		return nil, err
 	}

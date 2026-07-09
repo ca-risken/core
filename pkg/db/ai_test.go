@@ -25,11 +25,6 @@ func newRemediationProposalRows(data ...*model.RemediationProposal) *sqlmock.Row
 
 func TestCreateRemediationProposal(t *testing.T) {
 	now := time.Now()
-	input := &model.RemediationProposal{
-		FindingID: 1001,
-		ProjectID: 1,
-		Status:    model.RemediationProposalStatusPending,
-	}
 	proposal := &model.RemediationProposal{
 		RemediationProposalID: 1001,
 		FindingID:             1001,
@@ -40,7 +35,6 @@ func TestCreateRemediationProposal(t *testing.T) {
 	}
 	cases := []struct {
 		name       string
-		input      *model.RemediationProposal
 		want       *model.RemediationProposal
 		wantErr    bool
 		mockErr    error
@@ -48,19 +42,16 @@ func TestCreateRemediationProposal(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   input,
 			want:    proposal,
 			wantErr: false,
 		},
 		{
 			name:    "NG DB error(insert)",
-			input:   input,
 			wantErr: true,
 			mockErr: errors.New("DB error"),
 		},
 		{
 			name:       "NG DB error(select)",
-			input:      input,
 			wantErr:    true,
 			mockGetErr: errors.New("DB error"),
 		},
@@ -72,6 +63,11 @@ func TestCreateRemediationProposal(t *testing.T) {
 				t.Fatalf("Failed to open mock sql db, error: %+v", err)
 			}
 			ctx := context.Background()
+			input := &model.RemediationProposal{
+				FindingID: 1001,
+				ProjectID: 1,
+				Status:    model.RemediationProposalStatusPending,
+			}
 			insertQuery := "INSERT INTO `remediation_proposal`"
 			if c.mockErr != nil {
 				mock.ExpectBegin()
@@ -80,19 +76,19 @@ func TestCreateRemediationProposal(t *testing.T) {
 			} else {
 				mock.ExpectBegin()
 				mock.ExpectExec(insertQuery).
-					WithArgs(c.input.FindingID, c.input.ProjectID, c.input.Status, nil, nil, nil, sqlmock.AnyArg(), sqlmock.AnyArg()).
+					WithArgs(input.FindingID, input.ProjectID, input.Status, nil, nil, nil, sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnResult(sqlmock.NewResult(1001, 1))
 				mock.ExpectCommit()
 				if c.mockGetErr != nil {
 					mock.ExpectQuery(regexp.QuoteMeta(selectGetRemediationProposal)).WillReturnError(c.mockGetErr)
 				} else {
 					mock.ExpectQuery(regexp.QuoteMeta(selectGetRemediationProposal)).
-						WithArgs(c.input.ProjectID, c.want.RemediationProposalID).
+						WithArgs(input.ProjectID, c.want.RemediationProposalID).
 						WillReturnRows(newRemediationProposalRows(c.want))
 				}
 			}
 
-			got, err := client.CreateRemediationProposal(ctx, c.input)
+			got, err := client.CreateRemediationProposal(ctx, input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
