@@ -12,9 +12,7 @@ type AIRepository interface {
 	CreateRemediationProposal(ctx context.Context, data *model.RemediationProposal) (*model.RemediationProposal, error)
 	GetRemediationProposal(ctx context.Context, projectID uint32, remediationProposalID uint32) (*model.RemediationProposal, error)
 	ListRemediationProposal(ctx context.Context, projectID uint32, findingID uint64, status []string) ([]*model.RemediationProposal, error)
-	GetLatestRemediationProposal(ctx context.Context, projectID uint32, findingID uint64) (*model.RemediationProposal, error)
 	UpdateRemediationProposalStatus(ctx context.Context, projectID uint32, remediationProposalID uint32, status string, statusDetail, remediationPlan *string, generatedAt *time.Time) (*model.RemediationProposal, error)
-	GetActiveRemediationProposal(ctx context.Context, projectID uint32, findingID uint64, createdSince time.Time) (*model.RemediationProposal, error)
 }
 
 var _ AIRepository = (*Client)(nil)
@@ -60,23 +58,6 @@ func (c *Client) ListRemediationProposal(ctx context.Context, projectID uint32, 
 	return data, nil
 }
 
-const selectGetLatestRemediationProposal = `
-	select *
-	from remediation_proposal
-	where project_id = ?
-	  and finding_id = ?
-	order by created_at desc
-	limit 1
-`
-
-func (c *Client) GetLatestRemediationProposal(ctx context.Context, projectID uint32, findingID uint64) (*model.RemediationProposal, error) {
-	var data model.RemediationProposal
-	if err := c.Slave.WithContext(ctx).Raw(selectGetLatestRemediationProposal, projectID, findingID).First(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
 const updateUpdateRemediationProposalStatus = `
 	update remediation_proposal
 	set status = ?,
@@ -93,26 +74,4 @@ func (c *Client) UpdateRemediationProposalStatus(ctx context.Context, projectID 
 		return nil, err
 	}
 	return c.getRemediationProposalMaster(ctx, projectID, remediationProposalID)
-}
-
-const selectGetActiveRemediationProposal = `
-	select *
-	from remediation_proposal
-	where project_id = ?
-	  and finding_id = ?
-	  and status in (?, ?)
-	  and created_at >= ?
-	order by created_at desc
-	limit 1
-`
-
-// GetActiveRemediationProposal returns the latest pending/succeeded proposal created after createdSince.
-// Reads from master because the result guards the regeneration cooldown right before a new pending row is created.
-func (c *Client) GetActiveRemediationProposal(ctx context.Context, projectID uint32, findingID uint64, createdSince time.Time) (*model.RemediationProposal, error) {
-	var data model.RemediationProposal
-	if err := c.Master.WithContext(ctx).Raw(selectGetActiveRemediationProposal,
-		projectID, findingID, model.RemediationProposalStatusPending, model.RemediationProposalStatusSucceeded, createdSince).First(&data).Error; err != nil {
-		return nil, err
-	}
-	return &data, nil
 }
