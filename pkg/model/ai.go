@@ -4,20 +4,20 @@ import "time"
 
 // RemediationProposal status
 const (
-	RemediationProposalStatusPending   = "pending"
-	RemediationProposalStatusSucceeded = "succeeded"
-	RemediationProposalStatusFailed    = "failed"
+	RemediationProposalStatusPending   = "PENDING"
+	RemediationProposalStatusSucceeded = "SUCCEEDED"
+	RemediationProposalStatusFailed    = "FAILED"
 )
 
 // RemediationProposal entity model
 type RemediationProposal struct {
-	RequestID       string `gorm:"primary_key"`
-	FindingID       uint64
-	ProjectID       uint32
-	Status          string
-	ErrorMessage    *string
-	RemediationPlan *string
-	GeneratedAt     *time.Time
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
+	RemediationProposalID uint32 `gorm:"primary_key"`
+	FindingID             uint64
+	ProjectID             uint32
+	Status                string
+	StatusDetail          *string
+	RemediationPlan       *string
+	GeneratedAt           *time.Time
+	CreatedAt             time.Time
+	UpdatedAt             time.Time
 }
