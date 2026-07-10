@@ -3,6 +3,8 @@ syntax = "proto3";
 package core.ai;
 option go_package = "github.com/ca-risken/core/proto/ai";
 
+import "validate/validate.proto";
+
 /*
  * Entity
  */
@@ -23,11 +25,11 @@ enum ChatRole {
 
 // RemediationProposal
 message RemediationProposal {
-  string request_id = 1;
+  uint32 remediation_proposal_id = 1;
   uint64 finding_id = 2;
   uint32 project_id = 3;
-  string status = 4; // pending / succeeded / failed
-  string error_message = 5;
+  string status = 4; // PENDING / SUCCEEDED / FAILED
+  string status_detail = 5;
   string remediation_plan = 6; // JSON
   int64 generated_at = 7;
   int64 created_at = 8;
@@ -36,11 +38,13 @@ message RemediationProposal {
 
 // RemediationProposalForUpsert
 message RemediationProposalForUpsert {
-  string request_id = 1;
+  uint32 remediation_proposal_id = 1;
   uint64 finding_id = 2;
   uint32 project_id = 3;
-  string status = 4; // pending / succeeded / failed
-  string error_message = 5;
+  string status = 4 [ (validate.rules).string = {
+    in : [ "PENDING", "SUCCEEDED", "FAILED" ]
+  } ]; // PENDING / SUCCEEDED / FAILED
+  string status_detail = 5;
   string remediation_plan = 6; // JSON
   int64 generated_at = 7;
 }

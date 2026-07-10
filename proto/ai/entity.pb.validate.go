@@ -160,7 +160,7 @@ func (m *RemediationProposal) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for RequestId
+	// no validation rules for RemediationProposalId
 
 	// no validation rules for FindingId
 
@@ -168,7 +168,7 @@ func (m *RemediationProposal) validate(all bool) error {
 
 	// no validation rules for Status
 
-	// no validation rules for ErrorMessage
+	// no validation rules for StatusDetail
 
 	// no validation rules for RemediationPlan
 
@@ -280,15 +280,24 @@ func (m *RemediationProposalForUpsert) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for RequestId
+	// no validation rules for RemediationProposalId
 
 	// no validation rules for FindingId
 
 	// no validation rules for ProjectId
 
-	// no validation rules for Status
+	if _, ok := _RemediationProposalForUpsert_Status_InLookup[m.GetStatus()]; !ok {
+		err := RemediationProposalForUpsertValidationError{
+			field:  "Status",
+			reason: "value must be in list [PENDING SUCCEEDED FAILED]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for ErrorMessage
+	// no validation rules for StatusDetail
 
 	// no validation rules for RemediationPlan
 
@@ -374,3 +383,9 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = RemediationProposalForUpsertValidationError{}
+
+var _RemediationProposalForUpsert_Status_InLookup = map[string]struct{}{
+	"PENDING":   {},
+	"SUCCEEDED": {},
+	"FAILED":    {},
+}
