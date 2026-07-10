@@ -284,8 +284,6 @@ func (m *RemediationProposalForUpsert) validate(all bool) error {
 
 	// no validation rules for FindingId
 
-	// no validation rules for ProjectId
-
 	if _, ok := _RemediationProposalForUpsert_Status_InLookup[m.GetStatus()]; !ok {
 		err := RemediationProposalForUpsertValidationError{
 			field:  "Status",
