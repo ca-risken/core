@@ -28,7 +28,7 @@ message RemediationProposal {
   uint32 remediation_proposal_id = 1;
   uint64 finding_id = 2;
   uint32 project_id = 3;
-  string status = 4; // PENDING / SUCCEEDED / FAILED
+  string status = 4;
   string status_detail = 5;
   string remediation_plan = 6; // JSON
   int64 generated_at = 7;
@@ -40,10 +40,10 @@ message RemediationProposal {
 message RemediationProposalForUpsert {
   uint32 remediation_proposal_id = 1;
   uint64 finding_id = 2;
-  string status = 4 [ (validate.rules).string = {
+  string status = 3 [ (validate.rules).string = {
     in : [ "PENDING", "SUCCEEDED", "FAILED" ]
-  } ]; // PENDING / SUCCEEDED / FAILED
-  string status_detail = 5;
-  string remediation_plan = 6; // JSON
-  int64 generated_at = 7;
+  } ];
+  string status_detail = 4;
+  string remediation_plan = 5; // JSON
+  int64 generated_at = 6;
 }
