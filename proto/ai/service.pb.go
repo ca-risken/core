@@ -360,12 +360,12 @@ type PutRemediationProposalRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProjectId             uint32 `protobuf:"varint,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`                                       // Required
-	RemediationProposalId uint32 `protobuf:"varint,2,opt,name=remediation_proposal_id,json=remediationProposalId,proto3" json:"remediation_proposal_id,omitempty"` // Optional
-	FindingId             uint64 `protobuf:"varint,3,opt,name=finding_id,json=findingId,proto3" json:"finding_id,omitempty"`                                       // Required
-	Status                string `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`                                                               // Required
+	ProjectId             uint32 `protobuf:"varint,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"` // Required
+	RemediationProposalId uint32 `protobuf:"varint,2,opt,name=remediation_proposal_id,json=remediationProposalId,proto3" json:"remediation_proposal_id,omitempty"`
+	FindingId             uint64 `protobuf:"varint,3,opt,name=finding_id,json=findingId,proto3" json:"finding_id,omitempty"` // Required
+	Status                string `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`                         // Required
 	StatusDetail          string `protobuf:"bytes,5,opt,name=status_detail,json=statusDetail,proto3" json:"status_detail,omitempty"`
-	RemediationPlan       string `protobuf:"bytes,6,opt,name=remediation_plan,json=remediationPlan,proto3" json:"remediation_plan,omitempty"` // JSON
+	RemediationPlan       string `protobuf:"bytes,6,opt,name=remediation_plan,json=remediationPlan,proto3" json:"remediation_plan,omitempty"`
 	GeneratedAt           int64  `protobuf:"varint,7,opt,name=generated_at,json=generatedAt,proto3" json:"generated_at,omitempty"`
 }
 
@@ -504,7 +504,7 @@ type ListRemediationProposalRequest struct {
 
 	ProjectId uint32   `protobuf:"varint,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"` // Required
 	FindingId uint64   `protobuf:"varint,2,opt,name=finding_id,json=findingId,proto3" json:"finding_id,omitempty"` // Required
-	Status    []string `protobuf:"bytes,3,rep,name=status,proto3" json:"status,omitempty"`                         // Optional
+	Status    []string `protobuf:"bytes,3,rep,name=status,proto3" json:"status,omitempty"`
 }
 
 func (x *ListRemediationProposalRequest) Reset() {

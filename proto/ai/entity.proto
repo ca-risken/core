@@ -28,7 +28,7 @@ message RemediationProposal {
   uint32 project_id = 3;
   string status = 4;
   string status_detail = 5;
-  string remediation_plan = 6; // JSON
+  string remediation_plan = 6;
   int64 generated_at = 7;
   int64 created_at = 8;
   int64 updated_at = 9;

@@ -140,7 +140,7 @@ type RemediationProposal struct {
 	ProjectId             uint32 `protobuf:"varint,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 	Status                string `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
 	StatusDetail          string `protobuf:"bytes,5,opt,name=status_detail,json=statusDetail,proto3" json:"status_detail,omitempty"`
-	RemediationPlan       string `protobuf:"bytes,6,opt,name=remediation_plan,json=remediationPlan,proto3" json:"remediation_plan,omitempty"` // JSON
+	RemediationPlan       string `protobuf:"bytes,6,opt,name=remediation_plan,json=remediationPlan,proto3" json:"remediation_plan,omitempty"`
 	GeneratedAt           int64  `protobuf:"varint,7,opt,name=generated_at,json=generatedAt,proto3" json:"generated_at,omitempty"`
 	CreatedAt             int64  `protobuf:"varint,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt             int64  `protobuf:"varint,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`

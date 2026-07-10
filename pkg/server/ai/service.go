@@ -11,6 +11,8 @@ import (
 var _ ai.AIServiceServer = (*AIService)(nil)
 
 type AIService struct {
+	ai.UnimplementedAIServiceServer
+
 	aiClient     aiservice.AIService
 	reportClient report.ReportServiceClient
 	logger       logging.Logger
