@@ -51,7 +51,7 @@ func (c *Client) ListRemediationProposal(ctx context.Context, projectID uint32, 
 	}
 	query += " order by created_at desc"
 	var data []*model.RemediationProposal
-	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return data, nil

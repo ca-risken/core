@@ -10,7 +10,9 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/ca-risken/core/pkg/model"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 func newRemediationProposalRows(data ...*model.RemediationProposal) *sqlmock.Rows {
@@ -21,6 +23,39 @@ func newRemediationProposalRows(data ...*model.RemediationProposal) *sqlmock.Row
 		rows.AddRow(d.RemediationProposalID, d.FindingID, d.ProjectID, d.Status, d.StatusDetail, d.RemediationPlan, d.GeneratedAt, d.CreatedAt, d.UpdatedAt)
 	}
 	return rows
+}
+
+func newSplitMockClient() (*Client, sqlmock.Sqlmock, sqlmock.Sqlmock, func(), error) {
+	master, masterMock, closeMaster, err := newMockGormDB()
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	slave, slaveMock, closeSlave, err := newMockGormDB()
+	if err != nil {
+		closeMaster()
+		return nil, nil, nil, nil, err
+	}
+	close := func() {
+		closeMaster()
+		closeSlave()
+	}
+	return &Client{Master: master, Slave: slave}, masterMock, slaveMock, close, nil
+}
+
+func newMockGormDB() (*gorm.DB, sqlmock.Sqlmock, func(), error) {
+	sqlDB, mock, err := sqlmock.New()
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	gormDB, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      sqlDB,
+		SkipInitializeWithVersion: true,
+	}), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
+	if err != nil {
+		_ = sqlDB.Close()
+		return nil, nil, nil, err
+	}
+	return gormDB, mock, func() { _ = sqlDB.Close() }, nil
 }
 
 func TestCreateRemediationProposal(t *testing.T) {
@@ -249,6 +284,42 @@ func TestListRemediationProposal(t *testing.T) {
 				t.Errorf("Unfulfilled expectations: %+v", err)
 			}
 		})
+	}
+}
+
+func TestListRemediationProposal_UsesMaster(t *testing.T) {
+	now := time.Now()
+	proposal := &model.RemediationProposal{
+		RemediationProposalID: 1002,
+		FindingID:             1001,
+		ProjectID:             1,
+		Status:                model.RemediationProposalStatusPending,
+		CreatedAt:             now,
+		UpdatedAt:             now,
+	}
+	client, masterMock, slaveMock, closeDB, err := newSplitMockClient()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+	defer closeDB()
+
+	query := `select * from remediation_proposal where project_id = ? and finding_id = ? order by created_at desc`
+	masterMock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(uint32(1), uint64(1001)).
+		WillReturnRows(newRemediationProposalRows(proposal))
+
+	got, err := client.ListRemediationProposal(context.Background(), 1, 1001, nil)
+	if err != nil {
+		t.Fatalf("Unexpected error: %+v", err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("Unexpected count: got=%d, want=%d", len(got), 1)
+	}
+	if err := masterMock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Unfulfilled master expectations: %+v", err)
+	}
+	if err := slaveMock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Unfulfilled slave expectations: %+v", err)
 	}
 }
 
