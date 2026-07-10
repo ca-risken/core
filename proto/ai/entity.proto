@@ -38,8 +38,6 @@ message RemediationProposal {
 
 // RemediationProposalForUpsert
 message RemediationProposalForUpsert {
-  reserved 3;
-
   uint32 remediation_proposal_id = 1;
   uint64 finding_id = 2;
   string status = 4 [ (validate.rules).string = {
