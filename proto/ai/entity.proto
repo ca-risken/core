@@ -3,8 +3,6 @@ syntax = "proto3";
 package core.ai;
 option go_package = "github.com/ca-risken/core/proto/ai";
 
-import "validate/validate.proto";
-
 /*
  * Entity
  */
@@ -34,16 +32,4 @@ message RemediationProposal {
   int64 generated_at = 7;
   int64 created_at = 8;
   int64 updated_at = 9;
-}
-
-// RemediationProposalForUpsert
-message RemediationProposalForUpsert {
-  uint32 remediation_proposal_id = 1;
-  uint64 finding_id = 2;
-  string status = 3 [ (validate.rules).string = {
-    in : [ "PENDING", "SUCCEEDED", "FAILED" ]
-  } ];
-  string status_detail = 4;
-  string remediation_plan = 5; // JSON
-  int64 generated_at = 6;
 }

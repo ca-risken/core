@@ -815,10 +815,12 @@ func (m *PutRemediationProposalRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if m.GetRemediationProposal() == nil {
+	// no validation rules for RemediationProposalId
+
+	if m.GetFindingId() <= 0 {
 		err := PutRemediationProposalRequestValidationError{
-			field:  "RemediationProposal",
-			reason: "value is required",
+			field:  "FindingId",
+			reason: "value must be greater than 0",
 		}
 		if !all {
 			return err
@@ -826,34 +828,22 @@ func (m *PutRemediationProposalRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if all {
-		switch v := interface{}(m.GetRemediationProposal()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, PutRemediationProposalRequestValidationError{
-					field:  "RemediationProposal",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, PutRemediationProposalRequestValidationError{
-					field:  "RemediationProposal",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
+	if _, ok := _PutRemediationProposalRequest_Status_InLookup[m.GetStatus()]; !ok {
+		err := PutRemediationProposalRequestValidationError{
+			field:  "Status",
+			reason: "value must be in list [PENDING SUCCEEDED FAILED]",
 		}
-	} else if v, ok := interface{}(m.GetRemediationProposal()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return PutRemediationProposalRequestValidationError{
-				field:  "RemediationProposal",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
+		if !all {
+			return err
 		}
+		errors = append(errors, err)
 	}
+
+	// no validation rules for StatusDetail
+
+	// no validation rules for RemediationPlan
+
+	// no validation rules for GeneratedAt
 
 	if len(errors) > 0 {
 		return PutRemediationProposalRequestMultiError(errors)
@@ -935,6 +925,12 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = PutRemediationProposalRequestValidationError{}
+
+var _PutRemediationProposalRequest_Status_InLookup = map[string]struct{}{
+	"PENDING":   {},
+	"SUCCEEDED": {},
+	"FAILED":    {},
+}
 
 // Validate checks the field values on PutRemediationProposalResponse with the
 // rules defined in the proto definition for this message. If any rules are

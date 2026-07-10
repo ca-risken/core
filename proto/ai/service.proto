@@ -48,8 +48,14 @@ message GetRemediationProposalResponse {
 
 message PutRemediationProposalRequest {
   uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
-  RemediationProposalForUpsert remediation_proposal = 2
-      [ (validate.rules).message.required = true ]; // Required
+  uint32 remediation_proposal_id = 2;                       // Optional
+  uint64 finding_id = 3 [ (validate.rules).uint64.gt = 0 ]; // Required
+  string status = 4 [
+    (validate.rules).string = {in : [ "PENDING", "SUCCEEDED", "FAILED" ]}
+  ]; // Required
+  string status_detail = 5;
+  string remediation_plan = 6; // JSON
+  int64 generated_at = 7;
 }
 
 message PutRemediationProposalResponse {
