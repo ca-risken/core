@@ -11,8 +11,6 @@ import (
 var _ ai.AIServiceServer = (*AIService)(nil)
 
 type AIService struct {
-	ai.UnimplementedAIServiceServer
-
 	repository   db.AIRepository
 	aiClient     aiservice.AIService
 	reportClient report.ReportServiceClient
