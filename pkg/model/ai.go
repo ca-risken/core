@@ -11,13 +11,13 @@ const (
 
 // RemediationProposal entity model
 type RemediationProposal struct {
-	RequestID       string `gorm:"primary_key"`
-	FindingID       uint64
-	ProjectID       uint32
-	Status          string
-	StatusDetail    *string
-	RemediationPlan *string
-	GeneratedAt     *time.Time
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
+	RemediationProposalID uint32 `gorm:"primary_key"`
+	FindingID             uint64
+	ProjectID             uint32
+	Status                string
+	StatusDetail          *string
+	RemediationPlan       *string
+	GeneratedAt           *time.Time
+	CreatedAt             time.Time
+	UpdatedAt             time.Time
 }

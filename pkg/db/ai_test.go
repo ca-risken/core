@@ -15,23 +15,28 @@ import (
 
 func newRemediationProposalRows(data ...*model.RemediationProposal) *sqlmock.Rows {
 	rows := sqlmock.NewRows([]string{
-		"request_id", "finding_id", "project_id", "status", "status_detail", "remediation_plan", "generated_at", "created_at", "updated_at",
+		"remediation_proposal_id", "finding_id", "project_id", "status", "status_detail", "remediation_plan", "generated_at", "created_at", "updated_at",
 	})
 	for _, d := range data {
-		rows.AddRow(d.RequestID, d.FindingID, d.ProjectID, d.Status, d.StatusDetail, d.RemediationPlan, d.GeneratedAt, d.CreatedAt, d.UpdatedAt)
+		rows.AddRow(d.RemediationProposalID, d.FindingID, d.ProjectID, d.Status, d.StatusDetail, d.RemediationPlan, d.GeneratedAt, d.CreatedAt, d.UpdatedAt)
 	}
 	return rows
 }
 
 func TestCreateRemediationProposal(t *testing.T) {
 	now := time.Now()
-	proposal := &model.RemediationProposal{
-		RequestID: "req-0001",
+	input := &model.RemediationProposal{
 		FindingID: 1001,
 		ProjectID: 1,
 		Status:    model.RemediationProposalStatusPending,
-		CreatedAt: now,
-		UpdatedAt: now,
+	}
+	proposal := &model.RemediationProposal{
+		RemediationProposalID: 1001,
+		FindingID:             1001,
+		ProjectID:             1,
+		Status:                model.RemediationProposalStatusPending,
+		CreatedAt:             now,
+		UpdatedAt:             now,
 	}
 	cases := []struct {
 		name       string
@@ -43,19 +48,19 @@ func TestCreateRemediationProposal(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   proposal,
+			input:   input,
 			want:    proposal,
 			wantErr: false,
 		},
 		{
 			name:    "NG DB error(insert)",
-			input:   proposal,
+			input:   input,
 			wantErr: true,
 			mockErr: errors.New("DB error"),
 		},
 		{
 			name:       "NG DB error(select)",
-			input:      proposal,
+			input:      input,
 			wantErr:    true,
 			mockGetErr: errors.New("DB error"),
 		},
@@ -67,17 +72,22 @@ func TestCreateRemediationProposal(t *testing.T) {
 				t.Fatalf("Failed to open mock sql db, error: %+v", err)
 			}
 			ctx := context.Background()
+			insertQuery := "INSERT INTO `remediation_proposal`"
 			if c.mockErr != nil {
-				mock.ExpectExec(regexp.QuoteMeta(insertCreateRemediationProposal)).WillReturnError(c.mockErr)
+				mock.ExpectBegin()
+				mock.ExpectExec(insertQuery).WillReturnError(c.mockErr)
+				mock.ExpectRollback()
 			} else {
-				mock.ExpectExec(regexp.QuoteMeta(insertCreateRemediationProposal)).
-					WithArgs(c.input.RequestID, c.input.FindingID, c.input.ProjectID, c.input.Status, nil, nil, nil).
-					WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectBegin()
+				mock.ExpectExec(insertQuery).
+					WithArgs(c.input.FindingID, c.input.ProjectID, c.input.Status, nil, nil, nil, sqlmock.AnyArg(), sqlmock.AnyArg()).
+					WillReturnResult(sqlmock.NewResult(1001, 1))
+				mock.ExpectCommit()
 				if c.mockGetErr != nil {
 					mock.ExpectQuery(regexp.QuoteMeta(selectGetRemediationProposal)).WillReturnError(c.mockGetErr)
 				} else {
 					mock.ExpectQuery(regexp.QuoteMeta(selectGetRemediationProposal)).
-						WithArgs(c.input.ProjectID, c.input.RequestID).
+						WithArgs(c.input.ProjectID, c.want.RemediationProposalID).
 						WillReturnRows(newRemediationProposalRows(c.want))
 				}
 			}
@@ -89,7 +99,7 @@ func TestCreateRemediationProposal(t *testing.T) {
 			if err == nil && c.wantErr {
 				t.Fatal("No error")
 			}
-			if !c.wantErr && got.RequestID != c.want.RequestID {
+			if !c.wantErr && got.RemediationProposalID != c.want.RemediationProposalID {
 				t.Fatalf("Unexpected result: got=%+v, want=%+v", got, c.want)
 			}
 			if err := mock.ExpectationsWereMet(); err != nil {
@@ -102,12 +112,12 @@ func TestCreateRemediationProposal(t *testing.T) {
 func TestGetRemediationProposal(t *testing.T) {
 	now := time.Now()
 	proposal := &model.RemediationProposal{
-		RequestID: "req-0001",
-		FindingID: 1001,
-		ProjectID: 1,
-		Status:    model.RemediationProposalStatusSucceeded,
-		CreatedAt: now,
-		UpdatedAt: now,
+		RemediationProposalID: 1001,
+		FindingID:             1001,
+		ProjectID:             1,
+		Status:                model.RemediationProposalStatusSucceeded,
+		CreatedAt:             now,
+		UpdatedAt:             now,
 	}
 	cases := []struct {
 		name        string
@@ -144,11 +154,11 @@ func TestGetRemediationProposal(t *testing.T) {
 				mock.ExpectQuery(regexp.QuoteMeta(selectGetRemediationProposal)).WillReturnError(c.mockErr)
 			} else {
 				mock.ExpectQuery(regexp.QuoteMeta(selectGetRemediationProposal)).
-					WithArgs(proposal.ProjectID, proposal.RequestID).
+					WithArgs(proposal.ProjectID, proposal.RemediationProposalID).
 					WillReturnRows(c.mockRows)
 			}
 
-			got, err := client.GetRemediationProposal(ctx, proposal.ProjectID, proposal.RequestID)
+			got, err := client.GetRemediationProposal(ctx, proposal.ProjectID, proposal.RemediationProposalID)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -158,7 +168,7 @@ func TestGetRemediationProposal(t *testing.T) {
 			if c.wantErrType != nil && !errors.Is(err, c.wantErrType) {
 				t.Fatalf("Unexpected error type: got=%+v, want=%+v", err, c.wantErrType)
 			}
-			if !c.wantErr && got.RequestID != proposal.RequestID {
+			if !c.wantErr && got.RemediationProposalID != proposal.RemediationProposalID {
 				t.Fatalf("Unexpected result: got=%+v, want=%+v", got, proposal)
 			}
 			if err := mock.ExpectationsWereMet(); err != nil {
@@ -170,8 +180,8 @@ func TestGetRemediationProposal(t *testing.T) {
 
 func TestListRemediationProposal(t *testing.T) {
 	now := time.Now()
-	proposal1 := &model.RemediationProposal{RequestID: "req-0002", FindingID: 1001, ProjectID: 1, Status: model.RemediationProposalStatusPending, CreatedAt: now, UpdatedAt: now}
-	proposal2 := &model.RemediationProposal{RequestID: "req-0001", FindingID: 1001, ProjectID: 1, Status: model.RemediationProposalStatusFailed, CreatedAt: now.Add(-time.Hour), UpdatedAt: now.Add(-time.Hour)}
+	proposal1 := &model.RemediationProposal{RemediationProposalID: 1002, FindingID: 1001, ProjectID: 1, Status: model.RemediationProposalStatusPending, CreatedAt: now, UpdatedAt: now}
+	proposal2 := &model.RemediationProposal{RemediationProposalID: 1001, FindingID: 1001, ProjectID: 1, Status: model.RemediationProposalStatusFailed, CreatedAt: now.Add(-time.Hour), UpdatedAt: now.Add(-time.Hour)}
 	cases := []struct {
 		name      string
 		status    []string
@@ -249,12 +259,12 @@ func TestListRemediationProposal(t *testing.T) {
 func TestGetLatestRemediationProposal(t *testing.T) {
 	now := time.Now()
 	proposal := &model.RemediationProposal{
-		RequestID: "req-0002",
-		FindingID: 1001,
-		ProjectID: 1,
-		Status:    model.RemediationProposalStatusSucceeded,
-		CreatedAt: now,
-		UpdatedAt: now,
+		RemediationProposalID: 1002,
+		FindingID:             1001,
+		ProjectID:             1,
+		Status:                model.RemediationProposalStatusSucceeded,
+		CreatedAt:             now,
+		UpdatedAt:             now,
 	}
 	cases := []struct {
 		name        string
@@ -305,7 +315,7 @@ func TestGetLatestRemediationProposal(t *testing.T) {
 			if c.wantErrType != nil && !errors.Is(err, c.wantErrType) {
 				t.Fatalf("Unexpected error type: got=%+v, want=%+v", err, c.wantErrType)
 			}
-			if !c.wantErr && got.RequestID != proposal.RequestID {
+			if !c.wantErr && got.RemediationProposalID != proposal.RemediationProposalID {
 				t.Fatalf("Unexpected result: got=%+v, want=%+v", got, proposal)
 			}
 			if err := mock.ExpectationsWereMet(); err != nil {
@@ -320,23 +330,23 @@ func TestUpdateRemediationProposalStatus(t *testing.T) {
 	plan := `{"summary": "test"}`
 	errMsg := "some error"
 	succeeded := &model.RemediationProposal{
-		RequestID:       "req-0001",
-		FindingID:       1001,
-		ProjectID:       1,
-		Status:          model.RemediationProposalStatusSucceeded,
-		RemediationPlan: &plan,
-		GeneratedAt:     &now,
-		CreatedAt:       now,
-		UpdatedAt:       now,
+		RemediationProposalID: 1001,
+		FindingID:             1001,
+		ProjectID:             1,
+		Status:                model.RemediationProposalStatusSucceeded,
+		RemediationPlan:       &plan,
+		GeneratedAt:           &now,
+		CreatedAt:             now,
+		UpdatedAt:             now,
 	}
 	failed := &model.RemediationProposal{
-		RequestID:    "req-0001",
-		FindingID:    1001,
-		ProjectID:    1,
-		Status:       model.RemediationProposalStatusFailed,
-		StatusDetail: &errMsg,
-		CreatedAt:    now,
-		UpdatedAt:    now,
+		RemediationProposalID: 1001,
+		FindingID:             1001,
+		ProjectID:             1,
+		Status:                model.RemediationProposalStatusFailed,
+		StatusDetail:          &errMsg,
+		CreatedAt:             now,
+		UpdatedAt:             now,
 	}
 	cases := []struct {
 		name    string
@@ -372,14 +382,14 @@ func TestUpdateRemediationProposalStatus(t *testing.T) {
 				mock.ExpectExec(regexp.QuoteMeta(updateUpdateRemediationProposalStatus)).WillReturnError(c.mockErr)
 			} else {
 				mock.ExpectExec(regexp.QuoteMeta(updateUpdateRemediationProposalStatus)).
-					WithArgs(c.want.Status, c.want.StatusDetail, c.want.RemediationPlan, c.want.GeneratedAt, c.want.ProjectID, c.want.RequestID).
+					WithArgs(c.want.Status, c.want.StatusDetail, c.want.RemediationPlan, c.want.GeneratedAt, c.want.ProjectID, c.want.RemediationProposalID).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectQuery(regexp.QuoteMeta(selectGetRemediationProposal)).
-					WithArgs(c.want.ProjectID, c.want.RequestID).
+					WithArgs(c.want.ProjectID, c.want.RemediationProposalID).
 					WillReturnRows(newRemediationProposalRows(c.want))
 			}
 
-			got, err := client.UpdateRemediationProposalStatus(ctx, c.want.ProjectID, c.want.RequestID, c.want.Status, c.want.StatusDetail, c.want.RemediationPlan, c.want.GeneratedAt)
+			got, err := client.UpdateRemediationProposalStatus(ctx, c.want.ProjectID, c.want.RemediationProposalID, c.want.Status, c.want.StatusDetail, c.want.RemediationPlan, c.want.GeneratedAt)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -400,12 +410,12 @@ func TestGetActiveRemediationProposal(t *testing.T) {
 	now := time.Now()
 	since := now.Add(-time.Hour)
 	proposal := &model.RemediationProposal{
-		RequestID: "req-0001",
-		FindingID: 1001,
-		ProjectID: 1,
-		Status:    model.RemediationProposalStatusPending,
-		CreatedAt: now,
-		UpdatedAt: now,
+		RemediationProposalID: 1001,
+		FindingID:             1001,
+		ProjectID:             1,
+		Status:                model.RemediationProposalStatusPending,
+		CreatedAt:             now,
+		UpdatedAt:             now,
 	}
 	cases := []struct {
 		name        string
@@ -456,7 +466,7 @@ func TestGetActiveRemediationProposal(t *testing.T) {
 			if c.wantErrType != nil && !errors.Is(err, c.wantErrType) {
 				t.Fatalf("Unexpected error type: got=%+v, want=%+v", err, c.wantErrType)
 			}
-			if !c.wantErr && got.RequestID != proposal.RequestID {
+			if !c.wantErr && got.RemediationProposalID != proposal.RemediationProposalID {
 				t.Fatalf("Unexpected result: got=%+v, want=%+v", got, proposal)
 			}
 			if err := mock.ExpectationsWereMet(); err != nil {

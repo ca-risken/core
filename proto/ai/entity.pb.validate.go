@@ -160,7 +160,7 @@ func (m *RemediationProposal) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for RequestId
+	// no validation rules for RemediationProposalId
 
 	// no validation rules for FindingId
 
@@ -280,7 +280,7 @@ func (m *RemediationProposalForUpsert) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for RequestId
+	// no validation rules for RemediationProposalId
 
 	// no validation rules for FindingId
 

@@ -13,12 +13,12 @@ import (
 
 func convertRemediationProposal(r *model.RemediationProposal) *ai.RemediationProposal {
 	data := &ai.RemediationProposal{
-		RequestId: r.RequestID,
-		FindingId: r.FindingID,
-		ProjectId: r.ProjectID,
-		Status:    r.Status,
-		CreatedAt: r.CreatedAt.Unix(),
-		UpdatedAt: r.UpdatedAt.Unix(),
+		RemediationProposalId: r.RemediationProposalID,
+		FindingId:             r.FindingID,
+		ProjectId:             r.ProjectID,
+		Status:                r.Status,
+		CreatedAt:             r.CreatedAt.Unix(),
+		UpdatedAt:             r.UpdatedAt.Unix(),
 	}
 	if r.StatusDetail != nil {
 		data.StatusDetail = *r.StatusDetail
@@ -36,7 +36,7 @@ func (a *AIService) GetRemediationProposal(ctx context.Context, req *ai.GetRemed
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	data, err := a.repository.GetRemediationProposal(ctx, req.ProjectId, req.RequestId)
+	data, err := a.repository.GetRemediationProposal(ctx, req.ProjectId, req.RemediationProposalId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &ai.GetRemediationProposalResponse{}, nil
@@ -69,12 +69,14 @@ func (a *AIService) PutRemediationProposal(ctx context.Context, req *ai.PutRemed
 		return nil, err
 	}
 
-	exists := true
-	if _, err := a.repository.GetRemediationProposal(ctx, req.ProjectId, req.RemediationProposal.RequestId); err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
+	exists := req.RemediationProposal.RemediationProposalId != 0
+	if exists {
+		if _, err := a.repository.GetRemediationProposal(ctx, req.ProjectId, req.RemediationProposal.RemediationProposalId); err != nil {
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, err
+			}
+			exists = false
 		}
-		exists = false
 	}
 
 	var statusDetail, remediationPlan *string
@@ -94,16 +96,16 @@ func (a *AIService) PutRemediationProposal(ctx context.Context, req *ai.PutRemed
 	var err error
 	if exists {
 		result, err = a.repository.UpdateRemediationProposalStatus(ctx, req.ProjectId,
-			req.RemediationProposal.RequestId, req.RemediationProposal.Status, statusDetail, remediationPlan, generatedAt)
+			req.RemediationProposal.RemediationProposalId, req.RemediationProposal.Status, statusDetail, remediationPlan, generatedAt)
 	} else {
 		result, err = a.repository.CreateRemediationProposal(ctx, &model.RemediationProposal{
-			RequestID:       req.RemediationProposal.RequestId,
-			FindingID:       req.RemediationProposal.FindingId,
-			ProjectID:       req.RemediationProposal.ProjectId,
-			Status:          req.RemediationProposal.Status,
-			StatusDetail:    statusDetail,
-			RemediationPlan: remediationPlan,
-			GeneratedAt:     generatedAt,
+			RemediationProposalID: req.RemediationProposal.RemediationProposalId,
+			FindingID:             req.RemediationProposal.FindingId,
+			ProjectID:             req.RemediationProposal.ProjectId,
+			Status:                req.RemediationProposal.Status,
+			StatusDetail:          statusDetail,
+			RemediationPlan:       remediationPlan,
+			GeneratedAt:           generatedAt,
 		})
 	}
 	if err != nil {
@@ -113,9 +115,6 @@ func (a *AIService) PutRemediationProposal(ctx context.Context, req *ai.PutRemed
 }
 
 func validateRemediationProposalForUpsert(projectID uint32, data *ai.RemediationProposalForUpsert) error {
-	if data.RequestId == "" || len(data.RequestId) > 64 {
-		return fmt.Errorf("invalid request_id: %s", data.RequestId)
-	}
 	if data.FindingId == 0 {
 		return errors.New("finding_id is required")
 	}
@@ -126,6 +125,9 @@ func validateRemediationProposalForUpsert(projectID uint32, data *ai.Remediation
 	case model.RemediationProposalStatusPending, model.RemediationProposalStatusSucceeded, model.RemediationProposalStatusFailed:
 	default:
 		return fmt.Errorf("invalid status: %s", data.Status)
+	}
+	if data.Status != model.RemediationProposalStatusPending && data.RemediationProposalId == 0 {
+		return errors.New("remediation_proposal_id is required")
 	}
 	return nil
 }

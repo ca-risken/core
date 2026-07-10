@@ -38,8 +38,8 @@ message GenerateReportResponse {
 
 message GetRemediationProposalRequest {
   uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
-  string request_id = 2
-      [ (validate.rules).string = {min_len : 1, max_len : 64} ]; // Required
+  uint32 remediation_proposal_id = 2
+      [ (validate.rules).uint32.gt = 0 ]; // Required
 }
 
 message GetRemediationProposalResponse {

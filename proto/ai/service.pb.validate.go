@@ -558,10 +558,10 @@ func (m *GetRemediationProposalRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if l := utf8.RuneCountInString(m.GetRequestId()); l < 1 || l > 64 {
+	if m.GetRemediationProposalId() <= 0 {
 		err := GetRemediationProposalRequestValidationError{
-			field:  "RequestId",
-			reason: "value length must be between 1 and 64 runes, inclusive",
+			field:  "RemediationProposalId",
+			reason: "value must be greater than 0",
 		}
 		if !all {
 			return err
