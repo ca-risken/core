@@ -13,8 +13,6 @@ service AIService {
       returns (GetRemediationProposalResponse);
   rpc PutRemediationProposal(PutRemediationProposalRequest)
       returns (PutRemediationProposalResponse);
-  rpc ListRemediationProposal(ListRemediationProposalRequest)
-      returns (ListRemediationProposalResponse);
 }
 
 message ChatAIRequest {
@@ -60,16 +58,4 @@ message PutRemediationProposalRequest {
 
 message PutRemediationProposalResponse {
   RemediationProposal remediation_proposal = 1;
-}
-
-message ListRemediationProposalRequest {
-  uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
-  uint64 finding_id = 2 [ (validate.rules).uint64.gt = 0 ]; // Required
-  repeated string status = 3 [ (validate.rules).repeated.items.string = {
-    in : [ "PENDING", "SUCCEEDED", "FAILED" ]
-  } ];
-}
-
-message ListRemediationProposalResponse {
-  repeated RemediationProposal remediation_proposal = 1;
 }

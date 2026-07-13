@@ -105,36 +105,6 @@ func (_m *AIServiceServer) GetRemediationProposal(_a0 context.Context, _a1 *ai.G
 	return r0, r1
 }
 
-// ListRemediationProposal provides a mock function with given fields: _a0, _a1
-func (_m *AIServiceServer) ListRemediationProposal(_a0 context.Context, _a1 *ai.ListRemediationProposalRequest) (*ai.ListRemediationProposalResponse, error) {
-	ret := _m.Called(_a0, _a1)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ListRemediationProposal")
-	}
-
-	var r0 *ai.ListRemediationProposalResponse
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *ai.ListRemediationProposalRequest) (*ai.ListRemediationProposalResponse, error)); ok {
-		return rf(_a0, _a1)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, *ai.ListRemediationProposalRequest) *ai.ListRemediationProposalResponse); ok {
-		r0 = rf(_a0, _a1)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ai.ListRemediationProposalResponse)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, *ai.ListRemediationProposalRequest) error); ok {
-		r1 = rf(_a0, _a1)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // PutRemediationProposal provides a mock function with given fields: _a0, _a1
 func (_m *AIServiceServer) PutRemediationProposal(_a0 context.Context, _a1 *ai.PutRemediationProposalRequest) (*ai.PutRemediationProposalResponse, error) {
 	ret := _m.Called(_a0, _a1)

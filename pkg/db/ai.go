@@ -11,7 +11,6 @@ type AIRepository interface {
 	// RemediationProposal
 	CreateRemediationProposal(ctx context.Context, data *model.RemediationProposal) (*model.RemediationProposal, error)
 	GetRemediationProposal(ctx context.Context, projectID uint32, remediationProposalID uint32) (*model.RemediationProposal, error)
-	ListRemediationProposal(ctx context.Context, projectID uint32, findingID uint64, status []string) ([]*model.RemediationProposal, error)
 	UpdateRemediationProposalStatus(ctx context.Context, projectID uint32, remediationProposalID uint32, status string, statusDetail, remediationPlan *string, generatedAt *time.Time) (*model.RemediationProposal, error)
 }
 
@@ -40,21 +39,6 @@ func (c *Client) getRemediationProposalMaster(ctx context.Context, projectID uin
 		return nil, err
 	}
 	return &data, nil
-}
-
-func (c *Client) ListRemediationProposal(ctx context.Context, projectID uint32, findingID uint64, status []string) ([]*model.RemediationProposal, error) {
-	query := `select * from remediation_proposal where project_id = ? and finding_id = ?`
-	params := []interface{}{projectID, findingID}
-	if len(status) > 0 {
-		query += " and status in (?)"
-		params = append(params, status)
-	}
-	query += " order by created_at desc"
-	var data []*model.RemediationProposal
-	if err := c.Master.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
-		return nil, err
-	}
-	return data, nil
 }
 
 const updateUpdateRemediationProposalStatus = `

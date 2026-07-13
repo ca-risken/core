@@ -77,36 +77,6 @@ func (_m *AIRepository) GetRemediationProposal(ctx context.Context, projectID ui
 	return r0, r1
 }
 
-// ListRemediationProposal provides a mock function with given fields: ctx, projectID, findingID, status
-func (_m *AIRepository) ListRemediationProposal(ctx context.Context, projectID uint32, findingID uint64, status []string) ([]*model.RemediationProposal, error) {
-	ret := _m.Called(ctx, projectID, findingID, status)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ListRemediationProposal")
-	}
-
-	var r0 []*model.RemediationProposal
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint64, []string) ([]*model.RemediationProposal, error)); ok {
-		return rf(ctx, projectID, findingID, status)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint64, []string) []*model.RemediationProposal); ok {
-		r0 = rf(ctx, projectID, findingID, status)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*model.RemediationProposal)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint64, []string) error); ok {
-		r1 = rf(ctx, projectID, findingID, status)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // UpdateRemediationProposalStatus provides a mock function with given fields: ctx, projectID, remediationProposalID, status, statusDetail, remediationPlan, generatedAt
 func (_m *AIRepository) UpdateRemediationProposalStatus(ctx context.Context, projectID uint32, remediationProposalID uint32, status string, statusDetail *string, remediationPlan *string, generatedAt *time.Time) (*model.RemediationProposal, error) {
 	ret := _m.Called(ctx, projectID, remediationProposalID, status, statusDetail, remediationPlan, generatedAt)

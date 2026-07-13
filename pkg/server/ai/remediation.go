@@ -45,21 +45,6 @@ func (a *AIService) GetRemediationProposal(ctx context.Context, req *aipb.GetRem
 	return &aipb.GetRemediationProposalResponse{RemediationProposal: convertRemediationProposal(data)}, nil
 }
 
-func (a *AIService) ListRemediationProposal(ctx context.Context, req *aipb.ListRemediationProposalRequest) (*aipb.ListRemediationProposalResponse, error) {
-	if err := req.Validate(); err != nil {
-		return nil, err
-	}
-	list, err := a.repository.ListRemediationProposal(ctx, req.ProjectId, req.FindingId, req.Status)
-	if err != nil {
-		return nil, err
-	}
-	data := aipb.ListRemediationProposalResponse{}
-	for _, r := range list {
-		data.RemediationProposal = append(data.RemediationProposal, convertRemediationProposal(r))
-	}
-	return &data, nil
-}
-
 func (a *AIService) PutRemediationProposal(ctx context.Context, req *aipb.PutRemediationProposalRequest) (*aipb.PutRemediationProposalResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
