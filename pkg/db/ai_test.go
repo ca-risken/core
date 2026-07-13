@@ -114,9 +114,9 @@ func TestCreateRemediationProposal(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(1001, 1))
 				mock.ExpectCommit()
 				if c.mockGetErr != nil {
-					mock.ExpectQuery(regexp.QuoteMeta(selectGetRemediationProposal)).WillReturnError(c.mockGetErr)
+					mock.ExpectQuery(regexp.QuoteMeta(selectRemediationProposalByID)).WillReturnError(c.mockGetErr)
 				} else {
-					mock.ExpectQuery(regexp.QuoteMeta(selectGetRemediationProposal)).
+					mock.ExpectQuery(regexp.QuoteMeta(selectRemediationProposalByID)).
 						WithArgs(input.ProjectID, c.want.RemediationProposalID).
 						WillReturnRows(newRemediationProposalRows(c.want))
 				}
@@ -131,75 +131,6 @@ func TestCreateRemediationProposal(t *testing.T) {
 			}
 			if !c.wantErr && got.RemediationProposalID != c.want.RemediationProposalID {
 				t.Fatalf("Unexpected result: got=%+v, want=%+v", got, c.want)
-			}
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("Unfulfilled expectations: %+v", err)
-			}
-		})
-	}
-}
-
-func TestGetRemediationProposal(t *testing.T) {
-	now := time.Now()
-	proposal := &model.RemediationProposal{
-		RemediationProposalID: 1001,
-		FindingID:             1001,
-		ProjectID:             1,
-		Status:                model.RemediationProposalStatusSucceeded,
-		CreatedAt:             now,
-		UpdatedAt:             now,
-	}
-	cases := []struct {
-		name        string
-		mockRows    *sqlmock.Rows
-		mockErr     error
-		wantErr     bool
-		wantErrType error
-	}{
-		{
-			name:     "OK",
-			mockRows: newRemediationProposalRows(proposal),
-			wantErr:  false,
-		},
-		{
-			name:        "NG record not found",
-			mockRows:    newRemediationProposalRows(),
-			wantErr:     true,
-			wantErrType: gorm.ErrRecordNotFound,
-		},
-		{
-			name:    "NG DB error",
-			mockErr: errors.New("DB error"),
-			wantErr: true,
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			client, mock, err := newMockClient()
-			if err != nil {
-				t.Fatalf("Failed to open mock sql db, error: %+v", err)
-			}
-			ctx := context.Background()
-			if c.mockErr != nil {
-				mock.ExpectQuery(regexp.QuoteMeta(selectGetRemediationProposal)).WillReturnError(c.mockErr)
-			} else {
-				mock.ExpectQuery(regexp.QuoteMeta(selectGetRemediationProposal)).
-					WithArgs(proposal.ProjectID, proposal.RemediationProposalID).
-					WillReturnRows(c.mockRows)
-			}
-
-			got, err := client.GetRemediationProposal(ctx, proposal.ProjectID, proposal.RemediationProposalID)
-			if err != nil && !c.wantErr {
-				t.Fatalf("Unexpected error: %+v", err)
-			}
-			if err == nil && c.wantErr {
-				t.Fatal("No error")
-			}
-			if c.wantErrType != nil && !errors.Is(err, c.wantErrType) {
-				t.Fatalf("Unexpected error type: got=%+v, want=%+v", err, c.wantErrType)
-			}
-			if !c.wantErr && got.RemediationProposalID != proposal.RemediationProposalID {
-				t.Fatalf("Unexpected result: got=%+v, want=%+v", got, proposal)
 			}
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("Unfulfilled expectations: %+v", err)
@@ -267,7 +198,7 @@ func TestUpdateRemediationProposalStatus(t *testing.T) {
 				mock.ExpectExec(regexp.QuoteMeta(updateUpdateRemediationProposalStatus)).
 					WithArgs(c.want.Status, c.want.StatusDetail, c.want.RemediationPlan, c.want.GeneratedAt, c.want.ProjectID, c.want.RemediationProposalID).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectQuery(regexp.QuoteMeta(selectGetRemediationProposal)).
+				mock.ExpectQuery(regexp.QuoteMeta(selectRemediationProposalByID)).
 					WithArgs(c.want.ProjectID, c.want.RemediationProposalID).
 					WillReturnRows(newRemediationProposalRows(c.want))
 			}

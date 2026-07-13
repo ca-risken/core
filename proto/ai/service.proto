@@ -9,8 +9,6 @@ import "validate/validate.proto";
 service AIService {
   rpc ChatAI(ChatAIRequest) returns (ChatAIResponse);
   rpc GenerateReport(GenerateReportRequest) returns (GenerateReportResponse);
-  rpc GetRemediationProposal(GetRemediationProposalRequest)
-      returns (GetRemediationProposalResponse);
   rpc PutRemediationProposal(PutRemediationProposalRequest)
       returns (PutRemediationProposalResponse);
 }
@@ -32,16 +30,6 @@ message GenerateReportRequest {
 message GenerateReportResponse {
   uint32 report_id = 1;
   string status = 2;
-}
-
-message GetRemediationProposalRequest {
-  uint32 project_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
-  uint32 remediation_proposal_id = 2
-      [ (validate.rules).uint32.gt = 0 ]; // Required
-}
-
-message GetRemediationProposalResponse {
-  RemediationProposal remediation_proposal = 1;
 }
 
 message PutRemediationProposalRequest {

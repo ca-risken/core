@@ -7,7 +7,6 @@ import (
 
 	"github.com/ca-risken/core/pkg/model"
 	aipb "github.com/ca-risken/core/proto/ai"
-	"gorm.io/gorm"
 )
 
 func convertRemediationProposal(r *model.RemediationProposal) *aipb.RemediationProposal {
@@ -29,20 +28,6 @@ func convertRemediationProposal(r *model.RemediationProposal) *aipb.RemediationP
 		data.GeneratedAt = r.GeneratedAt.Unix()
 	}
 	return data
-}
-
-func (a *AIService) GetRemediationProposal(ctx context.Context, req *aipb.GetRemediationProposalRequest) (*aipb.GetRemediationProposalResponse, error) {
-	if err := req.Validate(); err != nil {
-		return nil, err
-	}
-	data, err := a.repository.GetRemediationProposal(ctx, req.ProjectId, req.RemediationProposalId)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &aipb.GetRemediationProposalResponse{}, nil
-		}
-		return nil, err
-	}
-	return &aipb.GetRemediationProposalResponse{RemediationProposal: convertRemediationProposal(data)}, nil
 }
 
 func (a *AIService) PutRemediationProposal(ctx context.Context, req *aipb.PutRemediationProposalRequest) (*aipb.PutRemediationProposalResponse, error) {
