@@ -2,7 +2,6 @@ package ai
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
@@ -30,45 +29,37 @@ func convertRemediationProposal(r *model.RemediationProposal) *aipb.RemediationP
 	return data
 }
 
-func (a *AIService) PutRemediationProposal(ctx context.Context, req *aipb.PutRemediationProposalRequest) (*aipb.PutRemediationProposalResponse, error) {
+func (a *AIService) CreateRemediationProposal(ctx context.Context, req *aipb.CreateRemediationProposalRequest) (*aipb.CreateRemediationProposalResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	if err := validatePutRemediationProposal(req); err != nil {
-		return nil, err
-	}
 
-	statusDetail, remediationPlan, generatedAt := remediationProposalOptionalValues(req)
-
-	var result *model.RemediationProposal
-	var err error
-	if req.RemediationProposalId == 0 {
-		result, err = a.repository.CreateRemediationProposal(ctx, &model.RemediationProposal{
-			FindingID:       req.FindingId,
-			ProjectID:       req.ProjectId,
-			Status:          req.Status,
-			StatusDetail:    statusDetail,
-			RemediationPlan: remediationPlan,
-			GeneratedAt:     generatedAt,
-		})
-	} else {
-		result, err = a.repository.UpdateRemediationProposalStatus(ctx, req.ProjectId,
-			req.RemediationProposalId, req.Status, statusDetail, remediationPlan, generatedAt)
-	}
+	result, err := a.repository.CreateRemediationProposal(ctx, &model.RemediationProposal{
+		FindingID: req.FindingId,
+		ProjectID: req.ProjectId,
+		Status:    model.RemediationProposalStatusPending,
+	})
 	if err != nil {
 		return nil, err
 	}
-	return &aipb.PutRemediationProposalResponse{RemediationProposal: convertRemediationProposal(result)}, nil
+	return &aipb.CreateRemediationProposalResponse{RemediationProposal: convertRemediationProposal(result)}, nil
 }
 
-func validatePutRemediationProposal(req *aipb.PutRemediationProposalRequest) error {
-	if req.Status != model.RemediationProposalStatusPending && req.RemediationProposalId == 0 {
-		return errors.New("remediation_proposal_id is required")
+func (a *AIService) UpdateRemediationProposalStatus(ctx context.Context, req *aipb.UpdateRemediationProposalStatusRequest) (*aipb.UpdateRemediationProposalStatusResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
 	}
-	return nil
+	statusDetail, remediationPlan, generatedAt := remediationProposalOptionalValues(req)
+
+	result, err := a.repository.UpdateRemediationProposalStatus(ctx, req.ProjectId,
+		req.RemediationProposalId, req.Status, statusDetail, remediationPlan, generatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &aipb.UpdateRemediationProposalStatusResponse{RemediationProposal: convertRemediationProposal(result)}, nil
 }
 
-func remediationProposalOptionalValues(req *aipb.PutRemediationProposalRequest) (*string, *string, *time.Time) {
+func remediationProposalOptionalValues(req *aipb.UpdateRemediationProposalStatusRequest) (*string, *string, *time.Time) {
 	var statusDetail, remediationPlan *string
 	if req.StatusDetail != "" {
 		statusDetail = &req.StatusDetail

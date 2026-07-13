@@ -10,6 +10,8 @@ import (
 type AIRepository interface {
 	// RemediationProposal
 	CreateRemediationProposal(ctx context.Context, data *model.RemediationProposal) (*model.RemediationProposal, error)
+	GetRemediationProposal(ctx context.Context, projectID uint32, remediationProposalID uint32) (*model.RemediationProposal, error)
+	ListRemediationProposal(ctx context.Context, projectID uint32, findingID uint64, status []string) ([]*model.RemediationProposal, error)
 	UpdateRemediationProposalStatus(ctx context.Context, projectID uint32, remediationProposalID uint32, status string, statusDetail, remediationPlan *string, generatedAt *time.Time) (*model.RemediationProposal, error)
 }
 
@@ -22,14 +24,37 @@ func (c *Client) CreateRemediationProposal(ctx context.Context, data *model.Reme
 	return c.getRemediationProposalMaster(ctx, data.ProjectID, data.RemediationProposalID)
 }
 
-const selectRemediationProposalByID = `select * from remediation_proposal where project_id = ? and remediation_proposal_id = ?`
+const selectGetRemediationProposal = `select * from remediation_proposal where project_id = ? and remediation_proposal_id = ?`
 
-func (c *Client) getRemediationProposalMaster(ctx context.Context, projectID uint32, remediationProposalID uint32) (*model.RemediationProposal, error) {
+func (c *Client) GetRemediationProposal(ctx context.Context, projectID uint32, remediationProposalID uint32) (*model.RemediationProposal, error) {
 	var data model.RemediationProposal
-	if err := c.Master.WithContext(ctx).Raw(selectRemediationProposalByID, projectID, remediationProposalID).First(&data).Error; err != nil {
+	if err := c.Slave.WithContext(ctx).Raw(selectGetRemediationProposal, projectID, remediationProposalID).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil
+}
+
+func (c *Client) getRemediationProposalMaster(ctx context.Context, projectID uint32, remediationProposalID uint32) (*model.RemediationProposal, error) {
+	var data model.RemediationProposal
+	if err := c.Master.WithContext(ctx).Raw(selectGetRemediationProposal, projectID, remediationProposalID).First(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (c *Client) ListRemediationProposal(ctx context.Context, projectID uint32, findingID uint64, status []string) ([]*model.RemediationProposal, error) {
+	query := `select * from remediation_proposal where project_id = ? and finding_id = ?`
+	params := []interface{}{projectID, findingID}
+	if len(status) > 0 {
+		query += " and status in (?)"
+		params = append(params, status)
+	}
+	query += " order by created_at desc"
+	var data []*model.RemediationProposal
+	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 const updateUpdateRemediationProposalStatus = `

@@ -13,9 +13,8 @@ import (
 	aipb "github.com/ca-risken/core/proto/ai"
 )
 
-func TestPutRemediationProposal(t *testing.T) {
+func TestCreateRemediationProposal(t *testing.T) {
 	now := time.Now()
-	plan := `{"summary":"test"}`
 	pendingModel := &model.RemediationProposal{
 		RemediationProposalID: 1001,
 		FindingID:             2001,
@@ -24,6 +23,73 @@ func TestPutRemediationProposal(t *testing.T) {
 		CreatedAt:             now,
 		UpdatedAt:             now,
 	}
+	cases := []struct {
+		name           string
+		input          *aipb.CreateRemediationProposalRequest
+		want           *aipb.CreateRemediationProposalResponse
+		mockCreateResp *model.RemediationProposal
+		mockCreateErr  error
+		wantErr        bool
+	}{
+		{
+			name: "OK create pending proposal",
+			input: &aipb.CreateRemediationProposalRequest{
+				ProjectId: 1,
+				FindingId: 2001,
+			},
+			mockCreateResp: pendingModel,
+			want: &aipb.CreateRemediationProposalResponse{
+				RemediationProposal: &aipb.RemediationProposal{
+					RemediationProposalId: 1001,
+					FindingId:             2001,
+					ProjectId:             1,
+					Status:                model.RemediationProposalStatusPending,
+					CreatedAt:             now.Unix(),
+					UpdatedAt:             now.Unix(),
+				},
+			},
+		},
+		{
+			name: "NG validation error",
+			input: &aipb.CreateRemediationProposalRequest{
+				ProjectId: 1,
+			},
+			wantErr: true,
+		},
+		{
+			name: "NG DB error(create)",
+			input: &aipb.CreateRemediationProposalRequest{
+				ProjectId: 1,
+				FindingId: 2001,
+			},
+			mockCreateErr: errors.New("DB error"),
+			wantErr:       true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewAIRepository(t)
+			svc := AIService{repository: mockDB}
+			if c.mockCreateResp != nil || c.mockCreateErr != nil {
+				mockDB.On("CreateRemediationProposal", test.RepeatMockAnything(2)...).Return(c.mockCreateResp, c.mockCreateErr).Once()
+			}
+			result, err := svc.CreateRemediationProposal(context.Background(), c.input)
+			if err != nil && !c.wantErr {
+				t.Fatalf("unexpected error: %+v", err)
+			}
+			if err == nil && c.wantErr {
+				t.Fatal("expected error but got nil")
+			}
+			if !reflect.DeepEqual(result, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
+			}
+		})
+	}
+}
+
+func TestUpdateRemediationProposalStatus(t *testing.T) {
+	now := time.Now()
+	plan := `{"summary":"test"}`
 	succeededModel := &model.RemediationProposal{
 		RemediationProposalID: 1001,
 		FindingID:             2001,
@@ -36,45 +102,23 @@ func TestPutRemediationProposal(t *testing.T) {
 	}
 	cases := []struct {
 		name           string
-		input          *aipb.PutRemediationProposalRequest
-		want           *aipb.PutRemediationProposalResponse
-		mockCreateResp *model.RemediationProposal
-		mockCreateErr  error
+		input          *aipb.UpdateRemediationProposalStatusRequest
+		want           *aipb.UpdateRemediationProposalStatusResponse
 		mockUpdateResp *model.RemediationProposal
 		mockUpdateErr  error
 		wantErr        bool
 	}{
 		{
-			name: "OK create pending proposal",
-			input: &aipb.PutRemediationProposalRequest{
-				ProjectId: 1,
-				FindingId: 2001,
-				Status:    model.RemediationProposalStatusPending,
-			},
-			mockCreateResp: pendingModel,
-			want: &aipb.PutRemediationProposalResponse{
-				RemediationProposal: &aipb.RemediationProposal{
-					RemediationProposalId: 1001,
-					FindingId:             2001,
-					ProjectId:             1,
-					Status:                model.RemediationProposalStatusPending,
-					CreatedAt:             now.Unix(),
-					UpdatedAt:             now.Unix(),
-				},
-			},
-		},
-		{
 			name: "OK update succeeded proposal",
-			input: &aipb.PutRemediationProposalRequest{
+			input: &aipb.UpdateRemediationProposalStatusRequest{
 				ProjectId:             1,
 				RemediationProposalId: 1001,
-				FindingId:             2001,
 				Status:                model.RemediationProposalStatusSucceeded,
 				RemediationPlan:       plan,
 				GeneratedAt:           now.Unix(),
 			},
 			mockUpdateResp: succeededModel,
-			want: &aipb.PutRemediationProposalResponse{
+			want: &aipb.UpdateRemediationProposalStatusResponse{
 				RemediationProposal: &aipb.RemediationProposal{
 					RemediationProposalId: 1001,
 					FindingId:             2001,
@@ -89,38 +133,26 @@ func TestPutRemediationProposal(t *testing.T) {
 		},
 		{
 			name: "NG validation error",
-			input: &aipb.PutRemediationProposalRequest{
-				ProjectId: 1,
-				FindingId: 2001,
-				Status:    "unknown",
+			input: &aipb.UpdateRemediationProposalStatusRequest{
+				ProjectId:             1,
+				RemediationProposalId: 1001,
+				Status:                "unknown",
 			},
 			wantErr: true,
 		},
 		{
-			name: "NG completed status without remediation_proposal_id",
-			input: &aipb.PutRemediationProposalRequest{
+			name: "NG missing remediation_proposal_id",
+			input: &aipb.UpdateRemediationProposalStatusRequest{
 				ProjectId: 1,
-				FindingId: 2001,
 				Status:    model.RemediationProposalStatusSucceeded,
 			},
 			wantErr: true,
 		},
 		{
-			name: "NG DB error(create)",
-			input: &aipb.PutRemediationProposalRequest{
-				ProjectId: 1,
-				FindingId: 2001,
-				Status:    model.RemediationProposalStatusPending,
-			},
-			mockCreateErr: errors.New("DB error"),
-			wantErr:       true,
-		},
-		{
 			name: "NG DB error(update)",
-			input: &aipb.PutRemediationProposalRequest{
+			input: &aipb.UpdateRemediationProposalStatusRequest{
 				ProjectId:             1,
 				RemediationProposalId: 1001,
-				FindingId:             2001,
 				Status:                model.RemediationProposalStatusSucceeded,
 			},
 			mockUpdateErr: errors.New("DB error"),
@@ -131,13 +163,10 @@ func TestPutRemediationProposal(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			mockDB := mocks.NewAIRepository(t)
 			svc := AIService{repository: mockDB}
-			if c.mockCreateResp != nil || c.mockCreateErr != nil {
-				mockDB.On("CreateRemediationProposal", test.RepeatMockAnything(2)...).Return(c.mockCreateResp, c.mockCreateErr).Once()
-			}
 			if c.mockUpdateResp != nil || c.mockUpdateErr != nil {
 				mockDB.On("UpdateRemediationProposalStatus", test.RepeatMockAnything(7)...).Return(c.mockUpdateResp, c.mockUpdateErr).Once()
 			}
-			result, err := svc.PutRemediationProposal(context.Background(), c.input)
+			result, err := svc.UpdateRemediationProposalStatus(context.Background(), c.input)
 			if err != nil && !c.wantErr {
 				t.Fatalf("unexpected error: %+v", err)
 			}
