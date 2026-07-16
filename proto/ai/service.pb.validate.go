@@ -524,3 +524,549 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GenerateReportResponseValidationError{}
+
+// Validate checks the field values on CreateRemediationProposalRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *CreateRemediationProposalRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreateRemediationProposalRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// CreateRemediationProposalRequestMultiError, or nil if none found.
+func (m *CreateRemediationProposalRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreateRemediationProposalRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetProjectId() <= 0 {
+		err := CreateRemediationProposalRequestValidationError{
+			field:  "ProjectId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetFindingId() <= 0 {
+		err := CreateRemediationProposalRequestValidationError{
+			field:  "FindingId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return CreateRemediationProposalRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreateRemediationProposalRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// CreateRemediationProposalRequest.ValidateAll() if the designated
+// constraints aren't met.
+type CreateRemediationProposalRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreateRemediationProposalRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreateRemediationProposalRequestMultiError) AllErrors() []error { return m }
+
+// CreateRemediationProposalRequestValidationError is the validation error
+// returned by CreateRemediationProposalRequest.Validate if the designated
+// constraints aren't met.
+type CreateRemediationProposalRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateRemediationProposalRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateRemediationProposalRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateRemediationProposalRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateRemediationProposalRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateRemediationProposalRequestValidationError) ErrorName() string {
+	return "CreateRemediationProposalRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreateRemediationProposalRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateRemediationProposalRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateRemediationProposalRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateRemediationProposalRequestValidationError{}
+
+// Validate checks the field values on CreateRemediationProposalResponse with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *CreateRemediationProposalResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreateRemediationProposalResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// CreateRemediationProposalResponseMultiError, or nil if none found.
+func (m *CreateRemediationProposalResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreateRemediationProposalResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetRemediationProposal()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CreateRemediationProposalResponseValidationError{
+					field:  "RemediationProposal",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CreateRemediationProposalResponseValidationError{
+					field:  "RemediationProposal",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetRemediationProposal()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CreateRemediationProposalResponseValidationError{
+				field:  "RemediationProposal",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return CreateRemediationProposalResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreateRemediationProposalResponseMultiError is an error wrapping multiple
+// validation errors returned by
+// CreateRemediationProposalResponse.ValidateAll() if the designated
+// constraints aren't met.
+type CreateRemediationProposalResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreateRemediationProposalResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreateRemediationProposalResponseMultiError) AllErrors() []error { return m }
+
+// CreateRemediationProposalResponseValidationError is the validation error
+// returned by CreateRemediationProposalResponse.Validate if the designated
+// constraints aren't met.
+type CreateRemediationProposalResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateRemediationProposalResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateRemediationProposalResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateRemediationProposalResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateRemediationProposalResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateRemediationProposalResponseValidationError) ErrorName() string {
+	return "CreateRemediationProposalResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreateRemediationProposalResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateRemediationProposalResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateRemediationProposalResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateRemediationProposalResponseValidationError{}
+
+// Validate checks the field values on UpdateRemediationProposalStatusRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *UpdateRemediationProposalStatusRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// UpdateRemediationProposalStatusRequest with the rules defined in the proto
+// definition for this message. If any rules are violated, the result is a
+// list of violation errors wrapped in
+// UpdateRemediationProposalStatusRequestMultiError, or nil if none found.
+func (m *UpdateRemediationProposalStatusRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateRemediationProposalStatusRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetProjectId() <= 0 {
+		err := UpdateRemediationProposalStatusRequestValidationError{
+			field:  "ProjectId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetRemediationProposalId() <= 0 {
+		err := UpdateRemediationProposalStatusRequestValidationError{
+			field:  "RemediationProposalId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if _, ok := _UpdateRemediationProposalStatusRequest_Status_InLookup[m.GetStatus()]; !ok {
+		err := UpdateRemediationProposalStatusRequestValidationError{
+			field:  "Status",
+			reason: "value must be in list [SUCCEEDED FAILED]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for StatusDetail
+
+	// no validation rules for RemediationPlan
+
+	// no validation rules for GeneratedAt
+
+	if len(errors) > 0 {
+		return UpdateRemediationProposalStatusRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateRemediationProposalStatusRequestMultiError is an error wrapping
+// multiple validation errors returned by
+// UpdateRemediationProposalStatusRequest.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateRemediationProposalStatusRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateRemediationProposalStatusRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateRemediationProposalStatusRequestMultiError) AllErrors() []error { return m }
+
+// UpdateRemediationProposalStatusRequestValidationError is the validation
+// error returned by UpdateRemediationProposalStatusRequest.Validate if the
+// designated constraints aren't met.
+type UpdateRemediationProposalStatusRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateRemediationProposalStatusRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateRemediationProposalStatusRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateRemediationProposalStatusRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateRemediationProposalStatusRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateRemediationProposalStatusRequestValidationError) ErrorName() string {
+	return "UpdateRemediationProposalStatusRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateRemediationProposalStatusRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateRemediationProposalStatusRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateRemediationProposalStatusRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateRemediationProposalStatusRequestValidationError{}
+
+var _UpdateRemediationProposalStatusRequest_Status_InLookup = map[string]struct{}{
+	"SUCCEEDED": {},
+	"FAILED":    {},
+}
+
+// Validate checks the field values on UpdateRemediationProposalStatusResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *UpdateRemediationProposalStatusResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// UpdateRemediationProposalStatusResponse with the rules defined in the proto
+// definition for this message. If any rules are violated, the result is a
+// list of violation errors wrapped in
+// UpdateRemediationProposalStatusResponseMultiError, or nil if none found.
+func (m *UpdateRemediationProposalStatusResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateRemediationProposalStatusResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetRemediationProposal()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UpdateRemediationProposalStatusResponseValidationError{
+					field:  "RemediationProposal",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UpdateRemediationProposalStatusResponseValidationError{
+					field:  "RemediationProposal",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetRemediationProposal()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateRemediationProposalStatusResponseValidationError{
+				field:  "RemediationProposal",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return UpdateRemediationProposalStatusResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateRemediationProposalStatusResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// UpdateRemediationProposalStatusResponse.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateRemediationProposalStatusResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateRemediationProposalStatusResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateRemediationProposalStatusResponseMultiError) AllErrors() []error { return m }
+
+// UpdateRemediationProposalStatusResponseValidationError is the validation
+// error returned by UpdateRemediationProposalStatusResponse.Validate if the
+// designated constraints aren't met.
+type UpdateRemediationProposalStatusResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateRemediationProposalStatusResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateRemediationProposalStatusResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateRemediationProposalStatusResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateRemediationProposalStatusResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateRemediationProposalStatusResponseValidationError) ErrorName() string {
+	return "UpdateRemediationProposalStatusResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateRemediationProposalStatusResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateRemediationProposalStatusResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateRemediationProposalStatusResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateRemediationProposalStatusResponseValidationError{}

@@ -91,6 +91,80 @@ func (_m *AIServiceClient) GenerateReport(ctx context.Context, in *ai.GenerateRe
 	return r0, r1
 }
 
+// CreateRemediationProposal provides a mock function with given fields: ctx, in, opts
+func (_m *AIServiceClient) CreateRemediationProposal(ctx context.Context, in *ai.CreateRemediationProposalRequest, opts ...grpc.CallOption) (*ai.CreateRemediationProposalResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateRemediationProposal")
+	}
+
+	var r0 *ai.CreateRemediationProposalResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.CreateRemediationProposalRequest, ...grpc.CallOption) (*ai.CreateRemediationProposalResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.CreateRemediationProposalRequest, ...grpc.CallOption) *ai.CreateRemediationProposalResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ai.CreateRemediationProposalResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *ai.CreateRemediationProposalRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateRemediationProposalStatus provides a mock function with given fields: ctx, in, opts
+func (_m *AIServiceClient) UpdateRemediationProposalStatus(ctx context.Context, in *ai.UpdateRemediationProposalStatusRequest, opts ...grpc.CallOption) (*ai.UpdateRemediationProposalStatusResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateRemediationProposalStatus")
+	}
+
+	var r0 *ai.UpdateRemediationProposalStatusResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.UpdateRemediationProposalStatusRequest, ...grpc.CallOption) (*ai.UpdateRemediationProposalStatusResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.UpdateRemediationProposalStatusRequest, ...grpc.CallOption) *ai.UpdateRemediationProposalStatusResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ai.UpdateRemediationProposalStatusResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *ai.UpdateRemediationProposalStatusRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewAIServiceClient creates a new instance of AIServiceClient. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewAIServiceClient(t interface {

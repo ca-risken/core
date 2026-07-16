@@ -75,6 +75,66 @@ func (_m *AIServiceServer) GenerateReport(_a0 context.Context, _a1 *ai.GenerateR
 	return r0, r1
 }
 
+// CreateRemediationProposal provides a mock function with given fields: _a0, _a1
+func (_m *AIServiceServer) CreateRemediationProposal(_a0 context.Context, _a1 *ai.CreateRemediationProposalRequest) (*ai.CreateRemediationProposalResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateRemediationProposal")
+	}
+
+	var r0 *ai.CreateRemediationProposalResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.CreateRemediationProposalRequest) (*ai.CreateRemediationProposalResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.CreateRemediationProposalRequest) *ai.CreateRemediationProposalResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ai.CreateRemediationProposalResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *ai.CreateRemediationProposalRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateRemediationProposalStatus provides a mock function with given fields: _a0, _a1
+func (_m *AIServiceServer) UpdateRemediationProposalStatus(_a0 context.Context, _a1 *ai.UpdateRemediationProposalStatusRequest) (*ai.UpdateRemediationProposalStatusResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateRemediationProposalStatus")
+	}
+
+	var r0 *ai.UpdateRemediationProposalStatusResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.UpdateRemediationProposalStatusRequest) (*ai.UpdateRemediationProposalStatusResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *ai.UpdateRemediationProposalStatusRequest) *ai.UpdateRemediationProposalStatusResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ai.UpdateRemediationProposalStatusResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *ai.UpdateRemediationProposalStatusRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewAIServiceServer creates a new instance of AIServiceServer. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewAIServiceServer(t interface {

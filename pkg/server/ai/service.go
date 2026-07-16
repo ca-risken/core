@@ -11,13 +11,15 @@ import (
 var _ ai.AIServiceServer = (*AIService)(nil)
 
 type AIService struct {
+	repository   db.AIRepository
 	aiClient     aiservice.AIService
 	reportClient report.ReportServiceClient
 	logger       logging.Logger
 }
 
 func NewAIService(
-	repository db.FindingRepository,
+	findingRepository db.FindingRepository,
+	repository db.AIRepository,
 	openaiToken string,
 	chatGPTModel string,
 	reasoningModel string,
@@ -25,7 +27,8 @@ func NewAIService(
 	logger logging.Logger,
 ) *AIService {
 	return &AIService{
-		aiClient:     aiservice.NewAIClient(repository, openaiToken, chatGPTModel, reasoningModel, logger),
+		repository:   repository,
+		aiClient:     aiservice.NewAIClient(findingRepository, openaiToken, chatGPTModel, reasoningModel, logger),
 		reportClient: reportClient,
 		logger:       logger,
 	}
