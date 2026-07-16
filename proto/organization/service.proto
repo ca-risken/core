@@ -88,6 +88,15 @@ message DeleteOrganizationInvitationRequest {
   uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
 }
 
+// Create Project With Organization
+message CreateProjectWithOrganizationRequest {
+  uint32 user_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  string name = 2 [ (validate.rules).string = {min_len : 1, max_len : 64} ];
+  uint32 organization_id = 3 [ (validate.rules).uint32.gt = 0 ];
+}
+
+message CreateProjectWithOrganizationResponse { project.Project project = 1; }
+
 // Reply Organizaiton Invitation
 message ReplyOrganizationInvitationRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
@@ -115,6 +124,8 @@ service OrganizationService {
       returns (google.protobuf.Empty) {}
 
   // Organization Project
+  rpc CreateProjectWithOrganization(CreateProjectWithOrganizationRequest)
+      returns (CreateProjectWithOrganizationResponse) {}
   rpc ListProjectsInOrganization(ListProjectsInOrganizationRequest)
       returns (ListProjectsInOrganizationResponse) {}
   rpc RemoveProjectsInOrganization(RemoveProjectsInOrganizationRequest)

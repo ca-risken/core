@@ -117,7 +117,7 @@ func (p *ProjectService) createDefaultRole(ctx context.Context, ownerUserID, pro
 	projectAdmin := "project-admin"
 	projectViewer := "project-viewer"
 	findingEditor := "finding-editor"
-	viewerActionPtn := "get|list|is-admin|put-alert-first-viewed-at"
+	viewerActionPtn := "get|list"
 
 	for name, actionPtn := range map[string]string{
 		projectAdmin:  ".*",

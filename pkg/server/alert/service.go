@@ -18,19 +18,20 @@ import (
 var _ alert.AlertServiceServer = (*AlertService)(nil)
 
 type AlertService struct {
-	repository        db.AlertRepository
-	findingClient     finding.FindingServiceClient
-	projectClient     project.ProjectServiceClient
-	iamClient         iam.IAMServiceClient
-	orgAlertClient    org_alert.OrgAlertServiceClient
-	maxAnalyzeAPICall int64
-	baseURL           string
-	logger            logging.Logger
-	defaultLocale     string
-	aiSummaryEnabled  bool
-	summaryLanguage   string
-	slackClient       slack.Client
-	retryer           backoff.BackOff
+	repository               db.AlertRepository
+	findingClient            finding.FindingServiceClient
+	projectClient            project.ProjectServiceClient
+	iamClient                iam.IAMServiceClient
+	orgAlertClient           org_alert.OrgAlertServiceClient
+	maxAnalyzeAPICall        int64
+	baseURL                  string
+	logger                   logging.Logger
+	defaultLocale            string
+	aiSummaryEnabled         bool
+	summaryLanguage          string
+	slackClient              slack.Client
+	slackActionSigningSecret string
+	retryer                  backoff.BackOff
 }
 
 func NewAlertService(
@@ -46,21 +47,23 @@ func NewAlertService(
 	aiSummaryEnabled bool,
 	summaryLanguage string,
 	slackApiToken string,
+	slackActionSigningSecret string,
 ) *AlertService {
 	return &AlertService{
-		repository:        repository,
-		findingClient:     findingClient,
-		projectClient:     projectClient,
-		iamClient:         iamClient,
-		orgAlertClient:    orgAlertClient,
-		maxAnalyzeAPICall: maxAnalyzeAPICall,
-		baseURL:           baseURL,
-		logger:            logger,
-		defaultLocale:     defaultLocale,
-		aiSummaryEnabled:  aiSummaryEnabled,
-		summaryLanguage:   summaryLanguage,
-		slackClient:       *slack.New(slackApiToken),
-		retryer:           backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10),
+		repository:               repository,
+		findingClient:            findingClient,
+		projectClient:            projectClient,
+		iamClient:                iamClient,
+		orgAlertClient:           orgAlertClient,
+		maxAnalyzeAPICall:        maxAnalyzeAPICall,
+		baseURL:                  baseURL,
+		logger:                   logger,
+		defaultLocale:            defaultLocale,
+		aiSummaryEnabled:         aiSummaryEnabled,
+		summaryLanguage:          summaryLanguage,
+		slackClient:              *slack.New(slackApiToken),
+		slackActionSigningSecret: slackActionSigningSecret,
+		retryer:                  backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10),
 	}
 }
 
