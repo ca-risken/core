@@ -56,6 +56,43 @@ message TestOrgNotificationRequest {
   uint32 notification_id = 2 [ (validate.rules).uint32.gt = 0 ];
 }
 
+// ListOrgAlertCondNotification
+message ListOrgAlertCondNotificationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 project_id = 2;
+  uint32 alert_condition_id = 3;
+  uint32 notification_id = 4;
+}
+
+message ListOrgAlertCondNotificationResponse {
+  repeated OrgAlertCondNotification alert_cond_notification = 1;
+}
+
+// GetOrgAlertCondNotification
+message GetOrgAlertCondNotificationRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
+  uint32 alert_condition_id = 3 [ (validate.rules).uint32.gt = 0 ];
+  uint32 notification_id = 4 [ (validate.rules).uint32.gt = 0 ];
+}
+
+message GetOrgAlertCondNotificationResponse {
+  OrgAlertCondNotification alert_cond_notification = 1;
+}
+
+// UpdateOrgAlertCondNotificationCache
+message UpdateOrgAlertCondNotificationCacheRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
+  uint32 alert_condition_id = 3 [ (validate.rules).uint32.gt = 0 ];
+  uint32 notification_id = 4 [ (validate.rules).uint32.gt = 0 ];
+  uint32 cache_second = 5;
+}
+
+message UpdateOrgAlertCondNotificationCacheResponse {
+  OrgAlertCondNotification alert_cond_notification = 1;
+}
+
 // OrgAlertService
 service OrgAlertService {
   rpc ListOrgNotification(ListOrgNotificationRequest)
@@ -70,4 +107,11 @@ service OrgAlertService {
       returns (google.protobuf.Empty) {}
   rpc TestOrgNotification(TestOrgNotificationRequest)
       returns (google.protobuf.Empty) {}
+  rpc ListOrgAlertCondNotification(ListOrgAlertCondNotificationRequest)
+      returns (ListOrgAlertCondNotificationResponse) {}
+  rpc GetOrgAlertCondNotification(GetOrgAlertCondNotificationRequest)
+      returns (GetOrgAlertCondNotificationResponse) {}
+  rpc UpdateOrgAlertCondNotificationCache(
+      UpdateOrgAlertCondNotificationCacheRequest)
+      returns (UpdateOrgAlertCondNotificationCacheResponse) {}
 }

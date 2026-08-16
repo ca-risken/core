@@ -353,19 +353,34 @@ func TestDeleteOrganization(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name:    "OK",
-			args:    args{organizationID: 1},
-			wantErr: false,
+			name: "OK - relation deleted before organization",
+			args: args{organizationID: 1},
 			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(deleteOrgAlertCondNotificationByOrganization)).WillReturnResult(sqlmock.NewResult(0, 2))
 				mock.ExpectExec(regexp.QuoteMeta(deleteOrganization)).WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectCommit()
 			},
 		},
 		{
-			name:    "NG DB error",
+			name:    "NG - relation delete rolls back",
 			args:    args{organizationID: 1},
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(deleteOrgAlertCondNotificationByOrganization)).WillReturnError(errors.New("DB error"))
+				mock.ExpectRollback()
+			},
+		},
+		{
+			name:    "NG - owner delete rolls back",
+			args:    args{organizationID: 1},
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(deleteOrgAlertCondNotificationByOrganization)).WillReturnResult(sqlmock.NewResult(0, 2))
 				mock.ExpectExec(regexp.QuoteMeta(deleteOrganization)).WillReturnError(errors.New("DB error"))
+				mock.ExpectRollback()
 			},
 		},
 	}
@@ -459,19 +474,24 @@ func TestRemoveProjectsInOrganization(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name:    "OK",
-			args:    args{organizationID: 1, projectID: 1},
-			wantErr: false,
+			name: "OK - relation deleted before membership",
+			args: args{organizationID: 1, projectID: 1},
 			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(deleteOrgAlertCondNotificationByOrganizationProject)).WillReturnResult(sqlmock.NewResult(0, 2))
 				mock.ExpectExec(regexp.QuoteMeta(removeProjectsInOrganization)).WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectCommit()
 			},
 		},
 		{
-			name:    "NG DB error",
+			name:    "NG - membership delete rolls back",
 			args:    args{organizationID: 1, projectID: 1},
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(deleteOrgAlertCondNotificationByOrganizationProject)).WillReturnResult(sqlmock.NewResult(0, 2))
 				mock.ExpectExec(regexp.QuoteMeta(removeProjectsInOrganization)).WillReturnError(errors.New("DB error"))
+				mock.ExpectRollback()
 			},
 		},
 	}
@@ -609,7 +629,7 @@ func TestPutOrganizationInvitation(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name:    "OK",
+			name:    "OK - membership and cross product commit together",
 			args:    args{organizationID: 1, projectID: 1},
 			want:    &model.OrganizationInvitation{OrganizationID: 1, ProjectID: 1, CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
@@ -681,10 +701,13 @@ func TestPutOrganizationProject(t *testing.T) {
 			want:    &model.OrganizationProject{OrganizationID: 1, ProjectID: 1, CreatedAt: now, UpdatedAt: now},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(putOrganizationProject)).WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectExec(regexp.QuoteMeta(insertOrgAlertCondNotificationByOrganizationProject)).WillReturnResult(sqlmock.NewResult(0, 2))
 				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrganizationProject)).WillReturnRows(sqlmock.NewRows([]string{
 					"organization_id", "project_id", "created_at", "updated_at"}).
 					AddRow(uint32(1), uint32(1), now, now))
+				mock.ExpectCommit()
 			},
 		},
 		{
@@ -693,7 +716,21 @@ func TestPutOrganizationProject(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(putOrganizationProject)).WillReturnError(errors.New("DB error"))
+				mock.ExpectRollback()
+			},
+		},
+		{
+			name:    "NG relation cross product rolls back membership",
+			args:    args{organizationID: 1, projectID: 1},
+			want:    nil,
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(putOrganizationProject)).WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectExec(regexp.QuoteMeta(insertOrgAlertCondNotificationByOrganizationProject)).WillReturnError(errors.New("DB error"))
+				mock.ExpectRollback()
 			},
 		},
 		{
@@ -702,8 +739,11 @@ func TestPutOrganizationProject(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(putOrganizationProject)).WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectExec(regexp.QuoteMeta(insertOrgAlertCondNotificationByOrganizationProject)).WillReturnResult(sqlmock.NewResult(0, 2))
 				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrganizationProject)).WillReturnError(errors.New("DB error"))
+				mock.ExpectRollback()
 			},
 		},
 	}

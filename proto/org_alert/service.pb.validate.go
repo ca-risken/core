@@ -1322,3 +1322,834 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = TestOrgNotificationRequestValidationError{}
+
+// Validate checks the field values on ListOrgAlertCondNotificationRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *ListOrgAlertCondNotificationRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListOrgAlertCondNotificationRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// ListOrgAlertCondNotificationRequestMultiError, or nil if none found.
+func (m *ListOrgAlertCondNotificationRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListOrgAlertCondNotificationRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() <= 0 {
+		err := ListOrgAlertCondNotificationRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for ProjectId
+
+	// no validation rules for AlertConditionId
+
+	// no validation rules for NotificationId
+
+	if len(errors) > 0 {
+		return ListOrgAlertCondNotificationRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListOrgAlertCondNotificationRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// ListOrgAlertCondNotificationRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ListOrgAlertCondNotificationRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListOrgAlertCondNotificationRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListOrgAlertCondNotificationRequestMultiError) AllErrors() []error { return m }
+
+// ListOrgAlertCondNotificationRequestValidationError is the validation error
+// returned by ListOrgAlertCondNotificationRequest.Validate if the designated
+// constraints aren't met.
+type ListOrgAlertCondNotificationRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListOrgAlertCondNotificationRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListOrgAlertCondNotificationRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListOrgAlertCondNotificationRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListOrgAlertCondNotificationRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListOrgAlertCondNotificationRequestValidationError) ErrorName() string {
+	return "ListOrgAlertCondNotificationRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListOrgAlertCondNotificationRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListOrgAlertCondNotificationRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListOrgAlertCondNotificationRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListOrgAlertCondNotificationRequestValidationError{}
+
+// Validate checks the field values on ListOrgAlertCondNotificationResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *ListOrgAlertCondNotificationResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListOrgAlertCondNotificationResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// ListOrgAlertCondNotificationResponseMultiError, or nil if none found.
+func (m *ListOrgAlertCondNotificationResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListOrgAlertCondNotificationResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetAlertCondNotification() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ListOrgAlertCondNotificationResponseValidationError{
+						field:  fmt.Sprintf("AlertCondNotification[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ListOrgAlertCondNotificationResponseValidationError{
+						field:  fmt.Sprintf("AlertCondNotification[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListOrgAlertCondNotificationResponseValidationError{
+					field:  fmt.Sprintf("AlertCondNotification[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ListOrgAlertCondNotificationResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListOrgAlertCondNotificationResponseMultiError is an error wrapping multiple
+// validation errors returned by
+// ListOrgAlertCondNotificationResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ListOrgAlertCondNotificationResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListOrgAlertCondNotificationResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListOrgAlertCondNotificationResponseMultiError) AllErrors() []error { return m }
+
+// ListOrgAlertCondNotificationResponseValidationError is the validation error
+// returned by ListOrgAlertCondNotificationResponse.Validate if the designated
+// constraints aren't met.
+type ListOrgAlertCondNotificationResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListOrgAlertCondNotificationResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListOrgAlertCondNotificationResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListOrgAlertCondNotificationResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListOrgAlertCondNotificationResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListOrgAlertCondNotificationResponseValidationError) ErrorName() string {
+	return "ListOrgAlertCondNotificationResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListOrgAlertCondNotificationResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListOrgAlertCondNotificationResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListOrgAlertCondNotificationResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListOrgAlertCondNotificationResponseValidationError{}
+
+// Validate checks the field values on GetOrgAlertCondNotificationRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *GetOrgAlertCondNotificationRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetOrgAlertCondNotificationRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// GetOrgAlertCondNotificationRequestMultiError, or nil if none found.
+func (m *GetOrgAlertCondNotificationRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetOrgAlertCondNotificationRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() <= 0 {
+		err := GetOrgAlertCondNotificationRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetProjectId() <= 0 {
+		err := GetOrgAlertCondNotificationRequestValidationError{
+			field:  "ProjectId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetAlertConditionId() <= 0 {
+		err := GetOrgAlertCondNotificationRequestValidationError{
+			field:  "AlertConditionId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetNotificationId() <= 0 {
+		err := GetOrgAlertCondNotificationRequestValidationError{
+			field:  "NotificationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return GetOrgAlertCondNotificationRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetOrgAlertCondNotificationRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// GetOrgAlertCondNotificationRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GetOrgAlertCondNotificationRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetOrgAlertCondNotificationRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetOrgAlertCondNotificationRequestMultiError) AllErrors() []error { return m }
+
+// GetOrgAlertCondNotificationRequestValidationError is the validation error
+// returned by GetOrgAlertCondNotificationRequest.Validate if the designated
+// constraints aren't met.
+type GetOrgAlertCondNotificationRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetOrgAlertCondNotificationRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetOrgAlertCondNotificationRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetOrgAlertCondNotificationRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetOrgAlertCondNotificationRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetOrgAlertCondNotificationRequestValidationError) ErrorName() string {
+	return "GetOrgAlertCondNotificationRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetOrgAlertCondNotificationRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetOrgAlertCondNotificationRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetOrgAlertCondNotificationRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetOrgAlertCondNotificationRequestValidationError{}
+
+// Validate checks the field values on GetOrgAlertCondNotificationResponse with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *GetOrgAlertCondNotificationResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetOrgAlertCondNotificationResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// GetOrgAlertCondNotificationResponseMultiError, or nil if none found.
+func (m *GetOrgAlertCondNotificationResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetOrgAlertCondNotificationResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetAlertCondNotification()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, GetOrgAlertCondNotificationResponseValidationError{
+					field:  "AlertCondNotification",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, GetOrgAlertCondNotificationResponseValidationError{
+					field:  "AlertCondNotification",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetAlertCondNotification()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetOrgAlertCondNotificationResponseValidationError{
+				field:  "AlertCondNotification",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return GetOrgAlertCondNotificationResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetOrgAlertCondNotificationResponseMultiError is an error wrapping multiple
+// validation errors returned by
+// GetOrgAlertCondNotificationResponse.ValidateAll() if the designated
+// constraints aren't met.
+type GetOrgAlertCondNotificationResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetOrgAlertCondNotificationResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetOrgAlertCondNotificationResponseMultiError) AllErrors() []error { return m }
+
+// GetOrgAlertCondNotificationResponseValidationError is the validation error
+// returned by GetOrgAlertCondNotificationResponse.Validate if the designated
+// constraints aren't met.
+type GetOrgAlertCondNotificationResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetOrgAlertCondNotificationResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetOrgAlertCondNotificationResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetOrgAlertCondNotificationResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetOrgAlertCondNotificationResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetOrgAlertCondNotificationResponseValidationError) ErrorName() string {
+	return "GetOrgAlertCondNotificationResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetOrgAlertCondNotificationResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetOrgAlertCondNotificationResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetOrgAlertCondNotificationResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetOrgAlertCondNotificationResponseValidationError{}
+
+// Validate checks the field values on
+// UpdateOrgAlertCondNotificationCacheRequest with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *UpdateOrgAlertCondNotificationCacheRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// UpdateOrgAlertCondNotificationCacheRequest with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// UpdateOrgAlertCondNotificationCacheRequestMultiError, or nil if none found.
+func (m *UpdateOrgAlertCondNotificationCacheRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateOrgAlertCondNotificationCacheRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() <= 0 {
+		err := UpdateOrgAlertCondNotificationCacheRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetProjectId() <= 0 {
+		err := UpdateOrgAlertCondNotificationCacheRequestValidationError{
+			field:  "ProjectId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetAlertConditionId() <= 0 {
+		err := UpdateOrgAlertCondNotificationCacheRequestValidationError{
+			field:  "AlertConditionId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetNotificationId() <= 0 {
+		err := UpdateOrgAlertCondNotificationCacheRequestValidationError{
+			field:  "NotificationId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for CacheSecond
+
+	if len(errors) > 0 {
+		return UpdateOrgAlertCondNotificationCacheRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateOrgAlertCondNotificationCacheRequestMultiError is an error wrapping
+// multiple validation errors returned by
+// UpdateOrgAlertCondNotificationCacheRequest.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateOrgAlertCondNotificationCacheRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateOrgAlertCondNotificationCacheRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateOrgAlertCondNotificationCacheRequestMultiError) AllErrors() []error { return m }
+
+// UpdateOrgAlertCondNotificationCacheRequestValidationError is the validation
+// error returned by UpdateOrgAlertCondNotificationCacheRequest.Validate if
+// the designated constraints aren't met.
+type UpdateOrgAlertCondNotificationCacheRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateOrgAlertCondNotificationCacheRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateOrgAlertCondNotificationCacheRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateOrgAlertCondNotificationCacheRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateOrgAlertCondNotificationCacheRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateOrgAlertCondNotificationCacheRequestValidationError) ErrorName() string {
+	return "UpdateOrgAlertCondNotificationCacheRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateOrgAlertCondNotificationCacheRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateOrgAlertCondNotificationCacheRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateOrgAlertCondNotificationCacheRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateOrgAlertCondNotificationCacheRequestValidationError{}
+
+// Validate checks the field values on
+// UpdateOrgAlertCondNotificationCacheResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *UpdateOrgAlertCondNotificationCacheResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// UpdateOrgAlertCondNotificationCacheResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// UpdateOrgAlertCondNotificationCacheResponseMultiError, or nil if none found.
+func (m *UpdateOrgAlertCondNotificationCacheResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateOrgAlertCondNotificationCacheResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetAlertCondNotification()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UpdateOrgAlertCondNotificationCacheResponseValidationError{
+					field:  "AlertCondNotification",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UpdateOrgAlertCondNotificationCacheResponseValidationError{
+					field:  "AlertCondNotification",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetAlertCondNotification()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateOrgAlertCondNotificationCacheResponseValidationError{
+				field:  "AlertCondNotification",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return UpdateOrgAlertCondNotificationCacheResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateOrgAlertCondNotificationCacheResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// UpdateOrgAlertCondNotificationCacheResponse.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateOrgAlertCondNotificationCacheResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateOrgAlertCondNotificationCacheResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateOrgAlertCondNotificationCacheResponseMultiError) AllErrors() []error { return m }
+
+// UpdateOrgAlertCondNotificationCacheResponseValidationError is the validation
+// error returned by UpdateOrgAlertCondNotificationCacheResponse.Validate if
+// the designated constraints aren't met.
+type UpdateOrgAlertCondNotificationCacheResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateOrgAlertCondNotificationCacheResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateOrgAlertCondNotificationCacheResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateOrgAlertCondNotificationCacheResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateOrgAlertCondNotificationCacheResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateOrgAlertCondNotificationCacheResponseValidationError) ErrorName() string {
+	return "UpdateOrgAlertCondNotificationCacheResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateOrgAlertCondNotificationCacheResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateOrgAlertCondNotificationCacheResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateOrgAlertCondNotificationCacheResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateOrgAlertCondNotificationCacheResponseValidationError{}

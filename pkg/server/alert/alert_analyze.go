@@ -13,7 +13,6 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
-	orgalert "github.com/ca-risken/core/proto/org_alert"
 	projectproto "github.com/ca-risken/core/proto/project"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vikyd/zero"
@@ -314,84 +313,139 @@ func (a *AlertService) NotificationAlert(
 	findingIDs *[]uint64,
 	existsNewFindings bool,
 ) error {
-	alertCondNotifications, err := a.repository.ListAlertCondNotification(ctx, alertCondition.ProjectID, alertCondition.AlertConditionID, 0, 0, time.Now().Unix())
+	var notificationErrors []error
+	targets := make([]alertNotificationTarget, 0)
+
+	projectRelations, err := a.repository.ListAlertCondNotificationForNotification(ctx, alertCondition.ProjectID, alertCondition.AlertConditionID)
 	if err != nil {
-		return err
+		notificationErrors = append(notificationErrors, fmt.Errorf("list project notification targets: %w", err))
+	} else {
+		for _, relation := range *projectRelations {
+			notification, err := a.repository.GetNotification(ctx, relation.ProjectID, relation.NotificationID)
+			if err != nil {
+				notificationErrors = append(notificationErrors, fmt.Errorf("get project notification %d: %w", relation.NotificationID, err))
+				continue
+			}
+			targets = append(targets, alertNotificationTarget{
+				kind:             projectNotificationTarget,
+				projectID:        relation.ProjectID,
+				alertConditionID: relation.AlertConditionID,
+				notificationID:   relation.NotificationID,
+				cacheSecond:      relation.CacheSecond,
+				notifiedAt:       relation.NotifiedAt,
+				notificationType: notification.Type,
+				notifySetting:    notification.NotifySetting,
+			})
+		}
 	}
+
+	orgRelations, err := a.repository.ListOrgAlertNotificationTarget(ctx, alertCondition.ProjectID, alertCondition.AlertConditionID)
+	if err != nil {
+		notificationErrors = append(notificationErrors, fmt.Errorf("list organization notification targets: %w", err))
+	} else {
+		for _, relation := range orgRelations {
+			targets = append(targets, alertNotificationTarget{
+				kind:             organizationNotificationTarget,
+				organizationID:   relation.OrganizationID,
+				projectID:        relation.ProjectID,
+				alertConditionID: relation.AlertConditionID,
+				notificationID:   relation.NotificationID,
+				cacheSecond:      relation.CacheSecond,
+				notifiedAt:       relation.NotifiedAt,
+				notificationType: relation.Type,
+				notifySetting:    relation.NotifySetting,
+			})
+		}
+	}
+
 	findings, err := a.getFindingDetailsForNotification(ctx, project.ProjectId, findingIDs)
 	if err != nil {
-		return err
+		return errors.Join(append(notificationErrors, err)...)
 	}
-	notified := false
-	for _, alertCondNotification := range *alertCondNotifications {
-		// 連続通知を防ぐ
-		if !existsNewFindings && time.Now().Unix() < alertCondNotification.NotifiedAt.Unix()+int64(alertCondNotification.CacheSecond) {
-			continue
-		}
-
-		notification, err := a.repository.GetNotification(ctx, alertCondition.ProjectID, alertCondNotification.NotificationID)
-		if err != nil {
-			return err
-		}
-		switch notification.Type {
-		case "slack":
-			err = a.sendSlackNotification(ctx, a.baseURL, notification.NotifySetting, alert, project, rules, findings, a.defaultLocale)
-			if err != nil {
-				return fmt.Errorf("notify error: notification_id=%d, err=%w", notification.NotificationID, err)
-			}
-			notified = true
-		default:
-			a.logger.Warn(ctx, "This notification_type is unimprement.", notification.Type)
-		}
-		// 通知時刻を更新する
-		dataAlertCondNotification := &model.AlertCondNotification{
-			AlertConditionID: alertCondNotification.AlertConditionID,
-			NotificationID:   alertCondNotification.NotificationID,
-			CacheSecond:      alertCondNotification.CacheSecond,
-			NotifiedAt:       time.Now(),
-			ProjectID:        alertCondNotification.ProjectID,
-		}
-		_, err = a.repository.UpsertAlertCondNotification(ctx, dataAlertCondNotification)
-		if err != nil {
-			return err
+	now := time.Now()
+	for _, target := range targets {
+		if err := a.notifyAlertTarget(ctx, target, alert, rules, project, findings, existsNewFindings, now); err != nil {
+			notificationErrors = append(notificationErrors, err)
 		}
 	}
-
-	if notified {
-		if err := a.notifyOrgAlerts(ctx, alert, rules, project, findings); err != nil {
-			a.logger.Errorf(ctx, "Failed to notify organization alerts: %v", err)
-		}
-	}
-
-	return nil
+	return errors.Join(notificationErrors...)
 }
 
-func (a *AlertService) notifyOrgAlerts(
+type alertNotificationTargetKind uint8
+
+const (
+	projectNotificationTarget alertNotificationTargetKind = iota
+	organizationNotificationTarget
+)
+
+type alertNotificationTarget struct {
+	kind             alertNotificationTargetKind
+	organizationID   uint32
+	projectID        uint32
+	alertConditionID uint32
+	notificationID   uint32
+	cacheSecond      uint32
+	notifiedAt       time.Time
+	notificationType string
+	notifySetting    string
+}
+
+var sendAlertNotification = func(
+	service *AlertService,
 	ctx context.Context,
+	notifySetting string,
+	alert *model.Alert,
+	project *projectproto.Project,
+	rules *[]model.AlertRule,
+	findings *findingDetail,
+) error {
+	return service.sendSlackNotification(ctx, service.baseURL, notifySetting, alert, project, rules, findings, service.defaultLocale)
+}
+
+func (a *AlertService) notifyAlertTarget(
+	ctx context.Context,
+	target alertNotificationTarget,
 	alert *model.Alert,
 	rules *[]model.AlertRule,
 	project *projectproto.Project,
 	findings *findingDetail,
+	existsNewFindings bool,
+	now time.Time,
 ) error {
-	resp, err := a.orgAlertClient.ListOrgNotificationByProject(ctx, &orgalert.ListOrgNotificationByProjectRequest{
-		ProjectId: project.ProjectId,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to list org notifications: %w", err)
-	}
-	if resp == nil || len(resp.Notification) == 0 {
+	if !existsNewFindings && now.Unix() < target.notifiedAt.Unix()+int64(target.cacheSecond) {
 		return nil
 	}
-	for _, n := range resp.Notification {
-		switch n.Type {
-		case "slack":
-			if err := a.sendSlackNotification(ctx, a.baseURL, n.NotifySetting, alert, project, rules, findings, a.defaultLocale); err != nil {
-				a.logger.Errorf(ctx, "Failed to send org notification: notification_id=%d, err=%v", n.NotificationId, err)
-				continue
-			}
-		default:
-			a.logger.Warnf(ctx, "Unsupported org notification type: %s", n.Type)
+	if target.kind == organizationNotificationTarget {
+		exists, err := a.repository.ExistsOrgAlertNotificationTarget(ctx, target.organizationID, target.projectID, target.alertConditionID, target.notificationID)
+		if err != nil {
+			return fmt.Errorf("recheck organization notification target: %w", err)
 		}
+		if !exists {
+			return nil
+		}
+	}
+	if target.notificationType != "slack" {
+		a.logger.Warnf(ctx, "Unsupported notification type: %s", target.notificationType)
+		return nil
+	}
+	if err := sendAlertNotification(a, ctx, target.notifySetting, alert, project, rules, findings); err != nil {
+		return fmt.Errorf("notify target: kind=%d, organization_id=%d, notification_id=%d, err=%w", target.kind, target.organizationID, target.notificationID, err)
+	}
+	if target.kind == organizationNotificationTarget {
+		if err := a.repository.UpdateOrgAlertCondNotificationNotifiedAt(ctx, target.organizationID, target.projectID, target.alertConditionID, target.notificationID, now); err != nil {
+			return fmt.Errorf("update organization notification target: %w", err)
+		}
+		return nil
+	}
+	_, err := a.repository.UpsertAlertCondNotification(ctx, &model.AlertCondNotification{
+		AlertConditionID: target.alertConditionID,
+		NotificationID:   target.notificationID,
+		CacheSecond:      target.cacheSecond,
+		NotifiedAt:       now,
+		ProjectID:        target.projectID,
+	})
+	if err != nil {
+		return fmt.Errorf("update project notification target: %w", err)
 	}
 	return nil
 }

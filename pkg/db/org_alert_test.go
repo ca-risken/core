@@ -5,11 +5,13 @@ import (
 	"errors"
 	"reflect"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/ca-risken/core/pkg/model"
+	orgalert "github.com/ca-risken/core/proto/org_alert"
 )
 
 func TestListOrgNotification(t *testing.T) {
@@ -146,12 +148,14 @@ func TestUpsertOrgNotification(t *testing.T) {
 			args:    args{data: &model.OrganizationNotification{NotificationID: 0, Name: "notif1", OrganizationID: 1, Type: "slack", NotifySetting: "{}"}},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
 				mock.ExpectQuery(regexp.QuoteMeta(selectFirstOrCreate)).
 					WithArgs(uint32(1), uint32(0)).
 					WillReturnRows(sqlmock.NewRows([]string{"notification_id"}))
-				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(insertFirstOrCreate)).
 					WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectExec(regexp.QuoteMeta(insertOrgAlertCondNotificationByOrgNotification)).
+					WillReturnResult(sqlmock.NewResult(0, 2))
 				mock.ExpectCommit()
 			},
 		},
@@ -161,9 +165,25 @@ func TestUpsertOrgNotification(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
 				mock.ExpectQuery(regexp.QuoteMeta(selectFirstOrCreate)).
 					WithArgs(uint32(1), uint32(0)).
 					WillReturnError(errors.New("DB error"))
+				mock.ExpectRollback()
+			},
+		},
+		{
+			name:    "NG - relation cross product rolls back notification",
+			args:    args{data: &model.OrganizationNotification{NotificationID: 0, Name: "notif1", OrganizationID: 1, Type: "slack", NotifySetting: "{}"}},
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(regexp.QuoteMeta(selectFirstOrCreate)).
+					WithArgs(uint32(1), uint32(0)).
+					WillReturnRows(sqlmock.NewRows([]string{"notification_id"}))
+				mock.ExpectExec(regexp.QuoteMeta(insertFirstOrCreate)).WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectExec(regexp.QuoteMeta(insertOrgAlertCondNotificationByOrgNotification)).WillReturnError(errors.New("DB error"))
+				mock.ExpectRollback()
 			},
 		},
 	}
@@ -201,11 +221,14 @@ func TestDeleteOrgNotification(t *testing.T) {
 		mockClosure func(mock sqlmock.Sqlmock)
 	}{
 		{
-			name:    "OK",
+			name:    "OK - relation deleted before notification",
 			args:    args{organizationID: 1, notificationID: 1},
 			wantErr: false,
 			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(deleteOrgAlertCondNotificationByOrgNotification)).WillReturnResult(sqlmock.NewResult(0, 2))
 				mock.ExpectExec(regexp.QuoteMeta(deleteOrgNotification)).WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectCommit()
 			},
 		},
 		{
@@ -213,7 +236,10 @@ func TestDeleteOrgNotification(t *testing.T) {
 			args:    args{organizationID: 1, notificationID: 1},
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(deleteOrgAlertCondNotificationByOrgNotification)).WillReturnResult(sqlmock.NewResult(0, 2))
 				mock.ExpectExec(regexp.QuoteMeta(deleteOrgNotification)).WillReturnError(errors.New("DB error"))
+				mock.ExpectRollback()
 			},
 		},
 	}
@@ -305,3 +331,481 @@ func TestListOrgNotificationByProjectID(t *testing.T) {
 	}
 }
 
+func TestListOrgAlertCondNotification(t *testing.T) {
+	now := time.Now().Truncate(time.Second)
+	epoch := time.Date(1970, time.January, 1, 0, 0, 0, 0, time.Local)
+	type args struct {
+		organizationID   uint32
+		projectID        uint32
+		alertConditionID uint32
+		notificationID   uint32
+	}
+	cases := []struct {
+		name        string
+		args        args
+		want        []*orgalert.OrgAlertCondNotification
+		wantErr     bool
+		mockClosure func(sqlmock.Sqlmock)
+	}{
+		{
+			name: "OK - epoch is API zero",
+			args: args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
+			want: []*orgalert.OrgAlertCondNotification{{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 1800, NotifiedAt: 0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				query := listOrgAlertCondNotification + " and project_id = ? and alert_condition_id = ? and notification_id = ? order by project_id, alert_condition_id, notification_id"
+				mock.ExpectQuery(regexp.QuoteMeta(query)).
+					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
+					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(1800), epoch, now, now))
+			},
+		},
+		{
+			name: "OK - organization scope",
+			args: args{organizationID: 1},
+			want: []*orgalert.OrgAlertCondNotification{{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 1800, NotifiedAt: 0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				query := listOrgAlertCondNotification + " order by project_id, alert_condition_id, notification_id"
+				mock.ExpectQuery(regexp.QuoteMeta(query)).
+					WithArgs(uint32(1)).
+					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(1800), epoch, now, now))
+			},
+		},
+		{
+			name: "OK - optional subset",
+			args: args{organizationID: 1, alertConditionID: 3},
+			want: []*orgalert.OrgAlertCondNotification{},
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				query := listOrgAlertCondNotification + " and alert_condition_id = ? order by project_id, alert_condition_id, notification_id"
+				mock.ExpectQuery(regexp.QuoteMeta(query)).
+					WithArgs(uint32(1), uint32(3)).
+					WillReturnRows(orgAlertCondNotificationRows())
+			},
+		},
+		{
+			name:    "NG - DB error",
+			args:    args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				query := listOrgAlertCondNotification + " and project_id = ? and alert_condition_id = ? and notification_id = ? order by project_id, alert_condition_id, notification_id"
+				mock.ExpectQuery(regexp.QuoteMeta(query)).
+					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
+					WillReturnError(errors.New("DB error"))
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			database, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("Unexpected mock DB error: %v", err)
+			}
+			c.mockClosure(mock)
+			got, err := database.ListOrgAlertCondNotification(context.Background(), c.args.organizationID, c.args.projectID, c.args.alertConditionID, c.args.notificationID)
+			if (err != nil) != c.wantErr {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestGetOrgAlertCondNotification(t *testing.T) {
+	now := time.Now().Truncate(time.Second)
+	type args struct {
+		organizationID   uint32
+		projectID        uint32
+		alertConditionID uint32
+		notificationID   uint32
+	}
+	cases := []struct {
+		name        string
+		args        args
+		want        *orgalert.OrgAlertCondNotification
+		wantErr     bool
+		mockClosure func(sqlmock.Sqlmock)
+	}{
+		{
+			name: "OK - all four keys",
+			args: args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
+			want: &orgalert.OrgAlertCondNotification{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 60, NotifiedAt: now.Unix(), CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotification)).
+					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
+					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(60), now, now, now))
+			},
+		},
+		{
+			name:    "NG - DB error",
+			args:    args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotification)).
+					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
+					WillReturnError(errors.New("DB error"))
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			database, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("Unexpected mock DB error: %v", err)
+			}
+			c.mockClosure(mock)
+			got, err := database.GetOrgAlertCondNotification(context.Background(), c.args.organizationID, c.args.projectID, c.args.alertConditionID, c.args.notificationID)
+			if (err != nil) != c.wantErr {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestInsertAndDeleteOrgAlertCondNotification(t *testing.T) {
+	type args struct {
+		organizationID   uint32
+		projectID        uint32
+		alertConditionID uint32
+		notificationID   uint32
+	}
+	cases := []struct {
+		name        string
+		operation   string
+		args        args
+		wantErr     bool
+		mockClosure func(sqlmock.Sqlmock)
+	}{
+		{
+			name:      "OK - idempotent insert uses all four keys",
+			operation: "insert",
+			args:      args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(regexp.QuoteMeta(insertOrgAlertCondNotification)).
+					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
+					WillReturnResult(sqlmock.NewResult(0, 0))
+			},
+		},
+		{
+			name:      "NG - insert error",
+			operation: "insert",
+			args:      args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
+			wantErr:   true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(regexp.QuoteMeta(insertOrgAlertCondNotification)).WillReturnError(errors.New("DB error"))
+			},
+		},
+		{
+			name:      "OK - delete uses all four keys",
+			operation: "delete",
+			args:      args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(regexp.QuoteMeta(deleteOrgAlertCondNotification)).
+					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+			},
+		},
+		{
+			name:      "NG - delete error",
+			operation: "delete",
+			args:      args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
+			wantErr:   true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(regexp.QuoteMeta(deleteOrgAlertCondNotification)).WillReturnError(errors.New("DB error"))
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			database, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("Unexpected mock DB error: %v", err)
+			}
+			c.mockClosure(mock)
+			if c.operation == "insert" {
+				err = database.InsertOrgAlertCondNotification(context.Background(), c.args.organizationID, c.args.projectID, c.args.alertConditionID, c.args.notificationID)
+			} else {
+				err = database.DeleteOrgAlertCondNotification(context.Background(), c.args.organizationID, c.args.projectID, c.args.alertConditionID, c.args.notificationID)
+			}
+			if (err != nil) != c.wantErr {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
+	now := time.Now().Truncate(time.Second)
+	type args struct {
+		organizationID   uint32
+		projectID        uint32
+		alertConditionID uint32
+		notificationID   uint32
+		cacheSecond      uint32
+	}
+	cases := []struct {
+		name        string
+		args        args
+		want        *orgalert.OrgAlertCondNotification
+		wantErr     bool
+		mockClosure func(sqlmock.Sqlmock)
+	}{
+		{
+			name: "OK - cache only update uses all four keys",
+			args: args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4, cacheSecond: 300},
+			want: &orgalert.OrgAlertCondNotification{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 300, NotifiedAt: now.Unix(), CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertCondNotificationCache)).
+					WithArgs(uint32(300), uint32(1), uint32(2), uint32(3), uint32(4)).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotification)).
+					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
+					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(300), now, now, now))
+			},
+		},
+		{
+			name:    "NG - update error",
+			args:    args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4, cacheSecond: 300},
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertCondNotificationCache)).WillReturnError(errors.New("DB error"))
+			},
+		},
+		{
+			name:    "NG - missing relation after update",
+			args:    args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 999, cacheSecond: 300},
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertCondNotificationCache)).WillReturnResult(sqlmock.NewResult(0, 0))
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotification)).WillReturnRows(orgAlertCondNotificationRows())
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			database, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("Unexpected mock DB error: %v", err)
+			}
+			c.mockClosure(mock)
+			got, err := database.UpdateOrgAlertCondNotificationCache(context.Background(), c.args.organizationID, c.args.projectID, c.args.alertConditionID, c.args.notificationID, c.args.cacheSecond)
+			if (err != nil) != c.wantErr {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestExistsOrgAlertConditionMembership(t *testing.T) {
+	cases := []struct {
+		name        string
+		want        bool
+		wantErr     bool
+		mockClosure func(sqlmock.Sqlmock)
+	}{
+		{
+			name: "OK - member",
+			want: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertConditionMembership)).
+					WithArgs(uint32(1), uint32(2), uint32(3)).
+					WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(true))
+			},
+		},
+		{
+			name: "OK - not member",
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertConditionMembership)).
+					WithArgs(uint32(1), uint32(2), uint32(3)).
+					WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(false))
+			},
+		},
+		{
+			name:    "NG - DB error",
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertConditionMembership)).WillReturnError(errors.New("DB error"))
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			database, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("Unexpected mock DB error: %v", err)
+			}
+			c.mockClosure(mock)
+			got, err := database.ExistsOrgAlertConditionMembership(context.Background(), 1, 2, 3)
+			if (err != nil) != c.wantErr {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if got != c.want {
+				t.Fatalf("Unexpected result: want=%v, got=%v", c.want, got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func orgAlertCondNotificationRows() *sqlmock.Rows {
+	return sqlmock.NewRows([]string{"organization_id", "project_id", "alert_condition_id", "notification_id", "cache_second", "notified_at", "created_at", "updated_at"})
+}
+
+func TestListOrgAlertNotificationTarget(t *testing.T) {
+	now := time.Now().Truncate(time.Second)
+	cases := []struct {
+		name        string
+		want        []*OrgAlertNotificationTarget
+		wantErr     bool
+		mockClosure func(sqlmock.Sqlmock)
+	}{
+		{
+			name: "OK - all organizations",
+			want: []*OrgAlertNotificationTarget{
+				{OrganizationID: 10, ProjectID: 1, AlertConditionID: 2, NotificationID: 100, CacheSecond: 30, NotifiedAt: now, Type: "slack", NotifySetting: "one"},
+				{OrganizationID: 20, ProjectID: 1, AlertConditionID: 2, NotificationID: 200, CacheSecond: 60, NotifiedAt: now, Type: "slack", NotifySetting: "two"},
+			},
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(listOrgAlertNotificationTarget)).WithArgs(uint32(1), uint32(2)).WillReturnRows(
+					sqlmock.NewRows([]string{"organization_id", "project_id", "alert_condition_id", "notification_id", "cache_second", "notified_at", "type", "notify_setting"}).
+						AddRow(uint32(10), uint32(1), uint32(2), uint32(100), uint32(30), now, "slack", "one").
+						AddRow(uint32(20), uint32(1), uint32(2), uint32(200), uint32(60), now, "slack", "two"))
+			},
+		},
+		{
+			name:    "NG - DB error",
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(regexp.QuoteMeta(listOrgAlertNotificationTarget)).WithArgs(uint32(1), uint32(2)).WillReturnError(errors.New("DB error"))
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			database, mock, err := newMockClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+			c.mockClosure(mock)
+			got, err := database.ListOrgAlertNotificationTarget(context.Background(), 1, 2)
+			if (err != nil) != c.wantErr {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected targets: want=%+v, got=%+v", c.want, got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestExistsOrgAlertNotificationTarget(t *testing.T) {
+	cases := []struct {
+		name     string
+		row      *sqlmock.Rows
+		queryErr error
+		want     bool
+		wantErr  bool
+	}{
+		{name: "OK - exists", row: sqlmock.NewRows([]string{"exists"}).AddRow(true), want: true},
+		{name: "OK - removed", row: sqlmock.NewRows([]string{"exists"}).AddRow(false)},
+		{name: "NG - DB error", queryErr: errors.New("DB error"), wantErr: true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			database, mock, err := newMockClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+			expectation := mock.ExpectQuery(regexp.QuoteMeta(existsOrgAlertNotificationTarget)).WithArgs(uint32(10), uint32(1), uint32(2), uint32(100))
+			if c.queryErr != nil {
+				expectation.WillReturnError(c.queryErr)
+			} else {
+				expectation.WillReturnRows(c.row)
+			}
+			got, err := database.ExistsOrgAlertNotificationTarget(context.Background(), 10, 1, 2, 100)
+			if (err != nil) != c.wantErr || got != c.want {
+				t.Fatalf("Unexpected result: got=%v, err=%v", got, err)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestUpdateOrgAlertCondNotificationNotifiedAt(t *testing.T) {
+	now := time.Now().Truncate(time.Second)
+	cases := []struct {
+		name      string
+		updateErr error
+		wantErr   bool
+	}{
+		{name: "OK - four-key success update"},
+		{name: "NG - DB error", updateErr: errors.New("DB error"), wantErr: true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			database, mock, err := newMockClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+			expectation := mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertCondNotificationNotifiedAt)).WithArgs(now, uint32(10), uint32(1), uint32(2), uint32(100))
+			if c.updateErr != nil {
+				expectation.WillReturnError(c.updateErr)
+			} else {
+				expectation.WillReturnResult(sqlmock.NewResult(0, 1))
+			}
+			err = database.UpdateOrgAlertCondNotificationNotifiedAt(context.Background(), 10, 1, 2, 100, now)
+			if (err != nil) != c.wantErr {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestLifecycleRelationInsertContract(t *testing.T) {
+	cases := []struct {
+		name  string
+		query string
+	}{
+		{name: "organization project", query: insertOrgAlertCondNotificationByOrganizationProject},
+		{name: "alert condition", query: insertOrgAlertCondNotificationByAlertCondition},
+		{name: "organization notification", query: insertOrgAlertCondNotificationByOrgNotification},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			query := strings.ToLower(c.query)
+			if !strings.Contains(query, "insert ignore") {
+				t.Fatalf("relation insert must be idempotent: %s", c.query)
+			}
+			if strings.Contains(query, "cache_second") || strings.Contains(query, "notified_at") || strings.Contains(query, "update") {
+				t.Fatalf("relation insert must preserve retries and use defaults after genuine re-add: %s", c.query)
+			}
+		})
+	}
+}
