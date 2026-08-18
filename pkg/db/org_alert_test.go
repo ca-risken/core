@@ -470,81 +470,6 @@ func TestGetOrgAlertCondNotification(t *testing.T) {
 	}
 }
 
-func TestInsertAndDeleteOrgAlertCondNotification(t *testing.T) {
-	type args struct {
-		organizationID   uint32
-		projectID        uint32
-		alertConditionID uint32
-		notificationID   uint32
-	}
-	cases := []struct {
-		name        string
-		operation   string
-		args        args
-		wantErr     bool
-		mockClosure func(sqlmock.Sqlmock)
-	}{
-		{
-			name:      "OK - idempotent insert uses all four keys",
-			operation: "insert",
-			args:      args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
-			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(regexp.QuoteMeta(insertOrgAlertCondNotification)).
-					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
-					WillReturnResult(sqlmock.NewResult(0, 0))
-			},
-		},
-		{
-			name:      "NG - insert error",
-			operation: "insert",
-			args:      args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
-			wantErr:   true,
-			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(regexp.QuoteMeta(insertOrgAlertCondNotification)).WillReturnError(errors.New("DB error"))
-			},
-		},
-		{
-			name:      "OK - delete uses all four keys",
-			operation: "delete",
-			args:      args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
-			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(regexp.QuoteMeta(deleteOrgAlertCondNotification)).
-					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
-					WillReturnResult(sqlmock.NewResult(0, 1))
-			},
-		},
-		{
-			name:      "NG - delete error",
-			operation: "delete",
-			args:      args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
-			wantErr:   true,
-			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(regexp.QuoteMeta(deleteOrgAlertCondNotification)).WillReturnError(errors.New("DB error"))
-			},
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			database, mock, err := newMockClient()
-			if err != nil {
-				t.Fatalf("Unexpected mock DB error: %v", err)
-			}
-			c.mockClosure(mock)
-			if c.operation == "insert" {
-				err = database.InsertOrgAlertCondNotification(context.Background(), c.args.organizationID, c.args.projectID, c.args.alertConditionID, c.args.notificationID)
-			} else {
-				err = database.DeleteOrgAlertCondNotification(context.Background(), c.args.organizationID, c.args.projectID, c.args.alertConditionID, c.args.notificationID)
-			}
-			if (err != nil) != c.wantErr {
-				t.Fatalf("Unexpected error: %v", err)
-			}
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Fatal(err)
-			}
-		})
-	}
-}
-
 func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 	now := time.Now().Truncate(time.Second)
 	type args struct {
@@ -562,16 +487,18 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 		mockClosure func(sqlmock.Sqlmock)
 	}{
 		{
-			name: "OK - cache only update uses all four keys",
+			name: "OK - membership and relation are locked with all four keys",
 			args: args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4, cacheSecond: 300},
 			want: &orgalert.OrgAlertCondNotification{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 300, NotifiedAt: now.Unix(), CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotificationForUpdate)).
+					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
+					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(1800), now, now, now))
 				mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertCondNotificationCache)).
 					WithArgs(uint32(300), uint32(1), uint32(2), uint32(3), uint32(4)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotification)).
-					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
-					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(300), now, now, now))
+				mock.ExpectCommit()
 			},
 		},
 		{
@@ -579,16 +506,21 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 			args:    args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4, cacheSecond: 300},
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotificationForUpdate)).
+					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(1800), now, now, now))
 				mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertCondNotificationCache)).WillReturnError(errors.New("DB error"))
+				mock.ExpectRollback()
 			},
 		},
 		{
-			name:    "NG - missing relation after update",
+			name:    "NG - membership or relation is missing",
 			args:    args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 999, cacheSecond: 300},
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertCondNotificationCache)).WillReturnResult(sqlmock.NewResult(0, 0))
-				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotification)).WillReturnRows(orgAlertCondNotificationRows())
+				mock.ExpectBegin()
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotificationForUpdate)).WillReturnRows(orgAlertCondNotificationRows())
+				mock.ExpectRollback()
 			},
 		},
 	}
@@ -605,59 +537,6 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, got)
-			}
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Fatal(err)
-			}
-		})
-	}
-}
-
-func TestExistsOrgAlertConditionMembership(t *testing.T) {
-	cases := []struct {
-		name        string
-		want        bool
-		wantErr     bool
-		mockClosure func(sqlmock.Sqlmock)
-	}{
-		{
-			name: "OK - member",
-			want: true,
-			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertConditionMembership)).
-					WithArgs(uint32(1), uint32(2), uint32(3)).
-					WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(true))
-			},
-		},
-		{
-			name: "OK - not member",
-			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertConditionMembership)).
-					WithArgs(uint32(1), uint32(2), uint32(3)).
-					WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(false))
-			},
-		},
-		{
-			name:    "NG - DB error",
-			wantErr: true,
-			mockClosure: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertConditionMembership)).WillReturnError(errors.New("DB error"))
-			},
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			database, mock, err := newMockClient()
-			if err != nil {
-				t.Fatalf("Unexpected mock DB error: %v", err)
-			}
-			c.mockClosure(mock)
-			got, err := database.ExistsOrgAlertConditionMembership(context.Background(), 1, 2, 3)
-			if (err != nil) != c.wantErr {
-				t.Fatalf("Unexpected error: %v", err)
-			}
-			if got != c.want {
-				t.Fatalf("Unexpected result: want=%v, got=%v", c.want, got)
 			}
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Fatal(err)

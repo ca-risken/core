@@ -17,24 +17,6 @@ type OrgAlertRepository struct {
 	mock.Mock
 }
 
-// DeleteOrgAlertCondNotification provides a mock function with given fields: ctx, organizationID, projectID, alertConditionID, notificationID
-func (_m *OrgAlertRepository) DeleteOrgAlertCondNotification(ctx context.Context, organizationID uint32, projectID uint32, alertConditionID uint32, notificationID uint32) error {
-	ret := _m.Called(ctx, organizationID, projectID, alertConditionID, notificationID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for DeleteOrgAlertCondNotification")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, uint32) error); ok {
-		r0 = rf(ctx, organizationID, projectID, alertConditionID, notificationID)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // DeleteOrgNotification provides a mock function with given fields: ctx, organizationID, notificationID
 func (_m *OrgAlertRepository) DeleteOrgNotification(ctx context.Context, organizationID uint32, notificationID uint32) error {
 	ret := _m.Called(ctx, organizationID, notificationID)
@@ -51,34 +33,6 @@ func (_m *OrgAlertRepository) DeleteOrgNotification(ctx context.Context, organiz
 	}
 
 	return r0
-}
-
-// ExistsOrgAlertConditionMembership provides a mock function with given fields: ctx, organizationID, projectID, alertConditionID
-func (_m *OrgAlertRepository) ExistsOrgAlertConditionMembership(ctx context.Context, organizationID uint32, projectID uint32, alertConditionID uint32) (bool, error) {
-	ret := _m.Called(ctx, organizationID, projectID, alertConditionID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ExistsOrgAlertConditionMembership")
-	}
-
-	var r0 bool
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32) (bool, error)); ok {
-		return rf(ctx, organizationID, projectID, alertConditionID)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32) bool); ok {
-		r0 = rf(ctx, organizationID, projectID, alertConditionID)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint32) error); ok {
-		r1 = rf(ctx, organizationID, projectID, alertConditionID)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
 }
 
 // GetOrgAlertCondNotification provides a mock function with given fields: ctx, organizationID, projectID, alertConditionID, notificationID
@@ -139,24 +93,6 @@ func (_m *OrgAlertRepository) GetOrgNotification(ctx context.Context, organizati
 	}
 
 	return r0, r1
-}
-
-// InsertOrgAlertCondNotification provides a mock function with given fields: ctx, organizationID, projectID, alertConditionID, notificationID
-func (_m *OrgAlertRepository) InsertOrgAlertCondNotification(ctx context.Context, organizationID uint32, projectID uint32, alertConditionID uint32, notificationID uint32) error {
-	ret := _m.Called(ctx, organizationID, projectID, alertConditionID, notificationID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for InsertOrgAlertCondNotification")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, uint32) error); ok {
-		r0 = rf(ctx, organizationID, projectID, alertConditionID, notificationID)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
 }
 
 // ListOrgAlertCondNotification provides a mock function with given fields: ctx, organizationID, projectID, alertConditionID, notificationID

@@ -125,47 +125,25 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 	relation := &orgalert.OrgAlertCondNotification{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 300}
 	validInput := &orgalert.UpdateOrgAlertCondNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 300}
 	cases := []struct {
-		name             string
-		input            *orgalert.UpdateOrgAlertCondNotificationCacheRequest
-		membership       bool
-		membershipErr    error
-		getResp          *orgalert.OrgAlertCondNotification
-		getErr           error
-		updateResp       *orgalert.OrgAlertCondNotification
-		updateErr        error
-		want             *orgalert.UpdateOrgAlertCondNotificationCacheResponse
-		wantErr          bool
-		expectMembership bool
-		expectGet        bool
-		expectUpdate     bool
+		name       string
+		input      *orgalert.UpdateOrgAlertCondNotificationCacheRequest
+		updateResp *orgalert.OrgAlertCondNotification
+		updateErr  error
+		want       *orgalert.UpdateOrgAlertCondNotificationCacheResponse
+		wantErr    bool
+		expectCall bool
 	}{
 		{
-			name: "OK - membership and relation exist", input: validInput,
-			membership: true, getResp: relation, updateResp: relation,
-			want:             &orgalert.UpdateOrgAlertCondNotificationCacheResponse{AlertCondNotification: relation},
-			expectMembership: true, expectGet: true, expectUpdate: true,
+			name: "OK - atomic update", input: validInput, updateResp: relation,
+			want: &orgalert.UpdateOrgAlertCondNotificationCacheResponse{AlertCondNotification: relation}, expectCall: true,
 		},
 		{
-			name: "NG - project is not organization member", input: validInput,
-			wantErr: true, expectMembership: true,
+			name: "NG - membership or relation is missing", input: validInput,
+			updateErr: gorm.ErrRecordNotFound, wantErr: true, expectCall: true,
 		},
 		{
-			name: "NG - relation is missing", input: validInput,
-			membership: true, getErr: gorm.ErrRecordNotFound,
-			wantErr: true, expectMembership: true, expectGet: true,
-		},
-		{
-			name: "NG - membership lookup error", input: validInput,
-			membershipErr: errors.New("DB error"), wantErr: true, expectMembership: true,
-		},
-		{
-			name: "NG - relation lookup error", input: validInput,
-			membership: true, getErr: errors.New("DB error"), wantErr: true, expectMembership: true, expectGet: true,
-		},
-		{
-			name: "NG - cache update error", input: validInput,
-			membership: true, getResp: relation, updateErr: errors.New("DB error"), wantErr: true,
-			expectMembership: true, expectGet: true, expectUpdate: true,
+			name: "NG - update error", input: validInput,
+			updateErr: errors.New("DB error"), wantErr: true, expectCall: true,
 		},
 		{
 			name:    "NG - validation error",
@@ -182,13 +160,7 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			repository := mocks.NewOrgAlertRepository(t)
 			service := OrgAlertService{repository: repository, logger: logging.NewLogger()}
-			if c.expectMembership {
-				repository.On("ExistsOrgAlertConditionMembership", mock.Anything, uint32(1), uint32(2), uint32(3)).Return(c.membership, c.membershipErr).Once()
-			}
-			if c.expectGet {
-				repository.On("GetOrgAlertCondNotification", mock.Anything, uint32(1), uint32(2), uint32(3), uint32(4)).Return(c.getResp, c.getErr).Once()
-			}
-			if c.expectUpdate {
+			if c.expectCall {
 				repository.On("UpdateOrgAlertCondNotificationCache", mock.Anything, uint32(1), uint32(2), uint32(3), uint32(4), uint32(300)).Return(c.updateResp, c.updateErr).Once()
 			}
 			got, err := service.UpdateOrgAlertCondNotificationCache(context.Background(), c.input)

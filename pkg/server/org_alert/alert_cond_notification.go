@@ -39,21 +39,11 @@ func (s *OrgAlertService) UpdateOrgAlertCondNotificationCache(ctx context.Contex
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	exists, err := s.repository.ExistsOrgAlertConditionMembership(ctx, req.OrganizationId, req.ProjectId, req.AlertConditionId)
+	data, err := s.repository.UpdateOrgAlertCondNotificationCache(ctx, req.OrganizationId, req.ProjectId, req.AlertConditionId, req.NotificationId, req.CacheSecond)
 	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, status.Error(codes.NotFound, "organization alert condition membership not found")
-	}
-	if _, err := s.repository.GetOrgAlertCondNotification(ctx, req.OrganizationId, req.ProjectId, req.AlertConditionId, req.NotificationId); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "organization alert condition notification not found")
 		}
-		return nil, err
-	}
-	data, err := s.repository.UpdateOrgAlertCondNotificationCache(ctx, req.OrganizationId, req.ProjectId, req.AlertConditionId, req.NotificationId, req.CacheSecond)
-	if err != nil {
 		return nil, err
 	}
 	return &orgalert.UpdateOrgAlertCondNotificationCacheResponse{AlertCondNotification: data}, nil
