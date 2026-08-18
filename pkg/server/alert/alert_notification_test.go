@@ -44,6 +44,7 @@ func TestNotificationAlert(t *testing.T) {
 		orgTargets           []*db.OrgAlertNotificationTarget
 		orgListErr           error
 		orgExists            map[uint32]bool
+		orgLatest            map[uint32]*db.OrgAlertNotificationTarget
 		sendErr              map[string]error
 		projectUpdateErr     error
 		orgUpdateErr         map[uint32]error
@@ -95,8 +96,10 @@ func TestNotificationAlert(t *testing.T) {
 			projectRelations:     []model.AlertCondNotification{projectRelation},
 			projectNotifications: map[uint32]*model.Notification{1: {NotificationID: 1, Type: "slack", NotifySetting: "project"}},
 			orgTargets:           []*db.OrgAlertNotificationTarget{&orgSuppressed},
+			orgExists:            map[uint32]bool{10: true},
 			wantSent:             []string{"project"},
 			wantProjectUpdates:   1,
+			wantOrgRechecks:      []uint32{10},
 		},
 		{
 			name:                 "NG - project send failure does not stop organization",
@@ -137,6 +140,13 @@ func TestNotificationAlert(t *testing.T) {
 			name:            "OK - send-time removed organization target is skipped",
 			orgTargets:      []*db.OrgAlertNotificationTarget{orgTarget},
 			orgExists:       map[uint32]bool{10: false},
+			wantOrgRechecks: []uint32{10},
+		},
+		{
+			name:            "OK - send-time organization suppression uses latest state",
+			orgTargets:      []*db.OrgAlertNotificationTarget{orgTarget},
+			orgExists:       map[uint32]bool{10: true},
+			orgLatest:       map[uint32]*db.OrgAlertNotificationTarget{10: &orgSuppressed},
 			wantOrgRechecks: []uint32{10},
 		},
 		{
@@ -184,6 +194,9 @@ func TestNotificationAlert(t *testing.T) {
 						latest = candidate
 						break
 					}
+				}
+				if candidate := c.orgLatest[organizationID]; candidate != nil {
+					latest = candidate
 				}
 				if c.orgExists[organizationID] {
 					mockDB.On("GetOrgAlertNotificationTarget", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1)).Return(latest, nil).Once()
