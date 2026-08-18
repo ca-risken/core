@@ -128,7 +128,7 @@ func (a *AlertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 		if registAlert.Status == alert.Status_ACTIVE.String() {
 			err = a.NotificationAlert(ctx, alertCondition, registAlert, alertRules, project, &matchFindingIDs, existsNewFindings)
 			if err != nil {
-				a.logger.Errorf(ctx, "Failed notification alert: %v", err)
+				return err
 			}
 		}
 	} else {
