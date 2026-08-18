@@ -1935,7 +1935,16 @@ func (m *UpdateOrgAlertCondNotificationCacheRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	// no validation rules for CacheSecond
+	if m.GetCacheSecond() > 31536000 {
+		err := UpdateOrgAlertCondNotificationCacheRequestValidationError{
+			field:  "CacheSecond",
+			reason: "value must be less than or equal to 31536000",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return UpdateOrgAlertCondNotificationCacheRequestMultiError(errors)

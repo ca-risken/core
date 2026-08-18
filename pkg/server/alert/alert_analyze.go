@@ -128,7 +128,7 @@ func (a *AlertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 		if registAlert.Status == alert.Status_ACTIVE.String() {
 			err = a.NotificationAlert(ctx, alertCondition, registAlert, alertRules, project, &matchFindingIDs, existsNewFindings)
 			if err != nil {
-				return err
+				a.logger.Errorf(ctx, "Failed notification alert: %v", err)
 			}
 		}
 	} else {
@@ -390,18 +390,6 @@ type alertNotificationTarget struct {
 	notifySetting    string
 }
 
-var sendAlertNotification = func(
-	service *AlertService,
-	ctx context.Context,
-	notifySetting string,
-	alert *model.Alert,
-	project *projectproto.Project,
-	rules *[]model.AlertRule,
-	findings *findingDetail,
-) error {
-	return service.sendSlackNotification(ctx, service.baseURL, notifySetting, alert, project, rules, findings, service.defaultLocale)
-}
-
 func (a *AlertService) notifyAlertTarget(
 	ctx context.Context,
 	target alertNotificationTarget,
@@ -428,7 +416,13 @@ func (a *AlertService) notifyAlertTarget(
 		a.logger.Warnf(ctx, "Unsupported notification type: %s", target.notificationType)
 		return nil
 	}
-	if err := sendAlertNotification(a, ctx, target.notifySetting, alert, project, rules, findings); err != nil {
+	send := a.sendAlertNotification
+	if send == nil {
+		send = func(ctx context.Context, notifySetting string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule, findings *findingDetail) error {
+			return a.sendSlackNotification(ctx, a.baseURL, notifySetting, alert, project, rules, findings, a.defaultLocale)
+		}
+	}
+	if err := send(ctx, target.notifySetting, alert, project, rules, findings); err != nil {
 		return fmt.Errorf("notify target: kind=%d, organization_id=%d, notification_id=%d, err=%w", target.kind, target.organizationID, target.notificationID, err)
 	}
 	if target.kind == organizationNotificationTarget {

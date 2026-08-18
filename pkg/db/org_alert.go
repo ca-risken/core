@@ -194,7 +194,7 @@ func (c *Client) ListOrgAlertCondNotification(ctx context.Context, organizationI
 		query.WriteString(" = ?")
 		args = append(args, filter.value)
 	}
-	query.WriteString(" order by project_id, alert_condition_id, notification_id")
+	query.WriteString(" order by project_id, alert_condition_id, notification_id limit 1000")
 	var rows []*organizationAlertCondNotification
 	if err := c.Slave.WithContext(ctx).Raw(query.String(), args...).Scan(&rows).Error; err != nil {
 		return nil, err
@@ -246,7 +246,7 @@ func convertOrgAlertCondNotification(row *organizationAlertCondNotification) *or
 		return &orgalert.OrgAlertCondNotification{}
 	}
 	notifiedAt := row.NotifiedAt.Unix()
-	if row.NotifiedAt.Year() == 1970 && row.NotifiedAt.YearDay() == 1 && row.NotifiedAt.Hour() == 0 && row.NotifiedAt.Minute() == 0 && row.NotifiedAt.Second() == 0 {
+	if row.NotifiedAt.IsZero() || (row.NotifiedAt.Year() == 1970 && row.NotifiedAt.YearDay() == 1 && row.NotifiedAt.Hour() == 0 && row.NotifiedAt.Minute() == 0 && row.NotifiedAt.Second() == 0) {
 		notifiedAt = 0
 	}
 	return &orgalert.OrgAlertCondNotification{

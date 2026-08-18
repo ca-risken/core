@@ -6,6 +6,7 @@ import (
 
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/db"
+	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/iam"
@@ -32,6 +33,7 @@ type AlertService struct {
 	slackClient              slack.Client
 	slackActionSigningSecret string
 	retryer                  backoff.BackOff
+	sendAlertNotification    func(context.Context, string, *model.Alert, *project.Project, *[]model.AlertRule, *findingDetail) error
 }
 
 func NewAlertService(

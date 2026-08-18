@@ -146,13 +146,13 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 			expectMembership: true, expectGet: true, expectUpdate: true,
 		},
 		{
-			name: "OK - project is not organization member", input: validInput,
-			want: &orgalert.UpdateOrgAlertCondNotificationCacheResponse{}, expectMembership: true,
+			name: "NG - project is not organization member", input: validInput,
+			wantErr: true, expectMembership: true,
 		},
 		{
-			name: "OK - relation is missing", input: validInput,
+			name: "NG - relation is missing", input: validInput,
 			membership: true, getErr: gorm.ErrRecordNotFound,
-			want: &orgalert.UpdateOrgAlertCondNotificationCacheResponse{}, expectMembership: true, expectGet: true,
+			wantErr: true, expectMembership: true, expectGet: true,
 		},
 		{
 			name: "NG - membership lookup error", input: validInput,
@@ -170,6 +170,11 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 		{
 			name:    "NG - validation error",
 			input:   &orgalert.UpdateOrgAlertCondNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3},
+			wantErr: true,
+		},
+		{
+			name:    "NG - cache exceeds one year",
+			input:   &orgalert.UpdateOrgAlertCondNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 31536001},
 			wantErr: true,
 		},
 	}

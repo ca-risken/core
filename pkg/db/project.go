@@ -243,6 +243,9 @@ func (c *Client) CleanWithNoProject(ctx context.Context) error {
 	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "alert_cond_notification"), projectIDs).Error; err != nil {
 		return err
 	}
+	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "organization_alert_cond_notification"), projectIDs).Error; err != nil {
+		return err
+	}
 	if err := c.Master.WithContext(ctx).Exec(fmt.Sprintf(cleanTableWithNoProjectTemplate, "notification"), projectIDs).Error; err != nil {
 		return err
 	}

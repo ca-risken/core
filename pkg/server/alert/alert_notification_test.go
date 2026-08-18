@@ -187,12 +187,10 @@ func TestNotificationAlert(t *testing.T) {
 				mockDB.On("UpdateOrgAlertCondNotificationNotifiedAt", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1), mock.Anything).Return(c.orgUpdateErr[organizationID]).Once()
 			}
 			var sent []string
-			originalSend := sendAlertNotification
-			sendAlertNotification = func(_ *AlertService, _ context.Context, setting string, _ *model.Alert, _ *project.Project, _ *[]model.AlertRule, _ *findingDetail) error {
+			svc.sendAlertNotification = func(_ context.Context, setting string, _ *model.Alert, _ *project.Project, _ *[]model.AlertRule, _ *findingDetail) error {
 				sent = append(sent, setting)
 				return c.sendErr[setting]
 			}
-			defer func() { sendAlertNotification = originalSend }()
 			findingIDs := []uint64{}
 			err := svc.NotificationAlert(context.Background(), &model.AlertCondition{ProjectID: 1, AlertConditionID: 2}, &model.Alert{}, &[]model.AlertRule{}, &project.Project{ProjectId: 1}, &findingIDs, false)
 			if (err != nil) != c.wantErr {

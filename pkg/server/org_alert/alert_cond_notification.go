@@ -5,6 +5,8 @@ import (
 	"errors"
 
 	orgalert "github.com/ca-risken/core/proto/org_alert"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
 
@@ -42,11 +44,11 @@ func (s *OrgAlertService) UpdateOrgAlertCondNotificationCache(ctx context.Contex
 		return nil, err
 	}
 	if !exists {
-		return &orgalert.UpdateOrgAlertCondNotificationCacheResponse{}, nil
+		return nil, status.Error(codes.NotFound, "organization alert condition membership not found")
 	}
 	if _, err := s.repository.GetOrgAlertCondNotification(ctx, req.OrganizationId, req.ProjectId, req.AlertConditionId, req.NotificationId); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &orgalert.UpdateOrgAlertCondNotificationCacheResponse{}, nil
+			return nil, status.Error(codes.NotFound, "organization alert condition notification not found")
 		}
 		return nil, err
 	}

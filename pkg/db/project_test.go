@@ -89,6 +89,7 @@ func TestCleanWithNoProject(t *testing.T) {
 				"delete from alert_cond_rule where project_id in",
 				"delete from alert_rule where project_id in",
 				"delete from alert_cond_notification where project_id in",
+				"delete from organization_alert_cond_notification where project_id in",
 				"delete from notification where project_id in",
 				"delete from finding where project_id in",
 				"delete from finding_tag where project_id in",
