@@ -615,16 +615,18 @@ func TestListOrgAlertNotificationTarget(t *testing.T) {
 	}
 }
 
-func TestExistsOrgAlertNotificationTarget(t *testing.T) {
+func TestGetOrgAlertNotificationTarget(t *testing.T) {
+	now := time.Now().Truncate(time.Second)
+	target := &OrgAlertNotificationTarget{OrganizationID: 10, ProjectID: 1, AlertConditionID: 2, NotificationID: 100, CacheSecond: 1800, NotifiedAt: now, Type: "slack", NotifySetting: "latest"}
 	cases := []struct {
 		name     string
 		row      *sqlmock.Rows
 		queryErr error
-		want     bool
+		want     *OrgAlertNotificationTarget
 		wantErr  bool
 	}{
-		{name: "OK - exists", row: sqlmock.NewRows([]string{"exists"}).AddRow(true), want: true},
-		{name: "OK - removed", row: sqlmock.NewRows([]string{"exists"}).AddRow(false)},
+		{name: "OK - latest setting", row: sqlmock.NewRows([]string{"organization_id", "project_id", "alert_condition_id", "notification_id", "cache_second", "notified_at", "type", "notify_setting"}).AddRow(10, 1, 2, 100, 1800, now, "slack", "latest"), want: target},
+		{name: "NG - removed", row: sqlmock.NewRows([]string{"organization_id"}), wantErr: true},
 		{name: "NG - DB error", queryErr: errors.New("DB error"), wantErr: true},
 	}
 	for _, c := range cases {
@@ -633,14 +635,14 @@ func TestExistsOrgAlertNotificationTarget(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			expectation := mock.ExpectQuery(regexp.QuoteMeta(existsOrgAlertNotificationTarget)).WithArgs(uint32(10), uint32(1), uint32(2), uint32(100))
+			expectation := mock.ExpectQuery(regexp.QuoteMeta(getOrgAlertNotificationTarget)).WithArgs(uint32(10), uint32(1), uint32(2), uint32(100))
 			if c.queryErr != nil {
 				expectation.WillReturnError(c.queryErr)
 			} else {
 				expectation.WillReturnRows(c.row)
 			}
-			got, err := database.ExistsOrgAlertNotificationTarget(context.Background(), 10, 1, 2, 100)
-			if (err != nil) != c.wantErr || got != c.want {
+			got, err := database.GetOrgAlertNotificationTarget(context.Background(), 10, 1, 2, 100)
+			if (err != nil) != c.wantErr || !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected result: got=%v, err=%v", got, err)
 			}
 			if err := mock.ExpectationsWereMet(); err != nil {

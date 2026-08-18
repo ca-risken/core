@@ -277,18 +277,21 @@ const (
 		where oacn.project_id = ? and oacn.alert_condition_id = ?
 		order by oacn.organization_id, oacn.notification_id
 	`
-	existsOrgAlertNotificationTarget = `
-		select exists (
-			select 1
-			from organization_project op
-			inner join organization_alert_cond_notification oacn
-				on oacn.organization_id = op.organization_id
-				and oacn.project_id = op.project_id
-			where oacn.organization_id = ?
-			and oacn.project_id = ?
-			and oacn.alert_condition_id = ?
-			and oacn.notification_id = ?
-		)
+	getOrgAlertNotificationTarget = `
+		select oacn.organization_id, oacn.project_id, oacn.alert_condition_id,
+			oacn.notification_id, oacn.cache_second, oacn.notified_at,
+			orgn.type, orgn.notify_setting
+		from organization_alert_cond_notification oacn
+		inner join organization_project op
+			on op.organization_id = oacn.organization_id
+			and op.project_id = oacn.project_id
+		inner join organization_notification orgn
+			on orgn.organization_id = oacn.organization_id
+			and orgn.notification_id = oacn.notification_id
+		where oacn.organization_id = ?
+		and oacn.project_id = ?
+		and oacn.alert_condition_id = ?
+		and oacn.notification_id = ?
 	`
 	updateOrgAlertCondNotificationNotifiedAt = `
 		update organization_alert_cond_notification
@@ -308,12 +311,12 @@ func (c *Client) ListOrgAlertNotificationTarget(ctx context.Context, projectID, 
 	return targets, nil
 }
 
-func (c *Client) ExistsOrgAlertNotificationTarget(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32) (bool, error) {
-	var exists bool
-	if err := c.Master.WithContext(ctx).Raw(existsOrgAlertNotificationTarget, organizationID, projectID, alertConditionID, notificationID).Scan(&exists).Error; err != nil {
-		return false, err
+func (c *Client) GetOrgAlertNotificationTarget(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32) (*OrgAlertNotificationTarget, error) {
+	var target OrgAlertNotificationTarget
+	if err := c.Master.WithContext(ctx).Raw(getOrgAlertNotificationTarget, organizationID, projectID, alertConditionID, notificationID).First(&target).Error; err != nil {
+		return nil, err
 	}
-	return exists, nil
+	return &target, nil
 }
 
 func (c *Client) UpdateOrgAlertCondNotificationNotifiedAt(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32, notifiedAt time.Time) error {

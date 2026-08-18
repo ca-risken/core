@@ -54,7 +54,7 @@ type AlertRepository interface {
 	ListEnabledAlertCondition(context.Context, uint32, []uint32) (*[]model.AlertCondition, error)
 	ListDisabledAlertCondition(context.Context, uint32, []uint32) (*[]model.AlertCondition, error)
 	ListOrgAlertNotificationTarget(context.Context, uint32, uint32) ([]*OrgAlertNotificationTarget, error)
-	ExistsOrgAlertNotificationTarget(context.Context, uint32, uint32, uint32, uint32) (bool, error)
+	GetOrgAlertNotificationTarget(context.Context, uint32, uint32, uint32, uint32) (*OrgAlertNotificationTarget, error)
 	UpdateOrgAlertCondNotificationNotifiedAt(context.Context, uint32, uint32, uint32, uint32, time.Time) error
 }
 

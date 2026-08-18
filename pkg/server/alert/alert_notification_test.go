@@ -178,7 +178,18 @@ func TestNotificationAlert(t *testing.T) {
 			}
 			mockDB.On("ListOrgAlertNotificationTarget", mock.Anything, uint32(1), uint32(2)).Return(c.orgTargets, c.orgListErr).Once()
 			for _, organizationID := range c.wantOrgRechecks {
-				mockDB.On("ExistsOrgAlertNotificationTarget", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1)).Return(c.orgExists[organizationID], nil).Once()
+				var latest *db.OrgAlertNotificationTarget
+				for _, candidate := range c.orgTargets {
+					if candidate.OrganizationID == organizationID {
+						latest = candidate
+						break
+					}
+				}
+				if c.orgExists[organizationID] {
+					mockDB.On("GetOrgAlertNotificationTarget", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1)).Return(latest, nil).Once()
+				} else {
+					mockDB.On("GetOrgAlertNotificationTarget", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1)).Return(nil, gorm.ErrRecordNotFound).Once()
+				}
 			}
 			for i := 0; i < c.wantProjectUpdates; i++ {
 				mockDB.On("UpsertAlertCondNotification", mock.Anything, mock.Anything).Return(&model.AlertCondNotification{}, c.projectUpdateErr).Once()

@@ -404,13 +404,15 @@ func (a *AlertService) notifyAlertTarget(
 		return nil
 	}
 	if target.kind == organizationNotificationTarget {
-		exists, err := a.repository.ExistsOrgAlertNotificationTarget(ctx, target.organizationID, target.projectID, target.alertConditionID, target.notificationID)
+		latest, err := a.repository.GetOrgAlertNotificationTarget(ctx, target.organizationID, target.projectID, target.alertConditionID, target.notificationID)
 		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil
+			}
 			return fmt.Errorf("recheck organization notification target: %w", err)
 		}
-		if !exists {
-			return nil
-		}
+		target.notificationType = latest.Type
+		target.notifySetting = latest.NotifySetting
 	}
 	if target.notificationType != "slack" {
 		a.logger.Warnf(ctx, "Unsupported notification type: %s", target.notificationType)

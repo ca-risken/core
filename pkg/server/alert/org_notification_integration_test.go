@@ -29,16 +29,16 @@ type deleteMembershipBeforeOrgRecheck struct {
 	err            error
 }
 
-func (r *deleteMembershipBeforeOrgRecheck) ExistsOrgAlertNotificationTarget(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32) (bool, error) {
+func (r *deleteMembershipBeforeOrgRecheck) GetOrgAlertNotificationTarget(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32) (*db.OrgAlertNotificationTarget, error) {
 	if organizationID == r.organizationID && projectID == r.projectID {
 		r.once.Do(func() {
 			r.err = r.client.RemoveProjectsInOrganization(ctx, r.organizationID, r.projectID)
 		})
 		if r.err != nil {
-			return false, r.err
+			return nil, r.err
 		}
 	}
-	return r.AlertRepository.ExistsOrgAlertNotificationTarget(ctx, organizationID, projectID, alertConditionID, notificationID)
+	return r.AlertRepository.GetOrgAlertNotificationTarget(ctx, organizationID, projectID, alertConditionID, notificationID)
 }
 
 func TestOrgNotificationIntegration(t *testing.T) {

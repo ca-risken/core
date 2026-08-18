@@ -180,34 +180,6 @@ func (_m *AlertRepository) DeleteRelAlertFinding(_a0 context.Context, _a1 uint32
 	return r0
 }
 
-// ExistsOrgAlertNotificationTarget provides a mock function with given fields: _a0, _a1, _a2, _a3, _a4
-func (_m *AlertRepository) ExistsOrgAlertNotificationTarget(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 uint32, _a4 uint32) (bool, error) {
-	ret := _m.Called(_a0, _a1, _a2, _a3, _a4)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ExistsOrgAlertNotificationTarget")
-	}
-
-	var r0 bool
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, uint32) (bool, error)); ok {
-		return rf(_a0, _a1, _a2, _a3, _a4)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, uint32) bool); ok {
-		r0 = rf(_a0, _a1, _a2, _a3, _a4)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint32, uint32) error); ok {
-		r1 = rf(_a0, _a1, _a2, _a3, _a4)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetAlert provides a mock function with given fields: _a0, _a1, _a2
 func (_m *AlertRepository) GetAlert(_a0 context.Context, _a1 uint32, _a2 uint32) (*model.Alert, error) {
 	ret := _m.Called(_a0, _a1, _a2)
@@ -441,6 +413,36 @@ func (_m *AlertRepository) GetNotification(_a0 context.Context, _a1 uint32, _a2 
 
 	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32) error); ok {
 		r1 = rf(_a0, _a1, _a2)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetOrgAlertNotificationTarget provides a mock function with given fields: _a0, _a1, _a2, _a3, _a4
+func (_m *AlertRepository) GetOrgAlertNotificationTarget(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 uint32, _a4 uint32) (*db.OrgAlertNotificationTarget, error) {
+	ret := _m.Called(_a0, _a1, _a2, _a3, _a4)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetOrgAlertNotificationTarget")
+	}
+
+	var r0 *db.OrgAlertNotificationTarget
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, uint32) (*db.OrgAlertNotificationTarget, error)); ok {
+		return rf(_a0, _a1, _a2, _a3, _a4)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, uint32) *db.OrgAlertNotificationTarget); ok {
+		r0 = rf(_a0, _a1, _a2, _a3, _a4)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*db.OrgAlertNotificationTarget)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint32, uint32) error); ok {
+		r1 = rf(_a0, _a1, _a2, _a3, _a4)
 	} else {
 		r1 = ret.Error(1)
 	}
