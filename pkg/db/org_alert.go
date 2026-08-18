@@ -210,8 +210,11 @@ func (c *Client) UpdateOrgAlertCondNotificationCache(ctx context.Context, organi
 		if err := tx.Exec(updateOrgAlertCondNotificationCache, cacheSecond, organizationID, projectID, alertConditionID, notificationID).Error; err != nil {
 			return err
 		}
-		row.CacheSecond = cacheSecond
-		data = convertOrgAlertCondNotification(&row)
+		updated, err := c.getOrgAlertCondNotification(ctx, tx, organizationID, projectID, alertConditionID, notificationID)
+		if err != nil {
+			return err
+		}
+		data = updated
 		return nil
 	})
 	if err != nil {

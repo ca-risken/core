@@ -498,6 +498,9 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 				mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertCondNotificationCache)).
 					WithArgs(uint32(300), uint32(1), uint32(2), uint32(3), uint32(4)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotification)).
+					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
+					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(300), now, now, now))
 				mock.ExpectCommit()
 			},
 		},
@@ -520,6 +523,19 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
 				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotificationForUpdate)).WillReturnRows(orgAlertCondNotificationRows())
+				mock.ExpectRollback()
+			},
+		},
+		{
+			name:    "NG - relation is deleted before response reload",
+			args:    args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4, cacheSecond: 300},
+			wantErr: true,
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotificationForUpdate)).
+					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(1800), now, now, now))
+				mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertCondNotificationCache)).WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotification)).WillReturnRows(orgAlertCondNotificationRows())
 				mock.ExpectRollback()
 			},
 		},
