@@ -15,6 +15,7 @@ import (
 
 func TestListOrgAlertCondNotification(t *testing.T) {
 	relation := &orgalert.OrgAlertCondNotification{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 1800}
+	relation2 := &orgalert.OrgAlertCondNotification{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 5, CacheSecond: 1800}
 	cases := []struct {
 		name       string
 		input      *orgalert.ListOrgAlertCondNotificationRequest
@@ -26,9 +27,9 @@ func TestListOrgAlertCondNotification(t *testing.T) {
 	}{
 		{
 			name:       "OK - all four keys",
-			input:      &orgalert.ListOrgAlertCondNotificationRequest{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4},
-			mockResp:   []*orgalert.OrgAlertCondNotification{relation},
-			want:       &orgalert.ListOrgAlertCondNotificationResponse{AlertCondNotification: []*orgalert.OrgAlertCondNotification{relation}},
+			input:      &orgalert.ListOrgAlertCondNotificationRequest{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, PageSize: 1},
+			mockResp:   []*orgalert.OrgAlertCondNotification{relation, relation2},
+			want:       &orgalert.ListOrgAlertCondNotificationResponse{AlertCondNotification: []*orgalert.OrgAlertCondNotification{relation}, HasNext: true, NextPageOffset: 1},
 			expectCall: true,
 		},
 		{
@@ -56,7 +57,11 @@ func TestListOrgAlertCondNotification(t *testing.T) {
 			repository := mocks.NewOrgAlertRepository(t)
 			service := OrgAlertService{repository: repository, logger: logging.NewLogger()}
 			if c.expectCall {
-				repository.On("ListOrgAlertCondNotification", mock.Anything, c.input.OrganizationId, c.input.ProjectId, c.input.AlertConditionId, c.input.NotificationId).Return(c.mockResp, c.mockErr).Once()
+				pageSize := c.input.PageSize
+				if pageSize == 0 {
+					pageSize = 100
+				}
+				repository.On("ListOrgAlertCondNotification", mock.Anything, c.input.OrganizationId, c.input.ProjectId, c.input.AlertConditionId, c.input.NotificationId, pageSize+1, c.input.PageOffset).Return(c.mockResp, c.mockErr).Once()
 			}
 			got, err := service.ListOrgAlertCondNotification(context.Background(), c.input)
 			if (err != nil) != c.wantErr {

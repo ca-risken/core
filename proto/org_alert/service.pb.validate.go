@@ -1363,6 +1363,19 @@ func (m *ListOrgAlertCondNotificationRequest) validate(all bool) error {
 
 	// no validation rules for NotificationId
 
+	if m.GetPageSize() > 1000 {
+		err := ListOrgAlertCondNotificationRequestValidationError{
+			field:  "PageSize",
+			reason: "value must be less than or equal to 1000",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for PageOffset
+
 	if len(errors) > 0 {
 		return ListOrgAlertCondNotificationRequestMultiError(errors)
 	}
@@ -1501,6 +1514,10 @@ func (m *ListOrgAlertCondNotificationResponse) validate(all bool) error {
 		}
 
 	}
+
+	// no validation rules for HasNext
+
+	// no validation rules for NextPageOffset
 
 	if len(errors) > 0 {
 		return ListOrgAlertCondNotificationResponseMultiError(errors)

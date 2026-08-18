@@ -352,9 +352,9 @@ func TestListOrgAlertCondNotification(t *testing.T) {
 			args: args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
 			want: []*orgalert.OrgAlertCondNotification{{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 1800, NotifiedAt: 0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				query := listOrgAlertCondNotification + " and project_id = ? and alert_condition_id = ? and notification_id = ? order by project_id, alert_condition_id, notification_id"
+				query := listOrgAlertCondNotification + " and project_id = ? and alert_condition_id = ? and notification_id = ? order by project_id, alert_condition_id, notification_id limit ? offset ?"
 				mock.ExpectQuery(regexp.QuoteMeta(query)).
-					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
+					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4), uint32(101), uint32(0)).
 					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(1800), epoch, now, now))
 			},
 		},
@@ -363,9 +363,9 @@ func TestListOrgAlertCondNotification(t *testing.T) {
 			args: args{organizationID: 1},
 			want: []*orgalert.OrgAlertCondNotification{{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 1800, NotifiedAt: 0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				query := listOrgAlertCondNotification + " order by project_id, alert_condition_id, notification_id"
+				query := listOrgAlertCondNotification + " order by project_id, alert_condition_id, notification_id limit ? offset ?"
 				mock.ExpectQuery(regexp.QuoteMeta(query)).
-					WithArgs(uint32(1)).
+					WithArgs(uint32(1), uint32(101), uint32(0)).
 					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(1800), epoch, now, now))
 			},
 		},
@@ -374,9 +374,9 @@ func TestListOrgAlertCondNotification(t *testing.T) {
 			args: args{organizationID: 1, alertConditionID: 3},
 			want: []*orgalert.OrgAlertCondNotification{},
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				query := listOrgAlertCondNotification + " and alert_condition_id = ? order by project_id, alert_condition_id, notification_id"
+				query := listOrgAlertCondNotification + " and alert_condition_id = ? order by project_id, alert_condition_id, notification_id limit ? offset ?"
 				mock.ExpectQuery(regexp.QuoteMeta(query)).
-					WithArgs(uint32(1), uint32(3)).
+					WithArgs(uint32(1), uint32(3), uint32(101), uint32(0)).
 					WillReturnRows(orgAlertCondNotificationRows())
 			},
 		},
@@ -385,9 +385,9 @@ func TestListOrgAlertCondNotification(t *testing.T) {
 			args:    args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
 			wantErr: true,
 			mockClosure: func(mock sqlmock.Sqlmock) {
-				query := listOrgAlertCondNotification + " and project_id = ? and alert_condition_id = ? and notification_id = ? order by project_id, alert_condition_id, notification_id"
+				query := listOrgAlertCondNotification + " and project_id = ? and alert_condition_id = ? and notification_id = ? order by project_id, alert_condition_id, notification_id limit ? offset ?"
 				mock.ExpectQuery(regexp.QuoteMeta(query)).
-					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
+					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4), uint32(101), uint32(0)).
 					WillReturnError(errors.New("DB error"))
 			},
 		},
@@ -399,7 +399,7 @@ func TestListOrgAlertCondNotification(t *testing.T) {
 				t.Fatalf("Unexpected mock DB error: %v", err)
 			}
 			c.mockClosure(mock)
-			got, err := database.ListOrgAlertCondNotification(context.Background(), c.args.organizationID, c.args.projectID, c.args.alertConditionID, c.args.notificationID)
+			got, err := database.ListOrgAlertCondNotification(context.Background(), c.args.organizationID, c.args.projectID, c.args.alertConditionID, c.args.notificationID, 101, 0)
 			if (err != nil) != c.wantErr {
 				t.Fatalf("Unexpected error: %v", err)
 			}

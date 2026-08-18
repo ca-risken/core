@@ -14,11 +14,23 @@ func (s *OrgAlertService) ListOrgAlertCondNotification(ctx context.Context, req 
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	list, err := s.repository.ListOrgAlertCondNotification(ctx, req.OrganizationId, req.ProjectId, req.AlertConditionId, req.NotificationId)
+	pageSize := req.PageSize
+	if pageSize == 0 {
+		pageSize = 100
+	}
+	list, err := s.repository.ListOrgAlertCondNotification(ctx, req.OrganizationId, req.ProjectId, req.AlertConditionId, req.NotificationId, pageSize+1, req.PageOffset)
 	if err != nil {
 		return nil, err
 	}
-	return &orgalert.ListOrgAlertCondNotificationResponse{AlertCondNotification: list}, nil
+	hasNext := len(list) > int(pageSize)
+	if hasNext {
+		list = list[:pageSize]
+	}
+	nextOffset := uint32(0)
+	if hasNext {
+		nextOffset = req.PageOffset + pageSize
+	}
+	return &orgalert.ListOrgAlertCondNotificationResponse{AlertCondNotification: list, HasNext: hasNext, NextPageOffset: nextOffset}, nil
 }
 
 func (s *OrgAlertService) GetOrgAlertCondNotification(ctx context.Context, req *orgalert.GetOrgAlertCondNotificationRequest) (*orgalert.GetOrgAlertCondNotificationResponse, error) {

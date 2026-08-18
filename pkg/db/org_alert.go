@@ -17,7 +17,7 @@ type OrgAlertRepository interface {
 	UpsertOrgNotification(ctx context.Context, data *model.OrganizationNotification) (*model.OrganizationNotification, error)
 	DeleteOrgNotification(ctx context.Context, organizationID, notificationID uint32) error
 	ListOrgNotificationByProjectID(ctx context.Context, projectID uint32) ([]*model.OrganizationNotification, error)
-	ListOrgAlertCondNotification(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32) ([]*orgalert.OrgAlertCondNotification, error)
+	ListOrgAlertCondNotification(ctx context.Context, organizationID, projectID, alertConditionID, notificationID, pageSize, pageOffset uint32) ([]*orgalert.OrgAlertCondNotification, error)
 	GetOrgAlertCondNotification(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32) (*orgalert.OrgAlertCondNotification, error)
 	UpdateOrgAlertCondNotificationCache(ctx context.Context, organizationID, projectID, alertConditionID, notificationID, cacheSecond uint32) (*orgalert.OrgAlertCondNotification, error)
 }
@@ -163,7 +163,7 @@ const (
 	`
 )
 
-func (c *Client) ListOrgAlertCondNotification(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32) ([]*orgalert.OrgAlertCondNotification, error) {
+func (c *Client) ListOrgAlertCondNotification(ctx context.Context, organizationID, projectID, alertConditionID, notificationID, pageSize, pageOffset uint32) ([]*orgalert.OrgAlertCondNotification, error) {
 	query := strings.Builder{}
 	query.WriteString(listOrgAlertCondNotification)
 	args := []interface{}{organizationID}
@@ -184,7 +184,8 @@ func (c *Client) ListOrgAlertCondNotification(ctx context.Context, organizationI
 		query.WriteString(" = ?")
 		args = append(args, filter.value)
 	}
-	query.WriteString(" order by project_id, alert_condition_id, notification_id limit 1000")
+	query.WriteString(" order by project_id, alert_condition_id, notification_id limit ? offset ?")
+	args = append(args, pageSize, pageOffset)
 	var rows []*organizationAlertCondNotification
 	if err := c.Slave.WithContext(ctx).Raw(query.String(), args...).Scan(&rows).Error; err != nil {
 		return nil, err
@@ -236,7 +237,8 @@ func convertOrgAlertCondNotification(row *organizationAlertCondNotification) *or
 		return &orgalert.OrgAlertCondNotification{}
 	}
 	notifiedAt := row.NotifiedAt.Unix()
-	if row.NotifiedAt.IsZero() || (row.NotifiedAt.Year() == 1970 && row.NotifiedAt.YearDay() == 1 && row.NotifiedAt.Hour() == 0 && row.NotifiedAt.Minute() == 0 && row.NotifiedAt.Second() == 0) {
+	epoch := time.Date(1970, time.January, 1, 0, 0, 0, 0, row.NotifiedAt.Location())
+	if row.NotifiedAt.IsZero() || row.NotifiedAt.Equal(epoch) {
 		notifiedAt = 0
 	}
 	return &orgalert.OrgAlertCondNotification{
