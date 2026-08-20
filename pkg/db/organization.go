@@ -93,10 +93,18 @@ func (c *Client) UpdateOrganization(ctx context.Context, organizationID uint32, 
 	return c.GetOrganizationByName(ctx, name)
 }
 
-const deleteOrganization = `delete from organization where organization_id = ?`
+const (
+	deleteOrganization                           = `delete from organization where organization_id = ?`
+	deleteOrgAlertCondNotificationByOrganization = `delete from organization_alert_cond_notification where organization_id = ?`
+)
 
 func (c *Client) DeleteOrganization(ctx context.Context, organizationID uint32) error {
-	return c.Master.WithContext(ctx).Exec(deleteOrganization, organizationID).Error
+	return c.Master.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec(deleteOrgAlertCondNotificationByOrganization, organizationID).Error; err != nil {
+			return err
+		}
+		return tx.Exec(deleteOrganization, organizationID).Error
+	})
 }
 
 const (
@@ -117,14 +125,30 @@ const (
 		where organization_id = ? 
 		  and project_id = ?
 	`
+	insertOrgAlertCondNotificationByOrganizationProject = `
+		insert ignore into organization_alert_cond_notification (
+			organization_id, project_id, alert_condition_id, notification_id
+		)
+		select op.organization_id, op.project_id, ac.alert_condition_id, orgn.notification_id
+		from organization_project op
+		inner join alert_condition ac on ac.project_id = op.project_id
+		inner join organization_notification orgn on orgn.organization_id = op.organization_id
+		where op.organization_id = ? and op.project_id = ?
+	`
 )
 
 func (c *Client) PutOrganizationProject(ctx context.Context, organizationID, projectID uint32) (*model.OrganizationProject, error) {
-	if err := c.Master.WithContext(ctx).Exec(putOrganizationProject, organizationID, projectID).Error; err != nil {
-		return nil, err
-	}
 	var data model.OrganizationProject
-	if err := c.Master.WithContext(ctx).Raw(selectGetOrganizationProject, organizationID, projectID).First(&data).Error; err != nil {
+	err := c.Master.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec(putOrganizationProject, organizationID, projectID).Error; err != nil {
+			return err
+		}
+		if err := tx.Exec(insertOrgAlertCondNotificationByOrganizationProject, organizationID, projectID).Error; err != nil {
+			return err
+		}
+		return tx.Raw(selectGetOrganizationProject, organizationID, projectID).First(&data).Error
+	})
+	if err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -151,8 +175,18 @@ const removeProjectsInOrganization = `
     and project_id = ?
 `
 
+const deleteOrgAlertCondNotificationByOrganizationProject = `
+	delete from organization_alert_cond_notification
+	where organization_id = ? and project_id = ?
+`
+
 func (c *Client) RemoveProjectsInOrganization(ctx context.Context, organizationID, projectID uint32) error {
-	return c.Master.WithContext(ctx).Exec(removeProjectsInOrganization, organizationID, projectID).Error
+	return c.Master.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec(deleteOrgAlertCondNotificationByOrganizationProject, organizationID, projectID).Error; err != nil {
+			return err
+		}
+		return tx.Exec(removeProjectsInOrganization, organizationID, projectID).Error
+	})
 }
 
 func (c *Client) ListOrganizationInvitation(ctx context.Context, organizationID, projectID uint32) ([]*model.OrganizationInvitation, error) {

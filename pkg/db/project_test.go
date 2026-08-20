@@ -10,46 +10,54 @@ import (
 )
 
 func TestDeleteProject(t *testing.T) {
-	client, mock, err := newMockClient()
-	if err != nil {
-		t.Fatalf("Failed to open mock sql db, error: %+v", err)
-	}
 	type args struct {
 		projectID uint32
 	}
 	cases := []struct {
-		name    string
-		input   args
-		wantErr bool
-		mockErr error
+		name        string
+		input       args
+		wantErr     bool
+		mockClosure func(sqlmock.Sqlmock)
 	}{
 		{
-			name:    "OK",
-			input:   args{projectID: 1},
-			wantErr: false,
+			name:  "OK - relation deleted before project",
+			input: args{projectID: 1},
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(deleteOrgAlertCondNotificationByProject)).WillReturnResult(sqlmock.NewResult(0, 2))
+				mock.ExpectExec(regexp.QuoteMeta(deleteProject)).WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
 		},
 		{
-			name:    "NG DB error",
+			name:    "NG - project delete rolls back",
 			input:   args{projectID: 1},
 			wantErr: true,
-			mockErr: errors.New("DB error"),
+			mockClosure: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(deleteOrgAlertCondNotificationByProject)).WillReturnResult(sqlmock.NewResult(0, 2))
+				mock.ExpectExec(regexp.QuoteMeta(deleteProject)).WillReturnError(errors.New("DB error"))
+				mock.ExpectRollback()
+			},
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			ctx := context.Background()
-			if c.mockErr != nil {
-				mock.ExpectExec(deleteProject).WillReturnError(c.mockErr)
-			} else {
-				mock.ExpectExec(deleteProject).WillReturnResult(sqlmock.NewResult(int64(1), int64(1)))
+			client, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("Failed to open mock sql db, error: %+v", err)
 			}
-
-			err := client.DeleteProject(ctx, c.input.projectID)
+			ctx := context.Background()
+			c.mockClosure(mock)
+			err = client.DeleteProject(ctx, c.input.projectID)
 			if err != nil && !c.wantErr {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
 			if err == nil && c.wantErr {
 				t.Fatal("No error")
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
 			}
 		})
 	}
@@ -81,6 +89,7 @@ func TestCleanWithNoProject(t *testing.T) {
 				"delete from alert_cond_rule where project_id in",
 				"delete from alert_rule where project_id in",
 				"delete from alert_cond_notification where project_id in",
+				"delete from organization_alert_cond_notification where project_id in",
 				"delete from notification where project_id in",
 				"delete from finding where project_id in",
 				"delete from finding_tag where project_id in",

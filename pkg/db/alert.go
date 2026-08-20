@@ -7,6 +7,7 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/vikyd/zero"
+	"gorm.io/gorm"
 )
 
 type AlertRepository interface {
@@ -41,6 +42,7 @@ type AlertRepository interface {
 	UpsertNotification(context.Context, *model.Notification) (*model.Notification, error)
 	DeleteNotification(context.Context, uint32, uint32) error
 	ListAlertCondNotification(context.Context, uint32, uint32, uint32, int64, int64) (*[]model.AlertCondNotification, error)
+	ListAlertCondNotificationForNotification(context.Context, uint32, uint32) (*[]model.AlertCondNotification, error)
 	GetAlertCondNotification(context.Context, uint32, uint32, uint32) (*model.AlertCondNotification, error)
 	UpsertAlertCondNotification(context.Context, *model.AlertCondNotification) (*model.AlertCondNotification, error)
 	DeleteAlertCondNotification(context.Context, uint32, uint32, uint32) error
@@ -51,6 +53,9 @@ type AlertRepository interface {
 	GetAlertByAlertConditionIDStatus(context.Context, uint32, uint32, []string) (*model.Alert, error)
 	ListEnabledAlertCondition(context.Context, uint32, []uint32) (*[]model.AlertCondition, error)
 	ListDisabledAlertCondition(context.Context, uint32, []uint32) (*[]model.AlertCondition, error)
+	ListOrgAlertNotificationTarget(context.Context, uint32, uint32) ([]*OrgAlertNotificationTarget, error)
+	GetOrgAlertNotificationTarget(context.Context, uint32, uint32, uint32, uint32) (*OrgAlertNotificationTarget, error)
+	UpdateOrgAlertCondNotificationNotifiedAt(context.Context, uint32, uint32, uint32, uint32, time.Time) error
 }
 
 var _ AlertRepository = (*Client)(nil)
@@ -275,7 +280,13 @@ func (c *Client) UpsertAlertCondition(ctx context.Context, data *model.AlertCond
 func (c *Client) upsertAlertCondition(ctx context.Context, data *model.AlertCondition) (*model.AlertCondition, error) {
 	var retData model.AlertCondition
 	update := alertConditionToMap(data)
-	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_condition_id = ?", data.ProjectID, data.AlertConditionID).Assign(update).FirstOrCreate(&retData).Error; err != nil {
+	err := c.Master.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("project_id = ? AND alert_condition_id = ?", data.ProjectID, data.AlertConditionID).Assign(update).FirstOrCreate(&retData).Error; err != nil {
+			return err
+		}
+		return tx.Exec(insertOrgAlertCondNotificationByAlertCondition, retData.ProjectID, retData.AlertConditionID).Error
+	})
+	if err != nil {
 		return nil, err
 	}
 	return &retData, nil
@@ -289,11 +300,30 @@ func (c *Client) DeleteAlertCondition(ctx context.Context, projectID uint32, ale
 }
 
 func (c *Client) deleteAlertCondition(ctx context.Context, projectID uint32, alertConditionID uint32) error {
-	if err := c.Master.WithContext(ctx).Where("project_id = ? AND alert_condition_id = ?", projectID, alertConditionID).Delete(model.AlertCondition{}).Error; err != nil {
-		return err
-	}
-	return nil
+	return c.Master.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec(deleteOrgAlertCondNotificationByAlertCondition, projectID, alertConditionID).Error; err != nil {
+			return err
+		}
+		return tx.Where("project_id = ? AND alert_condition_id = ?", projectID, alertConditionID).Delete(model.AlertCondition{}).Error
+	})
 }
+
+const (
+	insertOrgAlertCondNotificationByAlertCondition = `
+		insert ignore into organization_alert_cond_notification (
+			organization_id, project_id, alert_condition_id, notification_id
+		)
+		select op.organization_id, ac.project_id, ac.alert_condition_id, orgn.notification_id
+		from alert_condition ac
+		inner join organization_project op on op.project_id = ac.project_id
+		inner join organization_notification orgn on orgn.organization_id = op.organization_id
+		where ac.project_id = ? and ac.alert_condition_id = ?
+	`
+	deleteOrgAlertCondNotificationByAlertCondition = `
+		delete from organization_alert_cond_notification
+		where project_id = ? and alert_condition_id = ?
+	`
+)
 
 func (c *Client) ListAlertRule(ctx context.Context, projectID uint32, fromScore, toScore float32, fromAt, toAt int64) (*[]model.AlertRule, error) {
 	query := `select * from alert_rule where project_id = ? and score between ? and ? and updated_at between ? and ?`
@@ -468,6 +498,22 @@ func (c *Client) ListAlertCondNotification(ctx context.Context, projectID, alert
 	}
 	var data []model.AlertCondNotification
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+const listAlertCondNotificationForNotification = `
+	select *
+	from alert_cond_notification
+	where project_id = ?
+	and alert_condition_id = ?
+	order by notification_id
+`
+
+func (c *Client) ListAlertCondNotificationForNotification(ctx context.Context, projectID, alertConditionID uint32) (*[]model.AlertCondNotification, error) {
+	data := []model.AlertCondNotification{}
+	if err := c.Slave.WithContext(ctx).Raw(listAlertCondNotificationForNotification, projectID, alertConditionID).Scan(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ca-risken/common/pkg/logging"
+	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/pkg/db/mocks"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/stretchr/testify/mock"
@@ -19,113 +20,208 @@ import (
 	findingmock "github.com/ca-risken/core/proto/finding/mocks"
 	"github.com/ca-risken/core/proto/iam"
 	iammock "github.com/ca-risken/core/proto/iam/mocks"
-	"github.com/ca-risken/core/proto/org_alert"
-	orgalertmock "github.com/ca-risken/core/proto/org_alert/mocks"
 	"github.com/ca-risken/core/proto/project"
 	projectmock "github.com/ca-risken/core/proto/project/mocks"
 	"github.com/jarcoal/httpmock"
 )
 
 func TestNotificationAlert(t *testing.T) {
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
 	now := time.Now()
-	testFindingIDs := []uint64{}
-
-	httpmock.RegisterResponder("POST", "http://hogehoge.com", httpmock.NewStringResponder(200, "mocked"))
-	httpmock.RegisterResponder("POST", "http://fugafuga.com", httpmock.NewErrorResponder(errors.New("Something Wrong")))
+	projectRelation := model.AlertCondNotification{ProjectID: 1, AlertConditionID: 2, NotificationID: 1}
+	projectSuppressed := projectRelation
+	projectSuppressed.CacheSecond = 1800
+	projectSuppressed.NotifiedAt = now
+	orgTarget := &db.OrgAlertNotificationTarget{OrganizationID: 10, ProjectID: 1, AlertConditionID: 2, NotificationID: 1, Type: "slack", NotifySetting: "org-10"}
+	orgSuppressed := *orgTarget
+	orgSuppressed.CacheSecond = 1800
+	orgSuppressed.NotifiedAt = now
 	cases := []struct {
-		name                               string
-		alertCondition                     *model.AlertCondition
-		alert                              *model.Alert
-		wantErr                            bool
-		mockListAlertCondNotification      *[]model.AlertCondNotification
-		mockListAlertCondNotificationErr   error
-		mockGetNotification                *model.Notification
-		mockGetNotificationErr             error
-		mockGetProject                     *project.Project
-		mockGetProjectErr                  error
-		mockUpsertAlertCondNotification    *model.AlertCondNotification
-		mockUpsertAlertCondNotificationErr error
+		name                 string
+		projectRelations     []model.AlertCondNotification
+		projectListErr       error
+		projectNotifications map[uint32]*model.Notification
+		projectGetErr        map[uint32]error
+		orgTargets           []*db.OrgAlertNotificationTarget
+		orgListErr           error
+		orgExists            map[uint32]bool
+		orgLatest            map[uint32]*db.OrgAlertNotificationTarget
+		sendErr              map[string]error
+		projectUpdateErr     error
+		orgUpdateErr         map[uint32]error
+		wantSent             []string
+		wantProjectUpdates   int
+		wantOrgRechecks      []uint32
+		wantOrgUpdates       []uint32
+		wantErr              bool
 	}{
 		{
-			name:                             "OK 0 AlertCondNotification",
-			alertCondition:                   &model.AlertCondition{AlertConditionID: 1},
-			alert:                            &model.Alert{},
-			wantErr:                          false,
-			mockListAlertCondNotification:    &[]model.AlertCondNotification{},
-			mockListAlertCondNotificationErr: nil,
+			name:                 "OK - project and organization targets with overlapping IDs",
+			projectRelations:     []model.AlertCondNotification{projectRelation},
+			projectNotifications: map[uint32]*model.Notification{1: {NotificationID: 1, Type: "slack", NotifySetting: "project"}},
+			orgTargets:           []*db.OrgAlertNotificationTarget{orgTarget},
+			orgExists:            map[uint32]bool{10: true},
+			wantSent:             []string{"project", "org-10"},
+			wantProjectUpdates:   1,
+			wantOrgRechecks:      []uint32{10},
+			wantOrgUpdates:       []uint32{10},
 		},
 		{
-			name:                               "OK Notification Success",
-			alertCondition:                     &model.AlertCondition{AlertConditionID: 1},
-			alert:                              &model.Alert{},
-			wantErr:                            false,
-			mockListAlertCondNotification:      &[]model.AlertCondNotification{{AlertConditionID: 1, NotificationID: 1}},
-			mockListAlertCondNotificationErr:   nil,
-			mockGetNotification:                &model.Notification{Type: "slack", NotifySetting: `{"webhook_url":"http://hogehoge.com"}`},
-			mockGetNotificationErr:             nil,
-			mockUpsertAlertCondNotification:    &model.AlertCondNotification{},
-			mockUpsertAlertCondNotificationErr: nil,
+			name:            "OK - organization only",
+			orgTargets:      []*db.OrgAlertNotificationTarget{orgTarget},
+			orgExists:       map[uint32]bool{10: true},
+			wantSent:        []string{"org-10"},
+			wantOrgRechecks: []uint32{10},
+			wantOrgUpdates:  []uint32{10},
 		},
 		{
-			name:                             "OK Don't send Notification caused NotifedAt",
-			alertCondition:                   &model.AlertCondition{AlertConditionID: 1},
-			alert:                            &model.Alert{},
-			wantErr:                          false,
-			mockListAlertCondNotification:    &[]model.AlertCondNotification{{AlertConditionID: 1, NotificationID: 1, CacheSecond: 30, NotifiedAt: now}},
-			mockListAlertCondNotificationErr: nil,
+			name:                 "OK - project only",
+			projectRelations:     []model.AlertCondNotification{projectRelation},
+			projectNotifications: map[uint32]*model.Notification{1: {NotificationID: 1, Type: "slack", NotifySetting: "project"}},
+			wantSent:             []string{"project"},
+			wantProjectUpdates:   1,
+		},
+		{name: "OK - no targets"},
+		{
+			name:                 "OK - project suppression does not suppress organization",
+			projectRelations:     []model.AlertCondNotification{projectSuppressed},
+			projectNotifications: map[uint32]*model.Notification{1: {NotificationID: 1, Type: "slack", NotifySetting: "project"}},
+			orgTargets:           []*db.OrgAlertNotificationTarget{orgTarget},
+			orgExists:            map[uint32]bool{10: true},
+			wantSent:             []string{"org-10"},
+			wantOrgRechecks:      []uint32{10},
+			wantOrgUpdates:       []uint32{10},
 		},
 		{
-			name:                             "Error ListAlertCondNotification Failed",
-			alertCondition:                   &model.AlertCondition{AlertConditionID: 1},
-			alert:                            &model.Alert{},
-			wantErr:                          true,
-			mockListAlertCondNotification:    nil,
-			mockListAlertCondNotificationErr: errors.New("Somethinng error occured"),
+			name:                 "OK - organization suppression does not suppress project",
+			projectRelations:     []model.AlertCondNotification{projectRelation},
+			projectNotifications: map[uint32]*model.Notification{1: {NotificationID: 1, Type: "slack", NotifySetting: "project"}},
+			orgTargets:           []*db.OrgAlertNotificationTarget{&orgSuppressed},
+			orgExists:            map[uint32]bool{10: true},
+			wantSent:             []string{"project"},
+			wantProjectUpdates:   1,
+			wantOrgRechecks:      []uint32{10},
 		},
 		{
-			name:                             "Error GetNotification Failed",
-			alertCondition:                   &model.AlertCondition{AlertConditionID: 1},
-			alert:                            &model.Alert{},
-			wantErr:                          true,
-			mockListAlertCondNotification:    &[]model.AlertCondNotification{{AlertConditionID: 1, NotificationID: 1}},
-			mockListAlertCondNotificationErr: nil,
-			mockGetNotification:              nil,
-			mockGetNotificationErr:           errors.New("Somethinng error occured"),
+			name:                 "NG - project send failure does not stop organization",
+			projectRelations:     []model.AlertCondNotification{projectRelation},
+			projectNotifications: map[uint32]*model.Notification{1: {NotificationID: 1, Type: "slack", NotifySetting: "project"}},
+			orgTargets:           []*db.OrgAlertNotificationTarget{orgTarget},
+			orgExists:            map[uint32]bool{10: true},
+			sendErr:              map[string]error{"project": errors.New("send error")},
+			wantSent:             []string{"project", "org-10"},
+			wantOrgRechecks:      []uint32{10},
+			wantOrgUpdates:       []uint32{10},
+			wantErr:              true,
 		},
 		{
-			name:                               "Error UpsertAlertCondNotification Failed",
-			alertCondition:                     &model.AlertCondition{AlertConditionID: 1},
-			alert:                              &model.Alert{},
-			wantErr:                            true,
-			mockListAlertCondNotification:      &[]model.AlertCondNotification{{AlertConditionID: 1, NotificationID: 1}},
-			mockListAlertCondNotificationErr:   nil,
-			mockGetNotification:                &model.Notification{Type: "slack", NotifySetting: `{"webhook_url":"http://hogehoge.com"}`},
-			mockGetNotificationErr:             nil,
-			mockUpsertAlertCondNotification:    nil,
-			mockUpsertAlertCondNotificationErr: errors.New("Somethinng error occured"),
+			name:                 "NG - organization send failure does not stop project",
+			projectRelations:     []model.AlertCondNotification{projectRelation},
+			projectNotifications: map[uint32]*model.Notification{1: {NotificationID: 1, Type: "slack", NotifySetting: "project"}},
+			orgTargets:           []*db.OrgAlertNotificationTarget{orgTarget},
+			orgExists:            map[uint32]bool{10: true},
+			sendErr:              map[string]error{"org-10": errors.New("send error")},
+			wantSent:             []string{"project", "org-10"},
+			wantProjectUpdates:   1,
+			wantOrgRechecks:      []uint32{10},
+			wantErr:              true,
+		},
+		{
+			name: "OK - all organizations are sent",
+			orgTargets: []*db.OrgAlertNotificationTarget{
+				orgTarget,
+				{OrganizationID: 20, ProjectID: 1, AlertConditionID: 2, NotificationID: 1, Type: "slack", NotifySetting: "org-20"},
+			},
+			orgExists:       map[uint32]bool{10: true, 20: true},
+			wantSent:        []string{"org-10", "org-20"},
+			wantOrgRechecks: []uint32{10, 20},
+			wantOrgUpdates:  []uint32{10, 20},
+		},
+		{
+			name:            "OK - send-time removed organization target is skipped",
+			orgTargets:      []*db.OrgAlertNotificationTarget{orgTarget},
+			orgExists:       map[uint32]bool{10: false},
+			wantOrgRechecks: []uint32{10},
+		},
+		{
+			name:            "OK - send-time organization suppression uses latest state",
+			orgTargets:      []*db.OrgAlertNotificationTarget{orgTarget},
+			orgExists:       map[uint32]bool{10: true},
+			orgLatest:       map[uint32]*db.OrgAlertNotificationTarget{10: &orgSuppressed},
+			wantOrgRechecks: []uint32{10},
+		},
+		{
+			name:                 "OK - unsupported targets do not update suppression state",
+			projectRelations:     []model.AlertCondNotification{projectRelation},
+			projectNotifications: map[uint32]*model.Notification{1: {NotificationID: 1, Type: "email", NotifySetting: "project-email"}},
+			orgTargets:           []*db.OrgAlertNotificationTarget{{OrganizationID: 10, ProjectID: 1, AlertConditionID: 2, NotificationID: 1, Type: "email", NotifySetting: "org-email"}},
+			orgExists:            map[uint32]bool{10: true},
+			wantOrgRechecks:      []uint32{10},
+		},
+		{
+			name:            "NG - project resolution error still sends organization",
+			projectListErr:  errors.New("DB error"),
+			orgTargets:      []*db.OrgAlertNotificationTarget{orgTarget},
+			orgExists:       map[uint32]bool{10: true},
+			wantSent:        []string{"org-10"},
+			wantOrgRechecks: []uint32{10},
+			wantOrgUpdates:  []uint32{10},
+			wantErr:         true,
+		},
+		{
+			name:                 "NG - organization resolution error still sends project",
+			projectRelations:     []model.AlertCondNotification{projectRelation},
+			projectNotifications: map[uint32]*model.Notification{1: {NotificationID: 1, Type: "slack", NotifySetting: "project"}},
+			orgListErr:           errors.New("DB error"),
+			wantSent:             []string{"project"},
+			wantProjectUpdates:   1,
+			wantErr:              true,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			mockDB := mocks.NewAlertRepository(t)
-			mockOrgAlertClient := orgalertmock.NewOrgAlertServiceClient(t)
-			mockOrgAlertClient.On("ListOrgNotificationByProject", mock.Anything, mock.Anything, mock.Anything).
-				Return(&org_alert.ListOrgNotificationByProjectResponse{}, nil).Maybe()
-			svc := AlertService{repository: mockDB, orgAlertClient: mockOrgAlertClient, logger: logging.NewLogger()}
-			if c.mockListAlertCondNotification != nil || c.mockListAlertCondNotificationErr != nil {
-				mockDB.On("ListAlertCondNotification", test.RepeatMockAnything(6)...).Return(c.mockListAlertCondNotification, c.mockListAlertCondNotificationErr).Once()
+			svc := AlertService{repository: mockDB, logger: logging.NewLogger()}
+			projectRelations := c.projectRelations
+			mockDB.On("ListAlertCondNotificationForNotification", mock.Anything, uint32(1), uint32(2)).Return(&projectRelations, c.projectListErr).Once()
+			for _, relation := range c.projectRelations {
+				mockDB.On("GetNotification", mock.Anything, uint32(1), relation.NotificationID).Return(c.projectNotifications[relation.NotificationID], c.projectGetErr[relation.NotificationID]).Once()
 			}
-			if c.mockGetNotification != nil || c.mockGetNotificationErr != nil {
-				mockDB.On("GetNotification", test.RepeatMockAnything(3)...).Return(c.mockGetNotification, c.mockGetNotificationErr).Once()
+			mockDB.On("ListOrgAlertNotificationTarget", mock.Anything, uint32(1), uint32(2)).Return(c.orgTargets, c.orgListErr).Once()
+			for _, organizationID := range c.wantOrgRechecks {
+				var latest *db.OrgAlertNotificationTarget
+				for _, candidate := range c.orgTargets {
+					if candidate.OrganizationID == organizationID {
+						latest = candidate
+						break
+					}
+				}
+				if candidate := c.orgLatest[organizationID]; candidate != nil {
+					latest = candidate
+				}
+				if c.orgExists[organizationID] {
+					mockDB.On("GetOrgAlertNotificationTarget", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1)).Return(latest, nil).Once()
+				} else {
+					mockDB.On("GetOrgAlertNotificationTarget", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1)).Return(nil, gorm.ErrRecordNotFound).Once()
+				}
 			}
-			if c.mockUpsertAlertCondNotification != nil || c.mockUpsertAlertCondNotificationErr != nil {
-				mockDB.On("UpsertAlertCondNotification", test.RepeatMockAnything(2)...).Return(c.mockUpsertAlertCondNotification, c.mockUpsertAlertCondNotificationErr).Once()
+			for i := 0; i < c.wantProjectUpdates; i++ {
+				mockDB.On("UpsertAlertCondNotification", mock.Anything, mock.Anything).Return(&model.AlertCondNotification{}, c.projectUpdateErr).Once()
 			}
-			got := svc.NotificationAlert(context.Background(), c.alertCondition, c.alert, &[]model.AlertRule{}, &project.Project{}, &testFindingIDs, false)
-			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
-				t.Fatalf("Unexpected error: %+v", got)
+			for _, organizationID := range c.wantOrgUpdates {
+				mockDB.On("UpdateOrgAlertCondNotificationNotifiedAt", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1), mock.Anything).Return(c.orgUpdateErr[organizationID]).Once()
+			}
+			var sent []string
+			svc.sendAlertNotification = func(_ context.Context, setting string, _ *model.Alert, _ *project.Project, _ *[]model.AlertRule, _ *findingDetail) error {
+				sent = append(sent, setting)
+				return c.sendErr[setting]
+			}
+			findingIDs := []uint64{}
+			err := svc.NotificationAlert(context.Background(), &model.AlertCondition{ProjectID: 1, AlertConditionID: 2}, &model.Alert{}, &[]model.AlertRule{}, &project.Project{ProjectId: 1}, &findingIDs, false)
+			if (err != nil) != c.wantErr {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if !reflect.DeepEqual(sent, c.wantSent) {
+				t.Fatalf("Unexpected sends: want=%v, got=%v", c.wantSent, sent)
 			}
 		})
 	}
