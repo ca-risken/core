@@ -74,6 +74,7 @@ var slackMrkdwnReplacer = strings.NewReplacer(
 
 func (a *AlertService) sendSlackNotification(
 	ctx context.Context, url, notifySetting string,
+	organizationName string,
 	alert *model.Alert,
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
@@ -96,12 +97,12 @@ func (a *AlertService) sendSlackNotification(
 	}
 
 	if setting.WebhookURL != "" {
-		webhookMsg := a.getWebhookMessage(ctx, setting.Data.Channel, setting.Data.Message, url, alert, project, rules, findings, locale)
+		webhookMsg := a.getWebhookMessage(ctx, setting.Data.Channel, setting.Data.Message, url, organizationName, alert, project, rules, findings, locale)
 		if err := slack.PostWebhook(setting.WebhookURL, webhookMsg); err != nil {
 			return fmt.Errorf("failed to send slack(webhookurl): %w", err)
 		}
 	} else if setting.ChannelID != "" {
-		apiMsg := a.getApiMessage(ctx, setting.Data.Message, url, alert, project, rules, findings, locale)
+		apiMsg := a.getApiMessage(ctx, setting.Data.Message, url, organizationName, alert, project, rules, findings, locale)
 		if err := a.postMessageSlackWithRetry(ctx, setting.ChannelID, apiMsg...); err != nil {
 			return fmt.Errorf("failed to send slack(postmessage): %w", err)
 		}
@@ -194,6 +195,7 @@ func (a *AlertService) getWebhookMessage(
 	channel string,
 	message string,
 	url string,
+	organizationName string,
 	alert *model.Alert,
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
@@ -201,7 +203,7 @@ func (a *AlertService) getWebhookMessage(
 	locale string,
 ) *slack.WebhookMessage {
 	msgText := getSlackMessageText(locale, alert.Severity)
-	attachments := a.buildSlackAttachments(ctx, url, alert, project, rules, findings, locale)
+	attachments := a.buildSlackAttachments(ctx, url, organizationName, alert, project, rules, findings, locale)
 	msg := slack.WebhookMessage{
 		Text:        msgText,
 		Attachments: attachments,
@@ -219,6 +221,7 @@ func (a *AlertService) getApiMessage(
 	ctx context.Context,
 	message string,
 	url string,
+	organizationName string,
 	alert *model.Alert,
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
@@ -230,7 +233,7 @@ func (a *AlertService) getApiMessage(
 	if message != "" {
 		text = overrideToCustomMessage(message, alert.Severity)
 	}
-	attachments := a.buildSlackAttachments(ctx, url, alert, project, rules, findings, locale)
+	attachments := a.buildSlackAttachments(ctx, url, organizationName, alert, project, rules, findings, locale)
 
 	msgOptions = append(msgOptions, slack.MsgOptionText(text, false))
 	msgOptions = append(msgOptions, slack.MsgOptionAttachments(attachments...))
@@ -240,6 +243,7 @@ func (a *AlertService) getApiMessage(
 func (a *AlertService) buildSlackAttachments(
 	ctx context.Context,
 	url string,
+	organizationName string,
 	alert *model.Alert,
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
@@ -247,7 +251,7 @@ func (a *AlertService) buildSlackAttachments(
 	locale string,
 ) []slack.Attachment {
 	findingAttachments := a.getFindingAttachment(ctx, url, project.ProjectId, findings, locale)
-	alertAttachment := getAlertAttachment(url, alert, project, rules, findings)
+	alertAttachment := getAlertAttachment(url, organizationName, alert, project, rules, findings)
 	attachments := make([]slack.Attachment, 0, len(findingAttachments)+1)
 	attachments = append(attachments, findingAttachments...)
 	attachments = append(attachments, alertAttachment)
@@ -256,32 +260,40 @@ func (a *AlertService) buildSlackAttachments(
 
 func getAlertAttachment(
 	url string,
+	organizationName string,
 	alert *model.Alert,
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
 	findings *findingDetail,
 ) slack.Attachment {
-	return slack.Attachment{
-		Color: getColor(alert.Severity),
-		Fields: []slack.AttachmentField{
-			{
-				Value: fmt.Sprintf("<%s/alert/alert?project_id=%d&from=slack|%s>", url, project.ProjectId, alert.Description),
-			},
-			{
-				Title: "Rules",
-				Value: generateRuleList(rules),
-			},
-			{
-				Title: "Project",
-				Value: project.Name,
-				Short: true,
-			},
-			{
-				Title: "Findings",
-				Value: fmt.Sprint(findings.FindingCount),
-				Short: true,
-			},
+	fields := []slack.AttachmentField{
+		{
+			Value: fmt.Sprintf("<%s/alert/alert?project_id=%d&from=slack|%s>", url, project.ProjectId, alert.Description),
 		},
+		{
+			Title: "Rules",
+			Value: generateRuleList(rules),
+		},
+		{
+			Title: "Project",
+			Value: project.Name,
+			Short: true,
+		},
+		{
+			Title: "Findings",
+			Value: fmt.Sprint(findings.FindingCount),
+			Short: true,
+		},
+	}
+	if organizationName != "" {
+		fields = append(fields, slack.AttachmentField{
+			Title: "🏢 Organization",
+			Value: organizationName,
+		})
+	}
+	return slack.Attachment{
+		Color:  getColor(alert.Severity),
+		Fields: fields,
 	}
 }
 

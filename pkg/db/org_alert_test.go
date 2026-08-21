@@ -576,14 +576,14 @@ func TestListOrgAlertNotificationTarget(t *testing.T) {
 		{
 			name: "OK - all organizations",
 			want: []*OrgAlertNotificationTarget{
-				{OrganizationID: 10, ProjectID: 1, AlertConditionID: 2, NotificationID: 100, CacheSecond: 30, NotifiedAt: now, Type: "slack", NotifySetting: "one"},
-				{OrganizationID: 20, ProjectID: 1, AlertConditionID: 2, NotificationID: 200, CacheSecond: 60, NotifiedAt: now, Type: "slack", NotifySetting: "two"},
+				{OrganizationID: 10, OrganizationName: "org-one", ProjectID: 1, AlertConditionID: 2, NotificationID: 100, CacheSecond: 30, NotifiedAt: now, Type: "slack", NotifySetting: "one"},
+				{OrganizationID: 20, OrganizationName: "org-two", ProjectID: 1, AlertConditionID: 2, NotificationID: 200, CacheSecond: 60, NotifiedAt: now, Type: "slack", NotifySetting: "two"},
 			},
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(listOrgAlertNotificationTarget)).WithArgs(uint32(1), uint32(2)).WillReturnRows(
-					sqlmock.NewRows([]string{"organization_id", "project_id", "alert_condition_id", "notification_id", "cache_second", "notified_at", "type", "notify_setting"}).
-						AddRow(uint32(10), uint32(1), uint32(2), uint32(100), uint32(30), now, "slack", "one").
-						AddRow(uint32(20), uint32(1), uint32(2), uint32(200), uint32(60), now, "slack", "two"))
+					sqlmock.NewRows([]string{"organization_id", "organization_name", "project_id", "alert_condition_id", "notification_id", "cache_second", "notified_at", "type", "notify_setting"}).
+						AddRow(uint32(10), "org-one", uint32(1), uint32(2), uint32(100), uint32(30), now, "slack", "one").
+						AddRow(uint32(20), "org-two", uint32(1), uint32(2), uint32(200), uint32(60), now, "slack", "two"))
 			},
 		},
 		{
@@ -617,7 +617,7 @@ func TestListOrgAlertNotificationTarget(t *testing.T) {
 
 func TestGetOrgAlertNotificationTarget(t *testing.T) {
 	now := time.Now().Truncate(time.Second)
-	target := &OrgAlertNotificationTarget{OrganizationID: 10, ProjectID: 1, AlertConditionID: 2, NotificationID: 100, CacheSecond: 1800, NotifiedAt: now, Type: "slack", NotifySetting: "latest"}
+	target := &OrgAlertNotificationTarget{OrganizationID: 10, OrganizationName: "org-name", ProjectID: 1, AlertConditionID: 2, NotificationID: 100, CacheSecond: 1800, NotifiedAt: now, Type: "slack", NotifySetting: "latest"}
 	cases := []struct {
 		name     string
 		row      *sqlmock.Rows
@@ -625,7 +625,7 @@ func TestGetOrgAlertNotificationTarget(t *testing.T) {
 		want     *OrgAlertNotificationTarget
 		wantErr  bool
 	}{
-		{name: "OK - latest setting", row: sqlmock.NewRows([]string{"organization_id", "project_id", "alert_condition_id", "notification_id", "cache_second", "notified_at", "type", "notify_setting"}).AddRow(10, 1, 2, 100, 1800, now, "slack", "latest"), want: target},
+		{name: "OK - latest setting", row: sqlmock.NewRows([]string{"organization_id", "organization_name", "project_id", "alert_condition_id", "notification_id", "cache_second", "notified_at", "type", "notify_setting"}).AddRow(10, "org-name", 1, 2, 100, 1800, now, "slack", "latest"), want: target},
 		{name: "NG - removed", row: sqlmock.NewRows([]string{"organization_id"}), wantErr: true},
 		{name: "NG - DB error", queryErr: errors.New("DB error"), wantErr: true},
 	}

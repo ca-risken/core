@@ -31,7 +31,7 @@ func TestNotificationAlert(t *testing.T) {
 	projectSuppressed := projectRelation
 	projectSuppressed.CacheSecond = 1800
 	projectSuppressed.NotifiedAt = now
-	orgTarget := &db.OrgAlertNotificationTarget{OrganizationID: 10, ProjectID: 1, AlertConditionID: 2, NotificationID: 1, Type: "slack", NotifySetting: "org-10"}
+	orgTarget := &db.OrgAlertNotificationTarget{OrganizationID: 10, OrganizationName: "org-name", ProjectID: 1, AlertConditionID: 2, NotificationID: 1, Type: "slack", NotifySetting: "org-10"}
 	orgSuppressed := *orgTarget
 	orgSuppressed.CacheSecond = 1800
 	orgSuppressed.NotifiedAt = now
@@ -49,6 +49,7 @@ func TestNotificationAlert(t *testing.T) {
 		projectUpdateErr     error
 		orgUpdateErr         map[uint32]error
 		wantSent             []string
+		wantOrganizationName []string
 		wantProjectUpdates   int
 		wantOrgRechecks      []uint32
 		wantOrgUpdates       []uint32
@@ -61,6 +62,7 @@ func TestNotificationAlert(t *testing.T) {
 			orgTargets:           []*db.OrgAlertNotificationTarget{orgTarget},
 			orgExists:            map[uint32]bool{10: true},
 			wantSent:             []string{"project", "org-10"},
+			wantOrganizationName: []string{"", "org-name"},
 			wantProjectUpdates:   1,
 			wantOrgRechecks:      []uint32{10},
 			wantOrgUpdates:       []uint32{10},
@@ -211,8 +213,10 @@ func TestNotificationAlert(t *testing.T) {
 				mockDB.On("UpdateOrgAlertCondNotificationNotifiedAt", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1), mock.Anything).Return(c.orgUpdateErr[organizationID]).Once()
 			}
 			var sent []string
-			svc.sendAlertNotification = func(_ context.Context, setting string, _ *model.Alert, _ *project.Project, _ *[]model.AlertRule, _ *findingDetail) error {
+			var organizationNames []string
+			svc.sendAlertNotification = func(_ context.Context, setting, organizationName string, _ *model.Alert, _ *project.Project, _ *[]model.AlertRule, _ *findingDetail) error {
 				sent = append(sent, setting)
+				organizationNames = append(organizationNames, organizationName)
 				return c.sendErr[setting]
 			}
 			findingIDs := []uint64{}
@@ -222,6 +226,9 @@ func TestNotificationAlert(t *testing.T) {
 			}
 			if !reflect.DeepEqual(sent, c.wantSent) {
 				t.Fatalf("Unexpected sends: want=%v, got=%v", c.wantSent, sent)
+			}
+			if c.wantOrganizationName != nil && !reflect.DeepEqual(organizationNames, c.wantOrganizationName) {
+				t.Fatalf("Unexpected organization names: want=%v, got=%v", c.wantOrganizationName, organizationNames)
 			}
 		})
 	}
