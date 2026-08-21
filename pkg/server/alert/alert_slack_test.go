@@ -60,7 +60,7 @@ func TestSendSlackNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := a.sendSlackNotification(context.Background(), "unused", c.notifySetting, c.alert, c.project, &[]model.AlertRule{}, testFindings, LocaleEn)
+			got := a.sendSlackNotification(context.Background(), "unused", c.notifySetting, "", c.alert, c.project, &[]model.AlertRule{}, testFindings, LocaleEn)
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
 			}
@@ -320,7 +320,7 @@ func TestRenderAlertAISummary(t *testing.T) {
 	}
 }
 
-func TestBuildSlackAttachmentsOrdersFindingBeforeAlert(t *testing.T) {
+func TestBuildSlackAttachments(t *testing.T) {
 	alert := &model.Alert{
 		Description: "alert-desc",
 		Severity:    "high",
@@ -344,16 +344,46 @@ func TestBuildSlackAttachmentsOrdersFindingBeforeAlert(t *testing.T) {
 		}},
 	}
 
-	got := (&AlertService{}).buildSlackAttachments(context.Background(), "https://example.com", alert, project, rules, findings, LocaleJa)
+	cases := []struct {
+		name                 string
+		organizationName     string
+		wantOrganizationName string
+		wantOrganizationRow  bool
+	}{
+		{name: "project notification does not show organization"},
+		{
+			name:                 "organization notification shows escaped source",
+			organizationName:     "org <!channel> & <https://example.com|link>",
+			wantOrganizationName: "org &lt;!channel&gt; &amp; &lt;https://example.com|link&gt;",
+			wantOrganizationRow:  true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := (&AlertService{}).buildSlackAttachments(context.Background(), "https://example.com", c.organizationName, alert, project, rules, findings, LocaleJa)
 
-	if len(got) != 2 {
-		t.Fatalf("Unexpected attachment count: got=%d want=2", len(got))
-	}
-	if !strings.Contains(got[0].Fields[0].Value, "/finding/finding?project_id=1&finding_id=10") {
-		t.Fatalf("First attachment should be finding block: got=%+v", got[0].Fields[0].Value)
-	}
-	if !strings.Contains(got[1].Fields[0].Value, "alert-desc") {
-		t.Fatalf("Last attachment should be alert block: got=%+v", got[1].Fields[0].Value)
+			if len(got) != 2 {
+				t.Fatalf("Unexpected attachment count: got=%d want=2", len(got))
+			}
+			if !strings.Contains(got[0].Fields[0].Value, "/finding/finding?project_id=1&finding_id=10") {
+				t.Fatalf("First attachment should be finding block: got=%+v", got[0].Fields[0].Value)
+			}
+			if !strings.Contains(got[1].Fields[0].Value, "alert-desc") {
+				t.Fatalf("Last attachment should be alert block: got=%+v", got[1].Fields[0].Value)
+			}
+			organizationRows := 0
+			for _, field := range got[1].Fields {
+				if field.Title == "🏢 Organization" {
+					organizationRows++
+					if field.Value != c.wantOrganizationName {
+						t.Fatalf("Unexpected organization name: got=%q want=%q", field.Value, c.wantOrganizationName)
+					}
+				}
+			}
+			if (organizationRows == 1) != c.wantOrganizationRow {
+				t.Fatalf("Unexpected organization row count: got=%d", organizationRows)
+			}
+		})
 	}
 }
 

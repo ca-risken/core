@@ -255,6 +255,7 @@ func convertOrgAlertCondNotification(row *organizationAlertCondNotification) *or
 
 type OrgAlertNotificationTarget struct {
 	OrganizationID   uint32
+	OrganizationName string
 	ProjectID        uint32
 	AlertConditionID uint32
 	NotificationID   uint32
@@ -266,10 +267,13 @@ type OrgAlertNotificationTarget struct {
 
 const (
 	listOrgAlertNotificationTarget = `
-		select oacn.organization_id, oacn.project_id, oacn.alert_condition_id,
+		select oacn.organization_id, org.name as organization_name,
+			oacn.project_id, oacn.alert_condition_id,
 			oacn.notification_id, oacn.cache_second, oacn.notified_at,
 			orgn.type, orgn.notify_setting
 		from organization_alert_cond_notification oacn
+		inner join organization org
+			on org.organization_id = oacn.organization_id
 		inner join organization_notification orgn
 			on orgn.organization_id = oacn.organization_id
 			and orgn.notification_id = oacn.notification_id
@@ -280,10 +284,13 @@ const (
 		order by oacn.organization_id, oacn.notification_id
 	`
 	getOrgAlertNotificationTarget = `
-		select oacn.organization_id, oacn.project_id, oacn.alert_condition_id,
+		select oacn.organization_id, org.name as organization_name,
+			oacn.project_id, oacn.alert_condition_id,
 			oacn.notification_id, oacn.cache_second, oacn.notified_at,
 			orgn.type, orgn.notify_setting
 		from organization_alert_cond_notification oacn
+		inner join organization org
+			on org.organization_id = oacn.organization_id
 		inner join organization_project op
 			on op.organization_id = oacn.organization_id
 			and op.project_id = oacn.project_id

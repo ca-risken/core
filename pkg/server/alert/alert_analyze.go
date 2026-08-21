@@ -347,6 +347,7 @@ func (a *AlertService) NotificationAlert(
 			targets = append(targets, alertNotificationTarget{
 				kind:             organizationNotificationTarget,
 				organizationID:   relation.OrganizationID,
+				organizationName: relation.OrganizationName,
 				projectID:        relation.ProjectID,
 				alertConditionID: relation.AlertConditionID,
 				notificationID:   relation.NotificationID,
@@ -381,6 +382,7 @@ const (
 type alertNotificationTarget struct {
 	kind             alertNotificationTargetKind
 	organizationID   uint32
+	organizationName string
 	projectID        uint32
 	alertConditionID uint32
 	notificationID   uint32
@@ -412,6 +414,7 @@ func (a *AlertService) notifyAlertTarget(
 		target.notifiedAt = latest.NotifiedAt
 		target.notificationType = latest.Type
 		target.notifySetting = latest.NotifySetting
+		target.organizationName = latest.OrganizationName
 	}
 	if !existsNewFindings && now.Unix() < target.notifiedAt.Unix()+int64(target.cacheSecond) {
 		return nil
@@ -422,11 +425,11 @@ func (a *AlertService) notifyAlertTarget(
 	}
 	send := a.sendAlertNotification
 	if send == nil {
-		send = func(ctx context.Context, notifySetting string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule, findings *findingDetail) error {
-			return a.sendSlackNotification(ctx, a.baseURL, notifySetting, alert, project, rules, findings, a.defaultLocale)
+		send = func(ctx context.Context, notifySetting, organizationName string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule, findings *findingDetail) error {
+			return a.sendSlackNotification(ctx, a.baseURL, notifySetting, organizationName, alert, project, rules, findings, a.defaultLocale)
 		}
 	}
-	if err := send(ctx, target.notifySetting, alert, project, rules, findings); err != nil {
+	if err := send(ctx, target.notifySetting, target.organizationName, alert, project, rules, findings); err != nil {
 		return fmt.Errorf("notify target: kind=%d, organization_id=%d, notification_id=%d, err=%w", target.kind, target.organizationID, target.notificationID, err)
 	}
 	if target.kind == organizationNotificationTarget {
