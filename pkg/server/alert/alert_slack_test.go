@@ -345,12 +345,18 @@ func TestBuildSlackAttachments(t *testing.T) {
 	}
 
 	cases := []struct {
-		name                string
-		organizationName    string
-		wantOrganizationRow bool
+		name                 string
+		organizationName     string
+		wantOrganizationName string
+		wantOrganizationRow  bool
 	}{
 		{name: "project notification does not show organization"},
-		{name: "organization notification shows its source", organizationName: "org-name", wantOrganizationRow: true},
+		{
+			name:                 "organization notification shows escaped source",
+			organizationName:     "org <!channel> & <https://example.com|link>",
+			wantOrganizationName: "org &lt;!channel&gt; &amp; &lt;https://example.com|link&gt;",
+			wantOrganizationRow:  true,
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -369,8 +375,8 @@ func TestBuildSlackAttachments(t *testing.T) {
 			for _, field := range got[1].Fields {
 				if field.Title == "🏢 Organization" {
 					organizationRows++
-					if field.Value != c.organizationName {
-						t.Fatalf("Unexpected organization name: got=%q want=%q", field.Value, c.organizationName)
+					if field.Value != c.wantOrganizationName {
+						t.Fatalf("Unexpected organization name: got=%q want=%q", field.Value, c.wantOrganizationName)
 					}
 				}
 			}

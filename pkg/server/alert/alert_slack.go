@@ -288,7 +288,7 @@ func getAlertAttachment(
 	if organizationName != "" {
 		fields = append(fields, slack.AttachmentField{
 			Title: "🏢 Organization",
-			Value: organizationName,
+			Value: escapeSlackMrkdwn(organizationName),
 		})
 	}
 	return slack.Attachment{
