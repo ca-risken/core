@@ -723,6 +723,23 @@ func TestGetOrgAlertNotificationTarget(t *testing.T) {
 	}
 }
 
+func TestOrgAlertNotificationTargetRequiresEnabledRelation(t *testing.T) {
+	cases := []struct {
+		name  string
+		query string
+	}{
+		{name: "list targets", query: listOrgAlertNotificationTarget},
+		{name: "recheck target before sending", query: getOrgAlertNotificationTarget},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if !strings.Contains(strings.ToLower(c.query), "oacn.enabled = true") {
+				t.Fatalf("disabled project relation must not be notified: %s", c.query)
+			}
+		})
+	}
+}
+
 func TestUpdateOrgAlertCondNotificationNotifiedAt(t *testing.T) {
 	now := time.Now().Truncate(time.Second)
 	cases := []struct {
