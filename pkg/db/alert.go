@@ -281,6 +281,10 @@ func (c *Client) upsertAlertCondition(ctx context.Context, data *model.AlertCond
 	var retData model.AlertCondition
 	update := alertConditionToMap(data)
 	err := c.Master.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var organizationProjects []model.OrganizationProject
+		if err := tx.Raw(selectOrganizationProjectsByProjectForUpdate, data.ProjectID).Scan(&organizationProjects).Error; err != nil {
+			return err
+		}
 		if err := tx.Where("project_id = ? AND alert_condition_id = ?", data.ProjectID, data.AlertConditionID).Assign(update).FirstOrCreate(&retData).Error; err != nil {
 			return err
 		}
@@ -309,14 +313,34 @@ func (c *Client) deleteAlertCondition(ctx context.Context, projectID uint32, ale
 }
 
 const (
+	selectOrganizationProjectsByProjectForUpdate = `
+		select *
+		from organization_project
+		where project_id = ?
+		for update
+	`
 	insertOrgAlertCondNotificationByAlertCondition = `
 		insert ignore into organization_alert_cond_notification (
-			organization_id, project_id, alert_condition_id, notification_id
+			organization_id, project_id, alert_condition_id, notification_id,
+			enabled, cache_second
 		)
-		select op.organization_id, ac.project_id, ac.alert_condition_id, orgn.notification_id
+		select op.organization_id, ac.project_id, ac.alert_condition_id, orgn.notification_id,
+			coalesce(project_setting.enabled, true),
+			coalesce(project_setting.cache_second, 1800)
 		from alert_condition ac
 		inner join organization_project op on op.project_id = ac.project_id
 		inner join organization_notification orgn on orgn.organization_id = op.organization_id
+		left join (
+			select organization_id, project_id, notification_id,
+				min(enabled) as enabled,
+				case when min(cache_second) = max(cache_second)
+					then min(cache_second) else 1800 end as cache_second
+			from organization_alert_cond_notification
+			group by organization_id, project_id, notification_id
+		) project_setting
+			on project_setting.organization_id = op.organization_id
+			and project_setting.project_id = ac.project_id
+			and project_setting.notification_id = orgn.notification_id
 		where ac.project_id = ? and ac.alert_condition_id = ?
 	`
 	deleteOrgAlertCondNotificationByAlertCondition = `

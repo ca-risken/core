@@ -215,6 +215,66 @@ func (_m *OrgAlertRepository) UpdateOrgAlertCondNotificationCache(ctx context.Co
 	return r0, r1
 }
 
+// UpdateOrgAlertProjectNotificationCache provides a mock function with given fields: ctx, organizationID, projectID, notificationID, cacheSecond
+func (_m *OrgAlertRepository) UpdateOrgAlertProjectNotificationCache(ctx context.Context, organizationID uint32, projectID uint32, notificationID uint32, cacheSecond uint32) ([]*org_alert.OrgAlertCondNotification, error) {
+	ret := _m.Called(ctx, organizationID, projectID, notificationID, cacheSecond)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateOrgAlertProjectNotificationCache")
+	}
+
+	var r0 []*org_alert.OrgAlertCondNotification
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, uint32) ([]*org_alert.OrgAlertCondNotification, error)); ok {
+		return rf(ctx, organizationID, projectID, notificationID, cacheSecond)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, uint32) []*org_alert.OrgAlertCondNotification); ok {
+		r0 = rf(ctx, organizationID, projectID, notificationID, cacheSecond)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*org_alert.OrgAlertCondNotification)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint32, uint32) error); ok {
+		r1 = rf(ctx, organizationID, projectID, notificationID, cacheSecond)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateOrgAlertProjectNotificationEnabled provides a mock function with given fields: ctx, organizationID, projectID, notificationID, enabled
+func (_m *OrgAlertRepository) UpdateOrgAlertProjectNotificationEnabled(ctx context.Context, organizationID uint32, projectID uint32, notificationID uint32, enabled bool) ([]*org_alert.OrgAlertCondNotification, error) {
+	ret := _m.Called(ctx, organizationID, projectID, notificationID, enabled)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateOrgAlertProjectNotificationEnabled")
+	}
+
+	var r0 []*org_alert.OrgAlertCondNotification
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, bool) ([]*org_alert.OrgAlertCondNotification, error)); ok {
+		return rf(ctx, organizationID, projectID, notificationID, enabled)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, bool) []*org_alert.OrgAlertCondNotification); ok {
+		r0 = rf(ctx, organizationID, projectID, notificationID, enabled)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*org_alert.OrgAlertCondNotification)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint32, bool) error); ok {
+		r1 = rf(ctx, organizationID, projectID, notificationID, enabled)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // UpsertOrgNotification provides a mock function with given fields: ctx, data
 func (_m *OrgAlertRepository) UpsertOrgNotification(ctx context.Context, data *model.OrganizationNotification) (*model.OrganizationNotification, error) {
 	ret := _m.Called(ctx, data)

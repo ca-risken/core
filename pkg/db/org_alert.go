@@ -20,6 +20,8 @@ type OrgAlertRepository interface {
 	ListOrgAlertCondNotification(ctx context.Context, organizationID, projectID, alertConditionID, notificationID, pageSize, pageOffset uint32) ([]*orgalert.OrgAlertCondNotification, error)
 	GetOrgAlertCondNotification(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32) (*orgalert.OrgAlertCondNotification, error)
 	UpdateOrgAlertCondNotificationCache(ctx context.Context, organizationID, projectID, alertConditionID, notificationID, cacheSecond uint32) (*orgalert.OrgAlertCondNotification, error)
+	UpdateOrgAlertProjectNotificationEnabled(ctx context.Context, organizationID, projectID, notificationID uint32, enabled bool) ([]*orgalert.OrgAlertCondNotification, error)
+	UpdateOrgAlertProjectNotificationCache(ctx context.Context, organizationID, projectID, notificationID, cacheSecond uint32) ([]*orgalert.OrgAlertCondNotification, error)
 }
 
 var _ OrgAlertRepository = (*Client)(nil)
@@ -115,6 +117,7 @@ type organizationAlertCondNotification struct {
 	ProjectID        uint32
 	AlertConditionID uint32
 	NotificationID   uint32
+	Enabled          bool
 	CacheSecond      uint32
 	NotifiedAt       time.Time
 	CreatedAt        time.Time
@@ -159,6 +162,41 @@ const (
 		where organization_id = ?
 		and project_id = ?
 		and alert_condition_id = ?
+		and notification_id = ?
+	`
+	selectOrganizationProjectForUpdate = `
+		select *
+		from organization_project
+		where organization_id = ?
+		and project_id = ?
+		for update
+	`
+	selectOrgAlertProjectNotificationForUpdate = `
+		select oacn.*
+		from organization_alert_cond_notification oacn
+		inner join organization_project op
+			on op.organization_id = oacn.organization_id
+			and op.project_id = oacn.project_id
+		inner join organization_notification orgn
+			on orgn.organization_id = oacn.organization_id
+			and orgn.notification_id = oacn.notification_id
+		where oacn.organization_id = ?
+		and oacn.project_id = ?
+		and oacn.notification_id = ?
+		for update
+	`
+	updateOrgAlertProjectNotificationEnabled = `
+		update organization_alert_cond_notification
+		set enabled = ?
+		where organization_id = ?
+		and project_id = ?
+		and notification_id = ?
+	`
+	updateOrgAlertProjectNotificationCache = `
+		update organization_alert_cond_notification
+		set cache_second = ?
+		where organization_id = ?
+		and project_id = ?
 		and notification_id = ?
 	`
 )
@@ -224,6 +262,50 @@ func (c *Client) UpdateOrgAlertCondNotificationCache(ctx context.Context, organi
 	return data, nil
 }
 
+func (c *Client) UpdateOrgAlertProjectNotificationEnabled(ctx context.Context, organizationID, projectID, notificationID uint32, enabled bool) ([]*orgalert.OrgAlertCondNotification, error) {
+	return c.updateOrgAlertProjectNotification(ctx, organizationID, projectID, notificationID, func(tx *gorm.DB) error {
+		return tx.Exec(updateOrgAlertProjectNotificationEnabled, enabled, organizationID, projectID, notificationID).Error
+	})
+}
+
+func (c *Client) UpdateOrgAlertProjectNotificationCache(ctx context.Context, organizationID, projectID, notificationID, cacheSecond uint32) ([]*orgalert.OrgAlertCondNotification, error) {
+	return c.updateOrgAlertProjectNotification(ctx, organizationID, projectID, notificationID, func(tx *gorm.DB) error {
+		return tx.Exec(updateOrgAlertProjectNotificationCache, cacheSecond, organizationID, projectID, notificationID).Error
+	})
+}
+
+func (c *Client) updateOrgAlertProjectNotification(ctx context.Context, organizationID, projectID, notificationID uint32, update func(*gorm.DB) error) ([]*orgalert.OrgAlertCondNotification, error) {
+	var data []*orgalert.OrgAlertCondNotification
+	err := c.Master.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var organizationProject model.OrganizationProject
+		if err := tx.Raw(selectOrganizationProjectForUpdate, organizationID, projectID).First(&organizationProject).Error; err != nil {
+			return err
+		}
+		var rows []*organizationAlertCondNotification
+		if err := tx.Raw(selectOrgAlertProjectNotificationForUpdate, organizationID, projectID, notificationID).Scan(&rows).Error; err != nil {
+			return err
+		}
+		if len(rows) == 0 {
+			return gorm.ErrRecordNotFound
+		}
+		if err := update(tx); err != nil {
+			return err
+		}
+		if err := tx.Raw(listOrgAlertCondNotification+" and project_id = ? and notification_id = ? order by alert_condition_id", organizationID, projectID, notificationID).Scan(&rows).Error; err != nil {
+			return err
+		}
+		data = make([]*orgalert.OrgAlertCondNotification, 0, len(rows))
+		for _, row := range rows {
+			data = append(data, convertOrgAlertCondNotification(row))
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
 func (c *Client) getOrgAlertCondNotification(ctx context.Context, database *gorm.DB, organizationID, projectID, alertConditionID, notificationID uint32) (*orgalert.OrgAlertCondNotification, error) {
 	var row organizationAlertCondNotification
 	if err := database.WithContext(ctx).Raw(selectOrgAlertCondNotification, organizationID, projectID, alertConditionID, notificationID).First(&row).Error; err != nil {
@@ -246,6 +328,7 @@ func convertOrgAlertCondNotification(row *organizationAlertCondNotification) *or
 		ProjectId:        row.ProjectID,
 		AlertConditionId: row.AlertConditionID,
 		NotificationId:   row.NotificationID,
+		Enabled:          row.Enabled,
 		CacheSecond:      row.CacheSecond,
 		NotifiedAt:       notifiedAt,
 		CreatedAt:        row.CreatedAt.Unix(),
@@ -281,6 +364,7 @@ const (
 			on op.organization_id = oacn.organization_id
 			and op.project_id = oacn.project_id
 		where oacn.project_id = ? and oacn.alert_condition_id = ?
+		and oacn.enabled = true
 		order by oacn.organization_id, oacn.notification_id
 	`
 	getOrgAlertNotificationTarget = `
@@ -301,6 +385,7 @@ const (
 		and oacn.project_id = ?
 		and oacn.alert_condition_id = ?
 		and oacn.notification_id = ?
+		and oacn.enabled = true
 	`
 	updateOrgAlertCondNotificationNotifiedAt = `
 		update organization_alert_cond_notification

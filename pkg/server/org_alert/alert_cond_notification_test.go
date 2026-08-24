@@ -178,3 +178,59 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateOrgAlertProjectNotificationEnabled(t *testing.T) {
+	relations := []*orgalert.OrgAlertCondNotification{{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, Enabled: false}}
+	cases := []struct {
+		name       string
+		input      *orgalert.UpdateOrgAlertProjectNotificationEnabledRequest
+		mockErr    error
+		want       *orgalert.UpdateOrgAlertProjectNotificationEnabledResponse
+		wantErr    bool
+		expectCall bool
+	}{
+		{name: "OK - disable project", input: &orgalert.UpdateOrgAlertProjectNotificationEnabledRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 4, Enabled: false}, want: &orgalert.UpdateOrgAlertProjectNotificationEnabledResponse{AlertCondNotification: relations}, expectCall: true},
+		{name: "NG - missing relation", input: &orgalert.UpdateOrgAlertProjectNotificationEnabledRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 4}, mockErr: gorm.ErrRecordNotFound, wantErr: true, expectCall: true},
+		{name: "NG - validation", input: &orgalert.UpdateOrgAlertProjectNotificationEnabledRequest{OrganizationId: 1}, wantErr: true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			repository := mocks.NewOrgAlertRepository(t)
+			service := OrgAlertService{repository: repository, logger: logging.NewLogger()}
+			if c.expectCall {
+				repository.On("UpdateOrgAlertProjectNotificationEnabled", mock.Anything, uint32(1), uint32(2), uint32(4), false).Return(relations, c.mockErr).Once()
+			}
+			got, err := service.UpdateOrgAlertProjectNotificationEnabled(context.Background(), c.input)
+			if (err != nil) != c.wantErr || !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected result: got=%+v, err=%v", got, err)
+			}
+		})
+	}
+}
+
+func TestUpdateOrgAlertProjectNotificationCache(t *testing.T) {
+	relations := []*orgalert.OrgAlertCondNotification{{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, Enabled: true, CacheSecond: 300}}
+	cases := []struct {
+		name       string
+		input      *orgalert.UpdateOrgAlertProjectNotificationCacheRequest
+		want       *orgalert.UpdateOrgAlertProjectNotificationCacheResponse
+		wantErr    bool
+		expectCall bool
+	}{
+		{name: "OK - update project cache", input: &orgalert.UpdateOrgAlertProjectNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 4, CacheSecond: 300}, want: &orgalert.UpdateOrgAlertProjectNotificationCacheResponse{AlertCondNotification: relations}, expectCall: true},
+		{name: "NG - cache exceeds one year", input: &orgalert.UpdateOrgAlertProjectNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 4, CacheSecond: 31536001}, wantErr: true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			repository := mocks.NewOrgAlertRepository(t)
+			service := OrgAlertService{repository: repository, logger: logging.NewLogger()}
+			if c.expectCall {
+				repository.On("UpdateOrgAlertProjectNotificationCache", mock.Anything, uint32(1), uint32(2), uint32(4), uint32(300)).Return(relations, nil).Once()
+			}
+			got, err := service.UpdateOrgAlertProjectNotificationCache(context.Background(), c.input)
+			if (err != nil) != c.wantErr || !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected result: got=%+v, err=%v", got, err)
+			}
+		})
+	}
+}

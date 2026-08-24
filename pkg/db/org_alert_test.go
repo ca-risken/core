@@ -350,23 +350,23 @@ func TestListOrgAlertCondNotification(t *testing.T) {
 		{
 			name: "OK - epoch is API zero",
 			args: args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
-			want: []*orgalert.OrgAlertCondNotification{{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 1800, NotifiedAt: 0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			want: []*orgalert.OrgAlertCondNotification{{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, Enabled: true, CacheSecond: 1800, NotifiedAt: 0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				query := listOrgAlertCondNotification + " and project_id = ? and alert_condition_id = ? and notification_id = ? order by project_id, alert_condition_id, notification_id limit ? offset ?"
 				mock.ExpectQuery(regexp.QuoteMeta(query)).
 					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4), uint32(101), uint32(0)).
-					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(1800), epoch, now, now))
+					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), true, uint32(1800), epoch, now, now))
 			},
 		},
 		{
 			name: "OK - organization scope",
 			args: args{organizationID: 1},
-			want: []*orgalert.OrgAlertCondNotification{{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 1800, NotifiedAt: 0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			want: []*orgalert.OrgAlertCondNotification{{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, Enabled: true, CacheSecond: 1800, NotifiedAt: 0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				query := listOrgAlertCondNotification + " order by project_id, alert_condition_id, notification_id limit ? offset ?"
 				mock.ExpectQuery(regexp.QuoteMeta(query)).
 					WithArgs(uint32(1), uint32(101), uint32(0)).
-					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(1800), epoch, now, now))
+					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), true, uint32(1800), epoch, now, now))
 			},
 		},
 		{
@@ -431,11 +431,11 @@ func TestGetOrgAlertCondNotification(t *testing.T) {
 		{
 			name: "OK - all four keys",
 			args: args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4},
-			want: &orgalert.OrgAlertCondNotification{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 60, NotifiedAt: now.Unix(), CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+			want: &orgalert.OrgAlertCondNotification{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, Enabled: true, CacheSecond: 60, NotifiedAt: now.Unix(), CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotification)).
 					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
-					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(60), now, now, now))
+					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), true, uint32(60), now, now, now))
 			},
 		},
 		{
@@ -489,18 +489,18 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 		{
 			name: "OK - membership and relation are locked with all four keys",
 			args: args{organizationID: 1, projectID: 2, alertConditionID: 3, notificationID: 4, cacheSecond: 300},
-			want: &orgalert.OrgAlertCondNotification{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 300, NotifiedAt: now.Unix(), CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
+			want: &orgalert.OrgAlertCondNotification{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, Enabled: true, CacheSecond: 300, NotifiedAt: now.Unix(), CreatedAt: now.Unix(), UpdatedAt: now.Unix()},
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
 				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotificationForUpdate)).
 					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
-					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(1800), now, now, now))
+					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), true, uint32(1800), now, now, now))
 				mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertCondNotificationCache)).
 					WithArgs(uint32(300), uint32(1), uint32(2), uint32(3), uint32(4)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotification)).
 					WithArgs(uint32(1), uint32(2), uint32(3), uint32(4)).
-					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(300), now, now, now))
+					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), true, uint32(300), now, now, now))
 				mock.ExpectCommit()
 			},
 		},
@@ -511,7 +511,7 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
 				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotificationForUpdate)).
-					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(1800), now, now, now))
+					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), true, uint32(1800), now, now, now))
 				mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertCondNotificationCache)).WillReturnError(errors.New("DB error"))
 				mock.ExpectRollback()
 			},
@@ -533,7 +533,7 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 			mockClosure: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
 				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotificationForUpdate)).
-					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), uint32(1800), now, now, now))
+					WillReturnRows(orgAlertCondNotificationRows().AddRow(uint32(1), uint32(2), uint32(3), uint32(4), true, uint32(1800), now, now, now))
 				mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertCondNotificationCache)).WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertCondNotification)).WillReturnRows(orgAlertCondNotificationRows())
 				mock.ExpectRollback()
@@ -561,8 +561,81 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 	}
 }
 
+func TestUpdateOrgAlertProjectNotificationEnabled(t *testing.T) {
+	now := time.Now().Truncate(time.Second)
+	cases := []struct {
+		name    string
+		rows    *sqlmock.Rows
+		wantErr bool
+	}{
+		{name: "OK - all project conditions are disabled", rows: orgAlertCondNotificationRows().AddRow(1, 2, 3, 4, true, 1800, now, now, now)},
+		{name: "NG - project notification relation is missing", rows: orgAlertCondNotificationRows(), wantErr: true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			database, mock, err := newMockClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+			mock.ExpectBegin()
+			mock.ExpectQuery(regexp.QuoteMeta(selectOrganizationProjectForUpdate)).WithArgs(uint32(1), uint32(2)).WillReturnRows(sqlmock.NewRows([]string{"organization_id", "project_id"}).AddRow(uint32(1), uint32(2)))
+			mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertProjectNotificationForUpdate)).WithArgs(uint32(1), uint32(2), uint32(4)).WillReturnRows(c.rows)
+			if c.wantErr {
+				mock.ExpectRollback()
+			} else {
+				mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertProjectNotificationEnabled)).WithArgs(false, uint32(1), uint32(2), uint32(4)).WillReturnResult(sqlmock.NewResult(0, 1))
+				query := listOrgAlertCondNotification + " and project_id = ? and notification_id = ? order by alert_condition_id"
+				mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(uint32(1), uint32(2), uint32(4)).WillReturnRows(orgAlertCondNotificationRows().AddRow(1, 2, 3, 4, false, 1800, now, now, now))
+				mock.ExpectCommit()
+			}
+			got, err := database.UpdateOrgAlertProjectNotificationEnabled(context.Background(), 1, 2, 4, false)
+			if (err != nil) != c.wantErr {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if !c.wantErr && (len(got) != 1 || got[0].Enabled) {
+				t.Fatalf("Unexpected relations: %+v", got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestUpdateOrgAlertProjectNotificationCache(t *testing.T) {
+	now := time.Now().Truncate(time.Second)
+	cases := []struct {
+		name        string
+		cacheSecond uint32
+	}{
+		{name: "OK - project cache is applied to all conditions", cacheSecond: 300},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			database, mock, err := newMockClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+			mock.ExpectBegin()
+			mock.ExpectQuery(regexp.QuoteMeta(selectOrganizationProjectForUpdate)).WithArgs(uint32(1), uint32(2)).WillReturnRows(sqlmock.NewRows([]string{"organization_id", "project_id"}).AddRow(uint32(1), uint32(2)))
+			mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertProjectNotificationForUpdate)).WithArgs(uint32(1), uint32(2), uint32(4)).WillReturnRows(orgAlertCondNotificationRows().AddRow(1, 2, 3, 4, true, 1800, now, now, now))
+			mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertProjectNotificationCache)).WithArgs(c.cacheSecond, uint32(1), uint32(2), uint32(4)).WillReturnResult(sqlmock.NewResult(0, 1))
+			query := listOrgAlertCondNotification + " and project_id = ? and notification_id = ? order by alert_condition_id"
+			mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(uint32(1), uint32(2), uint32(4)).WillReturnRows(orgAlertCondNotificationRows().AddRow(1, 2, 3, 4, true, c.cacheSecond, now, now, now))
+			mock.ExpectCommit()
+			got, err := database.UpdateOrgAlertProjectNotificationCache(context.Background(), 1, 2, 4, c.cacheSecond)
+			if err != nil || len(got) != 1 || got[0].CacheSecond != c.cacheSecond {
+				t.Fatalf("Unexpected result: got=%+v, err=%v", got, err)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
 func orgAlertCondNotificationRows() *sqlmock.Rows {
-	return sqlmock.NewRows([]string{"organization_id", "project_id", "alert_condition_id", "notification_id", "cache_second", "notified_at", "created_at", "updated_at"})
+	return sqlmock.NewRows([]string{"organization_id", "project_id", "alert_condition_id", "notification_id", "enabled", "cache_second", "notified_at", "created_at", "updated_at"})
 }
 
 func TestListOrgAlertNotificationTarget(t *testing.T) {
@@ -652,6 +725,23 @@ func TestGetOrgAlertNotificationTarget(t *testing.T) {
 	}
 }
 
+func TestOrgAlertNotificationTargetRequiresEnabledRelation(t *testing.T) {
+	cases := []struct {
+		name  string
+		query string
+	}{
+		{name: "list targets", query: listOrgAlertNotificationTarget},
+		{name: "recheck target before sending", query: getOrgAlertNotificationTarget},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if !strings.Contains(strings.ToLower(c.query), "oacn.enabled = true") {
+				t.Fatalf("disabled project relation must not be notified: %s", c.query)
+			}
+		})
+	}
+}
+
 func TestUpdateOrgAlertCondNotificationNotifiedAt(t *testing.T) {
 	now := time.Now().Truncate(time.Second)
 	cases := []struct {
@@ -700,8 +790,11 @@ func TestLifecycleRelationInsertContract(t *testing.T) {
 			if !strings.Contains(query, "insert ignore") {
 				t.Fatalf("relation insert must be idempotent: %s", c.query)
 			}
-			if strings.Contains(query, "cache_second") || strings.Contains(query, "notified_at") || strings.Contains(query, "update") {
+			if strings.Contains(query, "notified_at") || strings.Contains(query, "update") {
 				t.Fatalf("relation insert must preserve retries and use defaults after genuine re-add: %s", c.query)
+			}
+			if c.name == "alert condition" && (!strings.Contains(query, "enabled") || !strings.Contains(query, "cache_second")) {
+				t.Fatalf("new alert conditions must inherit the project notification setting: %s", c.query)
 			}
 		})
 	}

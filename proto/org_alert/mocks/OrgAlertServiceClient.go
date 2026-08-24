@@ -351,6 +351,80 @@ func (_m *OrgAlertServiceClient) UpdateOrgAlertCondNotificationCache(ctx context
 	return r0, r1
 }
 
+// UpdateOrgAlertProjectNotificationCache provides a mock function with given fields: ctx, in, opts
+func (_m *OrgAlertServiceClient) UpdateOrgAlertProjectNotificationCache(ctx context.Context, in *org_alert.UpdateOrgAlertProjectNotificationCacheRequest, opts ...grpc.CallOption) (*org_alert.UpdateOrgAlertProjectNotificationCacheResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateOrgAlertProjectNotificationCache")
+	}
+
+	var r0 *org_alert.UpdateOrgAlertProjectNotificationCacheResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *org_alert.UpdateOrgAlertProjectNotificationCacheRequest, ...grpc.CallOption) (*org_alert.UpdateOrgAlertProjectNotificationCacheResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *org_alert.UpdateOrgAlertProjectNotificationCacheRequest, ...grpc.CallOption) *org_alert.UpdateOrgAlertProjectNotificationCacheResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*org_alert.UpdateOrgAlertProjectNotificationCacheResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *org_alert.UpdateOrgAlertProjectNotificationCacheRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateOrgAlertProjectNotificationEnabled provides a mock function with given fields: ctx, in, opts
+func (_m *OrgAlertServiceClient) UpdateOrgAlertProjectNotificationEnabled(ctx context.Context, in *org_alert.UpdateOrgAlertProjectNotificationEnabledRequest, opts ...grpc.CallOption) (*org_alert.UpdateOrgAlertProjectNotificationEnabledResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateOrgAlertProjectNotificationEnabled")
+	}
+
+	var r0 *org_alert.UpdateOrgAlertProjectNotificationEnabledResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *org_alert.UpdateOrgAlertProjectNotificationEnabledRequest, ...grpc.CallOption) (*org_alert.UpdateOrgAlertProjectNotificationEnabledResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *org_alert.UpdateOrgAlertProjectNotificationEnabledRequest, ...grpc.CallOption) *org_alert.UpdateOrgAlertProjectNotificationEnabledResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*org_alert.UpdateOrgAlertProjectNotificationEnabledResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *org_alert.UpdateOrgAlertProjectNotificationEnabledRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewOrgAlertServiceClient creates a new instance of OrgAlertServiceClient. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewOrgAlertServiceClient(t interface {

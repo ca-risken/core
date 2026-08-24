@@ -97,6 +97,30 @@ message UpdateOrgAlertCondNotificationCacheResponse {
   OrgAlertCondNotification alert_cond_notification = 1;
 }
 
+// UpdateOrgAlertProjectNotificationEnabled
+message UpdateOrgAlertProjectNotificationEnabledRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
+  uint32 notification_id = 3 [ (validate.rules).uint32.gt = 0 ];
+  bool enabled = 4;
+}
+
+message UpdateOrgAlertProjectNotificationEnabledResponse {
+  repeated OrgAlertCondNotification alert_cond_notification = 1;
+}
+
+// UpdateOrgAlertProjectNotificationCache
+message UpdateOrgAlertProjectNotificationCacheRequest {
+  uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
+  uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
+  uint32 notification_id = 3 [ (validate.rules).uint32.gt = 0 ];
+  uint32 cache_second = 4 [ (validate.rules).uint32.lte = 31536000 ];
+}
+
+message UpdateOrgAlertProjectNotificationCacheResponse {
+  repeated OrgAlertCondNotification alert_cond_notification = 1;
+}
+
 // OrgAlertService
 service OrgAlertService {
   rpc ListOrgNotification(ListOrgNotificationRequest)
@@ -118,4 +142,10 @@ service OrgAlertService {
   rpc UpdateOrgAlertCondNotificationCache(
       UpdateOrgAlertCondNotificationCacheRequest)
       returns (UpdateOrgAlertCondNotificationCacheResponse) {}
+  rpc UpdateOrgAlertProjectNotificationEnabled(
+      UpdateOrgAlertProjectNotificationEnabledRequest)
+      returns (UpdateOrgAlertProjectNotificationEnabledResponse) {}
+  rpc UpdateOrgAlertProjectNotificationCache(
+      UpdateOrgAlertProjectNotificationCacheRequest)
+      returns (UpdateOrgAlertProjectNotificationCacheResponse) {}
 }
