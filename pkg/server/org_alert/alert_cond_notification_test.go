@@ -10,6 +10,7 @@ import (
 	"github.com/ca-risken/core/pkg/db/mocks"
 	orgalert "github.com/ca-risken/core/proto/org_alert"
 	"github.com/stretchr/testify/mock"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 	"gorm.io/gorm"
 )
 
@@ -128,7 +129,7 @@ func TestGetOrgAlertCondNotification(t *testing.T) {
 
 func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 	relation := &orgalert.OrgAlertCondNotification{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 300}
-	validInput := &orgalert.UpdateOrgAlertCondNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 300}
+	validInput := &orgalert.UpdateOrgAlertCondNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: wrapperspb.UInt32(300)}
 	cases := []struct {
 		name       string
 		input      *orgalert.UpdateOrgAlertCondNotificationCacheRequest
@@ -152,12 +153,12 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 		},
 		{
 			name:    "NG - validation error",
-			input:   &orgalert.UpdateOrgAlertCondNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3},
+			input:   &orgalert.UpdateOrgAlertCondNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4},
 			wantErr: true,
 		},
 		{
 			name:    "NG - cache exceeds one year",
-			input:   &orgalert.UpdateOrgAlertCondNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: 31536001},
+			input:   &orgalert.UpdateOrgAlertCondNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: wrapperspb.UInt32(31536001)},
 			wantErr: true,
 		},
 	}
@@ -189,8 +190,8 @@ func TestUpdateOrgAlertProjectNotificationEnabled(t *testing.T) {
 		wantErr    bool
 		expectCall bool
 	}{
-		{name: "OK - disable project", input: &orgalert.UpdateOrgAlertProjectNotificationEnabledRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 4, Enabled: false}, want: &orgalert.UpdateOrgAlertProjectNotificationEnabledResponse{AlertCondNotification: relations}, expectCall: true},
-		{name: "NG - missing relation", input: &orgalert.UpdateOrgAlertProjectNotificationEnabledRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 4}, mockErr: gorm.ErrRecordNotFound, wantErr: true, expectCall: true},
+		{name: "OK - disable project", input: &orgalert.UpdateOrgAlertProjectNotificationEnabledRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 4, Enabled: wrapperspb.Bool(false)}, want: &orgalert.UpdateOrgAlertProjectNotificationEnabledResponse{AlertCondNotification: relations}, expectCall: true},
+		{name: "NG - missing relation", input: &orgalert.UpdateOrgAlertProjectNotificationEnabledRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 4, Enabled: wrapperspb.Bool(false)}, mockErr: gorm.ErrRecordNotFound, wantErr: true, expectCall: true},
 		{name: "NG - validation", input: &orgalert.UpdateOrgAlertProjectNotificationEnabledRequest{OrganizationId: 1}, wantErr: true},
 	}
 	for _, c := range cases {
@@ -217,8 +218,8 @@ func TestUpdateOrgAlertProjectNotificationCache(t *testing.T) {
 		wantErr    bool
 		expectCall bool
 	}{
-		{name: "OK - update project cache", input: &orgalert.UpdateOrgAlertProjectNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 4, CacheSecond: 300}, want: &orgalert.UpdateOrgAlertProjectNotificationCacheResponse{AlertCondNotification: relations}, expectCall: true},
-		{name: "NG - cache exceeds one year", input: &orgalert.UpdateOrgAlertProjectNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 4, CacheSecond: 31536001}, wantErr: true},
+		{name: "OK - update project cache", input: &orgalert.UpdateOrgAlertProjectNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 4, CacheSecond: wrapperspb.UInt32(300)}, want: &orgalert.UpdateOrgAlertProjectNotificationCacheResponse{AlertCondNotification: relations}, expectCall: true},
+		{name: "NG - cache exceeds one year", input: &orgalert.UpdateOrgAlertProjectNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 4, CacheSecond: wrapperspb.UInt32(31536001)}, wantErr: true},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -230,6 +231,51 @@ func TestUpdateOrgAlertProjectNotificationCache(t *testing.T) {
 			got, err := service.UpdateOrgAlertProjectNotificationCache(context.Background(), c.input)
 			if (err != nil) != c.wantErr || !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected result: got=%+v, err=%v", got, err)
+			}
+		})
+	}
+}
+
+func TestOrgAlertUpdateValuePresenceValidation(t *testing.T) {
+	cases := []struct {
+		name    string
+		request interface{ Validate() error }
+		wantErr bool
+	}{
+		{
+			name:    "OK - explicit false",
+			request: &orgalert.UpdateOrgAlertProjectNotificationEnabledRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 3, Enabled: wrapperspb.Bool(false)},
+		},
+		{
+			name:    "NG - enabled omitted",
+			request: &orgalert.UpdateOrgAlertProjectNotificationEnabledRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 3},
+			wantErr: true,
+		},
+		{
+			name:    "OK - explicit zero condition cache",
+			request: &orgalert.UpdateOrgAlertCondNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4, CacheSecond: wrapperspb.UInt32(0)},
+		},
+		{
+			name:    "NG - condition cache omitted",
+			request: &orgalert.UpdateOrgAlertCondNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, AlertConditionId: 3, NotificationId: 4},
+			wantErr: true,
+		},
+		{
+			name:    "OK - explicit zero project cache",
+			request: &orgalert.UpdateOrgAlertProjectNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 3, CacheSecond: wrapperspb.UInt32(0)},
+		},
+		{
+			name:    "NG - project cache omitted",
+			request: &orgalert.UpdateOrgAlertProjectNotificationCacheRequest{OrganizationId: 1, ProjectId: 2, NotificationId: 3},
+			wantErr: true,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := c.request.Validate()
+			if (err != nil) != c.wantErr {
+				t.Fatalf("Unexpected validation result: err=%v", err)
 			}
 		})
 	}

@@ -1952,10 +1952,23 @@ func (m *UpdateOrgAlertCondNotificationCacheRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if m.GetCacheSecond() > 31536000 {
+	if wrapper := m.GetCacheSecond(); wrapper != nil {
+
+		if wrapper.GetValue() > 31536000 {
+			err := UpdateOrgAlertCondNotificationCacheRequestValidationError{
+				field:  "CacheSecond",
+				reason: "value must be less than or equal to 31536000",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+	} else {
 		err := UpdateOrgAlertCondNotificationCacheRequestValidationError{
 			field:  "CacheSecond",
-			reason: "value must be less than or equal to 31536000",
+			reason: "value is required and must not be nil.",
 		}
 		if !all {
 			return err
@@ -2237,7 +2250,45 @@ func (m *UpdateOrgAlertProjectNotificationEnabledRequest) validate(all bool) err
 		errors = append(errors, err)
 	}
 
-	// no validation rules for Enabled
+	if m.GetEnabled() == nil {
+		err := UpdateOrgAlertProjectNotificationEnabledRequestValidationError{
+			field:  "Enabled",
+			reason: "value is required",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if all {
+		switch v := interface{}(m.GetEnabled()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UpdateOrgAlertProjectNotificationEnabledRequestValidationError{
+					field:  "Enabled",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UpdateOrgAlertProjectNotificationEnabledRequestValidationError{
+					field:  "Enabled",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetEnabled()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateOrgAlertProjectNotificationEnabledRequestValidationError{
+				field:  "Enabled",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
 	if len(errors) > 0 {
 		return UpdateOrgAlertProjectNotificationEnabledRequestMultiError(errors)
@@ -2530,10 +2581,23 @@ func (m *UpdateOrgAlertProjectNotificationCacheRequest) validate(all bool) error
 		errors = append(errors, err)
 	}
 
-	if m.GetCacheSecond() > 31536000 {
+	if wrapper := m.GetCacheSecond(); wrapper != nil {
+
+		if wrapper.GetValue() > 31536000 {
+			err := UpdateOrgAlertProjectNotificationCacheRequestValidationError{
+				field:  "CacheSecond",
+				reason: "value must be less than or equal to 31536000",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+	} else {
 		err := UpdateOrgAlertProjectNotificationCacheRequestValidationError{
 			field:  "CacheSecond",
-			reason: "value must be less than or equal to 31536000",
+			reason: "value is required and must not be nil.",
 		}
 		if !all {
 			return err
