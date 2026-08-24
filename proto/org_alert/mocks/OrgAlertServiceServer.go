@@ -286,6 +286,66 @@ func (_m *OrgAlertServiceServer) UpdateOrgAlertCondNotificationCache(_a0 context
 	return r0, r1
 }
 
+// UpdateOrgAlertProjectNotificationCache provides a mock function with given fields: _a0, _a1
+func (_m *OrgAlertServiceServer) UpdateOrgAlertProjectNotificationCache(_a0 context.Context, _a1 *org_alert.UpdateOrgAlertProjectNotificationCacheRequest) (*org_alert.UpdateOrgAlertProjectNotificationCacheResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateOrgAlertProjectNotificationCache")
+	}
+
+	var r0 *org_alert.UpdateOrgAlertProjectNotificationCacheResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *org_alert.UpdateOrgAlertProjectNotificationCacheRequest) (*org_alert.UpdateOrgAlertProjectNotificationCacheResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *org_alert.UpdateOrgAlertProjectNotificationCacheRequest) *org_alert.UpdateOrgAlertProjectNotificationCacheResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*org_alert.UpdateOrgAlertProjectNotificationCacheResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *org_alert.UpdateOrgAlertProjectNotificationCacheRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateOrgAlertProjectNotificationEnabled provides a mock function with given fields: _a0, _a1
+func (_m *OrgAlertServiceServer) UpdateOrgAlertProjectNotificationEnabled(_a0 context.Context, _a1 *org_alert.UpdateOrgAlertProjectNotificationEnabledRequest) (*org_alert.UpdateOrgAlertProjectNotificationEnabledResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateOrgAlertProjectNotificationEnabled")
+	}
+
+	var r0 *org_alert.UpdateOrgAlertProjectNotificationEnabledResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *org_alert.UpdateOrgAlertProjectNotificationEnabledRequest) (*org_alert.UpdateOrgAlertProjectNotificationEnabledResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *org_alert.UpdateOrgAlertProjectNotificationEnabledRequest) *org_alert.UpdateOrgAlertProjectNotificationEnabledResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*org_alert.UpdateOrgAlertProjectNotificationEnabledResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *org_alert.UpdateOrgAlertProjectNotificationEnabledRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewOrgAlertServiceServer creates a new instance of OrgAlertServiceServer. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewOrgAlertServiceServer(t interface {
