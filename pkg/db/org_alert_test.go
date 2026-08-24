@@ -578,6 +578,7 @@ func TestUpdateOrgAlertProjectNotificationEnabled(t *testing.T) {
 				t.Fatal(err)
 			}
 			mock.ExpectBegin()
+			mock.ExpectQuery(regexp.QuoteMeta(selectOrganizationProjectForUpdate)).WithArgs(uint32(1), uint32(2)).WillReturnRows(sqlmock.NewRows([]string{"organization_id", "project_id"}).AddRow(uint32(1), uint32(2)))
 			mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertProjectNotificationForUpdate)).WithArgs(uint32(1), uint32(2), uint32(4)).WillReturnRows(c.rows)
 			if c.wantErr {
 				mock.ExpectRollback()
@@ -616,6 +617,7 @@ func TestUpdateOrgAlertProjectNotificationCache(t *testing.T) {
 				t.Fatal(err)
 			}
 			mock.ExpectBegin()
+			mock.ExpectQuery(regexp.QuoteMeta(selectOrganizationProjectForUpdate)).WithArgs(uint32(1), uint32(2)).WillReturnRows(sqlmock.NewRows([]string{"organization_id", "project_id"}).AddRow(uint32(1), uint32(2)))
 			mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertProjectNotificationForUpdate)).WithArgs(uint32(1), uint32(2), uint32(4)).WillReturnRows(orgAlertCondNotificationRows().AddRow(1, 2, 3, 4, true, 1800, now, now, now))
 			mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertProjectNotificationCache)).WithArgs(c.cacheSecond, uint32(1), uint32(2), uint32(4)).WillReturnResult(sqlmock.NewResult(0, 1))
 			query := listOrgAlertCondNotification + " and project_id = ? and notification_id = ? order by alert_condition_id"

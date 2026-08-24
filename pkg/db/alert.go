@@ -281,6 +281,10 @@ func (c *Client) upsertAlertCondition(ctx context.Context, data *model.AlertCond
 	var retData model.AlertCondition
 	update := alertConditionToMap(data)
 	err := c.Master.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var organizationProjects []model.OrganizationProject
+		if err := tx.Raw(selectOrganizationProjectsByProjectForUpdate, data.ProjectID).Scan(&organizationProjects).Error; err != nil {
+			return err
+		}
 		if err := tx.Where("project_id = ? AND alert_condition_id = ?", data.ProjectID, data.AlertConditionID).Assign(update).FirstOrCreate(&retData).Error; err != nil {
 			return err
 		}
@@ -309,6 +313,12 @@ func (c *Client) deleteAlertCondition(ctx context.Context, projectID uint32, ale
 }
 
 const (
+	selectOrganizationProjectsByProjectForUpdate = `
+		select *
+		from organization_project
+		where project_id = ?
+		for update
+	`
 	insertOrgAlertCondNotificationByAlertCondition = `
 		insert ignore into organization_alert_cond_notification (
 			organization_id, project_id, alert_condition_id, notification_id,

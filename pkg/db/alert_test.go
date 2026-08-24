@@ -76,6 +76,7 @@ func TestUpsertAlertConditionLifecycle(t *testing.T) {
 				t.Fatal(err)
 			}
 			mock.ExpectBegin()
+			mock.ExpectQuery(regexp.QuoteMeta(selectOrganizationProjectsByProjectForUpdate)).WithArgs(uint32(1)).WillReturnRows(sqlmock.NewRows([]string{"organization_id", "project_id"}).AddRow(uint32(1), uint32(1)))
 			mock.ExpectQuery(regexp.QuoteMeta(selectAlertCondition)).WithArgs(uint32(1), uint32(0)).WillReturnRows(sqlmock.NewRows([]string{"alert_condition_id"}))
 			mock.ExpectExec("INSERT INTO `alert_condition`").WillReturnResult(sqlmock.NewResult(1, 1))
 			relation := mock.ExpectExec(regexp.QuoteMeta(insertOrgAlertCondNotificationByAlertCondition)).WithArgs(uint32(1), uint32(1))

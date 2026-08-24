@@ -164,6 +164,13 @@ const (
 		and alert_condition_id = ?
 		and notification_id = ?
 	`
+	selectOrganizationProjectForUpdate = `
+		select *
+		from organization_project
+		where organization_id = ?
+		and project_id = ?
+		for update
+	`
 	selectOrgAlertProjectNotificationForUpdate = `
 		select oacn.*
 		from organization_alert_cond_notification oacn
@@ -270,6 +277,10 @@ func (c *Client) UpdateOrgAlertProjectNotificationCache(ctx context.Context, org
 func (c *Client) updateOrgAlertProjectNotification(ctx context.Context, organizationID, projectID, notificationID uint32, update func(*gorm.DB) error) ([]*orgalert.OrgAlertCondNotification, error) {
 	var data []*orgalert.OrgAlertCondNotification
 	err := c.Master.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var organizationProject model.OrganizationProject
+		if err := tx.Raw(selectOrganizationProjectForUpdate, organizationID, projectID).First(&organizationProject).Error; err != nil {
+			return err
+		}
 		var rows []*organizationAlertCondNotification
 		if err := tx.Raw(selectOrgAlertProjectNotificationForUpdate, organizationID, projectID, notificationID).Scan(&rows).Error; err != nil {
 			return err
