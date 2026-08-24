@@ -51,7 +51,7 @@ func (s *OrgAlertService) UpdateOrgAlertCondNotificationCache(ctx context.Contex
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	data, err := s.repository.UpdateOrgAlertCondNotificationCache(ctx, req.OrganizationId, req.ProjectId, req.AlertConditionId, req.NotificationId, req.CacheSecond.Value)
+	data, err := s.repository.UpdateOrgAlertCondNotificationCache(ctx, req.OrganizationId, req.ProjectId, req.AlertConditionId, req.NotificationId, req.GetCacheSecond().GetValue())
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "organization alert condition notification not found")
@@ -65,7 +65,7 @@ func (s *OrgAlertService) UpdateOrgAlertProjectNotificationEnabled(ctx context.C
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	data, err := s.repository.UpdateOrgAlertProjectNotificationEnabled(ctx, req.OrganizationId, req.ProjectId, req.NotificationId, req.Enabled.Value)
+	data, err := s.repository.UpdateOrgAlertProjectNotificationEnabled(ctx, req.OrganizationId, req.ProjectId, req.NotificationId, req.GetEnabled().GetValue())
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "organization alert project notification not found")
@@ -79,7 +79,7 @@ func (s *OrgAlertService) UpdateOrgAlertProjectNotificationCache(ctx context.Con
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
-	data, err := s.repository.UpdateOrgAlertProjectNotificationCache(ctx, req.OrganizationId, req.ProjectId, req.NotificationId, req.CacheSecond.Value)
+	data, err := s.repository.UpdateOrgAlertProjectNotificationCache(ctx, req.OrganizationId, req.ProjectId, req.NotificationId, req.GetCacheSecond().GetValue())
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "organization alert project notification not found")
