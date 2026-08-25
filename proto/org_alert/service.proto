@@ -6,6 +6,7 @@ option go_package = "github.com/ca-risken/core/proto/org_alert";
 import "google/protobuf/empty.proto";
 import "org_alert/entity.proto";
 import "validate/validate.proto";
+import "google/protobuf/wrappers.proto";
 
 // ListOrgNotification
 message ListOrgNotificationRequest {
@@ -90,7 +91,8 @@ message UpdateOrgAlertCondNotificationCacheRequest {
   uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
   uint32 alert_condition_id = 3 [ (validate.rules).uint32.gt = 0 ];
   uint32 notification_id = 4 [ (validate.rules).uint32.gt = 0 ];
-  uint32 cache_second = 5 [ (validate.rules).uint32.lte = 31536000 ];
+  google.protobuf.UInt32Value cache_second = 5
+      [ (validate.rules).message.required = true, (validate.rules).uint32.lte = 31536000 ];
 }
 
 message UpdateOrgAlertCondNotificationCacheResponse {
@@ -102,7 +104,7 @@ message UpdateOrgAlertProjectNotificationEnabledRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
   uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
   uint32 notification_id = 3 [ (validate.rules).uint32.gt = 0 ];
-  bool enabled = 4;
+  google.protobuf.BoolValue enabled = 4 [ (validate.rules).message.required = true ];
 }
 
 message UpdateOrgAlertProjectNotificationEnabledResponse {
@@ -114,7 +116,8 @@ message UpdateOrgAlertProjectNotificationCacheRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ];
   uint32 project_id = 2 [ (validate.rules).uint32.gt = 0 ];
   uint32 notification_id = 3 [ (validate.rules).uint32.gt = 0 ];
-  uint32 cache_second = 4 [ (validate.rules).uint32.lte = 31536000 ];
+  google.protobuf.UInt32Value cache_second = 4
+      [ (validate.rules).message.required = true, (validate.rules).uint32.lte = 31536000 ];
 }
 
 message UpdateOrgAlertProjectNotificationCacheResponse {
