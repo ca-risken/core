@@ -570,14 +570,14 @@ func renderSlackText(text string) string {
 	for _, loc := range slackHTTPURLPattern.FindAllStringIndex(text, -1) {
 		rendered.WriteString(escapeSlackMrkdwn(text[last:loc[0]]))
 		candidate := text[loc[0]:loc[1]]
-		url := strings.TrimRight(candidate, "）")
+		url := strings.TrimRight(candidate, ".,;:]")
 		for strings.HasSuffix(url, ")") && strings.Count(url, ")") > strings.Count(url, "(") {
 			url = strings.TrimSuffix(url, ")")
 		}
 		if alertsummary.SanitizeLinkURL(url) == "" {
 			rendered.WriteString(escapeSlackMrkdwn(candidate))
 		} else {
-			fmt.Fprintf(&rendered, "<%s>", url)
+			fmt.Fprintf(&rendered, "<%s>", escapeSlackMrkdwn(url))
 			rendered.WriteString(escapeSlackMrkdwn(candidate[len(url):]))
 		}
 		last = loc[1]

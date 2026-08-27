@@ -299,6 +299,16 @@ func TestRenderAlertAISummary(t *testing.T) {
 			want:  "see <https://example.com/wiki/Function_(math)> now",
 		},
 		{
+			name:  "delimit url before trailing punctuation",
+			input: `{"blocks":[{"type":"text","text":"see https://example.com/path., next https://example.com/a]; done"}]}`,
+			want:  "see <https://example.com/path>., next <https://example.com/a>]; done",
+		},
+		{
+			name:  "escape ampersand in url",
+			input: `{"blocks":[{"type":"text","text":"see https://example.com/path?x=1&y=2 now"}]}`,
+			want:  "see <https://example.com/path?x=1&amp;y=2> now",
+		},
+		{
 			name:  "drop unsafe url in link block",
 			input: `{"blocks":[{"type":"text","text":"summary"},{"type":"link","label":"malicious","url":"https://example.com/a><!channel>"}]}`,
 			want:  "summary",
