@@ -289,54 +289,9 @@ func TestRenderAlertAISummary(t *testing.T) {
 			want:  "google.golang.org/grpc（<http://google.golang.org/grpc>）の既知の脆弱性を検知しました。",
 		},
 		{
-			name:  "delimit url before ASCII closing parenthesis",
-			input: `{"blocks":[{"type":"text","text":"see (https://example.com/path) now"}]}`,
-			want:  "see (<https://example.com/path>) now",
-		},
-		{
-			name:  "keep balanced parentheses in url",
-			input: `{"blocks":[{"type":"text","text":"see https://example.com/wiki/Function_(math) now"}]}`,
-			want:  "see <https://example.com/wiki/Function_(math)> now",
-		},
-		{
-			name:  "delimit url before trailing punctuation",
-			input: `{"blocks":[{"type":"text","text":"see https://example.com/path., next https://example.com/a]; done"}]}`,
-			want:  "see <https://example.com/path>., next <https://example.com/a>]; done",
-		},
-		{
-			name:  "escape ampersand in url",
-			input: `{"blocks":[{"type":"text","text":"see https://example.com/path?x=1&y=2 now"}]}`,
-			want:  "see <https://example.com/path?x=1&amp;y=2> now",
-		},
-		{
-			name:  "delimit punctuation before unbalanced closing parenthesis",
-			input: `{"blocks":[{"type":"text","text":"see https://example.com/path.) now"}]}`,
-			want:  "see <https://example.com/path>.) now",
-		},
-		{
-			name:  "do not link url without host",
-			input: `{"blocks":[{"type":"text","text":"end https://]. now"}]}`,
-			want:  "end https://]. now",
-		},
-		{
-			name:  "normalize Japanese path",
-			input: `{"blocks":[{"type":"text","text":"see https://example.com/脆弱性。確認してください。"}]}`,
-			want:  "see <https://example.com/%E8%84%86%E5%BC%B1%E6%80%A7>。確認してください。",
-		},
-		{
-			name:  "keep IPv6 host brackets",
-			input: `{"blocks":[{"type":"text","text":"see (http://[2001:db8::1]) now"}]}`,
-			want:  "see (<http://[2001:db8::1]>) now",
-		},
-		{
-			name:  "delimit url before full width space",
-			input: `{"blocks":[{"type":"text","text":"https://example.com/path　next"}]}`,
-			want:  "<https://example.com/path>　next",
-		},
-		{
-			name:  "keep full width punctuation in url",
-			input: `{"blocks":[{"type":"text","text":"https://example.com/質問？！．・"}]}`,
-			want:  "<https://example.com/%E8%B3%AA%E5%95%8F%EF%BC%9F%EF%BC%81%EF%BC%8E%E3%83%BB>",
+			name:  "leave other raw urls unchanged",
+			input: `{"blocks":[{"type":"text","text":"https://example.com/a, https://日本語.example.com/質問？！．・"}]}`,
+			want:  "https://example.com/a, https://日本語.example.com/質問？！．・",
 		},
 		{
 			name:  "drop unsafe url in link block",

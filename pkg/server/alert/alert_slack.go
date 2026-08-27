@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	neturl "net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -74,7 +73,7 @@ var slackMrkdwnReplacer = strings.NewReplacer(
 	">", "&gt;",
 )
 
-var slackHTTPURLPattern = regexp.MustCompile(`https?://[^\s　<>）。，、；：】」』]+`)
+var slackURLBeforeJapaneseClosingParenthesisPattern = regexp.MustCompile(`https?://[^\s\p{Z}<>）]+）`)
 
 func (a *AlertService) sendSlackNotification(
 	ctx context.Context, url, notifySetting string,
@@ -568,26 +567,14 @@ func renderAlertAISummary(raw string) string {
 func renderSlackText(text string) string {
 	var rendered strings.Builder
 	last := 0
-	for _, loc := range slackHTTPURLPattern.FindAllStringIndex(text, -1) {
+	for _, loc := range slackURLBeforeJapaneseClosingParenthesisPattern.FindAllStringIndex(text, -1) {
 		rendered.WriteString(escapeSlackMrkdwn(text[last:loc[0]]))
-		candidate := text[loc[0]:loc[1]]
-		url := candidate
-		for previous := ""; url != previous; {
-			previous = url
-			url = strings.TrimRight(url, ".,;:")
-			if strings.HasSuffix(url, ")") && strings.Count(url, ")") > strings.Count(url, "(") {
-				url = strings.TrimSuffix(url, ")")
-			}
-			if strings.HasSuffix(url, "]") && strings.Count(url, "]") > strings.Count(url, "[") {
-				url = strings.TrimSuffix(url, "]")
-			}
-		}
-		parsedURL, err := neturl.Parse(url)
-		if alertsummary.SanitizeLinkURL(url) == "" || err != nil || parsedURL.Host == "" {
-			rendered.WriteString(escapeSlackMrkdwn(candidate))
+		match := text[loc[0]:loc[1]]
+		url := strings.TrimSuffix(match, "）")
+		if alertsummary.SanitizeLinkURL(url) == "" {
+			rendered.WriteString(escapeSlackMrkdwn(match))
 		} else {
-			fmt.Fprintf(&rendered, "<%s>", escapeSlackMrkdwn(parsedURL.String()))
-			rendered.WriteString(escapeSlackMrkdwn(candidate[len(url):]))
+			fmt.Fprintf(&rendered, "<%s>）", escapeSlackMrkdwn(url))
 		}
 		last = loc[1]
 	}
