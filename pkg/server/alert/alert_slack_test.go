@@ -284,6 +284,21 @@ func TestRenderAlertAISummary(t *testing.T) {
 			want:  "notify &lt;!here&gt; &amp; review &lt;this&gt;\n<https://example.com|Git¦Hub &gt; docs>",
 		},
 		{
+			name:  "delimit url before Japanese closing parenthesis",
+			input: `{"blocks":[{"type":"text","text":"google.golang.org/grpc（http://google.golang.org/grpc）の既知の脆弱性を検知しました。"}]}`,
+			want:  "google.golang.org/grpc（<http://google.golang.org/grpc>）の既知の脆弱性を検知しました。",
+		},
+		{
+			name:  "delimit url before ASCII closing parenthesis",
+			input: `{"blocks":[{"type":"text","text":"see (https://example.com/path) now"}]}`,
+			want:  "see (<https://example.com/path>) now",
+		},
+		{
+			name:  "keep balanced parentheses in url",
+			input: `{"blocks":[{"type":"text","text":"see https://example.com/wiki/Function_(math) now"}]}`,
+			want:  "see <https://example.com/wiki/Function_(math)> now",
+		},
+		{
 			name:  "drop unsafe url in link block",
 			input: `{"blocks":[{"type":"text","text":"summary"},{"type":"link","label":"malicious","url":"https://example.com/a><!channel>"}]}`,
 			want:  "summary",
