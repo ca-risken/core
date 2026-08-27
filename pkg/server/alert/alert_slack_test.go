@@ -284,6 +284,16 @@ func TestRenderAlertAISummary(t *testing.T) {
 			want:  "notify &lt;!here&gt; &amp; review &lt;this&gt;\n<https://example.com|Git¦Hub &gt; docs>",
 		},
 		{
+			name:  "delimit url before Japanese closing parenthesis",
+			input: `{"blocks":[{"type":"text","text":"google.golang.org/grpc（http://google.golang.org/grpc）の既知の脆弱性を検知しました。"}]}`,
+			want:  "google.golang.org/grpc（<http://google.golang.org/grpc>）の既知の脆弱性を検知しました。",
+		},
+		{
+			name:  "leave other raw urls unchanged",
+			input: `{"blocks":[{"type":"text","text":"https://example.com/a, https://日本語.example.com/質問？！．・"}]}`,
+			want:  "https://example.com/a, https://日本語.example.com/質問？！．・",
+		},
+		{
 			name:  "drop unsafe url in link block",
 			input: `{"blocks":[{"type":"text","text":"summary"},{"type":"link","label":"malicious","url":"https://example.com/a><!channel>"}]}`,
 			want:  "summary",

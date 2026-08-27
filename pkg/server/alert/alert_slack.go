@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -71,6 +72,8 @@ var slackMrkdwnReplacer = strings.NewReplacer(
 	"<", "&lt;",
 	">", "&gt;",
 )
+
+var slackURLBeforeJapaneseClosingParenthesisPattern = regexp.MustCompile(`https?://[^\s\p{Z}<>）]+）`)
 
 func (a *AlertService) sendSlackNotification(
 	ctx context.Context, url, notifySetting string,
@@ -543,7 +546,7 @@ func renderAlertAISummary(raw string) string {
 	for _, block := range payload.Blocks {
 		switch block.Type {
 		case alertsummary.BlockTypeText:
-			if text := escapeSlackMrkdwn(strings.TrimSpace(block.Text)); text != "" {
+			if text := renderSlackText(strings.TrimSpace(block.Text)); text != "" {
 				lines = append(lines, text)
 			}
 		case alertsummary.BlockTypeLink:
@@ -559,6 +562,24 @@ func renderAlertAISummary(raw string) string {
 		}
 	}
 	return strings.Join(lines, "\n")
+}
+
+func renderSlackText(text string) string {
+	var rendered strings.Builder
+	last := 0
+	for _, loc := range slackURLBeforeJapaneseClosingParenthesisPattern.FindAllStringIndex(text, -1) {
+		rendered.WriteString(escapeSlackMrkdwn(text[last:loc[0]]))
+		match := text[loc[0]:loc[1]]
+		url := strings.TrimSuffix(match, "）")
+		if alertsummary.SanitizeLinkURL(url) == "" {
+			rendered.WriteString(escapeSlackMrkdwn(match))
+		} else {
+			fmt.Fprintf(&rendered, "<%s>）", escapeSlackMrkdwn(url))
+		}
+		last = loc[1]
+	}
+	rendered.WriteString(escapeSlackMrkdwn(text[last:]))
+	return rendered.String()
 }
 
 func escapeSlackMrkdwn(text string) string {
