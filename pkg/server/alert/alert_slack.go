@@ -74,7 +74,7 @@ var slackMrkdwnReplacer = strings.NewReplacer(
 	">", "&gt;",
 )
 
-var slackHTTPURLPattern = regexp.MustCompile(`https?://[^\s　<>）。，、；：？！．・】」』]+`)
+var slackHTTPURLPattern = regexp.MustCompile(`https?://[^\s　<>）。，、；：】」』]+`)
 
 func (a *AlertService) sendSlackNotification(
 	ctx context.Context, url, notifySetting string,

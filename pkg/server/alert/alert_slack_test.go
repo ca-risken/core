@@ -329,9 +329,14 @@ func TestRenderAlertAISummary(t *testing.T) {
 			want:  "see (<http://[2001:db8::1]>) now",
 		},
 		{
-			name:  "delimit url before full width separators",
-			input: `{"blocks":[{"type":"text","text":"https://example.com/a？ https://example.com/b！ https://example.com/c． https://example.com/d・ https://example.com/e　next"}]}`,
-			want:  "<https://example.com/a>？ <https://example.com/b>！ <https://example.com/c>． <https://example.com/d>・ <https://example.com/e>　next",
+			name:  "delimit url before full width space",
+			input: `{"blocks":[{"type":"text","text":"https://example.com/path　next"}]}`,
+			want:  "<https://example.com/path>　next",
+		},
+		{
+			name:  "keep full width punctuation in url",
+			input: `{"blocks":[{"type":"text","text":"https://example.com/質問？！．・"}]}`,
+			want:  "<https://example.com/%E8%B3%AA%E5%95%8F%EF%BC%9F%EF%BC%81%EF%BC%8E%E3%83%BB>",
 		},
 		{
 			name:  "drop unsafe url in link block",
