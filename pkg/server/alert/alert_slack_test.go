@@ -329,6 +329,11 @@ func TestRenderAlertAISummary(t *testing.T) {
 			want:  "see (<http://[2001:db8::1]>) now",
 		},
 		{
+			name:  "delimit url before full width separators",
+			input: `{"blocks":[{"type":"text","text":"https://example.com/a？ https://example.com/b！ https://example.com/c． https://example.com/d・ https://example.com/e　next"}]}`,
+			want:  "<https://example.com/a>？ <https://example.com/b>！ <https://example.com/c>． <https://example.com/d>・ <https://example.com/e>　next",
+		},
+		{
 			name:  "drop unsafe url in link block",
 			input: `{"blocks":[{"type":"text","text":"summary"},{"type":"link","label":"malicious","url":"https://example.com/a><!channel>"}]}`,
 			want:  "summary",
