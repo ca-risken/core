@@ -309,6 +309,16 @@ func TestRenderAlertAISummary(t *testing.T) {
 			want:  "see <https://example.com/path?x=1&amp;y=2> now",
 		},
 		{
+			name:  "delimit punctuation before unbalanced closing parenthesis",
+			input: `{"blocks":[{"type":"text","text":"see https://example.com/path.) now"}]}`,
+			want:  "see <https://example.com/path>.) now",
+		},
+		{
+			name:  "do not link url without host",
+			input: `{"blocks":[{"type":"text","text":"end https://]. now"}]}`,
+			want:  "end https://]. now",
+		},
+		{
 			name:  "drop unsafe url in link block",
 			input: `{"blocks":[{"type":"text","text":"summary"},{"type":"link","label":"malicious","url":"https://example.com/a><!channel>"}]}`,
 			want:  "summary",

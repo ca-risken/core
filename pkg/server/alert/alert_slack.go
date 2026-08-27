@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	neturl "net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -570,11 +571,16 @@ func renderSlackText(text string) string {
 	for _, loc := range slackHTTPURLPattern.FindAllStringIndex(text, -1) {
 		rendered.WriteString(escapeSlackMrkdwn(text[last:loc[0]]))
 		candidate := text[loc[0]:loc[1]]
-		url := strings.TrimRight(candidate, ".,;:]")
-		for strings.HasSuffix(url, ")") && strings.Count(url, ")") > strings.Count(url, "(") {
-			url = strings.TrimSuffix(url, ")")
+		url := candidate
+		for previous := ""; url != previous; {
+			previous = url
+			url = strings.TrimRight(url, ".,;:]")
+			if strings.HasSuffix(url, ")") && strings.Count(url, ")") > strings.Count(url, "(") {
+				url = strings.TrimSuffix(url, ")")
+			}
 		}
-		if alertsummary.SanitizeLinkURL(url) == "" {
+		parsedURL, err := neturl.Parse(url)
+		if alertsummary.SanitizeLinkURL(url) == "" || err != nil || parsedURL.Host == "" {
 			rendered.WriteString(escapeSlackMrkdwn(candidate))
 		} else {
 			fmt.Fprintf(&rendered, "<%s>", escapeSlackMrkdwn(url))
