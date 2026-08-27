@@ -319,6 +319,16 @@ func TestRenderAlertAISummary(t *testing.T) {
 			want:  "end https://]. now",
 		},
 		{
+			name:  "normalize Japanese path",
+			input: `{"blocks":[{"type":"text","text":"see https://example.com/脆弱性。確認してください。"}]}`,
+			want:  "see <https://example.com/%E8%84%86%E5%BC%B1%E6%80%A7>。確認してください。",
+		},
+		{
+			name:  "keep IPv6 host brackets",
+			input: `{"blocks":[{"type":"text","text":"see (http://[2001:db8::1]) now"}]}`,
+			want:  "see (<http://[2001:db8::1]>) now",
+		},
+		{
 			name:  "drop unsafe url in link block",
 			input: `{"blocks":[{"type":"text","text":"summary"},{"type":"link","label":"malicious","url":"https://example.com/a><!channel>"}]}`,
 			want:  "summary",
