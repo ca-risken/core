@@ -225,6 +225,7 @@ func (o *OrganizationService) createDefaultRole(ctx context.Context, ownerUserID
 			OrganizationId: organizationID,
 			Name:           name,
 			ActionPtn:      actionPtn,
+			ProjectPtn:     ".*",
 		})
 		if err != nil {
 			return fmt.Errorf("could not put %s-policy, err=%w", name, err)
