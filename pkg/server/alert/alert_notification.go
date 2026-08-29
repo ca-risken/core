@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
+	riskenslack "github.com/ca-risken/core/pkg/slack"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/ca-risken/core/proto/iam"
@@ -124,8 +125,9 @@ func (a *AlertService) PutNotification(ctx context.Context, req *alert.PutNotifi
 	if !zero.IsZeroVal(existData) {
 		switch existData.Type {
 		case "slack":
-			convertedNotifySetting, err := a.replaceSlackNotifySetting(ctx, existData.NotifySetting, data.NotifySetting)
+			convertedNotifySetting, err := riskenslack.ReplaceNotifySetting(existData.NotifySetting, data.NotifySetting)
 			if err != nil {
+				a.logger.Errorf(ctx, "Error occured when replace NotifySetting. err: %v", err)
 				return nil, err
 			}
 			newNotifySetting, err := json.Marshal(convertedNotifySetting)
@@ -150,34 +152,6 @@ func (a *AlertService) PutNotification(ctx context.Context, req *alert.PutNotifi
 		return nil, err
 	}
 	return &alert.PutNotificationResponse{Notification: convertedNotification}, nil
-}
-
-func (a *AlertService) replaceSlackNotifySetting(ctx context.Context, jsonNotifySettingExist, jsonNotifySettingUpdate string) (slackNotifySetting, error) {
-	var notifySettingUpdate slackNotifySetting
-	if err := json.Unmarshal([]byte(jsonNotifySettingUpdate), &notifySettingUpdate); err != nil {
-		a.logger.Errorf(ctx, "Error occured when unmarshal update.NotifySetting. err: %v", err)
-		return slackNotifySetting{}, err
-	}
-	var notifySettingExist slackNotifySetting
-	if err := json.Unmarshal([]byte(jsonNotifySettingExist), &notifySettingExist); err != nil {
-		a.logger.Errorf(ctx, "Error occured when unmarshal exist.NotifySetting. err: %v", err)
-		return slackNotifySetting{}, err
-	}
-
-	// Slack Options
-	// webhookURL and ChannelID are mutually exclusive
-	if notifySettingUpdate.WebhookURL != "" {
-		notifySettingUpdate.ChannelID = ""
-		return notifySettingUpdate, nil
-	}
-	if notifySettingUpdate.ChannelID != "" {
-		notifySettingUpdate.WebhookURL = ""
-		return notifySettingUpdate, nil
-	}
-
-	// No update options
-	notifySettingUpdate = notifySettingExist // overwrite existing data
-	return notifySettingUpdate, nil
 }
 
 func (a *AlertService) DeleteNotification(ctx context.Context, req *alert.DeleteNotificationRequest) (*empty.Empty, error) {
@@ -267,7 +241,7 @@ func (a *AlertService) convertNotification(ctx context.Context, n *model.Notific
 	var err error
 	setting := n.NotifySetting
 	if mask {
-		setting, err = maskingNotifySetting(n.Type, setting)
+		setting, err = riskenslack.MaskNotifySetting(n.Type, setting)
 		if err != nil {
 			a.logger.Errorf(ctx, "Failed to masking notify setting. %v", err)
 			return &alert.Notification{}, err
@@ -282,35 +256,6 @@ func (a *AlertService) convertNotification(ctx context.Context, n *model.Notific
 		CreatedAt:      n.CreatedAt.Unix(),
 		UpdatedAt:      n.UpdatedAt.Unix(),
 	}, nil
-}
-
-func maskingNotifySetting(notificationType, notifySetting string) (string, error) {
-	switch notificationType {
-	case "slack":
-		var setting slackNotifySetting
-		if err := json.Unmarshal([]byte(notifySetting), &setting); err != nil {
-			return "", err
-		}
-		if setting.WebhookURL == "" {
-			return notifySetting, nil
-		}
-		setting.WebhookURL = maskRight(setting.WebhookURL, len(setting.WebhookURL)/2)
-		ret, err := json.Marshal(setting)
-		if err != nil {
-			return "", err
-		}
-		return string(ret), err
-	default:
-		return notifySetting, nil
-	}
-}
-
-func maskRight(s string, num int) string {
-	rs := []rune(s)
-	for i := num; i < len(rs); i++ {
-		rs[i] = '*'
-	}
-	return string(rs)
 }
 
 const (
