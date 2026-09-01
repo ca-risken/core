@@ -54,7 +54,7 @@ type AlertRepository interface {
 	ListEnabledAlertCondition(context.Context, uint32, []uint32) (*[]model.AlertCondition, error)
 	ListDisabledAlertCondition(context.Context, uint32, []uint32) (*[]model.AlertCondition, error)
 	ListOrgAlertNotificationTarget(context.Context, uint32, uint32) ([]*OrgAlertNotificationTarget, error)
-	WithLockedOrgAlertNotificationTarget(context.Context, uint32, uint32, uint32, uint32, time.Time, func(*OrgAlertNotificationTarget) (bool, error)) error
+	WithLockedOrgAlertNotificationTarget(context.Context, uint32, uint32, uint32, uint32, func(*OrgAlertNotificationTarget) (bool, error)) error
 }
 
 var _ AlertRepository = (*Client)(nil)

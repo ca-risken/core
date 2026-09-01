@@ -30,7 +30,7 @@ type deleteMembershipBeforeOrgRecheck struct {
 	err            error
 }
 
-func (r *deleteMembershipBeforeOrgRecheck) WithLockedOrgAlertNotificationTarget(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32, notifiedAt time.Time, process func(*db.OrgAlertNotificationTarget) (bool, error)) error {
+func (r *deleteMembershipBeforeOrgRecheck) WithLockedOrgAlertNotificationTarget(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32, process func(*db.OrgAlertNotificationTarget) (bool, error)) error {
 	if organizationID == r.organizationID && projectID == r.projectID {
 		r.once.Do(func() {
 			r.err = r.client.RemoveProjectsInOrganization(ctx, r.organizationID, r.projectID)
@@ -39,7 +39,7 @@ func (r *deleteMembershipBeforeOrgRecheck) WithLockedOrgAlertNotificationTarget(
 			return r.err
 		}
 	}
-	return r.AlertRepository.WithLockedOrgAlertNotificationTarget(ctx, organizationID, projectID, alertConditionID, notificationID, notifiedAt, process)
+	return r.AlertRepository.WithLockedOrgAlertNotificationTarget(ctx, organizationID, projectID, alertConditionID, notificationID, process)
 }
 
 func TestOrgNotificationIntegration(t *testing.T) {

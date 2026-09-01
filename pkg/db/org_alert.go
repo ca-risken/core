@@ -191,6 +191,7 @@ const (
 		where organization_id = ?
 		and project_id = ?
 		and notification_id = ?
+		and enabled = true
 	`
 	updateOrgAlertProjectNotificationCache = `
 		update organization_alert_cond_notification
@@ -424,7 +425,7 @@ func (c *Client) UpdateOrgAlertCondNotificationNotifiedAt(ctx context.Context, o
 	return c.Master.WithContext(ctx).Exec(updateOrgAlertCondNotificationNotifiedAt, notifiedAt, organizationID, projectID, alertConditionID, notificationID).Error
 }
 
-func (c *Client) WithLockedOrgAlertNotificationTarget(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32, notifiedAt time.Time, process func(*OrgAlertNotificationTarget) (bool, error)) error {
+func (c *Client) WithLockedOrgAlertNotificationTarget(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32, process func(*OrgAlertNotificationTarget) (bool, error)) error {
 	return c.Master.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		var organizationProject model.OrganizationProject
 		if err := tx.Raw(selectOrganizationProjectForUpdate, organizationID, projectID).First(&organizationProject).Error; err != nil {
@@ -442,14 +443,20 @@ func (c *Client) WithLockedOrgAlertNotificationTarget(ctx context.Context, organ
 			return err
 		}
 		for _, row := range rows {
+			if !row.Enabled {
+				continue
+			}
 			if row.NotifiedAt.After(target.NotifiedAt) {
 				target.NotifiedAt = row.NotifiedAt
+			}
+			if row.CacheSecond > target.CacheSecond {
+				target.CacheSecond = row.CacheSecond
 			}
 		}
 		update, err := process(&target)
 		if err != nil || !update {
 			return err
 		}
-		return tx.Exec(updateOrgAlertProjectNotificationNotifiedAt, notifiedAt, organizationID, projectID, notificationID).Error
+		return tx.Exec(updateOrgAlertProjectNotificationNotifiedAt, time.Now(), organizationID, projectID, notificationID).Error
 	})
 }

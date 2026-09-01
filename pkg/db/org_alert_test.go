@@ -775,6 +775,51 @@ func TestUpdateOrgAlertCondNotificationNotifiedAt(t *testing.T) {
 	}
 }
 
+func TestWithLockedOrgAlertNotificationTarget(t *testing.T) {
+	now := time.Now().Truncate(time.Second)
+	later := now.Add(time.Minute)
+	disabledLater := later.Add(time.Minute)
+	cases := []struct {
+		name string
+	}{
+		{name: "OK - aggregates enabled relations only"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			database, mock, err := newMockClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+			mock.ExpectBegin()
+			mock.ExpectQuery(regexp.QuoteMeta(selectOrganizationProjectForUpdate)).WithArgs(uint32(10), uint32(1)).WillReturnRows(
+				sqlmock.NewRows([]string{"organization_id", "project_id"}).AddRow(uint32(10), uint32(1)))
+			mock.ExpectQuery(regexp.QuoteMeta(selectOrgAlertProjectNotificationForUpdate)).WithArgs(uint32(10), uint32(1), uint32(100)).WillReturnRows(
+				orgAlertCondNotificationRows().
+					AddRow(10, 1, 2, 100, true, 30, now, now, now).
+					AddRow(10, 1, 3, 100, true, 60, later, now, now).
+					AddRow(10, 1, 4, 100, false, 120, disabledLater, now, now))
+			mock.ExpectQuery(regexp.QuoteMeta(getOrgAlertNotificationTarget)).WithArgs(uint32(10), uint32(1), uint32(2), uint32(100)).WillReturnRows(
+				sqlmock.NewRows([]string{"organization_id", "organization_name", "project_id", "alert_condition_id", "notification_id", "cache_second", "notified_at", "type", "notify_setting"}).
+					AddRow(10, "org-name", 1, 2, 100, 30, now, "slack", "setting"))
+			mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertProjectNotificationNotifiedAt)).WithArgs(sqlmock.AnyArg(), uint32(10), uint32(1), uint32(100)).WillReturnResult(sqlmock.NewResult(0, 2))
+			mock.ExpectCommit()
+
+			err = database.WithLockedOrgAlertNotificationTarget(context.Background(), 10, 1, 2, 100, func(target *OrgAlertNotificationTarget) (bool, error) {
+				if target.CacheSecond != 60 || !target.NotifiedAt.Equal(later) {
+					t.Fatalf("Unexpected aggregation: %+v", target)
+				}
+				return true, nil
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
 func TestLifecycleRelationInsertContract(t *testing.T) {
 	cases := []struct {
 		name  string

@@ -53,6 +53,7 @@ func TestNotificationAlert(t *testing.T) {
 		wantProjectUpdates   int
 		wantOrgRechecks      []uint32
 		wantOrgUpdates       []uint32
+		existsNewFindings    bool
 		wantErr              bool
 	}{
 		{
@@ -152,6 +153,17 @@ func TestNotificationAlert(t *testing.T) {
 			wantOrgRechecks: []uint32{10},
 		},
 		{
+			name:                 "OK - new findings bypass organization suppression",
+			orgTargets:           []*db.OrgAlertNotificationTarget{orgTarget},
+			orgExists:            map[uint32]bool{10: true},
+			orgLatest:            map[uint32]*db.OrgAlertNotificationTarget{10: &orgSuppressed},
+			existsNewFindings:    true,
+			wantSent:             []string{"org-10"},
+			wantOrganizationName: []string{"org-name"},
+			wantOrgRechecks:      []uint32{10},
+			wantOrgUpdates:       []uint32{10},
+		},
+		{
 			name:                 "OK - unsupported targets do not update suppression state",
 			projectRelations:     []model.AlertCondNotification{projectRelation},
 			projectNotifications: map[uint32]*model.Notification{1: {NotificationID: 1, Type: "email", NotifySetting: "project-email"}},
@@ -212,11 +224,11 @@ func TestNotificationAlert(t *testing.T) {
 					latest = candidate
 				}
 				if !c.orgExists[organizationID] {
-					mockDB.On("WithLockedOrgAlertNotificationTarget", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1), mock.Anything, mock.Anything).Return(gorm.ErrRecordNotFound).Once()
+					mockDB.On("WithLockedOrgAlertNotificationTarget", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1), mock.Anything).Return(gorm.ErrRecordNotFound).Once()
 					continue
 				}
-				mockDB.On("WithLockedOrgAlertNotificationTarget", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1), mock.Anything, mock.Anything).Return(
-					func(_ context.Context, _ uint32, _ uint32, _ uint32, _ uint32, _ time.Time, process func(*db.OrgAlertNotificationTarget) (bool, error)) error {
+				mockDB.On("WithLockedOrgAlertNotificationTarget", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1), mock.Anything).Return(
+					func(_ context.Context, _ uint32, _ uint32, _ uint32, _ uint32, process func(*db.OrgAlertNotificationTarget) (bool, error)) error {
 						update, err := process(latest)
 						if err != nil || !update {
 							return err
@@ -227,7 +239,7 @@ func TestNotificationAlert(t *testing.T) {
 				).Once()
 			}
 			findingIDs := []uint64{}
-			err := svc.NotificationAlert(context.Background(), &model.AlertCondition{ProjectID: 1, AlertConditionID: 2}, &model.Alert{}, &[]model.AlertRule{}, &project.Project{ProjectId: 1}, &findingIDs, false)
+			err := svc.NotificationAlert(context.Background(), &model.AlertCondition{ProjectID: 1, AlertConditionID: 2}, &model.Alert{}, &[]model.AlertRule{}, &project.Project{ProjectId: 1}, &findingIDs, c.existsNewFindings)
 			if (err != nil) != c.wantErr {
 				t.Fatalf("Unexpected error: %v", err)
 			}

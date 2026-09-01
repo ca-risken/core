@@ -404,7 +404,7 @@ func (a *AlertService) notifyAlertTarget(
 	now time.Time,
 ) error {
 	if target.kind == organizationNotificationTarget {
-		err := a.repository.WithLockedOrgAlertNotificationTarget(ctx, target.organizationID, target.projectID, target.alertConditionID, target.notificationID, now, func(latest *db.OrgAlertNotificationTarget) (bool, error) {
+		err := a.repository.WithLockedOrgAlertNotificationTarget(ctx, target.organizationID, target.projectID, target.alertConditionID, target.notificationID, func(latest *db.OrgAlertNotificationTarget) (bool, error) {
 			target.cacheSecond = latest.CacheSecond
 			target.notifiedAt = latest.NotifiedAt
 			target.notificationType = latest.Type
