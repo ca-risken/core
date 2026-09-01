@@ -564,11 +564,14 @@ func TestUpdateOrgAlertCondNotificationCache(t *testing.T) {
 func TestUpdateOrgAlertProjectNotificationEnabled(t *testing.T) {
 	now := time.Now().Truncate(time.Second)
 	cases := []struct {
-		name    string
-		rows    *sqlmock.Rows
-		wantErr bool
+		name        string
+		rows        *sqlmock.Rows
+		enabled     bool
+		wantErr     bool
+		wantEnabled bool
 	}{
 		{name: "OK - all project conditions are disabled", rows: orgAlertCondNotificationRows().AddRow(1, 2, 3, 4, true, 1800, now, now, now)},
+		{name: "OK - all project conditions are re-enabled", rows: orgAlertCondNotificationRows().AddRow(1, 2, 3, 4, false, 1800, now, now, now), enabled: true, wantEnabled: true},
 		{name: "NG - project notification relation is missing", rows: orgAlertCondNotificationRows(), wantErr: true},
 	}
 	for _, c := range cases {
@@ -583,16 +586,16 @@ func TestUpdateOrgAlertProjectNotificationEnabled(t *testing.T) {
 			if c.wantErr {
 				mock.ExpectRollback()
 			} else {
-				mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertProjectNotificationEnabled)).WithArgs(false, uint32(1), uint32(2), uint32(4)).WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertProjectNotificationEnabled)).WithArgs(c.enabled, uint32(1), uint32(2), uint32(4)).WillReturnResult(sqlmock.NewResult(0, 1))
 				query := listOrgAlertCondNotification + " and project_id = ? and notification_id = ? order by alert_condition_id"
-				mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(uint32(1), uint32(2), uint32(4)).WillReturnRows(orgAlertCondNotificationRows().AddRow(1, 2, 3, 4, false, 1800, now, now, now))
+				mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(uint32(1), uint32(2), uint32(4)).WillReturnRows(orgAlertCondNotificationRows().AddRow(1, 2, 3, 4, c.wantEnabled, 1800, now, now, now))
 				mock.ExpectCommit()
 			}
-			got, err := database.UpdateOrgAlertProjectNotificationEnabled(context.Background(), 1, 2, 4, false)
+			got, err := database.UpdateOrgAlertProjectNotificationEnabled(context.Background(), 1, 2, 4, c.enabled)
 			if (err != nil) != c.wantErr {
 				t.Fatalf("Unexpected error: %v", err)
 			}
-			if !c.wantErr && (len(got) != 1 || got[0].Enabled) {
+			if !c.wantErr && (len(got) != 1 || got[0].Enabled != c.wantEnabled) {
 				t.Fatalf("Unexpected relations: %+v", got)
 			}
 			if err := mock.ExpectationsWereMet(); err != nil {

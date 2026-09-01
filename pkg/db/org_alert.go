@@ -191,7 +191,6 @@ const (
 		where organization_id = ?
 		and project_id = ?
 		and notification_id = ?
-		and enabled = true
 	`
 	updateOrgAlertProjectNotificationCache = `
 		update organization_alert_cond_notification
@@ -402,6 +401,7 @@ const (
 		where organization_id = ?
 		and project_id = ?
 		and notification_id = ?
+		and enabled = true
 	`
 )
 
