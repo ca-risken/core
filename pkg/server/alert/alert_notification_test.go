@@ -189,6 +189,17 @@ func TestNotificationAlert(t *testing.T) {
 				mockDB.On("GetNotification", mock.Anything, uint32(1), relation.NotificationID).Return(c.projectNotifications[relation.NotificationID], c.projectGetErr[relation.NotificationID]).Once()
 			}
 			mockDB.On("ListOrgAlertNotificationTarget", mock.Anything, uint32(1), uint32(2)).Return(c.orgTargets, c.orgListErr).Once()
+			for i := 0; i < c.wantProjectUpdates; i++ {
+				mockDB.On("UpsertAlertCondNotification", mock.Anything, mock.Anything).Return(&model.AlertCondNotification{}, c.projectUpdateErr).Once()
+			}
+			var sent []string
+			var organizationNames []string
+			var orgUpdates []uint32
+			svc.sendAlertNotification = func(_ context.Context, setting, organizationName string, _ *model.Alert, _ *project.Project, _ *[]model.AlertRule, _ *findingDetail) error {
+				sent = append(sent, setting)
+				organizationNames = append(organizationNames, organizationName)
+				return c.sendErr[setting]
+			}
 			for _, organizationID := range c.wantOrgRechecks {
 				var latest *db.OrgAlertNotificationTarget
 				for _, candidate := range c.orgTargets {
@@ -200,24 +211,20 @@ func TestNotificationAlert(t *testing.T) {
 				if candidate := c.orgLatest[organizationID]; candidate != nil {
 					latest = candidate
 				}
-				if c.orgExists[organizationID] {
-					mockDB.On("GetOrgAlertNotificationTarget", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1)).Return(latest, nil).Once()
-				} else {
-					mockDB.On("GetOrgAlertNotificationTarget", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1)).Return(nil, gorm.ErrRecordNotFound).Once()
+				if !c.orgExists[organizationID] {
+					mockDB.On("WithLockedOrgAlertNotificationTarget", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1), mock.Anything, mock.Anything).Return(gorm.ErrRecordNotFound).Once()
+					continue
 				}
-			}
-			for i := 0; i < c.wantProjectUpdates; i++ {
-				mockDB.On("UpsertAlertCondNotification", mock.Anything, mock.Anything).Return(&model.AlertCondNotification{}, c.projectUpdateErr).Once()
-			}
-			for _, organizationID := range c.wantOrgUpdates {
-				mockDB.On("UpdateOrgAlertCondNotificationNotifiedAt", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1), mock.Anything).Return(c.orgUpdateErr[organizationID]).Once()
-			}
-			var sent []string
-			var organizationNames []string
-			svc.sendAlertNotification = func(_ context.Context, setting, organizationName string, _ *model.Alert, _ *project.Project, _ *[]model.AlertRule, _ *findingDetail) error {
-				sent = append(sent, setting)
-				organizationNames = append(organizationNames, organizationName)
-				return c.sendErr[setting]
+				mockDB.On("WithLockedOrgAlertNotificationTarget", mock.Anything, organizationID, uint32(1), uint32(2), uint32(1), mock.Anything, mock.Anything).Return(
+					func(_ context.Context, _ uint32, _ uint32, _ uint32, _ uint32, _ time.Time, process func(*db.OrgAlertNotificationTarget) (bool, error)) error {
+						update, err := process(latest)
+						if err != nil || !update {
+							return err
+						}
+						orgUpdates = append(orgUpdates, organizationID)
+						return c.orgUpdateErr[organizationID]
+					},
+				).Once()
 			}
 			findingIDs := []uint64{}
 			err := svc.NotificationAlert(context.Background(), &model.AlertCondition{ProjectID: 1, AlertConditionID: 2}, &model.Alert{}, &[]model.AlertRule{}, &project.Project{ProjectId: 1}, &findingIDs, false)
@@ -229,6 +236,9 @@ func TestNotificationAlert(t *testing.T) {
 			}
 			if c.wantOrganizationName != nil && !reflect.DeepEqual(organizationNames, c.wantOrganizationName) {
 				t.Fatalf("Unexpected organization names: want=%v, got=%v", c.wantOrganizationName, organizationNames)
+			}
+			if !reflect.DeepEqual(orgUpdates, c.wantOrgUpdates) {
+				t.Fatalf("Unexpected organization updates: want=%v, got=%v", c.wantOrgUpdates, orgUpdates)
 			}
 		})
 	}

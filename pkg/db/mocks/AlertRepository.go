@@ -420,36 +420,6 @@ func (_m *AlertRepository) GetNotification(_a0 context.Context, _a1 uint32, _a2 
 	return r0, r1
 }
 
-// GetOrgAlertNotificationTarget provides a mock function with given fields: _a0, _a1, _a2, _a3, _a4
-func (_m *AlertRepository) GetOrgAlertNotificationTarget(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 uint32, _a4 uint32) (*db.OrgAlertNotificationTarget, error) {
-	ret := _m.Called(_a0, _a1, _a2, _a3, _a4)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetOrgAlertNotificationTarget")
-	}
-
-	var r0 *db.OrgAlertNotificationTarget
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, uint32) (*db.OrgAlertNotificationTarget, error)); ok {
-		return rf(_a0, _a1, _a2, _a3, _a4)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, uint32) *db.OrgAlertNotificationTarget); ok {
-		r0 = rf(_a0, _a1, _a2, _a3, _a4)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*db.OrgAlertNotificationTarget)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint32, uint32) error); ok {
-		r1 = rf(_a0, _a1, _a2, _a3, _a4)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetRelAlertFinding provides a mock function with given fields: _a0, _a1, _a2, _a3
 func (_m *AlertRepository) GetRelAlertFinding(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 uint64) (*model.RelAlertFinding, error) {
 	ret := _m.Called(_a0, _a1, _a2, _a3)
@@ -888,17 +858,17 @@ func (_m *AlertRepository) UpdateAlertFirstViewedAt(_a0 context.Context, _a1 uin
 	return r0
 }
 
-// UpdateOrgAlertCondNotificationNotifiedAt provides a mock function with given fields: _a0, _a1, _a2, _a3, _a4, _a5
-func (_m *AlertRepository) UpdateOrgAlertCondNotificationNotifiedAt(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 uint32, _a4 uint32, _a5 time.Time) error {
-	ret := _m.Called(_a0, _a1, _a2, _a3, _a4, _a5)
+// WithLockedOrgAlertNotificationTarget provides a mock function with given fields: _a0, _a1, _a2, _a3, _a4, _a5, _a6
+func (_m *AlertRepository) WithLockedOrgAlertNotificationTarget(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 uint32, _a4 uint32, _a5 time.Time, _a6 func(*db.OrgAlertNotificationTarget) (bool, error)) error {
+	ret := _m.Called(_a0, _a1, _a2, _a3, _a4, _a5, _a6)
 
 	if len(ret) == 0 {
-		panic("no return value specified for UpdateOrgAlertCondNotificationNotifiedAt")
+		panic("no return value specified for WithLockedOrgAlertNotificationTarget")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, uint32, time.Time) error); ok {
-		r0 = rf(_a0, _a1, _a2, _a3, _a4, _a5)
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, uint32, time.Time, func(*db.OrgAlertNotificationTarget) (bool, error)) error); ok {
+		r0 = rf(_a0, _a1, _a2, _a3, _a4, _a5, _a6)
 	} else {
 		r0 = ret.Error(0)
 	}

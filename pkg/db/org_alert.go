@@ -395,6 +395,13 @@ const (
 		and alert_condition_id = ?
 		and notification_id = ?
 	`
+	updateOrgAlertProjectNotificationNotifiedAt = `
+		update organization_alert_cond_notification
+		set notified_at = ?
+		where organization_id = ?
+		and project_id = ?
+		and notification_id = ?
+	`
 )
 
 func (c *Client) ListOrgAlertNotificationTarget(ctx context.Context, projectID, alertConditionID uint32) ([]*OrgAlertNotificationTarget, error) {
@@ -415,4 +422,34 @@ func (c *Client) GetOrgAlertNotificationTarget(ctx context.Context, organization
 
 func (c *Client) UpdateOrgAlertCondNotificationNotifiedAt(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32, notifiedAt time.Time) error {
 	return c.Master.WithContext(ctx).Exec(updateOrgAlertCondNotificationNotifiedAt, notifiedAt, organizationID, projectID, alertConditionID, notificationID).Error
+}
+
+func (c *Client) WithLockedOrgAlertNotificationTarget(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32, notifiedAt time.Time, process func(*OrgAlertNotificationTarget) (bool, error)) error {
+	return c.Master.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var organizationProject model.OrganizationProject
+		if err := tx.Raw(selectOrganizationProjectForUpdate, organizationID, projectID).First(&organizationProject).Error; err != nil {
+			return err
+		}
+		var rows []*organizationAlertCondNotification
+		if err := tx.Raw(selectOrgAlertProjectNotificationForUpdate, organizationID, projectID, notificationID).Scan(&rows).Error; err != nil {
+			return err
+		}
+		if len(rows) == 0 {
+			return gorm.ErrRecordNotFound
+		}
+		var target OrgAlertNotificationTarget
+		if err := tx.Raw(getOrgAlertNotificationTarget, organizationID, projectID, alertConditionID, notificationID).First(&target).Error; err != nil {
+			return err
+		}
+		for _, row := range rows {
+			if row.NotifiedAt.After(target.NotifiedAt) {
+				target.NotifiedAt = row.NotifiedAt
+			}
+		}
+		update, err := process(&target)
+		if err != nil || !update {
+			return err
+		}
+		return tx.Exec(updateOrgAlertProjectNotificationNotifiedAt, notifiedAt, organizationID, projectID, notificationID).Error
+	})
 }

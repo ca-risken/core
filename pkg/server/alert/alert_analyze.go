@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ca-risken/common/pkg/logging"
+	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
@@ -403,18 +404,31 @@ func (a *AlertService) notifyAlertTarget(
 	now time.Time,
 ) error {
 	if target.kind == organizationNotificationTarget {
-		latest, err := a.repository.GetOrgAlertNotificationTarget(ctx, target.organizationID, target.projectID, target.alertConditionID, target.notificationID)
+		err := a.repository.WithLockedOrgAlertNotificationTarget(ctx, target.organizationID, target.projectID, target.alertConditionID, target.notificationID, now, func(latest *db.OrgAlertNotificationTarget) (bool, error) {
+			target.cacheSecond = latest.CacheSecond
+			target.notifiedAt = latest.NotifiedAt
+			target.notificationType = latest.Type
+			target.notifySetting = latest.NotifySetting
+			target.organizationName = latest.OrganizationName
+			if !existsNewFindings && now.Unix() < target.notifiedAt.Unix()+int64(target.cacheSecond) {
+				return false, nil
+			}
+			if target.notificationType != "slack" {
+				a.logger.Warnf(ctx, "Unsupported notification type: %s", target.notificationType)
+				return false, nil
+			}
+			if err := a.sendNotification(ctx, target, alert, rules, project, findings); err != nil {
+				return false, err
+			}
+			return true, nil
+		})
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil
 			}
-			return fmt.Errorf("recheck organization notification target: %w", err)
+			return fmt.Errorf("process organization notification target: %w", err)
 		}
-		target.cacheSecond = latest.CacheSecond
-		target.notifiedAt = latest.NotifiedAt
-		target.notificationType = latest.Type
-		target.notifySetting = latest.NotifySetting
-		target.organizationName = latest.OrganizationName
+		return nil
 	}
 	if !existsNewFindings && now.Unix() < target.notifiedAt.Unix()+int64(target.cacheSecond) {
 		return nil
@@ -423,20 +437,8 @@ func (a *AlertService) notifyAlertTarget(
 		a.logger.Warnf(ctx, "Unsupported notification type: %s", target.notificationType)
 		return nil
 	}
-	send := a.sendAlertNotification
-	if send == nil {
-		send = func(ctx context.Context, notifySetting, organizationName string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule, findings *findingDetail) error {
-			return a.sendSlackNotification(ctx, a.baseURL, notifySetting, organizationName, alert, project, rules, findings, a.defaultLocale)
-		}
-	}
-	if err := send(ctx, target.notifySetting, target.organizationName, alert, project, rules, findings); err != nil {
-		return fmt.Errorf("notify target: kind=%d, organization_id=%d, notification_id=%d, err=%w", target.kind, target.organizationID, target.notificationID, err)
-	}
-	if target.kind == organizationNotificationTarget {
-		if err := a.repository.UpdateOrgAlertCondNotificationNotifiedAt(ctx, target.organizationID, target.projectID, target.alertConditionID, target.notificationID, now); err != nil {
-			return fmt.Errorf("update organization notification target: %w", err)
-		}
-		return nil
+	if err := a.sendNotification(ctx, target, alert, rules, project, findings); err != nil {
+		return err
 	}
 	_, err := a.repository.UpsertAlertCondNotification(ctx, &model.AlertCondNotification{
 		AlertConditionID: target.alertConditionID,
@@ -447,6 +449,19 @@ func (a *AlertService) notifyAlertTarget(
 	})
 	if err != nil {
 		return fmt.Errorf("update project notification target: %w", err)
+	}
+	return nil
+}
+
+func (a *AlertService) sendNotification(ctx context.Context, target alertNotificationTarget, alert *model.Alert, rules *[]model.AlertRule, project *projectproto.Project, findings *findingDetail) error {
+	send := a.sendAlertNotification
+	if send == nil {
+		send = func(ctx context.Context, notifySetting, organizationName string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule, findings *findingDetail) error {
+			return a.sendSlackNotification(ctx, a.baseURL, notifySetting, organizationName, alert, project, rules, findings, a.defaultLocale)
+		}
+	}
+	if err := send(ctx, target.notifySetting, target.organizationName, alert, project, rules, findings); err != nil {
+		return fmt.Errorf("notify target: kind=%d, organization_id=%d, notification_id=%d, err=%w", target.kind, target.organizationID, target.notificationID, err)
 	}
 	return nil
 }

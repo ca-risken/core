@@ -4,6 +4,7 @@ package alert
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -29,16 +30,16 @@ type deleteMembershipBeforeOrgRecheck struct {
 	err            error
 }
 
-func (r *deleteMembershipBeforeOrgRecheck) GetOrgAlertNotificationTarget(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32) (*db.OrgAlertNotificationTarget, error) {
+func (r *deleteMembershipBeforeOrgRecheck) WithLockedOrgAlertNotificationTarget(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32, notifiedAt time.Time, process func(*db.OrgAlertNotificationTarget) (bool, error)) error {
 	if organizationID == r.organizationID && projectID == r.projectID {
 		r.once.Do(func() {
 			r.err = r.client.RemoveProjectsInOrganization(ctx, r.organizationID, r.projectID)
 		})
 		if r.err != nil {
-			return nil, r.err
+			return r.err
 		}
 	}
-	return r.AlertRepository.GetOrgAlertNotificationTarget(ctx, organizationID, projectID, alertConditionID, notificationID)
+	return r.AlertRepository.WithLockedOrgAlertNotificationTarget(ctx, organizationID, projectID, alertConditionID, notificationID, notifiedAt, process)
 }
 
 func TestOrgNotificationIntegration(t *testing.T) {
@@ -266,6 +267,161 @@ func TestOrgNotificationIntegration(t *testing.T) {
 		assertOrgRelation(t, client, deletedOrganization.OrganizationID, project.ProjectID, condition.AlertConditionID, deletedNotification.NotificationID, 0, 0, false)
 		t.Logf("webhook evidence: project=%d organization=%d", projectCalls.Load(), organizationCalls.Load())
 	})
+
+	t.Run("aggregated organization notification timer", func(t *testing.T) {
+		runID := time.Now().UnixNano()
+		project, err := client.CreateProject(ctx, fmt.Sprintf("t003-aggregation-project-%d", runID))
+		if err != nil {
+			t.Fatal(err)
+		}
+		organization, err := client.CreateOrganization(ctx, fmt.Sprintf("t003-aggregation-org-%d", runID), "integration")
+		if err != nil {
+			t.Fatal(err)
+		}
+		conditions := make([]*model.AlertCondition, 0, 2)
+		for _, description := range []string{"aggregation-a", "aggregation-b"} {
+			condition, err := client.UpsertAlertCondition(ctx, &model.AlertCondition{ProjectID: project.ProjectID, Description: description, Severity: "low", AndOr: "and", Enabled: true})
+			if err != nil {
+				t.Fatal(err)
+			}
+			conditions = append(conditions, condition)
+		}
+		notifications := make([]*model.OrganizationNotification, 0, 2)
+		for _, name := range []string{"aggregated", "other-key"} {
+			notification, err := client.UpsertOrgNotification(ctx, &model.OrganizationNotification{OrganizationID: organization.OrganizationID, Name: name, Type: "slack", NotifySetting: fmt.Sprintf(`{"webhook_url":%q}`, name)})
+			if err != nil {
+				t.Fatal(err)
+			}
+			notifications = append(notifications, notification)
+		}
+		if _, err := client.PutOrganizationProject(ctx, organization.OrganizationID, project.ProjectID); err != nil {
+			t.Fatal(err)
+		}
+		for _, notification := range notifications {
+			if _, err := client.UpdateOrgAlertProjectNotificationCache(ctx, organization.OrganizationID, project.ProjectID, notification.NotificationID, 3600); err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		var calls atomic.Int32
+		var fail atomic.Bool
+		var delay atomic.Bool
+		newService := func(repository db.AlertRepository) *AlertService {
+			service := &AlertService{repository: repository, logger: logging.NewLogger(), baseURL: "http://risken.example", defaultLocale: LocaleEn}
+			service.sendAlertNotification = func(_ context.Context, setting, _ string, _ *model.Alert, _ *projectproto.Project, _ *[]model.AlertRule, _ *findingDetail) error {
+				var decoded map[string]string
+				if err := json.Unmarshal([]byte(setting), &decoded); err != nil || decoded["webhook_url"] != "aggregated" {
+					return fmt.Errorf("unexpected unsuppressed notification: %s", setting)
+				}
+				calls.Add(1)
+				if delay.Load() {
+					time.Sleep(150 * time.Millisecond)
+				}
+				if fail.Load() {
+					return fmt.Errorf("send failed")
+				}
+				return nil
+			}
+			return service
+		}
+		service := newService(client)
+		projectData := &projectproto.Project{ProjectId: project.ProjectID, Name: project.Name}
+		rules := &[]model.AlertRule{}
+		findings := &[]uint64{}
+		notify := func(service *AlertService, condition *model.AlertCondition) error {
+			return service.NotificationAlert(ctx, condition, &model.Alert{ProjectID: project.ProjectID, AlertConditionID: condition.AlertConditionID, Description: "integration", Severity: "low", Status: "open"}, rules, projectData, findings, false)
+		}
+		setGroup := func(notificationID uint32, values ...time.Time) {
+			t.Helper()
+			for i, condition := range conditions {
+				setOrgNotifiedAt(t, client, organization.OrganizationID, project.ProjectID, condition.AlertConditionID, notificationID, values[i])
+			}
+		}
+		now := time.Now().Truncate(time.Second)
+		setGroup(notifications[1].NotificationID, now, now)
+
+		cases := []struct {
+			name        string
+			before      []time.Time
+			fail        bool
+			wantCalls   int32
+			wantErr     bool
+			wantEqual   bool
+			wantAdvance bool
+		}{
+			{name: "MAX notified_at suppresses every condition", before: []time.Time{time.Unix(0, 0), now}, wantCalls: 0},
+			{name: "success updates every condition to one time", before: []time.Time{time.Unix(0, 0), time.Unix(0, 0)}, wantCalls: 1, wantEqual: true, wantAdvance: true},
+			{name: "send failure preserves every condition", before: []time.Time{time.Unix(0, 0), time.Unix(10, 0)}, fail: true, wantCalls: 1, wantErr: true},
+		}
+		for _, tc := range cases {
+			t.Run(tc.name, func(t *testing.T) {
+				setGroup(notifications[0].NotificationID, tc.before...)
+				calls.Store(0)
+				fail.Store(tc.fail)
+				if err := notify(service, conditions[0]); (err != nil) != tc.wantErr {
+					t.Fatalf("notification error: %v", err)
+				}
+				if got := calls.Load(); got != tc.wantCalls {
+					t.Fatalf("webhook calls: want=%d got=%d", tc.wantCalls, got)
+				}
+				after := orgNotifiedAtByCondition(t, client, organization.OrganizationID, project.ProjectID, notifications[0].NotificationID)
+				if tc.wantEqual && !after[conditions[0].AlertConditionID].Equal(after[conditions[1].AlertConditionID]) {
+					t.Fatalf("aggregated notified_at differs: %+v", after)
+				}
+				if tc.wantAdvance && !after[conditions[0].AlertConditionID].After(time.Unix(0, 0)) {
+					t.Fatalf("aggregated notified_at did not advance: %+v", after)
+				}
+				if !tc.wantAdvance {
+					for i, condition := range conditions {
+						if !after[condition.AlertConditionID].Equal(tc.before[i]) {
+							t.Fatalf("notified_at changed without successful send: want=%v got=%+v", tc.before, after)
+						}
+					}
+				}
+				other := orgNotifiedAtByCondition(t, client, organization.OrganizationID, project.ProjectID, notifications[1].NotificationID)
+				for _, condition := range conditions {
+					if !other[condition.AlertConditionID].Equal(now) {
+						t.Fatalf("different aggregation key changed: %+v", other)
+					}
+				}
+			})
+		}
+
+		t.Run("independent DB connections serialize one send", func(t *testing.T) {
+			setGroup(notifications[0].NotificationID, time.Unix(0, 0), time.Unix(0, 0))
+			calls.Store(0)
+			fail.Store(false)
+			delay.Store(true)
+			secondClient := newIntegrationDBClient(t)
+			services := []*AlertService{service, newService(secondClient)}
+			start := make(chan struct{})
+			errs := make(chan error, 2)
+			var wait sync.WaitGroup
+			for i := range services {
+				wait.Add(1)
+				go func(i int) {
+					defer wait.Done()
+					<-start
+					errs <- notify(services[i], conditions[i])
+				}(i)
+			}
+			close(start)
+			wait.Wait()
+			close(errs)
+			for err := range errs {
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			if got := calls.Load(); got != 1 {
+				t.Fatalf("parallel webhook calls: want=1 got=%d", got)
+			}
+			after := orgNotifiedAtByCondition(t, client, organization.OrganizationID, project.ProjectID, notifications[0].NotificationID)
+			if !after[conditions[0].AlertConditionID].Equal(after[conditions[1].AlertConditionID]) || !after[conditions[0].AlertConditionID].After(time.Unix(0, 0)) {
+				t.Fatalf("parallel aggregated notified_at mismatch: %+v", after)
+			}
+		})
+	})
 }
 
 func newIntegrationDBClient(t *testing.T) *db.Client {
@@ -336,6 +492,22 @@ func setOrgNotifiedAt(t *testing.T, client *db.Client, organizationID, projectID
 	if err := client.Master.Exec(`update organization_alert_cond_notification set notified_at = ? where organization_id = ? and project_id = ? and alert_condition_id = ? and notification_id = ?`, notifiedAt, organizationID, projectID, alertConditionID, notificationID).Error; err != nil {
 		t.Fatal(err)
 	}
+}
+
+func orgNotifiedAtByCondition(t *testing.T, client *db.Client, organizationID, projectID, notificationID uint32) map[uint32]time.Time {
+	t.Helper()
+	var rows []struct {
+		AlertConditionID uint32
+		NotifiedAt       time.Time
+	}
+	if err := client.Master.Raw(`select alert_condition_id, notified_at from organization_alert_cond_notification where organization_id = ? and project_id = ? and notification_id = ?`, organizationID, projectID, notificationID).Scan(&rows).Error; err != nil {
+		t.Fatal(err)
+	}
+	result := make(map[uint32]time.Time, len(rows))
+	for _, row := range rows {
+		result[row.AlertConditionID] = row.NotifiedAt
+	}
+	return result
 }
 
 func assertNotifiedAfterEpoch(t *testing.T, client *db.Client, table, predicate string, args ...interface{}) {
