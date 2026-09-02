@@ -65,7 +65,7 @@ func TestOrgNotificationIntegration(t *testing.T) {
 		if _, err := client.PutOrganizationProject(ctx, organization.OrganizationID, project.ProjectID); err != nil {
 			t.Fatal(err)
 		}
-		assertOrgRelation(t, client, organization.OrganizationID, project.ProjectID, condition.AlertConditionID, notification.NotificationID, 1800, 0, true)
+		assertOrgRelation(t, client, organization.OrganizationID, project.ProjectID, condition.AlertConditionID, notification.NotificationID, 2592000, 0, true)
 
 		preservedAt := time.Now().Add(-time.Minute).Truncate(time.Second)
 		if err := client.Master.WithContext(ctx).Exec(`update organization_alert_cond_notification set cache_second = ?, notified_at = ? where organization_id = ? and project_id = ? and alert_condition_id = ? and notification_id = ?`, 73, preservedAt, organization.OrganizationID, project.ProjectID, condition.AlertConditionID, notification.NotificationID).Error; err != nil {
@@ -83,7 +83,7 @@ func TestOrgNotificationIntegration(t *testing.T) {
 		if _, err := client.PutOrganizationProject(ctx, organization.OrganizationID, project.ProjectID); err != nil {
 			t.Fatal(err)
 		}
-		assertOrgRelation(t, client, organization.OrganizationID, project.ProjectID, condition.AlertConditionID, notification.NotificationID, 1800, 0, true)
+		assertOrgRelation(t, client, organization.OrganizationID, project.ProjectID, condition.AlertConditionID, notification.NotificationID, 2592000, 0, true)
 
 		if err := client.DeleteAlertCondition(ctx, project.ProjectID, condition.AlertConditionID); err != nil {
 			t.Fatal(err)
@@ -92,7 +92,7 @@ func TestOrgNotificationIntegration(t *testing.T) {
 		if _, err := client.UpsertAlertCondition(ctx, condition); err != nil {
 			t.Fatal(err)
 		}
-		assertOrgRelation(t, client, organization.OrganizationID, project.ProjectID, condition.AlertConditionID, notification.NotificationID, 1800, 0, true)
+		assertOrgRelation(t, client, organization.OrganizationID, project.ProjectID, condition.AlertConditionID, notification.NotificationID, 2592000, 0, true)
 
 		if err := client.DeleteOrgNotification(ctx, organization.OrganizationID, notification.NotificationID); err != nil {
 			t.Fatal(err)
@@ -101,7 +101,7 @@ func TestOrgNotificationIntegration(t *testing.T) {
 		if _, err := client.UpsertOrgNotification(ctx, notification); err != nil {
 			t.Fatal(err)
 		}
-		assertOrgRelation(t, client, organization.OrganizationID, project.ProjectID, condition.AlertConditionID, notification.NotificationID, 1800, 0, true)
+		assertOrgRelation(t, client, organization.OrganizationID, project.ProjectID, condition.AlertConditionID, notification.NotificationID, 2592000, 0, true)
 
 		deleteCases := []struct {
 			name   string

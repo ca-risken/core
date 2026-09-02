@@ -326,7 +326,7 @@ const (
 		)
 		select op.organization_id, ac.project_id, ac.alert_condition_id, orgn.notification_id,
 			coalesce(project_setting.enabled, true),
-			coalesce(project_setting.cache_second, 1800)
+			coalesce(project_setting.cache_second, 2592000)
 		from alert_condition ac
 		inner join organization_project op on op.project_id = ac.project_id
 		inner join organization_notification orgn on orgn.organization_id = op.organization_id
@@ -334,7 +334,7 @@ const (
 			select organization_id, project_id, notification_id,
 				min(enabled) as enabled,
 				case when min(cache_second) = max(cache_second)
-					then min(cache_second) else 1800 end as cache_second
+					then min(cache_second) else 2592000 end as cache_second
 			from organization_alert_cond_notification
 			group by organization_id, project_id, notification_id
 		) project_setting
