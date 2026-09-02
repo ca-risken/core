@@ -321,6 +321,300 @@ var _ interface {
 	ErrorName() string
 } = GetReportFindingResponseValidationError{}
 
+// Validate checks the field values on GetReportFindingForOrganizationRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *GetReportFindingForOrganizationRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// GetReportFindingForOrganizationRequest with the rules defined in the proto
+// definition for this message. If any rules are violated, the result is a
+// list of violation errors wrapped in
+// GetReportFindingForOrganizationRequestMultiError, or nil if none found.
+func (m *GetReportFindingForOrganizationRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetReportFindingForOrganizationRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetOrganizationId() < 1 {
+		err := GetReportFindingForOrganizationRequestValidationError{
+			field:  "OrganizationId",
+			reason: "value must be greater than or equal to 1",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if !_GetReportFindingForOrganizationRequest_FromDate_Pattern.MatchString(m.GetFromDate()) {
+		err := GetReportFindingForOrganizationRequestValidationError{
+			field:  "FromDate",
+			reason: "value does not match regex pattern \"^(|[0-9]{4}-[0-9]{2}-[0-9]{2})$\"",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if !_GetReportFindingForOrganizationRequest_ToDate_Pattern.MatchString(m.GetToDate()) {
+		err := GetReportFindingForOrganizationRequestValidationError{
+			field:  "ToDate",
+			reason: "value does not match regex pattern \"^(|[0-9]{4}-[0-9]{2}-[0-9]{2})$\"",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if val := m.GetScore(); val < 0 || val > 1 {
+		err := GetReportFindingForOrganizationRequestValidationError{
+			field:  "Score",
+			reason: "value must be inside range [0, 1]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return GetReportFindingForOrganizationRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetReportFindingForOrganizationRequestMultiError is an error wrapping
+// multiple validation errors returned by
+// GetReportFindingForOrganizationRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GetReportFindingForOrganizationRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetReportFindingForOrganizationRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetReportFindingForOrganizationRequestMultiError) AllErrors() []error { return m }
+
+// GetReportFindingForOrganizationRequestValidationError is the validation
+// error returned by GetReportFindingForOrganizationRequest.Validate if the
+// designated constraints aren't met.
+type GetReportFindingForOrganizationRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetReportFindingForOrganizationRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetReportFindingForOrganizationRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetReportFindingForOrganizationRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetReportFindingForOrganizationRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetReportFindingForOrganizationRequestValidationError) ErrorName() string {
+	return "GetReportFindingForOrganizationRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetReportFindingForOrganizationRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetReportFindingForOrganizationRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetReportFindingForOrganizationRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetReportFindingForOrganizationRequestValidationError{}
+
+var _GetReportFindingForOrganizationRequest_FromDate_Pattern = regexp.MustCompile("^(|[0-9]{4}-[0-9]{2}-[0-9]{2})$")
+
+var _GetReportFindingForOrganizationRequest_ToDate_Pattern = regexp.MustCompile("^(|[0-9]{4}-[0-9]{2}-[0-9]{2})$")
+
+// Validate checks the field values on GetReportFindingForOrganizationResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *GetReportFindingForOrganizationResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// GetReportFindingForOrganizationResponse with the rules defined in the proto
+// definition for this message. If any rules are violated, the result is a
+// list of violation errors wrapped in
+// GetReportFindingForOrganizationResponseMultiError, or nil if none found.
+func (m *GetReportFindingForOrganizationResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetReportFindingForOrganizationResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetReportFinding() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GetReportFindingForOrganizationResponseValidationError{
+						field:  fmt.Sprintf("ReportFinding[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GetReportFindingForOrganizationResponseValidationError{
+						field:  fmt.Sprintf("ReportFinding[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetReportFindingForOrganizationResponseValidationError{
+					field:  fmt.Sprintf("ReportFinding[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return GetReportFindingForOrganizationResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetReportFindingForOrganizationResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// GetReportFindingForOrganizationResponse.ValidateAll() if the designated
+// constraints aren't met.
+type GetReportFindingForOrganizationResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetReportFindingForOrganizationResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetReportFindingForOrganizationResponseMultiError) AllErrors() []error { return m }
+
+// GetReportFindingForOrganizationResponseValidationError is the validation
+// error returned by GetReportFindingForOrganizationResponse.Validate if the
+// designated constraints aren't met.
+type GetReportFindingForOrganizationResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetReportFindingForOrganizationResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetReportFindingForOrganizationResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetReportFindingForOrganizationResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetReportFindingForOrganizationResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetReportFindingForOrganizationResponseValidationError) ErrorName() string {
+	return "GetReportFindingForOrganizationResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetReportFindingForOrganizationResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetReportFindingForOrganizationResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetReportFindingForOrganizationResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetReportFindingForOrganizationResponseValidationError{}
+
 // Validate checks the field values on GetReportFindingAllRequest with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.

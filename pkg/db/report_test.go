@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"reflect"
 	"regexp"
@@ -11,6 +12,82 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/ca-risken/core/pkg/model"
 )
+
+func TestGetReportFindingForOrganization(t *testing.T) {
+	type args struct {
+		organizationID uint32
+		projectID      []uint32
+		dataSource     []string
+		fromDate       string
+		toDate         string
+		score          float32
+	}
+	cases := []struct {
+		name       string
+		input      args
+		want       *[]model.ReportFinding
+		wantErr    bool
+		mockResult *sqlmock.Rows
+		mockErr    error
+		wantQuery  string
+		wantArgs   []driver.Value
+	}{
+		{
+			name:  "OK all projects in organization",
+			input: args{organizationID: 1},
+			want:  &[]model.ReportFinding{{ReportFindingID: 1, ProjectID: 10, ProjectName: "project-10"}},
+			mockResult: sqlmock.NewRows([]string{"report_finding_id", "project_id", "project_name"}).
+				AddRow(uint32(1), uint32(10), "project-10"),
+			wantQuery: "select r.*,p.name as project_name from report_finding as r, project as p where r.project_id = p.project_id and score >= ? and exists (select 1 from organization_project op where op.organization_id = ? and op.project_id = r.project_id)",
+			wantArgs:  []driver.Value{float32(0), uint32(1)},
+		},
+		{
+			name: "OK selected projects and filters",
+			input: args{
+				organizationID: 1,
+				projectID:      []uint32{10, 20},
+				dataSource:     []string{"aws", "gcp"},
+				fromDate:       "2026-01-01",
+				toDate:         "2026-01-31",
+				score:          0.5,
+			},
+			want:       new([]model.ReportFinding),
+			mockResult: sqlmock.NewRows([]string{"report_finding_id", "project_id", "project_name"}),
+			wantQuery:  "select r.*,p.name as project_name from report_finding as r, project as p where r.project_id = p.project_id and score >= ? and exists (select 1 from organization_project op where op.organization_id = ? and op.project_id = r.project_id) and r.project_id in (?,?) and data_source regexp ? and report_date >= ? and report_date <= ?",
+			wantArgs:   []driver.Value{float32(0.5), uint32(1), uint32(10), uint32(20), "aws|gcp", "2026-01-01", "2026-01-31"},
+		},
+		{
+			name:      "NG DB error",
+			input:     args{organizationID: 1},
+			wantErr:   true,
+			mockErr:   errors.New("DB error"),
+			wantQuery: "select r.*,p.name as project_name from report_finding as r, project as p where r.project_id = p.project_id and score >= ? and exists (select 1 from organization_project op where op.organization_id = ? and op.project_id = r.project_id)",
+			wantArgs:  []driver.Value{float32(0), uint32(1)},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			client, mockDB, err := newMockClient()
+			if err != nil {
+				t.Fatalf("Failed to open mock sql db, error: %+v", err)
+			}
+			expect := mockDB.ExpectQuery(regexp.QuoteMeta(c.wantQuery)).WithArgs(c.wantArgs...)
+			if c.mockErr != nil {
+				expect.WillReturnError(c.mockErr)
+			} else {
+				expect.WillReturnRows(c.mockResult)
+			}
+
+			got, err := client.GetReportFindingForOrganization(context.Background(), c.input.organizationID, c.input.projectID, c.input.dataSource, c.input.fromDate, c.input.toDate, c.input.score)
+			if (err != nil) != c.wantErr {
+				t.Fatalf("unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected result: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
 
 func TestPurgeReportFinding(t *testing.T) {
 	client, mock, err := newMockClient()
@@ -174,11 +251,11 @@ func TestPutReport(t *testing.T) {
 		report *model.Report
 	}
 	cases := []struct {
-		name       string
-		input      args
-		want       *model.Report
-		wantErr    bool
-		mockExecErr error
+		name            string
+		input           args
+		want            *model.Report
+		wantErr         bool
+		mockExecErr     error
 		mockQueryResult *sqlmock.Rows
 		mockQueryErr    error
 	}{

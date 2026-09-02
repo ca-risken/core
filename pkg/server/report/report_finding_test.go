@@ -60,6 +60,68 @@ func TestGetReportFinding(t *testing.T) {
 	}
 }
 
+func TestGetReportFindingForOrganization(t *testing.T) {
+	cases := []struct {
+		name         string
+		input        *report.GetReportFindingForOrganizationRequest
+		want         *report.GetReportFindingForOrganizationResponse
+		mockResponse *[]model.ReportFinding
+		mockError    error
+		wantErr      bool
+	}{
+		{
+			name:         "OK",
+			input:        &report.GetReportFindingForOrganizationRequest{OrganizationId: 1, ProjectId: []uint32{10, 20}},
+			want:         &report.GetReportFindingForOrganizationResponse{ReportFinding: []*report.ReportFinding{{ReportFindingId: 1001}, {ReportFindingId: 1002}}},
+			mockResponse: &[]model.ReportFinding{{ReportFindingID: 1001}, {ReportFindingID: 1002}},
+		},
+		{
+			name:         "OK empty",
+			input:        &report.GetReportFindingForOrganizationRequest{OrganizationId: 1},
+			want:         &report.GetReportFindingForOrganizationResponse{},
+			mockResponse: &[]model.ReportFinding{},
+		},
+		{
+			name:      "OK record not found",
+			input:     &report.GetReportFindingForOrganizationRequest{OrganizationId: 1},
+			want:      &report.GetReportFindingForOrganizationResponse{},
+			mockError: gorm.ErrRecordNotFound,
+		},
+		{
+			name:    "NG organization ID is required",
+			input:   &report.GetReportFindingForOrganizationRequest{},
+			wantErr: true,
+		},
+		{
+			name:    "NG invalid date",
+			input:   &report.GetReportFindingForOrganizationRequest{OrganizationId: 1, FromDate: "invalid"},
+			wantErr: true,
+		},
+		{
+			name:    "NG invalid score",
+			input:   &report.GetReportFindingForOrganizationRequest{OrganizationId: 1, Score: 1.1},
+			wantErr: true,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewReportRepository(t)
+			svc := ReportService{repository: mockDB}
+
+			if c.mockResponse != nil || c.mockError != nil {
+				mockDB.On("GetReportFindingForOrganization", test.RepeatMockAnything(7)...).Return(c.mockResponse, c.mockError).Once()
+			}
+			result, err := svc.GetReportFindingForOrganization(context.Background(), c.input)
+			if (err != nil) != c.wantErr {
+				t.Fatalf("unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(result, c.want) {
+				t.Fatalf("Unexpected mapping: want=%+v, got=%+v", c.want, result)
+			}
+		})
+	}
+}
+
 func TestGetReportFindingAll(t *testing.T) {
 	cases := []struct {
 		name         string
