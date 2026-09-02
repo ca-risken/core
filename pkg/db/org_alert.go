@@ -82,9 +82,9 @@ func (c *Client) DeleteOrgNotification(ctx context.Context, organizationID, noti
 const (
 	insertOrgAlertCondNotificationByOrgNotification = `
 		insert ignore into organization_alert_cond_notification (
-			organization_id, project_id, alert_condition_id, notification_id
+			organization_id, project_id, alert_condition_id, notification_id, cache_second
 		)
-		select orgn.organization_id, op.project_id, ac.alert_condition_id, orgn.notification_id
+		select orgn.organization_id, op.project_id, ac.alert_condition_id, orgn.notification_id, 2592000
 		from organization_notification orgn
 		inner join organization_project op on op.organization_id = orgn.organization_id
 		inner join alert_condition ac on ac.project_id = op.project_id

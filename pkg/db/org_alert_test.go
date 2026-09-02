@@ -796,6 +796,9 @@ func TestLifecycleRelationInsertContract(t *testing.T) {
 			if c.name == "alert condition" && (!strings.Contains(query, "enabled") || !strings.Contains(query, "cache_second")) {
 				t.Fatalf("new alert conditions must inherit the project notification setting: %s", c.query)
 			}
+			if !strings.Contains(query, "2592000") {
+				t.Fatalf("new relations must default cache_second to 30 days: %s", c.query)
+			}
 		})
 	}
 }
