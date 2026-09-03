@@ -725,6 +725,43 @@ func TestGetOrgAlertNotificationTarget(t *testing.T) {
 	}
 }
 
+func TestGetOrgAlertProjectNotificationTarget(t *testing.T) {
+	now := time.Now().Truncate(time.Second)
+	target := &OrgAlertNotificationTarget{OrganizationID: 10, OrganizationName: "org-name", ProjectID: 1, AlertConditionID: 2, NotificationID: 100, CacheSecond: 1800, NotifiedAt: now, Type: "slack", NotifySetting: "latest"}
+	cases := []struct {
+		name     string
+		row      *sqlmock.Rows
+		queryErr error
+		want     *OrgAlertNotificationTarget
+		wantErr  bool
+	}{
+		{name: "OK - project window", row: sqlmock.NewRows([]string{"organization_id", "organization_name", "project_id", "alert_condition_id", "notification_id", "cache_second", "notified_at", "type", "notify_setting"}).AddRow(10, "org-name", 1, 2, 100, 1800, now, "slack", "latest"), want: target},
+		{name: "NG - removed", row: sqlmock.NewRows([]string{"organization_id"}), wantErr: true},
+		{name: "NG - DB error", queryErr: errors.New("DB error"), wantErr: true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			database, mock, err := newMockClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+			expectation := mock.ExpectQuery(regexp.QuoteMeta(getOrgAlertProjectNotificationTarget)).WithArgs(uint32(10), uint32(1), uint32(2), uint32(100))
+			if c.queryErr != nil {
+				expectation.WillReturnError(c.queryErr)
+			} else {
+				expectation.WillReturnRows(c.row)
+			}
+			got, err := database.GetOrgAlertProjectNotificationTarget(context.Background(), 10, 1, 2, 100)
+			if (err != nil) != c.wantErr || !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected result: got=%v, err=%v", got, err)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
 func TestOrgAlertNotificationTargetRequiresEnabledRelation(t *testing.T) {
 	cases := []struct {
 		name  string
@@ -732,6 +769,7 @@ func TestOrgAlertNotificationTargetRequiresEnabledRelation(t *testing.T) {
 	}{
 		{name: "list targets", query: listOrgAlertNotificationTarget},
 		{name: "recheck target before sending", query: getOrgAlertNotificationTarget},
+		{name: "recheck project window before sending", query: getOrgAlertProjectNotificationTarget},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -739,6 +777,15 @@ func TestOrgAlertNotificationTargetRequiresEnabledRelation(t *testing.T) {
 				t.Fatalf("disabled project relation must not be notified: %s", c.query)
 			}
 		})
+	}
+}
+
+func TestOrgAlertProjectNotificationTargetUsesProjectWindow(t *testing.T) {
+	if !strings.Contains(strings.ToLower(getOrgAlertProjectNotificationTarget), "max(notified_at)") {
+		t.Fatalf("project notification target must use a project-level notified_at window: %s", getOrgAlertProjectNotificationTarget)
+	}
+	if strings.Contains(strings.ToLower(updateOrgAlertProjectNotificationNotifiedAt), "alert_condition_id") {
+		t.Fatalf("project notification update must not be scoped by alert_condition_id: %s", updateOrgAlertProjectNotificationNotifiedAt)
 	}
 }
 
@@ -765,6 +812,39 @@ func TestUpdateOrgAlertCondNotificationNotifiedAt(t *testing.T) {
 				expectation.WillReturnResult(sqlmock.NewResult(0, 1))
 			}
 			err = database.UpdateOrgAlertCondNotificationNotifiedAt(context.Background(), 10, 1, 2, 100, now)
+			if (err != nil) != c.wantErr {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestUpdateOrgAlertProjectNotificationNotifiedAt(t *testing.T) {
+	now := time.Now().Truncate(time.Second)
+	cases := []struct {
+		name      string
+		updateErr error
+		wantErr   bool
+	}{
+		{name: "OK - project notification success update"},
+		{name: "NG - DB error", updateErr: errors.New("DB error"), wantErr: true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			database, mock, err := newMockClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+			expectation := mock.ExpectExec(regexp.QuoteMeta(updateOrgAlertProjectNotificationNotifiedAt)).WithArgs(now, uint32(10), uint32(1), uint32(100))
+			if c.updateErr != nil {
+				expectation.WillReturnError(c.updateErr)
+			} else {
+				expectation.WillReturnResult(sqlmock.NewResult(0, 2))
+			}
+			err = database.UpdateOrgAlertProjectNotificationNotifiedAt(context.Background(), 10, 1, 100, now)
 			if (err != nil) != c.wantErr {
 				t.Fatalf("Unexpected error: %v", err)
 			}

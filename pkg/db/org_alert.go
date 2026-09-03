@@ -387,6 +387,35 @@ const (
 		and oacn.notification_id = ?
 		and oacn.enabled = true
 	`
+	getOrgAlertProjectNotificationTarget = `
+		select oacn.organization_id, org.name as organization_name,
+			oacn.project_id, oacn.alert_condition_id,
+			oacn.notification_id, oacn.cache_second, project_window.notified_at,
+			orgn.type, orgn.notify_setting
+		from organization_alert_cond_notification oacn
+		inner join organization org
+			on org.organization_id = oacn.organization_id
+		inner join organization_project op
+			on op.organization_id = oacn.organization_id
+			and op.project_id = oacn.project_id
+		inner join organization_notification orgn
+			on orgn.organization_id = oacn.organization_id
+			and orgn.notification_id = oacn.notification_id
+		inner join (
+			select organization_id, project_id, notification_id, max(notified_at) as notified_at
+			from organization_alert_cond_notification
+			where enabled = true
+			group by organization_id, project_id, notification_id
+		) project_window
+			on project_window.organization_id = oacn.organization_id
+			and project_window.project_id = oacn.project_id
+			and project_window.notification_id = oacn.notification_id
+		where oacn.organization_id = ?
+		and oacn.project_id = ?
+		and oacn.alert_condition_id = ?
+		and oacn.notification_id = ?
+		and oacn.enabled = true
+	`
 	updateOrgAlertCondNotificationNotifiedAt = `
 		update organization_alert_cond_notification
 		set notified_at = ?
@@ -394,6 +423,14 @@ const (
 		and project_id = ?
 		and alert_condition_id = ?
 		and notification_id = ?
+	`
+	updateOrgAlertProjectNotificationNotifiedAt = `
+		update organization_alert_cond_notification
+		set notified_at = ?
+		where organization_id = ?
+		and project_id = ?
+		and notification_id = ?
+		and enabled = true
 	`
 )
 
@@ -413,6 +450,18 @@ func (c *Client) GetOrgAlertNotificationTarget(ctx context.Context, organization
 	return &target, nil
 }
 
+func (c *Client) GetOrgAlertProjectNotificationTarget(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32) (*OrgAlertNotificationTarget, error) {
+	var target OrgAlertNotificationTarget
+	if err := c.Master.WithContext(ctx).Raw(getOrgAlertProjectNotificationTarget, organizationID, projectID, alertConditionID, notificationID).First(&target).Error; err != nil {
+		return nil, err
+	}
+	return &target, nil
+}
+
 func (c *Client) UpdateOrgAlertCondNotificationNotifiedAt(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32, notifiedAt time.Time) error {
 	return c.Master.WithContext(ctx).Exec(updateOrgAlertCondNotificationNotifiedAt, notifiedAt, organizationID, projectID, alertConditionID, notificationID).Error
+}
+
+func (c *Client) UpdateOrgAlertProjectNotificationNotifiedAt(ctx context.Context, organizationID, projectID, notificationID uint32, notifiedAt time.Time) error {
+	return c.Master.WithContext(ctx).Exec(updateOrgAlertProjectNotificationNotifiedAt, notifiedAt, organizationID, projectID, notificationID).Error
 }
