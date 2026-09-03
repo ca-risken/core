@@ -243,6 +243,56 @@ func TestNotificationAlert(t *testing.T) {
 	}
 }
 
+func TestNotificationAlertDefersOrgProjectWindowUpdate(t *testing.T) {
+	mockDB := mocks.NewAlertRepository(t)
+	svc := AlertService{repository: mockDB, logger: logging.NewLogger()}
+	conditions := []*model.AlertCondition{
+		{ProjectID: 1, AlertConditionID: 2},
+		{ProjectID: 1, AlertConditionID: 3},
+	}
+	alertData := &model.Alert{}
+	rules := &[]model.AlertRule{}
+	projectData := &project.Project{ProjectId: 1}
+	findingIDs := []uint64{}
+	orgTarget := &db.OrgAlertNotificationTarget{
+		OrganizationID:   10,
+		OrganizationName: "org-name",
+		ProjectID:        1,
+		AlertConditionID: 2,
+		NotificationID:   1,
+		Type:             "slack",
+		NotifySetting:    "org-10",
+	}
+	collector := newOrgProjectNotificationUpdateCollector()
+
+	for _, condition := range conditions {
+		target := *orgTarget
+		target.AlertConditionID = condition.AlertConditionID
+		mockDB.On("ListAlertCondNotificationForNotification", mock.Anything, condition.ProjectID, condition.AlertConditionID).Return(&[]model.AlertCondNotification{}, nil).Once()
+		mockDB.On("ListOrgAlertNotificationTarget", mock.Anything, condition.ProjectID, condition.AlertConditionID).Return([]*db.OrgAlertNotificationTarget{&target}, nil).Once()
+		mockDB.On("GetOrgAlertProjectNotificationTarget", mock.Anything, target.OrganizationID, target.ProjectID, target.AlertConditionID, target.NotificationID).Return(&target, nil).Once()
+	}
+	mockDB.On("UpdateOrgAlertProjectNotificationNotifiedAt", mock.Anything, uint32(10), uint32(1), uint32(1), mock.Anything).Return(nil).Once()
+
+	var sent []string
+	svc.sendAlertNotification = func(_ context.Context, setting, _ string, _ *model.Alert, _ *project.Project, _ *[]model.AlertRule, _ *findingDetail) error {
+		sent = append(sent, setting)
+		return nil
+	}
+
+	for _, condition := range conditions {
+		if err := svc.notificationAlert(context.Background(), condition, alertData, rules, projectData, &findingIDs, false, collector); err != nil {
+			t.Fatalf("Unexpected notification error: %v", err)
+		}
+	}
+	if !reflect.DeepEqual(sent, []string{"org-10", "org-10"}) {
+		t.Fatalf("Unexpected sends: got=%v", sent)
+	}
+	if err := collector.flush(context.Background(), mockDB); err != nil {
+		t.Fatalf("Unexpected flush error: %v", err)
+	}
+}
+
 func TestGetFindingDetailsForNotification(t *testing.T) {
 	type inputParam struct {
 		ProjectID  uint32
