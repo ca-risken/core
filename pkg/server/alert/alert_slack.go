@@ -31,6 +31,8 @@ type slackNotifyOption struct {
 	Message string `json:"message,omitempty"`
 }
 
+type notificationReason string
+
 const (
 	LocaleJa                      = "ja"
 	LocaleEn                      = "en"
@@ -53,8 +55,16 @@ const (
 	slackNotificationAttachmentEn                = "Please check all %d Findings from <%s/alert/alert?project_id=%d&from=slack|Alert screen>."
 	slackNotificationTestMessageJa               = "RISKENからのテスト通知です"
 	slackNotificationTestMessageEn               = "This is a test notification from RISKEN"
+	slackNotificationReasonTitleJa               = "通知理由"
+	slackNotificationReasonTitleEn               = "Reason"
+	slackNotificationReasonNewFindingJa          = "新規Findingがアラート条件を満たしたため通知しました。"
+	slackNotificationReasonNewFindingEn          = "A new Finding matched this alert condition."
+	slackNotificationReasonRegularJa             = "抑制時間が経過し、現在もアラート条件を満たしているため通知しました。"
+	slackNotificationReasonRegularEn             = "The suppression window has elapsed and this alert condition still matches."
 	slackRequestProjectRoleNotificationMessageJa = `<!here> %sさんがプロジェクト%sへのアクセスをリクエストしました。プロジェクト管理者は問題がなければ<%s/iam/user?project_id=%d|ユーザー一覧>から%sさんを招待してください。`
 	slackRequestProjectRoleNotificationMessageEn = `<!here> %s has requested access to your Project %s. If there are no issues, the project administrator should  <%s/iam/user?project_id=%d|the user list> and invite %s.`
+	notificationReasonNewFinding                 = notificationReason("new_finding")
+	notificationReasonRegular                    = notificationReason("regular")
 )
 
 type slackActionPayload struct {
@@ -79,6 +89,7 @@ func (a *AlertService) sendSlackNotification(
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
 	findings *findingDetail,
+	reason notificationReason,
 	defaultLocale string,
 ) error {
 	var setting slackNotifySetting
@@ -97,12 +108,12 @@ func (a *AlertService) sendSlackNotification(
 	}
 
 	if setting.WebhookURL != "" {
-		webhookMsg := a.getWebhookMessage(ctx, setting.Data.Channel, setting.Data.Message, url, organizationName, alert, project, rules, findings, locale)
+		webhookMsg := a.getWebhookMessage(ctx, setting.Data.Channel, setting.Data.Message, url, organizationName, alert, project, rules, findings, reason, locale)
 		if err := slack.PostWebhook(setting.WebhookURL, webhookMsg); err != nil {
 			return fmt.Errorf("failed to send slack(webhookurl): %w", err)
 		}
 	} else if setting.ChannelID != "" {
-		apiMsg := a.getApiMessage(ctx, setting.Data.Message, url, organizationName, alert, project, rules, findings, locale)
+		apiMsg := a.getApiMessage(ctx, setting.Data.Message, url, organizationName, alert, project, rules, findings, reason, locale)
 		if err := a.postMessageSlackWithRetry(ctx, setting.ChannelID, apiMsg...); err != nil {
 			return fmt.Errorf("failed to send slack(postmessage): %w", err)
 		}
@@ -200,10 +211,11 @@ func (a *AlertService) getWebhookMessage(
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
 	findings *findingDetail,
+	reason notificationReason,
 	locale string,
 ) *slack.WebhookMessage {
 	msgText := getSlackMessageText(locale, alert.Severity)
-	attachments := a.buildSlackAttachments(ctx, url, organizationName, alert, project, rules, findings, locale)
+	attachments := a.buildSlackAttachments(ctx, url, organizationName, alert, project, rules, findings, reason, locale)
 	msg := slack.WebhookMessage{
 		Text:        msgText,
 		Attachments: attachments,
@@ -226,6 +238,7 @@ func (a *AlertService) getApiMessage(
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
 	findings *findingDetail,
+	reason notificationReason,
 	locale string,
 ) []slack.MsgOption {
 	msgOptions := []slack.MsgOption{}
@@ -233,7 +246,7 @@ func (a *AlertService) getApiMessage(
 	if message != "" {
 		text = overrideToCustomMessage(message, alert.Severity)
 	}
-	attachments := a.buildSlackAttachments(ctx, url, organizationName, alert, project, rules, findings, locale)
+	attachments := a.buildSlackAttachments(ctx, url, organizationName, alert, project, rules, findings, reason, locale)
 
 	msgOptions = append(msgOptions, slack.MsgOptionText(text, false))
 	msgOptions = append(msgOptions, slack.MsgOptionAttachments(attachments...))
@@ -248,10 +261,11 @@ func (a *AlertService) buildSlackAttachments(
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
 	findings *findingDetail,
+	reason notificationReason,
 	locale string,
 ) []slack.Attachment {
 	findingAttachments := a.getFindingAttachment(ctx, url, project.ProjectId, findings, locale)
-	alertAttachment := getAlertAttachment(url, organizationName, alert, project, rules, findings)
+	alertAttachment := getAlertAttachment(url, organizationName, alert, project, rules, findings, reason, locale)
 	attachments := make([]slack.Attachment, 0, len(findingAttachments)+1)
 	attachments = append(attachments, findingAttachments...)
 	attachments = append(attachments, alertAttachment)
@@ -265,6 +279,8 @@ func getAlertAttachment(
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
 	findings *findingDetail,
+	reason notificationReason,
+	locale string,
 ) slack.Attachment {
 	fields := []slack.AttachmentField{
 		{
@@ -291,10 +307,34 @@ func getAlertAttachment(
 			Value: escapeSlackMrkdwn(organizationName),
 		})
 	}
+	fields = append(fields, slack.AttachmentField{
+		Title: getSlackNotificationReasonTitle(locale),
+		Value: getSlackNotificationReason(reason, locale),
+	})
 	return slack.Attachment{
 		Color:  getColor(alert.Severity),
 		Fields: fields,
 	}
+}
+
+func getSlackNotificationReasonTitle(locale string) string {
+	if locale == LocaleJa {
+		return slackNotificationReasonTitleJa
+	}
+	return slackNotificationReasonTitleEn
+}
+
+func getSlackNotificationReason(reason notificationReason, locale string) string {
+	if reason == notificationReasonNewFinding {
+		if locale == LocaleJa {
+			return slackNotificationReasonNewFindingJa
+		}
+		return slackNotificationReasonNewFindingEn
+	}
+	if locale == LocaleJa {
+		return slackNotificationReasonRegularJa
+	}
+	return slackNotificationReasonRegularEn
 }
 
 func getSlackMessageText(locale, severity string) string {

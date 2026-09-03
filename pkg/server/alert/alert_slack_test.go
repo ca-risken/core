@@ -60,7 +60,7 @@ func TestSendSlackNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := a.sendSlackNotification(context.Background(), "unused", c.notifySetting, "", c.alert, c.project, &[]model.AlertRule{}, testFindings, LocaleEn)
+			got := a.sendSlackNotification(context.Background(), "unused", c.notifySetting, "", c.alert, c.project, &[]model.AlertRule{}, testFindings, notificationReasonRegular, LocaleEn)
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
 			}
@@ -347,20 +347,31 @@ func TestBuildSlackAttachments(t *testing.T) {
 	cases := []struct {
 		name                 string
 		organizationName     string
+		reason               notificationReason
 		wantOrganizationName string
 		wantOrganizationRow  bool
+		wantReasonTitle      string
+		wantReason           string
 	}{
-		{name: "project notification does not show organization"},
+		{
+			name:            "project notification shows regular reason",
+			reason:          notificationReasonRegular,
+			wantReasonTitle: "通知理由",
+			wantReason:      slackNotificationReasonRegularJa,
+		},
 		{
 			name:                 "organization notification shows escaped source",
 			organizationName:     "org <!channel> & <https://example.com|link>",
+			reason:               notificationReasonNewFinding,
 			wantOrganizationName: "org &lt;!channel&gt; &amp; &lt;https://example.com|link&gt;",
 			wantOrganizationRow:  true,
+			wantReasonTitle:      "通知理由",
+			wantReason:           slackNotificationReasonNewFindingJa,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := (&AlertService{}).buildSlackAttachments(context.Background(), "https://example.com", c.organizationName, alert, project, rules, findings, LocaleJa)
+			got := (&AlertService{}).buildSlackAttachments(context.Background(), "https://example.com", c.organizationName, alert, project, rules, findings, c.reason, LocaleJa)
 
 			if len(got) != 2 {
 				t.Fatalf("Unexpected attachment count: got=%d want=2", len(got))
@@ -372,6 +383,7 @@ func TestBuildSlackAttachments(t *testing.T) {
 				t.Fatalf("Last attachment should be alert block: got=%+v", got[1].Fields[0].Value)
 			}
 			organizationRows := 0
+			reasonRows := 0
 			for _, field := range got[1].Fields {
 				if field.Title == "🏢 Organization" {
 					organizationRows++
@@ -379,9 +391,18 @@ func TestBuildSlackAttachments(t *testing.T) {
 						t.Fatalf("Unexpected organization name: got=%q want=%q", field.Value, c.wantOrganizationName)
 					}
 				}
+				if field.Title == c.wantReasonTitle {
+					reasonRows++
+					if field.Value != c.wantReason {
+						t.Fatalf("Unexpected notification reason: got=%q want=%q", field.Value, c.wantReason)
+					}
+				}
 			}
 			if (organizationRows == 1) != c.wantOrganizationRow {
 				t.Fatalf("Unexpected organization row count: got=%d", organizationRows)
+			}
+			if reasonRows != 1 {
+				t.Fatalf("Unexpected reason row count: got=%d", reasonRows)
 			}
 		})
 	}

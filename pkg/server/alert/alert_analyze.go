@@ -508,13 +508,17 @@ func (a *AlertService) notifyAlertTarget(
 		a.logger.Warnf(ctx, "Unsupported notification type: %s", target.notificationType)
 		return nil
 	}
+	reason := notificationReasonRegular
+	if existsNewFindings {
+		reason = notificationReasonNewFinding
+	}
 	send := a.sendAlertNotification
 	if send == nil {
-		send = func(ctx context.Context, notifySetting, organizationName string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule, findings *findingDetail) error {
-			return a.sendSlackNotification(ctx, a.baseURL, notifySetting, organizationName, alert, project, rules, findings, a.defaultLocale)
+		send = func(ctx context.Context, notifySetting, organizationName string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule, findings *findingDetail, reason notificationReason) error {
+			return a.sendSlackNotification(ctx, a.baseURL, notifySetting, organizationName, alert, project, rules, findings, reason, a.defaultLocale)
 		}
 	}
-	if err := send(ctx, target.notifySetting, target.organizationName, alert, project, rules, findings); err != nil {
+	if err := send(ctx, target.notifySetting, target.organizationName, alert, project, rules, findings, reason); err != nil {
 		return fmt.Errorf("notify target: kind=%d, organization_id=%d, notification_id=%d, err=%w", target.kind, target.organizationID, target.notificationID, err)
 	}
 	if target.kind == organizationNotificationTarget {

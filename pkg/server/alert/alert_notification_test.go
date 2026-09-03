@@ -223,7 +223,7 @@ func TestNotificationAlert(t *testing.T) {
 			}
 			var sent []string
 			var organizationNames []string
-			svc.sendAlertNotification = func(_ context.Context, setting, organizationName string, _ *model.Alert, _ *project.Project, _ *[]model.AlertRule, _ *findingDetail) error {
+			svc.sendAlertNotification = func(_ context.Context, setting, organizationName string, _ *model.Alert, _ *project.Project, _ *[]model.AlertRule, _ *findingDetail, _ notificationReason) error {
 				sent = append(sent, setting)
 				organizationNames = append(organizationNames, organizationName)
 				return c.sendErr[setting]
@@ -275,7 +275,7 @@ func TestNotificationAlertDefersOrgProjectWindowUpdate(t *testing.T) {
 	mockDB.On("UpdateOrgAlertProjectNotificationNotifiedAt", mock.Anything, uint32(10), uint32(1), uint32(1), mock.Anything).Return(nil).Once()
 
 	var sent []string
-	svc.sendAlertNotification = func(_ context.Context, setting, _ string, _ *model.Alert, _ *project.Project, _ *[]model.AlertRule, _ *findingDetail) error {
+	svc.sendAlertNotification = func(_ context.Context, setting, _ string, _ *model.Alert, _ *project.Project, _ *[]model.AlertRule, _ *findingDetail, _ notificationReason) error {
 		sent = append(sent, setting)
 		return nil
 	}
