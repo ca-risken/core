@@ -130,6 +130,8 @@ func TestGetAlertAgeMessage(t *testing.T) {
 		createdAt time.Time
 		want      string
 	}{
+		{name: "zero creation time", locale: LocaleJa, createdAt: time.Time{}, want: ""},
+		{name: "future creation time", locale: LocaleJa, createdAt: notifiedAt.Add(time.Minute), want: "通知時点で、このアラートは生成から *1分未満* です。"},
 		{name: "less than one minute in Japanese", locale: LocaleJa, createdAt: notifiedAt.Add(-30 * time.Second), want: "通知時点で、このアラートは生成から *1分未満* です。"},
 		{name: "minutes in Japanese", locale: LocaleJa, createdAt: notifiedAt.Add(-35 * time.Minute), want: "通知時点で、このアラートは生成から *35分* 経過しています。"},
 		{name: "hours and minutes in Japanese", locale: LocaleJa, createdAt: notifiedAt.Add(-(2*time.Hour + 35*time.Minute)), want: "通知時点で、このアラートは生成から *2時間35分* 経過しています。"},

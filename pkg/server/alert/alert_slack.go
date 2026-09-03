@@ -223,7 +223,9 @@ func (a *AlertService) getWebhookMessage(
 	if message != "" {
 		msg.Text = overrideToCustomMessage(message, alert.Severity)
 	}
-	msg.Text = fmt.Sprintf("%s\n%s", getAlertAgeMessage(locale, alert.CreatedAt, time.Now()), msg.Text)
+	if ageMessage := getAlertAgeMessage(locale, alert.CreatedAt, time.Now()); ageMessage != "" {
+		msg.Text = fmt.Sprintf("%s\n%s", ageMessage, msg.Text)
+	}
 	if channel != "" {
 		msg.Channel = channel // add channel
 	}
@@ -247,7 +249,9 @@ func (a *AlertService) getApiMessage(
 	if message != "" {
 		text = overrideToCustomMessage(message, alert.Severity)
 	}
-	text = fmt.Sprintf("%s\n%s", getAlertAgeMessage(locale, alert.CreatedAt, time.Now()), text)
+	if ageMessage := getAlertAgeMessage(locale, alert.CreatedAt, time.Now()); ageMessage != "" {
+		text = fmt.Sprintf("%s\n%s", ageMessage, text)
+	}
 	attachments := a.buildSlackAttachments(ctx, url, organizationName, alert, project, rules, findings, reason, locale)
 
 	msgOptions = append(msgOptions, slack.MsgOptionText(text, false))
@@ -351,7 +355,13 @@ func getSlackMessageText(locale, severity string) string {
 }
 
 func getAlertAgeMessage(locale string, createdAt, notifiedAt time.Time) string {
+	if createdAt.IsZero() {
+		return ""
+	}
 	elapsed := notifiedAt.Sub(createdAt)
+	if elapsed < 0 {
+		elapsed = 0
+	}
 	if elapsed < time.Minute {
 		if locale == LocaleJa {
 			return "通知時点で、このアラートは生成から *1分未満* です。"
