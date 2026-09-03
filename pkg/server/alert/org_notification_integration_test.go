@@ -41,6 +41,18 @@ func (r *deleteMembershipBeforeOrgRecheck) GetOrgAlertNotificationTarget(ctx con
 	return r.AlertRepository.GetOrgAlertNotificationTarget(ctx, organizationID, projectID, alertConditionID, notificationID)
 }
 
+func (r *deleteMembershipBeforeOrgRecheck) GetOrgAlertProjectNotificationTarget(ctx context.Context, organizationID, projectID, alertConditionID, notificationID uint32) (*db.OrgAlertNotificationTarget, error) {
+	if organizationID == r.organizationID && projectID == r.projectID {
+		r.once.Do(func() {
+			r.err = r.client.RemoveProjectsInOrganization(ctx, r.organizationID, r.projectID)
+		})
+		if r.err != nil {
+			return nil, r.err
+		}
+	}
+	return r.AlertRepository.GetOrgAlertProjectNotificationTarget(ctx, organizationID, projectID, alertConditionID, notificationID)
+}
+
 func TestOrgNotificationIntegration(t *testing.T) {
 	client := newIntegrationDBClient(t)
 	ctx := context.Background()

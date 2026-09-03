@@ -450,6 +450,36 @@ func (_m *AlertRepository) GetOrgAlertNotificationTarget(_a0 context.Context, _a
 	return r0, r1
 }
 
+// GetOrgAlertProjectNotificationTarget provides a mock function with given fields: _a0, _a1, _a2, _a3, _a4
+func (_m *AlertRepository) GetOrgAlertProjectNotificationTarget(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 uint32, _a4 uint32) (*db.OrgAlertNotificationTarget, error) {
+	ret := _m.Called(_a0, _a1, _a2, _a3, _a4)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetOrgAlertProjectNotificationTarget")
+	}
+
+	var r0 *db.OrgAlertNotificationTarget
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, uint32) (*db.OrgAlertNotificationTarget, error)); ok {
+		return rf(_a0, _a1, _a2, _a3, _a4)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, uint32) *db.OrgAlertNotificationTarget); ok {
+		r0 = rf(_a0, _a1, _a2, _a3, _a4)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*db.OrgAlertNotificationTarget)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint32, uint32, uint32) error); ok {
+		r1 = rf(_a0, _a1, _a2, _a3, _a4)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetRelAlertFinding provides a mock function with given fields: _a0, _a1, _a2, _a3
 func (_m *AlertRepository) GetRelAlertFinding(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 uint64) (*model.RelAlertFinding, error) {
 	ret := _m.Called(_a0, _a1, _a2, _a3)
@@ -899,6 +929,24 @@ func (_m *AlertRepository) UpdateOrgAlertCondNotificationNotifiedAt(_a0 context.
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, uint32, time.Time) error); ok {
 		r0 = rf(_a0, _a1, _a2, _a3, _a4, _a5)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UpdateOrgAlertProjectNotificationNotifiedAt provides a mock function with given fields: _a0, _a1, _a2, _a3, _a4
+func (_m *AlertRepository) UpdateOrgAlertProjectNotificationNotifiedAt(_a0 context.Context, _a1 uint32, _a2 uint32, _a3 uint32, _a4 time.Time) error {
+	ret := _m.Called(_a0, _a1, _a2, _a3, _a4)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateOrgAlertProjectNotificationNotifiedAt")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint32, uint32, time.Time) error); ok {
+		r0 = rf(_a0, _a1, _a2, _a3, _a4)
 	} else {
 		r0 = ret.Error(0)
 	}

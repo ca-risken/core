@@ -403,7 +403,7 @@ func (a *AlertService) notifyAlertTarget(
 	now time.Time,
 ) error {
 	if target.kind == organizationNotificationTarget {
-		latest, err := a.repository.GetOrgAlertNotificationTarget(ctx, target.organizationID, target.projectID, target.alertConditionID, target.notificationID)
+		latest, err := a.repository.GetOrgAlertProjectNotificationTarget(ctx, target.organizationID, target.projectID, target.alertConditionID, target.notificationID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil
@@ -433,7 +433,10 @@ func (a *AlertService) notifyAlertTarget(
 		return fmt.Errorf("notify target: kind=%d, organization_id=%d, notification_id=%d, err=%w", target.kind, target.organizationID, target.notificationID, err)
 	}
 	if target.kind == organizationNotificationTarget {
-		if err := a.repository.UpdateOrgAlertCondNotificationNotifiedAt(ctx, target.organizationID, target.projectID, target.alertConditionID, target.notificationID, now); err != nil {
+		if existsNewFindings {
+			return nil
+		}
+		if err := a.repository.UpdateOrgAlertProjectNotificationNotifiedAt(ctx, target.organizationID, target.projectID, target.notificationID, now); err != nil {
 			return fmt.Errorf("update organization notification target: %w", err)
 		}
 		return nil
