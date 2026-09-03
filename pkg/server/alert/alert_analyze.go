@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
 	"github.com/ca-risken/common/pkg/logging"
+	"github.com/ca-risken/core/pkg/db"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/alert"
 	"github.com/ca-risken/core/proto/finding"
@@ -47,12 +49,20 @@ func (a *AlertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 
 	// マッチング
 	a.logger.Infof(ctx, "start matching: RequestID=%s", requestID)
+	orgProjectNotificationUpdates := newOrgProjectNotificationUpdateCollector()
 	for _, alertCondition := range *alertConditions {
-		err := a.AnalyzeAlertByCondition(ctx, &alertCondition, project)
+		err := a.analyzeAlertByCondition(ctx, &alertCondition, project, orgProjectNotificationUpdates)
 		if err != nil {
 			a.logger.Error(ctx, err)
+			if updateErr := orgProjectNotificationUpdates.flush(ctx, a.repository); updateErr != nil {
+				return nil, errors.Join(err, updateErr)
+			}
 			return nil, err
 		}
+	}
+	if err := orgProjectNotificationUpdates.flush(ctx, a.repository); err != nil {
+		a.logger.Error(ctx, err)
+		return nil, err
 	}
 	a.logger.Infof(ctx, "finish matching: RequestID=%s", requestID)
 
@@ -79,6 +89,10 @@ func (a *AlertService) AnalyzeAlert(ctx context.Context, req *alert.AnalyzeAlert
 }
 
 func (a *AlertService) AnalyzeAlertByCondition(ctx context.Context, alertCondition *model.AlertCondition, project *projectproto.Project) error {
+	return a.analyzeAlertByCondition(ctx, alertCondition, project, nil)
+}
+
+func (a *AlertService) analyzeAlertByCondition(ctx context.Context, alertCondition *model.AlertCondition, project *projectproto.Project, orgProjectNotificationUpdates *orgProjectNotificationUpdateCollector) error {
 	// AlertRuleの取得
 	alertRules, err := a.repository.ListAlertRuleByAlertConditionID(ctx, alertCondition.ProjectID, alertCondition.AlertConditionID)
 	if err != nil {
@@ -126,7 +140,7 @@ func (a *AlertService) AnalyzeAlertByCondition(ctx context.Context, alertConditi
 		}
 		// AlertがACTIVE、かつMatchしている場合はAlert通知を行う
 		if registAlert.Status == alert.Status_ACTIVE.String() {
-			err = a.NotificationAlert(ctx, alertCondition, registAlert, alertRules, project, &matchFindingIDs, existsNewFindings)
+			err = a.notificationAlert(ctx, alertCondition, registAlert, alertRules, project, &matchFindingIDs, existsNewFindings, orgProjectNotificationUpdates)
 			if err != nil {
 				return err
 			}
@@ -313,6 +327,19 @@ func (a *AlertService) NotificationAlert(
 	findingIDs *[]uint64,
 	existsNewFindings bool,
 ) error {
+	return a.notificationAlert(ctx, alertCondition, alert, rules, project, findingIDs, existsNewFindings, nil)
+}
+
+func (a *AlertService) notificationAlert(
+	ctx context.Context,
+	alertCondition *model.AlertCondition,
+	alert *model.Alert,
+	rules *[]model.AlertRule,
+	project *projectproto.Project,
+	findingIDs *[]uint64,
+	existsNewFindings bool,
+	orgProjectNotificationUpdates *orgProjectNotificationUpdateCollector,
+) error {
 	var notificationErrors []error
 	targets := make([]alertNotificationTarget, 0)
 
@@ -365,11 +392,67 @@ func (a *AlertService) NotificationAlert(
 	}
 	now := time.Now()
 	for _, target := range targets {
-		if err := a.notifyAlertTarget(ctx, target, alert, rules, project, findings, existsNewFindings, now); err != nil {
+		if err := a.notifyAlertTarget(ctx, target, alert, rules, project, findings, existsNewFindings, now, orgProjectNotificationUpdates); err != nil {
 			notificationErrors = append(notificationErrors, err)
 		}
 	}
 	return errors.Join(notificationErrors...)
+}
+
+type orgProjectNotificationUpdateKey struct {
+	organizationID uint32
+	projectID      uint32
+	notificationID uint32
+}
+
+type orgProjectNotificationUpdateCollector struct {
+	notifiedAtByKey map[orgProjectNotificationUpdateKey]time.Time
+}
+
+func newOrgProjectNotificationUpdateCollector() *orgProjectNotificationUpdateCollector {
+	return &orgProjectNotificationUpdateCollector{
+		notifiedAtByKey: make(map[orgProjectNotificationUpdateKey]time.Time),
+	}
+}
+
+func (c *orgProjectNotificationUpdateCollector) add(organizationID, projectID, notificationID uint32, notifiedAt time.Time) {
+	if c == nil {
+		return
+	}
+	key := orgProjectNotificationUpdateKey{
+		organizationID: organizationID,
+		projectID:      projectID,
+		notificationID: notificationID,
+	}
+	if savedAt, ok := c.notifiedAtByKey[key]; !ok || notifiedAt.After(savedAt) {
+		c.notifiedAtByKey[key] = notifiedAt
+	}
+}
+
+func (c *orgProjectNotificationUpdateCollector) flush(ctx context.Context, repository db.AlertRepository) error {
+	if c == nil || len(c.notifiedAtByKey) == 0 {
+		return nil
+	}
+	keys := make([]orgProjectNotificationUpdateKey, 0, len(c.notifiedAtByKey))
+	for key := range c.notifiedAtByKey {
+		keys = append(keys, key)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		if keys[i].organizationID != keys[j].organizationID {
+			return keys[i].organizationID < keys[j].organizationID
+		}
+		if keys[i].projectID != keys[j].projectID {
+			return keys[i].projectID < keys[j].projectID
+		}
+		return keys[i].notificationID < keys[j].notificationID
+	})
+	var errs []error
+	for _, key := range keys {
+		if err := repository.UpdateOrgAlertProjectNotificationNotifiedAt(ctx, key.organizationID, key.projectID, key.notificationID, c.notifiedAtByKey[key]); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errors.Join(errs...)
 }
 
 type alertNotificationTargetKind uint8
@@ -401,6 +484,7 @@ func (a *AlertService) notifyAlertTarget(
 	findings *findingDetail,
 	existsNewFindings bool,
 	now time.Time,
+	orgProjectNotificationUpdates *orgProjectNotificationUpdateCollector,
 ) error {
 	if target.kind == organizationNotificationTarget {
 		latest, err := a.repository.GetOrgAlertProjectNotificationTarget(ctx, target.organizationID, target.projectID, target.alertConditionID, target.notificationID)
@@ -423,17 +507,25 @@ func (a *AlertService) notifyAlertTarget(
 		a.logger.Warnf(ctx, "Unsupported notification type: %s", target.notificationType)
 		return nil
 	}
+	reason := notificationReasonRegular
+	if existsNewFindings {
+		reason = notificationReasonNewFinding
+	}
 	send := a.sendAlertNotification
 	if send == nil {
-		send = func(ctx context.Context, notifySetting, organizationName string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule, findings *findingDetail) error {
-			return a.sendSlackNotification(ctx, a.baseURL, notifySetting, organizationName, alert, project, rules, findings, a.defaultLocale)
+		send = func(ctx context.Context, notifySetting, organizationName string, alert *model.Alert, project *projectproto.Project, rules *[]model.AlertRule, findings *findingDetail, reason notificationReason) error {
+			return a.sendSlackNotification(ctx, a.baseURL, notifySetting, organizationName, alert, project, rules, findings, reason, a.defaultLocale)
 		}
 	}
-	if err := send(ctx, target.notifySetting, target.organizationName, alert, project, rules, findings); err != nil {
+	if err := send(ctx, target.notifySetting, target.organizationName, alert, project, rules, findings, reason); err != nil {
 		return fmt.Errorf("notify target: kind=%d, organization_id=%d, notification_id=%d, err=%w", target.kind, target.organizationID, target.notificationID, err)
 	}
 	if target.kind == organizationNotificationTarget {
 		if existsNewFindings {
+			return nil
+		}
+		if orgProjectNotificationUpdates != nil {
+			orgProjectNotificationUpdates.add(target.organizationID, target.projectID, target.notificationID, now)
 			return nil
 		}
 		if err := a.repository.UpdateOrgAlertProjectNotificationNotifiedAt(ctx, target.organizationID, target.projectID, target.notificationID, now); err != nil {
