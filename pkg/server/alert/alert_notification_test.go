@@ -293,6 +293,23 @@ func TestNotificationAlertDefersOrgProjectWindowUpdate(t *testing.T) {
 	}
 }
 
+func TestOrgProjectNotificationUpdateCollectorFlushesNotifiedAtByKey(t *testing.T) {
+	mockDB := mocks.NewAlertRepository(t)
+	collector := newOrgProjectNotificationUpdateCollector()
+	firstNotifiedAt := time.Date(2026, 9, 3, 10, 0, 0, 0, time.UTC)
+	secondNotifiedAt := firstNotifiedAt.Add(10 * time.Second)
+
+	collector.add(10, 1, 1, firstNotifiedAt)
+	collector.add(10, 2, 1, secondNotifiedAt)
+
+	mockDB.On("UpdateOrgAlertProjectNotificationNotifiedAt", mock.Anything, uint32(10), uint32(1), uint32(1), firstNotifiedAt).Return(nil).Once()
+	mockDB.On("UpdateOrgAlertProjectNotificationNotifiedAt", mock.Anything, uint32(10), uint32(2), uint32(1), secondNotifiedAt).Return(nil).Once()
+
+	if err := collector.flush(context.Background(), mockDB); err != nil {
+		t.Fatalf("Unexpected flush error: %v", err)
+	}
+}
+
 func TestGetFindingDetailsForNotification(t *testing.T) {
 	type inputParam struct {
 		ProjectID  uint32

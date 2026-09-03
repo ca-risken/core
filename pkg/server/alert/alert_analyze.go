@@ -406,13 +406,12 @@ type orgProjectNotificationUpdateKey struct {
 }
 
 type orgProjectNotificationUpdateCollector struct {
-	keys       map[orgProjectNotificationUpdateKey]struct{}
-	notifiedAt time.Time
+	notifiedAtByKey map[orgProjectNotificationUpdateKey]time.Time
 }
 
 func newOrgProjectNotificationUpdateCollector() *orgProjectNotificationUpdateCollector {
 	return &orgProjectNotificationUpdateCollector{
-		keys: make(map[orgProjectNotificationUpdateKey]struct{}),
+		notifiedAtByKey: make(map[orgProjectNotificationUpdateKey]time.Time),
 	}
 }
 
@@ -420,22 +419,22 @@ func (c *orgProjectNotificationUpdateCollector) add(organizationID, projectID, n
 	if c == nil {
 		return
 	}
-	c.keys[orgProjectNotificationUpdateKey{
+	key := orgProjectNotificationUpdateKey{
 		organizationID: organizationID,
 		projectID:      projectID,
 		notificationID: notificationID,
-	}] = struct{}{}
-	if c.notifiedAt.IsZero() || notifiedAt.After(c.notifiedAt) {
-		c.notifiedAt = notifiedAt
+	}
+	if savedAt, ok := c.notifiedAtByKey[key]; !ok || notifiedAt.After(savedAt) {
+		c.notifiedAtByKey[key] = notifiedAt
 	}
 }
 
 func (c *orgProjectNotificationUpdateCollector) flush(ctx context.Context, repository db.AlertRepository) error {
-	if c == nil || len(c.keys) == 0 {
+	if c == nil || len(c.notifiedAtByKey) == 0 {
 		return nil
 	}
-	keys := make([]orgProjectNotificationUpdateKey, 0, len(c.keys))
-	for key := range c.keys {
+	keys := make([]orgProjectNotificationUpdateKey, 0, len(c.notifiedAtByKey))
+	for key := range c.notifiedAtByKey {
 		keys = append(keys, key)
 	}
 	sort.Slice(keys, func(i, j int) bool {
@@ -449,7 +448,7 @@ func (c *orgProjectNotificationUpdateCollector) flush(ctx context.Context, repos
 	})
 	var errs []error
 	for _, key := range keys {
-		if err := repository.UpdateOrgAlertProjectNotificationNotifiedAt(ctx, key.organizationID, key.projectID, key.notificationID, c.notifiedAt); err != nil {
+		if err := repository.UpdateOrgAlertProjectNotificationNotifiedAt(ctx, key.organizationID, key.projectID, key.notificationID, c.notifiedAtByKey[key]); err != nil {
 			errs = append(errs, err)
 		}
 	}
