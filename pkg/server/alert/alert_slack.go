@@ -223,6 +223,9 @@ func (a *AlertService) getWebhookMessage(
 	if message != "" {
 		msg.Text = overrideToCustomMessage(message, alert.Severity)
 	}
+	if ageMessage := getAlertAgeMessage(locale, alert.CreatedAt, time.Now()); ageMessage != "" {
+		msg.Text = fmt.Sprintf("%s\n%s", ageMessage, msg.Text)
+	}
 	if channel != "" {
 		msg.Channel = channel // add channel
 	}
@@ -245,6 +248,9 @@ func (a *AlertService) getApiMessage(
 	text := getSlackMessageText(locale, alert.Severity)
 	if message != "" {
 		text = overrideToCustomMessage(message, alert.Severity)
+	}
+	if ageMessage := getAlertAgeMessage(locale, alert.CreatedAt, time.Now()); ageMessage != "" {
+		text = fmt.Sprintf("%s\n%s", ageMessage, text)
 	}
 	attachments := a.buildSlackAttachments(ctx, url, organizationName, alert, project, rules, findings, reason, locale)
 
@@ -346,6 +352,48 @@ func getSlackMessageText(locale, severity string) string {
 		msgText = fmt.Sprintf(slackNotificationMessageEn, getMention(severity))
 	}
 	return msgText
+}
+
+func getAlertAgeMessage(locale string, createdAt, notifiedAt time.Time) string {
+	if createdAt.IsZero() {
+		return ""
+	}
+	elapsed := notifiedAt.Sub(createdAt)
+	if elapsed < 0 {
+		elapsed = 0
+	}
+	if elapsed < time.Minute {
+		if locale == LocaleJa {
+			return "通知時点で、このアラートは生成から *1分未満* です。"
+		}
+		return "At notification time, this alert was created *less than 1 minute* ago."
+	}
+
+	days := int(elapsed / (24 * time.Hour))
+	hours := int(elapsed/time.Hour) % 24
+	minutes := int(elapsed/time.Minute) % 60
+	var age string
+	switch {
+	case days > 0:
+		age = fmt.Sprintf("%d日%d時間", days, hours)
+	case hours > 0:
+		age = fmt.Sprintf("%d時間%d分", hours, minutes)
+	default:
+		age = fmt.Sprintf("%d分", minutes)
+	}
+	if locale == LocaleJa {
+		return fmt.Sprintf("通知時点で、このアラートは生成から *%s* 経過しています。", age)
+	}
+
+	switch {
+	case days > 0:
+		age = fmt.Sprintf("%d days %d hours", days, hours)
+	case hours > 0:
+		age = fmt.Sprintf("%d hours %d minutes", hours, minutes)
+	default:
+		age = fmt.Sprintf("%d minutes", minutes)
+	}
+	return fmt.Sprintf("At notification time, this alert was created *%s* ago.", age)
 }
 
 func getTestWebhookMessage(channel, locale string) *slack.WebhookMessage {

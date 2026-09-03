@@ -122,6 +122,32 @@ func TestGenerateRuleList(t *testing.T) {
 	}
 }
 
+func TestGetAlertAgeMessage(t *testing.T) {
+	notifiedAt := time.Date(2026, time.September, 3, 12, 0, 0, 0, time.UTC)
+	cases := []struct {
+		name      string
+		locale    string
+		createdAt time.Time
+		want      string
+	}{
+		{name: "zero creation time", locale: LocaleJa, createdAt: time.Time{}, want: ""},
+		{name: "future creation time", locale: LocaleJa, createdAt: notifiedAt.Add(time.Minute), want: "通知時点で、このアラートは生成から *1分未満* です。"},
+		{name: "less than one minute in Japanese", locale: LocaleJa, createdAt: notifiedAt.Add(-30 * time.Second), want: "通知時点で、このアラートは生成から *1分未満* です。"},
+		{name: "minutes in Japanese", locale: LocaleJa, createdAt: notifiedAt.Add(-35 * time.Minute), want: "通知時点で、このアラートは生成から *35分* 経過しています。"},
+		{name: "hours and minutes in Japanese", locale: LocaleJa, createdAt: notifiedAt.Add(-(2*time.Hour + 35*time.Minute)), want: "通知時点で、このアラートは生成から *2時間35分* 経過しています。"},
+		{name: "days and hours in Japanese", locale: LocaleJa, createdAt: notifiedAt.Add(-(3*24*time.Hour + 4*time.Hour + 35*time.Minute)), want: "通知時点で、このアラートは生成から *3日4時間* 経過しています。"},
+		{name: "hours and minutes in English", locale: LocaleEn, createdAt: notifiedAt.Add(-(2*time.Hour + 35*time.Minute)), want: "At notification time, this alert was created *2 hours 35 minutes* ago."},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := getAlertAgeMessage(c.locale, c.createdAt, notifiedAt)
+			if got != c.want {
+				t.Fatalf("Unexpected message: got=%q want=%q", got, c.want)
+			}
+		})
+	}
+}
+
 func TestGetFindingAttachment(t *testing.T) {
 	cases := []struct {
 		name      string
