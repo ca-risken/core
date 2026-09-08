@@ -14,23 +14,26 @@ import (
 	"github.com/ca-risken/core/proto/organization"
 	organizationmock "github.com/ca-risken/core/proto/organization/mocks"
 	"github.com/ca-risken/core/proto/org_iam"
+	"github.com/ca-risken/core/proto/project"
+	projectmock "github.com/ca-risken/core/proto/project/mocks"
 	"gorm.io/gorm"
 )
 
 func TestIsAuthorizedByOrgPolicy(t *testing.T) {
 	validPolicies := &[]model.OrganizationPolicy{
-		{PolicyID: 1, Name: "organization-admin", OrganizationID: 1, ActionPtn: "organization/.*"},
-		{PolicyID: 2, Name: "organizatino-viewer", OrganizationID: 1, ActionPtn: "project/(get|list)"},
+		{PolicyID: 1, Name: "organization-admin", OrganizationID: 1, ActionPtn: "organization/.*", ProjectPtn: ".*"},
+		{PolicyID: 2, Name: "organizatino-viewer", OrganizationID: 1, ActionPtn: "project/(get|list)", ProjectPtn: ".*"},
 	}
 	cases := []struct {
-		name    string
-		action  string
-		policy  *[]model.OrganizationPolicy
-		want    bool
-		wantErr bool
+		name        string
+		action      string
+		projectName string
+		policy      *[]model.OrganizationPolicy
+		want        bool
+		wantErr     bool
 	}{
 		{
-			name:   "OK Authorized organization get",
+			name:   "OK Authorized organization get without project context",
 			action: "organization/get-organization",
 			policy: validPolicies,
 			want:   true,
@@ -38,20 +41,45 @@ func TestIsAuthorizedByOrgPolicy(t *testing.T) {
 		{
 			name:   "OK Unauthorized action not allowed",
 			action: "organization/delete-organization",
-			policy: &[]model.OrganizationPolicy{{PolicyID: 2, Name: "organization-viewer", OrganizationID: 1, ActionPtn: "organization/(get|list)"}},
+			policy: &[]model.OrganizationPolicy{{PolicyID: 2, Name: "organization-viewer", OrganizationID: 1, ActionPtn: "organization/(get|list)", ProjectPtn: ".*"}},
 			want:   false,
 		},
 		{
-			name:    "NG Error invalid regex pattern",
+			name:        "OK Authorized with project name match",
+			action:      "finding/put-finding",
+			projectName: "team-a-prod",
+			policy: &[]model.OrganizationPolicy{
+				{PolicyID: 3, Name: "team-a-editor", OrganizationID: 1, ActionPtn: "finding/.*", ProjectPtn: "team-a-.*"},
+			},
+			want: true,
+		},
+		{
+			name:        "OK Unauthorized when project name does not match project_ptn",
+			action:      "finding/put-finding",
+			projectName: "team-b-prod",
+			policy: &[]model.OrganizationPolicy{
+				{PolicyID: 3, Name: "team-a-editor", OrganizationID: 1, ActionPtn: "finding/.*", ProjectPtn: "team-a-.*"},
+			},
+			want: false,
+		},
+		{
+			name:    "NG Error invalid action regex pattern",
 			action:  "organization/get",
-			policy:  &[]model.OrganizationPolicy{{PolicyID: 1, Name: "invalid-pattern", OrganizationID: 1, ActionPtn: "[invalid regex"}},
+			policy:  &[]model.OrganizationPolicy{{PolicyID: 1, Name: "invalid-pattern", OrganizationID: 1, ActionPtn: "[invalid regex", ProjectPtn: ".*"}},
 			wantErr: true,
+		},
+		{
+			name:        "NG Error invalid project regex pattern",
+			action:      "finding/put-finding",
+			projectName: "team-a-prod",
+			policy:      &[]model.OrganizationPolicy{{PolicyID: 1, Name: "invalid-project-pattern", OrganizationID: 1, ActionPtn: "finding/.*", ProjectPtn: "[invalid regex"}},
+			wantErr:     true,
 		},
 	}
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := isAuthorizedByOrgPolicy(c.action, c.policy)
+			got, err := isAuthorizedByOrgPolicy(c.action, c.projectName, c.policy)
 			if (err != nil) != c.wantErr {
 				t.Errorf("isAuthorizedByOrgPolicy() error = %v, wantErr %v", err, c.wantErr)
 				return
@@ -74,6 +102,9 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 		mockIsAdminResp   bool
 		mockIsAdminErr    error
 		expectIsAdminCall bool
+		callListProject   bool
+		listProjectResp   *project.ListProjectResponse
+		listProjectErr    error
 	}{
 		{
 			name: "OK Admin user - immediate authorization",
@@ -167,6 +198,44 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 			mockError:         gorm.ErrInvalidDB,
 			wantErr:           true,
 		},
+		{
+			name: "OK Authorized with project_ptn matching",
+			input: &org_iam.IsAuthorizedOrgRequest{
+				UserId:         111,
+				OrganizationId: 1001,
+				ActionName:     "finding/put-finding",
+				ProjectId:      3001,
+			},
+			want:              &org_iam.IsAuthorizedOrgResponse{Ok: true},
+			mockIsAdminResp:   false,
+			expectIsAdminCall: true,
+			callListProject:   true,
+			listProjectResp: &project.ListProjectResponse{
+				Project: []*project.Project{{ProjectId: 3001, Name: "team-a-prod"}},
+			},
+			mockResponse: &[]model.OrganizationPolicy{
+				{PolicyID: 101, Name: "team-a-editor", OrganizationID: 1001, ActionPtn: "finding/.*", ProjectPtn: "team-a-.*"},
+			},
+		},
+		{
+			name: "OK Unauthorized when project_ptn does not match",
+			input: &org_iam.IsAuthorizedOrgRequest{
+				UserId:         111,
+				OrganizationId: 1001,
+				ActionName:     "finding/put-finding",
+				ProjectId:      3002,
+			},
+			want:              &org_iam.IsAuthorizedOrgResponse{Ok: false},
+			mockIsAdminResp:   false,
+			expectIsAdminCall: true,
+			callListProject:   true,
+			listProjectResp: &project.ListProjectResponse{
+				Project: []*project.Project{{ProjectId: 3002, Name: "team-b-prod"}},
+			},
+			mockResponse: &[]model.OrganizationPolicy{
+				{PolicyID: 101, Name: "team-a-editor", OrganizationID: 1001, ActionPtn: "finding/.*", ProjectPtn: "team-a-.*"},
+			},
+		},
 	}
 
 	for _, c := range cases {
@@ -176,7 +245,8 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 			logger := logging.NewLogger()
 			mockIAM := iammock.NewIAMServiceClient(t)
 			mockOrg := organizationmock.NewOrganizationServiceClient(t)
-			svc := NewOrgIAMService(mockRepo, mockOrg, mockIAM, logger)
+			mockProject := projectmock.NewProjectServiceClient(t)
+			svc := NewOrgIAMService(mockRepo, mockOrg, mockIAM, mockProject, logger)
 
 			if c.expectIsAdminCall {
 				if c.mockIsAdminErr != nil {
@@ -184,6 +254,10 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 				} else {
 					mockIAM.On("IsAdmin", test.RepeatMockAnything(2)...).Return(&iam.IsAdminResponse{Ok: c.mockIsAdminResp}, nil).Once()
 				}
+			}
+
+			if c.callListProject {
+				mockProject.On("ListProject", test.RepeatMockAnything(2)...).Return(c.listProjectResp, c.listProjectErr).Once()
 			}
 
 			if !c.mockIsAdminResp && c.mockIsAdminErr == nil && c.expectIsAdminCall && (c.mockResponse != nil || c.mockError != nil) {
@@ -206,19 +280,22 @@ func TestIsAuthorizedOrganization(t *testing.T) {
 
 func TestIsAuthorizedOrgToken(t *testing.T) {
 	cases := []struct {
-		name           string
-		input          *org_iam.IsAuthorizedOrgTokenRequest
-		want           *org_iam.IsAuthorizedOrgTokenResponse
-		wantErr        bool
-		callOrgList    bool
-		orgListResp    *organization.ListOrganizationResponse
-		orgListErr     error
-		callMaintainer bool
-		maintainerResp bool
-		maintainerErr  error
-		callGetPolicy  bool
-		getPolicyResp  *[]model.OrganizationPolicy
-		getPolicyErr   error
+		name            string
+		input           *org_iam.IsAuthorizedOrgTokenRequest
+		want            *org_iam.IsAuthorizedOrgTokenResponse
+		wantErr         bool
+		callOrgList     bool
+		orgListResp     *organization.ListOrganizationResponse
+		orgListErr      error
+		callMaintainer  bool
+		maintainerResp  bool
+		maintainerErr   error
+		callListProject bool
+		listProjectResp *project.ListProjectResponse
+		listProjectErr  error
+		callGetPolicy   bool
+		getPolicyResp   *[]model.OrganizationPolicy
+		getPolicyErr    error
 	}{
 		{
 			name: "OK Authorized",
@@ -322,11 +399,41 @@ func TestIsAuthorizedOrgToken(t *testing.T) {
 					{OrganizationId: 1001},
 				},
 			},
-			callMaintainer: true,
-			maintainerResp: true,
-			callGetPolicy:  true,
+			callMaintainer:  true,
+			maintainerResp:  true,
+			callListProject: true,
+			listProjectResp: &project.ListProjectResponse{
+				Project: []*project.Project{{ProjectId: 3001, Name: "team-a-prod"}},
+			},
+			callGetPolicy: true,
 			getPolicyResp: &[]model.OrganizationPolicy{
-				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/.*"},
+				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/.*", ProjectPtn: ".*"},
+			},
+		},
+		{
+			name: "OK Unauthorized by project_ptn mismatch",
+			input: &org_iam.IsAuthorizedOrgTokenRequest{
+				OrganizationId: 1001,
+				AccessTokenId:  2001,
+				ActionName:     "organization/update",
+				ProjectId:      3002,
+			},
+			want:        &org_iam.IsAuthorizedOrgTokenResponse{Ok: false},
+			callOrgList: true,
+			orgListResp: &organization.ListOrganizationResponse{
+				Organization: []*organization.Organization{
+					{OrganizationId: 1001},
+				},
+			},
+			callMaintainer:  true,
+			maintainerResp:  true,
+			callListProject: true,
+			listProjectResp: &project.ListProjectResponse{
+				Project: []*project.Project{{ProjectId: 3002, Name: "team-b-prod"}},
+			},
+			callGetPolicy: true,
+			getPolicyResp: &[]model.OrganizationPolicy{
+				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/.*", ProjectPtn: "team-a-.*"},
 			},
 		},
 		{
@@ -372,11 +479,15 @@ func TestIsAuthorizedOrgToken(t *testing.T) {
 					{OrganizationId: 1001},
 				},
 			},
-			callMaintainer: true,
-			maintainerResp: true,
-			callGetPolicy:  true,
+			callMaintainer:  true,
+			maintainerResp:  true,
+			callListProject: true,
+			listProjectResp: &project.ListProjectResponse{
+				Project: []*project.Project{{ProjectId: 3001, Name: "team-a-prod"}},
+			},
+			callGetPolicy: true,
 			getPolicyResp: &[]model.OrganizationPolicy{
-				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/(get|list)"},
+				{PolicyID: 1, OrganizationID: 1001, ActionPtn: "organization/(get|list)", ProjectPtn: ".*"},
 			},
 		},
 	}
@@ -388,13 +499,17 @@ func TestIsAuthorizedOrgToken(t *testing.T) {
 			logger := logging.NewLogger()
 			mockIAM := iammock.NewIAMServiceClient(t)
 			mockOrg := organizationmock.NewOrganizationServiceClient(t)
-			svc := NewOrgIAMService(mockRepo, mockOrg, mockIAM, logger)
+			mockProject := projectmock.NewProjectServiceClient(t)
+			svc := NewOrgIAMService(mockRepo, mockOrg, mockIAM, mockProject, logger)
 
 			if c.callOrgList {
 				mockOrg.On("ListOrganization", test.RepeatMockAnything(2)...).Return(c.orgListResp, c.orgListErr).Once()
 			}
 			if c.callMaintainer {
 				mockRepo.On("ExistsOrgAccessTokenMaintainer", test.RepeatMockAnything(3)...).Return(c.maintainerResp, c.maintainerErr).Once()
+			}
+			if c.callListProject {
+				mockProject.On("ListProject", test.RepeatMockAnything(2)...).Return(c.listProjectResp, c.listProjectErr).Once()
 			}
 			if c.callGetPolicy {
 				mockRepo.On("GetOrgTokenPolicy", test.RepeatMockAnything(3)...).Return(c.getPolicyResp, c.getPolicyErr).Once()

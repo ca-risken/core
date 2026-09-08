@@ -147,6 +147,7 @@ func (i *IAMService) isAuthorizedByOrganizations(ctx context.Context, userID, pr
 			UserId:         userID,
 			OrganizationId: org.OrganizationId,
 			ActionName:     actionName,
+			ProjectId:      projectID,
 		})
 		if err != nil {
 			i.logger.Warnf(ctx, "Failed to check organization authorization: org_id=%d, user_id=%d, action=%s, error=%v", org.OrganizationId, userID, actionName, err)
