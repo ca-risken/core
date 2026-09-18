@@ -367,11 +367,13 @@ func (c *Client) existsFinding(ctx context.Context, projectID uint32, findingID 
 
 const insertUpsertFinding = `
 INSERT INTO finding
-  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
+  provider=IF(VALUES(provider) = '', provider, VALUES(provider)),
+  provider_target=IF(VALUES(provider_target) = '', provider_target, VALUES(provider_target)),
   resource_name=VALUES(resource_name),
   project_id=VALUES(project_id),
   original_score=VALUES(original_score),
@@ -389,7 +391,7 @@ func (c *Client) UpsertFinding(ctx context.Context, data *model.Finding) (*model
 
 func (c *Client) upsertFinding(ctx context.Context, data *model.Finding) (*model.Finding, error) {
 	if err := c.Master.WithContext(ctx).Exec(insertUpsertFinding,
-		data.FindingID, data.Description, data.DataSource, data.DataSourceID, data.ResourceName,
+		data.FindingID, data.Description, data.Provider, data.ProviderTarget, data.DataSource, data.DataSourceID, data.ResourceName,
 		data.ProjectID, data.OriginalScore, data.Score, data.Data).Error; err != nil {
 		return nil, err
 	}
@@ -615,18 +617,20 @@ func generateBulkUpsertFindingSQL(data []*model.Finding) (string, []interface{})
 	var params []interface{}
 	sql := `
 INSERT INTO finding
-  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data)
 VALUES`
 	for _, d := range data {
 		sql += `
-  (?, ?, ?, ?, ?, ?, ?, ?, ?),`
-		params = append(params, d.FindingID, d.Description, d.DataSource, d.DataSourceID,
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
+		params = append(params, d.FindingID, d.Description, d.Provider, d.ProviderTarget, d.DataSource, d.DataSourceID,
 			d.ResourceName, d.ProjectID, d.OriginalScore, d.Score, d.Data)
 	}
 	sql = strings.TrimRight(sql, ",")
 	sql += `
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
+  provider=IF(VALUES(provider) = '', provider, VALUES(provider)),
+  provider_target=IF(VALUES(provider_target) = '', provider_target, VALUES(provider_target)),
   resource_name=VALUES(resource_name),
   project_id=VALUES(project_id),
   original_score=VALUES(original_score),

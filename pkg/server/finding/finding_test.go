@@ -132,8 +132,8 @@ func TestGetFinding(t *testing.T) {
 		{
 			name:         "OK",
 			input:        &finding.GetFindingRequest{ProjectId: 1, FindingId: 1001},
-			want:         &finding.GetFindingResponse{Finding: &finding.Finding{FindingId: 1001, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockResponce: &model.Finding{FindingID: 1001, CreatedAt: now, UpdatedAt: now},
+			want:         &finding.GetFindingResponse{Finding: &finding.Finding{FindingId: 1001, Provider: "aws", ProviderTarget: "123456789012", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockResponce: &model.Finding{FindingID: 1001, Provider: "aws", ProviderTarget: "123456789012", CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:      "NG record not found",
@@ -180,10 +180,10 @@ func TestPutFinding(t *testing.T) {
 	}{
 		{
 			name:                   "OK Insert",
-			input:                  &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
-			want:                   &finding.PutFindingResponse{Finding: &finding.Finding{FindingId: 1001, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, Score: 1.0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			input:                  &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
+			want:                   &finding.PutFindingResponse{Finding: &finding.Finding{FindingId: 1001, Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, Score: 1.0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetErr:             gorm.ErrRecordNotFound,
-			mockUpResp:             &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 100.00, Score: 1.0, CreatedAt: now, UpdatedAt: now},
+			mockUpResp:             &model.Finding{FindingID: 1001, Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 100.00, Score: 1.0, CreatedAt: now, UpdatedAt: now},
 			callListFindingSetting: true,
 			callGetResourceByName:  true,
 			callUpsertResource:     true,
@@ -253,6 +253,58 @@ func TestPutFinding(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestGetFindingDataForUpsertProvider(t *testing.T) {
+	cases := []struct {
+		name         string
+		input        *finding.FindingForUpsert
+		stored       *model.Finding
+		storedErr    error
+		wantID       uint64
+		wantProvider string
+		wantTarget   string
+	}{
+		{
+			name:         "new finding",
+			input:        &finding.FindingForUpsert{Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceId: "1", ResourceName: "r", ProjectId: 1, OriginalScore: 1, OriginalMaxScore: 1},
+			storedErr:    gorm.ErrRecordNotFound,
+			wantProvider: "aws",
+			wantTarget:   "123456789012",
+		},
+		{
+			name:         "preserve stored metadata",
+			input:        &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "1", ResourceName: "r", ProjectId: 1, OriginalScore: 1, OriginalMaxScore: 1},
+			stored:       &model.Finding{FindingID: 10, Provider: "aws", ProviderTarget: "123456789012"},
+			wantID:       10,
+			wantProvider: "aws",
+			wantTarget:   "123456789012",
+		},
+		{
+			name:         "replace stored metadata",
+			input:        &finding.FindingForUpsert{Provider: "google", ProviderTarget: "project-1", DataSource: "ds", DataSourceId: "1", ResourceName: "r", ProjectId: 1, OriginalScore: 1, OriginalMaxScore: 1},
+			stored:       &model.Finding{FindingID: 10, Provider: "aws", ProviderTarget: "123456789012"},
+			wantID:       10,
+			wantProvider: "google",
+			wantTarget:   "project-1",
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mockDB := mocks.NewFindingRepository(t)
+			mockDB.On("GetFindingByDataSource", test.RepeatMockAnything(4)...).Return(c.stored, c.storedErr).Once()
+			mockDB.On("ListFindingSetting", test.RepeatMockAnything(3)...).Return(&[]model.FindingSetting{}, nil).Once()
+			svc := FindingService{repository: mockDB}
+
+			got, err := svc.getFindingDataForUpsert(context.Background(), c.input)
+			if err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if got.FindingID != c.wantID || got.Provider != c.wantProvider || got.ProviderTarget != c.wantTarget {
+				t.Fatalf("Unexpected provider metadata: want=(%d,%s,%s), got=(%d,%s,%s)", c.wantID, c.wantProvider, c.wantTarget, got.FindingID, got.Provider, got.ProviderTarget)
 			}
 		})
 	}

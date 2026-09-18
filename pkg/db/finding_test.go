@@ -85,11 +85,11 @@ func TestBulkUpsertFinding(t *testing.T) {
 		{
 			name: "OK",
 			input: []*model.Finding{
-				{FindingID: 1, Description: "desc", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
+				{FindingID: 1, Description: "desc", Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
 			},
 			mockSQL: regexp.QuoteMeta(`
 INSERT INTO finding
-  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data)
 VALUES`),
 		},
 		{
@@ -182,15 +182,17 @@ func TestGenerateBulkUpsertFindingSQL(t *testing.T) {
 		{
 			name: "Single",
 			input: []*model.Finding{
-				{FindingID: 1, Description: "desc", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
+				{FindingID: 1, Description: "desc", Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
 			},
 			wantSQL: `
 INSERT INTO finding
-  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
+  provider=IF(VALUES(provider) = '', provider, VALUES(provider)),
+  provider_target=IF(VALUES(provider_target) = '', provider_target, VALUES(provider_target)),
   resource_name=VALUES(resource_name),
   project_id=VALUES(project_id),
   original_score=VALUES(original_score),
@@ -198,25 +200,27 @@ ON DUPLICATE KEY UPDATE
   data=VALUES(data),
   updated_at=NOW()`,
 			wantParam: []interface{}{
-				uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(1), "desc", "aws", "123456789012", "ds", "1", "r", uint32(1), float32(1), float32(1), "data",
 			},
 		},
 		{
 			name: "Multi",
 			input: []*model.Finding{
-				{FindingID: 1, Description: "desc", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
-				{FindingID: 2, Description: "desc", DataSource: "ds", DataSourceID: "2", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
-				{FindingID: 3, Description: "desc", DataSource: "ds", DataSourceID: "3", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
+				{FindingID: 1, Description: "desc", Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
+				{FindingID: 2, Description: "desc", Provider: "google", ProviderTarget: "project-1", DataSource: "ds", DataSourceID: "2", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
+				{FindingID: 3, Description: "desc", Provider: "github", ProviderTarget: "owner/repo", DataSource: "ds", DataSourceID: "3", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
 			},
 			wantSQL: `
 INSERT INTO finding
-  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?, ?),
-  (?, ?, ?, ?, ?, ?, ?, ?, ?),
-  (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
+  provider=IF(VALUES(provider) = '', provider, VALUES(provider)),
+  provider_target=IF(VALUES(provider_target) = '', provider_target, VALUES(provider_target)),
   resource_name=VALUES(resource_name),
   project_id=VALUES(project_id),
   original_score=VALUES(original_score),
@@ -224,9 +228,9 @@ ON DUPLICATE KEY UPDATE
   data=VALUES(data),
   updated_at=NOW()`,
 			wantParam: []interface{}{
-				uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(1), "data",
-				uint64(2), "desc", "ds", "2", "r", uint32(1), float32(1), float32(1), "data",
-				uint64(3), "desc", "ds", "3", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(1), "desc", "aws", "123456789012", "ds", "1", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(2), "desc", "google", "project-1", "ds", "2", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(3), "desc", "github", "owner/repo", "ds", "3", "r", uint32(1), float32(1), float32(1), "data",
 			},
 		},
 	}
