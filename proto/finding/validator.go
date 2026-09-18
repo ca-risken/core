@@ -396,6 +396,8 @@ func (p *PutRecommendRequest) Validate() error {
 func (f *FindingForUpsert) Validate() error {
 	return validation.ValidateStruct(f,
 		validation.Field(&f.Description, validation.Length(0, 200)),
+		validation.Field(&f.Provider, validation.Length(0, 32)),
+		validation.Field(&f.ProviderTarget, validation.Length(0, 255)),
 		validation.Field(&f.DataSource, validation.Required, validation.Length(0, 64)),
 		validation.Field(&f.DataSourceId, validation.Required, validation.Length(0, 255)),
 		validation.Field(&f.ResourceName, validation.Required, validation.Length(0, 512)),

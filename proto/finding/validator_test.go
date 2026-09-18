@@ -1276,12 +1276,22 @@ func TestValidate_FindingForUpsert(t *testing.T) {
 	}{
 		{
 			name:    "OK",
-			input:   &FindingForUpsert{Description: "desc", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   &FindingForUpsert{Description: "desc", Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: false,
 		},
 		{
 			name:    "NG too long Description",
 			input:   &FindingForUpsert{Description: len201string, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			wantErr: true,
+		},
+		{
+			name:    "NG too long Provider",
+			input:   &FindingForUpsert{Description: "desc", Provider: strings.Repeat("p", 33), DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			wantErr: true,
+		},
+		{
+			name:    "NG too long ProviderTarget",
+			input:   &FindingForUpsert{Description: "desc", ProviderTarget: len256string, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{
