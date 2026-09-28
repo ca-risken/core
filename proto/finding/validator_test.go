@@ -1280,6 +1280,11 @@ func TestValidate_FindingForUpsert(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:    "OK max length Provider and ProviderTarget",
+			input:   &FindingForUpsert{Description: "desc", Provider: strings.Repeat("p", 32), ProviderTarget: strings.Repeat("t", 128), DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			wantErr: false,
+		},
+		{
 			name:    "NG too long Description",
 			input:   &FindingForUpsert{Description: len201string, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
@@ -1291,7 +1296,7 @@ func TestValidate_FindingForUpsert(t *testing.T) {
 		},
 		{
 			name:    "NG too long ProviderTarget",
-			input:   &FindingForUpsert{Description: "desc", ProviderTarget: len256string, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
+			input:   &FindingForUpsert{Description: "desc", ProviderTarget: len129string, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: true,
 		},
 		{

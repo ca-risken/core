@@ -107,7 +107,7 @@ CREATE TABLE finding (
   finding_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   description VARCHAR(200) NULL,
   provider VARCHAR(32) NOT NULL DEFAULT '',
-  provider_target VARCHAR(255) NOT NULL DEFAULT '',
+  provider_target VARCHAR(128) NOT NULL DEFAULT '',
   data_source VARCHAR(64) NOT NULL,
   data_source_id VARCHAR(255) NOT NULL,
   resource_name VARCHAR(512) NOT NULL,
@@ -127,7 +127,7 @@ CREATE TABLE finding (
 - provider: This is the provider that owns the finding.
 	- e.g. "aws", "google", "azure", "github"
 - provider_target: This is the provider-specific target identifier.
-	- e.g. AWS account ID, Google Cloud project ID, GitHub repository full name
+	- e.g. AWS account ID, Google Cloud project ID, GitHub organization or user name
 - resource_name: This is a name of cloud resource.
 	- e.g. "arn:aws:iam::123456789012:user/john.doe", "//bigquery.googleapis.com/projects/pj-name/datasets/ds-name"
 - score: Findings always have a score. Although score evaluation varies across data sources, when registered in RISKEN, scores are standardized to a number between 0.0 ~ 1.0. The score helps filter high-risk data and support prioritization decisions.
