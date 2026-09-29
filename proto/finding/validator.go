@@ -402,7 +402,7 @@ func (f *FindingForUpsert) Validate() error {
 		validation.Field(&f.OriginalScore, validation.Min(0.0), validation.Max(f.OriginalMaxScore)),
 		validation.Field(&f.OriginalMaxScore, validation.NilOrNotEmpty, validation.Min(0.0), validation.Max(999.99)),
 		validation.Field(&f.Data, is.JSON),
-		validation.Field(&f.Provider, validation.Length(0, 32)),
+		validation.Field(&f.Provider, validation.Length(0, 32), validation.In("", "aws", "google", "azure", "github")),
 		validation.Field(&f.ProviderTarget, validation.Length(0, 128)),
 	)
 }
