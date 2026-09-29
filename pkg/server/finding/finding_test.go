@@ -276,12 +276,12 @@ func TestGetFindingDataForUpsertProvider(t *testing.T) {
 			wantTarget:   "123456789012",
 		},
 		{
-			name:         "preserve stored metadata",
+			name:         "replace stored metadata with empty values",
 			input:        &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "1", ResourceName: "r", ProjectId: 1, OriginalScore: 1, OriginalMaxScore: 1},
 			stored:       &model.Finding{FindingID: 10, Provider: "aws", ProviderTarget: "123456789012"},
 			wantID:       10,
-			wantProvider: "aws",
-			wantTarget:   "123456789012",
+			wantProvider: "",
+			wantTarget:   "",
 		},
 		{
 			name:         "replace stored metadata",

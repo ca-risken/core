@@ -372,8 +372,8 @@ VALUES
   (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
-  provider=IF(VALUES(provider) = '', provider, VALUES(provider)),
-  provider_target=IF(VALUES(provider_target) = '', provider_target, VALUES(provider_target)),
+  provider=VALUES(provider),
+  provider_target=VALUES(provider_target),
   resource_name=VALUES(resource_name),
   project_id=VALUES(project_id),
   original_score=VALUES(original_score),
@@ -629,8 +629,8 @@ VALUES`
 	sql += `
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
-  provider=IF(VALUES(provider) = '', provider, VALUES(provider)),
-  provider_target=IF(VALUES(provider_target) = '', provider_target, VALUES(provider_target)),
+  provider=VALUES(provider),
+  provider_target=VALUES(provider_target),
   resource_name=VALUES(resource_name),
   project_id=VALUES(project_id),
   original_score=VALUES(original_score),

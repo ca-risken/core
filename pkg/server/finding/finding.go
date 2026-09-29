@@ -435,16 +435,8 @@ func (f *FindingService) getFindingDataForUpsert(ctx context.Context, req *findi
 	// Specify the ID in PK as much as possible to avoid unnecessary AUTO_INCREMENT.
 	// https://dev.mysql.com/doc/refman/5.6/ja/insert-on-duplicate.html
 	var findingID uint64
-	provider := req.Provider
-	providerTarget := req.ProviderTarget
 	if !noRecord {
 		findingID = storedData.FindingID
-		if provider == "" {
-			provider = storedData.Provider
-		}
-		if providerTarget == "" {
-			providerTarget = storedData.ProviderTarget
-		}
 	}
 	fs, err := f.getFindingSettingByResource(ctx, req.ProjectId, req.ResourceName)
 	if err != nil {
@@ -454,8 +446,8 @@ func (f *FindingService) getFindingDataForUpsert(ctx context.Context, req *findi
 	findingModel := &model.Finding{
 		FindingID:      findingID,
 		Description:    req.Description,
-		Provider:       provider,
-		ProviderTarget: providerTarget,
+		Provider:       req.Provider,
+		ProviderTarget: req.ProviderTarget,
 		DataSource:     req.DataSource,
 		DataSourceID:   req.DataSourceId,
 		ResourceName:   req.ResourceName,
