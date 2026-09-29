@@ -31,6 +31,8 @@ type slackNotifyOption struct {
 	Message string `json:"message,omitempty"`
 }
 
+type notificationReason string
+
 const (
 	LocaleJa                      = "ja"
 	LocaleEn                      = "en"
@@ -53,8 +55,16 @@ const (
 	slackNotificationAttachmentEn                = "Please check all %d Findings from <%s/alert/alert?project_id=%d&from=slack|Alert screen>."
 	slackNotificationTestMessageJa               = "RISKENからのテスト通知です"
 	slackNotificationTestMessageEn               = "This is a test notification from RISKEN"
+	slackNotificationReasonTitleJa               = "通知理由"
+	slackNotificationReasonTitleEn               = "Reason"
+	slackNotificationReasonNewFindingJa          = "新規Findingがアラート条件を満たしたため通知しました。"
+	slackNotificationReasonNewFindingEn          = "A new Finding matched this alert condition."
+	slackNotificationReasonRegularJa             = "抑制時間が経過し、現在もアラート条件を満たしているため通知しました。"
+	slackNotificationReasonRegularEn             = "The suppression window has elapsed and this alert condition still matches."
 	slackRequestProjectRoleNotificationMessageJa = `<!here> %sさんがプロジェクト%sへのアクセスをリクエストしました。プロジェクト管理者は問題がなければ<%s/iam/user?project_id=%d|ユーザー一覧>から%sさんを招待してください。`
 	slackRequestProjectRoleNotificationMessageEn = `<!here> %s has requested access to your Project %s. If there are no issues, the project administrator should  <%s/iam/user?project_id=%d|the user list> and invite %s.`
+	notificationReasonNewFinding                 = notificationReason("new_finding")
+	notificationReasonRegular                    = notificationReason("regular")
 )
 
 type slackActionPayload struct {
@@ -79,6 +89,7 @@ func (a *AlertService) sendSlackNotification(
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
 	findings *findingDetail,
+	reason notificationReason,
 	defaultLocale string,
 ) error {
 	var setting slackNotifySetting
@@ -97,12 +108,12 @@ func (a *AlertService) sendSlackNotification(
 	}
 
 	if setting.WebhookURL != "" {
-		webhookMsg := a.getWebhookMessage(ctx, setting.Data.Channel, setting.Data.Message, url, organizationName, alert, project, rules, findings, locale)
+		webhookMsg := a.getWebhookMessage(ctx, setting.Data.Channel, setting.Data.Message, url, organizationName, alert, project, rules, findings, reason, locale)
 		if err := slack.PostWebhook(setting.WebhookURL, webhookMsg); err != nil {
 			return fmt.Errorf("failed to send slack(webhookurl): %w", err)
 		}
 	} else if setting.ChannelID != "" {
-		apiMsg := a.getApiMessage(ctx, setting.Data.Message, url, organizationName, alert, project, rules, findings, locale)
+		apiMsg := a.getApiMessage(ctx, setting.Data.Message, url, organizationName, alert, project, rules, findings, reason, locale)
 		if err := a.postMessageSlackWithRetry(ctx, setting.ChannelID, apiMsg...); err != nil {
 			return fmt.Errorf("failed to send slack(postmessage): %w", err)
 		}
@@ -200,16 +211,20 @@ func (a *AlertService) getWebhookMessage(
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
 	findings *findingDetail,
+	reason notificationReason,
 	locale string,
 ) *slack.WebhookMessage {
 	msgText := getSlackMessageText(locale, alert.Severity)
-	attachments := a.buildSlackAttachments(ctx, url, organizationName, alert, project, rules, findings, locale)
+	attachments := a.buildSlackAttachments(ctx, url, organizationName, alert, project, rules, findings, reason, locale)
 	msg := slack.WebhookMessage{
 		Text:        msgText,
 		Attachments: attachments,
 	}
 	if message != "" {
 		msg.Text = overrideToCustomMessage(message, alert.Severity)
+	}
+	if ageMessage := getAlertAgeMessage(locale, alert.CreatedAt, time.Now()); ageMessage != "" {
+		msg.Text = fmt.Sprintf("%s\n%s", ageMessage, msg.Text)
 	}
 	if channel != "" {
 		msg.Channel = channel // add channel
@@ -226,6 +241,7 @@ func (a *AlertService) getApiMessage(
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
 	findings *findingDetail,
+	reason notificationReason,
 	locale string,
 ) []slack.MsgOption {
 	msgOptions := []slack.MsgOption{}
@@ -233,7 +249,10 @@ func (a *AlertService) getApiMessage(
 	if message != "" {
 		text = overrideToCustomMessage(message, alert.Severity)
 	}
-	attachments := a.buildSlackAttachments(ctx, url, organizationName, alert, project, rules, findings, locale)
+	if ageMessage := getAlertAgeMessage(locale, alert.CreatedAt, time.Now()); ageMessage != "" {
+		text = fmt.Sprintf("%s\n%s", ageMessage, text)
+	}
+	attachments := a.buildSlackAttachments(ctx, url, organizationName, alert, project, rules, findings, reason, locale)
 
 	msgOptions = append(msgOptions, slack.MsgOptionText(text, false))
 	msgOptions = append(msgOptions, slack.MsgOptionAttachments(attachments...))
@@ -248,10 +267,11 @@ func (a *AlertService) buildSlackAttachments(
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
 	findings *findingDetail,
+	reason notificationReason,
 	locale string,
 ) []slack.Attachment {
 	findingAttachments := a.getFindingAttachment(ctx, url, project.ProjectId, findings, locale)
-	alertAttachment := getAlertAttachment(url, organizationName, alert, project, rules, findings)
+	alertAttachment := getAlertAttachment(url, organizationName, alert, project, rules, findings, reason, locale)
 	attachments := make([]slack.Attachment, 0, len(findingAttachments)+1)
 	attachments = append(attachments, findingAttachments...)
 	attachments = append(attachments, alertAttachment)
@@ -265,6 +285,8 @@ func getAlertAttachment(
 	project *projectproto.Project,
 	rules *[]model.AlertRule,
 	findings *findingDetail,
+	reason notificationReason,
+	locale string,
 ) slack.Attachment {
 	fields := []slack.AttachmentField{
 		{
@@ -291,10 +313,34 @@ func getAlertAttachment(
 			Value: escapeSlackMrkdwn(organizationName),
 		})
 	}
+	fields = append(fields, slack.AttachmentField{
+		Title: getSlackNotificationReasonTitle(locale),
+		Value: getSlackNotificationReason(reason, locale),
+	})
 	return slack.Attachment{
 		Color:  getColor(alert.Severity),
 		Fields: fields,
 	}
+}
+
+func getSlackNotificationReasonTitle(locale string) string {
+	if locale == LocaleJa {
+		return slackNotificationReasonTitleJa
+	}
+	return slackNotificationReasonTitleEn
+}
+
+func getSlackNotificationReason(reason notificationReason, locale string) string {
+	if reason == notificationReasonNewFinding {
+		if locale == LocaleJa {
+			return slackNotificationReasonNewFindingJa
+		}
+		return slackNotificationReasonNewFindingEn
+	}
+	if locale == LocaleJa {
+		return slackNotificationReasonRegularJa
+	}
+	return slackNotificationReasonRegularEn
 }
 
 func getSlackMessageText(locale, severity string) string {
@@ -306,6 +352,48 @@ func getSlackMessageText(locale, severity string) string {
 		msgText = fmt.Sprintf(slackNotificationMessageEn, getMention(severity))
 	}
 	return msgText
+}
+
+func getAlertAgeMessage(locale string, createdAt, notifiedAt time.Time) string {
+	if createdAt.IsZero() {
+		return ""
+	}
+	elapsed := notifiedAt.Sub(createdAt)
+	if elapsed < 0 {
+		elapsed = 0
+	}
+	if elapsed < time.Minute {
+		if locale == LocaleJa {
+			return "通知時点で、このアラートは生成から *1分未満* です。"
+		}
+		return "At notification time, this alert was created *less than 1 minute* ago."
+	}
+
+	days := int(elapsed / (24 * time.Hour))
+	hours := int(elapsed/time.Hour) % 24
+	minutes := int(elapsed/time.Minute) % 60
+	var age string
+	switch {
+	case days > 0:
+		age = fmt.Sprintf("%d日%d時間", days, hours)
+	case hours > 0:
+		age = fmt.Sprintf("%d時間%d分", hours, minutes)
+	default:
+		age = fmt.Sprintf("%d分", minutes)
+	}
+	if locale == LocaleJa {
+		return fmt.Sprintf("通知時点で、このアラートは生成から *%s* 経過しています。", age)
+	}
+
+	switch {
+	case days > 0:
+		age = fmt.Sprintf("%d days %d hours", days, hours)
+	case hours > 0:
+		age = fmt.Sprintf("%d hours %d minutes", hours, minutes)
+	default:
+		age = fmt.Sprintf("%d minutes", minutes)
+	}
+	return fmt.Sprintf("At notification time, this alert was created *%s* ago.", age)
 }
 
 func getTestWebhookMessage(channel, locale string) *slack.WebhookMessage {

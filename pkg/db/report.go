@@ -10,12 +10,39 @@ import (
 type ReportRepository interface {
 	// Report
 	GetReportFinding(context.Context, uint32, []string, string, string, float32) (*[]model.ReportFinding, error)
+	GetReportFindingForOrganization(context.Context, uint32, []uint32, []string, string, string, float32) (*[]model.ReportFinding, error)
 	GetReportFindingAll(context.Context, []string, string, string, float32) (*[]model.ReportFinding, error)
 	CollectReportFinding(ctx context.Context) error
 	PurgeReportFinding(ctx context.Context) error
 	ListReport(ctx context.Context, projectID uint32) (*[]model.Report, error)
 	GetReport(ctx context.Context, projectID uint32, reportID uint32) (*model.Report, error)
 	PutReport(ctx context.Context, report *model.Report) (*model.Report, error)
+}
+
+func (c *Client) GetReportFindingForOrganization(ctx context.Context, organizationID uint32, projectID []uint32, dataSource []string, fromDate, toDate string, score float32) (*[]model.ReportFinding, error) {
+	query := `select r.*,p.name as project_name from report_finding as r, project as p where r.project_id = p.project_id and score >= ? and exists (select 1 from organization_project op where op.organization_id = ? and op.project_id = r.project_id)`
+	params := []interface{}{score, organizationID}
+	if len(projectID) != 0 {
+		query += " and r.project_id in ?"
+		params = append(params, projectID)
+	}
+	if len(dataSource) != 0 {
+		query += " and data_source regexp ?"
+		params = append(params, strings.Join(dataSource, "|"))
+	}
+	if len(fromDate) != 0 {
+		query += " and report_date >= ?"
+		params = append(params, fromDate)
+	}
+	if len(toDate) != 0 {
+		query += " and report_date <= ?"
+		params = append(params, toDate)
+	}
+	var data []model.ReportFinding
+	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
 }
 
 var _ ReportRepository = (*Client)(nil)

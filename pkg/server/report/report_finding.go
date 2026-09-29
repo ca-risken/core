@@ -33,6 +33,24 @@ func (f *ReportService) GetReportFinding(ctx context.Context, req *report.GetRep
 	return &data, nil
 }
 
+func (f *ReportService) GetReportFindingForOrganization(ctx context.Context, req *report.GetReportFindingForOrganizationRequest) (*report.GetReportFindingForOrganizationResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	list, err := f.repository.GetReportFindingForOrganization(ctx, req.OrganizationId, req.ProjectId, req.DataSource, req.FromDate, req.ToDate, req.Score)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &report.GetReportFindingForOrganizationResponse{}, nil
+		}
+		return nil, err
+	}
+	data := report.GetReportFindingForOrganizationResponse{}
+	for _, d := range *list {
+		data.ReportFinding = append(data.ReportFinding, convertReportFinding(&d))
+	}
+	return &data, nil
+}
+
 func (f *ReportService) GetReportFindingAll(ctx context.Context, req *report.GetReportFindingAllRequest) (*report.GetReportFindingAllResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err

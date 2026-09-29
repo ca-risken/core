@@ -60,7 +60,7 @@ func TestSendSlackNotification(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := a.sendSlackNotification(context.Background(), "unused", c.notifySetting, "", c.alert, c.project, &[]model.AlertRule{}, testFindings, LocaleEn)
+			got := a.sendSlackNotification(context.Background(), "unused", c.notifySetting, "", c.alert, c.project, &[]model.AlertRule{}, testFindings, notificationReasonRegular, LocaleEn)
 			if (got != nil && !c.wantErr) || (got == nil && c.wantErr) {
 				t.Fatalf("Unexpected error: %+v", got)
 			}
@@ -117,6 +117,32 @@ func TestGenerateRuleList(t *testing.T) {
 			got := generateRuleList(c.input)
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected result: want=%+v, got=%+v", c.want, got)
+			}
+		})
+	}
+}
+
+func TestGetAlertAgeMessage(t *testing.T) {
+	notifiedAt := time.Date(2026, time.September, 3, 12, 0, 0, 0, time.UTC)
+	cases := []struct {
+		name      string
+		locale    string
+		createdAt time.Time
+		want      string
+	}{
+		{name: "zero creation time", locale: LocaleJa, createdAt: time.Time{}, want: ""},
+		{name: "future creation time", locale: LocaleJa, createdAt: notifiedAt.Add(time.Minute), want: "通知時点で、このアラートは生成から *1分未満* です。"},
+		{name: "less than one minute in Japanese", locale: LocaleJa, createdAt: notifiedAt.Add(-30 * time.Second), want: "通知時点で、このアラートは生成から *1分未満* です。"},
+		{name: "minutes in Japanese", locale: LocaleJa, createdAt: notifiedAt.Add(-35 * time.Minute), want: "通知時点で、このアラートは生成から *35分* 経過しています。"},
+		{name: "hours and minutes in Japanese", locale: LocaleJa, createdAt: notifiedAt.Add(-(2*time.Hour + 35*time.Minute)), want: "通知時点で、このアラートは生成から *2時間35分* 経過しています。"},
+		{name: "days and hours in Japanese", locale: LocaleJa, createdAt: notifiedAt.Add(-(3*24*time.Hour + 4*time.Hour + 35*time.Minute)), want: "通知時点で、このアラートは生成から *3日4時間* 経過しています。"},
+		{name: "hours and minutes in English", locale: LocaleEn, createdAt: notifiedAt.Add(-(2*time.Hour + 35*time.Minute)), want: "At notification time, this alert was created *2 hours 35 minutes* ago."},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := getAlertAgeMessage(c.locale, c.createdAt, notifiedAt)
+			if got != c.want {
+				t.Fatalf("Unexpected message: got=%q want=%q", got, c.want)
 			}
 		})
 	}
@@ -347,20 +373,31 @@ func TestBuildSlackAttachments(t *testing.T) {
 	cases := []struct {
 		name                 string
 		organizationName     string
+		reason               notificationReason
 		wantOrganizationName string
 		wantOrganizationRow  bool
+		wantReasonTitle      string
+		wantReason           string
 	}{
-		{name: "project notification does not show organization"},
+		{
+			name:            "project notification shows regular reason",
+			reason:          notificationReasonRegular,
+			wantReasonTitle: "通知理由",
+			wantReason:      slackNotificationReasonRegularJa,
+		},
 		{
 			name:                 "organization notification shows escaped source",
 			organizationName:     "org <!channel> & <https://example.com|link>",
+			reason:               notificationReasonNewFinding,
 			wantOrganizationName: "org &lt;!channel&gt; &amp; &lt;https://example.com|link&gt;",
 			wantOrganizationRow:  true,
+			wantReasonTitle:      "通知理由",
+			wantReason:           slackNotificationReasonNewFindingJa,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got := (&AlertService{}).buildSlackAttachments(context.Background(), "https://example.com", c.organizationName, alert, project, rules, findings, LocaleJa)
+			got := (&AlertService{}).buildSlackAttachments(context.Background(), "https://example.com", c.organizationName, alert, project, rules, findings, c.reason, LocaleJa)
 
 			if len(got) != 2 {
 				t.Fatalf("Unexpected attachment count: got=%d want=2", len(got))
@@ -372,6 +409,7 @@ func TestBuildSlackAttachments(t *testing.T) {
 				t.Fatalf("Last attachment should be alert block: got=%+v", got[1].Fields[0].Value)
 			}
 			organizationRows := 0
+			reasonRows := 0
 			for _, field := range got[1].Fields {
 				if field.Title == "🏢 Organization" {
 					organizationRows++
@@ -379,9 +417,18 @@ func TestBuildSlackAttachments(t *testing.T) {
 						t.Fatalf("Unexpected organization name: got=%q want=%q", field.Value, c.wantOrganizationName)
 					}
 				}
+				if field.Title == c.wantReasonTitle {
+					reasonRows++
+					if field.Value != c.wantReason {
+						t.Fatalf("Unexpected notification reason: got=%q want=%q", field.Value, c.wantReason)
+					}
+				}
 			}
 			if (organizationRows == 1) != c.wantOrganizationRow {
 				t.Fatalf("Unexpected organization row count: got=%d", organizationRows)
+			}
+			if reasonRows != 1 {
+				t.Fatalf("Unexpected reason row count: got=%d", reasonRows)
 			}
 		})
 	}

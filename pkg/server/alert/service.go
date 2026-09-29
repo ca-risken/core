@@ -33,7 +33,7 @@ type AlertService struct {
 	slackClient              slack.Client
 	slackActionSigningSecret string
 	retryer                  backoff.BackOff
-	sendAlertNotification    func(context.Context, string, string, *model.Alert, *project.Project, *[]model.AlertRule, *findingDetail) error
+	sendAlertNotification    func(context.Context, string, string, *model.Alert, *project.Project, *[]model.AlertRule, *findingDetail, notificationReason) error
 }
 
 func NewAlertService(

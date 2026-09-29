@@ -127,9 +127,9 @@ const (
 	`
 	insertOrgAlertCondNotificationByOrganizationProject = `
 		insert ignore into organization_alert_cond_notification (
-			organization_id, project_id, alert_condition_id, notification_id
+			organization_id, project_id, alert_condition_id, notification_id, cache_second
 		)
-		select op.organization_id, op.project_id, ac.alert_condition_id, orgn.notification_id
+		select op.organization_id, op.project_id, ac.alert_condition_id, orgn.notification_id, 2592000
 		from organization_project op
 		inner join alert_condition ac on ac.project_id = op.project_id
 		inner join organization_notification orgn on orgn.organization_id = op.organization_id
