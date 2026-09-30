@@ -780,10 +780,3 @@ func (c *Client) DeleteUserReserved(ctx context.Context, projectID, reservedID u
 	}
 	return nil
 }
-
-func convertZeroValueToNull(input interface{}) interface{} {
-	if input == nil || zero.IsZeroVal(input) {
-		return gorm.Expr("NULL")
-	}
-	return input
-}

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"reflect"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -118,8 +119,9 @@ func TestUpsertFindingNullableProvider(t *testing.T) {
 		t.Fatalf("Failed to open mock sql db, error: %+v", err)
 	}
 	data := &model.Finding{FindingID: 1, Description: "desc", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"}
-	mock.ExpectExec(regexp.QuoteMeta(insertUpsertFinding)).
-		WithArgs(uint64(1), "desc", nil, nil, "ds", "1", "r", uint32(1), float32(1), float32(1), "data").
+	upsertSQL := strings.Replace(insertUpsertFinding, "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", "?, ?, NULL, NULL, ?, ?, ?, ?, ?, ?, ?", 1)
+	mock.ExpectExec(regexp.QuoteMeta(upsertSQL)).
+		WithArgs(uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(1), "data").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectQuery(regexp.QuoteMeta(selectGetFindingByDataSource)).
 		WithArgs(uint32(1), "ds", "1").
@@ -255,9 +257,9 @@ ON DUPLICATE KEY UPDATE
   updated_at=NOW()`,
 			wantParam: []interface{}{
 				uint64(1), "desc", "aws", "123456789012", "ds", "1", "r", uint32(1), float32(1), float32(1), "data",
-				uint64(2), "desc", "google", nil, "ds", "2", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(2), "desc", "google", gorm.Expr("NULL"), "ds", "2", "r", uint32(1), float32(1), float32(1), "data",
 				uint64(3), "desc", "github", "owner", "ds", "3", "r", uint32(1), float32(1), float32(1), "data",
-				uint64(4), "desc", nil, nil, "ds", "4", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(4), "desc", gorm.Expr("NULL"), gorm.Expr("NULL"), "ds", "4", "r", uint32(1), float32(1), float32(1), "data",
 			},
 		},
 	}

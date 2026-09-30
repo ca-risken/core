@@ -391,7 +391,7 @@ func (c *Client) UpsertFinding(ctx context.Context, data *model.Finding) (*model
 
 func (c *Client) upsertFinding(ctx context.Context, data *model.Finding) (*model.Finding, error) {
 	if err := c.Master.WithContext(ctx).Exec(insertUpsertFinding,
-		data.FindingID, data.Description, nullIfEmpty(data.Provider), nullIfEmpty(data.ProviderTarget), data.DataSource, data.DataSourceID, data.ResourceName,
+		data.FindingID, data.Description, convertZeroValueToNull(data.Provider), convertZeroValueToNull(data.ProviderTarget), data.DataSource, data.DataSourceID, data.ResourceName,
 		data.ProjectID, data.OriginalScore, data.Score, data.Data).Error; err != nil {
 		return nil, err
 	}
@@ -622,7 +622,7 @@ VALUES`
 	for _, d := range data {
 		sql += `
   (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
-		params = append(params, d.FindingID, d.Description, nullIfEmpty(d.Provider), nullIfEmpty(d.ProviderTarget), d.DataSource, d.DataSourceID,
+		params = append(params, d.FindingID, d.Description, convertZeroValueToNull(d.Provider), convertZeroValueToNull(d.ProviderTarget), d.DataSource, d.DataSourceID,
 			d.ResourceName, d.ProjectID, d.OriginalScore, d.Score, d.Data)
 	}
 	sql = strings.TrimRight(sql, ",")
@@ -638,13 +638,6 @@ ON DUPLICATE KEY UPDATE
   data=VALUES(data),
   updated_at=NOW()`
 	return sql, params
-}
-
-func nullIfEmpty(value string) any {
-	if value == "" {
-		return nil
-	}
-	return value
 }
 
 func (c *Client) BulkUpsertFindingTag(ctx context.Context, data []*model.FindingTag) error {
