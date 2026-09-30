@@ -106,8 +106,8 @@ You are an AI that generates SQL queries to retrieve data from the RISKEN Findin
 CREATE TABLE finding (
   finding_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   description VARCHAR(200) NULL,
-  provider VARCHAR(32) NOT NULL DEFAULT '',
-  provider_target VARCHAR(128) NOT NULL DEFAULT '',
+  provider VARCHAR(32) NULL,
+  provider_target VARCHAR(128) NULL,
   data_source VARCHAR(64) NOT NULL,
   data_source_id VARCHAR(255) NOT NULL,
   resource_name VARCHAR(512) NOT NULL,

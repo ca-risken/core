@@ -112,6 +112,30 @@ VALUES`),
 	}
 }
 
+func TestUpsertFindingNullableProvider(t *testing.T) {
+	f, mock, err := newMockClient()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+	data := &model.Finding{FindingID: 1, Description: "desc", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"}
+	mock.ExpectExec(regexp.QuoteMeta(insertUpsertFinding)).
+		WithArgs(uint64(1), "desc", nil, nil, "ds", "1", "r", uint32(1), float32(1), float32(1), "data").
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectQuery(regexp.QuoteMeta(selectGetFindingByDataSource)).
+		WithArgs(uint32(1), "ds", "1").
+		WillReturnRows(sqlmock.NewRows([]string{"finding_id", "provider", "provider_target"}).AddRow(uint64(1), nil, nil))
+	got, err := f.upsertFinding(context.Background(), data)
+	if err != nil {
+		t.Fatalf("Unexpected error: %+v", err)
+	}
+	if got.Provider != "" || got.ProviderTarget != "" {
+		t.Fatalf("Unexpected provider values: provider=%q, provider_target=%q", got.Provider, got.ProviderTarget)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Unmet SQL expectations: %+v", err)
+	}
+}
+
 func TestUpdateFindingAISummary(t *testing.T) {
 	f, mock, err := newMockClient()
 	if err != nil {
@@ -207,13 +231,15 @@ ON DUPLICATE KEY UPDATE
 			name: "Multi",
 			input: []*model.Finding{
 				{FindingID: 1, Description: "desc", Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
-				{FindingID: 2, Description: "desc", Provider: "google", ProviderTarget: "project-1", DataSource: "ds", DataSourceID: "2", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
-				{FindingID: 3, Description: "desc", Provider: "github", ProviderTarget: "owner/repo", DataSource: "ds", DataSourceID: "3", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
+				{FindingID: 2, Description: "desc", Provider: "google", DataSource: "ds", DataSourceID: "2", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
+				{FindingID: 3, Description: "desc", Provider: "github", ProviderTarget: "owner", DataSource: "ds", DataSourceID: "3", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
+				{FindingID: 4, Description: "desc", DataSource: "ds", DataSourceID: "4", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
 			},
 			wantSQL: `
 INSERT INTO finding
   (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data)
 VALUES
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
   (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
   (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
   (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -229,8 +255,9 @@ ON DUPLICATE KEY UPDATE
   updated_at=NOW()`,
 			wantParam: []interface{}{
 				uint64(1), "desc", "aws", "123456789012", "ds", "1", "r", uint32(1), float32(1), float32(1), "data",
-				uint64(2), "desc", "google", "project-1", "ds", "2", "r", uint32(1), float32(1), float32(1), "data",
-				uint64(3), "desc", "github", "owner/repo", "ds", "3", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(2), "desc", "google", nil, "ds", "2", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(3), "desc", "github", "owner", "ds", "3", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(4), "desc", nil, nil, "ds", "4", "r", uint32(1), float32(1), float32(1), "data",
 			},
 		},
 	}
