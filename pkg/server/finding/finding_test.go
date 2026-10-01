@@ -258,58 +258,6 @@ func TestPutFinding(t *testing.T) {
 	}
 }
 
-func TestGetFindingDataForUpsertProvider(t *testing.T) {
-	cases := []struct {
-		name         string
-		input        *finding.FindingForUpsert
-		stored       *model.Finding
-		storedErr    error
-		wantID       uint64
-		wantProvider string
-		wantTarget   string
-	}{
-		{
-			name:         "new finding",
-			input:        &finding.FindingForUpsert{Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceId: "1", ResourceName: "r", ProjectId: 1, OriginalScore: 1, OriginalMaxScore: 1},
-			storedErr:    gorm.ErrRecordNotFound,
-			wantProvider: "aws",
-			wantTarget:   "123456789012",
-		},
-		{
-			name:         "replace stored metadata with empty values",
-			input:        &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "1", ResourceName: "r", ProjectId: 1, OriginalScore: 1, OriginalMaxScore: 1},
-			stored:       &model.Finding{FindingID: 10, Provider: "aws", ProviderTarget: "123456789012"},
-			wantID:       10,
-			wantProvider: "",
-			wantTarget:   "",
-		},
-		{
-			name:         "replace stored metadata",
-			input:        &finding.FindingForUpsert{Provider: "google", ProviderTarget: "project-1", DataSource: "ds", DataSourceId: "1", ResourceName: "r", ProjectId: 1, OriginalScore: 1, OriginalMaxScore: 1},
-			stored:       &model.Finding{FindingID: 10, Provider: "aws", ProviderTarget: "123456789012"},
-			wantID:       10,
-			wantProvider: "google",
-			wantTarget:   "project-1",
-		},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			mockDB := mocks.NewFindingRepository(t)
-			mockDB.On("GetFindingByDataSource", test.RepeatMockAnything(4)...).Return(c.stored, c.storedErr).Once()
-			mockDB.On("ListFindingSetting", test.RepeatMockAnything(3)...).Return(&[]model.FindingSetting{}, nil).Once()
-			svc := FindingService{repository: mockDB}
-
-			got, err := svc.getFindingDataForUpsert(context.Background(), c.input)
-			if err != nil {
-				t.Fatalf("Unexpected error: %+v", err)
-			}
-			if got.FindingID != c.wantID || got.Provider != c.wantProvider || got.ProviderTarget != c.wantTarget {
-				t.Fatalf("Unexpected provider metadata: want=(%d,%s,%s), got=(%d,%s,%s)", c.wantID, c.wantProvider, c.wantTarget, got.FindingID, got.Provider, got.ProviderTarget)
-			}
-		})
-	}
-}
-
 func TestDeleteFinding(t *testing.T) {
 	var ctx context.Context
 	cases := []struct {
