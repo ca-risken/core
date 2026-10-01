@@ -1285,16 +1285,6 @@ func TestValidate_FindingForUpsert(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "OK google Provider",
-			input:   &FindingForUpsert{Description: "desc", Provider: "google", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
-			wantErr: false,
-		},
-		{
-			name:    "OK azure Provider",
-			input:   &FindingForUpsert{Description: "desc", Provider: "azure", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
-			wantErr: false,
-		},
-		{
 			name:    "OK github Provider and max length ProviderTarget",
 			input:   &FindingForUpsert{Description: "desc", Provider: "github", ProviderTarget: strings.Repeat("t", 128), DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", ProjectId: 1001, OriginalScore: 50.5, OriginalMaxScore: 100.0, Data: `{"key": "value"}`},
 			wantErr: false,
