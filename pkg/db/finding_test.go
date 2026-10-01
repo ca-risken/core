@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"reflect"
 	"regexp"
@@ -122,27 +123,30 @@ func TestUpsertFinding(t *testing.T) {
 		name       string
 		input      *model.Finding
 		mockSQL    string
+		wantArgs   []driver.Value
 		mockResult *sqlmock.Rows
 		want       *model.Finding
 	}{
 		{
 			name:       "OK",
-			input:      &model.Finding{FindingID: 1, Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceID: "1", ProjectID: 1},
+			input:      &model.Finding{FindingID: 1, Description: "desc", Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 0.5, Data: "data"},
 			mockSQL:    regexp.QuoteMeta(insertUpsertFinding),
+			wantArgs:   []driver.Value{uint64(1), "desc", "aws", "123456789012", "ds", "1", "r", uint32(1), float32(1), float32(0.5), "data"},
 			mockResult: sqlmock.NewRows([]string{"finding_id", "provider", "provider_target"}).AddRow(uint64(1), "aws", "123456789012"),
 			want:       &model.Finding{FindingID: 1, Provider: "aws", ProviderTarget: "123456789012"},
 		},
 		{
 			name:       "OK empty provider metadata becomes NULL",
-			input:      &model.Finding{FindingID: 1, DataSource: "ds", DataSourceID: "1", ProjectID: 1},
+			input:      &model.Finding{FindingID: 1, Description: "desc", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 0.5, Data: "data"},
 			mockSQL:    regexp.QuoteMeta(strings.Replace(insertUpsertFinding, "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", "?, ?, NULL, NULL, ?, ?, ?, ?, ?, ?, ?", 1)),
+			wantArgs:   []driver.Value{uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(0.5), "data"},
 			mockResult: sqlmock.NewRows([]string{"finding_id", "provider", "provider_target"}).AddRow(uint64(1), nil, nil),
 			want:       &model.Finding{FindingID: 1},
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mock.ExpectExec(c.mockSQL).WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectExec(c.mockSQL).WithArgs(c.wantArgs...).WillReturnResult(sqlmock.NewResult(1, 1))
 			mock.ExpectQuery(regexp.QuoteMeta(selectGetFindingByDataSource)).WillReturnRows(c.mockResult)
 			got, err := f.UpsertFinding(context.Background(), c.input)
 			if err != nil {
