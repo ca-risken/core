@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"reflect"
 	"regexp"
@@ -113,28 +114,55 @@ VALUES`),
 	}
 }
 
-func TestUpsertFindingNullableProvider(t *testing.T) {
-	f, mock, err := newMockClient()
-	if err != nil {
-		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+func TestUpsertFinding(t *testing.T) {
+	cases := []struct {
+		name           string
+		provider       string
+		providerTarget string
+		wantSQL        string
+		wantArgs       []driver.Value
+		rowProvider    driver.Value
+		rowTarget      driver.Value
+	}{
+		{
+			name:           "provider metadata",
+			provider:       "aws",
+			providerTarget: "123456789012",
+			wantSQL:        insertUpsertFinding,
+			wantArgs:       []driver.Value{uint64(1), "desc", "aws", "123456789012", "ds", "1", "r", uint32(1), float32(1), float32(1), "data"},
+			rowProvider:    "aws",
+			rowTarget:      "123456789012",
+		},
+		{
+			name:     "empty provider metadata becomes NULL",
+			wantSQL:  strings.Replace(insertUpsertFinding, "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", "?, ?, NULL, NULL, ?, ?, ?, ?, ?, ?, ?", 1),
+			wantArgs: []driver.Value{uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(1), "data"},
+		},
 	}
-	data := &model.Finding{FindingID: 1, Description: "desc", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"}
-	upsertSQL := strings.Replace(insertUpsertFinding, "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", "?, ?, NULL, NULL, ?, ?, ?, ?, ?, ?, ?", 1)
-	mock.ExpectExec(regexp.QuoteMeta(upsertSQL)).
-		WithArgs(uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(1), "data").
-		WillReturnResult(sqlmock.NewResult(1, 1))
-	mock.ExpectQuery(regexp.QuoteMeta(selectGetFindingByDataSource)).
-		WithArgs(uint32(1), "ds", "1").
-		WillReturnRows(sqlmock.NewRows([]string{"finding_id", "provider", "provider_target"}).AddRow(uint64(1), nil, nil))
-	got, err := f.upsertFinding(context.Background(), data)
-	if err != nil {
-		t.Fatalf("Unexpected error: %+v", err)
-	}
-	if got.Provider != "" || got.ProviderTarget != "" {
-		t.Fatalf("Unexpected provider values: provider=%q, provider_target=%q", got.Provider, got.ProviderTarget)
-	}
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Fatalf("Unmet SQL expectations: %+v", err)
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			f, mock, err := newMockClient()
+			if err != nil {
+				t.Fatalf("Failed to open mock sql db, error: %+v", err)
+			}
+			data := &model.Finding{FindingID: 1, Description: "desc", Provider: c.provider, ProviderTarget: c.providerTarget, DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"}
+			mock.ExpectExec(regexp.QuoteMeta(c.wantSQL)).
+				WithArgs(c.wantArgs...).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectQuery(regexp.QuoteMeta(selectGetFindingByDataSource)).
+				WithArgs(uint32(1), "ds", "1").
+				WillReturnRows(sqlmock.NewRows([]string{"finding_id", "provider", "provider_target"}).AddRow(uint64(1), c.rowProvider, c.rowTarget))
+			got, err := f.UpsertFinding(context.Background(), data)
+			if err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if got.Provider != c.provider || got.ProviderTarget != c.providerTarget {
+				t.Fatalf("Unexpected provider values: provider=%q, provider_target=%q", got.Provider, got.ProviderTarget)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatalf("Unmet SQL expectations: %+v", err)
+			}
+		})
 	}
 }
 
