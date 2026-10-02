@@ -379,17 +379,19 @@ func convertFinding(f *model.Finding) *finding.Finding {
 		return &finding.Finding{}
 	}
 	return &finding.Finding{
-		FindingId:     f.FindingID,
-		Description:   f.Description,
-		DataSource:    f.DataSource,
-		DataSourceId:  f.DataSourceID,
-		ResourceName:  f.ResourceName,
-		ProjectId:     f.ProjectID,
-		OriginalScore: f.OriginalScore,
-		Score:         f.Score,
-		Data:          f.Data,
-		CreatedAt:     f.CreatedAt.Unix(),
-		UpdatedAt:     f.UpdatedAt.Unix(),
+		FindingId:      f.FindingID,
+		Description:    f.Description,
+		Provider:       f.Provider,
+		ProviderTarget: f.ProviderTarget,
+		DataSource:     f.DataSource,
+		DataSourceId:   f.DataSourceID,
+		ResourceName:   f.ResourceName,
+		ProjectId:      f.ProjectID,
+		OriginalScore:  f.OriginalScore,
+		Score:          f.Score,
+		Data:           f.Data,
+		CreatedAt:      f.CreatedAt.Unix(),
+		UpdatedAt:      f.UpdatedAt.Unix(),
 	}
 }
 
@@ -442,15 +444,17 @@ func (f *FindingService) getFindingDataForUpsert(ctx context.Context, req *findi
 	}
 
 	findingModel := &model.Finding{
-		FindingID:     findingID,
-		Description:   req.Description,
-		DataSource:    req.DataSource,
-		DataSourceID:  req.DataSourceId,
-		ResourceName:  req.ResourceName,
-		ProjectID:     req.ProjectId,
-		OriginalScore: req.OriginalScore,
-		Score:         calculateScore(req.OriginalScore, req.OriginalMaxScore, fs),
-		Data:          req.Data,
+		FindingID:      findingID,
+		Description:    req.Description,
+		Provider:       req.Provider,
+		ProviderTarget: req.ProviderTarget,
+		DataSource:     req.DataSource,
+		DataSourceID:   req.DataSourceId,
+		ResourceName:   req.ResourceName,
+		ProjectID:      req.ProjectId,
+		OriginalScore:  req.OriginalScore,
+		Score:          calculateScore(req.OriginalScore, req.OriginalMaxScore, fs),
+		Data:           req.Data,
 	}
 
 	// Auto-Triage

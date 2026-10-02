@@ -21,6 +21,8 @@ message Finding {
   string data = 10;
   int64 created_at = 11;
   int64 updated_at = 12;
+  string provider = 13;
+  string provider_target = 14;
 }
 
 // Finding For Upsert
@@ -34,6 +36,8 @@ message FindingForUpsert {
   float original_score = 6;
   float original_max_score = 7;
   string data = 8;
+  string provider = 9;
+  string provider_target = 10;
 }
 
 message FindingBatchForUpsert {

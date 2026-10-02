@@ -2,9 +2,11 @@ package db
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"reflect"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -85,11 +87,11 @@ func TestBulkUpsertFinding(t *testing.T) {
 		{
 			name: "OK",
 			input: []*model.Finding{
-				{FindingID: 1, Description: "desc", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
+				{FindingID: 1, Description: "desc", Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
 			},
 			mockSQL: regexp.QuoteMeta(`
 INSERT INTO finding
-  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data)
 VALUES`),
 		},
 		{
@@ -107,6 +109,54 @@ VALUES`),
 			err := f.BulkUpsertFinding(ctx, c.input)
 			if err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
+			}
+		})
+	}
+}
+
+func TestUpsertFinding(t *testing.T) {
+	f, mock, err := newMockClient()
+	if err != nil {
+		t.Fatalf("Failed to open mock sql db, error: %+v", err)
+	}
+	cases := []struct {
+		name       string
+		input      *model.Finding
+		mockSQL    string
+		wantArgs   []driver.Value
+		mockResult *sqlmock.Rows
+		want       *model.Finding
+	}{
+		{
+			name:       "OK",
+			input:      &model.Finding{FindingID: 1, Description: "desc", Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 0.5, Data: "data"},
+			mockSQL:    regexp.QuoteMeta(insertUpsertFinding),
+			wantArgs:   []driver.Value{uint64(1), "desc", "aws", "123456789012", "ds", "1", "r", uint32(1), float32(1), float32(0.5), "data"},
+			mockResult: sqlmock.NewRows([]string{"finding_id", "provider", "provider_target"}).AddRow(uint64(1), "aws", "123456789012"),
+			want:       &model.Finding{FindingID: 1, Provider: "aws", ProviderTarget: "123456789012"},
+		},
+		{
+			name:       "OK empty provider metadata becomes NULL",
+			input:      &model.Finding{FindingID: 1, Description: "desc", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 0.5, Data: "data"},
+			mockSQL:    regexp.QuoteMeta(strings.Replace(insertUpsertFinding, "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", "?, ?, NULL, NULL, ?, ?, ?, ?, ?, ?, ?", 1)),
+			wantArgs:   []driver.Value{uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(0.5), "data"},
+			mockResult: sqlmock.NewRows([]string{"finding_id", "provider", "provider_target"}).AddRow(uint64(1), nil, nil),
+			want:       &model.Finding{FindingID: 1},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			mock.ExpectExec(c.mockSQL).WithArgs(c.wantArgs...).WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectQuery(regexp.QuoteMeta(selectGetFindingByDataSource)).WillReturnRows(c.mockResult)
+			got, err := f.UpsertFinding(context.Background(), c.input)
+			if err != nil {
+				t.Fatalf("Unexpected error: %+v", err)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("Unexpected finding: want=%+v, got=%+v", c.want, got)
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatalf("Unmet SQL expectations: %+v", err)
 			}
 		})
 	}
@@ -182,15 +232,17 @@ func TestGenerateBulkUpsertFindingSQL(t *testing.T) {
 		{
 			name: "Single",
 			input: []*model.Finding{
-				{FindingID: 1, Description: "desc", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
+				{FindingID: 1, Description: "desc", Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
 			},
 			wantSQL: `
 INSERT INTO finding
-  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
+  provider=VALUES(provider),
+  provider_target=VALUES(provider_target),
   resource_name=VALUES(resource_name),
   project_id=VALUES(project_id),
   original_score=VALUES(original_score),
@@ -198,25 +250,29 @@ ON DUPLICATE KEY UPDATE
   data=VALUES(data),
   updated_at=NOW()`,
 			wantParam: []interface{}{
-				uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(1), "desc", "aws", "123456789012", "ds", "1", "r", uint32(1), float32(1), float32(1), "data",
 			},
 		},
 		{
 			name: "Multi",
 			input: []*model.Finding{
-				{FindingID: 1, Description: "desc", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
-				{FindingID: 2, Description: "desc", DataSource: "ds", DataSourceID: "2", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
-				{FindingID: 3, Description: "desc", DataSource: "ds", DataSourceID: "3", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
+				{FindingID: 1, Description: "desc", Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
+				{FindingID: 2, Description: "desc", Provider: "google", DataSource: "ds", DataSourceID: "2", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
+				{FindingID: 3, Description: "desc", Provider: "github", ProviderTarget: "owner", DataSource: "ds", DataSourceID: "3", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
+				{FindingID: 4, Description: "desc", DataSource: "ds", DataSourceID: "4", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 1, Data: "data"},
 			},
 			wantSQL: `
 INSERT INTO finding
-  (finding_id, description, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?, ?),
-  (?, ?, ?, ?, ?, ?, ?, ?, ?),
-  (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
+  provider=VALUES(provider),
+  provider_target=VALUES(provider_target),
   resource_name=VALUES(resource_name),
   project_id=VALUES(project_id),
   original_score=VALUES(original_score),
@@ -224,9 +280,10 @@ ON DUPLICATE KEY UPDATE
   data=VALUES(data),
   updated_at=NOW()`,
 			wantParam: []interface{}{
-				uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(1), "data",
-				uint64(2), "desc", "ds", "2", "r", uint32(1), float32(1), float32(1), "data",
-				uint64(3), "desc", "ds", "3", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(1), "desc", "aws", "123456789012", "ds", "1", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(2), "desc", "google", gorm.Expr("NULL"), "ds", "2", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(3), "desc", "github", "owner", "ds", "3", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(4), "desc", gorm.Expr("NULL"), gorm.Expr("NULL"), "ds", "4", "r", uint32(1), float32(1), float32(1), "data",
 			},
 		},
 	}

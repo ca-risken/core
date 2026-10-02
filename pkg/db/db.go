@@ -13,6 +13,7 @@ import (
 	mimosasql "github.com/ca-risken/common/pkg/database/sql"
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/cenkalti/backoff/v4"
+	"github.com/vikyd/zero"
 )
 
 type Client struct {
@@ -106,4 +107,11 @@ func (c *Client) newRetryLogger(ctx context.Context, funcName string) func(error
 	return func(err error, t time.Duration) {
 		c.logger.Warnf(ctx, "[RetryLogger] %s error: duration=%+v, err=%+v", funcName, t, err)
 	}
+}
+
+func convertZeroValueToNull(input interface{}) interface{} {
+	if input == nil || zero.IsZeroVal(input) {
+		return gorm.Expr("NULL")
+	}
+	return input
 }

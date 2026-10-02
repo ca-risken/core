@@ -132,8 +132,8 @@ func TestGetFinding(t *testing.T) {
 		{
 			name:         "OK",
 			input:        &finding.GetFindingRequest{ProjectId: 1, FindingId: 1001},
-			want:         &finding.GetFindingResponse{Finding: &finding.Finding{FindingId: 1001, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
-			mockResponce: &model.Finding{FindingID: 1001, CreatedAt: now, UpdatedAt: now},
+			want:         &finding.GetFindingResponse{Finding: &finding.Finding{FindingId: 1001, Provider: "aws", ProviderTarget: "123456789012", CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			mockResponce: &model.Finding{FindingID: 1001, Provider: "aws", ProviderTarget: "123456789012", CreatedAt: now, UpdatedAt: now},
 		},
 		{
 			name:      "NG record not found",
@@ -180,10 +180,10 @@ func TestPutFinding(t *testing.T) {
 	}{
 		{
 			name:                   "OK Insert",
-			input:                  &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
-			want:                   &finding.PutFindingResponse{Finding: &finding.Finding{FindingId: 1001, DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, Score: 1.0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
+			input:                  &finding.PutFindingRequest{Finding: &finding.FindingForUpsert{Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, OriginalMaxScore: 100.00}},
+			want:                   &finding.PutFindingResponse{Finding: &finding.Finding{FindingId: 1001, Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceId: "ds-001", ResourceName: "rn", OriginalScore: 100.00, Score: 1.0, CreatedAt: now.Unix(), UpdatedAt: now.Unix()}},
 			mockGetErr:             gorm.ErrRecordNotFound,
-			mockUpResp:             &model.Finding{FindingID: 1001, DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 100.00, Score: 1.0, CreatedAt: now, UpdatedAt: now},
+			mockUpResp:             &model.Finding{FindingID: 1001, Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceID: "ds-001", ResourceName: "rn", OriginalScore: 100.00, Score: 1.0, CreatedAt: now, UpdatedAt: now},
 			callListFindingSetting: true,
 			callGetResourceByName:  true,
 			callUpsertResource:     true,
