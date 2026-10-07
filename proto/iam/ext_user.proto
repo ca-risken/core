@@ -1,0 +1,18 @@
+// TODO protoファイルの命名規則確認
+syntax = "proto3";
+
+package core.iam;
+option go_package = "github.com/CyberAgent/mimosa-core/proto/iam";
+
+import "iam/entity.proto";
+
+message PutExtUserRequest {
+    string ext_user_provider_id = 1;
+    string ext_user_id = 2;
+    repeated uint32 role_id = 3;
+}
+
+message PutExtUserResponse {
+    ExtUser ext_user = 1;
+    repeated ExtUserRole ext_user_role = 2;
+}
