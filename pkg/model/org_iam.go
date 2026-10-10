@@ -17,6 +17,7 @@ type OrganizationPolicy struct {
 	OrganizationID uint32
 	Name           string
 	ActionPtn      string
+	ProjectPtn     string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 }

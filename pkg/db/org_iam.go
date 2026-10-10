@@ -243,8 +243,10 @@ const putOrgPolicy = `
 		policy_id,
 		name,
 		organization_id,
-		action_ptn
+		action_ptn,
+		project_ptn
 	) VALUES (
+		?,
 		?,
 		?,
 		?,
@@ -252,11 +254,12 @@ const putOrgPolicy = `
 	) ON DUPLICATE KEY UPDATE
 		name = VALUES(name),
 		organization_id = VALUES(organization_id),
-		action_ptn = VALUES(action_ptn)
+		action_ptn = VALUES(action_ptn),
+		project_ptn = VALUES(project_ptn)
 `
 
 func (c *Client) PutOrgPolicy(ctx context.Context, p *model.OrganizationPolicy) (*model.OrganizationPolicy, error) {
-	if err := c.Master.WithContext(ctx).Exec(putOrgPolicy, p.PolicyID, p.Name, p.OrganizationID, p.ActionPtn).Error; err != nil {
+	if err := c.Master.WithContext(ctx).Exec(putOrgPolicy, p.PolicyID, p.Name, p.OrganizationID, p.ActionPtn, p.ProjectPtn).Error; err != nil {
 		return nil, err
 	}
 	return c.GetOrgPolicyByName(ctx, p.OrganizationID, p.Name)
