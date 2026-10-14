@@ -23,6 +23,9 @@ message Finding {
   int64 updated_at = 12;
   string provider = 13;
   string provider_target = 14;
+ string asset_type = 15;
+ string asset_key = 16;
+ string asset_name = 17;
 }
 
 // Finding For Upsert
@@ -189,3 +192,13 @@ message FindingTagForBatch { string tag = 1; }
 
 // ResourceTagForBatch
 message ResourceTagForBatch { string tag = 1; }
+
+message FindingAsset {
+ uint32 project_id = 1;
+ string asset_type = 2;
+ string asset_key = 3;
+ string asset_name = 4;
+ float max_score = 5;
+ uint32 finding_count = 6;
+ int64 updated_at = 7;
+}

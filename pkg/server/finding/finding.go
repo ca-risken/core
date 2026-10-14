@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strconv"
 	"time"
 
+	"github.com/ca-risken/core/pkg/findingasset"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -19,6 +21,9 @@ func (f *FindingService) ListFinding(ctx context.Context, req *finding.ListFindi
 		return nil, err
 	}
 	param := convertListFindingRequest(req)
+	if req.AssetView || req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 {
+		return f.listFindingAssetView(ctx, param)
+	}
 	total, err := f.repository.ListFindingCount(
 		ctx,
 		param.ProjectId, 0, param.AlertId,
@@ -49,14 +54,27 @@ func (f *FindingService) ListFindingForOrg(ctx context.Context, req *finding.Lis
 		return nil, err
 	}
 	param := convertListFindingForOrgRequest(req)
-	total, err := f.repository.ListFindingCount(
-		ctx,
-		0, param.OrganizationId, 0,
-		param.FromScore, param.ToScore,
-		param.FindingId,
-		param.DataSource, param.ResourceName, param.Tag,
-		param.Status,
-	)
+	if req.AssetView {
+		assets, total, err := f.repository.ListFindingAssets(ctx, orgAssetRequest(param), req.OrganizationId)
+		if err != nil {
+			return nil, err
+		}
+		return &finding.ListFindingForOrgResponse{Assets: assets, Count: uint32(len(assets)), Total: convertToUint32(total)}, nil
+	}
+	var total int64
+	var err error
+	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 {
+		_, total, err = f.repository.ListFindingAssets(ctx, orgAssetRequest(param), req.OrganizationId)
+	} else {
+		total, err = f.repository.ListFindingCount(
+			ctx,
+			0, param.OrganizationId, 0,
+			param.FromScore, param.ToScore,
+			param.FindingId,
+			param.DataSource, param.ResourceName, param.Tag,
+			param.Status,
+		)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -378,6 +396,10 @@ func convertFinding(f *model.Finding) *finding.Finding {
 	if f == nil {
 		return &finding.Finding{}
 	}
+	assetKey := f.AssetKey
+	if f.AssetType == "Unknown" {
+		assetKey = strconv.FormatUint(f.FindingID, 10)
+	}
 	return &finding.Finding{
 		FindingId:      f.FindingID,
 		Description:    f.Description,
@@ -386,12 +408,13 @@ func convertFinding(f *model.Finding) *finding.Finding {
 		DataSource:     f.DataSource,
 		DataSourceId:   f.DataSourceID,
 		ResourceName:   f.ResourceName,
-		ProjectId:      f.ProjectID,
-		OriginalScore:  f.OriginalScore,
-		Score:          f.Score,
-		Data:           f.Data,
-		CreatedAt:      f.CreatedAt.Unix(),
-		UpdatedAt:      f.UpdatedAt.Unix(),
+		AssetType:      f.AssetType, AssetKey: assetKey, AssetName: f.AssetName,
+		ProjectId:     f.ProjectID,
+		OriginalScore: f.OriginalScore,
+		Score:         f.Score,
+		Data:          f.Data,
+		CreatedAt:     f.CreatedAt.Unix(),
+		UpdatedAt:     f.UpdatedAt.Unix(),
 	}
 }
 
@@ -456,6 +479,9 @@ func (f *FindingService) getFindingDataForUpsert(ctx context.Context, req *findi
 		Score:          calculateScore(req.OriginalScore, req.OriginalMaxScore, fs),
 		Data:           req.Data,
 	}
+
+	asset := findingasset.Classify(req.DataSource, req.ResourceName, req.Data)
+	findingModel.AssetType, findingModel.AssetKey, findingModel.AssetName = asset.Type, asset.Key, asset.Name
 
 	// Auto-Triage
 	triaged, err := f.TriageFinding(ctx, findingModel)
