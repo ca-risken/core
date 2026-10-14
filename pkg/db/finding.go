@@ -30,6 +30,7 @@ type FindingWithPend struct {
 
 type FindingRepository interface {
 	// Finding
+	ListFindingAssets(context.Context, *finding.ListFindingRequest, uint32) ([]*finding.FindingAsset, int64, error)
 	ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*[]model.Finding, error)
 	ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]FindingWithPend, error)
 	BatchListFinding(context.Context, *finding.BatchListFindingRequest) (*[]model.Finding, error)
@@ -114,8 +115,19 @@ func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingReques
 		req.FromScore, req.ToScore, req.FindingId,
 		req.DataSource, req.ResourceName, req.Tag,
 		req.Status)
+	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 {
+		extra, args := assetConditions(req)
+		cond += extra
+		params = append(params, args...)
+		query = strings.Replace(query, "select finding.*", "select distinct finding.*", 1)
+		query = strings.Replace(query, "inner join finding f_alias using(finding_id)", "", 1)
+	}
 	query += cond
-	query += fmt.Sprintf(" order by f_alias.%s %s", req.Sort, req.Direction)
+	alias := "f_alias"
+	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 {
+		alias = "finding"
+	}
+	query += fmt.Sprintf(" order by %s.%s %s", alias, req.Sort, req.Direction)
 	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
 	var data []model.Finding
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
@@ -152,8 +164,19 @@ func (c *Client) ListFindingForOrg(ctx context.Context, req *finding.ListFinding
 		cond += " and pf.finding_id is not NULL and (pf.expired_at is NULL or NOW() < pf.expired_at)"
 	}
 
+	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 {
+		extra, args := assetConditions(&finding.ListFindingRequest{AssetType: req.AssetType, AssetKey: req.AssetKey, AssetProjectId: req.AssetProjectId})
+		cond += extra
+		params = append(params, args...)
+		query = strings.Replace(query, "select finding.*", "select distinct finding.*", 1)
+		query = strings.Replace(query, "inner join finding f_alias using(finding_id)", "", 1)
+	}
 	query += join + cond
-	query += fmt.Sprintf(" order by f_alias.%s %s", req.Sort, req.Direction)
+	alias := "f_alias"
+	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 {
+		alias = "finding"
+	}
+	query += fmt.Sprintf(" order by %s.%s %s", alias, req.Sort, req.Direction)
 	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
 	var data []FindingWithPend
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
@@ -367,9 +390,9 @@ func (c *Client) existsFinding(ctx context.Context, projectID uint32, findingID 
 
 const insertUpsertFinding = `
 INSERT INTO finding
-  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data, asset_type, asset_key, asset_name)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
   provider=VALUES(provider),
@@ -379,6 +402,7 @@ ON DUPLICATE KEY UPDATE
   original_score=VALUES(original_score),
   score=VALUES(score),
 	data=VALUES(data),
+asset_type=VALUES(asset_type), asset_key=VALUES(asset_key), asset_name=VALUES(asset_name),
 	updated_at=NOW()
 `
 
@@ -392,7 +416,7 @@ func (c *Client) UpsertFinding(ctx context.Context, data *model.Finding) (*model
 func (c *Client) upsertFinding(ctx context.Context, data *model.Finding) (*model.Finding, error) {
 	if err := c.Master.WithContext(ctx).Exec(insertUpsertFinding,
 		data.FindingID, data.Description, convertZeroValueToNull(data.Provider), convertZeroValueToNull(data.ProviderTarget), data.DataSource, data.DataSourceID, data.ResourceName,
-		data.ProjectID, data.OriginalScore, data.Score, data.Data).Error; err != nil {
+		data.ProjectID, data.OriginalScore, data.Score, data.Data, data.AssetType, data.AssetKey, data.AssetName).Error; err != nil {
 		return nil, err
 	}
 	return c.GetFindingByDataSource(ctx, data.ProjectID, data.DataSource, data.DataSourceID)
@@ -617,13 +641,13 @@ func generateBulkUpsertFindingSQL(data []*model.Finding) (string, []interface{})
 	var params []interface{}
 	sql := `
 INSERT INTO finding
-  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data, asset_type, asset_key, asset_name)
 VALUES`
 	for _, d := range data {
 		sql += `
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
 		params = append(params, d.FindingID, d.Description, convertZeroValueToNull(d.Provider), convertZeroValueToNull(d.ProviderTarget), d.DataSource, d.DataSourceID,
-			d.ResourceName, d.ProjectID, d.OriginalScore, d.Score, d.Data)
+			d.ResourceName, d.ProjectID, d.OriginalScore, d.Score, d.Data, d.AssetType, d.AssetKey, d.AssetName)
 	}
 	sql = strings.TrimRight(sql, ",")
 	sql += `
@@ -636,6 +660,7 @@ ON DUPLICATE KEY UPDATE
   original_score=VALUES(original_score),
   score=VALUES(score),
   data=VALUES(data),
+asset_type=VALUES(asset_type), asset_key=VALUES(asset_key), asset_name=VALUES(asset_name),
   updated_at=NOW()`
 	return sql, params
 }
