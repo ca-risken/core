@@ -22,6 +22,7 @@ func TestClassify(t *testing.T) {
 		{name: "pod not guessed", source: "google:scc", typ: "google.container.Cluster", resource: "cluster", category: "OS_VULNERABILITY", id: "CVE-2023-1234", objects: []object{{NS: "n", Kind: "Pod", Name: "app-123"}}, wantType: "Resource", wantKey: "cluster"},
 		{name: "missing namespace", source: "google:scc", typ: "google.container.Cluster", resource: "cluster", category: "OS_VULNERABILITY", id: "CVE-2023-1234", objects: []object{{Kind: "Deployment", Name: "app"}}, wantType: "Resource", wantKey: "cluster"},
 		{name: "image digest", source: "google:scc", category: "CONTAINER_IMAGE_VULNERABILITY", id: "CVE-2023-1234", container: container{ImageID: "registry.example/app@sha256:" + strings.Repeat("a", 64)}, wantType: "Image", wantKey: "registry.example/app@sha256:" + strings.Repeat("a", 64)},
+		{name: "image digest in URI", source: "google:scc", typ: "google.container.Cluster", resource: "cluster", category: "CONTAINER_IMAGE_VULNERABILITY", id: "CVE-2023-1234", container: container{URI: "registry.example/app@sha256:" + strings.Repeat("b", 64)}, wantType: "Image", wantKey: "registry.example/app@sha256:" + strings.Repeat("b", 64)},
 		{name: "vm", source: "google:scc", typ: "google.compute.Instance", resource: "//compute.googleapis.com/projects/p/zones/z/instances/v", category: "OS_VULNERABILITY", id: "CVE-2023-1234", wantType: "VM", wantKey: "//compute.googleapis.com/projects/p/zones/z/instances/v"},
 		{name: "unknown", source: "google:scc", category: "OS_VULNERABILITY", id: "CVE-2023-1234", wantType: "Unknown"},
 	}
