@@ -13,7 +13,7 @@ func BackfillChunk(ctx context.Context, db *sql.DB, after uint64, limit int) (ui
 	if err != nil {
 		return after, 0, err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 	rows, err := tx.QueryContext(ctx, "SELECT finding_id, data_source, resource_name, COALESCE(data,'{}') FROM finding WHERE finding_id > ? AND data_source = 'google:scc' ORDER BY finding_id LIMIT ? FOR UPDATE", after, limit)
 	if err != nil {
 		return after, 0, err

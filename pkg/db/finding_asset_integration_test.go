@@ -148,7 +148,7 @@ func TestFindingAssetsMySQL(t *testing.T) {
 		go func() { _, _, err := findingasset.BackfillChunk(ctx, raw, 0, 1); done <- err }()
 		select {
 		case err := <-done:
-			tx.Rollback()
+			_ = tx.Rollback()
 			t.Fatalf("lock bypassed: %v", err)
 		case <-time.After(100 * time.Millisecond):
 		}
