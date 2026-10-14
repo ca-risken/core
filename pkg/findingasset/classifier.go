@@ -106,11 +106,15 @@ func Classify(source, resource, data string) Asset {
 	return Asset{Type: "Unknown", Name: "Unknown"}
 }
 func addImage(images map[string]Asset, c container) {
-	if digest.MatchString(c.ImageID) {
+	key := c.ImageID
+	if !digest.MatchString(key) {
+		key = c.URI
+	}
+	if digest.MatchString(key) {
 		name := c.URI
 		if name == "" {
-			name = c.ImageID
+			name = key
 		}
-		images[c.ImageID] = Asset{"Image", c.ImageID, name}
+		images[key] = Asset{"Image", key, name}
 	}
 }
