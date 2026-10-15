@@ -126,6 +126,47 @@ func TestFindingAssetsMySQL(t *testing.T) {
 		}
 	})
 
+	t.Run("nullable asset fields", func(t *testing.T) {
+		cases := []struct {
+			name  string
+			asset findingasset.Asset
+			bulk  bool
+		}{
+			{"unsupported single", findingasset.Asset{}, false},
+			{"unsupported bulk", findingasset.Asset{}, true},
+			{"unknown single", findingasset.Asset{Type: "Unknown", Name: "Unknown"}, false},
+			{"unknown bulk", findingasset.Asset{Type: "Unknown", Name: "Unknown"}, true},
+			{"known", findingasset.Asset{Type: "VM", Key: hash("vm"), Name: "vm"}, false},
+		}
+		for _, c := range cases {
+			t.Run(c.name, func(t *testing.T) {
+				e := mk(99, 1, "nullable")
+				e.AssetType, e.AssetKey, e.AssetName = c.asset.Type, c.asset.Key, c.asset.Name
+				if c.bulk {
+					err = client.BulkUpsertFinding(ctx, []*model.Finding{e})
+				} else {
+					_, err = client.UpsertFinding(ctx, e)
+				}
+				if err != nil {
+					t.Fatal(err)
+				}
+				var typ, key, name sql.NullString
+				if err = raw.QueryRow("SELECT asset_type, asset_key, asset_name FROM finding WHERE finding_id=99").Scan(&typ, &key, &name); err != nil {
+					t.Fatal(err)
+				}
+				if typ.Valid != (c.asset.Type != "") || key.Valid != (c.asset.Key != "") || name.Valid != (c.asset.Name != "") {
+					t.Fatalf("%+v %+v %+v", typ, key, name)
+				}
+				got, readErr := client.GetFinding(ctx, 1, 99, true)
+				if readErr != nil || got.AssetType != c.asset.Type || got.AssetKey != c.asset.Key || got.AssetName != c.asset.Name {
+					t.Fatalf("%+v %v", got, readErr)
+				}
+			})
+		}
+		if _, err = raw.Exec("DELETE FROM finding WHERE finding_id=99"); err != nil {
+			t.Fatal(err)
+		}
+	})
 	t.Run("save clears old classification", func(t *testing.T) {
 		e := mk(10, 1, "old")
 		a := findingasset.Classify(e.DataSource, e.ResourceName, data)

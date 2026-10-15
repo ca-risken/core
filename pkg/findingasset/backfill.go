@@ -38,7 +38,7 @@ func BackfillChunk(ctx context.Context, db *sql.DB, after uint64, limit int) (ui
 	}
 	for _, e := range entries {
 		a := Classify(e.source, e.resource, e.data)
-		_, err = tx.ExecContext(ctx, "UPDATE finding SET asset_type=?, asset_key=?, asset_name=?, updated_at=updated_at WHERE finding_id=?", a.Type, a.Key, a.Name, e.id)
+		_, err = tx.ExecContext(ctx, "UPDATE finding SET asset_type=NULLIF(?,''), asset_key=NULLIF(?,''), asset_name=NULLIF(?,''), updated_at=updated_at WHERE finding_id=?", a.Type, a.Key, a.Name, e.id)
 		if err != nil {
 			return after, 0, err
 		}

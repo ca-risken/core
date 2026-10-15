@@ -138,7 +138,7 @@ func TestUpsertFinding(t *testing.T) {
 		{
 			name:       "OK empty provider metadata becomes NULL",
 			input:      &model.Finding{FindingID: 1, Description: "desc", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 0.5, Data: "data"},
-			mockSQL:    regexp.QuoteMeta(strings.Replace(insertUpsertFinding, "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", "?, ?, NULL, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", 1)),
+			mockSQL:    regexp.QuoteMeta(strings.Replace(insertUpsertFinding, "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,", "?, ?, NULL, NULL, ?, ?, ?, ?, ?, ?, ?,", 1)),
 			wantArgs:   []driver.Value{uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(0.5), "data", "", "", ""},
 			mockResult: sqlmock.NewRows([]string{"finding_id", "provider", "provider_target"}).AddRow(uint64(1), nil, nil),
 			want:       &model.Finding{FindingID: 1},
@@ -238,7 +238,7 @@ func TestGenerateBulkUpsertFindingSQL(t *testing.T) {
 INSERT INTO finding
   (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data, asset_type, asset_key, asset_name)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?,''), NULLIF(?,''), NULLIF(?,''))
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
   provider=VALUES(provider),
@@ -266,10 +266,10 @@ asset_type=VALUES(asset_type), asset_key=VALUES(asset_key), asset_name=VALUES(as
 INSERT INTO finding
   (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data, asset_type, asset_key, asset_name)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?,''), NULLIF(?,''), NULLIF(?,'')),
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?,''), NULLIF(?,''), NULLIF(?,'')),
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?,''), NULLIF(?,''), NULLIF(?,'')),
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?,''), NULLIF(?,''), NULLIF(?,''))
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
   provider=VALUES(provider),

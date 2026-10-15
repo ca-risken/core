@@ -18,7 +18,7 @@ func TestAssetConditions(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			q, args := assetConditions(&finding.ListFindingRequest{AssetType: c.typ, AssetKey: c.key, AssetProjectId: c.project})
-			if len(args) != c.args || !strings.Contains(q, "google:scc") {
+			if len(args) != c.args || !strings.Contains(q, "google:scc") || !strings.Contains(q, "asset_type IS NOT NULL") {
 				t.Fatalf("%s %v", q, args)
 			}
 			if strings.Contains(q, "BINARY") || strings.Contains(q, "CASE") {

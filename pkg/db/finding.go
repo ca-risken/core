@@ -392,7 +392,7 @@ const insertUpsertFinding = `
 INSERT INTO finding
   (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data, asset_type, asset_key, asset_name)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?,''), NULLIF(?,''), NULLIF(?,''))
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
   provider=VALUES(provider),
@@ -645,7 +645,7 @@ INSERT INTO finding
 VALUES`
 	for _, d := range data {
 		sql += `
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?,''), NULLIF(?,''), NULLIF(?,'')),`
 		params = append(params, d.FindingID, d.Description, convertZeroValueToNull(d.Provider), convertZeroValueToNull(d.ProviderTarget), d.DataSource, d.DataSourceID,
 			d.ResourceName, d.ProjectID, d.OriginalScore, d.Score, d.Data, d.AssetType, d.AssetKey, d.AssetName)
 	}
