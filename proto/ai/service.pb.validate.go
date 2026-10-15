@@ -1087,12 +1087,11 @@ func (m *ListRemediationProposalRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	for idx, item := range m.GetStatus() {
-		_, _ = idx, item
+	if m.GetStatus() != "" {
 
-		if _, ok := _ListRemediationProposalRequest_Status_InLookup[item]; !ok {
+		if _, ok := _ListRemediationProposalRequest_Status_InLookup[m.GetStatus()]; !ok {
 			err := ListRemediationProposalRequestValidationError{
-				field:  fmt.Sprintf("Status[%v]", idx),
+				field:  "Status",
 				reason: "value must be in list [PENDING SUCCEEDED FAILED]",
 			}
 			if !all {

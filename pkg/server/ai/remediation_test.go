@@ -285,7 +285,7 @@ func TestListRemediationProposal(t *testing.T) {
 			input: &aipb.ListRemediationProposalRequest{
 				ProjectId: 1,
 				FindingId: 2001,
-				Status:    []string{model.RemediationProposalStatusSucceeded},
+				Status:    model.RemediationProposalStatusSucceeded,
 			},
 			mock: proposals,
 			want: &aipb.ListRemediationProposalResponse{
@@ -319,7 +319,7 @@ func TestListRemediationProposal(t *testing.T) {
 			input: &aipb.ListRemediationProposalRequest{
 				ProjectId: 1,
 				FindingId: 2001,
-				Status:    []string{"INVALID"},
+				Status:    "INVALID",
 			},
 			wantError: true,
 		},
