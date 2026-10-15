@@ -45,6 +45,34 @@ func (a *AIService) CreateRemediationProposal(ctx context.Context, req *aipb.Cre
 	return &aipb.CreateRemediationProposalResponse{RemediationProposal: convertRemediationProposal(result)}, nil
 }
 
+func (a *AIService) GetRemediationProposal(ctx context.Context, req *aipb.GetRemediationProposalRequest) (*aipb.GetRemediationProposalResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	result, err := a.repository.GetRemediationProposal(ctx, req.ProjectId, req.RemediationProposalId)
+	if err != nil {
+		return nil, err
+	}
+	return &aipb.GetRemediationProposalResponse{RemediationProposal: convertRemediationProposal(result)}, nil
+}
+
+func (a *AIService) ListRemediationProposal(ctx context.Context, req *aipb.ListRemediationProposalRequest) (*aipb.ListRemediationProposalResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	results, err := a.repository.ListRemediationProposal(ctx, req.ProjectId, req.FindingId, req.Status)
+	if err != nil {
+		return nil, err
+	}
+	proposals := make([]*aipb.RemediationProposal, 0, len(results))
+	for _, result := range results {
+		proposals = append(proposals, convertRemediationProposal(result))
+	}
+	return &aipb.ListRemediationProposalResponse{RemediationProposals: proposals}, nil
+}
+
 func (a *AIService) UpdateRemediationProposalStatus(ctx context.Context, req *aipb.UpdateRemediationProposalStatusRequest) (*aipb.UpdateRemediationProposalStatusResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
