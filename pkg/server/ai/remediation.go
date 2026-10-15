@@ -2,10 +2,12 @@ package ai
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
 	aipb "github.com/ca-risken/core/proto/ai"
+	"gorm.io/gorm"
 )
 
 func convertRemediationProposal(r *model.RemediationProposal) *aipb.RemediationProposal {
@@ -52,6 +54,9 @@ func (a *AIService) GetRemediationProposal(ctx context.Context, req *aipb.GetRem
 
 	result, err := a.repository.GetRemediationProposal(ctx, req.ProjectId, req.RemediationProposalId)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &aipb.GetRemediationProposalResponse{}, nil
+		}
 		return nil, err
 	}
 	return &aipb.GetRemediationProposalResponse{RemediationProposal: convertRemediationProposal(result)}, nil

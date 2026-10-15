@@ -11,6 +11,7 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	aipb "github.com/ca-risken/core/proto/ai"
+	"gorm.io/gorm"
 )
 
 func TestCreateRemediationProposal(t *testing.T) {
@@ -220,6 +221,15 @@ func TestGetRemediationProposal(t *testing.T) {
 			name:      "NG validation error",
 			input:     &aipb.GetRemediationProposalRequest{ProjectId: 1},
 			wantError: true,
+		},
+		{
+			name: "OK not found",
+			input: &aipb.GetRemediationProposalRequest{
+				ProjectId:             1,
+				RemediationProposalId: 1001,
+			},
+			mockErr: gorm.ErrRecordNotFound,
+			want:    &aipb.GetRemediationProposalResponse{},
 		},
 		{
 			name: "NG DB error",
