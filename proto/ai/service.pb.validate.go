@@ -1087,6 +1087,22 @@ func (m *ListRemediationProposalRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	for idx, item := range m.GetStatus() {
+		_, _ = idx, item
+
+		if _, ok := _ListRemediationProposalRequest_Status_InLookup[item]; !ok {
+			err := ListRemediationProposalRequestValidationError{
+				field:  fmt.Sprintf("Status[%v]", idx),
+				reason: "value must be in list [PENDING SUCCEEDED FAILED]",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+	}
+
 	if len(errors) > 0 {
 		return ListRemediationProposalRequestMultiError(errors)
 	}
@@ -1167,6 +1183,12 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ListRemediationProposalRequestValidationError{}
+
+var _ListRemediationProposalRequest_Status_InLookup = map[string]struct{}{
+	"PENDING":   {},
+	"SUCCEEDED": {},
+	"FAILED":    {},
+}
 
 // Validate checks the field values on ListRemediationProposalResponse with the
 // rules defined in the proto definition for this message. If any rules are

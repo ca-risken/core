@@ -315,6 +315,15 @@ func TestListRemediationProposal(t *testing.T) {
 			wantError: true,
 		},
 		{
+			name: "NG invalid status",
+			input: &aipb.ListRemediationProposalRequest{
+				ProjectId: 1,
+				FindingId: 2001,
+				Status:    []string{"INVALID"},
+			},
+			wantError: true,
+		},
+		{
 			name: "NG DB error",
 			input: &aipb.ListRemediationProposalRequest{
 				ProjectId: 1,
