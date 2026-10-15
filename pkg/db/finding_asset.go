@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/ca-risken/core/proto/finding"
 )
@@ -14,12 +15,18 @@ func assetConditions(req *finding.ListFindingRequest) (string, []interface{}) {
 	cond := " and finding.data_source = 'google:scc' and finding.asset_type <> ''"
 	var args []interface{}
 	if req.AssetType != "" {
-		cond += " and BINARY finding.asset_type = BINARY ?"
+		cond += " and finding.asset_type = ?"
 		args = append(args, req.AssetType)
 	}
 	if req.AssetKey != "" {
-		cond += " and BINARY (" + assetKeySQL + ") = BINARY ?"
-		args = append(args, req.AssetKey)
+		if req.AssetType == "Unknown" {
+			id, _ := strconv.ParseUint(req.AssetKey, 10, 64)
+			cond += " and finding.finding_id = ?"
+			args = append(args, id)
+		} else {
+			cond += " and finding.asset_key = ?"
+			args = append(args, req.AssetKey)
+		}
 	}
 	if req.AssetProjectId != 0 {
 		cond += " and finding.project_id = ?"
@@ -41,7 +48,7 @@ func (c *Client) ListFindingAssets(ctx context.Context, req *finding.ListFinding
 	extra, params := assetConditions(req)
 	cond += extra
 	args = append(args, params...)
-	base := "SELECT DISTINCT finding.finding_id, finding.project_id, finding.asset_type, BINARY (" + assetKeySQL + ") AS asset_key, finding.asset_name, finding.score, finding.updated_at FROM finding" + cond
+	base := "SELECT DISTINCT finding.finding_id, finding.project_id, finding.asset_type, " + assetKeySQL + " AS asset_key, finding.asset_name, finding.score, finding.updated_at FROM finding" + cond
 	var total int64
 	if !req.AssetView {
 		err := c.Slave.WithContext(ctx).Raw("SELECT COUNT(*) FROM ("+base+") scoped", args...).Scan(&total).Error
@@ -63,7 +70,7 @@ func (c *Client) ListFindingAssets(ctx context.Context, req *finding.ListFinding
 	if req.Direction == "asc" {
 		direction = "asc"
 	}
-	query := grouped + fmt.Sprintf(" ORDER BY %s %s, project_id ASC, BINARY asset_type ASC, asset_key ASC LIMIT %d OFFSET %d", sort, direction, req.Limit, req.Offset)
+	query := grouped + fmt.Sprintf(" ORDER BY %s %s, project_id ASC, asset_type ASC, asset_key ASC LIMIT %d OFFSET %d", sort, direction, req.Limit, req.Offset)
 	var assets []*finding.FindingAsset
 	err := c.Slave.WithContext(ctx).Raw(query, args...).Scan(&assets).Error
 	return assets, total, err

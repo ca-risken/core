@@ -1,6 +1,8 @@
 package findingasset
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"regexp"
 )
@@ -42,6 +44,15 @@ var digest = regexp.MustCompile(`^(.+)@sha256:[a-fA-F0-9]{64}$`)
 
 // Unknown keys are resolved from finding_id on read, avoiding a second insert write.
 func Classify(source, resource, data string) Asset {
+	a := classify(source, resource, data)
+	if a.Key != "" {
+		sum := sha256.Sum256([]byte(a.Key))
+		a.Key = base64.RawURLEncoding.EncodeToString(sum[:])
+	}
+	return a
+}
+
+func classify(source, resource, data string) Asset {
 	if source != "google:scc" {
 		return Asset{}
 	}

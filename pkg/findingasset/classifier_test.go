@@ -1,6 +1,8 @@
 package findingasset
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"strings"
 	"testing"
@@ -37,8 +39,30 @@ func TestClassify(t *testing.T) {
 			r.Finding.Container = c.container
 			b, _ := json.Marshal(r)
 			got := Classify(c.source, c.resource, string(b))
-			if got.Type != c.wantType || got.Key != c.wantKey {
-				t.Fatalf("got %+v want %s/%s", got, c.wantType, c.wantKey)
+			wantKey := c.wantKey
+			if wantKey != "" {
+				sum := sha256.Sum256([]byte(wantKey))
+				wantKey = base64.RawURLEncoding.EncodeToString(sum[:])
+			}
+			if got.Type != c.wantType || got.Key != wantKey {
+				t.Fatalf("got %+v want %s/%s", got, c.wantType, wantKey)
+			}
+		})
+	}
+}
+
+func TestHashIdentity(t *testing.T) {
+	cases := []struct{ name, identity, want string }{
+		{"short", "vm", "W86Y9z8-0Mg38nKe2VCbOOpmoVbbf2UzVstv43s2boU"},
+		{"long", strings.Repeat("x", 9000), "55fir28FwkzdBkeTzmCp0BMC2aOw5d_1uwwEa4fy9mg"},
+		{"workload", "[\"cluster\",\"ns\",\"Deployment\",\"app\"]", "Lxxp4l0xeIUsX2i4WZFkXUeuVWGiKO9s-7WA9FDl6U0"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			data, _ := json.Marshal(map[string]any{"asset": map[string]any{"type": "google.compute.Instance", "full_name": c.identity}, "finding": map[string]any{"category": "OS_VULNERABILITY", "vulnerability": map[string]any{"cve": map[string]string{"id": "CVE-2023-1234"}}}})
+			got := Classify("google:scc", "", string(data))
+			if got.Key != c.want || len(got.Key) != 43 {
+				t.Fatalf("got %s want %s", got.Key, c.want)
 			}
 		})
 	}

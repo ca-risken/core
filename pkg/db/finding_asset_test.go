@@ -21,8 +21,17 @@ func TestAssetConditions(t *testing.T) {
 			if len(args) != c.args || !strings.Contains(q, "google:scc") {
 				t.Fatalf("%s %v", q, args)
 			}
-			if c.key != "" && !strings.Contains(q, "BINARY") {
-				t.Fatal("nonbinary identity")
+			if strings.Contains(q, "BINARY") || strings.Contains(q, "CASE") {
+				t.Fatal("expression in asset filter")
+			}
+			if c.key != "" {
+				column := "finding.asset_key = ?"
+				if c.typ == "Unknown" {
+					column = "finding.finding_id = ?"
+				}
+				if !strings.Contains(q, column) {
+					t.Fatal(q)
+				}
 			}
 		})
 	}

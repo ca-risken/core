@@ -2,7 +2,9 @@ package db
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"strings"
@@ -38,13 +40,17 @@ func TestFindingAssetsMySQL(t *testing.T) {
 		}
 	}
 	data := `{"asset":{"type":"google.compute.Instance","full_name":"vm"},"finding":{"category":"OS_VULNERABILITY","vulnerability":{"cve":{"id":"CVE-2023-1234"}}}}`
+	hash := func(key string) string {
+		sum := sha256.Sum256([]byte(key))
+		return base64.RawURLEncoding.EncodeToString(sum[:])
+	}
 	mk := func(id uint64, project uint32, key string) *model.Finding {
-		return &model.Finding{FindingID: id, ProjectID: project, DataSource: "google:scc", DataSourceID: fmt.Sprint(id), ResourceName: "reported-resource", Score: 0.9, OriginalScore: 0.9, Data: data, AssetType: "VM", AssetKey: key, AssetName: key}
+		return &model.Finding{FindingID: id, ProjectID: project, DataSource: "google:scc", DataSourceID: fmt.Sprint(id), ResourceName: "reported-resource", Score: 0.9, OriginalScore: 0.9, Data: data, AssetType: "VM", AssetKey: hash(key), AssetName: key}
 	}
 	entries := []*model.Finding{mk(1, 1, "vm"), mk(2, 1, "vm"), mk(3, 2, "vm"), mk(4, 3, "vm"), mk(5, 1, strings.Repeat("a", 1500)+"X"), mk(6, 1, strings.Repeat("a", 1500)+"Y"), mk(7, 1, "vm ")}
 	u1, u2 := mk(8, 1, ""), mk(9, 1, "")
-	u1.AssetType = "Unknown"
-	u2.AssetType = "Unknown"
+	u1.AssetType, u1.AssetKey = "Unknown", ""
+	u2.AssetType, u2.AssetKey = "Unknown", ""
 	entries = append(entries, u1, u2)
 	if err = client.BulkUpsertFinding(ctx, entries); err != nil {
 		t.Fatal(err)
@@ -62,14 +68,14 @@ func TestFindingAssetsMySQL(t *testing.T) {
 		groups     int64
 		firstCount uint32
 	}{
-		{"project", 0, &finding.ListFindingRequest{ProjectId: 1, AssetType: "VM", AssetKey: "vm"}, 1, 2},
-		{"org project separated", 7, &finding.ListFindingRequest{AssetType: "VM", AssetKey: "vm"}, 2, 2},
-		{"org intersection", 7, &finding.ListFindingRequest{AssetType: "VM", AssetKey: "vm", AssetProjectId: 3}, 0, 0},
-		{"active expired pend", 7, &finding.ListFindingRequest{AssetType: "VM", AssetKey: "vm", Status: finding.FindingStatus_FINDING_ACTIVE}, 2, 1},
-		{"pending", 7, &finding.ListFindingRequest{AssetType: "VM", AssetKey: "vm", Status: finding.FindingStatus_FINDING_PENDING}, 1, 1},
+		{"project", 0, &finding.ListFindingRequest{ProjectId: 1, AssetType: "VM", AssetKey: hash("vm")}, 1, 2},
+		{"org project separated", 7, &finding.ListFindingRequest{AssetType: "VM", AssetKey: hash("vm")}, 2, 2},
+		{"org intersection", 7, &finding.ListFindingRequest{AssetType: "VM", AssetKey: hash("vm"), AssetProjectId: 3}, 0, 0},
+		{"active expired pend", 7, &finding.ListFindingRequest{AssetType: "VM", AssetKey: hash("vm"), Status: finding.FindingStatus_FINDING_ACTIVE}, 2, 1},
+		{"pending", 7, &finding.ListFindingRequest{AssetType: "VM", AssetKey: hash("vm"), Status: finding.FindingStatus_FINDING_PENDING}, 1, 1},
 		{"duplicate tags", 0, &finding.ListFindingRequest{ProjectId: 1, Tag: []string{"a", "b"}}, 1, 1},
 		{"unknown separate", 0, &finding.ListFindingRequest{ProjectId: 1, AssetType: "Unknown"}, 2, 1},
-		{"binary long keys", 0, &finding.ListFindingRequest{ProjectId: 1, AssetType: "VM"}, 4, 2},
+		{"hashes of long keys", 0, &finding.ListFindingRequest{ProjectId: 1, AssetType: "VM"}, 4, 2},
 		{"search source intersection", 0, &finding.ListFindingRequest{ProjectId: 1, DataSource: []string{"aws:"}}, 0, 0},
 		{"search resource intersection", 0, &finding.ListFindingRequest{ProjectId: 1, ResourceName: []string{"other"}}, 0, 0},
 	}
@@ -90,7 +96,7 @@ func TestFindingAssetsMySQL(t *testing.T) {
 		})
 	}
 	t.Run("expansion exact", func(t *testing.T) {
-		r := &finding.ListFindingRequest{ProjectId: 1, ToScore: 1, Limit: 200, Sort: "finding_id", Direction: "asc", AssetType: "VM", AssetKey: "vm", Tag: []string{"a", "b"}}
+		r := &finding.ListFindingRequest{ProjectId: 1, ToScore: 1, Limit: 200, Sort: "finding_id", Direction: "asc", AssetType: "VM", AssetKey: hash("vm"), Tag: []string{"a", "b"}}
 		_, n, err := client.ListFindingAssets(ctx, r, 0)
 		if err != nil || n != 1 {
 			t.Fatalf("%d %v", n, err)
@@ -100,6 +106,26 @@ func TestFindingAssetsMySQL(t *testing.T) {
 			t.Fatalf("%v %v", list, err)
 		}
 	})
+	t.Run("unknown expansion by finding ID", func(t *testing.T) {
+		cases := []struct {
+			name, key string
+			id        uint64
+		}{{"first", "8", 8}, {"second", "9", 9}}
+		for _, c := range cases {
+			t.Run(c.name, func(t *testing.T) {
+				r := &finding.ListFindingRequest{ProjectId: 1, ToScore: 1, Limit: 20, Sort: "finding_id", Direction: "asc", AssetType: "Unknown", AssetKey: c.key}
+				_, n, err := client.ListFindingAssets(ctx, r, 0)
+				if err != nil || n != 1 {
+					t.Fatalf("count=%d err=%v", n, err)
+				}
+				list, err := client.ListFinding(ctx, r)
+				if err != nil || len(*list) != 1 || (*list)[0].FindingID != c.id {
+					t.Fatalf("%v %v", list, err)
+				}
+			})
+		}
+	})
+
 	t.Run("save clears old classification", func(t *testing.T) {
 		e := mk(10, 1, "old")
 		a := findingasset.Classify(e.DataSource, e.ResourceName, data)
@@ -159,7 +185,7 @@ func TestFindingAssetsMySQL(t *testing.T) {
 			t.Fatal(err)
 		}
 		var key string
-		if err = raw.QueryRow("SELECT asset_key FROM finding WHERE finding_id=1").Scan(&key); err != nil || key != "new-vm" {
+		if err = raw.QueryRow("SELECT asset_key FROM finding WHERE finding_id=1").Scan(&key); err != nil || key != hash("new-vm") {
 			t.Fatalf("%s %v", key, err)
 		}
 	})

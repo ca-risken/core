@@ -1,7 +1,9 @@
 package finding
 
 import (
+	"encoding/base64"
 	"errors"
+	"strconv"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
@@ -15,8 +17,21 @@ const (
 )
 
 func validateAssetRequest(view bool, typ, key, sort string) error {
-	if len(key) > 8192 {
-		return errors.New("asset_key must not exceed 8192 bytes")
+	if key != "" {
+		if typ == "Unknown" {
+			id, err := strconv.ParseUint(key, 10, 64)
+			if err != nil || id == 0 {
+				return errors.New("unknown asset_key must be a finding ID")
+			}
+		} else {
+			if len(key) != 43 {
+				return errors.New("asset_key must be 43 characters")
+			}
+			decoded, err := base64.RawURLEncoding.DecodeString(key)
+			if err != nil || len(decoded) != 32 || base64.RawURLEncoding.EncodeToString(decoded) != key {
+				return errors.New("asset_key must be a 43-character unpadded Base64URL SHA-256 hash")
+			}
+		}
 	}
 	if (typ == "") != (key == "") {
 		return errors.New("asset_type and asset_key must be supplied together")
