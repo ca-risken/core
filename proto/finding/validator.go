@@ -15,6 +15,9 @@ const (
 )
 
 func validateAssetRequest(view bool, typ, key, sort string) error {
+	if len(key) > 8192 {
+		return errors.New("asset_key must not exceed 8192 bytes")
+	}
 	if (typ == "") != (key == "") {
 		return errors.New("asset_type and asset_key must be supplied together")
 	}
@@ -63,6 +66,14 @@ func (l *ListFindingRequest) Validate() error {
 func (l *ListFindingForOrgRequest) Validate() error {
 	if err := validateAssetRequest(l.AssetView, l.AssetType, l.AssetKey, l.Sort); err != nil {
 		return err
+	}
+	if l.AssetView || l.AssetKey != "" || l.AssetProjectId != 0 {
+		if err := validation.Validate(l.Limit, validation.Min(0), validation.Max(200)); err != nil {
+			return err
+		}
+		if err := validation.Validate(l.Offset, validation.Min(0)); err != nil {
+			return err
+		}
 	}
 	return validation.ValidateStruct(l,
 		validation.Field(&l.OrganizationId, validation.Required),
