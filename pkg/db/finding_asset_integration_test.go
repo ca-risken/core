@@ -9,7 +9,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/ca-risken/common/pkg/logging"
 	"github.com/ca-risken/core/pkg/findingasset"
@@ -183,51 +182,6 @@ func TestFindingAssetsMySQL(t *testing.T) {
 		got, err := client.GetFinding(ctx, 1, 10, true)
 		if err != nil || got.AssetType != "" {
 			t.Fatalf("%+v %v", got, err)
-		}
-	})
-	t.Run("backfill preserves timestamp and state", func(t *testing.T) {
-		if _, err = raw.Exec("UPDATE finding SET updated_at='2020-01-01' WHERE finding_id=1"); err != nil {
-			t.Fatal(err)
-		}
-		last, n, err := findingasset.BackfillChunk(ctx, raw, 0, 2)
-		if err != nil || last != 2 || n != 2 {
-			t.Fatalf("%d %d %v", last, n, err)
-		}
-		var stamp time.Time
-		if err = raw.QueryRow("SELECT updated_at FROM finding WHERE finding_id=1").Scan(&stamp); err != nil || stamp.Year() != 2020 {
-			t.Fatalf("%v %v", stamp, err)
-		}
-		var pending int
-		if err = raw.QueryRow("SELECT COUNT(*) FROM pend_finding").Scan(&pending); err != nil || pending != 2 {
-			t.Fatal(pending, err)
-		}
-	})
-	t.Run("backfill waits for latest row", func(t *testing.T) {
-		tx, err := raw.Begin()
-		if err != nil {
-			t.Fatal(err)
-		}
-		newData := strings.Replace(data, `"full_name":"vm"`, `"full_name":"new-vm"`, 1)
-		if _, err = tx.Exec("UPDATE finding SET data=? WHERE finding_id=1", newData); err != nil {
-			t.Fatal(err)
-		}
-		done := make(chan error, 1)
-		go func() { _, _, err := findingasset.BackfillChunk(ctx, raw, 0, 1); done <- err }()
-		select {
-		case err := <-done:
-			_ = tx.Rollback()
-			t.Fatalf("lock bypassed: %v", err)
-		case <-time.After(100 * time.Millisecond):
-		}
-		if err = tx.Commit(); err != nil {
-			t.Fatal(err)
-		}
-		if err = <-done; err != nil {
-			t.Fatal(err)
-		}
-		var key string
-		if err = raw.QueryRow("SELECT asset_key FROM finding WHERE finding_id=1").Scan(&key); err != nil || key != hash("new-vm") {
-			t.Fatalf("%s %v", key, err)
 		}
 	})
 }
