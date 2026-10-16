@@ -11,9 +11,9 @@ import (
 const assetKeySQL = "CASE WHEN finding.asset_type = 'Unknown' THEN CAST(finding.finding_id AS CHAR) ELSE finding.asset_key END"
 
 // assetConditions is appended after the existing permission/search/status scope.
-func assetConditions(req *finding.ListFindingRequest) (string, []interface{}) {
+func assetConditions(req *finding.ListFindingRequest) (string, []any) {
 	cond := " and finding.data_source = 'google:scc' and finding.asset_type IS NOT NULL"
-	var args []interface{}
+	var args []any
 	if req.AssetType != "" {
 		cond += " and finding.asset_type = ?"
 		args = append(args, req.AssetType)
@@ -39,7 +39,7 @@ func assetConditions(req *finding.ListFindingRequest) (string, []interface{}) {
 // is false. DISTINCT removes duplicate tag matches before grouping/pagination.
 func (c *Client) ListFindingAssets(ctx context.Context, req *finding.ListFindingRequest, organizationID uint32) ([]*finding.FindingAsset, int64, error) {
 	var cond string
-	var args []interface{}
+	var args []any
 	if organizationID == 0 {
 		cond, args = generateProjectFindingQuery(req.ProjectId, req.AlertId, req.FromScore, req.ToScore, req.FindingId, req.DataSource, req.ResourceName, req.Tag, req.Status)
 	} else {

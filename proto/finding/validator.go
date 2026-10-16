@@ -65,7 +65,7 @@ func (l *ListFindingRequest) Validate() error {
 		validation.Field(&l.FromScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.ToScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.Tag, validation.Each(validation.Length(0, 64))),
-		validation.Field(&l.Sort, validation.By(func(value interface{}) error {
+		validation.Field(&l.Sort, validation.By(func(value any) error {
 			if l.AssetView {
 				return nil
 			}
@@ -97,7 +97,7 @@ func (l *ListFindingForOrgRequest) Validate() error {
 		validation.Field(&l.FromScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.ToScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.Tag, validation.Each(validation.Length(0, 64))),
-		validation.Field(&l.Sort, validation.By(func(value interface{}) error {
+		validation.Field(&l.Sort, validation.By(func(value any) error {
 			if l.AssetView {
 				return nil
 			}
