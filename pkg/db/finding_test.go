@@ -91,7 +91,7 @@ func TestBulkUpsertFinding(t *testing.T) {
 			},
 			mockSQL: regexp.QuoteMeta(`
 INSERT INTO finding
-  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data, asset_type, asset_key, asset_name)
 VALUES`),
 		},
 		{
@@ -131,15 +131,15 @@ func TestUpsertFinding(t *testing.T) {
 			name:       "OK",
 			input:      &model.Finding{FindingID: 1, Description: "desc", Provider: "aws", ProviderTarget: "123456789012", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 0.5, Data: "data"},
 			mockSQL:    regexp.QuoteMeta(insertUpsertFinding),
-			wantArgs:   []driver.Value{uint64(1), "desc", "aws", "123456789012", "ds", "1", "r", uint32(1), float32(1), float32(0.5), "data"},
+			wantArgs:   []driver.Value{uint64(1), "desc", "aws", "123456789012", "ds", "1", "r", uint32(1), float32(1), float32(0.5), "data", "", "", ""},
 			mockResult: sqlmock.NewRows([]string{"finding_id", "provider", "provider_target"}).AddRow(uint64(1), "aws", "123456789012"),
 			want:       &model.Finding{FindingID: 1, Provider: "aws", ProviderTarget: "123456789012"},
 		},
 		{
 			name:       "OK empty provider metadata becomes NULL",
 			input:      &model.Finding{FindingID: 1, Description: "desc", DataSource: "ds", DataSourceID: "1", ResourceName: "r", ProjectID: 1, OriginalScore: 1, Score: 0.5, Data: "data"},
-			mockSQL:    regexp.QuoteMeta(strings.Replace(insertUpsertFinding, "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", "?, ?, NULL, NULL, ?, ?, ?, ?, ?, ?, ?", 1)),
-			wantArgs:   []driver.Value{uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(0.5), "data"},
+			mockSQL:    regexp.QuoteMeta(strings.Replace(insertUpsertFinding, "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,", "?, ?, NULL, NULL, ?, ?, ?, ?, ?, ?, ?,", 1)),
+			wantArgs:   []driver.Value{uint64(1), "desc", "ds", "1", "r", uint32(1), float32(1), float32(0.5), "data", "", "", ""},
 			mockResult: sqlmock.NewRows([]string{"finding_id", "provider", "provider_target"}).AddRow(uint64(1), nil, nil),
 			want:       &model.Finding{FindingID: 1},
 		},
@@ -236,9 +236,9 @@ func TestGenerateBulkUpsertFindingSQL(t *testing.T) {
 			},
 			wantSQL: `
 INSERT INTO finding
-  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data, asset_type, asset_key, asset_name)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?,''), NULLIF(?,''), NULLIF(?,''))
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
   provider=VALUES(provider),
@@ -248,9 +248,10 @@ ON DUPLICATE KEY UPDATE
   original_score=VALUES(original_score),
   score=VALUES(score),
   data=VALUES(data),
+asset_type=VALUES(asset_type), asset_key=VALUES(asset_key), asset_name=VALUES(asset_name),
   updated_at=NOW()`,
 			wantParam: []interface{}{
-				uint64(1), "desc", "aws", "123456789012", "ds", "1", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(1), "desc", "aws", "123456789012", "ds", "1", "r", uint32(1), float32(1), float32(1), "data", "", "", "",
 			},
 		},
 		{
@@ -263,12 +264,12 @@ ON DUPLICATE KEY UPDATE
 			},
 			wantSQL: `
 INSERT INTO finding
-  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data)
+  (finding_id, description, provider, provider_target, data_source, data_source_id, resource_name, project_id, original_score, score, data, asset_type, asset_key, asset_name)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),
-  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?,''), NULLIF(?,''), NULLIF(?,'')),
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?,''), NULLIF(?,''), NULLIF(?,'')),
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?,''), NULLIF(?,''), NULLIF(?,'')),
+  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?,''), NULLIF(?,''), NULLIF(?,''))
 ON DUPLICATE KEY UPDATE
   description=VALUES(description),
   provider=VALUES(provider),
@@ -278,12 +279,13 @@ ON DUPLICATE KEY UPDATE
   original_score=VALUES(original_score),
   score=VALUES(score),
   data=VALUES(data),
+asset_type=VALUES(asset_type), asset_key=VALUES(asset_key), asset_name=VALUES(asset_name),
   updated_at=NOW()`,
 			wantParam: []interface{}{
-				uint64(1), "desc", "aws", "123456789012", "ds", "1", "r", uint32(1), float32(1), float32(1), "data",
-				uint64(2), "desc", "google", gorm.Expr("NULL"), "ds", "2", "r", uint32(1), float32(1), float32(1), "data",
-				uint64(3), "desc", "github", "owner", "ds", "3", "r", uint32(1), float32(1), float32(1), "data",
-				uint64(4), "desc", gorm.Expr("NULL"), gorm.Expr("NULL"), "ds", "4", "r", uint32(1), float32(1), float32(1), "data",
+				uint64(1), "desc", "aws", "123456789012", "ds", "1", "r", uint32(1), float32(1), float32(1), "data", "", "", "",
+				uint64(2), "desc", "google", gorm.Expr("NULL"), "ds", "2", "r", uint32(1), float32(1), float32(1), "data", "", "", "",
+				uint64(3), "desc", "github", "owner", "ds", "3", "r", uint32(1), float32(1), float32(1), "data", "", "", "",
+				uint64(4), "desc", gorm.Expr("NULL"), gorm.Expr("NULL"), "ds", "4", "r", uint32(1), float32(1), float32(1), "data", "", "", "",
 			},
 		},
 	}

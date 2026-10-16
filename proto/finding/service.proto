@@ -85,12 +85,17 @@ message ListFindingRequest {
   FindingStatus status = 13;
   uint64 finding_id = 14;
   uint32 alert_id = 15;
+ bool asset_view = 16;
+ string asset_type = 17;
+ string asset_key = 18;
+ uint32 asset_project_id = 19;
 }
 
 message ListFindingResponse {
   repeated uint64 finding_id = 1;
   uint32 count = 2;
   uint32 total = 3;
+ repeated FindingAsset assets = 4;
 }
 
 message ListFindingForOrgRequest {
@@ -106,6 +111,10 @@ message ListFindingForOrgRequest {
   int32 limit = 12;
   FindingStatus status = 13;
   uint64 finding_id = 14;
+ bool asset_view = 15;
+ string asset_type = 16;
+ string asset_key = 17;
+ uint32 asset_project_id = 18;
 }
 
 message PendInfo {
@@ -125,6 +134,7 @@ message ListFindingForOrgResponse {
   repeated FindingDetail findings = 1;
   uint32 count = 2;
   uint32 total = 3;
+ repeated FindingAsset assets = 4;
 }
 
 message BatchListFindingRequest {

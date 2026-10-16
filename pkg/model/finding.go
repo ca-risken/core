@@ -11,6 +11,9 @@ type Finding struct {
 	DataSource     string
 	DataSourceID   string
 	ResourceName   string
+	AssetType      string
+	AssetKey       string
+	AssetName      string
 	ProjectID      uint32
 	OriginalScore  float32
 	Score          float32
