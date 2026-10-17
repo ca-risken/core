@@ -180,7 +180,7 @@ func TestListRemediationProposal(t *testing.T) {
 	proposal2 := &model.RemediationProposal{RemediationProposalID: 1001, FindingID: 1001, ProjectID: 1, Status: model.RemediationProposalStatusFailed, CreatedAt: now.Add(-time.Hour), UpdatedAt: now.Add(-time.Hour)}
 	cases := []struct {
 		name      string
-		status    []string
+		status    string
 		wantQuery string
 		wantArgs  []driver.Value
 		mockRows  *sqlmock.Rows
@@ -198,9 +198,9 @@ func TestListRemediationProposal(t *testing.T) {
 		},
 		{
 			name:      "OK with status filter",
-			status:    []string{model.RemediationProposalStatusPending, model.RemediationProposalStatusSucceeded},
-			wantQuery: `select * from remediation_proposal where project_id = ? and finding_id = ? and status in (?,?) order by created_at desc`,
-			wantArgs:  []driver.Value{uint32(1), uint64(1001), model.RemediationProposalStatusPending, model.RemediationProposalStatusSucceeded},
+			status:    model.RemediationProposalStatusPending,
+			wantQuery: `select * from remediation_proposal where project_id = ? and finding_id = ? and status = ? order by created_at desc`,
+			wantArgs:  []driver.Value{uint32(1), uint64(1001), model.RemediationProposalStatusPending},
 			mockRows:  newRemediationProposalRows(proposal1),
 			wantCount: 1,
 			wantErr:   false,
