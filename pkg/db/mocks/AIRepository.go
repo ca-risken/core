@@ -78,7 +78,7 @@ func (_m *AIRepository) GetRemediationProposal(ctx context.Context, projectID ui
 }
 
 // ListRemediationProposal provides a mock function with given fields: ctx, projectID, findingID, status
-func (_m *AIRepository) ListRemediationProposal(ctx context.Context, projectID uint32, findingID uint64, status []string) ([]*model.RemediationProposal, error) {
+func (_m *AIRepository) ListRemediationProposal(ctx context.Context, projectID uint32, findingID uint64, status string) ([]*model.RemediationProposal, error) {
 	ret := _m.Called(ctx, projectID, findingID, status)
 
 	if len(ret) == 0 {
@@ -87,10 +87,10 @@ func (_m *AIRepository) ListRemediationProposal(ctx context.Context, projectID u
 
 	var r0 []*model.RemediationProposal
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint64, []string) ([]*model.RemediationProposal, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint64, string) ([]*model.RemediationProposal, error)); ok {
 		return rf(ctx, projectID, findingID, status)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint64, []string) []*model.RemediationProposal); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32, uint64, string) []*model.RemediationProposal); ok {
 		r0 = rf(ctx, projectID, findingID, status)
 	} else {
 		if ret.Get(0) != nil {
@@ -98,7 +98,7 @@ func (_m *AIRepository) ListRemediationProposal(ctx context.Context, projectID u
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint64, []string) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, uint32, uint64, string) error); ok {
 		r1 = rf(ctx, projectID, findingID, status)
 	} else {
 		r1 = ret.Error(1)

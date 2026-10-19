@@ -962,4 +962,18 @@ generate-report2:
 		-d '{"prompt":"google:sccのFindingを分析して", "project_id":1001}' \
 		$(CORE_API_ADDR) core.ai.AIService.GenerateReport
 
+.PHONY: get-remediation-proposal
+get-remediation-proposal:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001, "remediation_proposal_id":1001}' \
+		$(CORE_API_ADDR) core.ai.AIService.GetRemediationProposal
+
+.PHONY: list-remediation-proposal
+list-remediation-proposal:
+	$(GRPCURL) \
+		-plaintext \
+		-d '{"project_id":1001, "finding_id":1001}' \
+		$(CORE_API_ADDR) core.ai.AIService.ListRemediationProposal
+
 FAKE:

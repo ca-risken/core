@@ -2,10 +2,12 @@ package ai
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/ca-risken/core/pkg/model"
 	aipb "github.com/ca-risken/core/proto/ai"
+	"gorm.io/gorm"
 )
 
 func convertRemediationProposal(r *model.RemediationProposal) *aipb.RemediationProposal {
@@ -43,6 +45,37 @@ func (a *AIService) CreateRemediationProposal(ctx context.Context, req *aipb.Cre
 		return nil, err
 	}
 	return &aipb.CreateRemediationProposalResponse{RemediationProposal: convertRemediationProposal(result)}, nil
+}
+
+func (a *AIService) GetRemediationProposal(ctx context.Context, req *aipb.GetRemediationProposalRequest) (*aipb.GetRemediationProposalResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	result, err := a.repository.GetRemediationProposal(ctx, req.ProjectId, req.RemediationProposalId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &aipb.GetRemediationProposalResponse{}, nil
+		}
+		return nil, err
+	}
+	return &aipb.GetRemediationProposalResponse{RemediationProposal: convertRemediationProposal(result)}, nil
+}
+
+func (a *AIService) ListRemediationProposal(ctx context.Context, req *aipb.ListRemediationProposalRequest) (*aipb.ListRemediationProposalResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	results, err := a.repository.ListRemediationProposal(ctx, req.ProjectId, req.FindingId, req.Status)
+	if err != nil {
+		return nil, err
+	}
+	proposals := make([]*aipb.RemediationProposal, 0, len(results))
+	for _, result := range results {
+		proposals = append(proposals, convertRemediationProposal(result))
+	}
+	return &aipb.ListRemediationProposalResponse{RemediationProposals: proposals}, nil
 }
 
 func (a *AIService) UpdateRemediationProposalStatus(ctx context.Context, req *aipb.UpdateRemediationProposalStatusRequest) (*aipb.UpdateRemediationProposalStatusResponse, error) {
