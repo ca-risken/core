@@ -1,7 +1,9 @@
 package finding
 
 import (
+	"encoding/base64"
 	"errors"
+	"strconv"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
@@ -14,8 +16,48 @@ const (
 	PutResourceBatchMaxLength = 50
 )
 
+func validateAssetRequest(view bool, typ, key, sort string) error {
+	if key != "" {
+		if typ == "Unknown" {
+			id, err := strconv.ParseUint(key, 10, 64)
+			if err != nil || id == 0 {
+				return errors.New("unknown asset_key must be a finding ID")
+			}
+		} else {
+			if len(key) != 43 {
+				return errors.New("asset_key must be 43 characters")
+			}
+			decoded, err := base64.RawURLEncoding.DecodeString(key)
+			if err != nil || len(decoded) != 32 || base64.RawURLEncoding.EncodeToString(decoded) != key {
+				return errors.New("asset_key must be a 43-character unpadded Base64URL SHA-256 hash")
+			}
+		}
+	}
+	if (typ == "") != (key == "") {
+		return errors.New("asset_type and asset_key must be supplied together")
+	}
+	if typ != "" {
+		switch typ {
+		case "Workload", "Image", "VM", "Resource", "Unknown":
+		default:
+			return errors.New("invalid asset_type")
+		}
+	}
+	if view {
+		switch sort {
+		case "", "finding_id", "score", "updated_at", "asset_name", "asset_type", "finding_count", "project_id":
+		default:
+			return errors.New("invalid asset sort")
+		}
+	}
+	return nil
+}
+
 // Validate ListFindingRequest
 func (l *ListFindingRequest) Validate() error {
+	if err := validateAssetRequest(l.AssetView, l.AssetType, l.AssetKey, l.Sort); err != nil {
+		return err
+	}
 	return validation.ValidateStruct(l,
 		validation.Field(&l.ProjectId, validation.Required),
 		validation.Field(&l.DataSource, validation.Each(validation.Length(0, 64))),
@@ -23,8 +65,12 @@ func (l *ListFindingRequest) Validate() error {
 		validation.Field(&l.FromScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.ToScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.Tag, validation.Each(validation.Length(0, 64))),
-		validation.Field(&l.Sort, validation.In(
-			"finding_id", "description", "data_source", "resource_name", "score", "updated_at")),
+		validation.Field(&l.Sort, validation.By(func(value any) error {
+			if l.AssetView {
+				return nil
+			}
+			return validation.Validate(value, validation.In("finding_id", "description", "data_source", "resource_name", "score", "updated_at"))
+		})),
 		validation.Field(&l.Direction, validation.In("asc", "desc")),
 		validation.Field(&l.Offset, validation.Min(0)),
 		validation.Field(&l.Limit, validation.Min(0), validation.Max(200)),
@@ -33,6 +79,17 @@ func (l *ListFindingRequest) Validate() error {
 
 // Validate ListFindingForOrgRequest
 func (l *ListFindingForOrgRequest) Validate() error {
+	if err := validateAssetRequest(l.AssetView, l.AssetType, l.AssetKey, l.Sort); err != nil {
+		return err
+	}
+	if l.AssetView || l.AssetKey != "" || l.AssetProjectId != 0 {
+		if err := validation.Validate(l.Limit, validation.Min(0), validation.Max(200)); err != nil {
+			return err
+		}
+		if err := validation.Validate(l.Offset, validation.Min(0)); err != nil {
+			return err
+		}
+	}
 	return validation.ValidateStruct(l,
 		validation.Field(&l.OrganizationId, validation.Required),
 		validation.Field(&l.DataSource, validation.Each(validation.Length(0, 64))),
@@ -40,8 +97,12 @@ func (l *ListFindingForOrgRequest) Validate() error {
 		validation.Field(&l.FromScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.ToScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.Tag, validation.Each(validation.Length(0, 64))),
-		validation.Field(&l.Sort, validation.In(
-			"finding_id", "description", "data_source", "resource_name", "score", "updated_at")),
+		validation.Field(&l.Sort, validation.By(func(value any) error {
+			if l.AssetView {
+				return nil
+			}
+			return validation.Validate(value, validation.In("finding_id", "description", "data_source", "resource_name", "score", "updated_at"))
+		})),
 		validation.Field(&l.Direction, validation.In("asc", "desc")),
 	)
 }
