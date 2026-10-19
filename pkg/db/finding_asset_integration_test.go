@@ -5,8 +5,10 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -192,6 +194,40 @@ func TestFindingAssetsMySQL(t *testing.T) {
 		}
 		if _, err = raw.Exec("DELETE FROM finding WHERE finding_id=99"); err != nil {
 			t.Fatal(err)
+		}
+	})
+	t.Run("image versions share repository", func(t *testing.T) {
+		cases := []struct {
+			id     uint64
+			digest string
+		}{{90, strings.Repeat("a", 64)}, {91, strings.Repeat("b", 64)}}
+		for _, c := range cases {
+			e := mk(c.id, 1, "image")
+			e.Data = fmt.Sprintf(`{"asset":{"full_name":"registry.example/project/app@sha256:%s"},"finding":{"category":"CONTAINER_IMAGE_VULNERABILITY","vulnerability":{"cve":{"id":"GHSA-vcvr-r3jv-pc5j"}}}}`, c.digest)
+			a := findingasset.Classify(e.DataSource, e.ResourceName, e.Data)
+			e.AssetType, e.AssetKey, e.AssetName = a.Type, a.Key, a.Name
+			got, saveErr := client.UpsertFinding(ctx, e)
+			if saveErr != nil {
+				t.Fatal(saveErr)
+			}
+			var saved, original any
+			if err := json.Unmarshal([]byte(got.Data), &saved); err != nil {
+				t.Fatal(err)
+			}
+			if err := json.Unmarshal([]byte(e.Data), &original); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(saved, original) || got.ResourceName != e.ResourceName {
+				t.Fatalf("%v %v", got, saveErr)
+			}
+		}
+		req := &finding.ListFindingRequest{ProjectId: 1, AssetView: true, AssetType: "Image", ToScore: 1, Limit: 200}
+		assets, total, totalFindings, listErr := client.ListFindingAssets(ctx, req, 0)
+		if listErr != nil || total != 1 || totalFindings != 2 || len(assets) != 1 || assets[0].AssetKey != hash("registry.example/project/app") || assets[0].AssetName != "registry.example/project/app" {
+			t.Fatalf("%v %d %d %v", assets, total, totalFindings, listErr)
+		}
+		if _, deleteErr := raw.Exec("DELETE FROM finding WHERE finding_id IN (90,91)"); deleteErr != nil {
+			t.Fatal(deleteErr)
 		}
 	})
 	t.Run("save clears old classification", func(t *testing.T) {
