@@ -10,12 +10,12 @@ func orgAssetRequest(r *finding.ListFindingForOrgRequest) *finding.ListFindingRe
 	return &finding.ListFindingRequest{DataSource: r.DataSource, ResourceName: r.ResourceName, FromScore: r.FromScore, ToScore: r.ToScore, Tag: r.Tag, Sort: r.Sort, Direction: r.Direction, Offset: r.Offset, Limit: r.Limit, Status: r.Status, FindingId: r.FindingId, AssetView: r.AssetView, AssetType: r.AssetType, AssetKey: r.AssetKey, AssetProjectId: r.AssetProjectId}
 }
 func (f *FindingService) listFindingAssetView(ctx context.Context, r *finding.ListFindingRequest) (*finding.ListFindingResponse, error) {
-	assets, total, err := f.repository.ListFindingAssets(ctx, r, 0)
+	assets, total, totalFindings, err := f.repository.ListFindingAssets(ctx, r, 0)
 	if err != nil {
 		return nil, err
 	}
 	if r.AssetView {
-		return &finding.ListFindingResponse{Assets: assets, Count: uint32(len(assets)), Total: convertToUint32(total)}, nil
+		return &finding.ListFindingResponse{Assets: assets, Count: uint32(len(assets)), Total: convertToUint32(total), TotalFindingCount: totalFindings}, nil
 	}
 	list, err := f.repository.ListFinding(ctx, r)
 	if err != nil {

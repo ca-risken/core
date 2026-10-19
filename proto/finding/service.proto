@@ -96,6 +96,7 @@ message ListFindingResponse {
   uint32 count = 2;
   uint32 total = 3;
  repeated FindingAsset assets = 4;
+ uint64 total_finding_count = 5;
 }
 
 message ListFindingForOrgRequest {
@@ -135,6 +136,7 @@ message ListFindingForOrgResponse {
   uint32 count = 2;
   uint32 total = 3;
  repeated FindingAsset assets = 4;
+ uint64 total_finding_count = 5;
 }
 
 message BatchListFindingRequest {
