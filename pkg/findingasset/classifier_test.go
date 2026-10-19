@@ -23,8 +23,12 @@ func TestClassify(t *testing.T) {
 		{name: "ambiguous workloads fall back", source: "google:scc", typ: "google.container.Cluster", resource: "cluster", category: "OS_VULNERABILITY", id: "CVE-2023-1234", objects: []object{{NS: "n", Kind: "Deployment", Name: "a"}, {NS: "n", Kind: "Deployment", Name: "b"}}, wantType: "Resource", wantKey: "cluster"},
 		{name: "pod not guessed", source: "google:scc", typ: "google.container.Cluster", resource: "cluster", category: "OS_VULNERABILITY", id: "CVE-2023-1234", objects: []object{{NS: "n", Kind: "Pod", Name: "app-123"}}, wantType: "Resource", wantKey: "cluster"},
 		{name: "missing namespace", source: "google:scc", typ: "google.container.Cluster", resource: "cluster", category: "OS_VULNERABILITY", id: "CVE-2023-1234", objects: []object{{Kind: "Deployment", Name: "app"}}, wantType: "Resource", wantKey: "cluster"},
-		{name: "image digest", source: "google:scc", category: "CONTAINER_IMAGE_VULNERABILITY", id: "CVE-2023-1234", container: container{ImageID: "registry.example/app@sha256:" + strings.Repeat("a", 64)}, wantType: "Image", wantKey: "registry.example/app@sha256:" + strings.Repeat("a", 64)},
-		{name: "image digest in URI", source: "google:scc", typ: "google.container.Cluster", resource: "cluster", category: "CONTAINER_IMAGE_VULNERABILITY", id: "CVE-2023-1234", container: container{URI: "registry.example/app@sha256:" + strings.Repeat("b", 64)}, wantType: "Image", wantKey: "registry.example/app@sha256:" + strings.Repeat("b", 64)},
+		{name: "image digest", source: "google:scc", category: "CONTAINER_IMAGE_VULNERABILITY", id: "CVE-2023-1234", container: container{ImageID: "registry.example/app@sha256:" + strings.Repeat("a", 64)}, wantType: "Image", wantKey: "registry.example/app"},
+		{name: "image digest in URI", source: "google:scc", typ: "google.container.Cluster", resource: "cluster", category: "CONTAINER_IMAGE_VULNERABILITY", id: "CVE-2023-1234", container: container{URI: "registry.example/app@sha256:" + strings.Repeat("b", 64)}, wantType: "Image", wantKey: "registry.example/app"},
+		{name: "image resource", source: "google:scc", resource: "registry.example/project/app@sha256:" + strings.Repeat("a", 64), category: "CONTAINER_IMAGE_VULNERABILITY", id: "GHSA-vcvr-r3jv-pc5j", wantType: "Image", wantKey: "registry.example/project/app"},
+		{name: "image tag and registry port", source: "google:scc", category: "CONTAINER_IMAGE_VULNERABILITY", id: "CVE-2023-1234", container: container{ImageID: "registry.example:5000/project/app:v1@sha256:" + strings.Repeat("a", 64), URI: "display-name:v1"}, wantType: "Image", wantKey: "registry.example:5000/project/app"},
+		{name: "same repository candidates", source: "google:scc", resource: "registry.example/app@sha256:" + strings.Repeat("a", 64), category: "CONTAINER_IMAGE_VULNERABILITY", id: "CVE-2023-1234", container: container{ImageID: "registry.example/app@sha256:" + strings.Repeat("b", 64)}, wantType: "Image", wantKey: "registry.example/app"},
+		{name: "different repositories remain ambiguous", source: "google:scc", resource: "cluster", category: "CONTAINER_IMAGE_VULNERABILITY", id: "CVE-2023-1234", objects: []object{{Kind: "Pod", Containers: []container{{ImageID: "registry.example/a/app@sha256:" + strings.Repeat("a", 64)}, {ImageID: "registry.example/b/app@sha256:" + strings.Repeat("b", 64)}}}}, wantType: "Resource", wantKey: "cluster"},
 		{name: "vm", source: "google:scc", typ: "google.compute.Instance", resource: "//compute.googleapis.com/projects/p/zones/z/instances/v", category: "OS_VULNERABILITY", id: "CVE-2023-1234", wantType: "VM", wantKey: "//compute.googleapis.com/projects/p/zones/z/instances/v"},
 		{name: "unknown", source: "google:scc", category: "OS_VULNERABILITY", id: "CVE-2023-1234", wantType: "Unknown"},
 	}
@@ -44,7 +48,7 @@ func TestClassify(t *testing.T) {
 				sum := sha256.Sum256([]byte(wantKey))
 				wantKey = base64.RawURLEncoding.EncodeToString(sum[:])
 			}
-			if got.Type != c.wantType || got.Key != wantKey {
+			if got.Type != c.wantType || got.Key != wantKey || (c.wantType == "Image" && got.Name != c.wantKey) {
 				t.Fatalf("got %+v want %s/%s", got, c.wantType, wantKey)
 			}
 		})

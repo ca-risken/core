@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"regexp"
+	"strings"
 )
 
 type Asset struct{ Type, Key, Name string }
@@ -95,9 +96,7 @@ func classify(source, resource, data string) Asset {
 		}
 	}
 	addImage(images, r.Finding.Container)
-	if digest.MatchString(full) {
-		images[full] = Asset{"Image", full, full}
-	}
+	addImage(images, container{ImageID: full})
 	if len(images) == 1 {
 		for _, a := range images {
 			return a
@@ -121,11 +120,11 @@ func addImage(images map[string]Asset, c container) {
 	if !digest.MatchString(key) {
 		key = c.URI
 	}
-	if digest.MatchString(key) {
-		name := c.URI
-		if name == "" {
-			name = key
+	if match := digest.FindStringSubmatch(key); match != nil {
+		repository := match[1]
+		if colon := strings.LastIndex(repository, ":"); colon > strings.LastIndex(repository, "/") {
+			repository = repository[:colon]
 		}
-		images[key] = Asset{"Image", key, name}
+		images[repository] = Asset{"Image", repository, repository}
 	}
 }
