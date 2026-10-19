@@ -30,7 +30,7 @@ type FindingWithPend struct {
 
 type FindingRepository interface {
 	// Finding
-	ListFindingAssets(context.Context, *finding.ListFindingRequest, uint32) ([]*finding.FindingAsset, int64, error)
+	ListFindingAssets(context.Context, *finding.ListFindingRequest, uint32) ([]*finding.FindingAsset, int64, uint64, error)
 	ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*[]model.Finding, error)
 	ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]FindingWithPend, error)
 	BatchListFinding(context.Context, *finding.BatchListFindingRequest) (*[]model.Finding, error)

@@ -85,18 +85,46 @@ func TestFindingAssetsMySQL(t *testing.T) {
 			c.req.Limit = 200
 			c.req.Sort = "finding_count"
 			c.req.Direction = "desc"
-			a, n, err := client.ListFindingAssets(ctx, c.req, c.org)
+			a, n, totalFindings, err := client.ListFindingAssets(ctx, c.req, c.org)
 			if err != nil || n != c.groups {
 				t.Fatalf("groups=%d want=%d err=%v", n, c.groups, err)
+			}
+			var sum uint64
+			for _, asset := range a {
+				sum += uint64(asset.FindingCount)
+				if len(asset.DataSources) != 1 || asset.DataSources[0] != "google:scc" {
+					t.Fatal(asset)
+				}
+			}
+			if totalFindings != sum {
+				t.Fatalf("total findings=%d want=%d", totalFindings, sum)
 			}
 			if n > 0 && a[0].FindingCount != c.firstCount {
 				t.Fatalf("count=%d want=%d", a[0].FindingCount, c.firstCount)
 			}
 		})
 	}
+	t.Run("metadata independent of page", func(t *testing.T) {
+		cases := []struct {
+			name          string
+			limit, offset int32
+			wantRows      int
+		}{
+			{"first page", 1, 0, 1}, {"next page", 1, 1, 1}, {"past last page", 1, 99, 0}, {"zero page size", 0, 0, 0},
+		}
+		for _, c := range cases {
+			t.Run(c.name, func(t *testing.T) {
+				req := &finding.ListFindingRequest{ProjectId: 1, AssetView: true, AssetType: "VM", ToScore: 1, Limit: c.limit, Offset: c.offset}
+				assets, total, totalFindings, err := client.ListFindingAssets(ctx, req, 0)
+				if err != nil || total != 4 || totalFindings != 5 || len(assets) != c.wantRows {
+					t.Fatalf("assets=%v groups=%d findings=%d err=%v", assets, total, totalFindings, err)
+				}
+			})
+		}
+	})
 	t.Run("expansion exact", func(t *testing.T) {
 		r := &finding.ListFindingRequest{ProjectId: 1, ToScore: 1, Limit: 200, Sort: "finding_id", Direction: "asc", AssetType: "VM", AssetKey: hash("vm"), Tag: []string{"a", "b"}}
-		_, n, err := client.ListFindingAssets(ctx, r, 0)
+		_, n, _, err := client.ListFindingAssets(ctx, r, 0)
 		if err != nil || n != 1 {
 			t.Fatalf("%d %v", n, err)
 		}
@@ -113,7 +141,7 @@ func TestFindingAssetsMySQL(t *testing.T) {
 		for _, c := range cases {
 			t.Run(c.name, func(t *testing.T) {
 				r := &finding.ListFindingRequest{ProjectId: 1, ToScore: 1, Limit: 20, Sort: "finding_id", Direction: "asc", AssetType: "Unknown", AssetKey: c.key}
-				_, n, err := client.ListFindingAssets(ctx, r, 0)
+				_, n, _, err := client.ListFindingAssets(ctx, r, 0)
 				if err != nil || n != 1 {
 					t.Fatalf("count=%d err=%v", n, err)
 				}

@@ -55,16 +55,16 @@ func (f *FindingService) ListFindingForOrg(ctx context.Context, req *finding.Lis
 	}
 	param := convertListFindingForOrgRequest(req)
 	if req.AssetView {
-		assets, total, err := f.repository.ListFindingAssets(ctx, orgAssetRequest(param), req.OrganizationId)
+		assets, total, totalFindings, err := f.repository.ListFindingAssets(ctx, orgAssetRequest(param), req.OrganizationId)
 		if err != nil {
 			return nil, err
 		}
-		return &finding.ListFindingForOrgResponse{Assets: assets, Count: uint32(len(assets)), Total: convertToUint32(total)}, nil
+		return &finding.ListFindingForOrgResponse{Assets: assets, Count: uint32(len(assets)), Total: convertToUint32(total), TotalFindingCount: totalFindings}, nil
 	}
 	var total int64
 	var err error
 	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 {
-		_, total, err = f.repository.ListFindingAssets(ctx, orgAssetRequest(param), req.OrganizationId)
+		_, total, _, err = f.repository.ListFindingAssets(ctx, orgAssetRequest(param), req.OrganizationId)
 	} else {
 		total, err = f.repository.ListFindingCount(
 			ctx,

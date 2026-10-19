@@ -48,15 +48,19 @@ func TestListFindingAssets(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			m.ExpectQuery("SELECT COUNT.*SELECT DISTINCT").WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
-			if c.view {
-				m.ExpectQuery("SELECT project_id.*GROUP BY.*ORDER BY max_score").WillReturnRows(sqlmock.NewRows([]string{"project_id", "asset_type", "asset_key", "asset_name", "max_score", "finding_count", "updated_at"}).AddRow(1, "VM", "vm", "vm", 0.9, 2, 100))
+			countRows := sqlmock.NewRows([]string{"total", "finding_count"}).AddRow(1, 2)
+			if !c.view {
+				countRows = sqlmock.NewRows([]string{"count"}).AddRow(1)
 			}
-			a, n, err := client.ListFindingAssets(context.Background(), &finding.ListFindingRequest{ProjectId: 1, ToScore: 1, AssetView: c.view, Limit: 20}, c.org)
+			m.ExpectQuery("SELECT COUNT.*SELECT DISTINCT").WillReturnRows(countRows)
+			if c.view {
+				m.ExpectQuery("SELECT project_id.*GROUP BY.*ORDER BY max_score").WillReturnRows(sqlmock.NewRows([]string{"project_id", "asset_type", "asset_key", "asset_name", "max_score", "finding_count", "updated_at", "data_sources_json"}).AddRow(1, "VM", "vm", "vm", 0.9, 2, 100, `["google:scc"]`))
+			}
+			a, n, totalFindings, err := client.ListFindingAssets(context.Background(), &finding.ListFindingRequest{ProjectId: 1, ToScore: 1, AssetView: c.view, Limit: 20}, c.org)
 			if err != nil || n != 1 {
 				t.Fatalf("%v %d", err, n)
 			}
-			if c.view && len(a) != 1 {
+			if c.view && (totalFindings != 2 || len(a) != 1 || len(a[0].DataSources) != 1 || a[0].DataSources[0] != "google:scc") {
 				t.Fatal(a)
 			}
 			if err = m.ExpectationsWereMet(); err != nil {

@@ -1426,11 +1426,11 @@ func NewFindingRepository(t interface {
 	return mock
 }
 
-func (_m *FindingRepository) ListFindingAssets(ctx context.Context, req *finding.ListFindingRequest, org uint32) ([]*finding.FindingAsset, int64, error) {
+func (_m *FindingRepository) ListFindingAssets(ctx context.Context, req *finding.ListFindingRequest, org uint32) ([]*finding.FindingAsset, int64, uint64, error) {
 	ret := _m.Called(ctx, req, org)
 	var assets []*finding.FindingAsset
 	if ret.Get(0) != nil {
 		assets = ret.Get(0).([]*finding.FindingAsset)
 	}
-	return assets, ret.Get(1).(int64), ret.Error(2)
+	return assets, ret.Get(1).(int64), ret.Get(2).(uint64), ret.Error(3)
 }
