@@ -56,6 +56,9 @@ func (a *AIClient) callResponsesAPI(
 		MaxToolCalls:    openai.Int(MAX_TOOL_USE_COUNT),
 		MaxOutputTokens: openai.Int(25000),
 	}
+	if model == "gpt-6-luna" && reasoningEffort == "" {
+		reasoningEffort = "none"
+	}
 	if reasoningEffort != "" {
 		params.Reasoning = openai.ReasoningParam{
 			Effort: reasoningEffort,
@@ -84,13 +87,16 @@ func responsesStreamingAPI[T any](
 	sendContentFunc func(string) T,
 	logger logging.Logger,
 ) (string, error) {
-	streamResp := openaiClient.Responses.NewStreaming(ctx, responses.ResponseNewParams{
+	params := responses.ResponseNewParams{
 		Model:        model,
 		Instructions: openai.String(instruction),
 		Input:        inputs,
 		Tools:        tools,
-	},
-	)
+	}
+	if model == "gpt-6-luna" {
+		params.Reasoning = openai.ReasoningParam{Effort: "none"}
+	}
+	streamResp := openaiClient.Responses.NewStreaming(ctx, params)
 	defer streamResp.Close()
 
 	var answer string
