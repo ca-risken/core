@@ -130,7 +130,7 @@ func TestFindingPackagesMySQL(t *testing.T) {
 		{"other npm app directory", "NPM", []string{"/service/node_modules/.pnpm/next@1.0/node_modules/next/package.json"}, "location", "/service/node_modules"},
 		{"different app prefixes", "PYPI", []string{"/app2/site-packages/requests/__init__.py"}, "location", "/app2/site-packages"},
 		{"unknown package type with app path", "", []string{"/app/lib/example.jar"}, "app", "/app"},
-		{"relative path", "PYPI", []string{"venv/lib/site-packages/a.py"}, "", ""},
+		{"relative path", "PYPI", []string{"venv/lib/site-packages/a.py"}, "location", "/venv/lib/site-packages"},
 		{"different directories", "MAVEN", []string{"/opt/a/lib/a.jar", "/opt/b/lib/a.jar"}, "", ""},
 		{"OS overrides app location", "OS", []string{"/app/node_modules/example/package.json"}, "os", "alpine"},
 
