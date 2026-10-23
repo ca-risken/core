@@ -17,10 +17,11 @@ func packageFieldSQL(pkg, field string) string {
 func workScopeSQL() string {
 	document := "IF(JSON_VALID(finding.data), finding.data, '{}')"
 	files := "JSON_MERGE_PRESERVE(COALESCE(JSON_EXTRACT(" + document + ", '$.finding.files'), JSON_ARRAY()), COALESCE(JSON_EXTRACT(" + document + ", '$.finding.vulnerability.offending_package.files'), JSON_ARRAY()))"
-	path := "(CONVERT(file_path USING utf8mb4) COLLATE utf8mb4_bin)"
-	root := "CASE WHEN " + path + " IS NULL OR " + path + " NOT LIKE '/%/%' OR " + path + " LIKE '%/../%' OR " + path + " LIKE '%/./%' OR " + path + " LIKE '%/' THEN '' WHEN " + path + " LIKE '/app/%' THEN 'app:/app' WHEN " + path + " LIKE '%/node_modules/%' THEN CONCAT('location:', SUBSTRING_INDEX(" + path + ", '/node_modules/', 1), '/node_modules') WHEN " + path + " LIKE '%/site-packages/%' THEN CONCAT('location:', SUBSTRING_INDEX(" + path + ", '/site-packages/', 1), '/site-packages') WHEN " + path + " LIKE '%/dist-packages/%' THEN CONCAT('location:', SUBSTRING_INDEX(" + path + ", '/dist-packages/', 1), '/dist-packages') ELSE CONCAT('location:', REGEXP_REPLACE(" + path + ", '/[^/]+$', '')) END"
+	filePath := "COALESCE(NULLIF(file_path, ''), disk_relative_path)"
+	path := "(CONVERT(CASE WHEN LEFT(" + filePath + ", 1) = '/' THEN " + filePath + " ELSE CONCAT('/', " + filePath + ") END USING utf8mb4) COLLATE utf8mb4_bin)"
+	root := "CASE WHEN " + path + " IS NULL OR " + path + " NOT LIKE '/%/%' OR " + path + " LIKE '%/../%' OR " + path + " LIKE '%/./%' OR " + path + " LIKE '%/..' OR " + path + " LIKE '%/.' OR " + path + " LIKE '%/' THEN '' WHEN " + path + " LIKE '/app/%' THEN 'app:/app' WHEN " + path + " LIKE '%/node_modules/%' THEN CONCAT('location:', SUBSTRING_INDEX(" + path + ", '/node_modules/', 1), '/node_modules') WHEN " + path + " LIKE '%/site-packages/%' THEN CONCAT('location:', SUBSTRING_INDEX(" + path + ", '/site-packages/', 1), '/site-packages') WHEN " + path + " LIKE '%/dist-packages/%' THEN CONCAT('location:', SUBSTRING_INDEX(" + path + ", '/dist-packages/', 1), '/dist-packages') ELSE CONCAT('location:', REGEXP_REPLACE(" + path + ", '/[^/]+$', '')) END"
 
-	locations := "SELECT " + root + " AS location FROM JSON_TABLE(" + files + ", '$[*]' COLUMNS(file_path VARCHAR(8192) PATH '$.path' NULL ON EMPTY NULL ON ERROR)) paths"
+	locations := "SELECT " + root + " AS location FROM JSON_TABLE(" + files + ", '$[*]' COLUMNS(file_path VARCHAR(8192) PATH '$.path' NULL ON EMPTY NULL ON ERROR, disk_relative_path VARCHAR(8192) PATH '$.disk_path.relative_path' NULL ON EMPTY NULL ON ERROR)) paths"
 	// Any ambiguous or unrecognized path keeps the finding in the review group.
 	pathScope := "(SELECT IF(COUNT(*) > 0 AND COUNT(DISTINCT location) = 1 AND MIN(location) <> '', MIN(location), '') FROM (" + locations + ") locations)"
 	typ := packageFieldSQL("offending_package", "package_type")
