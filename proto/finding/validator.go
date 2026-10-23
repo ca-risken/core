@@ -2,6 +2,7 @@ package finding
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"strconv"
 
@@ -53,10 +54,37 @@ func validateAssetRequest(view bool, typ, key, sort string) error {
 	return nil
 }
 
+func validatePackageRequest(view bool, key string, assetView bool, assetType, assetKey string, projectID uint32) error {
+	if !view && key == "" {
+		return nil
+	}
+	if assetView || assetType == "" || assetKey == "" || projectID == 0 {
+		return errors.New("package requests require one asset and its project")
+	}
+	if view && key != "" {
+		return errors.New("package_view and package_key cannot be combined")
+	}
+	if key != "" {
+		var parts []string
+		if len(key) > 8192 || json.Unmarshal([]byte(key), &parts) != nil || len(parts) != 4 {
+			return errors.New("invalid package_key")
+		}
+	}
+	return nil
+}
+
 // Validate ListFindingRequest
 func (l *ListFindingRequest) Validate() error {
+	if err := validatePackageRequest(l.PackageView, l.PackageKey, l.AssetView, l.AssetType, l.AssetKey, l.AssetProjectId); err != nil {
+		return err
+	}
 	if err := validateAssetRequest(l.AssetView, l.AssetType, l.AssetKey, l.Sort); err != nil {
 		return err
+	}
+	if l.PackageView || l.PackageKey != "" {
+		if l.AssetProjectId != l.ProjectId {
+			return errors.New("asset_project_id must match project_id")
+		}
 	}
 	return validation.ValidateStruct(l,
 		validation.Field(&l.ProjectId, validation.Required),
@@ -79,6 +107,9 @@ func (l *ListFindingRequest) Validate() error {
 
 // Validate ListFindingForOrgRequest
 func (l *ListFindingForOrgRequest) Validate() error {
+	if err := validatePackageRequest(l.PackageView, l.PackageKey, l.AssetView, l.AssetType, l.AssetKey, l.AssetProjectId); err != nil {
+		return err
+	}
 	if err := validateAssetRequest(l.AssetView, l.AssetType, l.AssetKey, l.Sort); err != nil {
 		return err
 	}

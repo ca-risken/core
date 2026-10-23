@@ -89,6 +89,8 @@ message ListFindingRequest {
  string asset_type = 17;
  string asset_key = 18;
  uint32 asset_project_id = 19;
+ bool package_view = 20;
+ string package_key = 21;
 }
 
 message ListFindingResponse {
@@ -97,6 +99,7 @@ message ListFindingResponse {
   uint32 total = 3;
  repeated FindingAsset assets = 4;
  uint64 total_finding_count = 5;
+ repeated FindingPackage packages = 6;
 }
 
 message ListFindingForOrgRequest {
@@ -116,6 +119,8 @@ message ListFindingForOrgRequest {
  string asset_type = 16;
  string asset_key = 17;
  uint32 asset_project_id = 18;
+ bool package_view = 19;
+ string package_key = 20;
 }
 
 message PendInfo {
@@ -137,6 +142,7 @@ message ListFindingForOrgResponse {
   uint32 total = 3;
  repeated FindingAsset assets = 4;
  uint64 total_finding_count = 5;
+ repeated FindingPackage packages = 6;
 }
 
 message BatchListFindingRequest {
@@ -409,4 +415,20 @@ message UntagByResourceNameRequest {
   uint32 project_id = 1;
   string resource_name = 2;
   string tag = 3;
+}
+
+message FindingPackage {
+ string package_key = 1;
+ string package_name = 2;
+ string package_type = 3;
+ string platform = 4;
+ uint64 finding_count = 5;
+ repeated FindingPackageVersion versions = 6;
+ string work_type = 7;
+ string work_location = 8;
+}
+message FindingPackageVersion {
+ string current_version = 1;
+ string fixed_version = 2;
+ uint64 finding_count = 3;
 }
