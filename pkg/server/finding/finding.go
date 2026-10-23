@@ -54,6 +54,10 @@ func (f *FindingService) ListFindingForOrg(ctx context.Context, req *finding.Lis
 		return nil, err
 	}
 	param := convertListFindingForOrgRequest(req)
+	if req.PackageView {
+		packages, total, count, err := f.listFindingPackages(ctx, orgAssetRequest(param), req.OrganizationId)
+		return &finding.ListFindingForOrgResponse{Packages: packages, Total: total, Count: uint32(len(packages)), TotalFindingCount: count}, err
+	}
 	if req.AssetView {
 		assets, total, totalFindings, err := f.repository.ListFindingAssets(ctx, orgAssetRequest(param), req.OrganizationId)
 		if err != nil {

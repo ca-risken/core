@@ -33,6 +33,10 @@ func assetConditions(req *finding.ListFindingRequest) (string, []any) {
 		cond += " and finding.project_id = ?"
 		args = append(args, req.AssetProjectId)
 	}
+	if req.PackageKey != "" {
+		cond += " and CAST(" + packageKeySQL() + " AS BINARY) = CAST(? AS BINARY)"
+		args = append(args, req.PackageKey)
+	}
 	return cond, args
 }
 

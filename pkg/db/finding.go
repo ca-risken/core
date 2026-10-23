@@ -30,6 +30,7 @@ type FindingWithPend struct {
 
 type FindingRepository interface {
 	// Finding
+	ListFindingPackages(context.Context, *finding.ListFindingRequest, uint32) ([]*finding.FindingPackage, error)
 	ListFindingAssets(context.Context, *finding.ListFindingRequest, uint32) ([]*finding.FindingAsset, int64, uint64, error)
 	ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*[]model.Finding, error)
 	ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]FindingWithPend, error)
@@ -165,7 +166,7 @@ func (c *Client) ListFindingForOrg(ctx context.Context, req *finding.ListFinding
 	}
 
 	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 {
-		extra, args := assetConditions(&finding.ListFindingRequest{AssetType: req.AssetType, AssetKey: req.AssetKey, AssetProjectId: req.AssetProjectId})
+		extra, args := assetConditions(&finding.ListFindingRequest{AssetType: req.AssetType, AssetKey: req.AssetKey, AssetProjectId: req.AssetProjectId, PackageKey: req.PackageKey})
 		cond += extra
 		params = append(params, args...)
 		query = strings.Replace(query, "select finding.*", "select distinct finding.*", 1)
