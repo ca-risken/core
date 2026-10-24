@@ -22,11 +22,10 @@ func workScopeSQL() string {
 	root := "CASE WHEN " + path + " IS NULL OR " + path + " NOT LIKE '/%/%' OR " + path + " LIKE '%/../%' OR " + path + " LIKE '%/./%' OR " + path + " LIKE '%/..' OR " + path + " LIKE '%/.' OR " + path + " LIKE '%/' THEN '' WHEN " + path + " LIKE '/app/%' THEN 'app:/app' WHEN " + path + " LIKE '%/node_modules/%' THEN CONCAT('location:', SUBSTRING_INDEX(" + path + ", '/node_modules/', 1), '/node_modules') WHEN " + path + " LIKE '%/site-packages/%' THEN CONCAT('location:', SUBSTRING_INDEX(" + path + ", '/site-packages/', 1), '/site-packages') WHEN " + path + " LIKE '%/dist-packages/%' THEN CONCAT('location:', SUBSTRING_INDEX(" + path + ", '/dist-packages/', 1), '/dist-packages') ELSE CONCAT('location:', REGEXP_REPLACE(" + path + ", '/[^/]+$', '')) END"
 
 	locations := "SELECT " + root + " AS location FROM JSON_TABLE(" + files + ", '$[*]' COLUMNS(file_path VARCHAR(8192) PATH '$.path' NULL ON EMPTY NULL ON ERROR, disk_relative_path VARCHAR(8192) PATH '$.disk_path.relative_path' NULL ON EMPTY NULL ON ERROR)) paths"
-	// Any ambiguous or unrecognized path keeps the finding in the review group.
 	pathScope := "(SELECT IF(COUNT(*) > 0 AND COUNT(DISTINCT location) = 1 AND MIN(location) <> '', MIN(location), '') FROM (" + locations + ") locations)"
 	typ := packageFieldSQL("offending_package", "package_type")
 	platform := packageFieldSQL("offending_package", "cpe_uri")
-	return "CASE WHEN " + typ + " = 'OS' THEN CONCAT('os:', " + platform + ") ELSE COALESCE(" + pathScope + ", '') END"
+	return "CASE WHEN " + typ + " = 'OS' THEN CONCAT('os:', " + platform + ") WHEN " + packageFieldSQL("offending_package", "package_name") + " = '' THEN '' ELSE COALESCE(NULLIF(" + pathScope + ", ''), 'location:') END"
 }
 
 func packageKeySQL() string {
