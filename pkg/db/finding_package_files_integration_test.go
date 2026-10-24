@@ -36,19 +36,25 @@ func TestFindingPackageFileFormatsMySQL(t *testing.T) {
 		{"direct path takes precedence", "Workload", `[{"path":"usr/local/bin/gosu","disk_path":{"relative_path":"other/bin/gosu"}}]`, "location", "/usr/local/bin", false},
 		{"offending package files", "VM", `[{"disk_path":{"relative_path":"home/kubernetes/bin/kubelet"}}]`, "location", "/home/kubernetes/bin", true},
 		{"equivalent paths", "VM", `[{"path":"/home/kubernetes/bin/kubelet"},{"disk_path":{"relative_path":"home/kubernetes/bin/crictl"}}]`, "location", "/home/kubernetes/bin", false},
-		{"different directories stay unknown", "VM", `[{"disk_path":{"relative_path":"home/kubernetes/bin/kubelet"}},{"path":"var/lib/containerd/snapshots/1/fs/bin/tool"}]`, "", "", false},
-		{"missing paths", "VM", `[{"disk_path":{}}]`, "", "", false},
-		{"empty path", "Workload", `[{"path":""}]`, "", "", false},
-		{"parent traversal", "VM", `[{"disk_path":{"relative_path":"../home/kubernetes/bin/kubelet"}}]`, "", "", false},
-		{"embedded parent traversal", "Workload", `[{"path":"app/../other/package.json"}]`, "", "", false},
-		{"current directory traversal", "Workload", `[{"path":"./app/package.json"}]`, "", "", false},
-		{"trailing parent directory", "VM", `[{"path":"home/kubernetes/.."}]`, "", "", false},
-		{"trailing current directory", "VM", `[{"path":"home/kubernetes/."}]`, "", "", false},
-		{"directory path", "VM", `[{"path":"home/kubernetes/bin/"}]`, "", "", false},
+		{"different directories become libraries", "VM", `[{"disk_path":{"relative_path":"home/kubernetes/bin/kubelet"}},{"path":"var/lib/containerd/snapshots/1/fs/bin/tool"}]`, "location", "", false},
+		{"mixed app and binary paths", "Workload", `[{"path":"/app/lib/a"},{"path":"/usr/bin/tool"}]`, "location", "", false},
+		{"multiple app paths", "Image", `[{"path":"/app/lib/a"},{"path":"app/vendor/b"}]`, "app", "/app", false},
+		{"missing package name", "VM", `[{"path":"/usr/bin/tool"}]`, "", "", false},
+		{"missing paths", "VM", `[{"disk_path":{}}]`, "location", "", false},
+		{"empty path", "Workload", `[{"path":""}]`, "location", "", false},
+		{"parent traversal", "VM", `[{"disk_path":{"relative_path":"../home/kubernetes/bin/kubelet"}}]`, "location", "", false},
+		{"embedded parent traversal", "Workload", `[{"path":"app/../other/package.json"}]`, "location", "", false},
+		{"current directory traversal", "Workload", `[{"path":"./app/package.json"}]`, "location", "", false},
+		{"trailing parent directory", "VM", `[{"path":"home/kubernetes/.."}]`, "location", "", false},
+		{"trailing current directory", "VM", `[{"path":"home/kubernetes/."}]`, "location", "", false},
+		{"directory path", "VM", `[{"path":"home/kubernetes/bin/"}]`, "location", "", false},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			pkg := map[string]any{"package_name": "example", "package_type": "GO", "package_version": "1"}
+			if c.name == "missing package name" {
+				delete(pkg, "package_name")
+			}
 			report := map[string]any{"vulnerability": map[string]any{"offending_package": pkg}}
 			if c.offendingFiles {
 				pkg["files"] = json.RawMessage(c.files)
