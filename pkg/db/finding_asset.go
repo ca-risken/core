@@ -15,6 +15,10 @@ const assetKeySQL = "CASE WHEN finding.asset_type = 'Unknown' THEN CAST(finding.
 func assetConditions(req *finding.ListFindingRequest) (string, []any) {
 	cond := " and finding.data_source = 'google:scc' and finding.asset_type IS NOT NULL"
 	var args []any
+	if req.AssetName != "" {
+		cond += " and INSTR(finding.asset_name, ?) > 0"
+		args = append(args, req.AssetName)
+	}
 	if req.AssetType != "" {
 		cond += " and finding.asset_type = ?"
 		args = append(args, req.AssetType)

@@ -116,7 +116,7 @@ func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingReques
 		req.FromScore, req.ToScore, req.FindingId,
 		req.DataSource, req.ResourceName, req.Tag,
 		req.Status)
-	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 {
+	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 || req.AssetName != "" {
 		extra, args := assetConditions(req)
 		cond += extra
 		params = append(params, args...)
@@ -125,7 +125,7 @@ func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingReques
 	}
 	query += cond
 	alias := "f_alias"
-	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 {
+	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 || req.AssetName != "" {
 		alias = "finding"
 	}
 	query += fmt.Sprintf(" order by %s.%s %s", alias, req.Sort, req.Direction)
@@ -165,8 +165,8 @@ func (c *Client) ListFindingForOrg(ctx context.Context, req *finding.ListFinding
 		cond += " and pf.finding_id is not NULL and (pf.expired_at is NULL or NOW() < pf.expired_at)"
 	}
 
-	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 {
-		extra, args := assetConditions(&finding.ListFindingRequest{AssetType: req.AssetType, AssetKey: req.AssetKey, AssetProjectId: req.AssetProjectId, PackageKey: req.PackageKey})
+	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 || req.AssetName != "" {
+		extra, args := assetConditions(&finding.ListFindingRequest{AssetType: req.AssetType, AssetKey: req.AssetKey, AssetProjectId: req.AssetProjectId, PackageKey: req.PackageKey, AssetName: req.AssetName})
 		cond += extra
 		params = append(params, args...)
 		query = strings.Replace(query, "select finding.*", "select distinct finding.*", 1)
@@ -174,7 +174,7 @@ func (c *Client) ListFindingForOrg(ctx context.Context, req *finding.ListFinding
 	}
 	query += join + cond
 	alias := "f_alias"
-	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 {
+	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 || req.AssetName != "" {
 		alias = "finding"
 	}
 	query += fmt.Sprintf(" order by %s.%s %s", alias, req.Sort, req.Direction)

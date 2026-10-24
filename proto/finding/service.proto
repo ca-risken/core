@@ -91,6 +91,7 @@ message ListFindingRequest {
  uint32 asset_project_id = 19;
  bool package_view = 20;
  string package_key = 21;
+ string asset_name = 22;
 }
 
 message ListFindingResponse {
@@ -121,6 +122,7 @@ message ListFindingForOrgRequest {
  uint32 asset_project_id = 18;
  bool package_view = 19;
  string package_key = 20;
+ string asset_name = 21;
 }
 
 message PendInfo {

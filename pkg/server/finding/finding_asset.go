@@ -9,7 +9,7 @@ import (
 )
 
 func orgAssetRequest(r *finding.ListFindingForOrgRequest) *finding.ListFindingRequest {
-	return &finding.ListFindingRequest{DataSource: r.DataSource, ResourceName: r.ResourceName, FromScore: r.FromScore, ToScore: r.ToScore, Tag: r.Tag, Sort: r.Sort, Direction: r.Direction, Offset: r.Offset, Limit: r.Limit, Status: r.Status, FindingId: r.FindingId, AssetView: r.AssetView, AssetType: r.AssetType, AssetKey: r.AssetKey, AssetProjectId: r.AssetProjectId, PackageView: r.PackageView, PackageKey: r.PackageKey}
+	return &finding.ListFindingRequest{DataSource: r.DataSource, ResourceName: r.ResourceName, FromScore: r.FromScore, ToScore: r.ToScore, Tag: r.Tag, Sort: r.Sort, Direction: r.Direction, Offset: r.Offset, Limit: r.Limit, Status: r.Status, FindingId: r.FindingId, AssetView: r.AssetView, AssetType: r.AssetType, AssetKey: r.AssetKey, AssetProjectId: r.AssetProjectId, PackageView: r.PackageView, PackageKey: r.PackageKey, AssetName: r.AssetName}
 }
 func (f *FindingService) listFindingAssetView(ctx context.Context, r *finding.ListFindingRequest) (*finding.ListFindingResponse, error) {
 	if r.PackageView {

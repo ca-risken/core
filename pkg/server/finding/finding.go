@@ -21,7 +21,7 @@ func (f *FindingService) ListFinding(ctx context.Context, req *finding.ListFindi
 		return nil, err
 	}
 	param := convertListFindingRequest(req)
-	if req.AssetView || req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 {
+	if req.AssetView || req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 || req.AssetName != "" {
 		return f.listFindingAssetView(ctx, param)
 	}
 	total, err := f.repository.ListFindingCount(
@@ -67,7 +67,7 @@ func (f *FindingService) ListFindingForOrg(ctx context.Context, req *finding.Lis
 	}
 	var total int64
 	var err error
-	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 {
+	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 || req.AssetName != "" {
 		_, total, _, err = f.repository.ListFindingAssets(ctx, orgAssetRequest(param), req.OrganizationId)
 	} else {
 		total, err = f.repository.ListFindingCount(

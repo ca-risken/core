@@ -90,6 +90,7 @@ func (l *ListFindingRequest) Validate() error {
 		validation.Field(&l.ProjectId, validation.Required),
 		validation.Field(&l.DataSource, validation.Each(validation.Length(0, 64))),
 		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 512))),
+		validation.Field(&l.AssetName, validation.Length(0, 512)),
 		validation.Field(&l.FromScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.ToScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.Tag, validation.Each(validation.Length(0, 64))),
@@ -113,7 +114,7 @@ func (l *ListFindingForOrgRequest) Validate() error {
 	if err := validateAssetRequest(l.AssetView, l.AssetType, l.AssetKey, l.Sort); err != nil {
 		return err
 	}
-	if l.AssetView || l.AssetKey != "" || l.AssetProjectId != 0 {
+	if l.AssetView || l.AssetKey != "" || l.AssetProjectId != 0 || l.AssetName != "" {
 		if err := validation.Validate(l.Limit, validation.Min(0), validation.Max(200)); err != nil {
 			return err
 		}
@@ -125,6 +126,7 @@ func (l *ListFindingForOrgRequest) Validate() error {
 		validation.Field(&l.OrganizationId, validation.Required),
 		validation.Field(&l.DataSource, validation.Each(validation.Length(0, 64))),
 		validation.Field(&l.ResourceName, validation.Each(validation.Length(0, 512))),
+		validation.Field(&l.AssetName, validation.Length(0, 512)),
 		validation.Field(&l.FromScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.ToScore, validation.Min(0.0), validation.Max(1.0)),
 		validation.Field(&l.Tag, validation.Each(validation.Length(0, 64))),
