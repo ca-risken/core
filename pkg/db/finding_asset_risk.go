@@ -22,6 +22,18 @@ func (c *Client) loadAssetRisks(ctx context.Context, req *finding.ListFindingReq
 	if len(assets) == 0 {
 		return nil
 	}
+	pages := []string{}
+	args := []any{}
+	for i, a := range assets {
+		pages = append(pages, "SELECT ? AS asset_index, ? AS project_id, ? AS asset_type, ? AS asset_key")
+		args = append(args, i, a.ProjectId, a.AssetType, a.AssetKey)
+	}
+	return c.scanAssetRisks(ctx, req, orgID, strings.Join(pages, " UNION ALL "), args, func(index int, risk *finding.FindingAssetRisk) {
+		assets[index].RiskInformation = append(assets[index].RiskInformation, risk)
+	})
+}
+
+func (c *Client) scanAssetRisks(ctx context.Context, req *finding.ListFindingRequest, orgID uint32, pageSQL string, args []any, visit func(int, *finding.FindingAssetRisk)) error {
 	var cond string
 	var scopeArgs []any
 	if orgID == 0 {
@@ -29,13 +41,8 @@ func (c *Client) loadAssetRisks(ctx context.Context, req *finding.ListFindingReq
 	} else {
 		cond, scopeArgs = generateOrganizationFindingQuery(orgID, 0, req.FromScore, req.ToScore, 0, nil, nil, req.Tag, req.Status)
 	}
-	pages := []string{}
-	args := []any{}
-	for i, a := range assets {
-		pages = append(pages, "SELECT ? AS asset_index, ? AS project_id, ? AS asset_type, ? AS asset_key")
-		args = append(args, i, a.ProjectId, a.AssetType, a.AssetKey)
-	}
 	args = append(args, scopeArgs...)
+
 	sameAsset := "((page.asset_type = 'Unknown' AND CAST(finding.finding_id AS CHAR) = page.asset_key) OR (page.asset_type <> 'Unknown' AND finding.asset_type = page.asset_type AND finding.asset_key = page.asset_key))"
 	// Resolve the full resource name from the original Finding, never its display name
 	// or hashed asset_key. The original Finding is used only for identity matching.
@@ -48,7 +55,7 @@ func (c *Client) loadAssetRisks(ctx context.Context, req *finding.ListFindingReq
  'exploitation_activity', JSON_EXTRACT(finding.data, '$.finding.vulnerability.cve.exploitation_activity'),
  'exploit_release_date', JSON_EXTRACT(finding.data, '$.finding.vulnerability.cve.exploit_release_date')))),
  'vulnerability', JSON_OBJECT('kev', JSON_OBJECT('cveID', JSON_EXTRACT(finding.data, '$.vulnerability.kev.cveID'))))`
-	query := "SELECT DISTINCT finding.finding_id, page.asset_index, " + sameAsset + " AS same_asset, " + compactData + " AS data FROM finding JOIN (" + strings.Join(pages, " UNION ALL ") + ") page ON finding.project_id = page.project_id AND (" + sameAsset + " OR " + relatedResource + ")" + cond + " and finding.data_source = 'google:scc' ORDER BY finding.finding_id, page.asset_index"
+	query := "SELECT DISTINCT finding.finding_id, page.asset_index, " + sameAsset + " AS same_asset, " + compactData + " AS data FROM finding JOIN (" + pageSQL + ") page ON finding.project_id = page.project_id AND (" + sameAsset + " OR " + relatedResource + ")" + cond + " and finding.data_source = 'google:scc' ORDER BY finding.finding_id, page.asset_index"
 	rows, err := c.Slave.WithContext(ctx).Raw(query, args...).Rows()
 	if err != nil {
 		return err
@@ -70,7 +77,7 @@ func (c *Client) loadAssetRisks(ctx context.Context, req *finding.ListFindingReq
 				continue
 			}
 			seen[risk.Kind] = true
-			assets[row.AssetIndex].RiskInformation = append(assets[row.AssetIndex].RiskInformation, &finding.FindingAssetRisk{Kind: risk.Kind, FindingId: risk.FindingId, Detail: risk.Detail})
+			visit(row.AssetIndex, &finding.FindingAssetRisk{Kind: risk.Kind, FindingId: risk.FindingId, Detail: risk.Detail})
 		}
 	}
 	return rows.Err()

@@ -18,6 +18,7 @@ func TestFindingAssetRiskMySQL(t *testing.T) {
 	client, err := NewClient(&Config{MasterHost: "db.middleware.svc.cluster.local", SlaveHost: "db.middleware.svc.cluster.local", MasterUser: "root", SlaveUser: "root", Schema: "scc_asset_t003", Port: 3306}, logging.NewLogger())
 	require.NoError(t, err)
 	cleanup := func() {
+		client.Master.Exec("DELETE FROM finding_tag WHERE finding_id BETWEEN 94001 AND 94035")
 		client.Master.Exec("DELETE FROM pend_finding WHERE finding_id BETWEEN 94001 AND 94035")
 		client.Master.Exec("DELETE FROM finding WHERE finding_id BETWEEN 94001 AND 94035")
 	}
@@ -38,8 +39,8 @@ func TestFindingAssetRiskMySQL(t *testing.T) {
 		pending  bool
 		expected int
 	}{
-		{"project lower score evidence", 0, false, 2},
-		{"organization excludes other project", 7, false, 2},
+		{"project excludes lower score evidence", 0, false, 1},
+		{"organization excludes lower score evidence", 7, false, 1},
 		{"active excludes pending evidence", 7, true, 1},
 	}
 	for _, tc := range cases {
@@ -58,6 +59,17 @@ func TestFindingAssetRiskMySQL(t *testing.T) {
 			}
 		})
 	}
+	for _, org := range []uint32{0, 7} {
+		t.Run("tag filter "+strconv.Itoa(int(org)), func(t *testing.T) {
+			require.NoError(t, client.Master.Exec("INSERT INTO finding_tag(finding_tag_id,finding_id,project_id,tag) VALUES(94001,94001,1,'selected'),(94002,94002,1,'other')").Error)
+			defer client.Master.Exec("DELETE FROM finding_tag WHERE finding_id IN (94001,94002)")
+			assets := []*finding.FindingAsset{{ProjectId: 1, AssetType: "Resource", AssetKey: "risk-key"}}
+			require.NoError(t, client.loadAssetRisks(context.Background(), &finding.ListFindingRequest{ProjectId: 1, FromScore: 0, ToScore: 1, Tag: []string{"selected"}}, org, assets))
+			require.Len(t, assets[0].RiskInformation, 1)
+			require.Equal(t, uint64(94001), assets[0].RiskInformation[0].FindingId)
+		})
+	}
+
 	t.Run("all IDs and late KEV", func(t *testing.T) {
 		for i := 94005; i <= 94035; i++ {
 			data := `{"finding":{"vulnerability":{"cve":{"id":"CVE-2026-1","exploitation_activity":3}}}}`

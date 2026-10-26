@@ -118,3 +118,29 @@ func tcScope(org uint32) uint32 {
 	}
 	return 1
 }
+
+func TestAssetRiskSortRank(t *testing.T) {
+	cases := []struct {
+		name  string
+		risks []*finding.FindingAssetRisk
+		want  int
+	}{
+		{"none", nil, 0},
+		{"public", []*finding.FindingAssetRisk{{Kind: "internet"}}, 1},
+		{"exploit", []*finding.FindingAssetRisk{{Kind: "exploit", Detail: "AVAILABLE"}}, 4},
+		{"public exploit", []*finding.FindingAssetRisk{{Kind: "internet"}, {Kind: "exploit", Detail: "AVAILABLE"}}, 5},
+		{"kev", []*finding.FindingAssetRisk{{Kind: "exploit", Detail: "KEV"}}, 6},
+		{"public kev", []*finding.FindingAssetRisk{{Kind: "exploit", Detail: "KEV"}, {Kind: "internet"}, {Kind: "exploit", Detail: "AVAILABLE"}}, 7},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			rank := 0
+			for _, risk := range tc.risks {
+				rank = assetRiskSortRank(rank, risk)
+			}
+			if rank != tc.want {
+				t.Fatalf("rank=%d want=%d", rank, tc.want)
+			}
+		})
+	}
+}

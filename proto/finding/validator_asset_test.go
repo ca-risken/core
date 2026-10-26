@@ -85,3 +85,20 @@ func TestOrgAssetProjectFilterLimit(t *testing.T) {
 		})
 	}
 }
+
+func TestAssetRiskSort(t *testing.T) {
+	cases := []struct{ name, direction string }{{"ascending", "asc"}, {"descending", "desc"}}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			requests := []interface{ Validate() error }{
+				&ListFindingRequest{ProjectId: 1, AssetView: true, Sort: "risk_information", Direction: tc.direction},
+				&ListFindingForOrgRequest{OrganizationId: 1, AssetView: true, Sort: "risk_information", Direction: tc.direction},
+			}
+			for _, req := range requests {
+				if err := req.Validate(); err != nil {
+					t.Fatalf("%T: %v", req, err)
+				}
+			}
+		})
+	}
+}
