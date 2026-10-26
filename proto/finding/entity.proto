@@ -150,12 +150,12 @@ message FindingSetting {
   string setting = 4;
   FindingSettingStatus status = 5;
   int64 created_at = 6;
-  int64 updated_at = 7;
+ int64 updated_at = 7;
 }
 
 // FindingSettingForUpsert
 message FindingSettingForUpsert {
-  uint32 project_id = 1;
+ uint32 project_id = 1;
   string resource_name = 2;
   string setting = 3;
   FindingSettingStatus status = 4;
@@ -193,7 +193,18 @@ message FindingTagForBatch { string tag = 1; }
 // ResourceTagForBatch
 message ResourceTagForBatch { string tag = 1; }
 
+message FindingAssetRisk {
+  string kind = 1;
+  uint64 finding_id = 2;
+  string category = 3;
+  string cve_id = 4;
+  string detail = 5;
+  int64 updated_at = 6;
+  string scc_detail_url = 7;
+}
+
 message FindingAsset {
+  repeated FindingAssetRisk risk_information = 9;
  repeated string data_sources = 8;
  uint32 project_id = 1;
  string asset_type = 2;
