@@ -46,7 +46,7 @@ func validateAssetRequest(view bool, typ, key, sort string) error {
 	}
 	if view {
 		switch sort {
-		case "", "finding_id", "score", "updated_at", "asset_name", "asset_type", "finding_count", "project_id", "risk_information":
+		case "", "finding_id", "score", "updated_at", "asset_name", "asset_type", "finding_count", "project_id":
 		default:
 			return errors.New("invalid asset sort")
 		}

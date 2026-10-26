@@ -86,17 +86,24 @@ func TestOrgAssetProjectFilterLimit(t *testing.T) {
 	}
 }
 
-func TestAssetRiskSort(t *testing.T) {
-	cases := []struct{ name, direction string }{{"ascending", "asc"}, {"descending", "desc"}}
+func TestAssetSortSupportedColumns(t *testing.T) {
+	cases := []struct {
+		name, sort string
+		invalid    bool
+	}{
+		{"score", "score", false},
+		{"finding count", "finding_count", false},
+		{"risk sorting disabled", "risk_information", true},
+	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			requests := []interface{ Validate() error }{
-				&ListFindingRequest{ProjectId: 1, AssetView: true, Sort: "risk_information", Direction: tc.direction},
-				&ListFindingForOrgRequest{OrganizationId: 1, AssetView: true, Sort: "risk_information", Direction: tc.direction},
+				&ListFindingRequest{ProjectId: 1, AssetView: true, Sort: tc.sort},
+				&ListFindingForOrgRequest{OrganizationId: 1, AssetView: true, Sort: tc.sort},
 			}
 			for _, req := range requests {
-				if err := req.Validate(); err != nil {
-					t.Fatalf("%T: %v", req, err)
+				if err := req.Validate(); (err != nil) != tc.invalid {
+					t.Fatalf("%T: error=%v, invalid=%v", req, err, tc.invalid)
 				}
 			}
 		})
