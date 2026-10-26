@@ -25,9 +25,9 @@ func (c *Client) loadAssetRisks(ctx context.Context, req *finding.ListFindingReq
 	var cond string
 	var scopeArgs []any
 	if orgID == 0 {
-		cond, scopeArgs = generateProjectFindingQuery(req.ProjectId, 0, 0, 1, 0, nil, nil, nil, req.Status)
+		cond, scopeArgs = generateProjectFindingQuery(req.ProjectId, 0, req.FromScore, req.ToScore, 0, nil, nil, req.Tag, req.Status)
 	} else {
-		cond, scopeArgs = generateOrganizationFindingQuery(orgID, 0, 0, 1, 0, nil, nil, nil, req.Status)
+		cond, scopeArgs = generateOrganizationFindingQuery(orgID, 0, req.FromScore, req.ToScore, 0, nil, nil, req.Tag, req.Status)
 	}
 	pages := []string{}
 	args := []any{}

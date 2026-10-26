@@ -92,7 +92,7 @@ func TestLoadAssetRisks(t *testing.T) {
 	}
 }
 
-func TestRiskScopeDoesNotDependOnSearchFilters(t *testing.T) {
+func TestRiskScopeUsesSearchFilters(t *testing.T) {
 	cases := []struct {
 		name string
 		org  uint32
@@ -103,8 +103,8 @@ func TestRiskScopeDoesNotDependOnSearchFilters(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			mock.ExpectQuery("SELECT DISTINCT finding.finding_id.*").WithArgs(0, uint32(1), "VM", "key", float32(0), float32(1), tcScope(tc.org)).WillReturnRows(sqlmock.NewRows([]string{"finding_id"}))
-			err = client.loadAssetRisks(context.Background(), &finding.ListFindingRequest{ProjectId: 1, FromScore: 0.9, Tag: []string{"filtered"}}, tc.org, []*finding.FindingAsset{{ProjectId: 1, AssetType: "VM", AssetKey: "key", AssetName: "resource"}})
+			mock.ExpectQuery(`SELECT DISTINCT finding.finding_id.*inner join finding_tag ft using\(finding_id\).*finding.score between \? and \?.*ft.tag in \(\?\)`).WithArgs(0, uint32(1), "VM", "key", float32(0.6), float32(0.9), "filtered", tcScope(tc.org)).WillReturnRows(sqlmock.NewRows([]string{"finding_id"}))
+			err = client.loadAssetRisks(context.Background(), &finding.ListFindingRequest{ProjectId: 1, FromScore: 0.6, ToScore: 0.9, Tag: []string{"filtered"}}, tc.org, []*finding.FindingAsset{{ProjectId: 1, AssetType: "VM", AssetKey: "key", AssetName: "resource"}})
 			if err != nil || mock.ExpectationsWereMet() != nil {
 				t.Fatal(err)
 			}
