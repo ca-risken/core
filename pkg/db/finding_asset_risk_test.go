@@ -65,10 +65,11 @@ func TestLoadAssetRisks(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			rows := sqlmock.NewRows([]string{"finding_id", "project_id", "asset_type", "asset_key", "resource_name", "data", "updated_at"}).
-				AddRow(11, 1, tc.typ, tc.key, "resource", `{"finding":{"vulnerability":{"cve":{"id":"CVE-1","exploitation_activity":3}}}}`, 100).
-				AddRow(12, 1, "", "", "resource", `{"finding":{"category":"PUBLIC_SQL_INSTANCE"}}`, 100).
-				AddRow(13, 2, tc.typ, tc.key, "resource", `{"finding":{"category":"PUBLIC_SQL_INSTANCE"}}`, 100)
+			rows := sqlmock.NewRows([]string{"finding_id", "asset_index", "same_asset", "data"}).
+				AddRow(11, 0, true, `{"finding":{"vulnerability":{"cve":{"id":"CVE-1","exploitation_activity":3}}}}`)
+			if tc.typ == "VM" {
+				rows.AddRow(12, 0, false, `{"finding":{"category":"PUBLIC_SQL_INSTANCE"}}`)
+			}
 			query := "SELECT DISTINCT finding.finding_id.*finding.data.*"
 			if tc.org != 0 {
 				query += "organization_project.*op.organization_id"
@@ -102,7 +103,7 @@ func TestRiskScopeDoesNotDependOnSearchFilters(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			mock.ExpectQuery("SELECT DISTINCT finding.finding_id.*").WithArgs(float32(0), float32(1), tcScope(tc.org), uint32(1), "VM", "key", "resource").WillReturnRows(sqlmock.NewRows([]string{"finding_id"}))
+			mock.ExpectQuery("SELECT DISTINCT finding.finding_id.*").WithArgs(0, uint32(1), "VM", "key", float32(0), float32(1), tcScope(tc.org)).WillReturnRows(sqlmock.NewRows([]string{"finding_id"}))
 			err = client.loadAssetRisks(context.Background(), &finding.ListFindingRequest{ProjectId: 1, FromScore: 0.9, Tag: []string{"filtered"}}, tc.org, []*finding.FindingAsset{{ProjectId: 1, AssetType: "VM", AssetKey: "key", AssetName: "resource"}})
 			if err != nil || mock.ExpectationsWereMet() != nil {
 				t.Fatal(err)
