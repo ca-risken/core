@@ -105,8 +105,5 @@ func (c *Client) ListFindingAssets(ctx context.Context, req *finding.ListFinding
 		}
 		assets = append(assets, &finding.FindingAsset{ProjectId: row.ProjectID, AssetType: row.AssetType, AssetKey: row.AssetKey, AssetName: row.AssetName, MaxScore: row.MaxScore, FindingCount: row.FindingCount, UpdatedAt: row.UpdatedAt, DataSources: sources})
 	}
-	if err := c.loadAssetRisks(ctx, req, organizationID, assets); err != nil {
-		return nil, 0, 0, err
-	}
 	return assets, total, counts.FindingCount, nil
 }

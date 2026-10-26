@@ -56,15 +56,15 @@ func TestListFindingAssets(t *testing.T) {
 			if c.view {
 				m.ExpectQuery("SELECT project_id.*GROUP BY.*ORDER BY max_score").WillReturnRows(sqlmock.NewRows([]string{"project_id", "asset_type", "asset_key", "asset_name", "max_score", "finding_count", "updated_at", "data_sources_json"}).AddRow(1, "VM", "vm", "vm", 0.9, 2, 100, `["google:scc"]`))
 			}
-			if c.view {
-				m.ExpectQuery("SELECT DISTINCT finding.finding_id.*finding.data.*ORDER BY finding.finding_id").WillReturnRows(sqlmock.NewRows([]string{"finding_id"}))
-			}
 			a, n, totalFindings, err := client.ListFindingAssets(context.Background(), &finding.ListFindingRequest{ProjectId: 1, ToScore: 1, AssetView: c.view, Limit: 20}, c.org)
 			if err != nil || n != 1 {
 				t.Fatalf("%v %d", err, n)
 			}
 			if c.view && (totalFindings != 2 || len(a) != 1 || len(a[0].DataSources) != 1 || a[0].DataSources[0] != "google:scc") {
 				t.Fatal(a)
+			}
+			if c.view && len(a[0].RiskInformation) != 0 {
+				t.Fatal("risk information must not be aggregated")
 			}
 			if err = m.ExpectationsWereMet(); err != nil {
 				t.Fatal(err)

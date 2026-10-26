@@ -31,16 +31,14 @@ func TestFindingAssetRiskMySQL(t *testing.T) {
 	insert(94002, 1, "", "", "public-setting", .1, `{"finding":{"category":"PUBLIC_SQL_INSTANCE"}}`)
 	insert(94003, 3, "Resource", "risk-key", "risk-sql", .9, `{"finding":{"category":"PUBLIC_BUCKET_ACL"}}`)
 	insert(94004, 1, "Resource", "different-key", "other-sql", .9, `{"finding":{"vulnerability":{"cve":{"id":"CVE-2026-2","exploitation_activity":3}}}}`)
-	// Pending exposure must not appear in the active view.
 	cases := []struct {
-		name     string
-		org      uint32
-		pending  bool
-		expected int
+		name    string
+		org     uint32
+		pending bool
 	}{
-		{"project lower score evidence", 0, false, 2},
-		{"organization excludes other project", 7, false, 2},
-		{"active excludes pending evidence", 7, true, 1},
+		{"project list skips evidence", 0, false},
+		{"org list skips evidence", 7, false},
+		{"pending evidence is not loaded", 7, true},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -51,14 +49,11 @@ func TestFindingAssetRiskMySQL(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, int64(1), total)
 			require.Len(t, assets, 1)
-			require.Len(t, assets[0].RiskInformation, tc.expected)
-			for _, r := range assets[0].RiskInformation {
-				require.NotEqual(t, uint64(94003), r.FindingId)
-				require.NotEqual(t, uint64(94004), r.FindingId)
-			}
+			require.Empty(t, assets[0].RiskInformation)
+
 		})
 	}
-	t.Run("all IDs and late KEV", func(t *testing.T) {
+	t.Run("list skips all risk evidence", func(t *testing.T) {
 		for i := 94005; i <= 94035; i++ {
 			data := `{"finding":{"vulnerability":{"cve":{"id":"CVE-2026-1","exploitation_activity":3}}}}`
 			if i == 94035 {
@@ -69,18 +64,8 @@ func TestFindingAssetRiskMySQL(t *testing.T) {
 		assets, _, _, err := client.ListFindingAssets(context.Background(), &finding.ListFindingRequest{ProjectId: 1, AssetView: true, AssetName: "Friendly SQL name", FromScore: .8, ToScore: 1, Status: finding.FindingStatus_FINDING_ACTIVE, Limit: 20}, 0)
 		require.NoError(t, err)
 		require.Len(t, assets, 1)
-		require.Len(t, assets[0].RiskInformation, 32)
-		ids := map[uint64]bool{}
-		kev := false
-		for _, risk := range assets[0].RiskInformation {
-			require.False(t, ids[risk.FindingId])
-			ids[risk.FindingId] = true
-			kev = kev || risk.Detail == "KEV"
-			require.Empty(t, risk.CveId)
-			require.Empty(t, risk.Category)
-			require.Empty(t, risk.SccDetailUrl)
-		}
-		require.True(t, kev)
+		require.Empty(t, assets[0].RiskInformation)
+		require.Equal(t, uint32(32), assets[0].FindingCount)
 	})
 
 }
