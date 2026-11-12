@@ -24,8 +24,9 @@ message GetOrgPolicyResponse { OrgPolicy policy = 1; }
 message PutOrgPolicyRequest {
   uint32 organization_id = 1 [ (validate.rules).uint32.gt = 0 ]; // Required
   string name = 2
-      [ (validate.rules).string = {min_len : 1, max_len : 64} ]; // Required
-  string action_ptn = 3 [ (validate.rules).string.min_len = 1 ]; // Required
+      [ (validate.rules).string = {min_len : 1, max_len : 64} ];  // Required
+  string action_ptn = 3 [ (validate.rules).string.min_len = 1 ];  // Required
+  string project_ptn = 4 [ (validate.rules).string.min_len = 1 ]; // Required
 }
 
 message PutOrgPolicyResponse { OrgPolicy policy = 1; }

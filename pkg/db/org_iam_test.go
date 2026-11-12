@@ -1505,8 +1505,8 @@ func TestGetOrgTokenPolicy(t *testing.T) {
 			name:    "OK",
 			wantLen: 1,
 			mock: func(mock sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows([]string{"policy_id", "name", "organization_id", "action_ptn", "created_at", "updated_at"}).
-					AddRow(uint32(1), "policy", uint32(2), "organization/.*", now, now)
+				rows := sqlmock.NewRows([]string{"policy_id", "name", "organization_id", "action_ptn", "project_ptn", "created_at", "updated_at"}).
+					AddRow(uint32(1), "policy", uint32(2), "organization/.*", ".*", now, now)
 				mock.ExpectQuery(regexp.QuoteMeta(selectGetOrgTokenPolicy)).
 					WithArgs(uint32(1), uint32(2)).
 					WillReturnRows(rows)
