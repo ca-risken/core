@@ -198,6 +198,9 @@ func TestClassifySensitiveContentWithDecisions(t *testing.T) {
 						if question.Type != "predicate" || question.Instructions == "" || len(question.Choices) != 0 {
 							t.Errorf("invalid predicate question %q", question.Name)
 						}
+						if question.Name != "test_data" && !strings.Contains(question.Instructions, "including fictional or synthetic samples") {
+							t.Errorf("predicate %q must consider sensitive values in synthetic data", question.Name)
+						}
 						continue
 					}
 					if question.Type != "choice" || question.Instructions == "" {

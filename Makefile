@@ -976,4 +976,20 @@ list-remediation-proposal:
 		-d '{"project_id":1001, "finding_id":1001}' \
 		$(CORE_API_ADDR) core.ai.AIService.ListRemediationProposal
 
+SENSITIVE_CONTENT_SAMPLE_TARGETS = \
+	classify-sensitive-content-csv \
+	classify-sensitive-content-image \
+	classify-sensitive-content-pdf-text \
+	classify-sensitive-content-pdf-image
+
+.PHONY: classify-sensitive-content-samples $(SENSITIVE_CONTENT_SAMPLE_TARGETS)
+classify-sensitive-content-samples: $(SENSITIVE_CONTENT_SAMPLE_TARGETS)
+
+$(SENSITIVE_CONTENT_SAMPLE_TARGETS): classify-sensitive-content-%: hack/sensitive-content-samples/%.json
+	payload=$$(cat "$<") && \
+		$(GRPCURL) \
+			-plaintext \
+			-d "$$payload" \
+			$(CORE_API_ADDR) core.ai.SensitiveContentService/ClassifySensitiveContent
+
 FAKE:

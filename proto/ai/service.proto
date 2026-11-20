@@ -19,6 +19,12 @@ service AIService {
       returns (UpdateRemediationProposalStatusResponse);
 }
 
+// Internal scanner service.
+service SensitiveContentService {
+  rpc ClassifySensitiveContent(ClassifySensitiveContentRequest)
+      returns (ClassifySensitiveContentResponse);
+}
+
 message ChatAIRequest {
   string question = 1 [ (validate.rules).string.min_len = 1 ]; // Required
   repeated ChatHistory chat_history = 2;
@@ -86,4 +92,58 @@ message UpdateRemediationProposalStatusRequest {
 
 message UpdateRemediationProposalStatusResponse {
   RemediationProposal remediation_proposal = 1;
+}
+
+message ClassifySensitiveContentRequest {
+  // Send exactly one of text and image.
+  // One UTF-8 object sample. Mask credentials and payment card numbers before
+  // submission and retain local detections for the final result.
+  string text = 1 [ (validate.rules).string.max_bytes = 32768 ];
+  // Optional base file name used as context for the test-data decision.
+  string file_name = 2 [ (validate.rules).string.max_bytes = 1024 ];
+  // One raw JPEG or PNG image, at most 2 MiB and 2048 pixels on either axis.
+  bytes image = 3 [ (validate.rules).bytes.max_len = 2097152 ];
+}
+
+message ClassifySensitiveContentResponse {
+  Sensitivity sensitivity = 1;
+  // Category and kind classification runs only when sensitivity is TRUE.
+  repeated SensitiveContentCategory categories = 2;
+  ContentKind content_kind = 3;
+  // UNKNOWN when sensitivity is not TRUE or the evidence is inconclusive.
+  TestData test_data = 4;
+}
+
+enum Sensitivity {
+  SENSITIVITY_UNKNOWN = 0;
+  SENSITIVITY_TRUE = 1;
+  // Applies to the submitted sample only.
+  SENSITIVITY_FALSE = 2;
+}
+
+enum TestData {
+  TEST_DATA_UNKNOWN = 0;
+  TEST_DATA_TRUE = 1;
+  TEST_DATA_FALSE = 2;
+}
+
+enum SensitiveContentCategory {
+  SENSITIVE_CONTENT_CATEGORY_UNSPECIFIED = 0;
+  SENSITIVE_CONTENT_CATEGORY_PII = 1;
+  SENSITIVE_CONTENT_CATEGORY_PAYMENT_CARD = 2;
+  SENSITIVE_CONTENT_CATEGORY_CREDENTIAL = 3;
+  SENSITIVE_CONTENT_CATEGORY_CLIENT_DATA = 4;
+  SENSITIVE_CONTENT_CATEGORY_OTHER = 5;
+}
+
+enum ContentKind {
+  CONTENT_KIND_UNSPECIFIED = 0;
+  CONTENT_KIND_LOG = 1;
+  CONTENT_KIND_OTHER = 2;
+  CONTENT_KIND_TABULAR_DATA = 3;
+  CONTENT_KIND_STRUCTURED_RECORD = 4;
+  CONTENT_KIND_DOCUMENT = 5;
+  CONTENT_KIND_SOURCE_CODE = 6;
+  CONTENT_KIND_CONFIGURATION = 7;
+  CONTENT_KIND_IMAGE = 8;
 }
