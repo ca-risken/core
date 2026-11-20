@@ -215,7 +215,7 @@ func (a *AlertService) ListAlertHistory(ctx context.Context, req *alert.ListAler
 	if err != nil {
 		return nil, err
 	}
-	if *listCreated != nil && len(*listCreated) > 0 {
+	if len(*listCreated) > 0 {
 		converted, err := convertAlertHistory(&(*listCreated)[0], true)
 		if err != nil {
 			a.logger.Errorf(ctx, "Error occurred in convertAlertHistory. err: %v", err)

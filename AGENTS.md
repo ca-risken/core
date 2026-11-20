@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This Go 1.23.3 workspace centers on `main.go` and the `pkg/` tree. Unit tests (`*_test.go`) live beside the code they cover. Database schema changes are stored in `migration/`, while infrastructure bits (Dockerfiles, CodeBuild specs) stay at the repo root for easy CI wiring.
+This Go 1.27.3 workspace centers on `main.go` and the `pkg/` tree. Unit tests (`*_test.go`) live beside the code they cover. Database schema changes are stored in `migration/`, while infrastructure bits (Dockerfiles, CodeBuild specs) stay at the repo root for easy CI wiring.
 
 ### Directory Structure
 ```
