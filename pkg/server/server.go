@@ -153,6 +153,7 @@ func (s *Server) Run(ctx context.Context) error {
 	finding.RegisterFindingServiceServer(server, fsvc)
 	project.RegisterProjectServiceServer(server, psvc)
 	ai.RegisterAIServiceServer(server, aisvc)
+	ai.RegisterSensitiveContentServiceServer(server, aiserver.NewSensitiveContentService(s.config.OpenAIToken))
 	organization.RegisterOrganizationServiceServer(server, osvc)
 	org_iam.RegisterOrgIAMServiceServer(server, oisvc)
 	org_alert.RegisterOrgAlertServiceServer(server, oasvc)

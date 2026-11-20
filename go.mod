@@ -1,6 +1,6 @@
 module github.com/ca-risken/core
 
-go 1.23.3
+go 1.27.3
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0

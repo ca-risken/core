@@ -1,0 +1,1 @@
+{"fileName": "customers.csv", "text": "customer_id,full_name,email,customer_name,plan\nCUST-1001,八雲 理乃,r.yakumo@example.com,汐岬観測技研合同会社,Enterprise\nCUST-1002,榊野 遥,h.sakakino@example.net,霧凪計測株式会社,Standard\nCUST-1003,菱代 碧,a.hishiro@example.org,蒼砂電装株式会社,Trial\n"}

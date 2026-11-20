@@ -50,6 +50,23 @@ Deploy the pre-built containers to the Kubernetes environment on your local mach
 | project | spec.template.spec.containers.image | `public.ecr.aws/risken/core/project:latest` | `core/project:latest`                    |
 | report  | spec.template.spec.containers.image | `public.ecr.aws/risken/core/report:latest`  | `core/report:latest`                     |
 
+### Trying sensitive content classification locally
+
+Start Core with `OPEN_AI_TOKEN` set and install `grpcurl`. With Core listening on `127.0.0.1:8080`, run:
+
+```bash
+make classify-sensitive-content-samples GRPCURL=grpcurl CORE_API_ADDR=127.0.0.1:8080
+```
+
+To run a single request, use `make classify-sensitive-content-csv`,
+`make classify-sensitive-content-image`, `make classify-sensitive-content-pdf-text`, or
+`make classify-sensitive-content-pdf-image` with the same variable overrides.
+
+The [sample requests](hack/sensitive-content-samples/) use fictional customer and driver's license
+data. The PDF examples submit extracted text from page 1 and a JPEG of the image-only page 2.
+Image payloads are Base64 in the grpcurl JSON input. A populated synthetic sample can return
+`SENSITIVITY_TRUE` and `TEST_DATA_TRUE` in the same response.
+
 ## Community
 
 Info on reporting bugs, getting help, finding roadmaps,

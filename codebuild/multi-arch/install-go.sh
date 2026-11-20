@@ -1,5 +1,5 @@
 #!/bin/sh
-INSTALL_GO_VERSION=1.23.3
+INSTALL_GO_VERSION=1.27.3
 if [[ "${ARCH}" = "" ]]; then
   echo "environment value ARCH is not set"
   exit 1

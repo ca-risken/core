@@ -1,0 +1,10 @@
+version: "2"
+
+linters:
+  exclusions:
+    presets:
+      - std-error-handling # Preserve the v1 default exclusions.
+    rules:
+      # The v1 defaults did not enable stylecheck.
+      - linters: [staticcheck]
+        text: "^ST1005:"
