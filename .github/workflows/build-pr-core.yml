@@ -1,20 +1,68 @@
 name: Build and Tag Container for PR Core
 
-on: 
+on:
   pull_request:
     types: [opened, synchronize]
   workflow_dispatch:
 
 jobs:
   build-pr-core:
-    uses: ca-risken/.github/.github/workflows/build-pr.yml@main
-    with:
-      runs_on: codebuild-mimosa-core-pr-runner-${{ github.run_id }}-${{ github.run_attempt }}
-      install_go_version: "1.27.3"
-      golangci_lint_version: "v2.14.0"
-      image_prefix: "risken-core"
-      aws_xray_sdk_disabled: "true"
-    secrets:
-      DOCKER_USER: ${{ secrets.DOCKER_USER }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+    name: build-pr-core / build
+    runs-on: codebuild-mimosa-core-pr-runner-${{ github.run_id }}-${{ github.run_attempt }}
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    env:
+      AWS_XRAY_SDK_DISABLED: "true"
+      GOLANGCI_LINT_VERSION: "2.15.0"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Install golangci-lint
+        run: |
+          work_dir=$(mktemp -d)
+          trap 'rm -rf -- "$work_dir"' EXIT
+          cd "$work_dir"
+
+          package="golangci-lint-${GOLANGCI_LINT_VERSION}-$(go env GOOS)-$(go env GOARCH)"
+          archive="${package}.tar.gz"
+          checksums="golangci-lint-${GOLANGCI_LINT_VERSION}-checksums.txt"
+          release_url="https://github.com/golangci/golangci-lint/releases/download/v${GOLANGCI_LINT_VERSION}"
+          curl --fail --silent --show-error --location --retry 3 --remote-name "$release_url/$archive"
+          curl --fail --silent --show-error --location --retry 3 --remote-name "$release_url/$checksums"
+
+          # Match the archive name exactly because the list also contains its SBOM.
+          awk -v archive="$archive" '$2 == archive { print }' "$checksums" | sha256sum --check --strict
+          tar -xzf "$archive" "$package/golangci-lint"
+          install -m 0755 "$package/golangci-lint" "$RUNNER_TEMP/golangci-lint"
+          printf '%s\n' "$RUNNER_TEMP" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/golangci-lint" --version
+
+      - name: Lint and test
+        run: |
+          make lint -k
+          make go-test -j
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Docker build and tag
+        env:
+          IMAGE_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+        run: |
+          tag=$(git rev-parse --short HEAD)
+          make build-ci -j BUILD_OPT='--no-cache --pull' IMAGE_TAG="$tag" IMAGE_PREFIX=risken-core IMAGE_REGISTRY="$IMAGE_REGISTRY"
