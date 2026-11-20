@@ -30,12 +30,12 @@ func TestClassifySensitiveContentWithDecisions(t *testing.T) {
 	categoryNames := []string{"pii", "payment_card", "credential", "client_data", "other"}
 	kindNames := []string{"log", "tabular_data", "structured_record", "document", "source_code", "configuration", "image", "other"}
 	evidenceCriteria := map[string][]string{
-		"sensitive":    {"coupon barcodes", "Public promotional material", "non-public client advertising performance", "execution paths"},
-		"pii":          {"Require a link to a person", "cloud resource identifiers"},
-		"payment_card": {"coupon barcodes", "loyalty or membership numbers"},
-		"client_data":  {"named accounts or campaigns paired with spend or A/B test metrics"},
-		"other":        {"Non-public cloud resource identifiers", "ordinary error message alone is insufficient"},
-		"test_data":    {"values are clearly fabricated", "job, or batch label", "origin cannot be determined"},
+		"sensitive":    {"intended for public use", "Interpret identifiers by their purpose"},
+		"pii":          {"linked to an identifiable person"},
+		"payment_card": {"payment card context"},
+		"client_data":  {"non-public client or customer information"},
+		"other":        {"outside the other categories"},
+		"test_data":    {"values themselves were fabricated", "Treat copies of real data as real", "origin is unclear"},
 	}
 	tests := []struct {
 		name        string
