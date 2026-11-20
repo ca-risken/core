@@ -29,6 +29,14 @@ func TestClassifySensitiveContentWithDecisions(t *testing.T) {
 	const fileName = "test_customers.csv"
 	categoryNames := []string{"pii", "payment_card", "credential", "client_data", "other"}
 	kindNames := []string{"log", "tabular_data", "structured_record", "document", "source_code", "configuration", "image", "other"}
+	evidenceCriteria := map[string][]string{
+		"sensitive":    {"intended for public use", "Interpret identifiers by their purpose"},
+		"pii":          {"linked to an identifiable person"},
+		"payment_card": {"payment card context"},
+		"client_data":  {"non-public client or customer information"},
+		"other":        {"outside the other categories"},
+		"test_data":    {"values themselves were fabricated", "Treat copies of real data as real", "origin is unclear"},
+	}
 	tests := []struct {
 		name        string
 		first       string
@@ -194,6 +202,11 @@ func TestClassifySensitiveContentWithDecisions(t *testing.T) {
 				var gotNames []string
 				for _, question := range request.Questions {
 					gotNames = append(gotNames, question.Name)
+					for _, criteria := range evidenceCriteria[question.Name] {
+						if !strings.Contains(question.Instructions, criteria) {
+							t.Errorf("question %q is missing evidence criteria %q", question.Name, criteria)
+						}
+					}
 					if question.Name != "content_kind" {
 						if question.Type != "predicate" || question.Instructions == "" || len(question.Choices) != 0 {
 							t.Errorf("invalid predicate question %q", question.Name)
