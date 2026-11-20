@@ -931,8 +931,7 @@ type ClassifySensitiveContentRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	// Send exactly one of text and image.
-	// One UTF-8 object sample. Mask credentials and payment card numbers before
-	// submission and retain local detections for the final result.
+	// One UTF-8 object sample.
 	Text string `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
 	// Optional base file name used as context for the test-data decision.
 	FileName string `protobuf:"bytes,2,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty"`
