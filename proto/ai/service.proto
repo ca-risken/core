@@ -19,7 +19,8 @@ service AIService {
       returns (UpdateRemediationProposalStatusResponse);
 }
 
-// Internal scanner service.
+// Internal scanner service for samples from publicly readable objects.
+// Callers verify that an object is readable without credentials.
 service SensitiveContentService {
   rpc ClassifySensitiveContent(ClassifySensitiveContentRequest)
       returns (ClassifySensitiveContentResponse);
@@ -96,8 +97,7 @@ message UpdateRemediationProposalStatusResponse {
 
 message ClassifySensitiveContentRequest {
   // Send exactly one of text and image.
-  // One UTF-8 object sample. Mask credentials and payment card numbers before
-  // submission and retain local detections for the final result.
+  // One UTF-8 object sample.
   string text = 1 [ (validate.rules).string.max_bytes = 32768 ];
   // Optional base file name used as context for the test-data decision.
   string file_name = 2 [ (validate.rules).string.max_bytes = 1024 ];
