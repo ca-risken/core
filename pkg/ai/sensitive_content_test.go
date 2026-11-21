@@ -27,6 +27,8 @@ func TestClassifySensitiveContentWithDecisions(t *testing.T) {
 
 	const sample = "client_id,contact\n42,[REDACTED]"
 	const fileName = "test_customers.csv"
+	const scopedSample = "OTHER_TOKEN=opaque-synthetic-control\nTOKEN=fixture # dummy value for tests"
+	const scope = "For sensitivity, categories, and test_data, assess only the credential on line 2."
 	categoryNames := []string{"pii", "payment_card", "credential", "client_data", "other"}
 	kindNames := []string{"log", "tabular_data", "structured_record", "document", "source_code", "configuration", "image", "other"}
 	evidenceCriteria := map[string][]string{
@@ -44,6 +46,7 @@ func TestClassifySensitiveContentWithDecisions(t *testing.T) {
 		kindAnswer  string
 		testData    string
 		imageFormat string
+		prompt      string
 		want        *ai.ClassifySensitiveContentResponse
 		failed      bool
 	}{
@@ -60,6 +63,20 @@ func TestClassifySensitiveContentWithDecisions(t *testing.T) {
 					ai.SensitiveContentCategory_SENSITIVE_CONTENT_CATEGORY_CLIENT_DATA,
 				},
 				ContentKind: ai.ContentKind_CONTENT_KIND_TABULAR_DATA,
+				TestData:    ai.TestData_TEST_DATA_TRUE,
+			},
+		},
+		{
+			name:       "caller guidance scopes both decisions",
+			first:      "0.95",
+			categories: []string{"0", "0", "0.98", "0", "0"},
+			kindAnswer: `{"type":"choice","name":"content_kind","choice":"configuration","confidence":0.9}`,
+			testData:   "0.9",
+			prompt:     scope,
+			want: &ai.ClassifySensitiveContentResponse{
+				Sensitivity: ai.Sensitivity_SENSITIVITY_TRUE,
+				Categories:  []ai.SensitiveContentCategory{ai.SensitiveContentCategory_SENSITIVE_CONTENT_CATEGORY_CREDENTIAL},
+				ContentKind: ai.ContentKind_CONTENT_KIND_CONFIGURATION,
 				TestData:    ai.TestData_TEST_DATA_TRUE,
 			},
 		},
@@ -137,7 +154,10 @@ func TestClassifySensitiveContentWithDecisions(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			input := &ai.ClassifySensitiveContentRequest{Text: sample, FileName: fileName}
+			input := &ai.ClassifySensitiveContentRequest{Text: sample, FileName: fileName, CustomPrompt: tt.prompt}
+			if tt.prompt != "" {
+				input.Text = scopedSample
+			}
 			var imagePart decisionInputPart
 			if tt.imageFormat != "" {
 				input.Text = ""
@@ -176,7 +196,7 @@ func TestClassifySensitiveContentWithDecisions(t *testing.T) {
 					t.Error("unexpected model or caching mode")
 				}
 				wantNames := []string{"sensitive"}
-				if calls == 1 || tt.imageFormat != "" {
+				if calls == 1 || tt.imageFormat != "" || tt.prompt != "" {
 					var gotInput []decisionInputMessage
 					if err := json.Unmarshal(request.Input, &gotInput); err != nil {
 						t.Fatalf("decode decision evidence: %v", err)
@@ -184,12 +204,20 @@ func TestClassifySensitiveContentWithDecisions(t *testing.T) {
 					var parts []decisionInputPart
 					if calls == 1 {
 						wantNames = append(append([]string{}, categoryNames...), "content_kind", "test_data")
+					}
+					if calls == 1 || tt.prompt != "" {
 						parts = append(parts, decisionInputPart{Type: "input_json", Data: new(contentSample{FileName: fileName, Text: input.Text})})
 					}
 					if tt.imageFormat != "" {
 						parts = append(parts, imagePart)
 					}
 					wantInput := []decisionInputMessage{{Role: "user", Content: parts}}
+					if tt.prompt != "" {
+						wantInput = append([]decisionInputMessage{
+							{Role: "developer", Content: []decisionInputPart{{Type: "input_text", Text: decisionScopeInstructions}}},
+							{Role: "user", Content: []decisionInputPart{{Type: "input_text", Text: tt.prompt}}},
+						}, wantInput...)
+					}
 					if diff := cmp.Diff(wantInput, gotInput); diff != "" {
 						t.Errorf("decision evidence mismatch (-want +got):\n%s", diff)
 					}
@@ -202,6 +230,9 @@ func TestClassifySensitiveContentWithDecisions(t *testing.T) {
 				var gotNames []string
 				for _, question := range request.Questions {
 					gotNames = append(gotNames, question.Name)
+					if strings.Contains(question.Instructions, scope) || strings.Contains(question.Instructions, scopedSample) {
+						t.Errorf("question %q instructions include caller guidance or sample evidence", question.Name)
+					}
 					for _, criteria := range evidenceCriteria[question.Name] {
 						if !strings.Contains(question.Instructions, criteria) {
 							t.Errorf("question %q is missing evidence criteria %q", question.Name, criteria)

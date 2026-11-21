@@ -30,6 +30,7 @@ func TestClassifySensitiveContent(t *testing.T) {
 		input       string
 		image       []byte
 		fileName    string
+		prompt      string
 		disabled    bool
 		providerErr error
 		canceled    bool
@@ -42,6 +43,8 @@ func TestClassifySensitiveContent(t *testing.T) {
 		{name: "invalid image", image: []byte{1}, providerErr: aiservice.ErrInvalidSensitiveContentImage, want: codes.InvalidArgument},
 		{name: "valid file name", input: "sample", fileName: "test_customers.csv", want: codes.OK},
 		{name: "file name byte limit", input: "sample", fileName: strings.Repeat("a", 1025), want: codes.InvalidArgument},
+		{name: "custom prompt byte limit inclusive", input: "sample", prompt: strings.Repeat("a", 4096), want: codes.OK},
+		{name: "custom prompt over byte limit", input: "sample", prompt: strings.Repeat("あ", 1366), want: codes.InvalidArgument},
 		{name: "missing OpenAI token", disabled: true, want: codes.FailedPrecondition},
 		{name: "blank input", input: " \n ", want: codes.InvalidArgument},
 		{name: "input byte limit", input: strings.Repeat("あ", 10923), want: codes.InvalidArgument},
@@ -57,7 +60,7 @@ func TestClassifySensitiveContent(t *testing.T) {
 			if !tt.disabled {
 				service.classifier = classifyContentFunc(func(ctx context.Context, req *ai.ClassifySensitiveContentRequest) (*ai.ClassifySensitiveContentResponse, error) {
 					calls++
-					if req.GetText() != tt.input || req.GetFileName() != tt.fileName || len(req.GetImage()) != len(tt.image) {
+					if req.GetText() != tt.input || req.GetFileName() != tt.fileName || req.GetCustomPrompt() != tt.prompt || len(req.GetImage()) != len(tt.image) {
 						t.Error("classifier did not receive the request fields")
 					}
 					if _, ok := ctx.Deadline(); !ok {
@@ -74,7 +77,9 @@ func TestClassifySensitiveContent(t *testing.T) {
 			if tt.canceled {
 				cancel()
 			}
-			got, err := service.ClassifySensitiveContent(ctx, &ai.ClassifySensitiveContentRequest{Text: tt.input, FileName: tt.fileName, Image: tt.image})
+			got, err := service.ClassifySensitiveContent(ctx, &ai.ClassifySensitiveContentRequest{
+				Text: tt.input, FileName: tt.fileName, Image: tt.image, CustomPrompt: tt.prompt,
+			})
 			if code := status.Code(err); code != tt.want {
 				t.Fatalf("status = %v, want %v", code, tt.want)
 			}
