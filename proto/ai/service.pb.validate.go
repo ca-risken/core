@@ -1666,6 +1666,17 @@ func (m *ClassifySensitiveContentRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	if len(m.GetCustomPrompt()) > 4096 {
+		err := ClassifySensitiveContentRequestValidationError{
+			field:  "CustomPrompt",
+			reason: "value length must be at most 4096 bytes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
 	if len(errors) > 0 {
 		return ClassifySensitiveContentRequestMultiError(errors)
 	}

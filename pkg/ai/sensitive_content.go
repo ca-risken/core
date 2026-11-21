@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"slices"
+	"strings"
 
 	"github.com/ca-risken/core/proto/ai"
 	"github.com/openai/openai-go"
@@ -137,9 +138,14 @@ func (c *SensitiveContentClassifier) Classify(ctx context.Context, req *ai.Class
 		sensitivityInput = decisionInput(imagePart)
 		detailParts = append(detailParts, imagePart)
 	}
+	var callerGuidance string
+	if prompt := strings.TrimSpace(req.GetCustomPrompt()); prompt != "" {
+		callerGuidance = "\n\nUse the following caller guidance to determine the scope and relevant evidence. Apply the classification criteria above within that scope:\n" + prompt
+		sensitivityInput = decisionInput(detailParts...)
+	}
 	sensitivityQuestion := predicateQuestion("sensitive",
 		"Does the sample contain values representing private personal information, payment card data, credentials, non-public client data or other confidential material?"+
-			sensitiveValueInstructions)
+			sensitiveValueInstructions+callerGuidance)
 	answers, err := c.askDecisions(ctx, sensitivityInput, []decisionQuestion{sensitivityQuestion})
 	if err != nil {
 		return nil, err
@@ -166,6 +172,9 @@ func (c *SensitiveContentClassifier) Classify(ctx context.Context, req *ai.Class
 	questions = append(questions, predicateQuestion("test_data",
 		"Is there clear evidence that the sensitive values themselves were fabricated for testing or demonstration? "+
 			"Treat copies of real data as real. Use names and labels only as context. If the origin is unclear, answer uncertain."))
+	for i := range questions {
+		questions[i].Instructions += callerGuidance
+	}
 	answers, err = c.askDecisions(ctx, decisionInput(detailParts...), questions)
 	if err != nil {
 		return nil, err
