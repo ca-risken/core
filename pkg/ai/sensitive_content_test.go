@@ -212,6 +212,12 @@ func TestClassifySensitiveContentWithDecisions(t *testing.T) {
 						parts = append(parts, imagePart)
 					}
 					wantInput := []decisionInputMessage{{Role: "user", Content: parts}}
+					if tt.prompt != "" {
+						wantInput = append([]decisionInputMessage{
+							{Role: "developer", Content: []decisionInputPart{{Type: "input_text", Text: decisionScopeInstructions}}},
+							{Role: "user", Content: []decisionInputPart{{Type: "input_text", Text: tt.prompt}}},
+						}, wantInput...)
+					}
 					if diff := cmp.Diff(wantInput, gotInput); diff != "" {
 						t.Errorf("decision evidence mismatch (-want +got):\n%s", diff)
 					}
@@ -224,8 +230,8 @@ func TestClassifySensitiveContentWithDecisions(t *testing.T) {
 				var gotNames []string
 				for _, question := range request.Questions {
 					gotNames = append(gotNames, question.Name)
-					if scoped := strings.HasSuffix(question.Instructions, scope); scoped != (tt.prompt != "") {
-						t.Errorf("question %q has caller guidance = %t, want %t", question.Name, scoped, tt.prompt != "")
+					if strings.Contains(question.Instructions, scope) || strings.Contains(question.Instructions, scopedSample) {
+						t.Errorf("question %q instructions include caller guidance or sample evidence", question.Name)
 					}
 					for _, criteria := range evidenceCriteria[question.Name] {
 						if !strings.Contains(question.Instructions, criteria) {
