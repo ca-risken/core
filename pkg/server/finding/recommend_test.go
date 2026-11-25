@@ -11,6 +11,8 @@ import (
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/pkg/test"
 	"github.com/ca-risken/core/proto/finding"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
 
@@ -141,6 +143,28 @@ func TestPutRecommend(t *testing.T) {
 			if !reflect.DeepEqual(got, c.want) {
 				t.Fatalf("Unexpected response: want=%+v, got=%+v", c.want, got)
 			}
+		})
+	}
+}
+
+func TestPutRecommendSCCMethod(t *testing.T) {
+	cases := []struct{ name, data, want string }{
+		{"OS", `{"finding":{"vulnerability":{"offending_package":{"package_type":"OS"}}}}`, "os_update"},
+		{"application", `{"finding":{"files":[{"path":"app/lib/a"}],"vulnerability":{"offending_package":{"package_name":"a"}}}}`, "app_dependency_update"},
+		{"binary", `{"finding":{"files":[{"disk_path":{"relative_path":"usr/bin/a"}}],"vulnerability":{"offending_package":{"package_name":"a"}}}}`, "library_update"},
+		{"missing package", `{}`, "review"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			repo := mocks.NewFindingRepository(t)
+			repo.On("GetFinding", mock.Anything, uint32(1), uint64(2), true).Return(&model.Finding{FindingID: 2, DataSource: "google:scc", Data: c.data}, nil).Once()
+			repo.On("UpsertRecommend", mock.Anything, mock.MatchedBy(func(r *model.Recommend) bool {
+				return r.RemediationType == c.want && r.Recommendation == "original steps"
+			})).Return(&model.Recommend{RecommendID: 3}, nil).Once()
+			repo.On("UpsertRecommendFinding", mock.Anything, mock.Anything).Return(&model.RecommendFinding{FindingID: 2, RecommendID: 3, ProjectID: 1}, nil).Once()
+			service := FindingService{repository: repo, logger: logging.NewLogger()}
+			_, err := service.PutRecommend(context.Background(), &finding.PutRecommendRequest{ProjectId: 1, FindingId: 2, DataSource: "google:scc", Type: "unique-finding-name", Risk: "SOFTWARE_VULNERABILITY", Recommendation: "original steps"})
+			require.NoError(t, err)
 		})
 	}
 }

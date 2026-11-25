@@ -486,7 +486,7 @@ func TestBulkUpsertRecommend(t *testing.T) {
 			},
 			mockSQL: regexp.QuoteMeta(`
 INSERT INTO recommend
-  (recommend_id, data_source, type, risk, recommendation)
+  (recommend_id, data_source, type, risk, recommendation, remediation_type)
 VALUES`),
 		},
 		{
@@ -523,17 +523,18 @@ func TestGenerateBulkUpsertRecommendSQL(t *testing.T) {
 			},
 			wantSQL: `
 INSERT INTO recommend
-  (recommend_id, data_source, type, risk, recommendation)
+  (recommend_id, data_source, type, risk, recommendation, remediation_type)
 VALUES
-  (?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   data_source=VALUES(data_source),
   type=VALUES(type),
   risk=VALUES(risk),
   recommendation=VALUES(recommendation),
+  remediation_type=VALUES(remediation_type),
   updated_at=NOW()`,
 			wantParam: []interface{}{
-				uint32(1), "ds", "type1", "risk", "recommend",
+				uint32(1), "ds", "type1", "risk", "recommend", "",
 			},
 		},
 		{
@@ -545,21 +546,22 @@ ON DUPLICATE KEY UPDATE
 			},
 			wantSQL: `
 INSERT INTO recommend
-  (recommend_id, data_source, type, risk, recommendation)
+  (recommend_id, data_source, type, risk, recommendation, remediation_type)
 VALUES
-  (?, ?, ?, ?, ?),
-  (?, ?, ?, ?, ?),
-  (?, ?, ?, ?, ?)
+  (?, ?, ?, ?, ?, ?),
+  (?, ?, ?, ?, ?, ?),
+  (?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   data_source=VALUES(data_source),
   type=VALUES(type),
   risk=VALUES(risk),
   recommendation=VALUES(recommendation),
+  remediation_type=VALUES(remediation_type),
   updated_at=NOW()`,
 			wantParam: []interface{}{
-				uint32(1), "ds", "type1", "risk", "recommend",
-				uint32(2), "ds", "type2", "risk", "recommend",
-				uint32(0), "ds", "type3", "risk", "recommend",
+				uint32(1), "ds", "type1", "risk", "recommend", "",
+				uint32(2), "ds", "type2", "risk", "recommend", "",
+				uint32(0), "ds", "type3", "risk", "recommend", "",
 			},
 		},
 	}
@@ -634,6 +636,7 @@ INSERT INTO recommend_finding
 VALUES
   (?, ?, ?)
 ON DUPLICATE KEY UPDATE
+  recommend_id=VALUES(recommend_id),
   updated_at=NOW()`,
 			wantParam: []interface{}{
 				uint64(1), uint32(1), uint32(1),
@@ -652,6 +655,7 @@ VALUES
   (?, ?, ?),
   (?, ?, ?)
 ON DUPLICATE KEY UPDATE
+  recommend_id=VALUES(recommend_id),
   updated_at=NOW()`,
 			wantParam: []interface{}{
 				uint64(1), uint32(1), uint32(1),

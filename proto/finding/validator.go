@@ -39,7 +39,7 @@ func validateAssetRequest(view bool, typ, key, sort string) error {
 	}
 	if typ != "" {
 		switch typ {
-		case "Workload", "Image", "VM", "Resource", "Unknown":
+		case "Workload", "Image", "VM", "Resource", "Unknown", "EC2Instance", "IAMUser", "IAMRole", "S3Bucket", "EC2SecurityGroup", "LambdaFunction", "RDSInstance", "EKSCluster", "KMSKey", "SNSTopic", "SQSQueue", "SecretsManagerSecret":
 		default:
 			return errors.New("invalid asset_type")
 		}

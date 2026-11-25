@@ -85,3 +85,26 @@ func TestOrgAssetProjectFilterLimit(t *testing.T) {
 		})
 	}
 }
+
+func TestAWSAssetTypes(t *testing.T) {
+	cases := []struct {
+		name    string
+		invalid bool
+	}{
+		{"EC2Instance", false}, {"IAMUser", false}, {"IAMRole", false}, {"S3Bucket", false},
+		{"EC2SecurityGroup", false}, {"LambdaFunction", false}, {"RDSInstance", false},
+		{"EKSCluster", false}, {"KMSKey", false}, {"SNSTopic", false}, {"SQSQueue", false},
+		{"SecretsManagerSecret", false}, {"aws:portscan", true}, {"IAM", true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			key := "W86Y9z8-0Mg38nKe2VCbOOpmoVbbf2UzVstv43s2boU"
+			requests := []interface{ Validate() error }{&ListFindingRequest{ProjectId: 1, AssetType: c.name, AssetKey: key}, &ListFindingForOrgRequest{OrganizationId: 1, AssetType: c.name, AssetKey: key}}
+			for _, r := range requests {
+				if err := r.Validate(); (err != nil) != c.invalid {
+					t.Fatalf("%T: %v", r, err)
+				}
+			}
+		})
+	}
+}

@@ -230,7 +230,7 @@ func TestFindingAssetsMySQL(t *testing.T) {
 			t.Fatal(deleteErr)
 		}
 	})
-	t.Run("save clears old classification", func(t *testing.T) {
+	t.Run("non vulnerability category remains in asset view", func(t *testing.T) {
 		e := mk(10, 1, "old")
 		a := findingasset.Classify(e.DataSource, e.ResourceName, data)
 		e.AssetType, e.AssetKey, e.AssetName = a.Type, a.Key, a.Name
@@ -244,7 +244,7 @@ func TestFindingAssetsMySQL(t *testing.T) {
 			t.Fatal(err)
 		}
 		got, err := client.GetFinding(ctx, 1, 10, true)
-		if err != nil || got.AssetType != "" {
+		if err != nil || got.AssetType != "Resource" {
 			t.Fatalf("%+v %v", got, err)
 		}
 	})

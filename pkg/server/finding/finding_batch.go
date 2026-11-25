@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ca-risken/core/pkg/findingremediation"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -52,11 +53,12 @@ func (f *FindingService) PutFindingBatch(ctx context.Context, req *finding.PutFi
 				recommendIDCache[idx] = *storedRecommendID
 			}
 			recommends = append(recommends, &model.Recommend{
-				RecommendID:    recommendID,
-				DataSource:     d.Finding.DataSource,
-				Type:           d.Recommend.Type,
-				Risk:           d.Recommend.Risk,
-				Recommendation: d.Recommend.Recommendation,
+				RecommendID:     recommendID,
+				DataSource:      d.Finding.DataSource,
+				Type:            d.Recommend.Type,
+				Risk:            d.Recommend.Risk,
+				Recommendation:  d.Recommend.Recommendation,
+				RemediationType: findingremediation.Classify(d.Finding.DataSource, d.Recommend.Type, d.Recommend.Risk, fi.Data),
 			})
 		}
 	}

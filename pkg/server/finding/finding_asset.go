@@ -53,14 +53,11 @@ func (f *FindingService) listFindingPackages(ctx context.Context, r *finding.Lis
 	byWork := map[string]*work{}
 	for _, g := range groups {
 		location := g.WorkLocation
-		if g.WorkType == "location" {
-			location = ""
-		}
 		encoded, _ := json.Marshal([]string{g.WorkType, location})
 		key := string(encoded)
 		w := byWork[key]
 		if w == nil {
-			w = &work{key: key, review: g.WorkType == ""}
+			w = &work{key: key, review: g.WorkType == "" || g.WorkType == "review"}
 			byWork[key] = w
 			works = append(works, w)
 		}

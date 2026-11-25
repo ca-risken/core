@@ -21,7 +21,7 @@ func TestListFindingPackagesPagination(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			repo := mocks.NewFindingRepository(t)
-			repo.On("ListFindingPackages", mock.Anything, mock.Anything, c.org).Return([]*finding.FindingPackage{{PackageName: "next", FindingCount: 3, WorkType: "app", WorkLocation: "/app"}, {PackageName: "openssl", FindingCount: 2, WorkType: "os", WorkLocation: "alpine"}, {PackageName: "undici", FindingCount: 4, WorkType: "app", WorkLocation: "/app"}}, nil).Once()
+			repo.On("ListFindingPackages", mock.Anything, mock.Anything, c.org).Return([]*finding.FindingPackage{{PackageName: "next", FindingCount: 3, WorkType: "vulnerability", WorkLocation: "google:scc"}, {PackageName: "openssl", FindingCount: 2, WorkType: "public_access", WorkLocation: "google:asset"}, {PackageName: "undici", FindingCount: 4, WorkType: "vulnerability", WorkLocation: "google:scc"}}, nil).Once()
 			service := &FindingService{repository: repo}
 			groups, total, count, err := service.listFindingPackages(context.Background(), &finding.ListFindingRequest{Offset: c.offset, Limit: c.limit}, c.org)
 			require.NoError(t, err)
@@ -43,7 +43,7 @@ func TestReviewWorkGroupLast(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			repo := mocks.NewFindingRepository(t)
-			repo.On("ListFindingPackages", mock.Anything, mock.Anything, uint32(0)).Return([]*finding.FindingPackage{{PackageName: "unknown", FindingCount: 100}, {PackageName: "next", FindingCount: 1, WorkType: "app", WorkLocation: "/app"}}, nil).Once()
+			repo.On("ListFindingPackages", mock.Anything, mock.Anything, uint32(0)).Return([]*finding.FindingPackage{{PackageName: "unknown", FindingCount: 100, WorkType: "review"}, {PackageName: "next", FindingCount: 1, WorkType: "vulnerability", WorkLocation: "google:scc"}}, nil).Once()
 			service := &FindingService{repository: repo}
 			groups, total, count, err := service.listFindingPackages(context.Background(), &finding.ListFindingRequest{Offset: c.offset, Limit: 1}, 0)
 			require.NoError(t, err)
@@ -55,18 +55,18 @@ func TestReviewWorkGroupLast(t *testing.T) {
 	}
 }
 
-func TestLocationWorkGroups(t *testing.T) {
+func TestSourceMethodWorkGroups(t *testing.T) {
 	cases := []struct {
 		name, kind               string
 		wantGroups, wantPackages int
 	}{
-		{"different locations share a category", "location", 1, 2},
-		{"different applications stay separate", "app", 2, 1},
+		{"same method stays separate across sources", "public_access", 2, 1},
+		{"unknown methods stay separate across sources", "review", 2, 1},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			repo := mocks.NewFindingRepository(t)
-			repo.On("ListFindingPackages", mock.Anything, mock.Anything, uint32(0)).Return([]*finding.FindingPackage{{PackageName: "tar", FindingCount: 1, WorkType: c.kind, WorkLocation: "/usr/local/lib/node_modules/npm"}, {PackageName: "undici", FindingCount: 1, WorkType: c.kind, WorkLocation: "/usr/lib/node_modules/corepack"}}, nil).Once()
+			repo.On("ListFindingPackages", mock.Anything, mock.Anything, uint32(0)).Return([]*finding.FindingPackage{{PackageName: "tar", FindingCount: 1, WorkType: c.kind, WorkLocation: "google:asset"}, {PackageName: "undici", FindingCount: 1, WorkType: c.kind, WorkLocation: "google:cloudsploit"}}, nil).Once()
 			service := &FindingService{repository: repo}
 			groups, total, count, err := service.listFindingPackages(context.Background(), &finding.ListFindingRequest{Limit: 1}, 0)
 			require.NoError(t, err)

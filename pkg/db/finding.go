@@ -120,15 +120,20 @@ func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingReques
 		extra, args := assetConditions(req)
 		cond += extra
 		params = append(params, args...)
-		query = strings.Replace(query, "select finding.*", "select distinct finding.*", 1)
-		query = strings.Replace(query, "inner join finding f_alias using(finding_id)", "", 1)
 	}
 	query += cond
-	alias := "f_alias"
 	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 || req.AssetName != "" {
-		alias = "finding"
+		page := "SELECT DISTINCT finding.finding_id, finding." + req.Sort + " AS asset_sort FROM finding" + cond
+		page += fmt.Sprintf(" ORDER BY asset_sort %s, finding.finding_id %s LIMIT %d, %d", req.Direction, req.Direction, req.Offset, req.Limit)
+		var data []model.Finding
+		query = "SELECT finding.* FROM finding INNER JOIN (" + page + ") asset_page ON finding.finding_id = asset_page.finding_id"
+		query += fmt.Sprintf(" ORDER BY asset_page.asset_sort %s, asset_page.finding_id %s", req.Direction, req.Direction)
+		if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
+			return nil, err
+		}
+		return &data, nil
 	}
-	query += fmt.Sprintf(" order by %s.%s %s", alias, req.Sort, req.Direction)
+	query += fmt.Sprintf(" order by f_alias.%s %s", req.Sort, req.Direction)
 	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
 	var data []model.Finding
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
@@ -171,13 +176,27 @@ func (c *Client) ListFindingForOrg(ctx context.Context, req *finding.ListFinding
 		params = append(params, args...)
 		query = strings.Replace(query, "select finding.*", "select distinct finding.*", 1)
 		query = strings.Replace(query, "inner join finding f_alias using(finding_id)", "", 1)
+		join = strings.Replace(join, "inner join finding_tag ft using(finding_id)", "inner join finding_tag ft on finding.finding_id = ft.finding_id and finding.project_id = ft.project_id", 1)
 	}
 	query += join + cond
-	alias := "f_alias"
 	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 || req.AssetName != "" {
-		alias = "finding"
+		// Select and sort a page of IDs before touching full Finding JSON.
+		from := query[strings.Index(query, "from finding"):]
+		page := "SELECT DISTINCT finding.finding_id, finding." + req.Sort + " AS asset_sort " + from
+		page += fmt.Sprintf(" ORDER BY asset_sort %s, finding.finding_id %s LIMIT %d, %d", req.Direction, req.Direction, req.Offset, req.Limit)
+		query = `SELECT finding.*, pf.pend_user_id, pf.note AS pend_note, pf.reason AS pend_reason,
+          pf.expired_at AS pend_expired_at, u.name AS pend_user_name
+          FROM finding INNER JOIN (` + page + `) asset_page ON finding.finding_id = asset_page.finding_id
+          LEFT JOIN pend_finding pf ON pf.finding_id = finding.finding_id AND pf.project_id = finding.project_id
+          LEFT JOIN user u ON u.user_id = pf.pend_user_id`
+		query += fmt.Sprintf(" ORDER BY asset_page.asset_sort %s, asset_page.finding_id %s", req.Direction, req.Direction)
+		var data []FindingWithPend
+		if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
+			return nil, err
+		}
+		return &data, nil
 	}
-	query += fmt.Sprintf(" order by %s.%s %s", alias, req.Sort, req.Direction)
+	query += fmt.Sprintf(" order by f_alias.%s %s", req.Sort, req.Direction)
 	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
 	var data []FindingWithPend
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
@@ -1163,12 +1182,12 @@ func generateBulkUpsertRecommendSQL(data []*model.Recommend) (string, []interfac
 	var params []interface{}
 	sql := `
 INSERT INTO recommend
-  (recommend_id, data_source, type, risk, recommendation)
+  (recommend_id, data_source, type, risk, recommendation, remediation_type)
 VALUES`
 	for _, d := range data {
 		sql += `
-  (?, ?, ?, ?, ?),`
-		params = append(params, d.RecommendID, d.DataSource, d.Type, d.Risk, d.Recommendation)
+  (?, ?, ?, ?, ?, ?),`
+		params = append(params, d.RecommendID, d.DataSource, d.Type, d.Risk, d.Recommendation, d.RemediationType)
 	}
 	sql = strings.TrimRight(sql, ",")
 	sql += `
@@ -1177,6 +1196,7 @@ ON DUPLICATE KEY UPDATE
   type=VALUES(type),
   risk=VALUES(risk),
   recommendation=VALUES(recommendation),
+  remediation_type=VALUES(remediation_type),
   updated_at=NOW()`
 	return sql, params
 }
@@ -1210,6 +1230,7 @@ VALUES`
 	sql = strings.TrimRight(sql, ",")
 	sql += `
 ON DUPLICATE KEY UPDATE
+  recommend_id=VALUES(recommend_id),
   updated_at=NOW()`
 	return sql, params
 }

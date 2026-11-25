@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/ca-risken/core/pkg/findingremediation"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/vikyd/zero"
@@ -46,15 +47,21 @@ func (f *FindingService) PutRecommend(ctx context.Context, req *finding.PutRecom
 		return nil, err
 	}
 	// exists finding in the req project
-	if fd, err := f.repository.GetFinding(ctx, req.ProjectId, req.FindingId, true); err != nil || zero.IsZeroVal(fd.FindingID) {
+	fd, err := f.repository.GetFinding(ctx, req.ProjectId, req.FindingId, true)
+	if err != nil || zero.IsZeroVal(fd.FindingID) {
 		f.logger.Warnf(ctx, "Failed to get finding, project_id=%d, finding_id=%d, err=%+v", req.ProjectId, req.FindingId, err)
 		return nil, err
 	}
+	findingData := ""
+	if fd.DataSource == req.DataSource {
+		findingData = fd.Data
+	}
 	registered, err := f.repository.UpsertRecommend(ctx, &model.Recommend{
-		DataSource:     req.DataSource,
-		Type:           req.Type,
-		Risk:           req.Risk,
-		Recommendation: req.Recommendation,
+		DataSource:      req.DataSource,
+		Type:            req.Type,
+		Risk:            req.Risk,
+		Recommendation:  req.Recommendation,
+		RemediationType: findingremediation.Classify(req.DataSource, req.Type, req.Risk, findingData),
 	})
 	if err != nil {
 		return nil, err
