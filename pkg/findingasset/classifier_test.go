@@ -16,8 +16,8 @@ func TestClassify(t *testing.T) {
 		wantType, wantKey                         string
 	}{
 		{name: "other source", source: "aws:inspector", category: "OS_VULNERABILITY", id: "CVE-2023-1234"},
-		{name: "unsupported category", source: "google:scc", category: "PUBLIC_BUCKET", id: "CVE-2023-1234"},
-		{name: "missing identifier", source: "google:scc", category: "OS_VULNERABILITY"},
+		{name: "non vulnerability category included", source: "google:scc", category: "PUBLIC_BUCKET", id: "CVE-2023-1234", wantType: "Unknown"},
+		{name: "missing identifier included", source: "google:scc", category: "OS_VULNERABILITY", wantType: "Unknown"},
 		{name: "workload", source: "google:scc", typ: "google.container.Cluster", resource: "//container.googleapis.com/projects/test/zones/z/clusters/c", category: "OS_VULNERABILITY", id: "CVE-2023-1234", objects: []object{{NS: "default", Kind: "Deployment", Name: "app"}}, wantType: "Workload", wantKey: `["//container.googleapis.com/projects/test/zones/z/clusters/c","default","Deployment","app"]`},
 		{name: "duplicate workload", source: "google:scc", typ: "google.container.Cluster", resource: "cluster", category: "SOFTWARE_VULNERABILITY", id: "GHSA-abcd-1234-efgh", objects: []object{{NS: "n", Kind: "StatefulSet", Name: "app"}, {NS: "n", Kind: "StatefulSet", Name: "app"}}, wantType: "Workload", wantKey: `["cluster","n","StatefulSet","app"]`},
 		{name: "ambiguous workloads fall back", source: "google:scc", typ: "google.container.Cluster", resource: "cluster", category: "OS_VULNERABILITY", id: "CVE-2023-1234", objects: []object{{NS: "n", Kind: "Deployment", Name: "a"}, {NS: "n", Kind: "Deployment", Name: "b"}}, wantType: "Resource", wantKey: "cluster"},

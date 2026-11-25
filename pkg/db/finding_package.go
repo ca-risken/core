@@ -3,37 +3,13 @@ package db
 import (
 	"context"
 	"encoding/json"
-	"sort"
-	"strings"
 
 	"github.com/ca-risken/core/proto/finding"
 )
 
-func packageFieldSQL(pkg, field string) string {
-	document := "IF(JSON_VALID(finding.data), finding.data, '{}')"
-	return "COALESCE(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(" + document + ", '$.finding.vulnerability." + pkg + "." + field + "')), 'null'), '')"
-}
-
-func workScopeSQL() string {
-	document := "IF(JSON_VALID(finding.data), finding.data, '{}')"
-	files := "JSON_MERGE_PRESERVE(COALESCE(JSON_EXTRACT(" + document + ", '$.finding.files'), JSON_ARRAY()), COALESCE(JSON_EXTRACT(" + document + ", '$.finding.vulnerability.offending_package.files'), JSON_ARRAY()))"
-	filePath := "COALESCE(NULLIF(file_path, ''), disk_relative_path)"
-	path := "(CONVERT(CASE WHEN LEFT(" + filePath + ", 1) = '/' THEN " + filePath + " ELSE CONCAT('/', " + filePath + ") END USING utf8mb4) COLLATE utf8mb4_bin)"
-	root := "CASE WHEN " + path + " IS NULL OR " + path + " NOT LIKE '/%/%' OR " + path + " LIKE '%/../%' OR " + path + " LIKE '%/./%' OR " + path + " LIKE '%/..' OR " + path + " LIKE '%/.' OR " + path + " LIKE '%/' THEN '' WHEN " + path + " LIKE '/app/%' THEN 'app:/app' WHEN " + path + " LIKE '%/node_modules/%' THEN CONCAT('location:', SUBSTRING_INDEX(" + path + ", '/node_modules/', 1), '/node_modules') WHEN " + path + " LIKE '%/site-packages/%' THEN CONCAT('location:', SUBSTRING_INDEX(" + path + ", '/site-packages/', 1), '/site-packages') WHEN " + path + " LIKE '%/dist-packages/%' THEN CONCAT('location:', SUBSTRING_INDEX(" + path + ", '/dist-packages/', 1), '/dist-packages') ELSE CONCAT('location:', REGEXP_REPLACE(" + path + ", '/[^/]+$', '')) END"
-
-	locations := "SELECT " + root + " AS location FROM JSON_TABLE(" + files + ", '$[*]' COLUMNS(file_path VARCHAR(8192) PATH '$.path' NULL ON EMPTY NULL ON ERROR, disk_relative_path VARCHAR(8192) PATH '$.disk_path.relative_path' NULL ON EMPTY NULL ON ERROR)) paths"
-	pathScope := "(SELECT IF(COUNT(*) > 0 AND COUNT(DISTINCT location) = 1 AND MIN(location) <> '', MIN(location), '') FROM (" + locations + ") locations)"
-	typ := packageFieldSQL("offending_package", "package_type")
-	platform := packageFieldSQL("offending_package", "cpe_uri")
-	return "CASE WHEN " + typ + " = 'OS' THEN CONCAT('os:', " + platform + ") WHEN " + packageFieldSQL("offending_package", "package_name") + " = '' THEN '' ELSE COALESCE(NULLIF(" + pathScope + ", ''), 'location:') END"
-}
-
-func packageKeySQL() string {
-	name := packageFieldSQL("offending_package", "package_name")
-	typ := packageFieldSQL("offending_package", "package_type")
-	platform := packageFieldSQL("offending_package", "cpe_uri")
-	return "JSON_ARRAY(IF(" + name + " = '', '', " + typ + "), " + name + ", IF(" + name + " <> '' AND " + typ + " = 'OS', " + platform + ", ''), " + workScopeSQL() + ")"
-}
+// Missing, stale, and cross-source recommendations stay visible as review.
+const remediationMethodSQL = "COALESCE(NULLIF(asset_recommend.remediation_type, ''), 'review')"
+const remediationJoinSQL = " LEFT JOIN recommend_finding asset_rf ON asset_rf.finding_id = finding.finding_id AND asset_rf.project_id = finding.project_id LEFT JOIN recommend asset_recommend ON asset_recommend.recommend_id = asset_rf.recommend_id AND asset_recommend.data_source = finding.data_source "
 
 func (c *Client) ListFindingPackages(ctx context.Context, req *finding.ListFindingRequest, organizationID uint32) ([]*finding.FindingPackage, error) {
 	var cond string
@@ -46,41 +22,25 @@ func (c *Client) ListFindingPackages(ctx context.Context, req *finding.ListFindi
 	extra, params := assetConditions(req)
 	cond += extra
 	args = append(args, params...)
-	base := "SELECT DISTINCT finding.finding_id, CAST(" + packageKeySQL() + " AS BINARY) AS package_key, CAST(" + packageFieldSQL("offending_package", "package_version") + " AS BINARY) AS current_version, CAST(" + packageFieldSQL("fixed_package", "package_version") + " AS BINARY) AS fixed_version FROM finding" + cond
+	// Only IDs, source, and the stored method are read; no Finding JSON or
+	// recommendation text is transferred or parsed to count groups.
+	scoped := "SELECT DISTINCT finding.finding_id, finding.project_id, finding.data_source FROM finding" + cond
+	base := "SELECT finding.finding_id, finding.data_source, " + remediationMethodSQL + " AS method FROM (" + scoped + ") finding" + remediationJoinSQL
 	var rows []struct {
-		PackageKey     string
-		CurrentVersion string
-		FixedVersion   string
-		FindingCount   uint64
+		DataSource   string
+		Method       string
+		FindingCount uint64
 	}
-	query := "SELECT package_key, current_version, fixed_version, COUNT(*) AS finding_count FROM (" + base + ") scoped GROUP BY package_key, current_version, fixed_version ORDER BY package_key, current_version, fixed_version"
+	query := "SELECT data_source, method, COUNT(*) AS finding_count FROM (" + base + ") scoped GROUP BY data_source, method ORDER BY finding_count DESC, data_source, method"
 	if err := c.Slave.WithContext(ctx).Raw(query, args...).Scan(&rows).Error; err != nil {
 		return nil, err
 	}
-	groups := []*finding.FindingPackage{}
-	byKey := map[string]*finding.FindingPackage{}
+	groups := make([]*finding.FindingPackage, 0, len(rows))
 	for _, row := range rows {
-		group := byKey[row.PackageKey]
-		if group == nil {
-			var parts []string
-			if err := json.Unmarshal([]byte(row.PackageKey), &parts); err != nil {
-				return nil, err
-			}
-			group = &finding.FindingPackage{PackageKey: row.PackageKey, PackageType: parts[0], PackageName: parts[1], Platform: parts[2]}
-			if len(parts) > 3 && parts[3] != "" {
-				group.WorkType, group.WorkLocation, _ = strings.Cut(parts[3], ":")
-			}
-			byKey[row.PackageKey] = group
-			groups = append(groups, group)
-		}
-		group.FindingCount += row.FindingCount
-		group.Versions = append(group.Versions, &finding.FindingPackageVersion{CurrentVersion: row.CurrentVersion, FixedVersion: row.FixedVersion, FindingCount: row.FindingCount})
+		// Keep the existing four-string wire format; its meaning is now source +
+		// remediation method, not package name, version, or filesystem location.
+		key, _ := json.Marshal([4]string{row.DataSource, "", "", row.Method + ":"})
+		groups = append(groups, &finding.FindingPackage{PackageKey: string(key), WorkType: row.Method, WorkLocation: row.DataSource, FindingCount: row.FindingCount})
 	}
-	sort.Slice(groups, func(i, j int) bool {
-		if groups[i].FindingCount != groups[j].FindingCount {
-			return groups[i].FindingCount > groups[j].FindingCount
-		}
-		return groups[i].PackageKey < groups[j].PackageKey
-	})
 	return groups, nil
 }

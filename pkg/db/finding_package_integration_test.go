@@ -2,13 +2,12 @@ package db
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/base64"
-	"encoding/json"
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/ca-risken/common/pkg/logging"
+	"github.com/ca-risken/core/pkg/findingremediation"
 	"github.com/ca-risken/core/pkg/model"
 	"github.com/ca-risken/core/proto/finding"
 	"github.com/stretchr/testify/require"
@@ -18,144 +17,86 @@ func TestFindingPackagesMySQL(t *testing.T) {
 	if os.Getenv("FINDING_ASSET_TEST_DSN") == "" {
 		t.Skip("dedicated MySQL fixture not configured")
 	}
-	client, err := NewClient(&Config{MasterHost: "db.middleware.svc.cluster.local", SlaveHost: "db.middleware.svc.cluster.local", MasterUser: "root", SlaveUser: "root", Schema: "scc_asset_t003", Port: 3306}, logging.NewLogger())
+	c, err := NewClient(&Config{MasterHost: "db.middleware.svc.cluster.local", SlaveHost: "db.middleware.svc.cluster.local", MasterUser: "root", SlaveUser: "root", Schema: "scc_asset_t003", Port: 3306}, logging.NewLogger())
 	require.NoError(t, err)
 	ctx := context.Background()
-	sum := sha256.Sum256([]byte("package-integration"))
-	key := base64.RawURLEncoding.EncodeToString(sum[:])
-	type pkg struct {
-		PackageName    string `json:"package_name"`
-		PackageType    string `json:"package_type"`
-		PackageVersion string `json:"package_version"`
-		CPE            string `json:"cpe_uri"`
-	}
-	records := []struct{ typ, name, platform, current, fixed, raw string }{
-		{"NPM", "next", "alpine", "1", "3", ""}, {"NPM", "next", "debian", "2", "4", ""},
-		{"OS", "next", "alpine", "1", "", ""}, {"OS", "next", "debian", "1", "2", ""},
-		{raw: `{}`}, {raw: `"invalid json"`},
-	}
 	cleanup := func() {
-		client.Master.Exec("DELETE FROM finding_tag WHERE finding_id BETWEEN 90001 AND 90006")
-		client.Master.Exec("DELETE FROM pend_finding WHERE finding_id BETWEEN 90001 AND 90006")
-		client.Master.Exec("DELETE FROM finding WHERE finding_id BETWEEN 90001 AND 90006")
+		for _, table := range []string{"finding_tag", "pend_finding", "recommend_finding", "finding"} {
+			require.NoError(t, c.Master.Exec("DELETE FROM "+table+" WHERE finding_id BETWEEN 90001 AND 90050").Error)
+		}
+		require.NoError(t, c.Master.Exec("DELETE FROM recommend WHERE type LIKE 'local-recommend-test-%'").Error)
 	}
 	cleanup()
 	defer cleanup()
-	for i, r := range records {
-		raw := r.raw
-		if raw == "" {
-			data, err := json.Marshal(map[string]any{"finding": map[string]any{"vulnerability": map[string]any{"offending_package": pkg{r.name, r.typ, r.current, r.platform}, "fixed_package": pkg{r.name, r.typ, r.fixed, r.platform}}}})
+	// Two different SCC recommendations, different packages and paths, same method.
+	for i := 1; i <= 25; i++ {
+		f := &model.Finding{FindingID: uint64(90000 + i), ProjectID: 1, DataSource: "google:scc", DataSourceID: fmt.Sprintf("local-recommend-test-%d", i), ResourceName: "fixture", Score: 0.9, Data: fmt.Sprintf(`{"finding":{"files":[{"path":"/%d/lib/file"}],"vulnerability":{"offending_package":{"package_name":"p%d"}}}}`, i, i), AssetType: "Image", AssetKey: "recommend-test-key", AssetName: "fixture"}
+		require.NoError(t, c.BulkUpsertFinding(ctx, []*model.Finding{f}))
+		if i <= 23 {
+			typ := fmt.Sprintf("local-recommend-test-%d", i%2)
+			r, err := c.UpsertRecommend(ctx, &model.Recommend{DataSource: f.DataSource, Type: typ, Risk: "SOFTWARE_VULNERABILITY", Recommendation: "Keep original instructions", RemediationType: findingremediation.Classify(f.DataSource, typ, "SOFTWARE_VULNERABILITY", f.Data)})
 			require.NoError(t, err)
-			raw = string(data)
+			require.NoError(t, c.BulkUpsertRecommendFinding(ctx, []*model.RecommendFinding{{FindingID: f.FindingID, ProjectID: 1, RecommendID: r.RecommendID}}))
 		}
-		require.NoError(t, client.BulkUpsertFinding(ctx, []*model.Finding{{FindingID: uint64(90001 + i), ProjectID: 1, DataSource: "google:scc", DataSourceID: string(rune('a' + i)), ResourceName: "fixture", Score: 0.9, Data: raw, AssetType: "Image", AssetKey: key, AssetName: "fixture"}}))
 	}
-	require.NoError(t, client.Master.Exec("INSERT INTO finding_tag VALUES(90001,90001,1,'package-a'),(90002,90001,1,'package-b')").Error)
-	require.NoError(t, client.Master.Exec("INSERT INTO pend_finding(finding_id,project_id) VALUES(90002,1)").Error)
-	for _, filter := range []struct {
+	require.NoError(t, c.Master.Exec("INSERT INTO finding_tag(finding_tag_id,finding_id,project_id,tag) VALUES(90001,90001,1,'method-a'),(90002,90001,1,'method-b')").Error)
+	require.NoError(t, c.Master.Exec("INSERT INTO pend_finding(finding_id,project_id) VALUES(90002,1)").Error)
+	cases := []struct {
 		name   string
 		tags   []string
 		status finding.FindingStatus
 		from   float32
 		want   uint64
 	}{
-		{name: "duplicate tag matches", tags: []string{"package-a", "package-b"}, want: 1},
-		{name: "active", status: finding.FindingStatus_FINDING_ACTIVE, want: 5},
-		{name: "pending", status: finding.FindingStatus_FINDING_PENDING, want: 1},
-		{name: "score", from: 0.95, want: 0},
-	} {
-		t.Run(filter.name, func(t *testing.T) {
-			groups, err := client.ListFindingPackages(ctx, &finding.ListFindingRequest{ProjectId: 1, AssetProjectId: 1, AssetType: "Image", AssetKey: key, ToScore: 1, FromScore: filter.from, Tag: filter.tags, Status: filter.status}, 0)
-			require.NoError(t, err)
-			var count uint64
-			for _, g := range groups {
-				count += g.FindingCount
-			}
-			require.Equal(t, filter.want, count)
-		})
+		{name: "all", want: 25}, {name: "duplicate tags", tags: []string{"method-a", "method-b"}, want: 1},
+		{name: "pending", status: finding.FindingStatus_FINDING_PENDING, want: 1}, {name: "active", status: finding.FindingStatus_FINDING_ACTIVE, want: 24}, {name: "score", from: 0.95, want: 0},
 	}
-	cases := []struct {
-		name    string
-		org     uint32
-		project uint32
-		groups  int
-		count   uint64
-	}{
-		{"project", 0, 1, 4, 6}, {"organization", 7, 1, 4, 6}, {"other project", 0, 2, 0, 0}, {"outside organization", 8, 1, 0, 0},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			req := &finding.ListFindingRequest{ProjectId: c.project, AssetProjectId: c.project, AssetType: "Image", AssetKey: key, ToScore: 1, Limit: 20, Sort: "finding_id", Direction: "asc"}
-			groups, err := client.ListFindingPackages(ctx, req, c.org)
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			req := &finding.ListFindingRequest{ProjectId: 1, AssetProjectId: 1, AssetType: "Image", AssetKey: "recommend-test-key", ToScore: 1, FromScore: tc.from, Tag: tc.tags, Status: tc.status, Sort: "finding_id", Direction: "asc", Limit: 20}
+			groups, err := c.ListFindingPackages(ctx, req, 0)
 			require.NoError(t, err)
-			require.Len(t, groups, c.groups)
-			var count uint64
-			for _, g := range groups {
-				count += g.FindingCount
-				req.PackageKey = g.PackageKey
-				if c.org == 0 {
-					items, err := client.ListFinding(ctx, req)
-					require.NoError(t, err)
-					require.Len(t, *items, int(g.FindingCount))
-				} else {
-					items, err := client.ListFindingForOrg(ctx, &finding.ListFindingForOrgRequest{OrganizationId: c.org, AssetProjectId: c.project, AssetType: "Image", AssetKey: key, PackageKey: g.PackageKey, ToScore: 1, Limit: 20, Sort: "finding_id", Direction: "asc"})
-					require.NoError(t, err)
-					require.Len(t, *items, int(g.FindingCount))
+			if tc.name == "all" {
+				require.Len(t, groups, 2)
+				counts := map[string]uint64{}
+				for _, g := range groups {
+					counts[g.WorkType] += g.FindingCount
 				}
+				require.Equal(t, uint64(23), counts["library_update"])
+				require.Equal(t, uint64(2), counts["review"])
 			}
-			require.Equal(t, c.count, count)
+			var total uint64
+			for _, g := range groups {
+				total += g.FindingCount
+				req.PackageKey = g.PackageKey
+				var count uint64
+				for offset := int32(0); ; offset += 20 {
+					req.Offset = offset
+					items, err := c.ListFinding(ctx, req)
+					require.NoError(t, err)
+					require.LessOrEqual(t, len(*items), 20)
+					count += uint64(len(*items))
+					if len(*items) < 20 {
+						break
+					}
+				}
+				require.Equal(t, g.FindingCount, count)
+			}
+			require.Equal(t, tc.want, total)
 		})
 	}
-	pathCases := []struct {
-		name, typ      string
-		paths          []string
-		kind, location string
-	}{
-		{"app", "NPM", []string{"/app/node_modules/next/package.json"}, "app", "/app"},
-		{"pnpm", "NPM", []string{"/app/node_modules/.pnpm/next@16.2.6/node_modules/next/package.json"}, "app", "/app"},
-		{"same app", "NPM", []string{"/app/node_modules/next/package.json", "/app/node_modules/.pnpm/next@16.2.9/node_modules/next/package.json"}, "app", "/app"},
-		{"different apps", "NPM", []string{"/app/node_modules/next/package.json", "/other/node_modules/next/package.json"}, "location", ""},
-		{"missing path", "NPM", nil, "location", ""},
-		{"app root", "NPM", []string{"/app/package.json"}, "app", "/app"},
-		{"same app different layouts", "NPM", []string{"/app/node_modules/next/package.json", "/app/package.json"}, "app", "/app"},
-		{"bundled npm", "NPM", []string{"/usr/local/lib/node_modules/npm/node_modules/next/package.json"}, "location", "/usr/local/lib/node_modules"},
-		{"bundled corepack", "NPM", []string{"/usr/lib/node_modules/corepack/node_modules/next/package.json"}, "location", "/usr/lib/node_modules"},
-		{"other global package", "NPM", []string{"/usr/lib/node_modules/other/node_modules/next/package.json"}, "location", "/usr/lib/node_modules"},
-		{"relative traversal", "NPM", []string{"/usr/local/lib/node_modules/npm/../other/package.json"}, "location", ""},
-		{"java app", "MAVEN", []string{"/app/example.jar"}, "app", "/app"},
-		{"python app", "PYPI", []string{"/app/venv/lib/python3.12/site-packages/requests/__init__.py"}, "app", "/app"},
-		{"python shared", "PYPI", []string{"/usr/local/lib/python3.12/site-packages/pip/_vendor/requests/__init__.py"}, "location", "/usr/local/lib/python3.12/site-packages"},
-		{"python dist", "PYPI", []string{"/usr/lib/python3/dist-packages/requests/__init__.py"}, "location", "/usr/lib/python3/dist-packages"},
-		{"java shared", "MAVEN", []string{"/opt/service/lib/example.jar"}, "location", "/opt/service/lib"},
-		{"other npm app directory", "NPM", []string{"/service/node_modules/.pnpm/next@1.0/node_modules/next/package.json"}, "location", "/service/node_modules"},
-		{"different app prefixes", "PYPI", []string{"/app2/site-packages/requests/__init__.py"}, "location", "/app2/site-packages"},
-		{"unknown package type with app path", "", []string{"/app/lib/example.jar"}, "app", "/app"},
-		{"relative path", "PYPI", []string{"venv/lib/site-packages/a.py"}, "location", "/venv/lib/site-packages"},
-		{"different directories", "MAVEN", []string{"/opt/a/lib/a.jar", "/opt/b/lib/a.jar"}, "location", ""},
-		{"OS overrides app location", "OS", []string{"/app/node_modules/example/package.json"}, "os", "alpine"},
-
-		{"os", "OS", nil, "os", "alpine"},
-	}
-	for _, c := range pathCases {
-		t.Run("path/"+c.name, func(t *testing.T) {
-			files := []map[string]string{}
-			for _, p := range c.paths {
-				files = append(files, map[string]string{"path": p})
-			}
-			data, err := json.Marshal(map[string]any{"finding": map[string]any{"files": files, "vulnerability": map[string]any{"offending_package": pkg{"next", c.typ, "1", "alpine"}, "fixed_package": pkg{"next", c.typ, "2", "alpine"}}}})
-			require.NoError(t, err)
-			require.NoError(t, client.Master.Exec("UPDATE finding SET data=? WHERE finding_id=90001", string(data)).Error)
-			req := &finding.ListFindingRequest{ProjectId: 1, AssetProjectId: 1, AssetType: "Image", AssetKey: key, FindingId: 90001, ToScore: 1, Sort: "finding_id", Direction: "asc", Limit: 20}
-			groups, err := client.ListFindingPackages(ctx, req, 0)
-			require.NoError(t, err)
-			require.Len(t, groups, 1)
-			require.Equal(t, c.kind, groups[0].WorkType)
-			require.Equal(t, c.location, groups[0].WorkLocation)
-			req.PackageKey = groups[0].PackageKey
-			items, err := client.ListFinding(ctx, req)
-			require.NoError(t, err)
-			require.Len(t, *items, 1)
-		})
-	}
-
+	// Bulk relation updates must replace the old recommendation, not just timestamp.
+	r, err := c.UpsertRecommend(ctx, &model.Recommend{DataSource: "google:scc", Type: "local-recommend-test-public", RemediationType: "public_access"})
+	require.NoError(t, err)
+	require.NoError(t, c.BulkUpsertRecommendFinding(ctx, []*model.RecommendFinding{{FindingID: 90001, ProjectID: 1, RecommendID: r.RecommendID}}))
+	got, err := c.GetRecommend(ctx, 1, 90001)
+	require.NoError(t, err)
+	require.Equal(t, r.RecommendID, got.RecommendID)
+	// An invalid cross-source relation must not supply another source's method.
+	require.NoError(t, c.Master.Exec("UPDATE recommend SET data_source='google:asset' WHERE recommend_id=?", r.RecommendID).Error)
+	req := &finding.ListFindingRequest{ProjectId: 1, AssetProjectId: 1, AssetType: "Image", AssetKey: "recommend-test-key", FindingId: 90001, ToScore: 1}
+	groups, err := c.ListFindingPackages(ctx, req, 0)
+	require.NoError(t, err)
+	require.Len(t, groups, 1)
+	require.Equal(t, "review", groups[0].WorkType)
 }

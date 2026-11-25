@@ -13,7 +13,7 @@ const assetKeySQL = "CASE WHEN finding.asset_type = 'Unknown' THEN CAST(finding.
 
 // assetConditions is appended after the existing permission/search/status scope.
 func assetConditions(req *finding.ListFindingRequest) (string, []any) {
-	cond := " and finding.data_source = 'google:scc' and finding.asset_type IS NOT NULL"
+	cond := " and finding.data_source IN ('google:scc', 'google:asset', 'google:cloudsploit', 'aws:access-analyzer', 'aws:guard-duty', 'aws:cloudsploit', 'aws:admin-checker') and finding.asset_type IS NOT NULL"
 	var args []any
 	if req.AssetName != "" {
 		cond += " and INSTR(finding.asset_name, ?) > 0"
@@ -38,9 +38,18 @@ func assetConditions(req *finding.ListFindingRequest) (string, []any) {
 		args = append(args, req.AssetProjectId)
 	}
 	if req.PackageKey != "" {
-		cond += " and CAST(" + packageKeySQL() + " AS BINARY) = CAST(? AS BINARY)"
-		args = append(args, req.PackageKey)
+		var parts []string
+		if json.Unmarshal([]byte(req.PackageKey), &parts) != nil || len(parts) != 4 {
+			return cond + " and 1=0", args
+		}
+		if parts[0] == "" || parts[1] != "" || parts[2] != "" || len(parts[3]) < 2 || parts[3][len(parts[3])-1] != ':' {
+			return cond + " and 1=0", args
+		}
+		method := parts[3][:len(parts[3])-1]
+		cond += " and finding.data_source = ? and COALESCE((SELECT NULLIF(r.remediation_type, '') FROM recommend_finding rf INNER JOIN recommend r ON r.recommend_id = rf.recommend_id AND r.data_source = finding.data_source WHERE rf.finding_id = finding.finding_id AND rf.project_id = finding.project_id), 'review') = ?"
+		args = append(args, parts[0], method)
 	}
+
 	return cond, args
 }
 

@@ -40,7 +40,6 @@ type report struct {
 	} `json:"finding"`
 }
 
-var identifier = regexp.MustCompile(`^(CVE-[0-9]{4}-[0-9]+|GHSA-[a-zA-Z0-9-]+)$`)
 var digest = regexp.MustCompile(`^(.+)@sha256:[a-fA-F0-9]{64}$`)
 
 // Unknown keys are resolved from finding_id on read, avoiding a second insert write.
@@ -54,20 +53,18 @@ func Classify(source, resource, data string) Asset {
 }
 
 func classify(source, resource, data string) Asset {
+	if awsSource(source) {
+		return classifyAWS(source, data)
+	}
+	if source == "google:asset" || source == "google:cloudsploit" {
+		return classifyGoogle(source, data)
+	}
 	if source != "google:scc" {
 		return Asset{}
 	}
 	var r report
 	if json.Unmarshal([]byte(data), &r) != nil {
-		return Asset{}
-	}
-	switch r.Finding.Category {
-	case "OS_VULNERABILITY", "SOFTWARE_VULNERABILITY", "CONTAINER_IMAGE_VULNERABILITY":
-	default:
-		return Asset{}
-	}
-	if !identifier.MatchString(r.Finding.Vulnerability.CVE.ID) {
-		return Asset{}
+		return Asset{Type: "Unknown", Name: "Unknown"}
 	}
 	full := r.Asset.FullName
 	if full == "" {
@@ -110,6 +107,11 @@ func classify(source, resource, data string) Asset {
 		name := r.Asset.DisplayName
 		if name == "" {
 			name = full
+		}
+		if typ == "Resource" {
+			if inferred := googleResource(full); inferred.Type != "Unknown" {
+				return inferred
+			}
 		}
 		return Asset{typ, full, name}
 	}
