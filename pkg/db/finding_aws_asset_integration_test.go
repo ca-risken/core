@@ -57,19 +57,19 @@ func TestAWSAssetsMySQL(t *testing.T) {
 	cases := []struct {
 		name   string
 		org    uint32
-		req    finding.ListFindingRequest
+		req    *finding.ListFindingRequest
 		groups int64
 		count  uint64
 	}{
-		{"project cross source", 0, finding.ListFindingRequest{ProjectId: 1, AssetType: "IAMUser", AssetKey: key}, 1, 3},
-		{"org separated and scoped", 7, finding.ListFindingRequest{AssetType: "IAMUser", AssetKey: key}, 2, 4},
-		{"org forbidden intersection", 7, finding.ListFindingRequest{AssetType: "IAMUser", AssetKey: key, AssetProjectId: 3}, 0, 0},
-		{"score", 0, finding.ListFindingRequest{ProjectId: 1, AssetType: "IAMUser", AssetKey: key, FromScore: .85}, 1, 1},
-		{"tags deduplicated", 0, finding.ListFindingRequest{ProjectId: 1, Tag: []string{"a", "b"}}, 1, 1},
-		{"source", 0, finding.ListFindingRequest{ProjectId: 1, DataSource: []string{"aws:admin-checker"}}, 1, 1},
-		{"active", 0, finding.ListFindingRequest{ProjectId: 1, AssetType: "IAMUser", AssetKey: key, Status: finding.FindingStatus_FINDING_ACTIVE}, 1, 2},
-		{"unknown not lost", 0, finding.ListFindingRequest{ProjectId: 1, AssetType: "Unknown"}, 2, 2},
-		{"unsupported excluded", 0, finding.ListFindingRequest{ProjectId: 1, DataSource: []string{"aws:portscan"}}, 0, 0},
+		{"project cross source", 0, &finding.ListFindingRequest{ProjectId: 1, AssetType: "IAMUser", AssetKey: key}, 1, 3},
+		{"org separated and scoped", 7, &finding.ListFindingRequest{AssetType: "IAMUser", AssetKey: key}, 2, 4},
+		{"org forbidden intersection", 7, &finding.ListFindingRequest{AssetType: "IAMUser", AssetKey: key, AssetProjectId: 3}, 0, 0},
+		{"score", 0, &finding.ListFindingRequest{ProjectId: 1, AssetType: "IAMUser", AssetKey: key, FromScore: .85}, 1, 1},
+		{"tags deduplicated", 0, &finding.ListFindingRequest{ProjectId: 1, Tag: []string{"a", "b"}}, 1, 1},
+		{"source", 0, &finding.ListFindingRequest{ProjectId: 1, DataSource: []string{"aws:admin-checker"}}, 1, 1},
+		{"active", 0, &finding.ListFindingRequest{ProjectId: 1, AssetType: "IAMUser", AssetKey: key, Status: finding.FindingStatus_FINDING_ACTIVE}, 1, 2},
+		{"unknown not lost", 0, &finding.ListFindingRequest{ProjectId: 1, AssetType: "Unknown"}, 2, 2},
+		{"unsupported excluded", 0, &finding.ListFindingRequest{ProjectId: 1, DataSource: []string{"aws:portscan"}}, 0, 0},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -77,7 +77,7 @@ func TestAWSAssetsMySQL(t *testing.T) {
 			req.ToScore = 1
 			req.Limit = 20
 			req.AssetView = true
-			a, n, count, err := c.ListFindingAssets(context.Background(), &req, tc.org)
+			a, n, count, err := c.ListFindingAssets(context.Background(), req, tc.org)
 			require.NoError(t, err)
 			require.Equal(t, tc.groups, n)
 			require.Equal(t, tc.count, count)
