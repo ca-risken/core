@@ -8,6 +8,7 @@ import "finding/entity.proto";
 
 service FindingService {
   // fiding
+  rpc GetFindingCount(GetFindingCountRequest) returns (GetFindingCountResponse);
   rpc ListFinding(ListFindingRequest) returns (ListFindingResponse);
   rpc ListFindingForOrg(ListFindingForOrgRequest)
       returns (ListFindingForOrgResponse);
@@ -433,4 +434,21 @@ message FindingPackageVersion {
  string current_version = 1;
  string fixed_version = 2;
  uint64 finding_count = 3;
+}
+
+// Count matching findings without retrieving a page of finding IDs.
+message GetFindingCountRequest {
+  uint32 project_id = 1;
+  repeated string data_source = 2;
+  repeated string resource_name = 3;
+  float from_score = 4;
+  float to_score = 5;
+  repeated string tag = 6;
+  FindingStatus status = 7;
+  uint64 finding_id = 8;
+  uint32 alert_id = 9;
+}
+
+message GetFindingCountResponse {
+  uint32 total = 1;
 }

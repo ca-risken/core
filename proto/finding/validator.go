@@ -590,3 +590,12 @@ func (u *UpdateFindingAISummaryRequest) Validate() error {
 		validation.Field(&u.AiSummaryCreatedAt, validation.Required, validation.Min(int64(1)), validation.Max(int64(253402268399))), // 1970-01-01T00:00:01 ~ 9999-12-31T23:59:59
 	)
 }
+
+// Validate GetFindingCountRequest with the same filters as ListFinding.
+func (r *GetFindingCountRequest) Validate() error {
+	return (&ListFindingRequest{
+		ProjectId: r.ProjectId, DataSource: r.DataSource, ResourceName: r.ResourceName,
+		FromScore: r.FromScore, ToScore: r.ToScore, Tag: r.Tag,
+		Status: r.Status, FindingId: r.FindingId, AlertId: r.AlertId,
+	}).Validate()
+}
