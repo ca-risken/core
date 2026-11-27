@@ -138,17 +138,21 @@ func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingReques
 }
 
 func (c *Client) ListFindingForOrg(ctx context.Context, req *finding.ListFindingForOrgRequest) (*[]FindingWithPend, error) {
-	query := `select finding.*, 
+	columns := `finding.*,
 		pf.pend_user_id as pend_user_id,
 		pf.note as pend_note,
 		pf.reason as pend_reason,
 		pf.expired_at as pend_expired_at,
-		u.name as pend_user_name
+		u.name as pend_user_name`
+	from := `
 	from finding 
 	inner join finding f_alias using(finding_id)
 	left join pend_finding pf on finding.finding_id = pf.finding_id and finding.project_id = pf.project_id
 	left join user u on pf.pend_user_id = u.user_id
 	inner join organization_project op on finding.project_id = op.project_id`
+
+	query := "select " + columns + from
+	assetFilter := req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 || req.AssetName != ""
 
 	join, cond, params := generateListFindingConditions(
 		0,
@@ -165,7 +169,7 @@ func (c *Client) ListFindingForOrg(ctx context.Context, req *finding.ListFinding
 		cond += " and pf.finding_id is not NULL and (pf.expired_at is NULL or NOW() < pf.expired_at)"
 	}
 
-	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 || req.AssetName != "" {
+	if assetFilter {
 		extra, args := assetConditions(&finding.ListFindingRequest{AssetType: req.AssetType, AssetKey: req.AssetKey, AssetProjectId: req.AssetProjectId, PackageKey: req.PackageKey, AssetName: req.AssetName})
 		cond += extra
 		params = append(params, args...)
@@ -173,12 +177,18 @@ func (c *Client) ListFindingForOrg(ctx context.Context, req *finding.ListFinding
 		query = strings.Replace(query, "inner join finding f_alias using(finding_id)", "", 1)
 	}
 	query += join + cond
-	alias := "f_alias"
-	if req.AssetType != "" || req.AssetKey != "" || req.AssetProjectId != 0 || req.AssetName != "" {
-		alias = "finding"
+	if assetFilter {
+		query += fmt.Sprintf(" order by finding.%s %s limit %d, %d", req.Sort, req.Direction, req.Offset, req.Limit)
+	} else {
+		page := "select finding.finding_id, f_alias." + req.Sort + " as page_sort" + from + join + cond
+		page += fmt.Sprintf(" order by f_alias.%s %s limit %d, %d", req.Sort, req.Direction, req.Offset, req.Limit)
+		query = "select " + columns + `
+		from (` + page + `) finding_page
+		inner join finding on finding.finding_id = finding_page.finding_id
+		left join pend_finding pf on finding.finding_id = pf.finding_id and finding.project_id = pf.project_id
+		left join user u on pf.pend_user_id = u.user_id`
+		query += fmt.Sprintf(" order by finding_page.page_sort %s", req.Direction)
 	}
-	query += fmt.Sprintf(" order by %s.%s %s", alias, req.Sort, req.Direction)
-	query += fmt.Sprintf(" limit %d, %d", req.Offset, req.Limit)
 	var data []FindingWithPend
 	if err := c.Slave.WithContext(ctx).Raw(query, params...).Scan(&data).Error; err != nil {
 		return nil, err
