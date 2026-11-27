@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/ca-risken/common/pkg/logging"
 	mimosarpc "github.com/ca-risken/common/pkg/rpc"
@@ -190,8 +189,7 @@ func (s *Server) Run(ctx context.Context) error {
 }
 
 func (s *Server) newFindingClient(svcAddr string) (finding.FindingServiceClient, error) {
-	ctx := context.Background()
-	conn, err := getGRPCConn(ctx, svcAddr)
+	conn, err := getGRPCConn(svcAddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
 	}
@@ -199,8 +197,7 @@ func (s *Server) newFindingClient(svcAddr string) (finding.FindingServiceClient,
 }
 
 func (s *Server) newIAMClient(svcAddr string) (iam.IAMServiceClient, error) {
-	ctx := context.Background()
-	conn, err := getGRPCConn(ctx, svcAddr)
+	conn, err := getGRPCConn(svcAddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
 	}
@@ -208,8 +205,7 @@ func (s *Server) newIAMClient(svcAddr string) (iam.IAMServiceClient, error) {
 }
 
 func (s *Server) newProjectClient(svcAddr string) (project.ProjectServiceClient, error) {
-	ctx := context.Background()
-	conn, err := getGRPCConn(ctx, svcAddr)
+	conn, err := getGRPCConn(svcAddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
 	}
@@ -217,8 +213,7 @@ func (s *Server) newProjectClient(svcAddr string) (project.ProjectServiceClient,
 }
 
 func (s *Server) newOrgIAMClient(svcAddr string) (org_iam.OrgIAMServiceClient, error) {
-	ctx := context.Background()
-	conn, err := getGRPCConn(ctx, svcAddr)
+	conn, err := getGRPCConn(svcAddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
 	}
@@ -226,8 +221,7 @@ func (s *Server) newOrgIAMClient(svcAddr string) (org_iam.OrgIAMServiceClient, e
 }
 
 func (s *Server) newOrganizationClient(svcAddr string) (organization.OrganizationServiceClient, error) {
-	ctx := context.Background()
-	conn, err := getGRPCConn(ctx, svcAddr)
+	conn, err := getGRPCConn(svcAddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
 	}
@@ -235,8 +229,7 @@ func (s *Server) newOrganizationClient(svcAddr string) (organization.Organizatio
 }
 
 func (s *Server) newOrgAlertClient(svcAddr string) (org_alert.OrgAlertServiceClient, error) {
-	ctx := context.Background()
-	conn, err := getGRPCConn(ctx, svcAddr)
+	conn, err := getGRPCConn(svcAddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
 	}
@@ -244,18 +237,15 @@ func (s *Server) newOrgAlertClient(svcAddr string) (org_alert.OrgAlertServiceCli
 }
 
 func (s *Server) newReportClient(svcAddr string) (report.ReportServiceClient, error) {
-	ctx := context.Background()
-	conn, err := getGRPCConn(ctx, svcAddr)
+	conn, err := getGRPCConn(svcAddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get grpc connection: err=%w", err)
 	}
 	return report.NewReportServiceClient(conn), nil
 }
 
-func getGRPCConn(ctx context.Context, addr string) (*grpc.ClientConn, error) {
-	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
-	defer cancel()
-	conn, err := grpc.DialContext(ctx, addr,
+func getGRPCConn(addr string) (*grpc.ClientConn, error) {
+	conn, err := grpc.NewClient(addr,
 		grpc.WithUnaryInterceptor(grpctrace.UnaryClientInterceptor()),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
