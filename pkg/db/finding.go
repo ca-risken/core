@@ -110,7 +110,7 @@ type FindingRepository interface {
 var _ FindingRepository = (*Client)(nil)
 
 func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingRequest) (*[]model.Finding, error) {
-	query := "select finding.* from finding inner join finding f_alias using(finding_id)"
+	query := "select finding.finding_id from finding inner join finding f_alias using(finding_id)"
 	cond, params := generateProjectFindingQuery(
 		req.ProjectId, req.AlertId,
 		req.FromScore, req.ToScore, req.FindingId,
@@ -120,7 +120,7 @@ func (c *Client) ListFinding(ctx context.Context, req *finding.ListFindingReques
 		extra, args := assetConditions(req)
 		cond += extra
 		params = append(params, args...)
-		query = strings.Replace(query, "select finding.*", "select distinct finding.*", 1)
+		query = strings.Replace(query, "select finding.finding_id", "select distinct finding.*", 1)
 		query = strings.Replace(query, "inner join finding f_alias using(finding_id)", "", 1)
 	}
 	query += cond
