@@ -52,7 +52,7 @@ func TestListFindingAssets(t *testing.T) {
 			if !c.view {
 				countRows = sqlmock.NewRows([]string{"count"}).AddRow(1)
 			}
-			m.ExpectQuery("SELECT COUNT.*SELECT DISTINCT").WillReturnRows(countRows)
+			m.ExpectQuery("SELECT COUNT.*SELECT finding").WillReturnRows(countRows)
 			if c.view {
 				m.ExpectQuery("SELECT project_id.*GROUP BY.*ORDER BY max_score").WillReturnRows(sqlmock.NewRows([]string{"project_id", "asset_type", "asset_key", "asset_name", "max_score", "finding_count", "updated_at", "data_sources_json"}).AddRow(1, "VM", "vm", "vm", 0.9, 2, 100, `["google:scc"]`))
 			}

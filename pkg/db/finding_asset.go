@@ -57,10 +57,16 @@ func (c *Client) ListFindingAssets(ctx context.Context, req *finding.ListFinding
 	extra, params := assetConditions(req)
 	cond += extra
 	args = append(args, params...)
-	base := "SELECT DISTINCT finding.finding_id, finding.project_id, finding.asset_type, " + assetKeySQL + " AS asset_key, finding.asset_name, finding.data_source, finding.score, finding.updated_at FROM finding" + cond
+	selection := "SELECT "
+	if len(req.Tag) > 0 {
+		selection += "DISTINCT "
+	}
+	keys := "finding.finding_id, finding.project_id, finding.asset_type, " + assetKeySQL + " AS asset_key"
+	countBase := selection + keys + " FROM finding" + cond
+	base := selection + keys + ", finding.asset_name, finding.data_source, finding.score, finding.updated_at FROM finding" + cond
 	var total int64
 	if !req.AssetView {
-		err := c.Slave.WithContext(ctx).Raw("SELECT COUNT(*) FROM ("+base+") scoped", args...).Scan(&total).Error
+		err := c.Slave.WithContext(ctx).Raw("SELECT COUNT(*) FROM ("+countBase+") scoped", args...).Scan(&total).Error
 		return nil, total, uint64(total), err
 	}
 	grouped := "SELECT project_id, asset_type, asset_key, MIN(asset_name) AS asset_name, MAX(score) AS max_score, COUNT(*) AS finding_count, CONCAT('[', GROUP_CONCAT(DISTINCT JSON_QUOTE(data_source) ORDER BY data_source SEPARATOR ','), ']') AS data_sources_json, UNIX_TIMESTAMP(MAX(updated_at)) AS updated_at FROM (" + base + ") scoped GROUP BY project_id, asset_type, asset_key"
@@ -68,7 +74,7 @@ func (c *Client) ListFindingAssets(ctx context.Context, req *finding.ListFinding
 		Total        int64
 		FindingCount uint64
 	}
-	countsSQL := "SELECT COUNT(*) AS finding_count FROM (" + base + ") scoped GROUP BY project_id, asset_type, asset_key"
+	countsSQL := "SELECT COUNT(*) AS finding_count FROM (" + countBase + ") scoped GROUP BY project_id, asset_type, asset_key"
 	if err := c.Slave.WithContext(ctx).Raw("SELECT COUNT(*) AS total, COALESCE(SUM(finding_count), 0) AS finding_count FROM ("+countsSQL+") assets", args...).Scan(&counts).Error; err != nil {
 		return nil, 0, 0, err
 	}
